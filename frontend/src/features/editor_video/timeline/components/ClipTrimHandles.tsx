@@ -58,9 +58,9 @@ export const ClipTrimHandles: React.FC<ClipTrimHandlesProps> = ({
       {/* ─── Left Trim Handle ────────────────────────────────────────────── */}
       <div
         onMouseDown={(e) => onResizeStart(e, "left", duration)}
-        className={`absolute top-0 bottom-0 left-0 w-3 z-30 cursor-col-resize flex items-center justify-center transition-all ${
+        className={`absolute top-0 bottom-0 left-0 w-3 z-30 cursor-col-resize flex items-center justify-center transition-opacity ${
           isResizing && activeSide === "left"
-            ? `opacity-100 w-3.5 ${styles.handleBg} ${styles.glow} brightness-125`
+            ? `opacity-100 ${styles.handleBg} ${styles.glow} brightness-125`
             : `opacity-0 group-hover:opacity-100 ${styles.handleBg}`
         } rounded-l-sm select-none`}
         title="Drag left edge to trim start"
@@ -74,9 +74,9 @@ export const ClipTrimHandles: React.FC<ClipTrimHandlesProps> = ({
       {/* ─── Right Resize Handle ─────────────────────────────────────────── */}
       <div
         onMouseDown={(e) => onResizeStart(e, "right", duration)}
-        className={`absolute top-0 bottom-0 right-0 w-3 z-30 cursor-col-resize flex items-center justify-center transition-all ${
+        className={`absolute top-0 bottom-0 right-0 w-3 z-30 cursor-col-resize flex items-center justify-center transition-opacity ${
           isResizing && activeSide === "right"
-            ? `opacity-100 w-3.5 ${styles.handleBg} ${styles.glow} brightness-125`
+            ? `opacity-100 ${styles.handleBg} ${styles.glow} brightness-125`
             : `opacity-0 group-hover:opacity-100 ${styles.handleBg}`
         } rounded-r-sm select-none`}
         title="Drag right edge to resize duration"

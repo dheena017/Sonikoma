@@ -42,6 +42,78 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
     deltaSecs: number;
   } | null>(null);
 
+  // Per-clip position offsets (persisted in local state across renders)
+  const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  const [movingInfo, setMovingInfo] = useState<{
+    key: string;
+    idx: number;
+    baseLeftPx: number;
+    deltaPx: number;
+  } | null>(null);
+
+  const handleMoveStart = (
+    e: React.MouseEvent,
+    key: string,
+    idx: number,
+    baseLeftPx: number
+  ) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    let hasMoved = false;
+    document.body.style.userSelect = "none";
+    setMovingInfo({ key, idx, baseLeftPx, deltaPx: 0 });
+
+    const dur = panels[idx]?.camera_duration || panels[idx]?.duration || 3.0;
+    const baseWidthPx = dur * 30;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaPx = moveEvent.clientX - startX;
+      if (Math.abs(deltaPx) > 4) {
+        hasMoved = true;
+        document.body.style.cursor = "grabbing";
+      }
+      setMovingInfo({ key, idx, baseLeftPx, deltaPx });
+    };
+
+    const onMouseUp = () => {
+      if (!hasMoved) {
+        onClipClick(key, idx);
+      } else {
+        // Compute desired new left position
+        const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
+        // Build positions of other clips
+        const otherClips = panels.map((p: any, i: number) => {
+          const t: PanelTiming | undefined = panelTimings[i];
+          const k = `v2-${i}`;
+          const offset = clipOffsets[k] ?? 0;
+          const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
+          const width = (p.camera_duration ?? t?.duration ?? 3.0) * 30;
+          return { key: k, left, width };
+        }).filter(c => c.key !== key);
+        // Find neighbouring clips
+        const leftNeighbors = otherClips.filter(c => c.left < baseLeftPx).sort((a, b) => b.left - a.left);
+        const rightNeighbors = otherClips.filter(c => c.left > baseLeftPx).sort((a, b) => a.left - b.left);
+        const leftBound = leftNeighbors.length ? leftNeighbors[0].left + leftNeighbors[0].width : 0;
+        const rightBound = rightNeighbors.length ? rightNeighbors[0].left - (baseWidthPx) : Infinity;
+        const clampedLeft = Math.max(leftBound, Math.min(desiredLeft, rightBound));
+        const finalOffset = clampedLeft - baseLeftPx;
+        setClipOffsets(prev => ({ ...prev, [key]: (prev[key] ?? 0) + finalOffset }));
+      }
+      setMovingInfo(null);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const movingInfoRef = React.useRef(movingInfo);
+  React.useEffect(() => { movingInfoRef.current = movingInfo; }, [movingInfo]);
+
   const handleResizeStart = (
     e: React.MouseEvent,
     key: string,
@@ -137,21 +209,28 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
               }
             }
 
+            const isMoving = movingInfo?.key === key;
+            const offsetPx = clipOffsets[key] ?? 0;
+            const finalLeftPx = displayLeftPx + offsetPx + (isMoving ? movingInfo!.deltaPx : 0);
+
             return (
               <div
                 key={key}
-                onClick={() => onClipClick(key, idx)}
+                onMouseDown={(e) => handleMoveStart(e, key, idx, baseLeftPx + offsetPx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute top-0.5 bottom-0.5 flex items-center justify-between gap-1 cursor-pointer truncate transition-all rounded-md border text-[9px] font-mono font-bold px-2.5 bg-indigo-950/90 border-indigo-500/40 text-indigo-200 select-none ${
-                  isResizing
-                    ? "ring-2 ring-indigo-400 border-indigo-300 shadow-[0_0_24px_rgba(129,140,248,0.8)] z-30 brightness-125"
+                className={`group absolute top-0.5 bottom-0.5 flex items-center justify-between gap-1 select-none truncate rounded-md border text-[9px] font-mono font-bold px-2.5 bg-indigo-950/90 border-indigo-500/40 text-indigo-200 z-10 ${
+                  isMoving
+                    ? "cursor-grabbing shadow-[0_4px_20px_rgba(129,140,248,0.4)] z-40 scale-[1.01]"
+                    : isResizing
+                    ? "cursor-col-resize border-indigo-300 shadow-[0_0_14px_rgba(129,140,248,0.5)] z-30"
                     : selectedClip === key
-                    ? "ring-2 ring-indigo-400/80 brightness-115 z-10"
-                    : "hover:brightness-110 hover:border-indigo-400/60"
+                    ? "cursor-grab border-indigo-300 z-10"
+                    : "cursor-grab hover:border-indigo-400/60"
                 }`}
                 style={{
-                  left: `${displayLeftPx}px`,
+                  left: `${finalLeftPx}px`,
                   width: `${displayWidthPx}px`,
+                  transition: isMoving ? "none" : undefined,
                 }}
                 title={`Panel #${idx + 1} Effect: ${fx}`}
               >

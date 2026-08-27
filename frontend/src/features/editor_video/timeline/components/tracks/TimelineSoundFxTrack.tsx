@@ -47,6 +47,74 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
     deltaSecs: number;
   } | null>(null);
 
+  const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  const [movingInfo, setMovingInfo] = useState<{ key: string; idx: number; deltaPx: number } | null>(null);
+  const movingInfoRef = React.useRef(movingInfo);
+  React.useEffect(() => { movingInfoRef.current = movingInfo; }, [movingInfo]);
+
+  const handleMoveStart = (
+    e: React.MouseEvent,
+    key: string,
+    idx: number,
+    baseLeftPx: number,
+    widthPx: number
+  ) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    let hasMoved = false;
+    document.body.style.userSelect = "none";
+    setMovingInfo({ key, idx, deltaPx: 0 });
+
+    const onMouseMove = (mv: MouseEvent) => {
+      const d = mv.clientX - startX;
+      if (Math.abs(d) > 4) {
+        hasMoved = true;
+        document.body.style.cursor = "grabbing";
+      }
+      setMovingInfo({ key, idx, deltaPx: d });
+    };
+
+    const onMouseUp = () => {
+      if (!hasMoved) {
+        onClipClick(key, idx);
+      } else {
+        const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
+        // Build list of other SFX clips
+        const otherClips = panels.map((p: any, i: number) => {
+          const sfx = p.sfx || p.sfx_name || p.sound_fx;
+          if (!sfx) return null;
+          const t: PanelTiming | undefined = panelTimings[i];
+          const k = `a2-${i}`;
+          const offset = clipOffsets[k] ?? 0;
+          const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
+          const width = (p.sfx_duration ?? t?.duration ?? 1.5) * 30;
+          return { key: k, left, width };
+        }).filter((c): c is { key: string; left: number; width: number } => c !== null && c.key !== key);
+
+        const leftNeighbors = otherClips.filter((c) => c.left < baseLeftPx).sort((a, b) => b.left - a.left);
+        const rightNeighbors = otherClips.filter((c) => c.left > baseLeftPx).sort((a, b) => a.left - b.left);
+        const leftBound = leftNeighbors.length ? leftNeighbors[0].left + leftNeighbors[0].width : 0;
+        const rightBound = rightNeighbors.length ? rightNeighbors[0].left - widthPx : Infinity;
+        const clampedLeft = Math.max(leftBound, Math.min(desiredLeft, rightBound));
+        const finalOffset = clampedLeft - baseLeftPx;
+
+        setClipOffsets((p) => ({
+          ...p,
+          [key]: (p[key] ?? 0) + finalOffset,
+        }));
+      }
+      setMovingInfo(null);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
   const handleResizeStart = (
     e: React.MouseEvent,
     key: string,
@@ -56,12 +124,10 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
     e.stopPropagation();
     e.preventDefault();
     setResizingInfo({ key, side, deltaPx: 0, deltaSecs: 0 });
-
     const startX = e.clientX;
     const initialDuration = currentDuration;
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
-
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
@@ -69,7 +135,6 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
       setResizingInfo({ key, side, deltaPx: deltaX, deltaSecs });
       onDurationChange?.(key, parseFloat(nextDuration.toFixed(1)));
     };
-
     const onMouseUp = () => {
       setResizingInfo(null);
       document.body.style.cursor = "";
@@ -77,7 +142,6 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
     };
-
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
   };
@@ -147,21 +211,28 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
               }
             }
 
+            const isMoving = movingInfo?.key === key;
+            const offsetPx = clipOffsets[key] ?? 0;
+            const finalLeftPx = displayLeftPx + offsetPx + (isMoving ? movingInfo!.deltaPx : 0);
+
             return (
               <div
                 key={key}
-                onClick={() => onClipClick(key, idx)}
+                onMouseDown={(e) => handleMoveStart(e, key, idx, baseLeftPx + offsetPx, baseWidthPx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute inset-y-0 rounded-md overflow-hidden cursor-pointer transition-all border select-none ${
-                  isResizing
-                    ? "border-cyan-300 ring-2 ring-cyan-400/80 shadow-[0_0_24px_rgba(103,232,249,0.8)] brightness-115 z-30"
+                className={`group absolute inset-y-0 rounded-md overflow-hidden select-none border z-10 ${
+                  isMoving
+                    ? "cursor-grabbing shadow-[0_4px_20px_rgba(103,232,249,0.4)] z-40"
+                    : isResizing
+                    ? "cursor-col-resize border-cyan-300 shadow-[0_0_14px_rgba(103,232,249,0.5)] z-30"
                     : selectedClip === key
-                    ? "border-cyan-300 ring-2 ring-cyan-400/50 shadow-[0_0_12px_rgba(103,232,249,0.4)] z-20"
-                    : "border-cyan-500/40 hover:border-cyan-300/80 z-10"
+                    ? "cursor-grab border-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.3)] z-20"
+                    : "cursor-grab border-cyan-500/40 hover:border-cyan-300/80 z-10"
                 } bg-[#0e7490]`}
                 style={{
-                  left: `${displayLeftPx}px`,
+                  left: `${finalLeftPx}px`,
                   width: `${displayWidthPx}px`,
+                  transition: isMoving ? "none" : undefined,
                 }}
                 title={`SFX #${idx + 1}: ${sfx}`}
               >

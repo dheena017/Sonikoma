@@ -40,6 +40,59 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 }) => {
   const [resizingSide, setResizingSide] = useState<"left" | "right" | null>(null);
   const [deltaSecs, setDeltaSecs] = useState<number>(0);
+  // per-clip offsets to persist moved positions (only one clip currently)
+  const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  const [movingInfo, setMovingInfo] = useState<{ key: string; deltaPx: number } | null>(null);
+  const movingInfoRef = React.useRef(movingInfo);
+  React.useEffect(() => {
+    movingInfoRef.current = movingInfo;
+  }, [movingInfo]);
+
+  const handleMoveStart = (
+    e: React.MouseEvent,
+    key: string,
+    idx: number,
+    baseLeftPx: number,
+    widthPx: number
+  ) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    let hasMoved = false;
+    document.body.style.userSelect = "none";
+    setMovingInfo({ key, deltaPx: 0 });
+
+    const onMouseMove = (mv: MouseEvent) => {
+      const deltaPx = mv.clientX - startX;
+      if (Math.abs(deltaPx) > 4) {
+        hasMoved = true;
+        document.body.style.cursor = "grabbing";
+      }
+      setMovingInfo({ key, deltaPx });
+    };
+
+    const onMouseUp = () => {
+      if (!hasMoved) {
+        onClipClick(key, idx);
+      } else {
+        const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
+        const clampedLeft = Math.max(0, desiredLeft);
+        const finalOffset = clampedLeft - baseLeftPx;
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + finalOffset,
+        }));
+      }
+      setMovingInfo(null);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
 
   const handleResizeStart = (
     e: React.MouseEvent,
@@ -100,14 +153,26 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
       <div className="flex-1 relative h-9">
         {hasMusic ? (
           <div
-            onClick={() => onClipClick("a1-0", 0)}
+            onMouseDown={(e) => handleMoveStart(e, "a1-0", 0, 0, totalDuration * 30)}
             onContextMenu={(e) => onContextMenu(e, "a1-0", 0)}
-            className={`group absolute inset-y-0 inset-x-0 rounded-md overflow-hidden cursor-pointer transition-all border ${resizingSide !== null
-                ? "border-emerald-300 ring-2 ring-emerald-400/80 shadow-[0_0_24px_rgba(52,211,153,0.8)] brightness-115"
-                : selectedClip === "a1-0"
-                  ? "border-emerald-300 ring-2 ring-emerald-400/50 shadow-[0_0_12px_rgba(52,211,153,0.4)]"
-                  : "border-emerald-600/50 hover:border-emerald-300/80"
-              } bg-[#064e3b]`}
+            className={`group absolute inset-y-0 rounded-md overflow-hidden cursor-pointer bg-[#064e3b] ${
+              movingInfo?.key === "a1-0" ? 'cursor-grabbing shadow-[0_4px_20px_rgba(52,211,153,0.4)] z-40' :
+                selectedClip === "a1-0" ? 'cursor-grab border border-[#34d399] shadow-[0_0_8px_rgba(52,211,153,0.3)] z-20' :
+                'cursor-grab border border-[#34d399]/50 hover:border-[#34d399]/80'
+            }`}
+            style={{
+              left: `${(clipOffsets["a1-0"] ?? 0) + (movingInfo?.key === "a1-0" ? movingInfo.deltaPx : 0)}px`,
+              width: `${totalDuration * 30}px`,
+              outline:
+                selectedClip === "a1-0"
+                  ? "1.5px solid #34d399"
+                  : "1px solid rgba(16,185,129,0.35)",
+              outlineOffset: "-1px",
+              boxShadow:
+                selectedClip === "a1-0"
+                  ? "0 0 8px rgba(52,211,153,0.3)"
+                  : undefined,
+            }}
           >
             {/* Continuous Waveform Envelope */}
             <div className="absolute inset-0 flex items-center px-1">

@@ -62,6 +62,91 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     deltaSecs: number;
   } | null>(null);
 
+  // Per-clip position offsets for move dragging
+  const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  const [movingInfo, setMovingInfo] = useState<{
+    key: string;
+    idx: number;
+    baseLeftPx: number;
+    widthPx: number;
+    deltaPx: number;
+  } | null>(null);
+  const movingInfoRef = React.useRef(movingInfo);
+  React.useEffect(() => {
+    movingInfoRef.current = movingInfo;
+  }, [movingInfo]);
+
+  const handleMoveStart = (
+    e: React.MouseEvent,
+    key: string,
+    idx: number,
+    baseLeftPx: number,
+    widthPx: number
+  ) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    let hasMoved = false;
+    document.body.style.userSelect = "none";
+    setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx: 0 });
+
+    const onMouseMove = (mv: MouseEvent) => {
+      const deltaPx = mv.clientX - startX;
+      if (Math.abs(deltaPx) > 4) {
+        hasMoved = true;
+        document.body.style.cursor = "grabbing";
+      }
+      setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx });
+    };
+
+    const onMouseUp = () => {
+      if (!hasMoved) {
+        onClipClick(key, idx);
+      } else {
+        const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
+        // Build list of other panel positions
+        const otherClips = panels
+          .map((p: any, i: number) => {
+            const t: PanelTiming | undefined = panelTimings[i];
+            const k = `v1-${i}`;
+            const offset = clipOffsets[k] ?? 0;
+            const left =
+              (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
+            const width = (p.duration || 3.5) * 30;
+            return { key: k, left, width };
+          })
+          .filter((c) => c.key !== key);
+
+        const leftNeighbors = otherClips
+          .filter((c) => c.left < baseLeftPx)
+          .sort((a, b) => b.left - a.left);
+        const rightNeighbors = otherClips
+          .filter((c) => c.left > baseLeftPx)
+          .sort((a, b) => a.left - b.left);
+        const leftBound = leftNeighbors.length
+          ? leftNeighbors[0].left + leftNeighbors[0].width
+          : 0;
+        const rightBound = rightNeighbors.length
+          ? rightNeighbors[0].left - widthPx
+          : Infinity;
+        const clampedLeft = Math.max(leftBound, Math.min(desiredLeft, rightBound));
+        const finalOffset = clampedLeft - baseLeftPx;
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + finalOffset,
+        }));
+      }
+      setMovingInfo(null);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
   const handleResizeStart = (
     e: React.MouseEvent,
     idx: number,
@@ -172,20 +257,38 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                 }
               }
 
+              const isMoving = movingInfo?.key === key;
+              const offsetPx = clipOffsets[key] ?? 0;
+              const finalLeftPx =
+                displayLeftPx + offsetPx + (isMoving ? movingInfo!.deltaPx : 0);
+
               return (
                 <div
                   key={key}
-                  onClick={() => onClipClick(key, idx)}
+                  onMouseDown={(e) =>
+                    handleMoveStart(
+                      e,
+                      key,
+                      idx,
+                      baseLeftPx + offsetPx,
+                      baseWidthPx
+                    )
+                  }
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
-                  className={`group absolute top-1 bottom-1 rounded-md border transition-shadow cursor-pointer select-none overflow-hidden ${
-                    isSelected
-                      ? "border-purple-400/90 shadow-[0_0_12px_rgba(168,85,247,0.5)] z-20"
-                      : "border-purple-500/25 hover:border-purple-400/60 z-10"
-                  } ${isResizing ? "ring-2 ring-purple-400 z-30" : ""}`}
+                  className={`group absolute top-1 bottom-1 rounded-md border select-none overflow-hidden z-10 ${
+                    isMoving
+                      ? "cursor-grabbing shadow-[0_4px_20px_rgba(168,85,247,0.5)] z-40 border-purple-300"
+                      : isResizing
+                      ? "cursor-col-resize shadow-[0_0_10px_rgba(168,85,247,0.5)] z-30"
+                      : isSelected
+                      ? "cursor-grab border-purple-400/90 shadow-[0_0_10px_rgba(168,85,247,0.4)] z-20"
+                      : "cursor-grab border-purple-500/25 hover:border-purple-400/60 z-10"
+                  }`}
                   style={{
-                    left: `${displayLeftPx}px`,
+                    left: `${finalLeftPx}px`,
                     width: `${displayWidthPx}px`,
                     backgroundColor: "#0d0b14",
+                    transition: isMoving ? "none" : undefined,
                   }}
                 >
                   {/* Thumbnail background */}

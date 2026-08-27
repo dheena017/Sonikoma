@@ -49,6 +49,69 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
     deltaSecs: number;
   } | null>(null);
 
+  // per-clip offsets to persist moved positions
+  const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
+  const [movingInfo, setMovingInfo] = useState<{ key: string; idx: number; baseLeftPx: number; widthPx: number; deltaPx: number } | null>(null);
+  const movingInfoRef = React.useRef(movingInfo);
+  React.useEffect(() => { movingInfoRef.current = movingInfo; }, [movingInfo]);
+
+  const handleMoveStart = (
+    e: React.MouseEvent,
+    key: string,
+    idx: number,
+    baseLeftPx: number,
+    widthPx: number
+  ) => {
+    // ignore clicks on inner buttons
+    if ((e.target as HTMLElement).closest("button")) return;
+    e.preventDefault();
+    const startX = e.clientX;
+    let hasMoved = false;
+    document.body.style.userSelect = "none";
+    setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx: 0 });
+
+    const onMouseMove = (mv: MouseEvent) => {
+      const deltaPx = mv.clientX - startX;
+      if (Math.abs(deltaPx) > 4) { hasMoved = true; document.body.style.cursor = "grabbing"; }
+      setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx });
+    };
+
+    const onMouseUp = () => {
+      if (!hasMoved) {
+        onClipClick(key, idx);
+      } else {
+        // Compute desired new left position
+        const currentOffset = clipOffsets[key] ?? 0;
+        let desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
+        // Build list of other clips positions
+        const otherClips = panels.map((p: any, i: number) => {
+          const t: PanelTiming | undefined = panelTimings[i];
+          const k = `a3-${i}`;
+          const offset = clipOffsets[k] ?? 0;
+          const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
+          const width = (p.voice_duration ?? t?.duration ?? 3.5) * 30;
+          return { key: k, left, width };
+        }).filter(c => c.key !== key);
+        // Find neighboring clips
+        const leftNeighbors = otherClips.filter(c => c.left < baseLeftPx).sort((a, b) => b.left - a.left);
+        const rightNeighbors = otherClips.filter(c => c.left > baseLeftPx).sort((a, b) => a.left - b.left);
+        const leftBound = leftNeighbors.length ? leftNeighbors[0].left + leftNeighbors[0].width : 0;
+        const rightBound = rightNeighbors.length ? rightNeighbors[0].left - (widthPx) : Infinity;
+        const clampedLeft = Math.max(leftBound, Math.min(desiredLeft, rightBound));
+        const finalOffset = clampedLeft - baseLeftPx;
+        setClipOffsets(prev => ({ ...prev, [key]: (prev[key] ?? 0) + finalOffset }));
+      }
+      setMovingInfo(null);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
   const handleResizeStart = (
     e: React.MouseEvent,
     key: string,
@@ -174,24 +237,40 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
               }
             }
 
+            const isMoving = movingInfo?.key === key;
+            const offsetPx = clipOffsets[key] ?? 0;
+            const finalLeftPx =
+              displayLeftPx + offsetPx + (isMoving ? movingInfo!.deltaPx : 0);
+
             return (
               <div
                 key={key}
-                onClick={() => onClipClick(key, idx)}
-                onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute inset-y-0 rounded-md overflow-hidden cursor-pointer transition-all border select-none ${
-                  isResizing
-                    ? "ring-2 ring-purple-300 border-purple-300 shadow-[0_0_24px_rgba(192,132,252,0.8)] z-30 brightness-115"
-                    : selectedClip === key
-                    ? "ring-2 ring-purple-400 border-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.5)] z-20"
-                    : "border-purple-600/50 hover:border-purple-300/80"
-                } bg-[#6b21a8]`}
-                style={{
-                  left: `${displayLeftPx}px`,
-                  width: `${displayWidthPx}px`,
-                }}
-                title={`VO #${idx + 1} (${speaker}): ${dialogue}`}
-              >
+                onMouseDown={(e) =>
+                  handleMoveStart(
+                    e,
+                    key,
+                    idx,
+                    baseLeftPx + offsetPx,
+                    baseWidthPx
+                  )
+                }
+                    onContextMenu={(e) => onContextMenu(e, key, idx)}
+                    className={`group absolute inset-y-0 rounded-md overflow-hidden select-none border z-10 ${
+                      isMoving
+                        ? "cursor-grabbing shadow-[0_4px_20px_rgba(168,85,247,0.4)] z-40"
+                        : isResizing
+                        ? "cursor-col-resize border-purple-300 shadow-[0_0_14px_rgba(192,132,252,0.5)] z-30"
+                        : selectedClip === key
+                        ? "cursor-grab border-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.3)] z-20"
+                        : "cursor-grab border-purple-600/50 hover:border-purple-300/80 z-10"
+                    } bg-[#6b21a8]`}
+                    style={{
+                      left: `${finalLeftPx}px`,
+                      width: `${displayWidthPx}px`,
+                      transition: isMoving ? "none" : undefined,
+                    }}
+                    title={`VO #${idx + 1} (${speaker}): ${dialogue}`}
+                  >
                 {/* Audio Waveform Envelope */}
                 <div className="absolute inset-0 flex items-center px-1">
                   <AudioWaveformVisual

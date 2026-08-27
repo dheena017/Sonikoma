@@ -70,11 +70,11 @@ const ClipBlock: React.FC<ClipBlockProps> = ({
       onClick={() => onClipClick(clipKey, panelIdx)}
       onContextMenu={(e) => onContextMenu(e, clipKey, panelIdx)}
       style={style}
-      className={`group/clip absolute flex items-center justify-between cursor-pointer truncate transition-all rounded-lg border text-[10px] font-semibold px-2 ${baseColorClass} ${
+      className={`group/clip absolute flex items-center justify-between cursor-pointer truncate rounded-lg border text-[10px] font-semibold px-2 ${baseColorClass} ${
         selected
-          ? "ring-2 ring-white/60 brightness-115 z-10 shadow-lg"
-          : "hover:brightness-110"
-      } ${isResizing ? "ring-2 ring-purple-400" : ""}`}
+          ? "border-white/60 shadow-lg z-10"
+          : "hover:border-white/30"
+      } ${isResizing ? "border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.5)]" : ""}`}
     >
       <div className="flex items-center gap-1.5 min-w-0 truncate">
         <SyncStatusBadge status={status} />
