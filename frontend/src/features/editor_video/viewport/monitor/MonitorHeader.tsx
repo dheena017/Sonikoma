@@ -259,7 +259,11 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
       left={leftBlock}
       center={centerBlock}
       right={rightBlock}
-      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+      className={
+        isFloating
+          ? "border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+          : "rounded-none border-b border-white/10 bg-[#0b0c14] backdrop-blur-xl px-3.5 py-2 shrink-0 shadow-none border-t-0 border-l-0 border-r-0"
+      }
     />
   );
 };

@@ -1038,7 +1038,7 @@ export default function VideoPreviewCinemaPlayer({
         setShowChaptersMenu(false);
       }}
       className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${variant === "floating" || variant === "embedded"
-          ? "w-full h-full rounded-xl"
+          ? "w-full h-full rounded-none"
           : isTheaterMode
             ? "w-full h-[85vh] lg:h-[90vh]"
             : "fixed inset-0 z-50 w-screen h-screen"

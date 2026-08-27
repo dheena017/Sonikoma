@@ -73,7 +73,7 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
   return (
     <div
       id="section-monitor"
-      className="w-full bg-[#0c0d16]/70 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 space-y-4 mb-4 scroll-mt-20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex flex-col min-w-0"
+      className="w-full h-full bg-[#0c0d16]/90 flex flex-col min-w-0 overflow-hidden select-none"
     >
       <MonitorHeader
         videoUrl={videoUrl}
@@ -101,8 +101,8 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
         onZoomReset={onZoomReset}
       />
 
-      {/* RIGHT: Cinema Player or Blank Viewport */}
-      <div className="w-full h-[460px] sm:h-[540px] md:h-[600px] lg:h-[660px] max-h-[75vh] rounded-2xl overflow-hidden border border-neutral-800/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative bg-[#09090f] min-w-0">
+      {/* Cinema Player or Blank Viewport */}
+      <div className="w-full flex-1 min-h-0 overflow-hidden relative bg-black min-w-0 flex flex-col">
         {activePreviewTab === "editor" ? (
           <BlankViewport
             panels={panels}
