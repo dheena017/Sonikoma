@@ -3,7 +3,7 @@
 // Specialized Canva & NLE context menus tailored uniquely per track type:
 // V1 (Story Panels), V2 (Camera FX), V3 (Subtitles), A1 (Music), A2 (SFX), A3 (Voiceover).
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Copy,
   ClipboardPaste,
@@ -40,6 +40,7 @@ interface ContextMenuPopupProps {
   onRemoveDuration: () => void;
   onApplyDurationToAll: () => void;
   onSplit: () => void;
+  onClose?: () => void;
 }
 
 const MENU_W = 240;
@@ -55,6 +56,7 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
   onRemoveDuration,
   onApplyDurationToAll,
   onSplit,
+  onClose,
 }) => {
   if (!contextMenu) return null;
 
@@ -253,9 +255,8 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
   }
 
   const HeaderIcon = trackIcon;
-  const MENU_W = 230;
-  const estimatedH = items.length * 32 + 54;
-  const MENU_H = Math.min(estimatedH, window.innerHeight - 32);
+  const MENU_W = 240;
+  const MENU_H = items.length * 34 + 48;
 
   const bTop = contextMenu.buttonTop ?? contextMenu.y;
   const bBottom = contextMenu.buttonBottom ?? contextMenu.y;
@@ -264,40 +265,53 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
 
   const spaceBelow = window.innerHeight - bBottom;
   const spaceAbove = bTop;
-  const spaceRight = window.innerWidth - bLeft;
 
-  // 1. Vertical Auto-Positioning (Top vs Bottom):
+  // Decide open direction:
   let y: number;
-  if (spaceBelow >= MENU_H + 12 || spaceBelow >= spaceAbove) {
-    // Sufficient room below: open downwards
-    y = bBottom + 4;
-  } else {
-    // Insufficient room below: open upwards
+  if (spaceBelow < MENU_H + 20 && spaceAbove >= MENU_H) {
+    // Open directly ABOVE the button
     y = bTop - MENU_H - 4;
-  }
-
-  // 2. Horizontal Auto-Positioning (Left vs Right):
-  let x: number;
-  if (spaceRight >= MENU_W + 12) {
-    // Open aligned to left of trigger
-    x = bLeft;
+  } else if (spaceBelow < MENU_H + 20 && spaceAbove > spaceBelow) {
+    // Open directly ABOVE the button
+    y = Math.max(12, bTop - MENU_H - 4);
   } else {
-    // Open aligned to right of trigger (flow leftward)
-    x = bRight - MENU_W;
+    // Open directly BELOW the button
+    y = bBottom + 4;
   }
 
-  // 3. Strict 4-Way Viewport Boundary Clamp (Zero edge overflow)
-  x = Math.max(12, Math.min(x, window.innerWidth - MENU_W - 12));
+  // Safety clamp so menu is always 100% on-screen
   y = Math.max(12, Math.min(y, window.innerHeight - MENU_H - 12));
 
+  // Horizontal Positioning: Align to right edge of button
+  let x = bRight - MENU_W;
+  if (x < 12) {
+    x = Math.max(12, bLeft);
+  }
+  x = Math.max(12, Math.min(x, window.innerWidth - MENU_W - 12));
+
   return (
-    <div
-      ref={contextMenuRef}
-      className="fixed z-[9999] bg-[#0f0f1c]/95 backdrop-blur-2xl rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.85)] border border-white/10 py-1.5 overflow-hidden text-neutral-200 select-none animate-in fade-in zoom-in-95 duration-100 max-h-[calc(100vh-28px)] flex flex-col"
-      style={{ left: `${x}px`, top: `${y}px`, width: `${MENU_W}px` }}
-    >
-      {/* Track Category Header */}
-      <div className="px-3 py-1.5 flex items-center justify-between border-b border-white/[0.08] mb-1 bg-white/[0.02]">
+    <>
+      {/* Invisible backdrop to capture all outside clicks safely */}
+      <div
+        className="fixed inset-0 z-[9998] bg-transparent cursor-default"
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          onClose?.();
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onClose?.();
+        }}
+      />
+
+      <div
+        ref={contextMenuRef}
+        className="fixed z-[9999] bg-[#0f0f1c]/98 backdrop-blur-2xl rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-white/10 py-1.5 overflow-hidden text-neutral-200 select-none animate-in fade-in zoom-in-95 duration-100 max-h-[calc(100vh-24px)] flex flex-col"
+        style={{ left: `${x}px`, top: `${y}px`, width: `${MENU_W}px` }}
+      >
+        {/* Track Category Header */}
+        <div className="px-3 py-1.5 flex items-center justify-between border-b border-white/[0.08] mb-1 bg-white/[0.02]">
         <div className="flex items-center gap-2 min-w-0">
           <HeaderIcon className={`h-3.5 w-3.5 ${trackColor} shrink-0`} />
           <span className="text-[11px] font-mono font-bold text-white truncate">
@@ -345,6 +359,7 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
         })}
       </div>
     </div>
+    </>
   );
 };
 

@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import TrackLabel from "../TrackLabel";
-import { Music, Plus } from "lucide-react";
+import { Music, Plus, MoreHorizontal } from "lucide-react";
 import AudioWaveformVisual from "../AudioWaveformVisual";
 import ClipTrimHandles from "../ClipTrimHandles";
 
@@ -81,9 +81,8 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 
   return (
     <div
-      className={`h-11 border-b border-white/[0.04] flex items-center ${
-        muted ? "opacity-40" : ""
-      }`}
+      className={`h-11 border-b border-white/[0.04] flex items-center ${muted ? "opacity-40" : ""
+        }`}
     >
       <TrackLabel
         id="A1"
@@ -103,13 +102,12 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
           <div
             onClick={() => onClipClick("a1-0", 0)}
             onContextMenu={(e) => onContextMenu(e, "a1-0", 0)}
-            className={`group absolute inset-y-0 inset-x-0 rounded-md overflow-hidden cursor-pointer transition-all border ${
-              resizingSide !== null
+            className={`group absolute inset-y-0 inset-x-0 rounded-md overflow-hidden cursor-pointer transition-all border ${resizingSide !== null
                 ? "border-emerald-300 ring-2 ring-emerald-400/80 shadow-[0_0_24px_rgba(52,211,153,0.8)] brightness-115"
                 : selectedClip === "a1-0"
-                ? "border-emerald-300 ring-2 ring-emerald-400/50 shadow-[0_0_12px_rgba(52,211,153,0.4)]"
-                : "border-emerald-600/50 hover:border-emerald-300/80"
-            } bg-[#064e3b]`}
+                  ? "border-emerald-300 ring-2 ring-emerald-400/50 shadow-[0_0_12px_rgba(52,211,153,0.4)]"
+                  : "border-emerald-600/50 hover:border-emerald-300/80"
+              } bg-[#064e3b]`}
           >
             {/* Continuous Waveform Envelope */}
             <div className="absolute inset-0 flex items-center px-1">
@@ -139,17 +137,17 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                   {totalDuration.toFixed(1)}s
                 </span>
 
-                {/* Prominent Three-Dots Action Menu Button */}
+                {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onContextMenu(e, "a1-0", 0);
                   }}
-                  className="h-4 px-1 flex items-center justify-center rounded bg-black/70 hover:bg-emerald-600 text-neutral-200 hover:text-white border border-white/20 hover:border-emerald-400 shadow-sm transition-all cursor-pointer"
+                  className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#0c0c16]/85 hover:bg-emerald-600 text-neutral-300 hover:text-white border border-white/20 hover:border-emerald-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(110,231,183,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                   title="Music Options"
                 >
-                  <span className="font-bold text-[10px] tracking-widest leading-none px-0.5">···</span>
+                  <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
                 </button>
               </div>
             </div>

@@ -537,6 +537,7 @@ const Timeline: React.FC<TimelineProps> = ({
         onRemoveDuration={s.handleRemoveDuration}
         onApplyDurationToAll={() => s.handleApplyDurationToAll(panels)}
         onSplit={s.handleSplit}
+        onClose={s.closeContextMenu}
       />
 
       {/* ── Media Picker Modal ──────────────────────────────────────────────── */}

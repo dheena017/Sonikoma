@@ -3,9 +3,10 @@
 
 import React, { useState } from "react";
 import TrackLabel from "../TrackLabel";
-import { ImagePlus, Image as ImageIcon, Film } from "lucide-react";
+import { ImagePlus, Image as ImageIcon, Film, MoreHorizontal } from "lucide-react";
 import { Keyframe } from "../../types";
 import ClipTrimHandles from "../ClipTrimHandles";
+import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 
 export interface PanelTiming {
   index: number;
@@ -133,14 +134,19 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
 
               const rawUrl =
                 panel.image_url ||
+                panel.imageUrl ||
+                panel.url ||
                 panel.panel_image_url ||
                 panel.panel_image ||
-                panel.generated_image_url;
-              const imgUrl = rawUrl
-                ? rawUrl.startsWith("http")
-                  ? rawUrl
-                  : `http://localhost:8000${rawUrl}`
-                : undefined;
+                panel.generated_image_url ||
+                panel.image ||
+                panel.thumbnail_url ||
+                panel.thumbnail ||
+                panel.preview_url ||
+                panel.media_url ||
+                panel.src ||
+                "";
+              const imgUrl = rawUrl ? getProxiedImageUrl(rawUrl) : undefined;
 
               const isSelected =
                 selectedClip === `v1-${idx}` || currentPanelIndex === idx;
@@ -230,17 +236,17 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                       {dur.toFixed(1)}s
                     </span>
 
-                    {/* Prominent Three-Dots Action Menu Button */}
+                    {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         onContextMenu(e, key, idx);
                       }}
-                      className="h-4 px-1 flex items-center justify-center rounded bg-black/70 hover:bg-purple-600 text-neutral-200 hover:text-white border border-white/20 hover:border-purple-400 shadow-sm transition-all cursor-pointer"
+                      className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#0c0c16]/85 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/20 hover:border-purple-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                       title="Frame Options"
                     >
-                      <span className="font-bold text-[10px] tracking-widest leading-none px-0.5">···</span>
+                      <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
                     </button>
                   </div>
 

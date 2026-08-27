@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import TrackLabel from "../TrackLabel";
-import { Type, Plus } from "lucide-react";
+import { Type, Plus, MoreHorizontal } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import ClipTrimHandles from "../ClipTrimHandles";
 
@@ -178,17 +178,17 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                     {dur.toFixed(1)}s
                   </span>
 
-                  {/* Prominent Three-Dots Action Menu Button */}
+                  {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onContextMenu(e, key, idx);
                     }}
-                    className="h-4 px-1 flex items-center justify-center rounded bg-black/70 hover:bg-purple-600 text-neutral-200 hover:text-white border border-white/20 hover:border-purple-400 shadow-sm transition-all cursor-pointer"
+                    className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#0c0c16]/85 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/20 hover:border-purple-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                     title="Subtitle Options"
                   >
-                    <span className="font-bold text-[10px] tracking-widest leading-none px-0.5">···</span>
+                    <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
                   </button>
                 </div>
 
