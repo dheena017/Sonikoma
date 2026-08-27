@@ -30,10 +30,10 @@ export const MediaWorkspaceHeader: React.FC<MediaWorkspaceHeaderProps> = ({
         </div>
         <div className="min-w-0 space-y-0.5">
           <h2 className="text-[11px] font-black text-white uppercase tracking-[0.28em] font-mono truncate">
-            Media Bin
+            Imported Assets
           </h2>
           <p className="text-[10px] text-neutral-300 font-mono truncate max-w-xs">
-            Browse and manage your visual assets with instant previews.
+            Browse and manage your imported visual assets with instant previews.
           </p>
         </div>
       </div>

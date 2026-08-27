@@ -47,7 +47,7 @@ export interface WorkspaceConfig {
 export const WORKSPACE_REGISTRY: Record<WorkspaceId, WorkspaceConfig> = {
   media: {
     id: "media",
-    title: "Media",
+    title: "Imported Assets",
     group: "primary",
     icon: Image,
     component: MediaWorkspace,
