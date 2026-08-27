@@ -32,7 +32,7 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
   onToggleHide,
   onToggleMute,
 }) => (
-  <div className="w-48 shrink-0 h-full sticky left-0 z-30 flex items-center justify-between px-3 border-r border-white/10 group bg-[#0d0d16] shadow-[4px_0_16px_rgba(0,0,0,0.85)] select-none">
+  <div data-track-header="true" className="w-48 shrink-0 h-full sticky left-0 z-30 flex items-center justify-between px-3 border-r border-white/10 group bg-[#0d0d16] shadow-[4px_0_16px_rgba(0,0,0,0.85)] select-none">
     {/* Track ID & Name (Always prominent & readable, never truncated) */}
     <div className="flex items-center gap-2 min-w-0 pr-1 overflow-hidden">
       <span

@@ -103,6 +103,49 @@ const Timeline: React.FC<TimelineProps> = ({
     left: number;
     width: number;
   } | null>(null);
+  const timelineScrollRef = useRef<HTMLDivElement>(null);
+
+  // Dedicated wheel listener: clean separation of horizontal timeline scrolling vs vertical track scrolling
+  useEffect(() => {
+    const el = timelineScrollRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Allow browser zoom or system modifiers (Ctrl/Cmd) to pass through
+      if (e.ctrlKey || e.metaKey) return;
+
+      // Check if mouse is hovering over the left track headers / action columns
+      const target = e.target as HTMLElement | null;
+      const isOverTrackHeader = Boolean(
+        target?.closest('[data-track-header="true"]') ||
+        target?.closest('.w-48')
+      );
+
+      if (isOverTrackHeader || e.shiftKey) {
+        // Vertical track scrolling across rows/lanes
+        if (Math.abs(e.deltaY) > 0) {
+          el.scrollTop += e.deltaY;
+          e.preventDefault();
+        }
+      } else {
+        // Horizontal timeline time scrolling
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+          // Native touchpad horizontal swipe
+          el.scrollLeft += e.deltaX;
+          e.preventDefault();
+        } else if (Math.abs(e.deltaY) > 0) {
+          // Standard mouse wheel up/down -> scroll left/right along timeline
+          el.scrollLeft += e.deltaY;
+          e.preventDefault();
+        }
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
 
   const displayPanels = panels;
   const totalPanels = displayPanels.length;
@@ -363,13 +406,8 @@ const Timeline: React.FC<TimelineProps> = ({
       >
         {/* ── Track Scroll Area: vertical + horizontal scrollbars ─────── */}
         <div
+          ref={timelineScrollRef}
           className="timeline-scroll-area flex-1 overflow-auto min-h-0 relative"
-          onWheel={(e) => {
-            if (e.shiftKey || Math.abs(e.deltaX) > 0) return;
-            if (Math.abs(e.deltaY) > 0) {
-              e.currentTarget.scrollLeft += e.deltaY;
-            }
-          }}
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "#6d28d9 #0d0d14",
