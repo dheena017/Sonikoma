@@ -714,7 +714,8 @@ export default function AppRouter(props: AppRouterProps) {
       chapterPathMatch,
       isDetailsMode,
       isWorkspacePath,
-      isWorkspaceOnly: isWorkspacePath,
+      isWorkspaceOnly:
+        currentPath === "/scraper" || currentPath === "/scraper/",
       isDashboardOverviewPath:
         currentPath === "/dashboard" || currentPath === "/",
       isProjectsPath: currentPath === "/projects",
@@ -730,9 +731,7 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/scraper/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
-        currentPath.startsWith("/scraper/editor") ||
-        currentPath.startsWith("/image-editor") ||
-        isImageEditorPage,
+        currentPath.startsWith("/scraper/editor"),
       isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
       isOptimizerPath:
@@ -1068,11 +1067,11 @@ export default function AppRouter(props: AppRouterProps) {
     >
       <React.Suspense fallback={<RouteLoadingFallback />}>
         {/* PAGE VIEW 1: Main Editor Workspace */}
-        <div
-          className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
-          style={{ display: isWorkspacePath ? "flex" : "none" }}
-        >
-          <ScraperPage
+        {isWorkspacePath && (
+          <div
+            className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
+          >
+            <ScraperPage
             isDashboardOnly={isWorkspaceOnly}
             projectId={projectId}
             seriesSlug={seriesSlugState}
@@ -1189,6 +1188,23 @@ export default function AppRouter(props: AppRouterProps) {
             audioFeedback={audioFeedback}
           />
         </div>
+      )}
+
+        {/* PAGE VIEW 1.25: Storyboard & Video Production Editor Studio */}
+        {isEditorPath && (
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <EditorPage
+              appLogic={memoizedAppLogic}
+              navigateTo={navigateTo}
+              onRequestProjectConfirmation={() => setShowScrapeConfirmModal(true)}
+              seriesSlug={seriesSlugState}
+              chapterSlug={chapterSlugState}
+              rating={scrapedRating}
+              likes={scrapedLikes}
+              views={scrapedViews}
+            />
+          </div>
+        )}
 
         {/* PAGE VIEW 1.5: Dashboard Overview */}
         {(isDashboardOverviewPath || currentPath === "/") && (

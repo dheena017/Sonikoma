@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useTransition } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 
 export interface UseAppRouterProps {
   scrapedImages?: string[];
@@ -76,8 +76,6 @@ export function useAppRouter(props?: UseAppRouterProps) {
     }
     return "/";
   });
-
-  const [, startTransition] = useTransition();
   const propsRef = useRef<UseAppRouterProps | undefined>(props);
   propsRef.current = props;
 
@@ -117,9 +115,7 @@ export function useAppRouter(props?: UseAppRouterProps) {
 
     const handleLocationChange = () => {
       const path = window.location.pathname;
-      startTransition(() => {
-        setCurrentPath(path);
-      });
+      setCurrentPath(path);
 
       if (path.includes("/editor")) {
         setLastEditorPath(path + window.location.search);
@@ -140,6 +136,9 @@ export function useAppRouter(props?: UseAppRouterProps) {
     (path: string) => {
       if (typeof window === "undefined") return;
 
+      // Eagerly prefetch route bundle immediately
+      prefetchRoute(path);
+
       let targetPath = path;
       if (propsRef.current?.isAuthenticated && (path === "/" || path === "" || path === "/index.html")) {
         targetPath = "/dashboard";
@@ -151,9 +150,7 @@ export function useAppRouter(props?: UseAppRouterProps) {
       window.history.pushState({}, "", targetPath);
       const newPath = window.location.pathname;
 
-      startTransition(() => {
-        setCurrentPath(newPath);
-      });
+      setCurrentPath(newPath);
 
       if (newPath.includes("/editor")) {
         setLastEditorPath(newPath + window.location.search);
