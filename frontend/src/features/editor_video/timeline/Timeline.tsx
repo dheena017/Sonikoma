@@ -42,19 +42,11 @@ const Timeline: React.FC<TimelineProps> = ({
   const s = useTimelineState(setCurrentPanelIndex);
   const pacing = useAIPacing(panels, s.clipDurations);
 
-  // Accurate panel timings mapping
+  // Accurate panel timings mapping (based on master frame duration)
   const panelTimings = useMemo(() => {
     let currentTime = 0;
     const durations = panels.map((p, idx) => {
-      return (
-        s.clipDurations[`v1-${idx}`] ??
-        s.clipDurations[`v2-${idx}`] ??
-        s.clipDurations[`v3-${idx}`] ??
-        s.clipDurations[`a2-${idx}`] ??
-        s.clipDurations[`a3-${idx}`] ??
-        p.duration ??
-        DEFAULT_PANEL_DURATION
-      );
+      return s.clipDurations[`v1-${idx}`] ?? p.duration ?? DEFAULT_PANEL_DURATION;
     });
     const total = durations.reduce((acc, d) => acc + d, 0) || 1;
 
@@ -288,13 +280,27 @@ const Timeline: React.FC<TimelineProps> = ({
   const handleDurationChange = useCallback(
     (key: string, newDuration: number) => {
       s.updateClipDuration(key, newDuration);
-      const match = key.match(/^[a-z0-9]+-(\d+)$/i);
+      const match = key.match(/^([a-z0-9]+)-(\d+)$/i);
       if (match) {
-        const idx = parseInt(match[1], 10);
+        const trackPrefix = match[1].toLowerCase();
+        const idx = parseInt(match[2], 10);
         if (projectStore?.setPanels && projectStore.activeProjectData?.panels) {
           const updated = projectStore.activeProjectData.panels.map(
-            (p: any, i: number) =>
-              i === idx ? { ...p, duration: newDuration } : p
+            (p: any, i: number) => {
+              if (i !== idx) return p;
+              if (trackPrefix === "v1") {
+                return { ...p, duration: newDuration };
+              } else if (trackPrefix === "v2") {
+                return { ...p, camera_duration: newDuration, fx_duration: newDuration };
+              } else if (trackPrefix === "v3") {
+                return { ...p, subtitle_duration: newDuration };
+              } else if (trackPrefix === "a2") {
+                return { ...p, sfx_duration: newDuration };
+              } else if (trackPrefix === "a3") {
+                return { ...p, voice_duration: newDuration };
+              }
+              return p;
+            }
           );
           projectStore.setPanels(updated);
         }
@@ -356,42 +362,46 @@ const Timeline: React.FC<TimelineProps> = ({
         className="flex-1 flex flex-col overflow-hidden min-h-0 relative"
         ref={s.trackAreaRef}
       >
-        {trackBounds && rulerHoverPct !== null && (
-          <div
-            className="pointer-events-none absolute top-0 bottom-0 w-px bg-white/20 z-10"
-            style={{
-              left: `${
-                trackBounds.left + (rulerHoverPct / 100) * trackBounds.width
-              }px`,
-            }}
-          />
-        )}
-
-        <TimelinePlayhead
-          playheadPercent={playheadPct}
-          onScrubStart={handlePlayheadScrubStart}
-          trackBounds={trackBounds}
-        />
-        <TimelineRuler
-          totalDuration={totalDuration}
-          onScrubStart={handlePlayheadScrubStart}
-          onHoverPctChange={(pct) => {
-            setRulerHoverPct(pct);
-            updateTrackBounds();
-          }}
-          ref={rulerRef}
-        />
-
         {/* ── Track Scroll Area: vertical + horizontal scrollbars ─────── */}
         <div
-          className="timeline-scroll-area flex-1 overflow-auto min-h-0"
+          className="timeline-scroll-area flex-1 overflow-auto min-h-0 relative"
+          onWheel={(e) => {
+            if (e.shiftKey || Math.abs(e.deltaX) > 0) return;
+            if (Math.abs(e.deltaY) > 0) {
+              e.currentTarget.scrollLeft += e.deltaY;
+            }
+          }}
           style={{
             scrollbarWidth: "thin",
             scrollbarColor: "#6d28d9 #0d0d14",
           }}
         >
-          {/* Inner wrapper — wide enough to scroll horizontally and display side-by-side add triggers */}
-          <div className="min-w-[max(100%,800px)] min-h-full relative pr-36">
+          {/* Inner wrapper with flush right edge and synchronized tracks */}
+          <div
+            className="min-h-full relative"
+            style={{
+              minWidth: `${Math.max(1000, totalDuration * 30 + 176 + 130)}px`,
+            }}
+          >
+            {/* Sticky Synchronized Top Ruler */}
+            <div className="sticky top-0 z-30 bg-[#0a0a10]">
+              <TimelineRuler
+                totalDuration={totalDuration}
+                onScrubStart={handlePlayheadScrubStart}
+                onHoverPctChange={(pct) => {
+                  setRulerHoverPct(pct);
+                }}
+                ref={rulerRef}
+              />
+            </div>
+
+            {/* Synchronized Playhead Scrubber */}
+            <TimelinePlayhead
+              currentTime={timelineTime}
+              playheadPercent={playheadPct}
+              onScrubStart={handlePlayheadScrubStart}
+            />
+
             {/* V3 — Subtitles / Overlay */}
             {!s.hiddenTracks["V3"] && s.captionsVisible && (
               <TimelineSubtitlesTrack

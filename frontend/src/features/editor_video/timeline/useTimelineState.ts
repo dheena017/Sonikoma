@@ -174,9 +174,22 @@ export function useTimelineState(
       e.stopPropagation();
       setSelectedClip(clipKey);
       setCurrentPanelIndex?.(panelIdx);
+
+      let x = e.clientX;
+      let y = e.clientY;
+      const target = e.currentTarget as HTMLElement | null;
+      if (target && typeof target.getBoundingClientRect === "function") {
+        const rect = target.getBoundingClientRect();
+        // If clicking a small action button (like the three-dots button), anchor to its bottom-right
+        if (rect.width < 60) {
+          x = rect.right;
+          y = rect.bottom + 4;
+        }
+      }
+
       setContextMenu({
-        x: e.clientX,
-        y: e.clientY,
+        x: x || 200,
+        y: y || 200,
         clipKey,
         panelIdx,
         clipDuration: getClipDuration(clipKey),
@@ -191,18 +204,24 @@ export function useTimelineState(
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeContextMenu();
     };
-    const onClick = (e: MouseEvent) => {
+    const onMouseDown = (e: MouseEvent) => {
       if (
         contextMenuRef.current &&
         !contextMenuRef.current.contains(e.target as Node)
-      )
+      ) {
         closeContextMenu();
+      }
     };
+
+    const timer = setTimeout(() => {
+      window.addEventListener("mousedown", onMouseDown);
+    }, 20);
     window.addEventListener("keydown", onKey);
-    window.addEventListener("mousedown", onClick);
+
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("mousedown", onClick);
+      window.removeEventListener("mousedown", onMouseDown);
     };
   }, [contextMenu, closeContextMenu]);
 

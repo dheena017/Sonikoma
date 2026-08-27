@@ -1,6 +1,7 @@
 // ─── TimelineRuler ────────────────────────────────────────────────────────────
 // Canonical location: timeline/components/TimelineRuler.tsx
-// High-precision NLE ruler with multi-scale minutes, hours, and sub-second subdivisions.
+// High-precision NLE ruler with multi-scale minutes, hours, and sub-second subdivisions
+// locked to fixed 30px per second absolute coordinates.
 
 import React, { forwardRef, useMemo, useRef } from "react";
 import { Clock } from "lucide-react";
@@ -58,53 +59,39 @@ function buildSubdividedTicks(totalDuration: number): RulerTick[] {
   let minorStep = 0.1;
 
   if (totalDuration > 3600) {
-    // Over 1 hour: Major every 5 mins (300s), Med every 1 min (60s), Minor every 15s
-    majorStep = 300.0;
-    mediumStep = 60.0;
-    minorStep = 15.0;
+    majorStep = 600; // every 10 mins
+    mediumStep = 300;
+    minorStep = 60;
   } else if (totalDuration > 600) {
-    // 10 to 60 mins: Major every 1 min (60s), Med every 30s, Minor every 5s
-    majorStep = 60.0;
-    mediumStep = 30.0;
-    minorStep = 5.0;
+    majorStep = 60; // every 1 min
+    mediumStep = 30;
+    minorStep = 10;
   } else if (totalDuration > 120) {
-    // 2 to 10 mins: Major every 30s or 15s
-    majorStep = 30.0;
-    mediumStep = 10.0;
-    minorStep = 2.0;
-  } else if (totalDuration > 60) {
-    // 1 to 2 mins: Major every 10s or 15s, Med every 5s, Minor every 1s
-    majorStep = 10.0;
-    mediumStep = 5.0;
-    minorStep = 1.0;
-  } else if (totalDuration > 20) {
-    majorStep = 5.0;
-    mediumStep = 1.0;
-    minorStep = 0.25;
-  } else if (totalDuration > 8) {
-    majorStep = 1.0;
+    majorStep = 10; // every 10s
+    mediumStep = 5;
+    minorStep = 1;
+  } else if (totalDuration > 30) {
+    majorStep = 5; // every 5s
+    mediumStep = 1;
+    minorStep = 0.5;
+  } else if (totalDuration > 10) {
+    majorStep = 2; // every 2s
+    mediumStep = 1;
+    minorStep = 0.2;
+  } else {
+    majorStep = 1; // every 1s
     mediumStep = 0.5;
     minorStep = 0.1;
-  } else {
-    majorStep = 0.5;
-    mediumStep = 0.25;
-    minorStep = 0.05;
   }
 
   const ticks: RulerTick[] = [];
-  const count = Math.round(totalDuration / minorStep);
+  const count = Math.ceil(totalDuration / minorStep);
 
   for (let i = 0; i <= count; i++) {
-    const t = parseFloat((i * minorStep).toFixed(3));
-    if (t > totalDuration + 0.001) break;
+    const t = Math.min(parseFloat((i * minorStep).toFixed(3)), totalDuration);
+    const pct = (t / totalDuration) * 100;
 
-    const pct = Math.min((t / totalDuration) * 100, 100);
-    const isMajor =
-      Math.abs(t % majorStep) < 0.001 ||
-      Math.abs((t % majorStep) - majorStep) < 0.001 ||
-      t === 0 ||
-      Math.abs(t - totalDuration) < 0.001;
-
+    const isMajor = Math.abs(t % majorStep) < 0.001 || Math.abs((t % majorStep) - majorStep) < 0.001;
     const isMedium =
       !isMajor &&
       (Math.abs(t % mediumStep) < 0.001 ||
@@ -173,28 +160,29 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         className="h-8 flex shrink-0 bg-[#0a0a10] border-b border-white/[0.06] cursor-pointer select-none group/ruler"
       >
         {/* Spacer aligned with the track labels column */}
-        <div className="w-28 shrink-0 border-r border-white/5 bg-[#09090f] flex items-center justify-between px-3">
+        <div className="w-44 shrink-0 sticky left-0 z-20 border-r border-white/10 bg-[#0d0d16] flex items-center justify-between px-3 shadow-[3px_0_12px_rgba(0,0,0,0.6)]">
           <div className="flex items-center gap-1.5 min-w-0">
-            <Clock className="h-3 w-3 text-purple-400 shrink-0" />
+            <Clock className="h-3.5 w-3.5 text-purple-400 shrink-0" />
             <span className="text-[10px] font-mono font-bold text-neutral-200 truncate">
               Timeline
             </span>
           </div>
-          <span className="text-[9px] font-mono text-purple-300/90 shrink-0 font-bold">
+          <span className="text-[9px] font-mono text-purple-300 font-bold bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-500/30 shrink-0 ml-1">
             {formatTimecode(totalDuration, true)}
           </span>
         </div>
 
-        {/* High-Precision Subdivided Ruler Rail */}
+        {/* High-Precision Subdivided Ruler Rail matching 30px/s */}
         <div
           ref={trackRef}
-          className="flex-1 relative overflow-hidden h-full timeline-ruler-track"
+          className="relative h-full timeline-ruler-track flex-1 mx-1"
+          style={{ minWidth: `${Math.max(600, totalDuration * 30)}px` }}
         >
           {/* Hover Time Scrubber Line & Tooltip */}
           {hoverPct !== null && hoverTime !== null && (
             <div
               className="pointer-events-none absolute inset-y-0 w-px bg-purple-400/50 z-20"
-              style={{ left: `${hoverPct}%` }}
+              style={{ left: `${(hoverTime * 30)}px` }}
             >
               <div className="absolute top-0.5 -translate-x-1/2 px-1.5 py-0.2 rounded bg-purple-600 text-white text-[8px] font-mono font-bold shadow-lg whitespace-nowrap">
                 {formatTimecode(hoverTime, true)}
@@ -207,6 +195,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
             const isFirst = tick.time === 0;
             const isLast = Math.abs(tick.time - totalDuration) < 0.001;
             const translateX = isFirst ? "0%" : isLast ? "-100%" : "-50%";
+            const tickPx = tick.time * 30;
 
             if (tick.type === "major") {
               return (
@@ -214,7 +203,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
                   key={`major-${idx}-${tick.time}`}
                   className="absolute bottom-0 flex flex-col items-center pointer-events-none"
                   style={{
-                    left: `${tick.pct}%`,
+                    left: `${tickPx}px`,
                     transform: `translateX(${translateX})`,
                   }}
                 >
@@ -234,7 +223,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
                   key={`med-${idx}-${tick.time}`}
                   className="absolute bottom-0 pointer-events-none"
                   style={{
-                    left: `${tick.pct}%`,
+                    left: `${tickPx}px`,
                     transform: "translateX(-50%)",
                   }}
                 >
@@ -249,7 +238,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
                 key={`min-${idx}-${tick.time}`}
                 className="absolute bottom-0 pointer-events-none"
                 style={{
-                  left: `${tick.pct}%`,
+                  left: `${tickPx}px`,
                   transform: "translateX(-50%)",
                 }}
               >
@@ -257,6 +246,14 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
               </div>
             );
           })}
+        </div>
+
+        {/* Right Symmetrical Header Spacer */}
+        <div className="w-32 shrink-0 sticky right-0 z-20 border-l border-white/10 bg-[#0d0d16] flex items-center justify-between px-3 shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
+          <span className="text-[10px] font-mono font-bold text-neutral-300 tracking-wider uppercase">
+            Quick Add
+          </span>
+          <span className="text-[10px] font-mono text-purple-400 font-bold">+</span>
         </div>
       </div>
     );

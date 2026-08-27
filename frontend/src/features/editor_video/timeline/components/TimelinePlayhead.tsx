@@ -1,17 +1,21 @@
 // ─── TimelinePlayhead ─────────────────────────────────────────────────────────
 // Canonical location: timeline/components/TimelinePlayhead.tsx
+// High-precision scrubber needle locked to exact timeline time coordinates.
 
 import React, { useState } from "react";
 
 interface TimelinePlayheadProps {
+  /** Current timeline time in seconds. */
+  currentTime?: number;
   /** 0–100 percentage position within the scrollable track area. */
-  playheadPercent: number;
+  playheadPercent?: number;
   onScrubStart?: (e: React.MouseEvent) => void;
   trackBounds?: { left: number; width: number } | null;
 }
 
 const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
-  playheadPercent,
+  currentTime,
+  playheadPercent = 0,
   onScrubStart,
   trackBounds,
 }) => {
@@ -29,9 +33,12 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
     window.addEventListener("mouseup", onMouseUp);
   };
 
-  const left = trackBounds
-    ? trackBounds.left + (playheadPercent / 100) * trackBounds.width
-    : undefined;
+  const left =
+    currentTime !== undefined
+      ? 176 + 4 + currentTime * 30
+      : trackBounds
+      ? trackBounds.left + (playheadPercent / 100) * trackBounds.width
+      : 176 + 4 + (playheadPercent / 100) * 800;
 
   return (
     <div
@@ -39,12 +46,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
       className={`absolute top-0 bottom-0 w-[2px] z-30 pointer-events-auto -translate-x-1/2 cursor-ew-resize group/playhead ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
-      style={{
-        left:
-          left !== undefined
-            ? `${left}px`
-            : `calc(112px + (100% - 112px) * ${playheadPercent / 100})`,
-      }}
+      style={{ left: `${left}px` }}
     >
       {/* Playhead Pin Head — top triangle stays visible inside the timeline container */}
       <div className="absolute top-1 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-auto">
