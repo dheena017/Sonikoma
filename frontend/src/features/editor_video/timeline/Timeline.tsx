@@ -47,13 +47,18 @@ const Timeline: React.FC<TimelineProps> = ({
     let currentTime = 0;
     const durations = panels.map((p, idx) => {
       return (
-        p.duration ||
-        s.clipDurations[`v1-${idx}`] ||
+        s.clipDurations[`v1-${idx}`] ??
+        s.clipDurations[`v2-${idx}`] ??
+        s.clipDurations[`v3-${idx}`] ??
+        s.clipDurations[`a2-${idx}`] ??
+        s.clipDurations[`a3-${idx}`] ??
+        p.duration ??
         DEFAULT_PANEL_DURATION
       );
     });
     const total = durations.reduce((acc, d) => acc + d, 0) || 1;
 
+    const pxPerSec = 30;
     return panels.map((panel, index) => {
       const duration = durations[index];
       const startTime = currentTime;
@@ -61,7 +66,18 @@ const Timeline: React.FC<TimelineProps> = ({
       currentTime = endTime;
       const startPct = (startTime / total) * 100;
       const widthPct = (duration / total) * 100;
-      return { index, duration, startTime, endTime, startPct, widthPct };
+      const startPx = startTime * pxPerSec;
+      const widthPx = duration * pxPerSec;
+      return {
+        index,
+        duration,
+        startTime,
+        endTime,
+        startPct,
+        widthPct,
+        startPx,
+        widthPx,
+      };
     });
   }, [panels, s.clipDurations]);
 
@@ -103,13 +119,20 @@ const Timeline: React.FC<TimelineProps> = ({
       ? Math.min(Math.max((timelineTime / totalDuration) * 100, 0), 100)
       : 0;
 
-  // Keep ref synced without causing render-loop on animation.
+  // Keep ref synced without overriding user clicks/scrubs
   useEffect(() => {
-    currentPanelIndexRef.current = currentPanelIndex;
-    if (!isPlaying && panelTimings[currentPanelIndex]) {
-      setTimelineTime(panelTimings[currentPanelIndex].startTime);
+    if (currentPanelIndex !== currentPanelIndexRef.current) {
+      currentPanelIndexRef.current = currentPanelIndex;
+      if (!isPlaying && panelTimings[currentPanelIndex]) {
+        const curTime = timelineTime;
+        const targetPanel = panelTimings[currentPanelIndex];
+        // Only jump time if current time is completely outside the selected panel
+        if (targetPanel && (curTime < targetPanel.startTime || curTime >= targetPanel.endTime)) {
+          setTimelineTime(targetPanel.startTime);
+        }
+      }
     }
-  }, [currentPanelIndex, isPlaying, panelTimings]);
+  }, [currentPanelIndex, isPlaying, panelTimings, timelineTime]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -168,8 +191,8 @@ const Timeline: React.FC<TimelineProps> = ({
   }, []);
 
   const seekToPosition = (clientX: number) => {
-    if (!rulerRef.current) return;
-    const rail = rulerRef.current.querySelector<HTMLDivElement>(
+    if (!rulerRef.current && !s.trackAreaRef.current) return;
+    const rail = rulerRef.current?.querySelector<HTMLDivElement>(
       ".timeline-ruler-track"
     );
     if (!rail) return;
@@ -209,7 +232,19 @@ const Timeline: React.FC<TimelineProps> = ({
   useEffect(() => {
     updateTrackBounds();
     window.addEventListener("resize", updateTrackBounds);
-    return () => window.removeEventListener("resize", updateTrackBounds);
+
+    let observer: ResizeObserver | null = null;
+    if (s.trackAreaRef.current) {
+      observer = new ResizeObserver(() => {
+        updateTrackBounds();
+      });
+      observer.observe(s.trackAreaRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateTrackBounds);
+      observer?.disconnect();
+    };
   }, []);
 
   const handlePlayheadScrubStart = (e: React.MouseEvent) => {
@@ -250,9 +285,30 @@ const Timeline: React.FC<TimelineProps> = ({
     ) ?? null;
 
   // ── Shared clip-interaction callbacks ───────────────────────────────────────
+  const handleDurationChange = useCallback(
+    (key: string, newDuration: number) => {
+      s.updateClipDuration(key, newDuration);
+      const match = key.match(/^[a-z0-9]+-(\d+)$/i);
+      if (match) {
+        const idx = parseInt(match[1], 10);
+        if (projectStore?.setPanels && projectStore.activeProjectData?.panels) {
+          const updated = projectStore.activeProjectData.panels.map(
+            (p: any, i: number) =>
+              i === idx ? { ...p, duration: newDuration } : p
+          );
+          projectStore.setPanels(updated);
+        }
+      }
+    },
+    [s, projectStore]
+  );
+
   const clipCbs = {
-    onClipClick: s.handleClipClick,
+    onClipClick: (key: string, idx: number) => {
+      s.handleClipClick(key, idx);
+    },
     onContextMenu: s.openContextMenu,
+    onDurationChange: handleDurationChange,
   };
 
   // ── Shared track-control factory ─────────────────────────────────────────────
@@ -321,10 +377,6 @@ const Timeline: React.FC<TimelineProps> = ({
           onScrubStart={handlePlayheadScrubStart}
           onHoverPctChange={(pct) => {
             setRulerHoverPct(pct);
-            if (pct === null) {
-              setTrackBounds(null);
-              return;
-            }
             updateTrackBounds();
           }}
           ref={rulerRef}
@@ -338,8 +390,8 @@ const Timeline: React.FC<TimelineProps> = ({
             scrollbarColor: "#6d28d9 #0d0d14",
           }}
         >
-          {/* Inner wrapper — wide enough to scroll horizontally */}
-          <div className="min-w-[max(100%,800px)] min-h-full relative">
+          {/* Inner wrapper — wide enough to scroll horizontally and display side-by-side add triggers */}
+          <div className="min-w-[max(100%,800px)] min-h-full relative pr-36">
             {/* V3 — Subtitles / Overlay */}
             {!s.hiddenTracks["V3"] && s.captionsVisible && (
               <TimelineSubtitlesTrack
@@ -349,6 +401,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("V3")}
                 {...clipCbs}
+                onAddSubtitle={s.openMediaPicker}
               />
             )}
 
@@ -361,6 +414,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("V2")}
                 {...clipCbs}
+                onAddFx={s.openMediaPicker}
               />
             )}
 
@@ -372,7 +426,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 currentPanelIndex={currentPanelIndex}
                 selectedClip={s.selectedClip}
                 getClipDuration={s.getClipDuration}
-                onDurationChange={s.updateClipDuration}
+                onDurationChange={handleDurationChange}
                 keyframesVisible={s.keyframesState.keyframeRowsVisible}
                 keyframesByClip={s.keyframesState.keyframes}
                 selectedKeyframeId={s.keyframesState.selectedKeyframeId}
@@ -383,6 +437,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 }
                 {...trackControls("V1")}
                 {...clipCbs}
+                onAddPanel={s.openMediaPicker}
               />
             )}
 
@@ -394,6 +449,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("A1")}
                 {...clipCbs}
+                onAddMusic={s.openMediaPicker}
               />
             )}
 
@@ -406,6 +462,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("A2")}
                 {...clipCbs}
+                onAddSfx={s.openMediaPicker}
               />
             )}
 
@@ -419,6 +476,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("A3")}
                 {...clipCbs}
+                onAddVoice={s.openMediaPicker}
               />
             )}
 

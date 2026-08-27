@@ -43,7 +43,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
         left:
           left !== undefined
             ? `${left}px`
-            : `calc(7rem + (100% - 7rem) * ${playheadPercent / 100})`,
+            : `calc(112px + (100% - 112px) * ${playheadPercent / 100})`,
       }}
     >
       {/* Playhead Pin Head — top triangle stays visible inside the timeline container */}
@@ -71,7 +71,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
 
       {/* Vertical Line */}
       <div className="relative w-full h-full pointer-events-none">
-        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/80" />
+        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/90 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
       </div>
     </div>
   );

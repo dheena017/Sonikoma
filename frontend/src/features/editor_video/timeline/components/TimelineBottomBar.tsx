@@ -15,8 +15,13 @@ interface TimelineBottomBarProps {
 }
 
 function formatTime(secs: number): string {
-  const m = Math.floor(secs / 60);
+  if (secs < 0) secs = 0;
+  const hours = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
   const s = Math.floor(secs % 60);
+  if (hours > 0) {
+    return `${hours}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 

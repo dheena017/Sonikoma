@@ -1,6 +1,6 @@
 // ─── TimelineRuler ────────────────────────────────────────────────────────────
 // Canonical location: timeline/components/TimelineRuler.tsx
-// High-precision NLE ruler with fine micro-frame sub-ticks and timecodes.
+// High-precision NLE ruler with multi-scale minutes, hours, and sub-second subdivisions.
 
 import React, { forwardRef, useMemo, useRef } from "react";
 import { Clock } from "lucide-react";
@@ -18,6 +18,36 @@ interface RulerTick {
   label?: string;
 }
 
+/** Formats seconds into human-readable NLE timecodes with minutes and hours. */
+export function formatTimecode(seconds: number, showDecimal = false): string {
+  if (seconds < 0) seconds = 0;
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  const secInt = Math.floor(secs);
+  const ms = (secs % 1).toFixed(2).substring(1); // e.g. .25
+
+  if (hours > 0) {
+    const minStr = minutes.toString().padStart(2, "0");
+    const secStr = secInt.toString().padStart(2, "0");
+    return `${hours}:${minStr}:${secStr}${showDecimal ? ms : ""}`;
+  }
+
+  if (seconds >= 60) {
+    const minStr = minutes.toString();
+    const secStr = secInt.toString().padStart(2, "0");
+    const decimalPart = showDecimal && secs % 1 !== 0 ? ms : "";
+    return `${minStr}:${secStr}${decimalPart}`;
+  }
+
+  // Under 60 seconds
+  if (seconds === 0) return "0s";
+  if (showDecimal && seconds % 1 !== 0) {
+    return `${seconds.toFixed(2)}s`;
+  }
+  return `${seconds % 1 === 0 ? seconds : seconds.toFixed(1)}s`;
+}
+
 function buildSubdividedTicks(totalDuration: number): RulerTick[] {
   if (totalDuration <= 0) {
     return [{ time: 0, pct: 0, type: "major", label: "0s" }];
@@ -27,14 +57,30 @@ function buildSubdividedTicks(totalDuration: number): RulerTick[] {
   let mediumStep = 0.5;
   let minorStep = 0.1;
 
-  if (totalDuration > 60) {
+  if (totalDuration > 3600) {
+    // Over 1 hour: Major every 5 mins (300s), Med every 1 min (60s), Minor every 15s
+    majorStep = 300.0;
+    mediumStep = 60.0;
+    minorStep = 15.0;
+  } else if (totalDuration > 600) {
+    // 10 to 60 mins: Major every 1 min (60s), Med every 30s, Minor every 5s
+    majorStep = 60.0;
+    mediumStep = 30.0;
+    minorStep = 5.0;
+  } else if (totalDuration > 120) {
+    // 2 to 10 mins: Major every 30s or 15s
+    majorStep = 30.0;
+    mediumStep = 10.0;
+    minorStep = 2.0;
+  } else if (totalDuration > 60) {
+    // 1 to 2 mins: Major every 10s or 15s, Med every 5s, Minor every 1s
+    majorStep = 10.0;
+    mediumStep = 5.0;
+    minorStep = 1.0;
+  } else if (totalDuration > 20) {
     majorStep = 5.0;
     mediumStep = 1.0;
-    minorStep = 0.5;
-  } else if (totalDuration > 20) {
-    majorStep = 2.0;
-    mediumStep = 0.5;
-    minorStep = 0.2;
+    minorStep = 0.25;
   } else if (totalDuration > 8) {
     majorStep = 1.0;
     mediumStep = 0.5;
@@ -69,7 +115,7 @@ function buildSubdividedTicks(totalDuration: number): RulerTick[] {
         time: t,
         pct,
         type: "major",
-        label: t === 0 ? "0s" : `${t.toFixed(t % 1 === 0 ? 0 : 1)}s`,
+        label: formatTimecode(t),
       });
     } else if (isMedium) {
       ticks.push({
@@ -134,8 +180,8 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
               Timeline
             </span>
           </div>
-          <span className="text-[9px] font-mono text-purple-300/80 shrink-0 font-semibold">
-            {totalDuration.toFixed(1)}s
+          <span className="text-[9px] font-mono text-purple-300/90 shrink-0 font-bold">
+            {formatTimecode(totalDuration, true)}
           </span>
         </div>
 
@@ -150,8 +196,8 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
               className="pointer-events-none absolute inset-y-0 w-px bg-purple-400/50 z-20"
               style={{ left: `${hoverPct}%` }}
             >
-              <div className="absolute top-0.5 -translate-x-1/2 px-1 py-0.2 rounded bg-purple-600 text-white text-[7px] font-mono font-bold shadow-md whitespace-nowrap">
-                {hoverTime.toFixed(2)}s
+              <div className="absolute top-0.5 -translate-x-1/2 px-1.5 py-0.2 rounded bg-purple-600 text-white text-[8px] font-mono font-bold shadow-lg whitespace-nowrap">
+                {formatTimecode(hoverTime, true)}
               </div>
             </div>
           )}
