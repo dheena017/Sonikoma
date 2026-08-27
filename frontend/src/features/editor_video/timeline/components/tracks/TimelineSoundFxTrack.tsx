@@ -210,10 +210,10 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
           <button
             type="button"
             onClick={onAddSfx}
-            className="h-full flex items-center gap-1 text-[9px] font-mono text-neutral-500 hover:text-cyan-300 italic px-2 hover:bg-cyan-950/20 rounded-md transition-colors cursor-pointer"
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-cyan-300 italic px-2 hover:bg-cyan-950/20 rounded-md transition-colors cursor-pointer group"
           >
-            <Plus className="h-2.5 w-2.5" />
-            <span>+ Add sound effect / ambient SFX</span>
+            <Plus className="h-2.5 w-2.5 text-cyan-400/70 group-hover:text-cyan-300 transition-colors" />
+            <span>Add sound effect / ambient SFX</span>
           </button>
         ) : (
           panels.map((panel: any, idx: number) => {

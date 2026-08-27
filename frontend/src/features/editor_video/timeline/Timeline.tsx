@@ -14,7 +14,6 @@ import TimelinePlayhead from "./components/TimelinePlayhead";
 import TimelineBottomBar from "./components/TimelineBottomBar";
 import AddTrackRow from "./components/AddTrackRow";
 import ContextMenuPopup from "./components/ContextMenuPopup";
-import MediaPickerModal from "./components/MediaPickerModal";
 import KeyframePanel from "./components/keyframes/KeyframePanel";
 import TimelineStoryPanelsTrack from "./components/tracks/TimelineStoryPanelsTrack";
 import TimelineCameraFxTrack from "./components/tracks/TimelineCameraFxTrack";
@@ -117,14 +116,23 @@ const Timeline: React.FC<TimelineProps> = ({
       max = Math.max(max, v1End, v2End, v3End, a2End, a3End);
     });
 
-    // Check music track duration
-    const musicDur = s.clipDurations["a1-0"];
-    if (musicDur && musicDur > max) {
-      max = musicDur;
+    // Check music track duration only if music is present and not deleted
+    const hasMusic =
+      s.clipDurations["a1-0"] !== 0 &&
+      ((!!musicTheme && musicTheme !== "none" && musicTheme !== "No Music" && musicTheme.trim() !== "") ||
+      !!(projectStore?.activeProjectData as any)?.bgm_url ||
+      !!(projectStore?.activeProjectData as any)?.music_url ||
+      !!(projectStore?.activeProjectData as any)?.music_theme);
+
+    if (hasMusic) {
+      const musicDur = s.clipDurations["a1-0"];
+      if (musicDur && musicDur > max) {
+        max = musicDur;
+      }
     }
 
     return Math.max(max + 2, 1); // +2s buffer at the end
-  }, [panelTimings, panels, s.clipDurations, s.clipOffsets]);
+  }, [panelTimings, panels, s.clipDurations, s.clipOffsets, musicTheme, projectStore?.activeProjectData]);
 
   const getPanelIndexAtTime = useCallback(
     (time: number): number => {
@@ -500,7 +508,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("V3")}
                 {...clipCbs}
-                onAddSubtitle={s.openMediaPicker}
+                onAddSubtitle={s.openSubtitlesPicker}
               />
             )}
 
@@ -513,7 +521,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("V2")}
                 {...clipCbs}
-                onAddFx={s.openMediaPicker}
+                onAddFx={s.openFxPicker}
               />
             )}
 
@@ -536,7 +544,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 }
                 {...trackControls("V1")}
                 {...clipCbs}
-                onAddPanel={s.openMediaPicker}
+                onAddPanel={s.openPanelsPicker}
               />
             )}
 
@@ -544,17 +552,15 @@ const Timeline: React.FC<TimelineProps> = ({
             {!s.hiddenTracks["A1"] && (
               <TimelineMusicTrack
                 musicTheme={
-                  musicTheme ||
-                  (projectStore?.activeProjectData as any)?.music_theme ||
                   (projectStore?.activeProjectData as any)?.bgm_theme ||
                   (projectStore?.activeProjectData as any)?.bgm_name ||
-                  (projectStore?.activeProjectData as any)?.bgm ||
-                  (projectStore?.activeProjectData as any)?.music
+                  (projectStore?.activeProjectData as any)?.music_name ||
+                  ""
                 }
                 musicUrl={
                   (projectStore?.activeProjectData as any)?.bgm_url ||
                   (projectStore?.activeProjectData as any)?.music_url ||
-                  (musicTheme?.startsWith("http") || musicTheme?.startsWith("/")
+                  (musicTheme?.startsWith("http") || musicTheme?.startsWith("/") || musicTheme?.startsWith("blob:")
                     ? musicTheme
                     : undefined)
                 }
@@ -563,7 +569,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("A1")}
                 {...clipCbs}
-                onAddMusic={s.openMediaPicker}
+                onAddMusic={s.openMusicPicker}
               />
             )}
 
@@ -576,7 +582,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("A2")}
                 {...clipCbs}
-                onAddSfx={s.openMediaPicker}
+                onAddSfx={s.openSfxPicker}
               />
             )}
 
@@ -590,7 +596,7 @@ const Timeline: React.FC<TimelineProps> = ({
                 selectedClip={s.selectedClip}
                 {...trackControls("A3")}
                 {...clipCbs}
-                onAddVoice={s.openMediaPicker}
+                onAddVoice={s.openVoicePicker}
               />
             )}
 
@@ -647,12 +653,6 @@ const Timeline: React.FC<TimelineProps> = ({
         onClose={s.closeContextMenu}
       />
 
-      {/* ── Media Picker Modal ──────────────────────────────────────────────── */}
-      <MediaPickerModal
-        isOpen={s.isMediaPickerOpen}
-        onClose={s.closeMediaPicker}
-        onSelectMedia={s.handleSelectMedia}
-      />
     </div>
   );
 };

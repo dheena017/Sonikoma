@@ -5,10 +5,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import {
   ContextMenuState,
-  MediaItem,
   AISuggestion,
 } from "./types";
 import { useKeyframes, KeyframesState } from "./useKeyframes";
+import { editorEventBus } from "../events/editorEventBus";
 
 export interface TimelineState {
   // Core State
@@ -27,7 +27,6 @@ export interface TimelineState {
 
   // Sub-systems
   keyframesState: KeyframesState;
-  isMediaPickerOpen: boolean;
   aiSuggestions: AISuggestion[];
 
   // Refs
@@ -67,10 +66,15 @@ export interface TimelineState {
   handleApplyDurationToAll: (panels: any[]) => void;
   handleSplit: () => void;
 
-  // Media Modal
+  // Track-specific workspace launchers (replaces single openMediaPicker)
+  openPanelsPicker: () => void;    // V1 → storyboard
+  openMusicPicker: () => void;     // A1 → audio
+  openSfxPicker: () => void;       // A2 → audio
+  openVoicePicker: () => void;     // A3 → audio
+  openFxPicker: () => void;        // V2 → elements
+  openSubtitlesPicker: () => void; // V3 → text
+  // Legacy alias kept for AddTrackRow
   openMediaPicker: () => void;
-  closeMediaPicker: () => void;
-  handleSelectMedia: (item: MediaItem) => void;
 
   // AI Suggestions
   acceptAISuggestion: (s: AISuggestion) => void;
@@ -102,7 +106,6 @@ export function useTimelineState(
 
   // Sub-states
   const keyframesState = useKeyframes();
-  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([
     {
       id: "ai-1",
@@ -279,12 +282,20 @@ export function useTimelineState(
 
   const handleSplit = useCallback(() => closeContextMenu(), [closeContextMenu]);
 
-  // ── Media Modal ─────────────────────────────────────────────────────────────
-  const openMediaPicker = useCallback(() => setIsMediaPickerOpen(true), []);
-  const closeMediaPicker = useCallback(() => setIsMediaPickerOpen(false), []);
-  const handleSelectMedia = useCallback((item: MediaItem) => {
-    console.log("Adding media item to timeline:", item);
+  // ── Workspace launchers via event bus ─────────────────────────────────────
+  /** Publish OPEN_WORKSPACE so WorkspacePanel switches to the right tab */
+  const openWorkspace = useCallback((workspaceId: string) => {
+    editorEventBus.publish("OPEN_WORKSPACE", { workspaceId });
   }, []);
+
+  const openPanelsPicker   = useCallback(() => openWorkspace("storyboard"), [openWorkspace]);
+  const openMusicPicker    = useCallback(() => openWorkspace("audio"), [openWorkspace]);
+  const openSfxPicker      = useCallback(() => openWorkspace("audio"), [openWorkspace]);
+  const openVoicePicker    = useCallback(() => openWorkspace("audio"), [openWorkspace]);
+  const openFxPicker       = useCallback(() => openWorkspace("elements"), [openWorkspace]);
+  const openSubtitlesPicker = useCallback(() => openWorkspace("text"), [openWorkspace]);
+  // Legacy alias for AddTrackRow
+  const openMediaPicker    = useCallback(() => openWorkspace("imported_assets"), [openWorkspace]);
 
   // ── AI Suggestions ──────────────────────────────────────────────────────────
   const acceptAISuggestion = useCallback(
@@ -339,7 +350,6 @@ export function useTimelineState(
     clipDurations,
     clipOffsets,
     keyframesState,
-    isMediaPickerOpen,
     aiSuggestions,
     trackAreaRef,
     contextMenuRef,
@@ -363,9 +373,13 @@ export function useTimelineState(
     handleRemoveDuration,
     handleApplyDurationToAll,
     handleSplit,
+    openPanelsPicker,
+    openMusicPicker,
+    openSfxPicker,
+    openVoicePicker,
+    openFxPicker,
+    openSubtitlesPicker,
     openMediaPicker,
-    closeMediaPicker,
-    handleSelectMedia,
     acceptAISuggestion,
     dismissAISuggestion,
     hasSelection,

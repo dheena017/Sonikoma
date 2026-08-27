@@ -218,7 +218,7 @@ export default function VideoPreviewCinemaPlayer({
           musicTheme:
             p.musicTheme ||
             localStorage.getItem("ai_comic_music_theme") ||
-            "Cinematic Tension",
+            "",
         };
       }
     } catch (e) {

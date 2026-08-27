@@ -17,7 +17,7 @@ const AddTrackRow: React.FC<AddTrackRowProps> = ({ onOpenMediaPicker }) => (
       />
     </div>
     <div className="flex-1 flex items-center px-3">
-      <span className="text-[11px] text-neutral-600 group-hover:text-neutral-500 transition-colors select-none">
+      <span className="text-[10px] font-mono text-neutral-600 group-hover:text-neutral-400 transition-colors select-none italic">
         or drag and drop media files directly onto timeline
       </span>
     </div>

@@ -206,10 +206,10 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
           <button
             type="button"
             onClick={onAddSubtitle}
-            className="h-full flex items-center gap-1 text-[9px] font-mono text-neutral-500 hover:text-purple-300 italic px-2 hover:bg-purple-950/20 rounded-md transition-colors cursor-pointer"
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-purple-300 italic px-2 hover:bg-purple-950/20 rounded-md transition-colors cursor-pointer group"
           >
-            <Plus className="h-2.5 w-2.5" />
-            <span>+ Add subtitles / text captions</span>
+            <Plus className="h-2.5 w-2.5 text-purple-400/70 group-hover:text-purple-300 transition-colors" />
+            <span>Add subtitles / text captions</span>
           </button>
         ) : (
           panels.map((panel: any, idx: number) => {

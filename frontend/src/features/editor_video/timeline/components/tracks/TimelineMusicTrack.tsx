@@ -147,18 +147,20 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
   };
 
   const hasMusic =
-    (!!musicTheme && musicTheme !== "none" && musicTheme !== "No Music") ||
-    !!musicUrl;
+    duration !== 0 &&
+    ((!!musicTheme && musicTheme !== "none" && musicTheme !== "No Music" && musicTheme.trim() !== "") ||
+    !!musicUrl);
 
   const displayTheme =
-    musicTheme &&
+    (musicTheme &&
     musicTheme !== "none" &&
     musicTheme !== "No Music" &&
+    musicTheme.trim() !== "" &&
     !musicTheme.startsWith("http") &&
     !musicTheme.startsWith("blob:") &&
-    !musicTheme.startsWith("/")
+    !musicTheme.startsWith("/"))
       ? musicTheme
-      : "BGM Track";
+      : (musicUrl ? musicUrl.split("/").pop() || musicUrl : musicTheme || "");
 
   const displayWidthPx = Math.max(
     30,
@@ -185,7 +187,16 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
         onAdd={onAddMusic}
       />
       <div className="flex-1 relative h-[38px] overflow-hidden" style={{ clipPath: "inset(0)" }}>
-        {hasMusic ? (
+        {!hasMusic ? (
+          <button
+            type="button"
+            onClick={onAddMusic}
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-emerald-300 italic px-2 hover:bg-emerald-950/20 rounded-md transition-colors cursor-pointer group"
+          >
+            <Plus className="h-2.5 w-2.5 text-emerald-400/70 group-hover:text-emerald-300 transition-colors" />
+            <span>Add background music / soundtrack</span>
+          </button>
+        ) : (
           <div
             onMouseDown={(e) =>
               handleMoveStart(
@@ -234,7 +245,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                     ? musicTheme
                     : undefined)
                 }
-                seed={`bgm-${musicTheme || musicUrl || "default"}`}
+                seed={`bgm-${musicTheme || musicUrl || ""}`}
                 color="#a7f3d0"
                 opacity={0.92}
               />
@@ -253,7 +264,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
               <div className="flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
                 {/* Live Drag Delta Display */}
                 {movingInfo && movingInfo.deltaPx !== 0 && (
-                  <span className="text-[7.5px] font-mono font-bold text-emerald-100 bg-emerald-900/90 px-1.5 py-0.5 rounded border border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse">
+                  <span className="text-[7.5px] font-mono font-bold text-emerald-100 bg-emerald-900/90 px-1.5 py-0.5 rounded-md border border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse">
                     {movingInfo.deltaPx > 0
                       ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
                       : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
@@ -293,10 +304,6 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
               onResizeStart={(e, side, d) => handleResizeStart(e, side, d)}
               accentColor="emerald"
             />
-          </div>
-        ) : (
-          <div className="h-full flex items-center text-neutral-600 font-mono text-[9px] italic px-2">
-            No background music added. Click "+ Add BGM" on the right.
           </div>
         )}
       </div>

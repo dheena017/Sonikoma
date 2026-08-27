@@ -4,11 +4,6 @@ import { WorkspaceId } from "../types/workspace.types";
 import { WORKSPACE_REGISTRY } from "../registry/workspaceRegistry";
 import { editorEventBus, useEditorEvent } from "../events/editorEventBus";
 
-interface FeedbackToast {
-  id: number;
-  msg: string;
-}
-
 interface WorkspacePanelProps {
   defaultWorkspace?: WorkspaceId;
   onBackToApp?: () => void;
@@ -24,6 +19,18 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
 }) => {
   const [activeWorkspace, setActiveWorkspace] =
     useState<WorkspaceId>(defaultWorkspace);
+
+  // ── Listen for OPEN_WORKSPACE events from Timeline track buttons ──────────
+  const handleOpenWorkspace = useCallback(
+    ({ workspaceId }: { workspaceId: string }) => {
+      const id = workspaceId as WorkspaceId;
+      if (WORKSPACE_REGISTRY[id]) {
+        setActiveWorkspace(id);
+      }
+    },
+    []
+  );
+  useEditorEvent("OPEN_WORKSPACE", handleOpenWorkspace);
 
   const config =
     WORKSPACE_REGISTRY[activeWorkspace] ||

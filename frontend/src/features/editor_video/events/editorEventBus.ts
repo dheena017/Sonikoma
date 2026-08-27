@@ -8,7 +8,8 @@ export type EditorEventType =
   | "PREVIEW_REFRESH"
   | "SCENE_CHANGED"
   | "AI_TASK_TRIGGERED"
-  | "FAVORITE_TOGGLED";
+  | "FAVORITE_TOGGLED"
+  | "OPEN_WORKSPACE";
 
 export interface EditorEventPayloads {
   MEDIA_ADDED: { assetId: string; title: string; type: string; url?: string };
@@ -23,6 +24,8 @@ export interface EditorEventPayloads {
   SCENE_CHANGED: { sceneId: string; sceneNumber: number; title: string };
   AI_TASK_TRIGGERED: { toolId: string; toolName: string };
   FAVORITE_TOGGLED: { itemId: string; title: string; starred: boolean };
+  /** Navigate the left WorkspacePanel to a given workspace tab */
+  OPEN_WORKSPACE: { workspaceId: string };
 }
 
 type EventHandler<K extends EditorEventType> = (

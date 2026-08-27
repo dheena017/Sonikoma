@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
-import { ImagePlus, Image as ImageIcon, Film, MoreHorizontal, GripVertical } from "lucide-react";
+import { ImagePlus, Image as ImageIcon, Film, MoreHorizontal, GripVertical, Plus } from "lucide-react";
 import { Keyframe } from "../../types";
 import ClipTrimHandles from "../ClipTrimHandles";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
@@ -213,9 +213,14 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
       />
       <div className="flex-1 relative transition-all duration-300" style={{ height: `${Math.max(56, innerHeightPx)}px` }}>
         {panels.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-neutral-600 font-mono text-[10px] italic">
-            No story panels created yet. Click "+ Add Frame" to begin.
-          </div>
+          <button
+            type="button"
+            onClick={onAddPanel}
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-purple-300 italic px-2 hover:bg-purple-950/20 rounded-md transition-colors cursor-pointer group"
+          >
+            <Plus className="h-2.5 w-2.5 text-purple-400/70 group-hover:text-purple-300 transition-colors" />
+            <span>Add story panels / comic frames</span>
+          </button>
         ) : (
           <div className="relative w-full h-full overflow-hidden">
             {panels.map((panel: any, idx: number) => {

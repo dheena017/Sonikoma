@@ -207,9 +207,14 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
       />
       <div className="flex-1 relative overflow-hidden transition-all duration-300" style={{ height: `${Math.max(38, innerHeightPx)}px` }}>
         {panels.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-neutral-600 font-mono text-[10px] italic">
-            No camera motion FX. Click "+ Add FX" on the right.
-          </div>
+          <button
+            type="button"
+            onClick={onAddFx}
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-indigo-300 italic px-2 hover:bg-indigo-950/20 rounded-md transition-colors cursor-pointer group"
+          >
+            <Plus className="h-2.5 w-2.5 text-indigo-400/70 group-hover:text-indigo-300 transition-colors" />
+            <span>Add camera motion / zoom FX</span>
+          </button>
         ) : (
           panels.map((panel: any, idx: number) => {
             const fx =

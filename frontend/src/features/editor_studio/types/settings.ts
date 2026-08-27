@@ -67,7 +67,7 @@ export const DEFAULT_AUDIO_SETTINGS: AudioSettingsConfig = {
   speechRate: 1.0,
   speechPitch: 0.0,
   voiceActor: "en-US-ChristopherNeural",
-  musicTheme: "orchestral_battle",
+  musicTheme: "",
   audioDucking: true,
 };
 

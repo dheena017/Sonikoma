@@ -9,7 +9,7 @@ export function useAppEditorSettings() {
     () => localStorage.getItem("ai_comic_voice") || DEFAULT_AUDIO_SETTINGS.voiceActor || "en_narrator_1"
   );
   const [musicTheme, setMusicTheme] = useState<string>(
-    () => localStorage.getItem("ai_comic_music") || DEFAULT_AUDIO_SETTINGS.musicTheme || "cinematic_action"
+    () => localStorage.getItem("ai_comic_music") || DEFAULT_AUDIO_SETTINGS.musicTheme || ""
   );
   const [aspectRatio, setAspectRatio] = useState<"auto" | "9:16" | "16:9">(
     () =>
