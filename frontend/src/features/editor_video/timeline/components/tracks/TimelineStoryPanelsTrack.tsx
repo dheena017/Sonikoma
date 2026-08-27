@@ -7,7 +7,7 @@ import { ImagePlus, Image as ImageIcon, Film, MoreHorizontal } from "lucide-reac
 import { Keyframe } from "../../types";
 import ClipTrimHandles from "../ClipTrimHandles";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
-import { LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
+import { STORY_PANEL_LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
 
 export interface PanelTiming {
   index: number;
@@ -65,8 +65,6 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
 
   // Per-clip position offsets for move dragging
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
-  // Per-clip lane (row) assignments to avoid overlap
-  const [clipLanes, setClipLanes] = useState<Record<string, number>>({});
   const [movingInfo, setMovingInfo] = useState<{
     key: string;
     idx: number;
@@ -90,14 +88,14 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     e.preventDefault();
     const startX = e.clientX;
     let hasMoved = false;
+    document.body.style.cursor = "grabbing";
     document.body.style.userSelect = "none";
     setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx: 0 });
 
     const onMouseMove = (mv: MouseEvent) => {
       const deltaPx = mv.clientX - startX;
-      if (Math.abs(deltaPx) > 4) {
+      if (Math.abs(deltaPx) > 2) {
         hasMoved = true;
-        document.body.style.cursor = "grabbing";
       }
       setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx });
     };
@@ -108,19 +106,10 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
       } else {
         const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
         const newOffset = desiredLeft - baseLeftPx;
-        const newOffsets = { ...clipOffsets, [key]: (clipOffsets[key] ?? 0) + newOffset };
-        setClipOffsets(newOffsets);
-
-        // Recalculate lanes for all clips after the move
-        const allClips = panels.map((p: any, i: number) => {
-          const t: PanelTiming | undefined = panelTimings[i];
-          const k = `v1-${i}`;
-          const offset = newOffsets[k] ?? 0;
-          const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
-          const width = (p.duration || 3.5) * 30;
-          return { key: k, left, width };
-        });
-        setClipLanes(assignLanes(allClips));
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + newOffset,
+        }));
       }
       setMovingInfo(null);
       document.body.style.cursor = "";
@@ -185,12 +174,34 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  // Reactively compute lanes whenever clips are moved, resized, or when space opens up
+  const clipLanes = useMemo(() => {
+    const allClips = panels.map((p: any, i: number) => {
+      const t: PanelTiming | undefined = panelTimings[i];
+      const k = `v1-${i}`;
+      const dur = p.duration || 3.5;
+      const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
+      const offset = clipOffsets[k] ?? 0;
+      const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
+      const isResizingThis = resizingInfo?.idx === i;
+      const resizeLeftDelta =
+        isResizingThis && resizingInfo?.side === "left"
+          ? (dur - resizingInfo.initialDuration) * 30
+          : 0;
+
+      const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
+      const width = dur * 30;
+      return { key: k, left, width };
+    });
+    return assignLanes(allClips);
+  }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo]);
+
   // Compute max lane to size track height dynamically
   const maxLane = useMemo(() => {
     const vals = Object.values(clipLanes);
     return vals.length > 0 ? Math.max(...vals) : 0;
   }, [clipLanes]);
-  const innerHeightPx = trackInnerHeight(maxLane);
+  const innerHeightPx = trackInnerHeight(maxLane, STORY_PANEL_LANE_HEIGHT);
   const outerHeightPx = innerHeightPx + 8;
 
   return (
@@ -217,7 +228,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
             No story panels created yet. Click "+ Add Frame" to begin.
           </div>
         ) : (
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full overflow-hidden">
             {panels.map((panel: any, idx: number) => {
               const timing: PanelTiming = panelTimings[idx] ?? {
                 index: idx,
@@ -271,8 +282,8 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                 displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
               const lane = clipLanes[key] ?? 0;
-              const clipTop = lane * LANE_HEIGHT + 2;
-              const clipHeight = LANE_HEIGHT - 4;
+              const clipTop = lane * STORY_PANEL_LANE_HEIGHT + 2;
+              const clipHeight = STORY_PANEL_LANE_HEIGHT - 4;
 
               return (
                 <div
@@ -355,6 +366,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     </span>
 
                     {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
+                    {displayWidthPx >= 55 && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -366,6 +378,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     >
                       <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
                     </button>
+                    )}
                   </div>
 
                   {/* Dual Left & Right Drag-to-Resize Handles */}

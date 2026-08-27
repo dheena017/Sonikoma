@@ -22,7 +22,6 @@ import TimelineSubtitlesTrack from "./components/tracks/TimelineSubtitlesTrack";
 import TimelineMusicTrack from "./components/tracks/TimelineMusicTrack";
 import TimelineSoundFxTrack from "./components/tracks/TimelineSoundFxTrack";
 import TimelineVoiceoverTrack from "./components/tracks/TimelineVoiceoverTrack";
-import { DEFAULT_PANEL_DURATION } from "./types";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 export type { TimelineProps };
@@ -46,7 +45,7 @@ const Timeline: React.FC<TimelineProps> = ({
   const panelTimings = useMemo(() => {
     let currentTime = 0;
     const durations = panels.map((p, idx) => {
-      return s.clipDurations[`v1-${idx}`] ?? p.duration ?? DEFAULT_PANEL_DURATION;
+      return s.clipDurations[`v1-${idx}`] ?? p.duration ?? 0;
     });
     const total = durations.reduce((acc, d) => acc + d, 0) || 1;
 
@@ -74,12 +73,27 @@ const Timeline: React.FC<TimelineProps> = ({
   }, [panels, s.clipDurations]);
 
   const totalDuration = useMemo(() => {
-    return (
-      panelTimings.reduce((acc, t) => acc + t.duration, 0) ||
-      panels.length * DEFAULT_PANEL_DURATION ||
-      1
-    );
-  }, [panelTimings, panels.length]);
+    let max = panelTimings.reduce((acc, t) => acc + t.duration, 0) || 1;
+
+    // Check all tracks for clips extending beyond panels
+    panelTimings.forEach((t, idx) => {
+      const p = panels[idx] || {};
+      const baseStart = t.startTime;
+      const v2End = baseStart + (s.clipDurations[`v2-${idx}`] ?? p.camera_duration ?? p.duration ?? 0);
+      const v3End = baseStart + (s.clipDurations[`v3-${idx}`] ?? p.subtitle_duration ?? p.duration ?? 0);
+      const a2End = baseStart + (s.clipDurations[`a2-${idx}`] ?? p.sfx_duration ?? p.duration ?? 0);
+      const a3End = baseStart + (s.clipDurations[`a3-${idx}`] ?? p.voice_duration ?? p.duration ?? 0);
+      max = Math.max(max, v2End, v3End, a2End, a3End);
+    });
+
+    // Check music track duration
+    const musicDur = s.clipDurations["a1-0"];
+    if (musicDur && musicDur > max) {
+      max = musicDur;
+    }
+
+    return Math.max(max, 1);
+  }, [panelTimings, panels, s.clipDurations]);
 
   const getPanelIndexAtTime = useCallback(
     (time: number): number => {
@@ -380,8 +394,6 @@ const Timeline: React.FC<TimelineProps> = ({
         snapEnabled={s.snapEnabled}
         captionsVisible={s.captionsVisible}
         keyframesVisible={s.keyframesState.keyframeRowsVisible}
-        selectedDuration={s.selectedDuration}
-        selectedClip={s.selectedClip}
         isPlaying={isPlaying}
         playbackTime={timelineTime}
         totalDuration={totalDuration}
@@ -413,11 +425,11 @@ const Timeline: React.FC<TimelineProps> = ({
             scrollbarColor: "#6d28d9 #0d0d14",
           }}
         >
-          {/* Inner wrapper with flush right edge and synchronized tracks */}
+          {/* Inner wrapper with flush right edge, generous end-buffer and synchronized tracks */}
           <div
             className="min-h-full relative"
             style={{
-              minWidth: `${Math.max(1000, totalDuration * 30 + 192 + 130)}px`,
+              minWidth: `${Math.max(1000, totalDuration * 30 + 192 + 130 + 50)}px`,
             }}
           >
             {/* Sticky Synchronized Top Ruler */}
@@ -499,6 +511,7 @@ const Timeline: React.FC<TimelineProps> = ({
                     ? musicTheme
                     : undefined)
                 }
+                duration={s.clipDurations["a1-0"]}
                 totalDuration={totalDuration}
                 selectedClip={s.selectedClip}
                 {...trackControls("A1")}
@@ -542,6 +555,7 @@ const Timeline: React.FC<TimelineProps> = ({
       {/* ── Bottom Bar ───────────────────────────────────────────────────────── */}
       <TimelineBottomBar
         currentPanelIndex={currentPanelIndex}
+        currentTimeSecs={panelTimings[currentPanelIndex]?.startTime ?? 0}
         totalDuration={totalDuration}
         snapEnabled={s.snapEnabled}
         soloTrack={s.soloTrack}

@@ -3,10 +3,11 @@
 
 import React from "react";
 import { Music, Sparkles } from "lucide-react";
-import { DEFAULT_PANEL_DURATION } from "../types";
 
 interface TimelineBottomBarProps {
   currentPanelIndex: number;
+  /** Actual accumulated time (seconds) for the current panel — replaces index×DEFAULT_PANEL_DURATION */
+  currentTimeSecs?: number;
   totalDuration: number;
   snapEnabled: boolean;
   soloTrack: string | null;
@@ -27,10 +28,11 @@ function formatTime(secs: number): string {
 
 const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
   currentPanelIndex,
+  currentTimeSecs,
   totalDuration,
   snapEnabled,
   soloTrack,
-  pacingScore = "Balanced (2.1s avg)",
+  pacingScore,
   onOpenMediaPicker,
 }) => (
   <div className="h-8 px-3 border-t border-white/[0.05] bg-[#0d0d12] flex items-center justify-between shrink-0">
@@ -57,7 +59,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
         <span className="text-amber-400/70 font-bold">SOLO: {soloTrack}</span>
       )}
       <span className="text-neutral-300 font-bold">
-        {formatTime(totalDuration > 0 ? currentPanelIndex * DEFAULT_PANEL_DURATION : 0)}
+        {formatTime(currentTimeSecs ?? 0)}
       </span>
       <span className="text-neutral-700">/</span>
       <span className="text-neutral-400">{formatTime(totalDuration)}</span>

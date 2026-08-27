@@ -7,7 +7,7 @@ import { Mic, Volume2, Plus, MoreHorizontal } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import AudioWaveformVisual from "../AudioWaveformVisual";
 import ClipTrimHandles from "../ClipTrimHandles";
-import { LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
+import { AUDIO_FX_LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
 
 export interface TimelineVoiceoverTrackProps {
   panels: any[];
@@ -52,7 +52,6 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
 
   // per-clip offsets to persist moved positions
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
-  const [clipLanes, setClipLanes] = useState<Record<string, number>>({});
   const [movingInfo, setMovingInfo] = useState<{ key: string; idx: number; baseLeftPx: number; widthPx: number; deltaPx: number } | null>(null);
   const movingInfoRef = React.useRef(movingInfo);
   React.useEffect(() => { movingInfoRef.current = movingInfo; }, [movingInfo]);
@@ -69,12 +68,13 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
     e.preventDefault();
     const startX = e.clientX;
     let hasMoved = false;
+    document.body.style.cursor = "grabbing";
     document.body.style.userSelect = "none";
     setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx: 0 });
 
     const onMouseMove = (mv: MouseEvent) => {
       const deltaPx = mv.clientX - startX;
-      if (Math.abs(deltaPx) > 4) { hasMoved = true; document.body.style.cursor = "grabbing"; }
+      if (Math.abs(deltaPx) > 2) { hasMoved = true; }
       setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx });
     };
 
@@ -84,18 +84,10 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
       } else {
         const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
         const newOffset = desiredLeft - baseLeftPx;
-        const newOffsets = { ...clipOffsets, [key]: (clipOffsets[key] ?? 0) + newOffset };
-        setClipOffsets(newOffsets);
-
-        const allClips = panels.map((p: any, i: number) => {
-          const t: PanelTiming | undefined = panelTimings[i];
-          const k = `a3-${i}`;
-          const offset = newOffsets[k] ?? 0;
-          const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
-          const width = (p.voice_duration ?? t?.duration ?? 3.5) * 30;
-          return { key: k, left, width };
-        });
-        setClipLanes(assignLanes(allClips));
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + newOffset,
+        }));
       }
       setMovingInfo(null);
       document.body.style.cursor = "";
@@ -169,18 +161,52 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
       p.dialogue
   );
 
+  // Reactively compute lanes whenever clips are moved, resized, or when space opens up
+  const clipLanes = useMemo(() => {
+    const allClips = panels
+      .map((p: any, i: number) => {
+        const hasVoiceAudio = !!(
+          p.speech_audio_url ||
+          p.narrative_audio_url ||
+          p.audio_url ||
+          p.speech_text ||
+          p.narrative ||
+          p.dialogue
+        );
+        if (!hasVoiceAudio) return null;
+        const t: PanelTiming | undefined = panelTimings[i];
+        const k = `a3-${i}`;
+        const dur = p.voice_duration ?? t?.duration ?? 0;
+        const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
+        const offset = clipOffsets[k] ?? 0;
+        const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
+        const isResizingThis = resizingInfo?.key === k;
+        const resizeLeftDelta =
+          isResizingThis && resizingInfo?.side === "left"
+            ? (dur - resizingInfo.initialDuration) * 30
+            : 0;
+
+        const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
+        const width = dur * 30;
+        return { key: k, left, width };
+      })
+      .filter((c): c is { key: string; left: number; width: number } => c !== null);
+    return assignLanes(allClips);
+  }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo]);
+
   const maxLane = useMemo(() => {
     const vals = Object.values(clipLanes);
     return vals.length > 0 ? Math.max(...vals) : 0;
   }, [clipLanes]);
-  const innerHeightPx = trackInnerHeight(maxLane);
+  const innerHeightPx = trackInnerHeight(maxLane, AUDIO_FX_LANE_HEIGHT);
+  const outerHeightPx = innerHeightPx + 8;
 
   return (
     <div
       className={`border-b border-white/[0.04] flex items-center transition-all duration-300 ${
         muted ? "opacity-40" : ""
       }`}
-      style={{ height: `${Math.max(44, innerHeightPx + 8)}px` }}
+      style={{ height: `${Math.max(46, outerHeightPx)}px` }}
     >
       <TrackLabel
         id="A3"
@@ -196,7 +222,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
         onAdd={onAddVoice}
       />
 
-      <div className="flex-1 relative transition-all duration-300" style={{ height: `${Math.max(36, innerHeightPx)}px` }}>
+      <div className="flex-1 relative overflow-hidden transition-all duration-300" style={{ height: `${Math.max(38, innerHeightPx)}px`, clipPath: "inset(0)" }}>
         {!hasAnyVoice ? (
           <button
             type="button"
@@ -239,7 +265,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
             const label = dialogue ? `"${dialogue}"` : `${speaker} P#${idx + 1}`;
             const key = `a3-${idx}`;
             const isResizing = resizingInfo?.key === key;
-            const dur = panel.voice_duration ?? timing.duration ?? 3.5;
+            const dur = panel.voice_duration ?? timing.duration ?? 0;
             
             const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
             const offsetPx = clipOffsets[key] ?? 0;
@@ -257,8 +283,8 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
               displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
             const lane = clipLanes[key] ?? 0;
-            const clipTop = lane * LANE_HEIGHT + 1;
-            const clipHeight = LANE_HEIGHT - 2;
+            const clipTop = lane * AUDIO_FX_LANE_HEIGHT + 2;
+            const clipHeight = AUDIO_FX_LANE_HEIGHT - 4;
 
             return (
               <div
@@ -296,6 +322,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                 <div className="absolute inset-0 flex items-center px-1">
                   <AudioWaveformVisual
                     audioUrl={panel.speech_audio_url || panel.narrative_audio_url || panel.audio_url}
+                    seed={`vo-${idx}-${speaker}-${dialogue}`}
                     color="#e9d5ff"
                     opacity={0.92}
                   />
@@ -316,11 +343,14 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                         {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
+                    {displayWidthPx >= 55 && (
                     <span className="text-[8px] font-mono font-bold text-purple-100 bg-black/50 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
                       {dur.toFixed(1)}s
                     </span>
+                    )}
 
                     {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
+                    {displayWidthPx >= 55 && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -332,6 +362,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                     >
                       <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
                     </button>
+                    )}
                   </div>
                 </div>
 

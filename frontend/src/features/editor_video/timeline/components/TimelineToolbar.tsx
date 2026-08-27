@@ -22,8 +22,6 @@ interface TimelineToolbarProps {
   snapEnabled: boolean;
   captionsVisible: boolean;
   keyframesVisible: boolean;
-  selectedDuration: number | null;
-  selectedClip: string | null;
   isPlaying?: boolean;
   playbackTime?: number;
   totalDuration?: number;
@@ -54,8 +52,6 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   snapEnabled,
   captionsVisible,
   keyframesVisible,
-  selectedDuration,
-  selectedClip,
   isPlaying = false,
   playbackTime = 0,
   totalDuration = 0,
@@ -194,11 +190,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
               SNAP
             </span>
           )}
-          {selectedDuration != null && selectedDuration > 0 && (
-            <span className="ml-1 text-white font-bold bg-white/8 px-2 py-0.5 rounded border border-white/10">
-              {selectedDuration.toFixed(1)}s
-            </span>
-          )}
+
           <button
             title={isPlaying ? "Pause" : "Play"}
             onClick={onPlay}

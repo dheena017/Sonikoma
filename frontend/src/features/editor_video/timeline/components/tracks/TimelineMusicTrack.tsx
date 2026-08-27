@@ -10,6 +10,7 @@ import ClipTrimHandles from "../ClipTrimHandles";
 export interface TimelineMusicTrackProps {
   musicTheme?: string;
   musicUrl?: string;
+  duration?: number;
   totalDuration: number;
   selectedClip: string | null;
   muted: boolean;
@@ -27,6 +28,7 @@ export interface TimelineMusicTrackProps {
 export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
   musicTheme,
   musicUrl,
+  duration,
   totalDuration,
   selectedClip,
   muted,
@@ -50,6 +52,8 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
     movingInfoRef.current = movingInfo;
   }, [movingInfo]);
 
+  const clipDuration = duration ?? (totalDuration > 0 ? totalDuration : 15.0);
+
   const handleMoveStart = (
     e: React.MouseEvent,
     key: string,
@@ -61,14 +65,14 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
     e.preventDefault();
     const startX = e.clientX;
     let hasMoved = false;
+    document.body.style.cursor = "grabbing";
     document.body.style.userSelect = "none";
     setMovingInfo({ key, deltaPx: 0 });
 
     const onMouseMove = (mv: MouseEvent) => {
       const deltaPx = mv.clientX - startX;
-      if (Math.abs(deltaPx) > 4) {
+      if (Math.abs(deltaPx) > 2) {
         hasMoved = true;
-        document.body.style.cursor = "grabbing";
       }
       setMovingInfo({ key, deltaPx });
     };
@@ -145,9 +149,11 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
   const hasMusic =
     !!musicTheme && musicTheme !== "none" && musicTheme !== "No Music";
 
+  const displayWidthPx = Math.max(15, (clipDuration + (resizingSide === "right" ? deltaSecs : 0)) * 30);
+
   return (
     <div
-      className={`h-11 border-b border-white/[0.04] flex items-center ${muted ? "opacity-40" : ""
+      className={`h-[46px] border-b border-white/[0.04] flex items-center ${muted ? "opacity-40" : ""
         }`}
     >
       <TrackLabel
@@ -163,10 +169,10 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
         onToggleHide={onToggleHide}
         onAdd={onAddMusic}
       />
-      <div className="flex-1 relative h-9">
+      <div className="flex-1 relative h-[38px] overflow-hidden">
         {hasMusic ? (
           <div
-            onMouseDown={(e) => handleMoveStart(e, "a1-0", 0, 0, totalDuration * 30)}
+            onMouseDown={(e) => handleMoveStart(e, "a1-0", 0, clipOffsets["a1-0"] ?? 0, displayWidthPx)}
             onContextMenu={(e) => onContextMenu(e, "a1-0", 0)}
             className={`group absolute inset-y-0 rounded-md overflow-hidden select-none border z-10 ${
               movingInfo?.key === "a1-0"
@@ -185,7 +191,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                     (resizingSide === "left" ? deltaSecs * 30 : 0)
                 ) + (movingInfo?.key === "a1-0" ? movingInfo.deltaPx : 0)
               }px`,
-              width: `${totalDuration * 30}px`,
+              width: `${displayWidthPx}px`,
               cursor: movingInfo?.key === "a1-0" ? "grabbing" : resizingSide !== null ? "col-resize" : "grab",
             }}
           >
@@ -200,6 +206,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                     ? musicTheme
                     : undefined)
                 }
+                seed={`bgm-${musicTheme || "default"}`}
                 color="#a7f3d0"
                 opacity={0.92}
               />
@@ -221,7 +228,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                   </span>
                 )}
                 <span className="text-[8px] font-mono text-emerald-100 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/15 shrink-0 font-bold">
-                  {totalDuration.toFixed(1)}s
+                  {(clipDuration + deltaSecs).toFixed(1)}s
                 </span>
 
                 {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
@@ -242,7 +249,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
             {/* Dual Left & Right Drag-to-Resize Handles */}
             <ClipTrimHandles
               clipKey="a1-0"
-              duration={totalDuration}
+              duration={clipDuration}
               isResizing={resizingSide !== null}
               activeSide={resizingSide}
               onResizeStart={(e, side, d) => handleResizeStart(e, side, d)}

@@ -6,7 +6,7 @@ import TrackLabel from "../TrackLabel";
 import { Camera, Plus, MoreHorizontal } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import ClipTrimHandles from "../ClipTrimHandles";
-import { LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
+import { AUDIO_FX_LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
 
 export interface TimelineCameraFxTrackProps {
   panels: any[];
@@ -45,7 +45,6 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
 
   // Per-clip position offsets (persisted in local state across renders)
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
-  const [clipLanes, setClipLanes] = useState<Record<string, number>>({});
   const [movingInfo, setMovingInfo] = useState<{
     key: string;
     idx: number;
@@ -63,17 +62,16 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
     e.preventDefault();
     const startX = e.clientX;
     let hasMoved = false;
+    document.body.style.cursor = "grabbing";
     document.body.style.userSelect = "none";
     setMovingInfo({ key, idx, baseLeftPx, deltaPx: 0 });
 
-    const dur = panels[idx]?.camera_duration || panels[idx]?.duration || 3.0;
-    const baseWidthPx = dur * 30;
+    const dur = panels[idx]?.camera_duration || panels[idx]?.duration || 0;
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaPx = moveEvent.clientX - startX;
-      if (Math.abs(deltaPx) > 4) {
+      if (Math.abs(deltaPx) > 2) {
         hasMoved = true;
-        document.body.style.cursor = "grabbing";
       }
       setMovingInfo({ key, idx, baseLeftPx, deltaPx });
     };
@@ -84,18 +82,10 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
       } else {
         const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
         const newOffset = desiredLeft - baseLeftPx;
-        const newOffsets = { ...clipOffsets, [key]: (clipOffsets[key] ?? 0) + newOffset };
-        setClipOffsets(newOffsets);
-
-        const allClips = panels.map((p: any, i: number) => {
-          const t: PanelTiming | undefined = panelTimings[i];
-          const k = `v2-${i}`;
-          const offset = newOffsets[k] ?? 0;
-          const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
-          const width = (p.camera_duration ?? t?.duration ?? 3.0) * 30;
-          return { key: k, left, width };
-        });
-        setClipLanes(assignLanes(allClips));
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + newOffset,
+        }));
       }
       setMovingInfo(null);
       document.body.style.cursor = "";
@@ -167,16 +157,39 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  // Reactively compute lanes whenever clips are moved, resized, or when space opens up
+  const clipLanes = useMemo(() => {
+    const allClips = panels.map((p: any, i: number) => {
+      const t: PanelTiming | undefined = panelTimings[i];
+      const k = `v2-${i}`;
+      const dur = p.camera_duration ?? t?.duration ?? 0;
+      const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
+      const offset = clipOffsets[k] ?? 0;
+      const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
+      const isResizingThis = resizingInfo?.key === k;
+      const resizeLeftDelta =
+        isResizingThis && resizingInfo?.side === "left"
+          ? (dur - resizingInfo.initialDuration) * 30
+          : 0;
+
+      const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
+      const width = dur * 30;
+      return { key: k, left, width };
+    });
+    return assignLanes(allClips);
+  }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo]);
+
   const maxLane = useMemo(() => {
     const vals = Object.values(clipLanes);
     return vals.length > 0 ? Math.max(...vals) : 0;
   }, [clipLanes]);
-  const innerHeightPx = trackInnerHeight(maxLane);
+  const innerHeightPx = trackInnerHeight(maxLane, AUDIO_FX_LANE_HEIGHT);
+  const outerHeightPx = innerHeightPx + 8;
 
   return (
     <div
       className="border-b border-white/[0.04] flex items-center transition-all duration-300"
-      style={{ height: `${Math.max(40, innerHeightPx + 8)}px` }}
+      style={{ height: `${Math.max(46, outerHeightPx)}px` }}
     >
       <TrackLabel
         id="V2"
@@ -191,7 +204,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
         onToggleMute={() => {}}
         onAdd={onAddFx}
       />
-      <div className="flex-1 relative transition-all duration-300" style={{ height: `${Math.max(32, innerHeightPx)}px` }}>
+      <div className="flex-1 relative overflow-hidden transition-all duration-300" style={{ height: `${Math.max(38, innerHeightPx)}px` }}>
         {panels.length === 0 ? (
           <div className="h-full flex items-center justify-center text-neutral-600 font-mono text-[10px] italic">
             No camera motion FX. Click "+ Add FX" on the right.
@@ -202,7 +215,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
               panel.camera_motion ||
               panel.camera_fx ||
               (idx % 2 === 0 ? "zoom_in" : "zoom_out");
-            const dur = panel.camera_duration || panel.duration || 3.0;
+            const dur = panel.camera_duration || panel.duration || 0;
             const key = `v2-${idx}`;
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
@@ -237,8 +250,8 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
               displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
             const lane = clipLanes[key] ?? 0;
-            const clipTop = lane * LANE_HEIGHT + 1;
-            const clipHeight = LANE_HEIGHT - 2;
+            const clipTop = lane * AUDIO_FX_LANE_HEIGHT + 2;
+            const clipHeight = AUDIO_FX_LANE_HEIGHT - 4;
 
             return (
               <div
@@ -275,11 +288,14 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                       {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                     </span>
                   )}
+                  {displayWidthPx >= 55 && (
                   <span className="text-[7px] font-mono text-indigo-300/80 bg-black/40 px-1 py-0.2 rounded-sm border border-indigo-500/20 shrink-0">
                     {dur.toFixed(1)}s
                   </span>
+                  )}
 
                   {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
+                  {displayWidthPx >= 55 && (
                   <button
                     type="button"
                     onClick={(e) => {
@@ -291,6 +307,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                   >
                     <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
                   </button>
+                  )}
                 </div>
 
                 {/* Dual Left & Right Drag-to-Resize Handles */}

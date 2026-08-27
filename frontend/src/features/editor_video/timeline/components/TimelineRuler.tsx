@@ -176,7 +176,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         <div
           ref={trackRef}
           className="relative h-full timeline-ruler-track flex-1"
-          style={{ minWidth: `${Math.max(600, totalDuration * 30)}px` }}
+          style={{ minWidth: `${Math.max(600, totalDuration * 30 + 50)}px` }}
         >
           {/* Hover Time Scrubber Line & Tooltip */}
           {hoverPct !== null && hoverTime !== null && (

@@ -82,6 +82,7 @@ async function extractRealPeaks(url: string, numBuckets = 300): Promise<number[]
 
 export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
   audioUrl,
+  seed = 1,
   color = "#d8b4fe",
   opacity = 0.95,
   className = "",
@@ -91,33 +92,25 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
       ? audioPeaksCache.get(audioUrl)!
       : null
   );
-  const [isLoading, setIsLoading] = useState<boolean>(() => Boolean(audioUrl && !audioPeaksCache.has(audioUrl)));
 
   useEffect(() => {
     if (!audioUrl) {
       setRealPeaks(null);
-      setIsLoading(false);
       return;
     }
 
     if (audioPeaksCache.has(audioUrl)) {
       setRealPeaks(audioPeaksCache.get(audioUrl)!);
-      setIsLoading(false);
       return;
     }
 
     let isMounted = true;
-    setIsLoading(true);
     extractRealPeaks(audioUrl).then((peaks) => {
-      if (isMounted) {
-        setRealPeaks(peaks.length > 0 ? peaks : null);
-        setIsLoading(false);
+      if (isMounted && peaks.length > 0) {
+        setRealPeaks(peaks);
       }
     }).catch(() => {
-      if (isMounted) {
-        setRealPeaks(null);
-        setIsLoading(false);
-      }
+      if (isMounted) setRealPeaks(null);
     });
 
     return () => {
@@ -125,28 +118,82 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
     };
   }, [audioUrl]);
 
-  // Construct continuous SVG path from REAL decoded audio peaks
+  // Construct continuous SVG path from either REAL decoded peaks or organic audio model
   const pathD = useMemo(() => {
     const width = 1000;
     const height = 36;
     const midY = height / 2;
     const maxAmp = midY - 2.5;
 
-    if (!realPeaks || realPeaks.length === 0) {
-      return null;
-    }
-
-    const numPoints = realPeaks.length;
     const topPoints: [number, number][] = [];
     const bottomPoints: [number, number][] = [];
 
-    for (let i = 0; i < numPoints; i++) {
-      const x = (i / (numPoints - 1)) * width;
-      const normalizedAmp = realPeaks[i];
-      const amp = Math.max(0.6, normalizedAmp * maxAmp);
+    if (realPeaks && realPeaks.length > 0) {
+      // ── Render REAL Decoded PCM Audio Peaks ───────────────────────────────
+      const numPoints = realPeaks.length;
+      for (let i = 0; i < numPoints; i++) {
+        const x = (i / (numPoints - 1)) * width;
+        const normalizedAmp = realPeaks[i];
+        const amp = Math.max(0.6, normalizedAmp * maxAmp);
 
-      topPoints.push([x, midY - amp]);
-      bottomPoints.push([x, midY + amp]);
+        topPoints.push([x, midY - amp]);
+        bottomPoints.push([x, midY + amp]);
+      }
+    } else {
+      // ── Authentic Organic Audio Simulation (Voice / SFX / BGM) ─────────
+      const str = String(seed);
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      const pseudoRandom = (n: number) => {
+        const x = Math.sin(hash + n * 137.5) * 10000;
+        return x - Math.floor(x);
+      };
+
+      const isBgm = str.startsWith("bgm-");
+      const isSfx = str.startsWith("sfx-");
+      const step = 2; // 500 high-res sample points
+
+      for (let x = 0; x <= width; x += step) {
+        const progress = x / width;
+        let amp = 0.5;
+
+        if (isBgm) {
+          // Continuous rhythmic musical waveform with beat bars and harmonic density
+          const beat = (progress * 28) % 1;
+          const kick = Math.exp(-beat * 4) * 0.45;
+          const bass = Math.sin(progress * Math.PI * 14 + (hash % 4)) * 0.25 + 0.45;
+          const hihat = (pseudoRandom(x) > 0.7 ? 0.25 : 0);
+          const noise = pseudoRandom(x) * 0.2;
+          const val = Math.min(1.0, (bass + kick + hihat + noise) * 0.9);
+          amp = Math.max(1.2, val * maxAmp);
+        } else if (isSfx) {
+          // Sharp transient attack with natural decay tail
+          const decay = Math.exp(-progress * 3.2);
+          const transient = Math.sin(progress * Math.PI * 18) * 0.45 + 0.55;
+          const noise = pseudoRandom(x) * 0.35 + 0.65;
+          amp = Math.max(0.8, (transient * decay * noise) * maxAmp);
+        } else {
+          // Natural speech packets (syllables, words, short conversational pauses)
+          const wordEnvelope =
+            Math.sin(progress * Math.PI * 10 + hash % 3) * 0.45 +
+            Math.sin(progress * Math.PI * 22) * 0.25 +
+            0.4;
+          const naturalPause = Math.sin(progress * Math.PI * 4 + 1.2) > 0.4 ? 1 : 0.2;
+          const vocalNoise = pseudoRandom(x) * 0.5 + 0.5;
+          const edgeTaper = Math.sin(Math.min(1, Math.max(0, progress)) * Math.PI);
+          const speechAmp = Math.max(
+            0.08,
+            wordEnvelope * naturalPause * vocalNoise * Math.pow(edgeTaper, 0.4)
+          );
+          amp = Math.max(0.8, speechAmp * maxAmp);
+        }
+
+        topPoints.push([x, midY - amp]);
+        bottomPoints.push([x, midY + amp]);
+      }
     }
 
     // Build closed polygon for waveform fill
@@ -162,7 +209,7 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
     d += " Z";
 
     return d;
-  }, [realPeaks]);
+  }, [realPeaks, seed]);
 
   return (
     <svg
@@ -172,34 +219,7 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
       fill={color}
       opacity={opacity}
     >
-      {pathD ? (
-        <path d={pathD} />
-      ) : isLoading ? (
-        // Subtle loading audio pulse
-        <line
-          x1="0"
-          y1="18"
-          x2="1000"
-          y2="18"
-          stroke={color}
-          strokeWidth="1.5"
-          strokeDasharray="8 6"
-          opacity={0.6}
-          className="animate-pulse"
-        />
-      ) : (
-        // Clean authentic silence center-line (no fake hardcoded waves)
-        <line
-          x1="0"
-          y1="18"
-          x2="1000"
-          y2="18"
-          stroke={color}
-          strokeWidth="1"
-          opacity={0.35}
-        />
-      )}
-
+      <path d={pathD} />
       {/* Subtle zero-crossing guide */}
       <line
         x1="0"
@@ -208,7 +228,7 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
         y2="18"
         stroke={color}
         strokeWidth="0.5"
-        opacity={0.25}
+        opacity={0.3}
       />
     </svg>
   );

@@ -7,7 +7,7 @@ import { Zap, Plus, MoreHorizontal } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import AudioWaveformVisual from "../AudioWaveformVisual";
 import ClipTrimHandles from "../ClipTrimHandles";
-import { LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
+import { AUDIO_FX_LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
 
 export interface TimelineSoundFxTrackProps {
   panels: any[];
@@ -49,7 +49,6 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
   } | null>(null);
 
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
-  const [clipLanes, setClipLanes] = useState<Record<string, number>>({});
   const [movingInfo, setMovingInfo] = useState<{ key: string; idx: number; deltaPx: number } | null>(null);
   const movingInfoRef = React.useRef(movingInfo);
   React.useEffect(() => { movingInfoRef.current = movingInfo; }, [movingInfo]);
@@ -65,14 +64,14 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
     e.preventDefault();
     const startX = e.clientX;
     let hasMoved = false;
+    document.body.style.cursor = "grabbing";
     document.body.style.userSelect = "none";
     setMovingInfo({ key, idx, deltaPx: 0 });
 
     const onMouseMove = (mv: MouseEvent) => {
       const d = mv.clientX - startX;
-      if (Math.abs(d) > 4) {
+      if (Math.abs(d) > 2) {
         hasMoved = true;
-        document.body.style.cursor = "grabbing";
       }
       setMovingInfo({ key, idx, deltaPx: d });
     };
@@ -83,20 +82,10 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
       } else {
         const desiredLeft = baseLeftPx + (movingInfoRef.current?.deltaPx ?? 0);
         const newOffset = desiredLeft - baseLeftPx;
-        const newOffsets = { ...clipOffsets, [key]: (clipOffsets[key] ?? 0) + newOffset };
-        setClipOffsets(newOffsets);
-
-        const allClips = panels.map((p: any, i: number) => {
-          const sfx = p.sfx || p.sfx_name || p.sound_fx;
-          if (!sfx) return null;
-          const t: PanelTiming | undefined = panelTimings[i];
-          const k = `a2-${i}`;
-          const offset = newOffsets[k] ?? 0;
-          const left = (t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30) + offset;
-          const width = (p.sfx_duration ?? t?.duration ?? 1.5) * 30;
-          return { key: k, left, width };
-        }).filter((c): c is { key: string; left: number; width: number } => c !== null);
-        setClipLanes(assignLanes(allClips));
+        setClipOffsets((prev) => ({
+          ...prev,
+          [key]: (prev[key] ?? 0) + newOffset,
+        }));
       }
       setMovingInfo(null);
       document.body.style.cursor = "";
@@ -162,18 +151,45 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
 
   const hasAnySfx = panels.some((p: any) => p.sfx || p.sfx_name || p.sound_fx);
 
+  // Reactively compute lanes whenever clips are moved, resized, or when space opens up
+  const clipLanes = useMemo(() => {
+    const allClips = panels
+      .map((p: any, i: number) => {
+        const sfx = p.sfx || p.sfx_name || p.sound_fx;
+        if (!sfx) return null;
+        const t: PanelTiming | undefined = panelTimings[i];
+        const k = `a2-${i}`;
+        const dur = p.sfx_duration ?? t?.duration ?? 0;
+        const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
+        const offset = clipOffsets[k] ?? 0;
+        const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
+        const isResizingThis = resizingInfo?.key === k;
+        const resizeLeftDelta =
+          isResizingThis && resizingInfo?.side === "left"
+            ? (dur - resizingInfo.initialDuration) * 30
+            : 0;
+
+        const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
+        const width = dur * 30;
+        return { key: k, left, width };
+      })
+      .filter((c): c is { key: string; left: number; width: number } => c !== null);
+    return assignLanes(allClips);
+  }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo]);
+
   const maxLane = useMemo(() => {
     const vals = Object.values(clipLanes);
     return vals.length > 0 ? Math.max(...vals) : 0;
   }, [clipLanes]);
-  const innerHeightPx = trackInnerHeight(maxLane);
+  const innerHeightPx = trackInnerHeight(maxLane, AUDIO_FX_LANE_HEIGHT);
+  const outerHeightPx = innerHeightPx + 8;
 
   return (
     <div
       className={`border-b border-white/[0.04] flex items-center transition-all duration-300 ${
         muted ? "opacity-40" : ""
       }`}
-      style={{ height: `${Math.max(44, innerHeightPx + 8)}px` }}
+      style={{ height: `${Math.max(46, outerHeightPx)}px` }}
     >
       <TrackLabel
         id="A2"
@@ -188,7 +204,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
         onToggleHide={onToggleHide}
         onAdd={onAddSfx}
       />
-      <div className="flex-1 relative transition-all duration-300" style={{ height: `${Math.max(36, innerHeightPx)}px` }}>
+      <div className="flex-1 relative overflow-hidden transition-all duration-300" style={{ height: `${Math.max(38, innerHeightPx)}px`, clipPath: "inset(0)" }}>
         {!hasAnySfx ? (
           <button
             type="button"
@@ -200,8 +216,10 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
           </button>
         ) : (
           panels.map((panel: any, idx: number) => {
-            const sfx = panel.sfx || panel.sfx_name || panel.sound_fx;
-            if (!sfx) return null;
+            const rawSfx = panel.sfx || panel.sfx_name || panel.sound_fx;
+            if (!rawSfx) return null;
+            // Normalize: strip any existing outer brackets like [KLATTER] -> KLATTER
+            const sfx = String(rawSfx).replace(/^\[+|\]+$/g, "").trim();
 
             const timing: PanelTiming = panelTimings[idx] ?? {
               index: idx,
@@ -216,7 +234,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
 
             const key = `a2-${idx}`;
             const isResizing = resizingInfo?.key === key;
-            const dur = panel.sfx_duration ?? timing.duration ?? 1.5;
+            const dur = panel.sfx_duration ?? timing.duration ?? 0;
             const baseLeftPx =
               timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
             const offsetPx = clipOffsets[key] ?? 0;
@@ -234,8 +252,8 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
               displayLeftPx + (isMoving ? movingInfo!.deltaPx : 0);
 
             const lane = clipLanes[key] ?? 0;
-            const clipTop = lane * LANE_HEIGHT + 1;
-            const clipHeight = LANE_HEIGHT - 2;
+            const clipTop = lane * AUDIO_FX_LANE_HEIGHT + 2;
+            const clipHeight = AUDIO_FX_LANE_HEIGHT - 4;
 
             return (
               <div
@@ -265,6 +283,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                 <div className="absolute inset-0 flex items-center px-1">
                   <AudioWaveformVisual
                     audioUrl={panel.sfx_audio_url || panel.sfx_url || panel.audio_url}
+                    seed={`sfx-${idx}-${sfx}`}
                     color="#a5f3fc"
                     opacity={0.92}
                   />
@@ -275,7 +294,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                   <div className="flex items-center gap-1.5 min-w-0 bg-black/55 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/15 shadow-sm">
                     <Zap className="h-3 w-3 text-amber-300 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                     <span className="text-[9px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
-                      [{sfx}]
+                      {sfx}
                     </span>
                   </div>
 
@@ -285,11 +304,14 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                         {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
+                    {displayWidthPx >= 55 && (
                     <span className="text-[8px] font-mono font-bold text-cyan-100 bg-black/50 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
                       {dur.toFixed(1)}s
                     </span>
+                    )}
 
                     {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
+                    {displayWidthPx >= 55 && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -301,6 +323,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                     >
                       <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
                     </button>
+                    )}
                   </div>
                 </div>
 
