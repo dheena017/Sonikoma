@@ -1,15 +1,15 @@
-// ─── AudioTrackA3 (Voiceover) ─────────────────────────────────────────────────
-// Canonical location: timeline/components/tracks/AudioTrackA3.tsx
+// ─── TimelineVoiceoverTrack (A3 Voiceover Track) ──────────────────────────────
+// Canonical location: timeline/components/tracks/TimelineVoiceoverTrack.tsx
 
 import React from "react";
 import TrackLabel from "../TrackLabel";
 import { Mic, Volume2 } from "lucide-react";
-import { PanelTiming } from "./VideoTrackV1";
+import { PanelTiming } from "./TimelineStoryPanelsTrack";
 
-interface AudioTrackA3Props {
+export interface TimelineVoiceoverTrackProps {
   panels: any[];
   panelTimings?: PanelTiming[];
-  totalPanels: number;
+  totalPanels?: number;
   voiceActor?: string;
   selectedClip: string | null;
   muted: boolean;
@@ -30,7 +30,7 @@ function clipClass(key: string, selectedClip: string | null, base: string) {
   }`;
 }
 
-const AudioTrackA3: React.FC<AudioTrackA3Props> = ({
+export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
   panels = [],
   panelTimings = [],
   voiceActor,
@@ -134,4 +134,4 @@ const AudioTrackA3: React.FC<AudioTrackA3Props> = ({
   );
 };
 
-export default React.memo(AudioTrackA3);
+export default React.memo(TimelineVoiceoverTrack);

@@ -4,9 +4,11 @@
 import React from "react";
 import TrackLabel from "../TrackLabel";
 import { Zap } from "lucide-react";
+import { PanelTiming } from "./VideoTrackV1";
 
 interface AudioTrackA2Props {
   panels: any[];
+  panelTimings?: PanelTiming[];
   totalPanels: number;
   selectedClip: string | null;
   muted: boolean;
@@ -20,7 +22,7 @@ interface AudioTrackA2Props {
 }
 
 function clipClass(key: string, selectedClip: string | null, base: string) {
-  return `absolute flex items-center gap-1 cursor-pointer truncate transition-all rounded-lg border text-[9px] font-mono font-bold px-2 ${base} ${
+  return `absolute top-0 bottom-0 flex items-center gap-1 cursor-pointer truncate transition-all rounded-lg border text-[9px] font-mono font-bold px-2 ${base} ${
     selectedClip === key
       ? "ring-2 ring-cyan-400/60 brightness-115 z-10"
       : "hover:brightness-110"
@@ -29,7 +31,7 @@ function clipClass(key: string, selectedClip: string | null, base: string) {
 
 const AudioTrackA2: React.FC<AudioTrackA2Props> = ({
   panels = [],
-  totalPanels,
+  panelTimings = [],
   selectedClip,
   muted,
   locked,
@@ -50,7 +52,7 @@ const AudioTrackA2: React.FC<AudioTrackA2Props> = ({
     >
       <TrackLabel
         id="A2"
-        label="SFX"
+        label="Sound FX"
         color="text-cyan-400"
         type="audio"
         locked={locked}
@@ -70,6 +72,11 @@ const AudioTrackA2: React.FC<AudioTrackA2Props> = ({
             const sfx = panel.sfx || panel.sfx_name || panel.sound_fx;
             if (!sfx) return null;
 
+            const timing = panelTimings[idx] ?? {
+              startPct: (idx / Math.max(panels.length, 1)) * 100,
+              widthPct: (1 / Math.max(panels.length, 1)) * 100,
+            };
+
             const key = `a2-${idx}`;
             return (
               <div
@@ -79,11 +86,11 @@ const AudioTrackA2: React.FC<AudioTrackA2Props> = ({
                 className={clipClass(
                   key,
                   selectedClip,
-                  "bg-cyan-950/80 border-cyan-500/40 text-cyan-200 h-full"
+                  "bg-cyan-950/80 border-cyan-500/40 text-cyan-200"
                 )}
                 style={{
-                  left: `${(idx / Math.max(totalPanels, 1)) * 96}%`,
-                  width: `${Math.max((1 / Math.max(totalPanels, 1)) * 36, 12)}%`,
+                  left: `${timing.startPct}%`,
+                  width: `calc(${timing.widthPct}% - 3px)`,
                 }}
                 title={`Panel #${idx + 1} SFX: ${sfx}`}
               >

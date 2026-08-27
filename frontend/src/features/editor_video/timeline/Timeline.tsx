@@ -4,7 +4,7 @@
 //
 // All state lives in useTimelineState, and visual sections are modularized.
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { TimelineProps } from "./types";
 import { useTimelineState } from "./useTimelineState";
 import { useAIPacing } from "./hooks/useAIPacing";
@@ -16,12 +16,12 @@ import AddTrackRow from "./components/AddTrackRow";
 import ContextMenuPopup from "./components/ContextMenuPopup";
 import MediaPickerModal from "./components/MediaPickerModal";
 import KeyframePanel from "./components/keyframes/KeyframePanel";
-import VideoTrackV1 from "./components/tracks/VideoTrackV1";
-import VideoTrackV2 from "./components/tracks/VideoTrackV2";
-import VideoTrackV3 from "./components/tracks/VideoTrackV3";
-import AudioTrackA1 from "./components/tracks/AudioTrackA1";
-import AudioTrackA2 from "./components/tracks/AudioTrackA2";
-import AudioTrackA3 from "./components/tracks/AudioTrackA3";
+import TimelineStoryPanelsTrack from "./components/tracks/TimelineStoryPanelsTrack";
+import TimelineCameraFxTrack from "./components/tracks/TimelineCameraFxTrack";
+import TimelineSubtitlesTrack from "./components/tracks/TimelineSubtitlesTrack";
+import TimelineMusicTrack from "./components/tracks/TimelineMusicTrack";
+import TimelineSoundFxTrack from "./components/tracks/TimelineSoundFxTrack";
+import TimelineVoiceoverTrack from "./components/tracks/TimelineVoiceoverTrack";
 import { DEFAULT_PANEL_DURATION } from "./types";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
@@ -42,6 +42,49 @@ const Timeline: React.FC<TimelineProps> = ({
   const s = useTimelineState(setCurrentPanelIndex);
   const pacing = useAIPacing(panels, s.clipDurations);
 
+  // Accurate panel timings mapping
+  const panelTimings = useMemo(() => {
+    let currentTime = 0;
+    const durations = panels.map((p, idx) => {
+      return (
+        p.duration ||
+        s.clipDurations[`v1-${idx}`] ||
+        DEFAULT_PANEL_DURATION
+      );
+    });
+    const total = durations.reduce((acc, d) => acc + d, 0) || 1;
+
+    return panels.map((panel, index) => {
+      const duration = durations[index];
+      const startTime = currentTime;
+      const endTime = startTime + duration;
+      currentTime = endTime;
+      const startPct = (startTime / total) * 100;
+      const widthPct = (duration / total) * 100;
+      return { index, duration, startTime, endTime, startPct, widthPct };
+    });
+  }, [panels, s.clipDurations]);
+
+  const totalDuration = useMemo(() => {
+    return (
+      panelTimings.reduce((acc, t) => acc + t.duration, 0) ||
+      panels.length * DEFAULT_PANEL_DURATION ||
+      1
+    );
+  }, [panelTimings, panels.length]);
+
+  const getPanelIndexAtTime = useCallback(
+    (time: number): number => {
+      if (panelTimings.length === 0) return 0;
+      const clamped = Math.max(0, Math.min(time, totalDuration));
+      const found = panelTimings.findIndex(
+        (t) => clamped >= t.startTime && clamped < t.endTime
+      );
+      return found !== -1 ? found : Math.max(0, panelTimings.length - 1);
+    },
+    [panelTimings, totalDuration]
+  );
+
   // Playback state
   const [isPlaying, setIsPlaying] = useState(false);
   const [timelineTime, setTimelineTime] = useState(0);
@@ -55,10 +98,6 @@ const Timeline: React.FC<TimelineProps> = ({
 
   const displayPanels = panels;
   const totalPanels = displayPanels.length;
-  const totalDuration = panels.reduce(
-    (acc, p: any) => acc + (p.duration || DEFAULT_PANEL_DURATION),
-    0
-  );
   const playheadPct =
     totalDuration > 0
       ? Math.min(Math.max((timelineTime / totalDuration) * 100, 0), 100)
@@ -67,10 +106,10 @@ const Timeline: React.FC<TimelineProps> = ({
   // Keep ref synced without causing render-loop on animation.
   useEffect(() => {
     currentPanelIndexRef.current = currentPanelIndex;
-    if (!isPlaying) {
-      setTimelineTime(currentPanelIndex * DEFAULT_PANEL_DURATION);
+    if (!isPlaying && panelTimings[currentPanelIndex]) {
+      setTimelineTime(panelTimings[currentPanelIndex].startTime);
     }
-  }, [currentPanelIndex, isPlaying]);
+  }, [currentPanelIndex, isPlaying, panelTimings]);
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -83,10 +122,7 @@ const Timeline: React.FC<TimelineProps> = ({
 
       setTimelineTime((prevTime) => {
         const nextTime = Math.min(prevTime + delta, totalDuration);
-        const nextPanelIndex = Math.min(
-          totalPanels - 1,
-          Math.floor(nextTime / DEFAULT_PANEL_DURATION)
-        );
+        const nextPanelIndex = getPanelIndexAtTime(nextTime);
 
         if (nextPanelIndex !== currentPanelIndexRef.current) {
           currentPanelIndexRef.current = nextPanelIndex;
@@ -113,7 +149,7 @@ const Timeline: React.FC<TimelineProps> = ({
         animationFrameRef.current = null;
       }
     };
-  }, [isPlaying, totalDuration, totalPanels, setCurrentPanelIndex]);
+  }, [isPlaying, totalDuration, getPanelIndexAtTime, setCurrentPanelIndex]);
 
   const togglePlayback = () => setIsPlaying((prev) => !prev);
 
@@ -142,10 +178,7 @@ const Timeline: React.FC<TimelineProps> = ({
     const relativeX = clientX - rect.left;
     const pct = Math.max(0, Math.min(1, relativeX / Math.max(1, rect.width)));
     const nextTime = pct * totalDuration;
-    const nextPanelIndex = Math.min(
-      totalPanels - 1,
-      Math.floor(nextTime / DEFAULT_PANEL_DURATION)
-    );
+    const nextPanelIndex = getPanelIndexAtTime(nextTime);
 
     currentPanelIndexRef.current = nextPanelIndex;
     setCurrentPanelIndex?.(nextPanelIndex);
@@ -307,10 +340,11 @@ const Timeline: React.FC<TimelineProps> = ({
         >
           {/* Inner wrapper — wide enough to scroll horizontally */}
           <div className="min-w-[max(100%,800px)] min-h-full relative">
-            {/* V3 — Overlay / Captions (conditional) */}
+            {/* V3 — Subtitles / Overlay */}
             {!s.hiddenTracks["V3"] && s.captionsVisible && (
-              <VideoTrackV3
+              <TimelineSubtitlesTrack
                 panels={displayPanels}
+                panelTimings={panelTimings}
                 totalPanels={totalPanels}
                 selectedClip={s.selectedClip}
                 {...trackControls("V3")}
@@ -318,10 +352,11 @@ const Timeline: React.FC<TimelineProps> = ({
               />
             )}
 
-            {/* V2 — Effects */}
+            {/* V2 — Camera FX */}
             {!s.hiddenTracks["V2"] && (
-              <VideoTrackV2
+              <TimelineCameraFxTrack
                 panels={displayPanels}
+                panelTimings={panelTimings}
                 totalPanels={totalPanels}
                 selectedClip={s.selectedClip}
                 {...trackControls("V2")}
@@ -329,10 +364,11 @@ const Timeline: React.FC<TimelineProps> = ({
               />
             )}
 
-            {/* V1 — Main Video */}
+            {/* V1 — Story Panels (Main Video) */}
             {!s.hiddenTracks["V1"] && (
-              <VideoTrackV1
+              <TimelineStoryPanelsTrack
                 panels={displayPanels}
+                panelTimings={panelTimings}
                 currentPanelIndex={currentPanelIndex}
                 selectedClip={s.selectedClip}
                 getClipDuration={s.getClipDuration}
@@ -350,9 +386,9 @@ const Timeline: React.FC<TimelineProps> = ({
               />
             )}
 
-            {/* A1 — Music */}
+            {/* A1 — Music (BGM) */}
             {!s.hiddenTracks["A1"] && (
-              <AudioTrackA1
+              <TimelineMusicTrack
                 musicTheme={musicTheme}
                 totalDuration={totalDuration}
                 selectedClip={s.selectedClip}
@@ -361,10 +397,11 @@ const Timeline: React.FC<TimelineProps> = ({
               />
             )}
 
-            {/* A2 — SFX */}
+            {/* A2 — Sound FX */}
             {!s.hiddenTracks["A2"] && (
-              <AudioTrackA2
+              <TimelineSoundFxTrack
                 panels={displayPanels}
+                panelTimings={panelTimings}
                 totalPanels={totalPanels}
                 selectedClip={s.selectedClip}
                 {...trackControls("A2")}
@@ -374,8 +411,9 @@ const Timeline: React.FC<TimelineProps> = ({
 
             {/* A3 — Voiceover */}
             {!s.hiddenTracks["A3"] && (
-              <AudioTrackA3
+              <TimelineVoiceoverTrack
                 panels={displayPanels}
+                panelTimings={panelTimings}
                 totalPanels={totalPanels}
                 voiceActor={voiceActor}
                 selectedClip={s.selectedClip}
