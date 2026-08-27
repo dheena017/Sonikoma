@@ -8,6 +8,7 @@ import {
 import { ImportedAssetsCard } from "./components/ImportedAssetsCard";
 import { ImportedAssetsAiToolbar } from "./components/ImportedAssetsAiToolbar";
 import { ImportedAssetsUploadZone } from "./components/ImportedAssetsUploadZone";
+import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
 
 export interface ImportedAssetsWorkspaceProps {
   onTriggerFeedback?: (msg: string) => void;
@@ -52,6 +53,14 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
   const [mergingIndex, setMergingIndex] = useState<number | null>(null);
+
+  // Delete Confirmation Modal State
+  const [deleteModalState, setDeleteModalState] = useState<{
+    isOpen: boolean;
+    type: "single" | "bulk";
+    targetIndex?: number;
+    count?: number;
+  } | null>(null);
 
   // Toggle Favorite
   const toggleFavorite = useCallback((idx: number, e: React.MouseEvent) => {
@@ -132,26 +141,46 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
     setSelectedUrls([]);
   }, [selectedUrls, appLogic, projectStore, panels.length, onTriggerFeedback]);
 
+  // Delete Handlers Opening Confirmation Modal
   const handleDeleteSelected = useCallback(() => {
     if (selectedUrls.length === 0) return;
-    if (!window.confirm(`Delete ${selectedUrls.length} selected frame(s)?`)) return;
-    const toDelete = new Set(selectedUrls);
-    const updated = scrapedImages.filter((url) => !toDelete.has(url));
-    setScrapedImages(updated);
-    setSelectedUrls([]);
-    onTriggerFeedback?.(`Deleted ${selectedUrls.length} frame(s)`);
-  }, [selectedUrls, scrapedImages, setScrapedImages, onTriggerFeedback]);
+    setDeleteModalState({
+      isOpen: true,
+      type: "bulk",
+      count: selectedUrls.length,
+    });
+  }, [selectedUrls.length]);
 
-  const handleDeleteSingle = useCallback(
-    (idx: number, e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (!window.confirm(`Delete Frame #${idx + 1}?`)) return;
+  const handleDeleteSingle = useCallback((idx: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteModalState({
+      isOpen: true,
+      type: "single",
+      targetIndex: idx,
+    });
+  }, []);
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!deleteModalState) return;
+
+    if (
+      deleteModalState.type === "single" &&
+      deleteModalState.targetIndex !== undefined
+    ) {
+      const idx = deleteModalState.targetIndex;
       const updated = scrapedImages.filter((_, i) => i !== idx);
       setScrapedImages(updated);
       onTriggerFeedback?.(`Deleted Frame #${idx + 1}`);
-    },
-    [scrapedImages, setScrapedImages, onTriggerFeedback]
-  );
+    } else if (deleteModalState.type === "bulk") {
+      const toDelete = new Set(selectedUrls);
+      const updated = scrapedImages.filter((url) => !toDelete.has(url));
+      setScrapedImages(updated);
+      onTriggerFeedback?.(`Deleted ${selectedUrls.length} frame(s)`);
+      setSelectedUrls([]);
+    }
+
+    setDeleteModalState(null);
+  }, [deleteModalState, scrapedImages, selectedUrls, setScrapedImages, onTriggerFeedback]);
 
   const handleMergeWithNext = useCallback(
     async (idx: number, e: React.MouseEvent) => {
@@ -276,6 +305,28 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
       <WorkspaceLayout.Footer
         text={`Sonikoma Imported Assets • ${scrapedImages.length} frames`}
       />
+
+      {/* ── 4. Delete Confirmation Modal ──────────────────────────────────── */}
+      {deleteModalState?.isOpen && (
+        <DeleteConfirmModal
+          title={
+            deleteModalState.type === "single"
+              ? `Delete Frame #${(deleteModalState.targetIndex ?? 0) + 1}`
+              : `Delete ${deleteModalState.count} Frames`
+          }
+          message={
+            deleteModalState.type === "single"
+              ? `Are you sure you want to permanently delete Frame #${
+                  (deleteModalState.targetIndex ?? 0) + 1
+                }? This action will remove the asset from your project.`
+              : `Are you sure you want to permanently delete ${deleteModalState.count} selected frames from this project? This action cannot be undone.`
+          }
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteModalState(null)}
+        />
+      )}
     </WorkspaceLayout>
   );
 };
