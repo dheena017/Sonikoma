@@ -1,5 +1,6 @@
 export type WorkspaceId =
   | "imported_assets"
+  | "storyboard"
   | "media"
   | "favorites"
   | "recent"
