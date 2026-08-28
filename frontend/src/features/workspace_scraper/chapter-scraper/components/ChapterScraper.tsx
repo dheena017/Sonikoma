@@ -42,7 +42,7 @@ import {
 import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
 import { ChapterReaderModal } from "./ChapterReaderModal";
 import { ChapterScraperEmptyState } from "./ChapterScraperEmptyState";
-import WebtoonConnectionErrorCard from "./WebtoonConnectionErrorCard";
+import ScraperConnectionErrorCard from "./ScraperConnectionErrorCard";
 import type { NotificationType } from "@/features/app_notification";
 import { getSeriesEpisodes, separateComicUrl } from "@/api/endpoints/scraper";
 import type { Chapter } from "../types/ChapterTypes";
@@ -797,13 +797,13 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       {/* ── SKELETON LOADING STATE (shown while fetching series/chapter data from backend) ── */}
       {isLoading && <ChapterScraperSkeleton />}
 
-      {/* ── ERROR STATE: Webtoon Connection Error Card ── */}
+      {/* ── ERROR STATE: Scraper Connection Error Card ── */}
       {!isLoading && isErrorSeries && (
-        <WebtoonConnectionErrorCard
+        <ScraperConnectionErrorCard
           errorMessage={
             error ||
             (seriesMetadata?.title?.toLowerCase().includes("connect error")
-              ? "The webtoon server returned 'Connect Error :: WEBTOON'. The requested series could not be found or was blocked."
+              ? "The source server returned a connection error. The requested series could not be found or was blocked."
               : "Unable to retrieve chapters for this series URL.")
           }
           targetUrl={urlInput || titleNoInput || initialSeriesName}

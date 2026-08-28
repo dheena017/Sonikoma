@@ -310,7 +310,7 @@ async def scrape_series_chapters(
             )
 
             if _is_error_title or len(chapter_list) == 0:
-                err_msg = f"Failed to retrieve chapters from webtoon source ({series_title}). Please check the URL or series ID." if _is_error_title else "No chapters found for this series URL."
+                err_msg = f"Failed to retrieve chapters from source ({series_title}). Please check the URL or series ID." if _is_error_title else "No chapters found for this series URL."
                 logger.warning(f"[SeriesWorkflow] Rejected invalid scrape result: title='{series_title}', chapters={len(chapter_list)}")
                 return {
                     "success": False,
