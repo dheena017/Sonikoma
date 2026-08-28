@@ -25,7 +25,8 @@ from api.dependencies.auth import get_admin_user
 from core.logging import get_logs, add_log_listener, remove_log_listener
 from app.core.config import NODE_ENV, BACKEND_PORT
 from core.cache import get_all_cache_stats, get_total_storage_size_bytes
-from schemas.health import CustomLogPayload
+from schemas.health import CustomLogPayload, BackendStatusResponse
+from services.system import get_comprehensive_backend_status
 
 # Import repository functions directly
 from repositories.system import (
@@ -52,6 +53,27 @@ def _check_capability(module_name: str) -> bool:
 
 
 # ─── Routes ───────────────────────────────────────────────────────────────────
+
+@router.get(
+    "/status",
+    response_model=BackendStatusResponse,
+    summary="Comprehensive Backend Status & Telemetry",
+    description="Authentic real-time diagnostics including CPU, Memory, GPU, Storage, SQLite metrics, background job queues, and AI provider availability."
+)
+async def get_backend_status_endpoint(
+    x_user_gemini_key: Optional[str] = Header(None, alias="X-User-Gemini-Key"),
+    x_user_huggingface_key: Optional[str] = Header(None, alias="X-User-Huggingface-Key"),
+    x_user_openai_key: Optional[str] = Header(None, alias="X-User-Openai-Key"),
+    x_user_anthropic_key: Optional[str] = Header(None, alias="X-User-Anthropic-Key"),
+):
+    """Returns authentic, comprehensive backend status and telemetry."""
+    return get_comprehensive_backend_status(
+        gemini_key_override=x_user_gemini_key,
+        huggingface_key_override=x_user_huggingface_key,
+        openai_key_override=x_user_openai_key,
+        anthropic_key_override=x_user_anthropic_key,
+    )
+
 
 @router.get("/health", summary="Health check and capability probe")
 async def get_health_status_endpoint(

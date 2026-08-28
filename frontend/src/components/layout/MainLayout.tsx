@@ -305,10 +305,8 @@ export default function MainLayout(props: MainLayoutProps) {
   } = props;
 
   const isWorkspacePath =
-    currentPath === "/scraper" ||
-    (currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/) !== null &&
-      !currentPath.endsWith("/details") &&
-      !currentPath.startsWith("/scraper/editor"));
+    (currentPath === "/scraper" || currentPath === "/scraper/") &&
+    currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/) === null;
 
   const isAdminRestricted =
     isAnyAdmin && (!user || user.creator_role !== "admin");

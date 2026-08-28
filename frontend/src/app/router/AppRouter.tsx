@@ -686,7 +686,7 @@ export default function AppRouter(props: AppRouterProps) {
       /\/series\/[^\/]+\/chapters\/([^\/]+)/
     );
     const editorRouteMatch = currentPath.match(
-      /^\/scraper\/editor\/series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
+      /^\/scraper\/(?:editor\/)?series\/([^\/]+)\/chapters\/([^\/]+)(?:\/image-editor)?\/?$/
     );
     const isDetailsMode = currentPath.endsWith("/details");
     const isImageEditorPage =
@@ -702,13 +702,12 @@ export default function AppRouter(props: AppRouterProps) {
       currentPath !== "/scraper" &&
       currentPath !== "/scraper/" &&
       !currentPath.startsWith("/scraper/editor") &&
+      !currentPath.includes("/chapters/") &&
       !currentPath.startsWith("/scraper/audio-settings");
 
     const isWorkspacePath =
-      (currentPath === "/scraper" || currentPath === "/scraper/") ||
-      (chapterPathMatch !== null &&
-        !isDetailsMode &&
-        !currentPath.startsWith("/scraper/editor"));
+      (currentPath === "/scraper" || currentPath === "/scraper/") &&
+      chapterPathMatch === null;
 
     return {
       chapterPathMatch,
@@ -731,7 +730,8 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/scraper/episode-scraper",
       isEditorPath:
         currentPath.startsWith("/editor") ||
-        currentPath.startsWith("/scraper/editor"),
+        currentPath.startsWith("/scraper/editor") ||
+        (chapterPathMatch !== null && !isDetailsMode),
       isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
       isOptimizerPath:
@@ -879,7 +879,8 @@ export default function AppRouter(props: AppRouterProps) {
   const isProEditorPage =
     (Boolean(pathFlags.editorRouteMatch) ||
       currentPath.startsWith("/editor") ||
-      currentPath.startsWith("/scraper/editor")) &&
+      currentPath.startsWith("/scraper/editor") ||
+      Boolean(pathFlags.chapterPathMatch && !pathFlags.isDetailsMode)) &&
     !pathFlags.isImageEditorPage;
 
   const editorSeriesSlug =
@@ -928,6 +929,21 @@ export default function AppRouter(props: AppRouterProps) {
   React.useEffect(() => {
     if (currentPath.startsWith("/workspace")) {
       const newPath = currentPath.replace(/^\/workspace/, "/scraper");
+      const search = window.location.search;
+      navigateTo(`${newPath}${search}`);
+    }
+  }, [currentPath, navigateTo]);
+
+  // Cleanly normalize /scraper/series/... URLs to /scraper/editor/series/...
+  React.useEffect(() => {
+    if (
+      currentPath.startsWith("/scraper/series/") &&
+      !currentPath.startsWith("/scraper/editor/series/")
+    ) {
+      const newPath = currentPath.replace(
+        /^\/scraper\/series\//,
+        "/scraper/editor/series/"
+      );
       const search = window.location.search;
       navigateTo(`${newPath}${search}`);
     }

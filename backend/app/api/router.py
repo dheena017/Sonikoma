@@ -65,6 +65,7 @@ api_router.include_router(video_router,          prefix="/api/video", include_in
 api_router.include_router(export_router,         prefix="/api/export", include_in_schema=False)
 api_router.include_router(proxy_router,          prefix="/api", include_in_schema=False)
 api_router.include_router(health_router,         prefix="/api", include_in_schema=False)
+api_router.include_router(health_router,         prefix="/api/system", include_in_schema=False)
 api_router.include_router(health_router,         prefix="/api/py", include_in_schema=False)
 api_router.include_router(audio_router,          prefix="/api/py/audio", include_in_schema=False)
 

@@ -46,9 +46,16 @@ PUBLIC_ROUTE_SET = {
     "/api/py/health",
     "/api/v1/health",
     "/api/v1/system/health",
+    "/api/status",
+    "/api/py/status",
+    "/api/v1/status",
+    "/api/system/status",
+    "/api/v1/system/status",
     "/api/health/ffmpeg",
     "/api/py/health/ffmpeg",
     "/api/v1/system/metrics",
+    "/api/metrics",
+    "/api/py/metrics",
     "/api/v1/system/logs",            # Diagnostic log polling (system terminal panel)
     "/api/v1/system/system-logs",     # Alias
     "/api/system/logs",               # Legacy alias

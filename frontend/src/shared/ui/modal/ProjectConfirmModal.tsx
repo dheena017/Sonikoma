@@ -491,9 +491,17 @@ export default function ProjectConfirmModal({
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-purple-500/10 border border-purple-500/30 rounded-2xl">
-              <Sparkles className="h-5 w-5 text-purple-400" />
+          <div className="flex items-center gap-3.5">
+            <div className="relative group/logo flex items-center justify-center shrink-0">
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600/40 via-indigo-600/30 to-purple-600/40 opacity-75 blur-md" />
+              <img
+                src="/logo-dark.png"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+                }}
+                alt="Sonikoma Logo"
+                className="relative h-10 w-10 rounded-2xl bg-[#0a0a14] shadow-xl shadow-purple-950/60 object-cover border border-purple-500/30 shrink-0"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">

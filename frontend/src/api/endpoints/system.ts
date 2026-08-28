@@ -21,6 +21,17 @@ export const checkHealth = async (): Promise<ApiResponse<any>> => {
   return res.json();
 };
 
+export const getBackendStatus = async (
+  fetchWithInterceptor?: FetchClient
+): Promise<ApiResponse<any>> => {
+  if (fetchWithInterceptor) {
+    return apiRequest(fetchWithInterceptor, "/api/v1/system/status");
+  }
+  const res = await fetch("/api/v1/system/status", { headers: getAuthHeaders() });
+  if (!res.ok) throw new Error("Failed to fetch backend status");
+  return res.json();
+};
+
 export const getSystemLogs = async (
   since?: string
 ): Promise<ApiResponse<any>> => {

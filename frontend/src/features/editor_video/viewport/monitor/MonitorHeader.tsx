@@ -99,24 +99,27 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         <button
           type="button"
           onClick={() => setActivePreviewTab?.("timeline")}
-          className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${activePreviewTab === "timeline"
-              ? "bg-purple-600/30 border-purple-500/60 text-white shadow-[0_0_10px_rgba(168,85,247,0.2)]"
-              : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
-            }`}
+          className={`flex items-center gap-1.5 px-3 h-7 rounded-xl text-[11px] font-bold font-mono transition-all cursor-pointer border ${
+            activePreviewTab === "timeline"
+              ? "bg-purple-600/30 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.3)]"
+              : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.04]"
+          }`}
         >
-          <Layout
-            className={`h-3 w-3 ${activePreviewTab === "timeline"
-                ? "text-purple-400"
+          <Film
+            className={`h-3.5 w-3.5 ${
+              activePreviewTab === "timeline"
+                ? "text-purple-300"
                 : "text-neutral-500"
-              }`}
+            }`}
           />
           <span>Storyboard Live</span>
           {panelsCount > 0 && (
             <span
-              className={`text-[8px] px-1 py-0.2 rounded font-black border ${activePreviewTab === "timeline"
-                  ? "bg-purple-500/30 text-purple-200 border-purple-500/40"
+              className={`text-[9px] px-1.5 py-0.5 rounded-md font-black border ${
+                activePreviewTab === "timeline"
+                  ? "bg-purple-500/30 text-purple-200 border-purple-500/40 shadow-sm"
                   : "bg-neutral-900 text-neutral-500 border-neutral-800"
-                }`}
+              }`}
             >
               {panelsCount}p
             </span>
@@ -128,23 +131,26 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         <button
           type="button"
           onClick={() => setActivePreviewTab?.("editor")}
-          className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${activePreviewTab === "editor"
-              ? "bg-indigo-600/30 border-indigo-500/60 text-white shadow-[0_0_10px_rgba(99,102,241,0.2)]"
-              : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
-            }`}
+          className={`flex items-center gap-1.5 px-3 h-7 rounded-xl text-[11px] font-bold font-mono transition-all cursor-pointer border ${
+            activePreviewTab === "editor"
+              ? "bg-indigo-600/30 border-indigo-500/60 text-white shadow-[0_0_14px_rgba(99,102,241,0.3)]"
+              : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.04]"
+          }`}
         >
           <Sparkles
-            className={`h-3 w-3 ${activePreviewTab === "editor"
-                ? "text-indigo-400"
+            className={`h-3.5 w-3.5 ${
+              activePreviewTab === "editor"
+                ? "text-indigo-300"
                 : "text-neutral-500"
-              }`}
+            }`}
           />
           <span>Video Editor Live</span>
           <span
-            className={`text-[8px] px-1 py-0.2 rounded font-black border ${activePreviewTab === "editor"
+            className={`text-[9px] px-1.5 py-0.5 rounded-md font-black border ${
+              activePreviewTab === "editor"
                 ? "bg-indigo-500/25 text-indigo-200 border-indigo-500/40"
                 : "bg-neutral-900 text-neutral-500 border-neutral-800"
-              }`}
+            }`}
           >
             CANVAS
           </span>
@@ -154,23 +160,26 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
       <button
         type="button"
         onClick={() => setActivePreviewTab?.("video")}
-        className={`flex items-center gap-1.5 px-2.5 h-6 rounded-lg text-[10px] font-bold font-mono transition-all cursor-pointer border ${activePreviewTab === "video"
-            ? "bg-emerald-600/25 border-emerald-500/50 text-white shadow-[0_0_10px_rgba(16,185,129,0.2)]"
-            : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
-          }`}
+        className={`flex items-center gap-1.5 px-3 h-7 rounded-xl text-[11px] font-bold font-mono transition-all cursor-pointer border ${
+          activePreviewTab === "video"
+            ? "bg-emerald-600/30 border-emerald-500/60 text-white shadow-[0_0_14px_rgba(16,185,129,0.3)]"
+            : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.04]"
+        }`}
       >
         <Video
-          className={`h-3 w-3 ${activePreviewTab === "video"
-              ? "text-emerald-400"
+          className={`h-3.5 w-3.5 ${
+            activePreviewTab === "video"
+              ? "text-emerald-300"
               : "text-neutral-500"
-            }`}
+          }`}
         />
         <span>Final Video</span>
         <span
-          className={`text-[8px] px-1 py-0.2 rounded font-black border ${activePreviewTab === "video"
+          className={`text-[9px] px-1.5 py-0.5 rounded-md font-black border ${
+            activePreviewTab === "video"
               ? "bg-emerald-500/25 text-emerald-200 border-emerald-500/40"
               : "bg-neutral-900 text-neutral-500 border-neutral-800"
-            }`}
+          }`}
         >
           MP4
         </span>
