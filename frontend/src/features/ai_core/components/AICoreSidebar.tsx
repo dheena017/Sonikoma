@@ -131,18 +131,6 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
           icon: LayoutGrid,
           path: "/ai-core",
         },
-        {
-          id: "playground",
-          label: "Interactive Playground",
-          icon: Sparkles,
-          path: "/ai-core/playground",
-        },
-        {
-          id: "arena",
-          label: "Model Arena (Battle)",
-          icon: Sliders,
-          path: "/ai-core/arena",
-        },
       ],
     },
     {

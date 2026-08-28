@@ -19,8 +19,6 @@ export { default as AICoreOverviewPage } from "./pages/AICoreOverviewPage";
 export { default as AIAPIKeysPage } from "./pages/AIAPIKeysPage";
 export { default as AIRateLimitsPage } from "./pages/AIRateLimitsPage";
 export { default as AIUsageAnalyticsPage } from "./pages/AIUsageAnalyticsPage";
-export { default as AIPlaygroundPage } from "./pages/AIPlaygroundPage";
-export { default as AIModelArenaPage } from "./pages/AIModelArenaPage";
 export { default as AIRoutingPage } from "./pages/AIRoutingPage";
 export { default as AICreditWalletPage } from "./pages/AICreditWalletPage";
 

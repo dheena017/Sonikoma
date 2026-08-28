@@ -79,10 +79,6 @@ export default function AIModelCard({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleNavigatePlayground = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.location.href = `/studio/ai-core/playground?model=${encodeURIComponent(model.id)}`;
-  };
 
   return (
     <div
@@ -277,10 +273,13 @@ export default function AIModelCard({
         </div>
 
         <button
-          onClick={handleNavigatePlayground}
+          onClick={(e) => {
+            e.stopPropagation();
+            window.location.href = `/ai-core/routing`;
+          }}
           className="px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-purple-600 text-neutral-300 hover:text-white border border-neutral-800 text-[10px] font-mono flex items-center gap-1 transition-all cursor-pointer shadow-sm"
         >
-          <span>Test</span>
+          <span>Route</span>
           <ArrowUpRight className="w-3 h-3" />
         </button>
       </div>

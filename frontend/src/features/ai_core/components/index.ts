@@ -7,4 +7,5 @@ export type { HeaderCreditsPopoverProps } from "./HeaderCreditsPopover";
 export { default as AIModelSelector, AIModelSelector as NamedAIModelSelector } from "./AIModelSelector";
 export { default as AIModelCard } from "./AIModelCard";
 export type { AIModelCardData } from "./AIModelCard";
-
+export { default as TierModelCard } from "./TierModelCard";
+export type { DynamicModelOption, TierType } from "./TierModelCard";

@@ -111,12 +111,6 @@ const AIRateLimitsPage = React.lazy(
 const AIUsageAnalyticsPage = React.lazy(
   () => import("@/features/ai_core/pages/AIUsageAnalyticsPage")
 );
-const AIPlaygroundPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIPlaygroundPage")
-);
-const AIModelArenaPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIModelArenaPage")
-);
 const AIRoutingPage = React.lazy(
   () => import("@/features/ai_core/pages/AIRoutingPage")
 );
@@ -806,8 +800,6 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/ai-core/usage" ||
         currentPath === "/ai-core/charts" ||
         currentPath === "/ai-core/analytics",
-      isAIPlaygroundPath: currentPath === "/ai-core/playground",
-      isAIArenaPath: currentPath === "/ai-core/arena",
       isAIRoutingPath:
         currentPath === "/ai-core/routing" ||
         currentPath === "/ai-core/models",
@@ -854,8 +846,6 @@ export default function AppRouter(props: AppRouterProps) {
     isAIAPIKeysPath,
     isAIRateLimitsPath,
     isAIUsagePath,
-    isAIPlaygroundPath,
-    isAIArenaPath,
     isAIRoutingPath,
     isAIWalletPath,
     isImageEditorPage,
@@ -1366,10 +1356,6 @@ export default function AppRouter(props: AppRouterProps) {
                 <AIRateLimitsPage addNotification={addNotification} />
               ) : isAIUsagePath ? (
                 <AIUsageAnalyticsPage addNotification={addNotification} />
-              ) : isAIPlaygroundPath ? (
-                <AIPlaygroundPage addNotification={addNotification} />
-              ) : isAIArenaPath ? (
-                <AIModelArenaPage addNotification={addNotification} />
               ) : isAIRoutingPath ? (
                 <AIRoutingPage addNotification={addNotification} />
               ) : isAIWalletPath ? (

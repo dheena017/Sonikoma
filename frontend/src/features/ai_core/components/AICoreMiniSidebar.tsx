@@ -36,18 +36,6 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
           icon: LayoutGrid,
           path: "/ai-core",
         },
-        {
-          id: "playground",
-          label: "Interactive Playground",
-          icon: Sparkles,
-          path: "/ai-core/playground",
-        },
-        {
-          id: "arena",
-          label: "Model Arena",
-          icon: Activity,
-          path: "/ai-core/arena",
-        },
       ],
     },
     {

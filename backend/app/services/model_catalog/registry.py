@@ -268,13 +268,30 @@ class ModelRegistry:
             return matching
         return [m["id"] for m in cls.get_catalog() if m.get("provider") == "gemini"] or ["gemini-3.7-flash"]
 
+    RECOMMENDED_CAPABILITY_CHAINS: Dict[str, List[tuple[str, str]]] = {
+        "storyboard_narrative": [("gemini", "gemini-3.7-flash"), ("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o")],
+        "panel_analysis": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o"), ("anthropic", "claude-3-5-sonnet-20241022")],
+        "scraper_blueprint": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o-mini"), ("deepseek", "deepseek-chat")],
+        "prompt_enhancement": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
+        "image_diffusion": [("huggingface", "FLUX.1-schnell"), ("openai", "dall-e-3"), ("stablediffusion", "stable-diffusion-xl")],
+        "speech_synthesis": [("elevenlabs", "eleven_multilingual_v2"), ("openai", "tts-1-hd"), ("edgetts", "edge-tts-neural")],
+        "translate": [("deepl", "deepl-pro"), ("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o-mini")],
+        "character_persona": [("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o"), ("gemini", "gemini-3.7-flash")],
+        "seo_optimization": [("openai", "gpt-4o-mini"), ("gemini", "gemini-3.7-flash"), ("deepseek", "deepseek-chat")],
+        "sfx_audio": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
+        "smart_crop": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o"), ("gemini", "gemini-3.5-flash")],
+    }
+
     @classmethod
     def get_cross_provider_fallback_chain(cls, capability: str) -> List[tuple[str, str]]:
         """
         Returns capability-aware cross-provider fallbacks dynamically discovered
-        from the catalog without hardcoded lists.
+        from the catalog with specialized default production configurations.
         """
         cap = capability.lower()
+        if cap in cls.RECOMMENDED_CAPABILITY_CHAINS:
+            return cls.RECOMMENDED_CAPABILITY_CHAINS[cap]
+
         matching: List[tuple[str, str]] = []
         for m in cls.get_catalog():
             m_caps = [c.lower() for c in m.get("capabilities", [])]
