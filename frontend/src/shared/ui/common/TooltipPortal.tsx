@@ -33,7 +33,7 @@ const TooltipPortal: React.FC<TooltipPortalProps> = ({
   const node = (
     <div
       style={style}
-      className="pointer-events-none transition-opacity bg-neutral-900 border border-neutral-800 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-mono"
+      className="pointer-events-none bg-neutral-900/95 backdrop-blur-md border border-neutral-700/70 text-neutral-200 text-xs font-medium px-2.5 py-1 rounded-md whitespace-nowrap z-[9999] shadow-xl shadow-black/40 animate-in fade-in zoom-in-95 duration-150 select-none"
     >
       {text}
     </div>

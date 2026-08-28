@@ -348,7 +348,7 @@ export default function ProfileAnalyticsTab() {
       {/* Recent Activity Timeline Feed */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 shadow-2xl relative space-y-4">
         <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5 pb-3 border-b border-white/5">
-          <Activity className="w-4.5 h-4.5 text-purple-400" /> Recent Activity
+          <Activity className="w-4.5 h-4.5 text-[#3B82F6]" /> Recent Activity
           Feed
         </h4>
 
@@ -356,7 +356,7 @@ export default function ProfileAnalyticsTab() {
           {activities.map((act, idx) => (
             <div key={idx} className="relative space-y-1 text-left">
               {/* Bullet point */}
-              <div className="absolute -left-[17px] top-1.5 w-2 h-2 rounded-full bg-purple-500 ring-4 ring-neutral-950" />
+              <div className="absolute -left-[17px] top-1.5 w-2 h-2 rounded-full bg-[#3B82F6] ring-4 ring-neutral-950" />
               <div className="flex justify-between items-baseline">
                 <h6 className="text-xs font-bold text-neutral-200">
                   {act.title}

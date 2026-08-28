@@ -22,6 +22,7 @@ import {
   Zap,
   Database,
   Image,
+  User,
 } from "lucide-react";
 
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
@@ -55,15 +56,25 @@ const ActiveProjectSidebarWidget: React.FC<{
   setDrawerOpen: (open: boolean) => void;
 }> = ({ setDrawerOpen }) => {
   const { activeProjectId, activeProjectData } = useProjectStore();
+  const [imgError, setImgError] = React.useState(false);
+
+  const coverUrl =
+    activeProjectData?.project?.cover_image ||
+    activeProjectData?.panels?.[0]?.image_url;
+
+  // Reset img error if cover URL changes
+  React.useEffect(() => {
+    setImgError(false);
+  }, [coverUrl]);
 
   return (
-    <div className="px-3 py-3.5 rounded-2xl bg-gradient-to-br from-purple-950/40 via-[#0e0f17] to-indigo-950/30 border border-purple-500/20 text-xs shadow-lg shadow-purple-900/20 my-3 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] uppercase font-bold text-purple-300 tracking-widest flex items-center gap-1.5">
-          <Zap className="w-3 h-3 text-amber-400" /> Active Project
+    <div className="p-3 rounded-2xl bg-neutral-900/70 border border-neutral-800/80 text-xs shadow-sm my-2 backdrop-blur-md">
+      <div className="flex items-center justify-between mb-2.5">
+        <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5">
+          <Zap className="w-3 h-3 text-purple-400" /> Active Project
         </span>
         {activeProjectId ? (
-          <span className="text-[9px] text-emerald-400 font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 flex items-center gap-1">
+          <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Active
           </span>
@@ -72,30 +83,30 @@ const ActiveProjectSidebarWidget: React.FC<{
 
       {activeProjectId && activeProjectData ? (
         <div className="space-y-2.5">
-          <div className="flex items-center gap-2.5 min-w-0 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/30 transition-colors">
-            <div className="w-9 h-9 rounded-lg overflow-hidden bg-neutral-900 border border-purple-500/30 shrink-0 shadow-md">
-              {activeProjectData.project?.cover_image ||
-              activeProjectData.panels?.[0]?.image_url ? (
+          <div className="flex items-center gap-3 p-2 rounded-xl bg-neutral-950/70 border border-neutral-800/60 hover:border-neutral-700/80 transition-colors">
+            <div className="w-9 h-9 rounded-xl overflow-hidden bg-neutral-900 border border-neutral-700/50 shrink-0 flex items-center justify-center shadow-inner">
+              {coverUrl && !imgError ? (
                 <img
                   src={
-                    activeProjectData.project?.cover_image ||
-                    activeProjectData.panels?.[0]?.image_url
+                    coverUrl.startsWith("http")
+                      ? `/api/proxy-image?url=${encodeURIComponent(coverUrl)}`
+                      : coverUrl
                   }
-                  alt={activeProjectData.project?.title}
+                  alt={activeProjectData.project?.title || "Project Cover"}
+                  onError={() => setImgError(true)}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-inner">
-                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
-                    "P"}
+                <div className="w-full h-full bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border border-purple-500/20 flex items-center justify-center text-purple-300 font-bold text-xs">
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
                 </div>
               )}
             </div>
-            <div className="min-w-0 flex flex-col">
-              <h4 className="font-semibold text-xs text-white truncate leading-tight">
+            <div className="min-w-0 flex-1">
+              <h4 className="font-semibold text-xs text-neutral-100 truncate leading-tight">
                 {activeProjectData.project?.title || "Untitled Project"}
               </h4>
-              <span className="text-[9px] text-neutral-400 truncate font-mono">
+              <span className="text-[10px] text-neutral-400 truncate font-mono">
                 {activeProjectData.panels?.length || 0} panel
                 {activeProjectData.panels?.length !== 1 ? "s" : ""}
               </span>
@@ -104,7 +115,7 @@ const ActiveProjectSidebarWidget: React.FC<{
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600/30 to-indigo-600/20 hover:from-purple-600/50 hover:to-indigo-600/40 text-purple-300 hover:text-purple-100 border border-purple-500/40 hover:border-purple-500/60 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-purple-600/20 text-neutral-300 hover:text-purple-200 border border-neutral-700/60 hover:border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
           >
             <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
@@ -112,17 +123,17 @@ const ActiveProjectSidebarWidget: React.FC<{
         </div>
       ) : (
         <div className="space-y-2.5">
-          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
-            <p className="text-[10px] text-amber-200 font-medium">
+          <div className="p-2.5 rounded-xl bg-neutral-950/60 border border-neutral-800/60">
+            <p className="text-[11px] text-neutral-300 font-medium">
               No active project
             </p>
-            <p className="text-[9px] text-amber-100/60 mt-0.5">
-              Select one to get started
+            <p className="text-[10px] text-neutral-500 mt-0.5">
+              Select one to begin editing
             </p>
           </div>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/30 hover:shadow-lg hover:shadow-purple-600/40 cursor-pointer"
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20 hover:shadow-purple-600/30 cursor-pointer active:scale-[0.98]"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Project</span>
@@ -327,7 +338,7 @@ const SidebarInner = ({
         },
         {
           label: "Profile",
-          icon: Sparkles,
+          icon: User,
           active: currentPath === "/profile",
           path: "/profile",
           onClick: () => navigateTo("/profile"),
@@ -392,16 +403,16 @@ const SidebarInner = ({
         />
 
         {/* NAVIGATION MENUS WITH HIDDEN SCROLLBAR */}
-        <div className="space-y-6 overflow-y-auto flex-grow min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
+        <div className="space-y-5 overflow-y-auto flex-grow min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
           {menuItems.map((group, groupIdx) => (
-            <div key={group.group} className="space-y-2">
+            <div key={group.group} className="space-y-1.5">
               {groupIdx > 0 && (
-                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-3" />
+                <div className="w-full h-px bg-neutral-800/60 my-2.5" />
               )}
-              <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans pl-2.5 flex items-center gap-2">
+              <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.16em] font-sans px-3 mb-1 flex items-center gap-2">
                 <span>{group.group}</span>
               </h4>
-              <ul className="space-y-1.5">
+              <ul className="space-y-1">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   return (
@@ -414,37 +425,35 @@ const SidebarInner = ({
                           }
                         }}
                         disabled={!item.enabled}
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
+                        aria-label={item.label}
+                        className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold font-sans transition-all duration-150 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
                           item.active
-                            ? "text-white bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-purple-500/40 shadow-[0_4px_20px_rgba(168,85,247,0.2)]"
-                            : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border border-transparent hover:border-neutral-800/60"
+                            ? "text-white bg-purple-500/15 border border-purple-500/30"
+                            : "text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent"
                         } ${
                           (item as any).isProcessing
-                            ? "ring-1 ring-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.3)]"
+                            ? "ring-1 ring-purple-500/50"
                             : ""
                         }`}
-                        title={
-                          !item.enabled ? (item as any).disabledTip : item.label
-                        }
                       >
-                        {/* Active Left Indicator Bar */}
+                        {/* Active Left Indicator Pill */}
                         {item.active && (
-                          <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                          <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-purple-400" />
                         )}
 
                         <div className="flex items-center gap-3">
                           <Icon
-                            className={`h-4 w-4 transition-transform duration-200 ${
+                            className={`h-4 w-4 transition-colors duration-150 ${
                               item.active
-                                ? "text-purple-300 scale-110"
-                                : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-105"
+                                ? "text-purple-300"
+                                : "text-neutral-400 group-hover:text-purple-300"
                             }`}
                           />
                           <span
                             className={
                               item.active
                                 ? "font-bold text-white"
-                                : "font-medium"
+                                : "font-medium text-neutral-300 group-hover:text-white"
                             }
                           >
                             {item.label}
@@ -476,10 +485,10 @@ const SidebarInner = ({
         </div>
       </div>
 
-      {/* BOTTOM STATUS CARD */}
-      <div className="space-y-3 pt-4 border-t border-neutral-800/60">
+      {/* BOTTOM STATUS FOOTER */}
+      <div className="pt-3 border-t border-neutral-800/60 space-y-2">
         {panels.length > 0 && (
-          <div className="px-3.5 py-2.5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 text-xs font-sans flex items-center justify-between backdrop-blur-md">
+          <div className="px-3 py-2 rounded-xl bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 text-xs font-sans flex items-center justify-between backdrop-blur-md">
             <span className="text-neutral-400 text-[11px]">
               Video Duration:
             </span>
@@ -488,6 +497,13 @@ const SidebarInner = ({
             </span>
           </div>
         )}
+        <div className="flex items-center justify-between text-[11px] text-neutral-400 px-2 py-0.5">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+            System Online
+          </span>
+          <span className="font-mono text-neutral-400 text-[10px]">v1.2.0</span>
+        </div>
       </div>
     </div>
   );

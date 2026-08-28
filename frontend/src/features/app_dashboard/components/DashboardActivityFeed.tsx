@@ -1,13 +1,9 @@
 import React, { useState, useMemo } from "react";
+import { formatDetailedTime } from "@/utils/dateUtils";
 import {
   Activity,
-  Layers,
-  Sparkles,
-  Volume2,
-  Film,
   ArrowUpRight,
   Clock,
-  Download,
 } from "lucide-react";
 
 interface ActivityItem {
@@ -38,11 +34,12 @@ export default function DashboardActivityFeed({
     // Only use explicit activities from the analytics API — no synthesized/fake items
     if (analytics?.activities && Array.isArray(analytics.activities)) {
       analytics.activities.forEach((act, idx) => {
+        const timeDisplay = formatDetailedTime(act.timestamp || act.time);
         items.push({
           id: `analytics-${idx}`,
           title: act.title || "Project Update",
           desc: act.desc || act.description || "",
-          time: act.time || "Recently",
+          time: timeDisplay,
           type: act.type || "general",
           badge: act.badge || "Live",
           badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
@@ -59,36 +56,6 @@ export default function DashboardActivityFeed({
     if (activeFilter === "all") return activities;
     return activities.filter((act) => act.type === activeFilter);
   }, [activities, activeFilter]);
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "scrape":
-        return <Download className="w-4 h-4 text-[#3B82F6]" />;
-      case "panel":
-        return <Layers className="w-4 h-4 text-[#F59E0B]" />;
-      case "voice":
-        return <Volume2 className="w-4 h-4 text-[#A855F7]" />;
-      case "render":
-        return <Film className="w-4 h-4 text-[#10B981]" />;
-      default:
-        return <Sparkles className="w-4 h-4 text-[#3B82F6]" />;
-    }
-  };
-
-  const getActivityIconBg = (type: string) => {
-    switch (type) {
-      case "scrape":
-        return "bg-[#3B82F6]/10 border-[#3B82F6]/25";
-      case "panel":
-        return "bg-[#F59E0B]/10 border-[#F59E0B]/25";
-      case "voice":
-        return "bg-[#A855F7]/10 border-[#A855F7]/25";
-      case "render":
-        return "bg-[#10B981]/10 border-[#10B981]/25";
-      default:
-        return "bg-[#3B82F6]/10 border-[#3B82F6]/25";
-    }
-  };
 
   return (
     <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-7 shadow-2xl transition-all duration-300">
@@ -144,52 +111,27 @@ export default function DashboardActivityFeed({
                   );
                 }
               }}
-              className="flex items-start justify-between gap-4 p-4 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] hover:-translate-y-0.5 transition-all group cursor-pointer shadow-sm"
+              className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] hover:-translate-y-0.5 transition-all group cursor-pointer shadow-sm"
             >
-              <div className="flex items-start gap-3.5 min-w-0">
-                {/* Thumbnail or Category Icon */}
-                {act.coverImage ? (
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#121212] border border-[#2F2F2F] shrink-0 relative shadow-md group-hover:scale-105 transition-transform">
-                    <img
-                      src={
-                        act.coverImage.startsWith("http")
-                          ? `/api/proxy-image?url=${encodeURIComponent(act.coverImage)}`
-                          : act.coverImage
-                      }
-                      alt=""
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className={`p-2.5 rounded-xl border shrink-0 group-hover:scale-105 transition-transform ${getActivityIconBg(
-                      act.type
-                    )}`}
-                  >
-                    {getActivityIcon(act.type)}
-                  </div>
-                )}
-
-                {/* Event Details */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                    <h4 className="text-xs sm:text-sm font-extrabold text-[#E5E5E5] truncate group-hover:text-[#3B82F6] transition-colors">
-                      {act.title}
-                    </h4>
-                    {act.badge && (
-                      <span
-                        className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${
-                          act.badgeColor || "text-[#9CA3AF] bg-[#121212] border-[#2F2F2F]"
-                        }`}
-                      >
-                        {act.badge}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-[#9CA3AF] leading-relaxed truncate">
-                    {act.desc}
-                  </p>
+              {/* Event Details */}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                  <h4 className="text-xs sm:text-sm font-extrabold text-[#E5E5E5] truncate group-hover:text-[#3B82F6] transition-colors">
+                    {act.title}
+                  </h4>
+                  {act.badge && (
+                    <span
+                      className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                        act.badgeColor || "text-[#9CA3AF] bg-[#121212] border-[#2F2F2F]"
+                      }`}
+                    >
+                      {act.badge}
+                    </span>
+                  )}
                 </div>
+                <p className="text-xs text-[#9CA3AF] leading-relaxed truncate">
+                  {act.desc}
+                </p>
               </div>
 
               {/* Timestamp & Open Indicator */}

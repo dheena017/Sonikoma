@@ -120,29 +120,50 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
                 "time": audit["created_at"],
             })
 
-        activities.sort(key=lambda x: x["time"], reverse=True)
-        activities = activities[:4]
+        activities.sort(key=lambda x: x.get("time") or "", reverse=True)
+        activities = activities[:6]
+
+        def format_relative_time(raw_time):
+            if not raw_time:
+                return "Just now"
+            try:
+                clean_time = str(raw_time).replace("Z", "+00:00")
+                if "T" in clean_time:
+                    dt = datetime.datetime.fromisoformat(clean_time)
+                else:
+                    dt = datetime.datetime.strptime(clean_time.split(".")[0], "%Y-%m-%d %H:%M:%S")
+                
+                now = datetime.datetime.utcnow() if dt.tzinfo is None else datetime.datetime.now(datetime.timezone.utc)
+                diff = now - dt
+                total_seconds = int(diff.total_seconds())
+
+                if total_seconds < 0:
+                    return "Just now"
+                if total_seconds < 60:
+                    return "Just now"
+                elif total_seconds < 3600:
+                    mins = total_seconds // 60
+                    return f"{mins} minute{'s' if mins != 1 else ''} ago"
+                elif total_seconds < 86400:
+                    hours = total_seconds // 3600
+                    return f"{hours} hour{'s' if hours != 1 else ''} ago"
+                elif total_seconds < 172800:
+                    return "1 day ago"
+                elif total_seconds < 604800:
+                    days = total_seconds // 86400
+                    return f"{days} days ago"
+                else:
+                    return dt.strftime("%b %d, %Y")
+            except Exception:
+                return str(raw_time).split("T")[0] if "T" in str(raw_time) else str(raw_time).split(" ")[0]
 
         for act in activities:
-            try:
-                dt = datetime.datetime.strptime(act["time"], "%Y-%m-%d %H:%M:%S")
-                diff = datetime.datetime.now() - dt
-                if diff.days == 0:
-                    hours = diff.seconds // 3600
-                    if hours == 0:
-                        mins = (diff.seconds % 3600) // 60
-                        act["time"] = f"{mins} minutes ago" if mins > 0 else "Just now"
-                    else:
-                        act["time"] = f"{hours} hours ago"
-                elif diff.days == 1:
-                    act["time"] = "1 day ago"
-                else:
-                    act["time"] = f"{diff.days} days ago"
-            except Exception:
-                act["time"] = act["time"].split(" ")[0]
+            raw_t = act.get("time")
+            act["timestamp"] = raw_t
+            act["time"] = format_relative_time(raw_t)
 
         if not activities:
-            activities = [{"title": "System Initialized", "desc": "Creator account profile created successfully", "time": "Just now"}]
+            activities = [{"title": "System Initialized", "desc": "Creator account profile created successfully", "time": "Just now", "timestamp": None}]
 
         counts_by_date = {}
 

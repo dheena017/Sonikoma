@@ -17,6 +17,7 @@ import {
   Zap,
   Database,
   Image,
+  User,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
@@ -113,7 +114,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       ],
     },
     {
-      group: "Creative Studio",
+      group: "Creative",
       items: [
         {
           label: "Creative Suite",
@@ -128,7 +129,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           onClick: () => navigateTo("/creative-suite"),
         },
         {
-          label: "AI Core & Multi-Engine",
+          label: "AI Core",
           icon: Brain,
           active: currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
           path: "/ai-core",
@@ -170,7 +171,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         },
         {
           label: "Profile",
-          icon: Sparkles,
+          icon: User,
           active: currentPath === "/profile",
           path: "/profile",
           onClick: () => navigateTo("/profile"),
@@ -197,11 +198,11 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
     return (
       <div className="relative group w-full flex justify-center py-0.5">
-        {/* Premium Floating Active Pill */}
+        {/* Simple Clean Active Pill */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+          className={`absolute left-1 top-1/2 -translate-y-1/2 w-0.5 rounded-full transition-all duration-150 z-10 ${
             item.active
-              ? "h-5 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
+              ? "h-4 bg-purple-400 opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -210,27 +211,27 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           onClick={item.onClick}
           onMouseEnter={handleEnter}
           onMouseLeave={handleLeave}
-          title={item.label}
-          className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
+          aria-label={item.label}
+          className="p-1 transition-all duration-150 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
         >
-          {/* iOS-style icon pill */}
+          {/* Flat clean icon pill */}
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 ${
               item.active
-                ? "bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.3)] scale-105"
-                : "bg-neutral-800/80 border border-neutral-700/80 group-hover:bg-purple-500/15 group-hover:border-purple-500/30"
+                ? "bg-purple-500/15 border border-purple-500/30 text-purple-300"
+                : "bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:border-neutral-700 hover:text-neutral-200"
             }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-300 ${
+              className={`w-[18px] h-[18px] transition-colors duration-150 ${
                 item.active
                   ? "text-purple-300"
-                  : "text-neutral-400 group-hover:text-purple-300"
+                  : "text-neutral-400 group-hover:text-neutral-200"
               }`}
             />
           </div>
           {item.badge && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-r from-purple-500 to-indigo-600 text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-sm z-20">
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-purple-600 text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 z-20">
               {item.badge}
             </span>
           )}
@@ -244,26 +245,25 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const [creativeRect, setCreativeRect] = useState<DOMRect | null>(null);
 
   return (
-    // Premium Glassmorphism Container
-    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-955/95 backdrop-blur-2xl border-r border-neutral-800/80 shadow-[4px_0_24px_rgba(0,0,0,0.4)] hidden lg:flex flex-col items-center py-4 z-40 overflow-hidden">
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-950 border-r border-neutral-800/80 hidden lg:flex flex-col items-center py-3 z-40 overflow-hidden select-none">
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-1">
         {groups.map((group, groupIdx) => (
           <div
             key={groupIdx}
-            className="w-full flex flex-col items-center pb-2"
+            className="w-full flex flex-col items-center pb-1"
           >
-            {/* Section divider (only between groups) + label for every group */}
+            {/* Section divider + label */}
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.5rem" : "0",
-                marginBottom: "0.375rem",
+                marginTop: groupIdx > 0 ? "0.375rem" : "0",
+                marginBottom: "0.25rem",
               }}
             >
               {groupIdx > 0 && (
-                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />
+                <div className="w-6 h-px bg-neutral-800 rounded-full mb-1" />
               )}
-              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-neutral-400 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
+              <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-neutral-500 select-none text-center w-full px-1">
                 {group.group}
               </span>
             </div>
@@ -275,19 +275,20 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         ))}
       </div>
 
-      {/* Creative Tools Button - Matched to the Premium "Return" styling */}
-      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-800/60">
+      {/* Bottom Action Button */}
+      <div className="mt-auto pt-3 flex justify-center w-full pb-1 border-t border-neutral-800/80">
         <div className="relative group w-full flex justify-center">
           <button
-            onClick={() => navigateTo("/scraper")}
+            onClick={() => navigateTo("/creative-suite")}
             onMouseEnter={(e) => {
               setCreativeRect(e.currentTarget.getBoundingClientRect());
               setCreativeHover(true);
             }}
             onMouseLeave={() => setCreativeHover(false)}
-            className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 cursor-pointer flex items-center justify-center"
+            aria-label="Creative Suite"
+            className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:border-neutral-700 hover:text-white transition-all duration-150 active:scale-95 cursor-pointer flex items-center justify-center"
           >
-            <Sparkles className="w-[18px] h-[18px] shrink-0" />
+            <Sparkles className="w-4 h-4 shrink-0" />
           </button>
           <TooltipPortal
             text="Creative Suite"

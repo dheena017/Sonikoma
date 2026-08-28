@@ -195,15 +195,13 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       </div>
 
       {/* Navigation Groups */}
-      <div className="flex-1 overflow-y-auto py-6 px-4 space-y-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {groups.map((group, groupIdx) => (
-          <div key={group.name} className="space-y-2.5">
+          <div key={group.name} className="space-y-1">
             {groupIdx > 0 && (
-              <div className="w-full flex flex-col pt-1">
-                <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-3" />
-              </div>
+              <div className="w-full h-px bg-neutral-800/60 my-2.5" />
             )}
-            <h4 className="px-3 text-[10px] font-black text-violet-400/50 uppercase tracking-[0.25em] font-mono">
+            <h4 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.16em] font-sans mb-1">
               {group.name}
             </h4>
             <ul className="space-y-1">
@@ -211,34 +209,30 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 const active = isActive(item.path);
                 return (
                   <li key={item.id} className="relative">
-                    {/* Premium Floating Active Pill */}
-                    <div
-                      className={`absolute left-2 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-                        active
-                          ? "h-5 bg-gradient-to-b from-[#3B82F6] to-[#60A5FA] shadow-[0_0_14px_rgba(59,130,246,0.9)] opacity-100"
-                          : "h-0 bg-transparent opacity-0"
-                      }`}
-                    />
+                    {/* Active Left Indicator Pill */}
+                    {active && (
+                      <div className="absolute left-1 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-purple-400 z-10" />
+                    )}
 
                     <button
                       onClick={() => {
                         navigateTo(item.path);
                         onClose();
                       }}
-                      className={`w-full flex items-center gap-3.5 px-4 py-2.5 rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
+                      className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-semibold font-sans transition-all duration-150 group relative cursor-pointer active:scale-[0.98] ${
                         active
-                          ? "bg-[#3B82F6]/10 text-white shadow-[0_4px_20px_rgba(59,130,246,0.2)] border border-[#3B82F6]/40 font-bold"
-                          : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border border-transparent hover:border-neutral-800/60"
+                          ? "bg-purple-500/15 text-white border border-purple-500/30"
+                          : "text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent"
                       }`}
                     >
                       <item.icon
-                        className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
+                        className={`w-4 h-4 shrink-0 transition-colors duration-150 ${
                           active
-                            ? "text-[#3B82F6]"
-                            : "text-neutral-400 group-hover:scale-110 group-hover:text-[#3B82F6]"
+                            ? "text-purple-300"
+                            : "text-neutral-400 group-hover:text-purple-300"
                         }`}
                       />
-                      <span className="text-sm font-bold tracking-wide">
+                      <span className="truncate">
                         {item.label}
                       </span>
                     </button>
@@ -251,17 +245,24 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       </div>
 
       {/* Sidebar Footer */}
-      <div className="p-5 border-t border-neutral-800/60">
+      <div className="p-4 border-t border-neutral-800/60 space-y-2">
         <button
           onClick={() => {
             navigateTo("/dashboard");
             onClose();
           }}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white text-xs font-black tracking-widest transition-all shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] active:scale-95 border border-violet-400/30 cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-xl bg-neutral-900 hover:bg-purple-600/20 text-neutral-300 hover:text-purple-200 border border-neutral-800 hover:border-purple-500/40 text-xs font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer"
         >
-          <ExternalLink className="w-4 h-4 shrink-0" />
+          <ExternalLink className="w-3.5 h-3.5" />
           <span>RETURN TO APP</span>
         </button>
+        <div className="flex items-center justify-between text-[11px] text-neutral-400 px-1 pt-1">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+            Infrastructure OK
+          </span>
+          <span className="font-mono text-neutral-400 text-[10px]">Admin</span>
+        </div>
       </div>
     </div>
   );

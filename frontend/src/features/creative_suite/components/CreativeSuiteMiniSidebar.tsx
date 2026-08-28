@@ -136,9 +136,9 @@ const CreativeSuiteMiniSidebarInner: React.FC<
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Active side indicator */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${
+          className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-200 z-10 ${
             active
-              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.8)] opacity-100"
+              ? "h-5 bg-gradient-to-b from-purple-400 to-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)] opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -147,24 +147,25 @@ const CreativeSuiteMiniSidebarInner: React.FC<
           onClick={() => navigateTo(item.path)}
           onMouseEnter={handleEnter}
           onMouseLeave={() => setHover(false)}
-          className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
+          aria-label={item.label}
+          className="p-1 transition-all duration-150 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
-                ? "bg-purple-550/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                ? "bg-purple-600/20 border border-purple-500/50 shadow-[0_0_14px_rgba(168,85,247,0.25)] text-purple-200 scale-105"
                 : isLocked
                 ? "bg-neutral-950 border border-neutral-900 opacity-40 cursor-not-allowed"
-                : "bg-neutral-900 border border-neutral-800 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+                : "bg-neutral-900/90 border border-neutral-800 text-neutral-400 group-hover:bg-neutral-800/90 group-hover:border-neutral-700 group-hover:text-neutral-100 group-hover:shadow-md"
             }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-300 ${
+              className={`w-[18px] h-[18px] transition-colors duration-150 ${
                 active
-                  ? "text-purple-400"
+                  ? "text-purple-300"
                   : isLocked
                   ? "text-neutral-700"
-                  : "text-neutral-450 group-hover:text-purple-300"
+                  : "text-neutral-400 group-hover:text-neutral-200"
               }`}
             />
           </div>
@@ -179,25 +180,25 @@ const CreativeSuiteMiniSidebarInner: React.FC<
   };
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#070709] border-r border-neutral-900 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.3)] select-none overflow-hidden">
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#070709] border-r border-neutral-900 hidden lg:flex flex-col items-center py-3 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.3)] select-none overflow-hidden">
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-1">
         {groups.map((group, groupIdx) => (
           <div
             key={group.name}
-            className="w-full flex flex-col items-center pb-2"
+            className="w-full flex flex-col items-center pb-1"
           >
             {/* Section divider (only between groups) + label for every group */}
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.5rem" : "0",
-                marginBottom: "0.375rem",
+                marginTop: groupIdx > 0 ? "0.375rem" : "0",
+                marginBottom: "0.25rem",
               }}
             >
               {groupIdx > 0 && (
-                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />
+                <div className="w-6 h-px bg-neutral-700/60 rounded-full mb-1" />
               )}
-              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-purple-400/80 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
+              <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-neutral-500 select-none text-center w-full px-1">
                 {group.name}
               </span>
             </div>
@@ -210,18 +211,15 @@ const CreativeSuiteMiniSidebarInner: React.FC<
       </div>
 
       {/* Return to App Dashboard */}
-      <div className="mt-auto pt-4 flex justify-center w-full pb-2 border-t border-neutral-900">
+      <div className="mt-auto pt-3 flex justify-center w-full pb-1 border-t border-neutral-900">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/dashboard")}
-            className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 cursor-pointer"
+            aria-label="Main Dashboard"
+            className="w-11 h-11 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:bg-purple-600/20 hover:border-purple-500/40 hover:text-purple-300 hover:shadow-[0_0_14px_rgba(168,85,247,0.25)] transition-all duration-200 active:scale-90 cursor-pointer flex items-center justify-center"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>
-
-          <div className="absolute left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 -translate-x-2 group-hover:translate-x-0 bg-neutral-900 border border-white/10 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-medium tracking-wide">
-            Main Dashboard
-          </div>
         </div>
       </div>
     </aside>

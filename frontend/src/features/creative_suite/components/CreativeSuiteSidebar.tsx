@@ -25,15 +25,24 @@ const ActiveProjectSidebarWidget: React.FC<{
   setDrawerOpen: (open: boolean) => void;
 }> = ({ setDrawerOpen }) => {
   const { activeProjectId, activeProjectData } = useProjectStore();
+  const [imgError, setImgError] = React.useState(false);
+
+  const coverUrl =
+    activeProjectData?.project?.cover_image ||
+    activeProjectData?.panels?.[0]?.image_url;
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [coverUrl]);
 
   return (
-    <div className="p-3 rounded-2xl bg-[#0e0f17] border border-white/10 text-xs shadow-md my-2">
+    <div className="p-3 rounded-2xl bg-neutral-900/70 border border-neutral-800/80 text-xs shadow-sm my-2">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1">
+        <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1">
           <Zap className="w-3 h-3 text-purple-400" /> Active Project
         </span>
         {activeProjectId ? (
-          <span className="text-[9px] text-emerald-400 font-medium px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+          <span className="text-[10px] text-emerald-400 font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
             ● Active
           </span>
         ) : null}
@@ -42,19 +51,20 @@ const ActiveProjectSidebarWidget: React.FC<{
       {activeProjectId && activeProjectData ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0">
-              {activeProjectData.project?.cover_image ||
-              activeProjectData.panels?.[0]?.image_url ? (
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-900 border border-neutral-700/50 shrink-0 flex items-center justify-center">
+              {coverUrl && !imgError ? (
                 <img
                   src={
-                    activeProjectData.project?.cover_image ||
-                    activeProjectData.panels?.[0]?.image_url
+                    coverUrl.startsWith("http")
+                      ? `/api/proxy-image?url=${encodeURIComponent(coverUrl)}`
+                      : coverUrl
                   }
-                  alt={activeProjectData.project?.title}
+                  alt={activeProjectData.project?.title || "Project Cover"}
+                  onError={() => setImgError(true)}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center text-purple-300 font-bold text-xs">
+                <div className="w-full h-full bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-purple-500/20 flex items-center justify-center text-purple-300 font-bold text-xs">
                   {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
                     "P"}
                 </div>

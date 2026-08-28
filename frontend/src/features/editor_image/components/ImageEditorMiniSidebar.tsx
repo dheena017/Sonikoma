@@ -124,7 +124,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
                   }}
                   onMouseLeave={() => setHoveredItem(null)}
                   className="p-0 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
-                  title={item.label}
+                  aria-label={item.label}
                 >
                   {/* iOS Squircle Icon Container */}
                   <div
