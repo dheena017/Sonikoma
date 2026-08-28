@@ -31,18 +31,18 @@ export default function DashboardHeader({
           </p>
         </div>
 
-        {/* Floating Search Bar */}
+        {/* Simple Clean Search Bar */}
         <div className="relative max-w-md pt-0.5 group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#3B82F6] transition-colors" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280] group-hover:text-[#3B82F6] transition-colors" />
           <input
             type="text"
             placeholder="Search projects, chapters, or series..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/50 focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 rounded-xl py-2.5 pl-10 pr-9 text-xs sm:text-sm text-[#E5E5E5] outline-none font-sans transition-all placeholder:text-[#6B7280]"
+            className="w-full bg-[#18181E] border border-white/[0.08] hover:border-[#3B82F6]/50 focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 rounded-xl py-2 pl-10 pr-9 text-xs sm:text-sm text-[#E5E5E5] outline-none font-sans transition-all placeholder:text-[#6B7280]"
           />
           {searchQuery && (
-            <Tooltip text="Clear search query" placement="top">
+            <Tooltip text="Clear search" placement="top">
               <button
                 type="button"
                 onClick={() => onSearchChange("")}

@@ -219,70 +219,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
         </div>
       </div>
 
-      {/* Middle side: Search Command Palette */}
-      <div
-        className="hidden md:flex flex-1 max-w-sm lg:max-w-md relative"
-        ref={searchRef}
-      >
-        <div className="relative w-full">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-neutral-500" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search Creative Tools (Ctrl+K or /)"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setShowSearchDropdown(true);
-            }}
-            onFocus={() => setShowSearchDropdown(true)}
-            className="w-full bg-neutral-900 text-xs text-neutral-200 pl-9 pr-8 py-2 rounded-xl border border-neutral-850 focus:border-purple-500/60 focus:bg-neutral-900/90 focus:outline-none transition-all placeholder:text-neutral-500 font-sans shadow-inner shadow-black/45"
-          />
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[9px] font-mono font-bold text-neutral-500 bg-neutral-950 border border-neutral-850 rounded">
-              ⌘K
-            </kbd>
-          </div>
-        </div>
 
-        {showSearchDropdown && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto scrollbar-thin">
-            <div className="p-2 border-b border-neutral-850/60">
-              <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
-                Launch Creative Tool
-              </span>
-              <div className="space-y-0.5">
-                {filteredNavItems.map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => {
-                      navigateTo(item.path);
-                      setShowSearchDropdown(false);
-                      setSearchQuery("");
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-center justify-between group transition-colors cursor-pointer"
-                  >
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-200 group-hover:text-white">
-                        {item.label}
-                      </p>
-                    </div>
-                    <span className="text-[9px] text-neutral-600 font-normal uppercase">
-                      {item.path}
-                    </span>
-                  </button>
-                ))}
-                {filteredNavItems.length === 0 && (
-                  <div className="px-3 py-4 text-center text-xs text-neutral-500 font-mono">
-                    No matching creative tools found
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Right side: Standardized Controls Suite */}
       <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0">

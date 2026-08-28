@@ -225,6 +225,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           </div>
         </div>
 
+
+
         {/* Server Status Indicator */}
         <div className="flex items-center justify-center">
           <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
@@ -232,7 +234,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
         <div className="flex items-center gap-1.5 sm:gap-2.5">
           {/* 🤖 Global AI Model Selector */}
-          <AIModelSelector compact className="flex" />
+          <AIModelSelector className="flex" />
 
           {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
           {credits !== null && (

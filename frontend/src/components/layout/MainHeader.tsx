@@ -33,9 +33,10 @@ import { getProjects } from "@/api/endpoints/projects";
 import { HeaderCreditsPopover } from "@/features/ai_core";
 import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
-import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import GlobalSearchBar from "./GlobalSearchBar";
 
 interface HeaderProps {
   isProcessing: boolean;
@@ -484,177 +485,8 @@ const HeaderInner = ({
         </div>
       </div>
 
-      {/* Center Side: Quick Search / Command Bar */}
-      <div
-        className="hidden xl:flex flex-1 max-w-xs lg:max-w-sm relative mx-4"
-        ref={searchRef}
-      >
-        <div className="relative w-full">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-neutral-500" />
-          </div>
-          <input
-            ref={searchInputRef}
-            type="text"
-            placeholder="Quick Find (Ctrl+K or /)"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setShowSearchDropdown(true);
-            }}
-            onFocus={() => setShowSearchDropdown(true)}
-            className="w-full bg-neutral-900 text-xs text-neutral-205 pl-9 pr-8 py-2 rounded-xl border border-neutral-850 focus:border-purple-500/60 focus:bg-neutral-900/90 focus:outline-none transition-all placeholder:text-neutral-500 font-sans shadow-inner shadow-black/45"
-          />
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[9px] font-mono font-bold text-neutral-500 bg-neutral-950 border border-neutral-850 rounded">
-              ⌘K
-            </kbd>
-          </div>
-        </div>
-
-        {/* Command Palette Real Search Results Dropdown */}
-        {showSearchDropdown && q.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0d16]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[380px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {/* 1. Projects Section */}
-            {matchedProjects.length > 0 && (
-              <div className="p-2 border-b border-white/10">
-                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase flex items-center justify-between">
-                  <span>Projects &amp; Series</span>
-                  <span className="text-[8.5px] font-mono text-neutral-500">
-                    {matchedProjects.length} found
-                  </span>
-                </span>
-                <div className="space-y-1">
-                  {matchedProjects.map((project) => {
-                    const cover =
-                      project.cover_image ||
-                      project.panels?.[0]?.image_url ||
-                      null;
-                    return (
-                      <button
-                        key={project.id}
-                        onClick={() => {
-                          useProjectStore.getState().setActiveProjectId(project.id);
-                          useProjectStore
-                            .getState()
-                            .hydrateActiveProject(project.id, fetchWithInterceptor);
-                          navigateTo(`/dashboard`);
-                          setShowSearchDropdown(false);
-                          setSearchQuery("");
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/[0.06] flex items-center justify-between group transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center">
-                            {cover ? (
-                              <img
-                                src={cover}
-                                alt={project.title || "Cover"}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <FolderOpen className="w-4 h-4 text-purple-400" />
-                            )}
-                          </div>
-                          <div className="min-w-0 flex flex-col">
-                            <p className="text-xs font-bold text-neutral-200 group-hover:text-white truncate">
-                              {project.title || "Untitled Project"}
-                            </p>
-                            <span className="text-[10px] text-neutral-400 truncate">
-                              {project.genre ? `${project.genre} • ` : ""}
-                              {project.panels?.length || 0} panels
-                            </span>
-                          </div>
-                        </div>
-                        <ChevronDown className="-rotate-90 h-3.5 w-3.5 text-neutral-600 group-hover:text-purple-400 transition-colors shrink-0" />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* 2. Panels & Dialogues Section */}
-            {matchedPanels.length > 0 && (
-              <div className="p-2 border-b border-white/10">
-                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase flex items-center justify-between">
-                  <span>Storyboard Panels &amp; Scripts</span>
-                  <span className="text-[8.5px] font-mono text-neutral-500">
-                    {matchedPanels.length} found
-                  </span>
-                </span>
-                <div className="space-y-1">
-                  {matchedPanels.map((panel, idx) => {
-                    const panelIdx = panels.findIndex(
-                      (p) => p.id === panel.id
-                    );
-                    return (
-                      <button
-                        key={panel.id || idx}
-                        onClick={() => {
-                          navigateTo(`/scraper/editor`);
-                          useProjectStore
-                            .getState()
-                            .setSelectedPanelIndex(
-                              panelIdx >= 0 ? panelIdx : idx
-                            );
-                          setShowSearchDropdown(false);
-                          setSearchQuery("");
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/[0.06] flex items-start gap-3 transition-colors cursor-pointer group"
-                      >
-                        <div className="w-10 h-7 rounded bg-neutral-950 border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
-                          {panel.image_url ? (
-                            <img
-                              src={panel.image_url}
-                              alt={`P${panel.id || idx + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-[8px] font-mono text-neutral-500">
-                              P{idx + 1}
-                            </span>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-neutral-300 font-mono">
-                              Panel #{idx + 1}
-                            </span>
-                            {panel.duration && (
-                              <span className="text-[9px] text-neutral-500 group-hover:text-purple-400 font-mono">
-                                {formatDuration(panel.duration)}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-neutral-400 truncate mt-0.5">
-                            {panel.speech_text ||
-                              panel.narrative ||
-                              "Panel visual action"}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Empty Results */}
-            {!hasAnyResults && (
-              <div className="p-6 text-center text-neutral-400 font-mono text-xs space-y-1 select-none">
-                <Search className="w-5 h-5 mx-auto text-neutral-600 mb-2" />
-                <p className="text-neutral-300 font-bold">
-                  No results found for &ldquo;{searchQuery}&rdquo;
-                </p>
-                <p className="text-[10px] text-neutral-500">
-                  Search across projects, chapters, comic storyboard scripts, or dialogue lines.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Center Side: Global Search Bar */}
+      <GlobalSearchBar className="hidden md:flex flex-1 max-w-xs lg:max-w-sm mx-4" />
 
       {/* Right side: Volume, Notifications, Stats, Profile */}
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
@@ -662,7 +494,7 @@ const HeaderInner = ({
         <ServerStatusIndicator status={backendStatus} />
 
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector compact className="flex" />
+        <AIModelSelector className="flex" />
 
         {/* 🧼 Speech Bubble Cleaning Processing Pill */}
         {isCleaningBubbles && (

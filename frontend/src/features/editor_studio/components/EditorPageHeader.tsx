@@ -303,15 +303,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         </div>
       </div>
 
-      {/* Center: Live Stats Chips (Only rendered when sufficient width exists to prevent collisions) */}
-      {panelsCount > 0 && (
-        <div className="hidden 2xl:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 pointer-events-none">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-purple-500/20 bg-purple-500/10 text-[9px] font-black uppercase tracking-widest text-purple-400">
-            <Layers className="h-2.5 w-2.5" />
-            {panelsCount} panels
-          </div>
-        </div>
-      )}
+
 
       {/* Right Section - Action Buttons (Unified h-9 height and clean spacing) */}
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
@@ -319,7 +311,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
 
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector compact className="flex" />
+        <AIModelSelector className="flex" />
 
         {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
         {credits !== null && (
