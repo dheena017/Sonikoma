@@ -1,69 +1,70 @@
 /* ==========================================================================
-   GLASS SURFACES & TRANSPARENT LAYOUT OVERRIDES — UNIFIED FROSTED GLASS
+   STUDIO GLASS & SURFACE STYLING — CLEAN DARK STUDIO THEME
    ========================================================================== */
 
 #app_root {
   background-color: #07080c !important;
+  color: #f3f4f6;
 }
 
 #main-content-layout,
 #main-scrollable-area {
-  background-color: #010104ff !important;
+  background-color: #07080c !important;
 }
 
-/* ── 1. Top Header Frosted Glass ────────────────────────────────────────── */
+/* ── 1. Top Header Glass ────────────────────────────────────────────────── */
 [data-mode="dark"] #header_pane,
 [data-mode="dark"] #app_root #header_pane,
 [data-mode="dark"] header {
-  background-color: rgba(8, 8, 14, 0.65) !important;
+  background-color: rgba(8, 9, 14, 0.85) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(24px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(16px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.2) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
 [data-mode="light"] #header_pane,
 [data-mode="light"] #app_root #header_pane,
 [data-mode="light"] header {
-  background-color: rgba(255, 255, 255, 0.75) !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
   border-bottom: 1px solid rgba(148, 163, 184, 0.25) !important;
-  backdrop-filter: blur(24px) saturate(1.15) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.15) !important;
+  backdrop-filter: blur(16px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.15) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
 }
 
-/* ── 2. Mini Sidebar & Drawer Frosted Glass ─────────────────────────────── */
+/* ── 2. Sidebar Glass ───────────────────────────────────────────────────── */
 [data-mode="dark"] aside,
 [data-mode="dark"] #app_root aside,
 [data-mode="dark"] #sidebar_pane {
-  background-color: rgba(8, 8, 14, 0.65) !important;
+  background-color: rgba(8, 9, 14, 0.9) !important;
   border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(24px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(16px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.2) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3) !important;
 }
 
 [data-mode="light"] aside,
 [data-mode="light"] #app_root aside,
 [data-mode="light"] #sidebar_pane {
-  background-color: rgba(255, 255, 255, 0.75) !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
   border-right: 1px solid rgba(148, 163, 184, 0.25) !important;
-  backdrop-filter: blur(24px) saturate(1.15) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(1.15) !important;
+  backdrop-filter: blur(16px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.15) !important;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* ── 3. Popups, Dropdowns & Modal Panels ────────────────────────────────── */
+/* ── 3. Dropdowns, Popovers & Dialogs ───────────────────────────────────── */
 [data-mode="dark"] .dropdown-menu,
 [data-mode="dark"] .popover-panel,
 [data-mode="dark"] .modal-container,
 [data-mode="dark"] [role="dialog"],
 [data-mode="dark"] [role="menu"] {
-  background-color: rgba(10, 10, 18, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  backdrop-filter: blur(28px) saturate(1.3) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(1.3) !important;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 35px rgba(168, 85, 247, 0.15) !important;
+  background-color: #0c0d16 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 20px rgba(147, 51, 234, 0.12) !important;
 }
 
 [data-mode="light"] .dropdown-menu,
@@ -71,54 +72,21 @@
 [data-mode="light"] .modal-container,
 [data-mode="light"] [role="dialog"],
 [data-mode="light"] [role="menu"] {
-  background-color: rgba(255, 255, 255, 0.9) !important;
+  background-color: #ffffff !important;
   border: 1px solid rgba(148, 163, 184, 0.3) !important;
-  backdrop-filter: blur(28px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(1.2) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12),
-    0 0 25px rgba(124, 58, 237, 0.08) !important;
+    0 0 20px rgba(124, 58, 237, 0.08) !important;
 }
 
-/* ── 4. Dashboard & Page Cards — Translucent Frosted Glass ───────────────── */
-[data-mode="dark"] .glass-panel,
-[data-mode="dark"] #app_root .bg-neutral-900\/40,
-[data-mode="dark"] #app_root .bg-neutral-900\/60,
-[data-mode="dark"] #app_root .bg-neutral-900\/80,
-[data-mode="dark"] #app_root .bg-neutral-950\/90,
-[data-mode="dark"] #app_root .bg-neutral-955,
-[data-mode="dark"] #app_root .bg-\[\#0b0b0e\],
-[data-mode="dark"] #app_root .bg-\[\#0b0b0f\],
-[data-mode="dark"] #app_root .bg-\[\#08080c\],
-[data-mode="dark"] #app_root .bg-\[\#0a0a0e\] {
-  background-color: rgba(10, 10, 16, 0.68) !important;
-  backdrop-filter: blur(16px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.2) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-[data-mode="light"] .glass-panel,
-[data-mode="light"] #app_root .bg-neutral-900\/40,
-[data-mode="light"] #app_root .bg-neutral-900\/60,
-[data-mode="light"] #app_root .bg-neutral-900\/80,
-[data-mode="light"] #app_root .bg-neutral-950\/90,
-[data-mode="light"] #app_root .bg-neutral-955,
-[data-mode="light"] #app_root .bg-\[\#0b0b0e\],
-[data-mode="light"] #app_root .bg-\[\#0b0b0f\],
-[data-mode="light"] #app_root .bg-\[\#08080c\],
-[data-mode="light"] #app_root .bg-\[\#0a0a0e\] {
-  background-color: rgba(255, 255, 255, 0.76) !important;
-  backdrop-filter: blur(16px) saturate(1.15) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.15) !important;
-  border-color: rgba(148, 163, 184, 0.25) !important;
-}
-
-/* ── 5. Clean Interactive Glass Effects ─────────────────────────────────── */
+/* ── 4. Clean Interactive Surface Hover Effects ─────────────────────────── */
 .glass-interactive {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-interactive:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.25);
-  border-color: rgba(168, 85, 247, 0.35) !important;
+  box-shadow: 0 10px 25px -5px rgba(147, 51, 234, 0.2);
+  border-color: rgba(168, 85, 247, 0.4) !important;
 }
