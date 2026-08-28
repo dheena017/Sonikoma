@@ -319,7 +319,12 @@ export default function YouTubeAnalyticsDashboard({
           </h2>
         </div>
         <button
-          onClick={fetchData}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fetchData();
+          }}
           disabled={isLoading}
           className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 border border-neutral-800 rounded-xl text-xs font-mono text-neutral-400 hover:text-white hover:border-neutral-700 transition-all cursor-pointer"
         >

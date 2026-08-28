@@ -474,7 +474,12 @@ export default function YouTubeChannelHeader({
           )}
 
           <button
-            onClick={fetchProfileDetails}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              fetchProfileDetails();
+            }}
             disabled={isLoading}
             className="p-2.5 bg-neutral-900/80 hover:bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 rounded-xl transition-all cursor-pointer"
             title="Refresh YouTube Profile & Telemetry"

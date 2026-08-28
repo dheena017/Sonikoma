@@ -470,7 +470,12 @@ export default function YouTubePlaylistsManager({
           </button>
 
           <button
-            onClick={fetchPlaylists}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              fetchPlaylists();
+            }}
             disabled={isLoading}
             className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm"
             title="Refresh Playlists"

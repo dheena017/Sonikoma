@@ -285,7 +285,12 @@ export default function YouTubeChannelHome({
               <span>Open on YouTube</span>
             </a>
             <button
-              onClick={fetchData}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fetchData();
+              }}
               disabled={isLoading}
               className="p-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-xl text-neutral-400 hover:text-white transition-all cursor-pointer shadow-md active:scale-95"
               title="Refresh Channel Data"
