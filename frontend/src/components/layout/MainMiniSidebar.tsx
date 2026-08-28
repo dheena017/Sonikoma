@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Menu,
   LayoutDashboard,
   Layout,
   FolderOpen,
@@ -18,6 +19,7 @@ import {
   Database,
   Image,
   User,
+  ExternalLink,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
@@ -28,6 +30,7 @@ interface MiniSidebarProps {
   projectId?: string | null;
   seriesSlug?: string | null;
   chapterSlug?: string | null;
+  onToggleSidebar?: () => void;
 }
 
 const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
@@ -37,6 +40,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   projectId = null,
   seriesSlug = null,
   chapterSlug = null,
+  onToggleSidebar,
 }) => {
   const isDashboardOverview =
     currentPath === "/" || currentPath === "/dashboard";
@@ -98,42 +102,30 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           onClick: () => navigateTo("/dashboard"),
         },
         {
-          label: "Workspace",
-          icon: Layout,
-          active: isWorkspace,
-          path: "/scraper",
-          onClick: handleNavigateToWorkspace,
-        },
-        {
-          label: "Projects",
+          label: "Projects & Series",
           icon: FolderOpen,
           active: isProjects,
           path: "/projects",
           onClick: () => navigateTo("/projects"),
         },
+        {
+          label: "Webtoon Scraper",
+          icon: Layout,
+          active: isWorkspace,
+          path: "/scraper",
+          onClick: handleNavigateToWorkspace,
+        },
       ],
     },
     {
-      group: "Creative",
+      group: "Studios",
       items: [
         {
-          label: "Creative Suite",
-          icon: Sparkles,
-          active:
-            currentPath === "/creative-suite" ||
-            currentPath.startsWith("/creative-suite/") ||
-            currentPath.startsWith("/ai-") ||
-            currentPath === "/panel-assistant" ||
-            currentPath === "/youtube",
-          path: "/creative-suite",
-          onClick: () => navigateTo("/creative-suite"),
-        },
-        {
-          label: "AI Core",
-          icon: Brain,
-          active: currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
-          path: "/ai-core",
-          onClick: () => navigateTo("/ai-core"),
+          label: "Video Studio",
+          icon: Film,
+          active: isVideoEditorPath,
+          path: "/video-editor",
+          onClick: () => navigateTo("/video-editor"),
         },
         {
           label: "Image Editor",
@@ -143,38 +135,37 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           onClick: () => navigateTo("/image-editor"),
         },
         {
-          label: "Video Editor",
-          icon: Film,
-          active: isVideoEditorPath,
-          path: "/video-editor",
-          onClick: () => navigateTo("/video-editor"),
-        },
-        {
-          label: "Admin",
-          icon: Shield,
-          active: isAdminPath,
-          path: "/admin",
-          onClick: () => navigateTo("/admin"),
+          label: "Auto-Crop Studio",
+          icon: Scissors,
+          active: isAutoCrop,
+          path: "/auto-crop",
+          onClick: () => navigateTo("/auto-crop"),
         },
       ],
     },
     {
-      group: "User",
+      group: "System",
       items: [
         {
-          label: "Notifications",
-          icon: Bell,
-          active: currentPath === "/notifications",
-          path: "/notifications",
-          onClick: () => navigateTo("/notifications"),
-          badge: notificationsCount > 0 ? notificationsCount : undefined,
+          label: "Creative Suite",
+          icon: Sparkles,
+          active: currentPath.startsWith("/creative-suite"),
+          path: "/creative-suite",
+          onClick: () => navigateTo("/creative-suite"),
         },
         {
-          label: "Profile",
-          icon: User,
-          active: currentPath === "/profile",
-          path: "/profile",
-          onClick: () => navigateTo("/profile"),
+          label: "AI Neural Core",
+          icon: Brain,
+          active: currentPath.startsWith("/ai-core"),
+          path: "/ai-core",
+          onClick: () => navigateTo("/ai-core"),
+        },
+        {
+          label: "Keyboard Shortcuts",
+          icon: Keyboard,
+          active: isShortcuts,
+          path: "/shortcuts",
+          onClick: () => navigateTo("/shortcuts"),
         },
       ],
     },
@@ -183,26 +174,24 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
   const SidebarItem: React.FC<{ item: any }> = ({ item }) => {
     const [hover, setHover] = useState(false);
     const [rect, setRect] = useState<DOMRect | null>(null);
+    const Icon = item.icon;
 
     const handleEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
-      const r = e.currentTarget.getBoundingClientRect();
-      setRect(r);
+      setRect(e.currentTarget.getBoundingClientRect());
       setHover(true);
-      if (item.path) {
-        (window as any).prefetchRoute?.(item.path);
-      }
     };
-    const handleLeave = () => setHover(false);
 
-    const Icon = item.icon;
+    const handleLeave = () => {
+      setHover(false);
+    };
 
     return (
       <div className="relative group w-full flex justify-center py-0.5">
-        {/* Simple Clean Active Pill */}
+        {/* Left edge active indicator bar */}
         <div
-          className={`absolute left-1 top-1/2 -translate-y-1/2 w-0.5 rounded-full transition-all duration-150 z-10 ${
+          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             item.active
-              ? "h-4 bg-purple-400 opacity-100"
+              ? "h-5 bg-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.9)] opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -212,26 +201,26 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           onMouseEnter={handleEnter}
           onMouseLeave={handleLeave}
           aria-label={item.label}
-          className="p-1 transition-all duration-150 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
+          className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
         >
-          {/* Flat clean icon pill */}
+          {/* iOS Squircle Icon Container */}
           <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-150 ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
               item.active
-                ? "bg-purple-500/15 border border-purple-500/30 text-purple-300"
-                : "bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:border-neutral-700 hover:text-neutral-200"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 shadow-[0_0_20px_rgba(59,130,246,0.6)] text-white scale-105"
+                : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
             }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-150 ${
+              className={`w-[18px] h-[18px] transition-colors duration-200 ${
                 item.active
-                  ? "text-purple-300"
-                  : "text-neutral-400 group-hover:text-neutral-200"
+                  ? "text-white"
+                  : "text-neutral-400 group-hover:text-white"
               }`}
             />
           </div>
           {item.badge && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-purple-600 text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 z-20">
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-[#3B82F6] text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1 border border-neutral-950 z-20">
               {item.badge}
             </span>
           )}
@@ -243,10 +232,36 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
   const [creativeHover, setCreativeHover] = useState(false);
   const [creativeRect, setCreativeRect] = useState<DOMRect | null>(null);
+  const [menuHover, setMenuHover] = useState(false);
+  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-neutral-950 border-r border-neutral-800/80 hidden lg:flex flex-col items-center py-3 z-40 overflow-hidden select-none">
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-1">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 overflow-hidden select-none">
+      {/* Top Drawer Toggle Button */}
+      {onToggleSidebar && (
+        <div className="w-full flex justify-center pb-3 pt-0.5 border-b border-white/10 shrink-0">
+          <button
+            onClick={onToggleSidebar}
+            onMouseEnter={(e) => {
+              setMenuRect(e.currentTarget.getBoundingClientRect());
+              setMenuHover(true);
+            }}
+            onMouseLeave={() => setMenuHover(false)}
+            aria-label="Navigation Menu"
+            className="w-11 h-11 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <TooltipPortal
+            text="Toggle Menu"
+            visible={menuHover}
+            anchorRect={menuRect}
+          />
+        </div>
+      )}
+
+      {/* Navigation Groups */}
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div
             key={groupIdx}
@@ -256,14 +271,14 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.375rem" : "0",
-                marginBottom: "0.25rem",
+                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
+                marginBottom: "0.4rem",
               }}
             >
               {groupIdx > 0 && (
-                <div className="w-6 h-px bg-neutral-800 rounded-full mb-1" />
+                <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
               )}
-              <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-neutral-500 select-none text-center w-full px-1">
+              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
                 {group.group}
               </span>
             </div>
@@ -276,7 +291,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       </div>
 
       {/* Bottom Action Button */}
-      <div className="mt-auto pt-3 flex justify-center w-full pb-1 border-t border-neutral-800/80">
+      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-white/10 shrink-0">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/creative-suite")}
@@ -286,9 +301,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             }}
             onMouseLeave={() => setCreativeHover(false)}
             aria-label="Creative Suite"
-            className="w-10 h-10 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:border-neutral-700 hover:text-white transition-all duration-150 active:scale-95 cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_28px_rgba(59,130,246,0.8)] active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
           >
-            <Sparkles className="w-4 h-4 shrink-0" />
+            <Sparkles className="w-5 h-5 shrink-0" />
           </button>
           <TooltipPortal
             text="Creative Suite"
