@@ -213,7 +213,6 @@ export default function YouTubeChannelHome({
                   onError={() => setAvatarError(true)}
                   className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover border-4 border-neutral-950 ring-2 ring-white/10 shadow-2xl bg-neutral-900"
                 />
-                <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-neutral-950 shadow-md" />
               </div>
             ) : (
               <div className="relative shrink-0">
@@ -222,7 +221,6 @@ export default function YouTubeChannelHome({
                     {channel?.title ? channel.title.charAt(0) : "Y"}
                   </span>
                 </div>
-                <span className="absolute bottom-1 right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-neutral-950 shadow-md" />
               </div>
             )}
 

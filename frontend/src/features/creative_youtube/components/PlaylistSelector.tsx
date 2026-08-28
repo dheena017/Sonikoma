@@ -8,6 +8,7 @@ import {
   FolderPlus,
   X,
 } from "lucide-react";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 interface Playlist {
   id: string;

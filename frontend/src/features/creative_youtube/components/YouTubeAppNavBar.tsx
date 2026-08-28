@@ -99,9 +99,6 @@ export default function YouTubeAppNavBar({
                     {channelTitle ? channelTitle.charAt(0) : "Y"}
                   </div>
                 )}
-                {isConnected && (
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-neutral-950 shadow-sm" />
-                )}
               </div>
 
               <div className="text-left min-w-0 max-w-[110px] sm:max-w-[140px]">
@@ -149,14 +146,8 @@ export default function YouTubeAppNavBar({
           </div>
         </nav>
 
-        {/* ── RIGHT: LIVE BADGE & PUBLISH CTA ── */}
+        {/* ── RIGHT: PUBLISH CTA ── */}
         <div className="flex items-center gap-2.5 shrink-0">
-          {isConnected && (
-            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-950/40 border border-emerald-700/40 text-emerald-400 text-[10px] font-mono font-bold shadow-sm">
-              <Radio className="w-3 h-3 animate-pulse text-emerald-400" />
-              <span>LIVE</span>
-            </div>
-          )}
 
           <Tooltip text="Publish or schedule video to connected YouTube channel" placement="bottom">
             <button

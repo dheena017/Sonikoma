@@ -211,12 +211,12 @@ export default function YouTubeChannelHeader({
     : "--";
 
   return (
-    <div className="relative z-30 bg-neutral-950/60 backdrop-blur-md border border-neutral-900 rounded-3xl shadow-2xl transition-all duration-300 hover:border-neutral-800 font-sans">
+    <div className="relative z-30 bg-neutral-950/80 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-xl transition-all duration-300 hover:border-white/[0.12] font-sans overflow-hidden">
       {/* Unified Master Banner Header */}
-      <div className="py-5 bg-gradient-to-r from-red-950/80 via-purple-950/50 to-neutral-950 relative rounded-t-3xl flex flex-col md:flex-row items-start md:items-center justify-between px-6 border-b border-neutral-900 gap-4">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ff0000_1px,transparent_1px)] [background-size:16px_16px] rounded-t-3xl overflow-hidden pointer-events-none" />
+      <div className="p-4 sm:p-5 bg-gradient-to-r from-red-950/50 via-neutral-900/70 to-neutral-950 relative flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/[0.06] gap-4">
+        <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#ff0000_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
 
-        <div className="relative z-10 flex items-center gap-4">
+        <div className="relative z-10 flex items-center gap-3.5 sm:gap-4 min-w-0">
           {activeThumbnail ? (
             <img
               src={activeThumbnail}
@@ -225,22 +225,22 @@ export default function YouTubeChannelHeader({
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).style.display = "none";
               }}
-              className="w-16 h-16 rounded-2xl border-2 border-red-500/40 shadow-xl object-cover shrink-0"
+              className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl border border-white/10 shadow-xl object-cover shrink-0"
             />
           ) : (
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-600 via-rose-700 to-purple-800 border-2 border-red-500/30 flex items-center justify-center text-white font-bold text-xl font-sans uppercase shrink-0 shadow-lg">
+            <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-red-600 via-rose-700 to-purple-800 border border-white/10 flex items-center justify-center text-white font-bold text-lg font-sans uppercase shrink-0 shadow-lg">
               {activeTitle ? activeTitle.charAt(0) : "Y"}
             </div>
           )}
 
           {/* Channel / Profile Details */}
-          <div className="relative z-30">
+          <div className="relative z-30 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <span className="px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider bg-red-500/10 text-red-300 border border-red-500/20">
+              <span className="px-2 py-0.5 rounded-md text-[8.5px] font-mono font-bold uppercase tracking-wider bg-red-500/10 text-red-300 border border-red-500/20">
                 YOUTUBE • INTEGRATION STUDIO
               </span>
               {seoScore > 0 && (
-                <span className="text-[11px] text-neutral-400 font-mono">
+                <span className="text-[10px] text-neutral-400 font-mono">
                   • SEO Score:{" "}
                   <strong className="text-purple-300">{seoScore}/100</strong>
                 </span>
@@ -258,41 +258,31 @@ export default function YouTubeChannelHeader({
                     setIsDropdownOpen(!isDropdownOpen);
                   }
                 }}
-                className="flex items-center gap-2 text-left group cursor-pointer"
+                className="flex items-center gap-1.5 text-left group cursor-pointer"
                 title="Click to switch or select YouTube Channel"
               >
-                <h2 className="text-xl font-black text-white tracking-tight group-hover:text-purple-300 transition-colors">
+                <h2 className="text-base sm:text-lg font-black text-white tracking-tight group-hover:text-red-400 transition-colors truncate">
                   {activeTitle}
                 </h2>
                 <ChevronDown
-                  className={`w-4 h-4 text-neutral-400 group-hover:text-white transition-transform duration-200 ${
-                    isDropdownOpen ? "rotate-180 text-purple-400" : ""
+                  className={`w-4 h-4 text-neutral-400 group-hover:text-white transition-transform duration-200 shrink-0 ${
+                    isDropdownOpen ? "rotate-180 text-red-400" : ""
                   }`}
                 />
               </button>
-
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border font-mono ${
-                  isConnected
-                    ? "bg-emerald-950/80 text-emerald-400 border-emerald-900/60"
-                    : "bg-amber-950/80 text-amber-300 border-amber-900/60"
-                }`}
-              >
-                {isConnected ? "CONNECTED CHANNEL" : "NOT CONNECTED"}
-              </span>
             </div>
 
-            <p className="text-xs text-neutral-400 font-mono font-medium mt-0.5 flex items-center gap-2">
+            <p className="text-xs text-neutral-400 font-mono font-medium mt-0.5 flex items-center gap-2 truncate">
               <span>{activeHandle}</span>
               {profileData?.user_email && (
-                <span className="text-neutral-500">
+                <span className="text-neutral-500 hidden sm:inline">
                   • {profileData.user_email}
                 </span>
               )}
             </p>
 
             {activeDescription && (
-              <p className="text-[11px] text-neutral-400 line-clamp-1 max-w-xl mt-1 font-mono">
+              <p className="text-[11px] text-neutral-400 line-clamp-1 max-w-xl mt-1 font-mono hidden md:block">
                 {activeDescription}
               </p>
             )}
@@ -432,14 +422,14 @@ export default function YouTubeChannelHeader({
         </div>
 
         {/* Right Status Actions */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="px-3.5 py-1.5 rounded-full bg-neutral-950/80 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
+        <div className="relative z-10 flex items-center gap-2.5 sm:gap-3 shrink-0">
+          <div className="px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-800/40 text-emerald-300 text-xs font-mono font-bold flex items-center gap-2 shadow-inner">
             <span
               className={`w-2 h-2 rounded-full ${
                 isPublishing
                   ? "bg-amber-400 animate-ping"
                   : isConnected
-                  ? "bg-emerald-400 animate-pulse"
+                  ? "bg-emerald-400"
                   : "bg-amber-400"
               }`}
             />
@@ -456,7 +446,7 @@ export default function YouTubeChannelHeader({
             <button
               onClick={handleConnectYouTube}
               disabled={isConnecting}
-              className="px-4 py-2 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-lg border border-red-500/30 transition-all font-mono active:scale-98 flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-lg border border-red-500/30 transition-all font-mono active:scale-98 flex items-center gap-2 cursor-pointer"
             >
               <YouTubeOfficialLogo className="w-4.5 h-3.5" />
               <span>{isConnecting ? "Connecting..." : "Connect YouTube"}</span>
@@ -465,7 +455,7 @@ export default function YouTubeChannelHeader({
             onOpenChannelModal && (
               <button
                 onClick={onOpenChannelModal}
-                className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-mono text-xs font-bold rounded-xl border border-neutral-800 transition-all flex items-center gap-2 cursor-pointer"
+                className="px-3.5 py-1.5 bg-[#14141E] hover:bg-[#1E1E2A] text-neutral-200 hover:text-white font-mono text-xs font-bold rounded-xl border border-white/[0.08] hover:border-red-500/40 transition-all flex items-center gap-2 cursor-pointer shadow-sm"
               >
                 <YouTubeOfficialLogo className="w-4 h-3" />
                 <span>Switch Channel</span>
@@ -481,12 +471,12 @@ export default function YouTubeChannelHeader({
               fetchProfileDetails();
             }}
             disabled={isLoading}
-            className="p-2.5 bg-neutral-900/80 hover:bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800 rounded-xl transition-all cursor-pointer"
+            className="p-2 bg-[#14141E] hover:bg-[#1E1E2A] text-neutral-400 hover:text-white border border-white/[0.08] hover:border-white/[0.15] rounded-xl transition-all cursor-pointer shadow-sm"
             title="Refresh YouTube Profile & Telemetry"
           >
             <RefreshCw
               className={`w-4 h-4 ${
-                isLoading ? "animate-spin text-purple-400" : ""
+                isLoading ? "animate-spin text-red-400" : ""
               }`}
             />
           </button>
@@ -494,54 +484,58 @@ export default function YouTubeChannelHeader({
       </div>
 
       {/* Stats Counter Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-neutral-900 border-t border-neutral-900/50 bg-neutral-950/40 font-mono">
-        <div className="p-3.5 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-red-950/30 text-red-400 border border-red-900/30">
+      <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/[0.06] border-t border-white/[0.06] bg-black/20 font-mono">
+        <div className="p-3 sm:p-4 flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-red-950/40 text-red-400 border border-red-900/30 shrink-0">
             <Users className="w-4 h-4" />
           </div>
-          <div>
-            <div className="text-[10px] text-neutral-500 font-bold uppercase">
+          <div className="min-w-0">
+            <div className="text-[9.5px] text-neutral-500 font-bold uppercase tracking-wider">
               Subscribers
             </div>
-            <div className="text-xs font-black text-white">
+            <div className="text-xs sm:text-sm font-black text-white truncate">
               {activeSubscribers}
             </div>
           </div>
         </div>
 
-        <div className="p-3.5 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-purple-950/30 text-purple-400 border border-purple-900/30">
+        <div className="p-3 sm:p-4 flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-purple-950/40 text-purple-400 border border-purple-900/30 shrink-0">
             <Eye className="w-4 h-4" />
           </div>
-          <div>
-            <div className="text-[10px] text-neutral-500 font-bold uppercase">
+          <div className="min-w-0">
+            <div className="text-[9.5px] text-neutral-500 font-bold uppercase tracking-wider">
               Lifetime Views
             </div>
-            <div className="text-xs font-black text-white">{activeViews}</div>
+            <div className="text-xs sm:text-sm font-black text-white truncate">
+              {activeViews}
+            </div>
           </div>
         </div>
 
-        <div className="p-3.5 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-950/30 text-indigo-400 border border-indigo-900/30">
+        <div className="p-3 sm:p-4 flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-indigo-950/40 text-indigo-400 border border-indigo-900/30 shrink-0">
             <Video className="w-4 h-4" />
           </div>
-          <div>
-            <div className="text-[10px] text-neutral-500 font-bold uppercase">
+          <div className="min-w-0">
+            <div className="text-[9.5px] text-neutral-500 font-bold uppercase tracking-wider">
               Videos Uploaded
             </div>
-            <div className="text-xs font-black text-white">{activeVideos}</div>
+            <div className="text-xs sm:text-sm font-black text-white truncate">
+              {activeVideos}
+            </div>
           </div>
         </div>
 
-        <div className="p-3.5 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-emerald-950/30 text-emerald-400 border border-emerald-900/30">
+        <div className="p-3 sm:p-4 flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-emerald-950/40 text-emerald-400 border border-emerald-900/30 shrink-0">
             <ShieldCheck className="w-4 h-4" />
           </div>
-          <div>
-            <div className="text-[10px] text-neutral-500 font-bold uppercase">
+          <div className="min-w-0">
+            <div className="text-[9.5px] text-neutral-500 font-bold uppercase tracking-wider">
               API Quota Health
             </div>
-            <div className="text-xs font-black text-emerald-400">
+            <div className="text-xs sm:text-sm font-black text-emerald-400 truncate">
               97.6% Free
             </div>
           </div>

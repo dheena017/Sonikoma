@@ -279,35 +279,35 @@ export default function YouTubeStudioPage({
   return (
     <div className="space-y-6 animate-fade-in">
       {/* ── 1. STUDIO TOP HEADER ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-800/80 pb-4">
+      <div className="flex items-center justify-between gap-4 pb-1">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-[#14141E] border border-white/[0.08] rounded-xl shadow-lg shadow-red-600/15 flex items-center justify-center">
+          <div className="p-2.5 bg-[#14141E] border border-white/[0.08] rounded-2xl shadow-lg shadow-red-600/15 flex items-center justify-center">
             <YouTubeOfficialLogo className="w-6 h-4.5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-white font-sans tracking-tight">
+              <h2 className="text-xl font-black text-white font-sans tracking-tight">
                 Upload video
               </h2>
-              <span className="px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-mono font-bold uppercase">
+              <span className="px-2 py-0.5 rounded-md bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-mono font-bold uppercase">
                 Studio
               </span>
             </div>
-            <p className="text-xs text-neutral-400 font-mono">
+            <p className="text-xs text-neutral-400 font-mono mt-0.5">
               {title ? title : "Untitled video draft"}
             </p>
           </div>
         </div>
-
-        {/* Channel Switcher */}
-        <YouTubeChannelHeader
-          key={headerRefreshKey}
-          seoScore={seoScore}
-          isPublishing={isPublishing}
-          onOpenChannelModal={() => setIsChannelModalOpen(true)}
-          addNotification={addNotification}
-        />
       </div>
+
+      {/* ── 2. CHANNEL INTEGRATION BANNER CARD ── */}
+      <YouTubeChannelHeader
+        key={headerRefreshKey}
+        seoScore={seoScore}
+        isPublishing={isPublishing}
+        onOpenChannelModal={() => setIsChannelModalOpen(true)}
+        addNotification={addNotification}
+      />
 
       {/* ── 2. OFFICIAL YOUTUBE STUDIO HORIZONTAL STEPPER BAR ── */}
       <div className="w-full bg-neutral-950/80 border border-neutral-800/80 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-xl">
