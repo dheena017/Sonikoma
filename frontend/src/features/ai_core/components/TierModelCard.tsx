@@ -11,6 +11,7 @@ import {
   Gauge,
   Activity,
   Cpu,
+  X,
 } from "lucide-react";
 
 export interface DynamicModelOption {
@@ -221,17 +222,40 @@ export default function TierModelCard({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isOpen]);
 
-  const filteredModels = availableModels.filter(
-    (m) =>
+  const [providerFilter, setProviderFilter] = useState<string>(providerKey);
+
+  // Sync provider filter with selected model provider when opened
+  useEffect(() => {
+    if (isOpen) {
+      setProviderFilter(providerKey);
+    }
+  }, [isOpen, providerKey]);
+
+  // Extract unique providers in catalog
+  const availableProviders = React.useMemo(() => {
+    const set = new Set<string>();
+    availableModels.forEach((m) => {
+      const p = m.provider?.toLowerCase() || inferProvider(m.id);
+      if (p) set.add(p);
+    });
+    return Array.from(set);
+  }, [availableModels]);
+
+  const filteredModels = availableModels.filter((m) => {
+    const p = m.provider?.toLowerCase() || inferProvider(m.id);
+    const matchesProvider =
+      providerFilter === "all" || p === providerFilter;
+    const matchesSearch =
       search === "" ||
       m.name.toLowerCase().includes(search.toLowerCase()) ||
       m.id.toLowerCase().includes(search.toLowerCase()) ||
       m.provider_name.toLowerCase().includes(search.toLowerCase()) ||
-      (m.category && m.category.toLowerCase().includes(search.toLowerCase()))
-  );
+      (m.category && m.category.toLowerCase().includes(search.toLowerCase()));
+    return matchesProvider && matchesSearch;
+  });
 
   // Format pricing string
-  const getPricingLabel = (m?: DynamicModelOption) => {
+  const getPricingLabel = (m?: any) => {
     if (!m) return "$0.00";
     if (m.price_per_image !== undefined && m.price_per_image > 0) {
       return `$${m.price_per_image.toFixed(3)}/img`;
@@ -239,14 +263,15 @@ export default function TierModelCard({
     if (m.price_per_1k_chars !== undefined && m.price_per_1k_chars > 0) {
       return `$${m.price_per_1k_chars.toFixed(2)}/1K char`;
     }
-    if (m.cost_per_1m_prompt !== undefined && m.cost_per_1m_prompt > 0) {
-      return `$${m.cost_per_1m_prompt.toFixed(2)}/1M`;
+    const cost1m = m.cost_per_1m_prompt ?? m.prompt_price_per_1m;
+    if (cost1m !== undefined && cost1m > 0) {
+      return `$${Number(cost1m).toFixed(2)}/1M`;
     }
     return "Included / Free";
   };
 
   // Format context label
-  const getContextLabel = (m?: DynamicModelOption) => {
+  const getContextLabel = (m?: any) => {
     if (!m) return "General";
     if (typeof m.context_window === "number") {
       if (m.context_window >= 1000000)
@@ -256,6 +281,19 @@ export default function TierModelCard({
       return `${m.context_window} ctx`;
     }
     return m.category || "General";
+  };
+
+  // Format speed label
+  const getSpeedLabel = (m?: any) => {
+    if (!m) return "Fast";
+    if (m.speed_rating) {
+      return m.speed_rating.split("(")[0].trim();
+    }
+    const idLower = (m.id || "").toLowerCase();
+    if (idLower.includes("flash") || idLower.includes("mini") || idLower.includes("haiku") || idLower.includes("turbo")) {
+      return "Ultra Fast";
+    }
+    return "Standard";
   };
 
   return (
@@ -272,7 +310,7 @@ export default function TierModelCard({
           : "none",
       }}
     >
-      {/* ── CARD HEADER (TIER BADGE, PROVIDER TAG & HEALTH STATUS) ── */}
+      {/* ── CARD HEADER (TIER BADGE & ROLE) ── */}
       <div
         className="flex items-center justify-between px-3.5 py-2.5 border-b gap-2"
         style={{
@@ -293,39 +331,56 @@ export default function TierModelCard({
           >
             {cfg.title}
           </span>
-          <span
-            className="text-[8.5px] font-black font-mono tracking-wider px-1.5 py-0.5 rounded border uppercase shrink-0"
-            style={{
-              backgroundColor: provTheme.bg,
-              color: provTheme.text,
-              borderColor: provTheme.border,
-            }}
-          >
-            {provTheme.name}
-          </span>
         </div>
-
-        {/* Live Health Status Dot */}
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#121212] border border-[#10B981]/30 text-[9px] font-mono text-[#10B981] shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
-          <span>READY</span>
-        </div>
+        <span className="text-[10px] text-[#9CA3AF] font-sans truncate font-medium">
+          {selectedModel?.category || "Specialized Engine"}
+        </span>
       </div>
 
-      {/* ── CARD BODY (MODEL NAME & SPECS) ── */}
+      {/* ── CARD BODY (SELECT-TYPE TRIGGER & TELEMETRY) ── */}
       <div className="p-3.5 flex-1 flex flex-col justify-between space-y-3">
-        {/* Model Title & Category */}
-        <div className="space-y-0.5">
-          <div className="text-[10px] text-[#9CA3AF] font-sans truncate">
-            {selectedModel?.category || "Specialized Engine"}
+        {/* ── SELECT TYPE TRIGGER BOX ── */}
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="w-full text-left p-2.5 rounded-xl border bg-neutral-950/70 hover:bg-neutral-900 transition-all duration-150 cursor-pointer shadow-inner group"
+          style={{
+            borderColor: isOpen ? cfg.color : "#2F2F2F",
+            boxShadow: isOpen ? `0 0 14px ${cfg.color}33` : "none",
+          }}
+        >
+          <div className="flex items-center justify-between gap-2 mb-1">
+            {/* 1. PROVIDER BADGE */}
+            <span
+              className="text-[8.5px] font-black font-mono tracking-wider px-1.5 py-0.5 rounded border uppercase shrink-0"
+              style={{
+                backgroundColor: provTheme.bg,
+                color: provTheme.text,
+                borderColor: provTheme.border,
+              }}
+            >
+              {provTheme.name}
+            </span>
+
+            {/* Dropdown Chevron indicator */}
+            <ChevronDown
+              className="w-3.5 h-3.5 transition-transform duration-200 shrink-0 text-neutral-400 group-hover:text-white"
+              style={{
+                color: isOpen ? cfg.color : undefined,
+                transform: isOpen ? "rotate(180deg)" : "none",
+              }}
+            />
           </div>
-          <h4 className="text-xs sm:text-sm font-bold text-[#E5E5E5] truncate tracking-tight">
+
+          {/* 2. SELECTED MODEL NAME */}
+          <div className="text-xs sm:text-sm font-bold text-white truncate tracking-tight">
             {selectedModel?.name || modelId || "Select Model"}
-          </h4>
-        </div>
+          </div>
+        </button>
 
         {/* Telemetry & Live Specs Metric Pills */}
-        <div className="grid grid-cols-3 gap-1.5 py-1 text-[10px] font-mono">
+        <div className="grid grid-cols-3 gap-1.5 py-0.5 text-[10px] font-mono">
           {/* Speed */}
           <div
             className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
@@ -333,9 +388,7 @@ export default function TierModelCard({
           >
             <Gauge className="w-3 h-3 text-[#F59E0B] shrink-0" />
             <span className="text-[#E5E5E5] truncate">
-              {selectedModel?.speed_rating
-                ? selectedModel.speed_rating.split("(")[0].trim()
-                : "Ultra Fast"}
+              {getSpeedLabel(selectedModel)}
             </span>
           </div>
 
@@ -361,30 +414,6 @@ export default function TierModelCard({
             </span>
           </div>
         </div>
-
-        {/* ── SELECTOR BUTTON ── */}
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all duration-150 cursor-pointer text-left font-mono"
-          style={{
-            backgroundColor: isOpen ? `${cfg.color}15` : "#181818",
-            borderColor: isOpen ? cfg.color : "#2F2F2F",
-            color: isOpen ? "#ffffff" : "#E5E5E5",
-          }}
-        >
-          <span className="truncate text-[11px]">
-            {isOpen ? "Choose Replacement Engine" : "Change Model / Engine"}
-          </span>
-          <ChevronDown
-            className="w-3.5 h-3.5 transition-transform duration-200 shrink-0"
-            style={{
-              color: cfg.color,
-              transform: isOpen ? "rotate(180deg)" : "none",
-            }}
-          />
-        </button>
       </div>
 
       {/* ── INTERACTIVE DROPDOWN FLYOUT ── */}
@@ -397,28 +426,73 @@ export default function TierModelCard({
             boxShadow: `0 20px 40px rgba(0, 0, 0, 0.8), 0 0 15px ${cfg.color}25`,
           }}
         >
-          {/* Search Box */}
+          {/* Enhanced Cyber Search Box */}
+          <div className="p-2.5 border-b border-white/10 bg-neutral-950/80">
+            <div
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900/90 border transition-all duration-200"
+              style={{
+                borderColor: search ? cfg.color : "#2F2F2F",
+                boxShadow: search ? `0 0 12px ${cfg.color}22` : "none",
+              }}
+            >
+              <Search
+                className="w-3.5 h-3.5 transition-colors shrink-0"
+                style={{ color: search ? cfg.color : "#737373" }}
+              />
+              <input
+                autoFocus
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search models by name, role, or ID..."
+                className="flex-1 bg-transparent text-xs text-white placeholder-neutral-500 outline-none border-none ring-0 focus:outline-none focus:ring-0 font-sans"
+              />
+              {search ? (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <span className="text-[9px] font-mono text-neutral-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/5 select-none">
+                  ESC
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Provider Filter Tabs */}
           <div
-            className="flex items-center gap-2 px-3 py-2.5 border-b"
-            style={{ borderColor: "#2F2F2F" }}
+            className="flex items-center gap-1.5 px-3 py-2 border-b overflow-x-auto no-scrollbar"
+            style={{ backgroundColor: "rgba(10, 10, 10, 0.7)", borderColor: "#2F2F2F" }}
           >
-            <Search className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
-            <input
-              autoFocus
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, provider, or capability..."
-              className="flex-1 bg-transparent text-xs text-neutral-200 placeholder-neutral-500 outline-none font-sans"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="text-[10px] text-neutral-400 hover:text-white px-1.5 py-0.5 rounded bg-white/5 font-mono"
-              >
-                CLEAR
-              </button>
-            )}
+            {availableProviders.map((p) => {
+              const pTheme = PROVIDER_THEMES[p] || PROVIDER_THEMES.gemini;
+              const count = availableModels.filter(
+                (m) => (m.provider?.toLowerCase() || inferProvider(m.id)) === p
+              ).length;
+              const isActive = providerFilter === p;
+
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setProviderFilter(p)}
+                  className="px-2.5 py-1 rounded-lg text-[9.5px] font-mono font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                  style={{
+                    backgroundColor: isActive ? pTheme.bg : "rgba(255, 255, 255, 0.04)",
+                    color: isActive ? pTheme.text : "#9ca3af",
+                    border: `1px solid ${isActive ? pTheme.border : "rgba(255, 255, 255, 0.06)"}`,
+                  }}
+                >
+                  <span>{pTheme.name}</span>
+                  <span className="opacity-60 text-[8.5px]">({count})</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* List of Models */}
@@ -436,8 +510,6 @@ export default function TierModelCard({
             ) : (
               filteredModels.map((m) => {
                 const isSelected = m.id === modelId;
-                const pKey = m.provider?.toLowerCase() || "gemini";
-                const pTheme = PROVIDER_THEMES[pKey] || PROVIDER_THEMES.gemini;
 
                 return (
                   <button
@@ -469,16 +541,6 @@ export default function TierModelCard({
                   >
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <div className="flex items-center gap-2">
-                        <span
-                          className="text-[8px] font-mono font-bold px-1.5 py-0.2 rounded border uppercase"
-                          style={{
-                            backgroundColor: pTheme.bg,
-                            color: pTheme.text,
-                            borderColor: pTheme.border,
-                          }}
-                        >
-                          {pTheme.name}
-                        </span>
                         <span
                           className="text-xs font-bold truncate"
                           style={{
