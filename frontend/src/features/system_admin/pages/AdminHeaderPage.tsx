@@ -288,35 +288,41 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           </div>
         </div>
 
-        {showSearchDropdown && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-[#181818] border border-[#2F2F2F] rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto">
-            <div className="p-2 border-b border-[#2F2F2F]">
-              <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-[#3B82F6] tracking-wider uppercase block">
-                Jump To Page
-              </span>
-              <div className="space-y-0.5">
-                {filteredNavItems.map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => {
-                      navigateTo(item.path);
-                      setShowSearchDropdown(false);
-                      setSearchQuery("");
-                    }}
-                    className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-center justify-between group transition-colors cursor-pointer"
-                  >
-                    <div>
-                      <p className="text-xs font-semibold text-neutral-200 group-hover:text-white">
-                        {item.label}
-                      </p>
-                    </div>
-                    <span className="text-[9px] text-neutral-600 font-normal uppercase">
-                      {item.path}
-                    </span>
-                  </button>
-                ))}
+        {showSearchDropdown && searchQuery.trim().length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-[#181818]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto">
+            {filteredNavItems.length > 0 ? (
+              <div className="p-2">
+                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-[#3B82F6] tracking-wider uppercase block">
+                  Admin Navigation
+                </span>
+                <div className="space-y-0.5">
+                  {filteredNavItems.map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => {
+                        navigateTo(item.path);
+                        setShowSearchDropdown(false);
+                        setSearchQuery("");
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-center justify-between group transition-colors cursor-pointer"
+                    >
+                      <div>
+                        <p className="text-xs font-semibold text-neutral-200 group-hover:text-white">
+                          {item.label}
+                        </p>
+                      </div>
+                      <span className="text-[9px] text-neutral-500 font-mono uppercase">
+                        {item.path}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="p-6 text-center text-neutral-400 font-mono text-xs select-none">
+                <p className="text-neutral-300 font-bold">No results found for &ldquo;{searchQuery}&rdquo;</p>
+              </div>
+            )}
           </div>
         )}
       </div>

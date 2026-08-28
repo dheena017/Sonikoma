@@ -29,6 +29,7 @@ import {
   DEFAULT_USER_AVATAR_DATA_URI,
 } from "@/shared/utils/avatar";
 import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
+import { getProjects } from "@/api/endpoints/projects";
 import { HeaderCreditsPopover } from "@/features/ai_core";
 import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
@@ -375,69 +376,69 @@ const HeaderInner = ({
       ? "text-neutral-500"
       : "text-rose-400";
 
-  // Search Navigation options
-  const navigationItems = [
-    {
-      name: "Main Dashboard",
-      path: "/dashboard",
-      desc: "Go to series workspace and panel upload",
-    },
-    {
-      name: "Timeline Editor",
-      path: "/scraper/editor",
-      desc: "Refine timelines, motion settings, and generation",
-    },
-    {
-      name: "Auto-Crop Panel Slicer",
-      path: "/auto-crop",
-      desc: "Slice webtoon sheets into individual images",
-    },
+  // Real Live Search Data
+  const [allProjects, setAllProjects] = useState<any[]>([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
 
-    {
-      name: "Voice & Sound Studio",
-      path: "/creative-suite/ai-voice",
-      desc: "Configure TTS voice actors, sound effects overlay, BGM loops and script dramatization",
-    },
-    {
-      name: "System Log Viewer",
-      path: "/logs",
-      desc: "Real-time backend worker processes and logs",
-    },
-    {
-      name: "Server Status Dashboard",
-      path: "/status",
-      desc: "Server connection latency and engine states",
-    },
-    {
-      name: "Keyboard Shortcuts",
-      path: "/shortcuts",
-      desc: "Quick keys for navigation and timelines",
-    },
-    {
-      name: "User Account Profile",
-      path: "/profile",
-      desc: "User statistics, account detail settings",
-    },
-  ];
+  useEffect(() => {
+    let isMounted = true;
+    if (fetchWithInterceptor) {
+      setIsLoadingProjects(true);
+      getProjects(fetchWithInterceptor)
+        .then((res: any) => {
+          if (isMounted && res?.data) {
+            setAllProjects(Array.isArray(res.data) ? res.data : []);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (isMounted) setIsLoadingProjects(false);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchWithInterceptor]);
 
-  const filteredNavItems = navigationItems.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.desc.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const q = searchQuery.trim().toLowerCase();
 
-  const matchedPanels = searchQuery.trim()
-    ? panels
-        .filter(
-          (panel) =>
-            String(panel.id).includes(searchQuery) ||
-            (panel.speech_text &&
-              panel.speech_text
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()))
-        )
+  const matchedProjects = q
+    ? allProjects
+        .filter((p) => {
+          const title = (p.title || p.name || "").toLowerCase();
+          const genre = (p.genre || "").toLowerCase();
+          const synopsis = (p.synopsis || p.description || "").toLowerCase();
+          const author = (p.author || "").toLowerCase();
+          return (
+            title.includes(q) ||
+            genre.includes(q) ||
+            synopsis.includes(q) ||
+            author.includes(q)
+          );
+        })
         .slice(0, 5)
     : [];
+
+  const matchedPanels = q
+    ? panels
+        .filter((panel, idx) => {
+          const idxStr = String(idx + 1);
+          const idStr = String(panel.id || "");
+          const speech = (panel.speech_text || "").toLowerCase();
+          const narrative = (panel.narrative || "").toLowerCase();
+          const sfx = (panel.sfx || "").toLowerCase();
+          return (
+            idxStr === q ||
+            idStr.includes(q) ||
+            speech.includes(q) ||
+            narrative.includes(q) ||
+            sfx.includes(q)
+          );
+        })
+        .slice(0, 5)
+    : [];
+
+  const hasAnyResults = matchedProjects.length > 0 || matchedPanels.length > 0;
 
   return (
     <header
@@ -511,109 +512,148 @@ const HeaderInner = ({
           </div>
         </div>
 
-        {/* Command Palette Results Dropdown */}
-        {showSearchDropdown &&
-          (searchQuery.trim() !== "" || filteredNavItems.length > 0) && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0d16]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {/* Pages Section */}
-              <div className="p-2 border-b border-neutral-850/60">
-                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
-                  Jump To Page
+        {/* Command Palette Real Search Results Dropdown */}
+        {showSearchDropdown && q.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-2 bg-[#0c0d16]/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[380px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {/* 1. Projects Section */}
+            {matchedProjects.length > 0 && (
+              <div className="p-2 border-b border-white/10">
+                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase flex items-center justify-between">
+                  <span>Projects &amp; Series</span>
+                  <span className="text-[8.5px] font-mono text-neutral-500">
+                    {matchedProjects.length} found
+                  </span>
                 </span>
-                <div className="space-y-0.5">
-                  {filteredNavItems.slice(0, 6).map((item) => (
-                    <button
-                      key={item.path}
-                      onClick={() => {
-                        navigateTo(item.path);
-                        setShowSearchDropdown(false);
-                        setSearchQuery("");
-                      }}
-                      onMouseEnter={() => (window as any).prefetchRoute?.(item.path)}
-                      className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-center justify-between group transition-colors cursor-pointer"
-                    >
-                      <div>
-                        <p className="text-xs font-semibold text-neutral-200 group-hover:text-white">
-                          {item.name}
-                        </p>
-                        <p className="text-[10px] text-neutral-500 truncate max-w-[280px]">
-                          {item.desc}
-                        </p>
-                      </div>
-                      <ChevronDown className="-rotate-90 h-3 w-3 text-neutral-600 group-hover:text-purple-400 transition-colors" />
-                    </button>
-                  ))}
+                <div className="space-y-1">
+                  {matchedProjects.map((project) => {
+                    const cover =
+                      project.cover_image ||
+                      project.panels?.[0]?.image_url ||
+                      null;
+                    return (
+                      <button
+                        key={project.id}
+                        onClick={() => {
+                          useProjectStore.getState().setActiveProjectId(project.id);
+                          useProjectStore
+                            .getState()
+                            .hydrateActiveProject(project.id, fetchWithInterceptor);
+                          navigateTo(`/dashboard`);
+                          setShowSearchDropdown(false);
+                          setSearchQuery("");
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/[0.06] flex items-center justify-between group transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0 flex items-center justify-center">
+                            {cover ? (
+                              <img
+                                src={cover}
+                                alt={project.title || "Cover"}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <FolderOpen className="w-4 h-4 text-purple-400" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex flex-col">
+                            <p className="text-xs font-bold text-neutral-200 group-hover:text-white truncate">
+                              {project.title || "Untitled Project"}
+                            </p>
+                            <span className="text-[10px] text-neutral-400 truncate">
+                              {project.genre ? `${project.genre} • ` : ""}
+                              {project.panels?.length || 0} panels
+                            </span>
+                          </div>
+                        </div>
+                        <ChevronDown className="-rotate-90 h-3.5 w-3.5 text-neutral-600 group-hover:text-purple-400 transition-colors shrink-0" />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+            )}
 
-              {/* Panels Section */}
-              {panels.length > 0 && (
-                <div className="p-2">
-                  <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
-                    Panel Scripts & Transcripts
+            {/* 2. Panels & Dialogues Section */}
+            {matchedPanels.length > 0 && (
+              <div className="p-2 border-b border-white/10">
+                <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase flex items-center justify-between">
+                  <span>Storyboard Panels &amp; Scripts</span>
+                  <span className="text-[8.5px] font-mono text-neutral-500">
+                    {matchedPanels.length} found
                   </span>
-                  {matchedPanels.length > 0 ? (
-                    <div className="space-y-0.5">
-                      {matchedPanels.map((panel) => {
-                        const panelIdx = panels.findIndex(
-                          (p) => p.id === panel.id
-                        );
-                        return (
-                          <button
-                            key={panel.id}
-                            onClick={() => {
-                              navigateTo(`/editor/adjust?idx=${panelIdx}`);
-                              setShowSearchDropdown(false);
-                              setSearchQuery("");
-                            }}
-                            className="w-full text-left px-3 py-2 rounded-xl hover:bg-neutral-800/80 flex items-start gap-3 transition-colors cursor-pointer group"
-                          >
-                            <div className="w-10 h-7 rounded bg-neutral-950 border border-neutral-850 overflow-hidden shrink-0 flex items-center justify-center">
-                              {panel.image_url ? (
-                                <img
-                                  src={panel.image_url}
-                                  alt={`P${panel.id}`}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <span className="text-[8px] font-mono text-neutral-500">
-                                  P{panel.id}
-                                </span>
-                              )}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex justify-between items-center">
-                                <span className="text-[10px] font-bold text-neutral-300 font-mono">
-                                  Panel #{panel.id}
-                                </span>
-                                <span className="text-[9px] text-neutral-500 group-hover:text-purple-400 font-mono">
-                                  {formatDuration(panel.duration)}
-                                </span>
-                              </div>
-                              <p className="text-[10px] text-neutral-500 truncate">
-                                {panel.speech_text ||
-                                  "No speech script generated"}
-                              </p>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : searchQuery.trim() !== "" ? (
-                    <p className="text-center py-4 text-[10px] text-neutral-500 italic">
-                      No matching panels found
-                    </p>
-                  ) : (
-                    <div className="px-3 py-2 bg-neutral-950/40 border border-neutral-850/60 rounded-xl">
-                      <p className="text-[10px] text-neutral-400 font-mono text-center">
-                        Type script keywords to search timelines
-                      </p>
-                    </div>
-                  )}
+                </span>
+                <div className="space-y-1">
+                  {matchedPanels.map((panel, idx) => {
+                    const panelIdx = panels.findIndex(
+                      (p) => p.id === panel.id
+                    );
+                    return (
+                      <button
+                        key={panel.id || idx}
+                        onClick={() => {
+                          navigateTo(`/scraper/editor`);
+                          useProjectStore
+                            .getState()
+                            .setSelectedPanelIndex(
+                              panelIdx >= 0 ? panelIdx : idx
+                            );
+                          setShowSearchDropdown(false);
+                          setSearchQuery("");
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-white/[0.06] flex items-start gap-3 transition-colors cursor-pointer group"
+                      >
+                        <div className="w-10 h-7 rounded bg-neutral-950 border border-white/10 overflow-hidden shrink-0 flex items-center justify-center">
+                          {panel.image_url ? (
+                            <img
+                              src={panel.image_url}
+                              alt={`P${panel.id || idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-[8px] font-mono text-neutral-500">
+                              P{idx + 1}
+                            </span>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-bold text-neutral-300 font-mono">
+                              Panel #{idx + 1}
+                            </span>
+                            {panel.duration && (
+                              <span className="text-[9px] text-neutral-500 group-hover:text-purple-400 font-mono">
+                                {formatDuration(panel.duration)}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-neutral-400 truncate mt-0.5">
+                            {panel.speech_text ||
+                              panel.narrative ||
+                              "Panel visual action"}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+
+            {/* Empty Results */}
+            {!hasAnyResults && (
+              <div className="p-6 text-center text-neutral-400 font-mono text-xs space-y-1 select-none">
+                <Search className="w-5 h-5 mx-auto text-neutral-600 mb-2" />
+                <p className="text-neutral-300 font-bold">
+                  No results found for &ldquo;{searchQuery}&rdquo;
+                </p>
+                <p className="text-[10px] text-neutral-500">
+                  Search across projects, chapters, comic storyboard scripts, or dialogue lines.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right side: Volume, Notifications, Stats, Profile */}

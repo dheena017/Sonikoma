@@ -241,27 +241,6 @@ export default function ImageEditorCanvasContainer({
               <Minimize2 className="w-3.5 h-3.5" />
             </button>
           )}
-
-          <div className="w-px h-3.5 bg-[#2F2F2F] mx-0.5" />
-
-          {/* Toggle properties panel */}
-          {setIsToolsPanelOpen && (
-            <button
-              onClick={() => setIsToolsPanelOpen((prev) => !prev)}
-              className="p-1.5 text-[#9CA3AF] hover:text-white rounded-lg hover:bg-[#262626] transition-all border border-transparent hover:border-[#2F2F2F] cursor-pointer active:scale-95"
-              title={
-                isToolsPanelOpen
-                  ? "Close Properties Panel"
-                  : "Open Properties Panel"
-              }
-            >
-              {isToolsPanelOpen ? (
-                <PanelRightClose className="w-3.5 h-3.5" />
-              ) : (
-                <PanelRightOpen className="w-3.5 h-3.5" />
-              )}
-            </button>
-          )}
         </div>
 
         {/* Right: Actions, AI Smart Crop & Mode Badges */}
