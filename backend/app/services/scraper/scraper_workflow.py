@@ -305,6 +305,24 @@ async def scrape_series_chapters(
                 ch.pop("thumbnail", None)
                 ch.pop("cover", None)
 
+            _is_error_title = bool(
+                re.search(r'\b(connect error|error ::|404 not found|page not found|access denied|blocked|unavailable)\b', series_title, re.I)
+            )
+
+            if _is_error_title or len(chapter_list) == 0:
+                err_msg = f"Failed to retrieve chapters from webtoon source ({series_title}). Please check the URL or series ID." if _is_error_title else "No chapters found for this series URL."
+                logger.warning(f"[SeriesWorkflow] Rejected invalid scrape result: title='{series_title}', chapters={len(chapter_list)}")
+                return {
+                    "success": False,
+                    "error": err_msg,
+                    "title": series_title,
+                    "series_title": series_title,
+                    "url": raw_input,
+                    "chapters": [],
+                    "total_chapters": 0,
+                    "series": series_dict
+                }
+
             result["chapters"] = chapter_list
             result["total_chapters"] = len(chapter_list)
             result.pop("episodes", None)

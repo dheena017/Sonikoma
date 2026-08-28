@@ -42,6 +42,7 @@ import {
 import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
 import { ChapterReaderModal } from "./ChapterReaderModal";
 import { ChapterScraperEmptyState } from "./ChapterScraperEmptyState";
+import WebtoonConnectionErrorCard from "./WebtoonConnectionErrorCard";
 import type { NotificationType } from "@/features/app_notification";
 import { getSeriesEpisodes, separateComicUrl } from "@/api/endpoints/scraper";
 import type { Chapter } from "../types/ChapterTypes";
@@ -188,6 +189,20 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     const sum = rated.reduce((acc, c) => acc + (c.rating || 0), 0);
     return (sum / rated.length).toFixed(1);
   }, [chapters]);
+
+  const isErrorSeries = useMemo(() => {
+    if (error) return true;
+    if (!seriesMetadata) return false;
+    const title = (seriesMetadata.title || "").toLowerCase();
+    return (
+      title.includes("connect error") ||
+      title.includes("error ::") ||
+      title.includes("404 not found") ||
+      title.includes("page not found") ||
+      title.includes("access denied") ||
+      (chapters.length === 0 && !isLoading)
+    );
+  }, [error, seriesMetadata, chapters.length, isLoading]);
 
   // Load suggestions from FavoritesManager
   useEffect(() => {
@@ -780,10 +795,30 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       )}
 
       {/* ── SKELETON LOADING STATE (shown while fetching series/chapter data from backend) ── */}
-      {isLoading && !seriesMetadata && <ChapterScraperSkeleton />}
+      {isLoading && <ChapterScraperSkeleton />}
+
+      {/* ── ERROR STATE: Webtoon Connection Error Card ── */}
+      {!isLoading && isErrorSeries && (
+        <WebtoonConnectionErrorCard
+          errorMessage={
+            error ||
+            (seriesMetadata?.title?.toLowerCase().includes("connect error")
+              ? "The webtoon server returned 'Connect Error :: WEBTOON'. The requested series could not be found or was blocked."
+              : "Unable to retrieve chapters for this series URL.")
+          }
+          targetUrl={urlInput || titleNoInput || initialSeriesName}
+          onRetry={(newUrl) => {
+            setError(null);
+            setSeriesMetadata(null);
+            setChapters([]);
+            if (newUrl) setUrlInput(newUrl);
+            triggerScrape(newUrl || urlInput || undefined, titleNoInput || undefined, true);
+          }}
+        />
+      )}
 
       {/* ── 1. AMBIENT GLASSMORPHIC HERO BANNER (MATCHING SERIES DETAILS PAGE) ── */}
-      {seriesMetadata && (
+      {!isLoading && !isErrorSeries && seriesMetadata && (
         <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-neutral-900/80 backdrop-blur-2xl shadow-2xl p-6 md:p-8">
           {/* Cover Background Blur Glow */}
           {seriesMetadata.cover_image && (

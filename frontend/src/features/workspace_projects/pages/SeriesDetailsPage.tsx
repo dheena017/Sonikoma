@@ -338,7 +338,9 @@ export default function SeriesDetailsPage({
     return <SeriesDetailsSkeleton />;
   }
 
-  if (error || !series) {
+  const isInvalidSeries = !series || error || Boolean(series.title && series.title.toLowerCase().includes("connect error"));
+
+  if (isInvalidSeries) {
     return (
       <div className="flex flex-col items-center justify-center h-full pt-32">
         <div className="w-16 h-16 rounded-3xl bg-rose-950/40 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4 shadow-xl">
