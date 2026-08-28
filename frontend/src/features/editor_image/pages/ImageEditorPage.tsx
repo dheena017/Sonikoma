@@ -527,16 +527,18 @@ const ImageEditorPage = React.memo(
               aria-label={
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }
-              className="absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 h-20 rounded-r-2xl bg-[#141522]/95 hover:bg-[#202236] border-y border-r border-white/20 hover:border-purple-500/50 text-neutral-300 hover:text-white flex items-center justify-center shadow-[6px_0_24px_rgba(0,0,0,0.85)] transition-all cursor-pointer group active:scale-95"
+              className="absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 sm:w-7 h-24 rounded-r-2xl bg-[#141524] hover:bg-[#1f2138] border-y border-r border-purple-500/40 hover:border-purple-400 text-purple-300 hover:text-white flex flex-col items-center justify-center gap-1 shadow-[6px_0_20px_rgba(168,85,247,0.35)] transition-all cursor-pointer group active:scale-95 select-none pointer-events-auto"
               title={
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }
             >
+              <div className="w-1 h-3 rounded-full bg-purple-500/40 group-hover:bg-purple-400/80 transition-colors" />
               {isToolsPanelOpen ? (
-                <ChevronLeft className="w-4 h-4 text-neutral-400 group-hover:text-purple-300 transition-transform group-hover:-translate-x-0.5" />
+                <ChevronLeft className="w-4 h-4 text-purple-400 group-hover:text-white transition-transform group-hover:-translate-x-0.5" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-purple-300 transition-transform group-hover:translate-x-0.5" />
+                <ChevronRight className="w-4 h-4 text-purple-400 group-hover:text-white transition-transform group-hover:translate-x-0.5" />
               )}
+              <div className="w-1 h-3 rounded-full bg-purple-500/40 group-hover:bg-purple-400/80 transition-colors" />
             </button>
           </aside>
 

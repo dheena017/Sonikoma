@@ -24,6 +24,8 @@ import {
   Download,
   Users,
   ChevronRight,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import { groupProjectsIntoSeries, Series } from "../utils/seriesGrouping";
 import type { Project, ViewMode } from "../hooks/ProjectTypes";
@@ -66,6 +68,8 @@ export default function SeriesDetailsPage({
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "panels" | "alphabetical"
   >("newest");
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = React.useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -79,6 +83,16 @@ export default function SeriesDetailsPage({
   const [isReaderModalOpen, setIsReaderModalOpen] = useState(false);
 
   const actions = useProjectsActions();
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     async function fetchSeriesDetails() {
@@ -600,17 +614,71 @@ export default function SeriesDetailsPage({
             ))}
           </div>
 
-          {/* Sort Dropdown */}
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs font-mono text-neutral-300 focus:outline-none focus:border-purple-500 transition-colors cursor-pointer"
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="panels">Most Panels</option>
-            <option value="alphabetical">Alphabetical</option>
-          </select>
+          {/* Custom Sort Dropdown */}
+          <div className="relative" ref={sortRef}>
+            <button
+              type="button"
+              onClick={() => setIsSortOpen((prev) => !prev)}
+              className={`flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 border rounded-xl px-3 py-2 text-xs font-mono transition-all cursor-pointer select-none ${
+                isSortOpen
+                  ? "border-purple-500/60 ring-2 ring-purple-500/20 text-white"
+                  : "border-neutral-800 text-neutral-300 hover:border-neutral-700"
+              }`}
+            >
+              <span className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold">
+                Sort:
+              </span>
+              <span className="font-semibold text-white">
+                {sortBy === "newest"
+                  ? "Newest First"
+                  : sortBy === "oldest"
+                  ? "Oldest First"
+                  : sortBy === "panels"
+                  ? "Most Panels"
+                  : "Alphabetical"}
+              </span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
+                  isSortOpen ? "rotate-180 text-purple-300" : ""
+                }`}
+              />
+            </button>
+
+            {isSortOpen && (
+              <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-1">
+                  {[
+                    { id: "newest", label: "Newest First" },
+                    { id: "oldest", label: "Oldest First" },
+                    { id: "panels", label: "Most Panels" },
+                    { id: "alphabetical", label: "Alphabetical" },
+                  ].map((opt) => {
+                    const isSelected = sortBy === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => {
+                          setSortBy(opt.id as any);
+                          setIsSortOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
+                          isSelected
+                            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-md shadow-purple-900/30"
+                            : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
+                        }`}
+                      >
+                        <span>{opt.label}</span>
+                        {isSelected && (
+                          <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* View Switcher */}
           <div className="flex items-center bg-neutral-900 border border-neutral-800 p-1 rounded-xl">
