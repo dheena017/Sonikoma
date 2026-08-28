@@ -15,6 +15,7 @@ import {
   FileAudio,
 } from "lucide-react";
 import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
+import YouTubeOfficialLogo from "@/features/creative_youtube/components/YouTubeOfficialLogo";
 
 export interface VideoPreviewMetadataPanelProps {
   musicTheme: string;
@@ -319,7 +320,7 @@ const VideoPreviewMetadataPanel = React.memo(
                     {isPublishing ? (
                       <Loader2 className="h-3 w-3 text-red-400 animate-spin" />
                     ) : (
-                      <Youtube className="h-3 w-3 text-red-400" />
+                      <YouTubeOfficialLogo className="w-3.5 h-2.5" />
                     )}
                   </span>
                   <span>

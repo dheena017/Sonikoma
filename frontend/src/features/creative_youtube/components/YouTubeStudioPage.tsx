@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Youtube, Check } from "lucide-react";
 import type { GeneratedPanel } from "@/types";
+import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
 import PublishMonitor from "./PublishMonitor";
 import YouTubeChannelHeader from "./YouTubeChannelHeader";
 import StudioDetailsTab from "./studio/StudioDetailsTab";
@@ -280,8 +281,8 @@ export default function YouTubeStudioPage({
       {/* ── 1. STUDIO TOP HEADER ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-800/80 pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-gradient-to-br from-red-600 to-red-700 rounded-xl shadow-lg shadow-red-600/30">
-            <Youtube className="w-5 h-5 text-white fill-white" />
+          <div className="p-2 bg-[#14141E] border border-white/[0.08] rounded-xl shadow-lg shadow-red-600/15 flex items-center justify-center">
+            <YouTubeOfficialLogo className="w-6 h-4.5" />
           </div>
           <div>
             <div className="flex items-center gap-2">

@@ -28,6 +28,7 @@ import {
   Film,
   Layers,
 } from "lucide-react";
+import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
 
 export interface YouTubeChannelOption {
   id: string;
@@ -452,9 +453,8 @@ export default function YouTubeChannelModal({
         <div className="px-6 pt-5 pb-4 border-b border-neutral-800/60 bg-gradient-to-b from-neutral-900/60 to-transparent shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <div className="relative p-2.5 bg-gradient-to-br from-red-600 to-rose-700 rounded-2xl text-white shadow-lg shadow-red-500/20 ring-1 ring-white/20">
-                <Youtube className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-black" />
+              <div className="p-2 bg-[#121218] border border-white/[0.08] rounded-2xl flex items-center justify-center">
+                <YouTubeOfficialLogo className="w-6 h-4.5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -727,8 +727,8 @@ export default function YouTubeChannelModal({
           ) : channels.length === 0 ? (
             /* ── No Channels Found ── */
             <div className="flex flex-col items-center py-6 px-4 gap-4 text-center">
-              <div className="p-3.5 bg-red-950/30 border border-red-900/40 rounded-2xl text-red-400">
-                <Youtube className="w-8 h-8" />
+              <div className="p-3 bg-[#121218] border border-white/[0.08] rounded-2xl flex items-center justify-center">
+                <YouTubeOfficialLogo className="w-10 h-7" />
               </div>
               <div className="space-y-1 max-w-md">
                 <h3 className="text-sm font-bold text-white font-sans">

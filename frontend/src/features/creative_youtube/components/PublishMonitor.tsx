@@ -18,6 +18,7 @@ import {
 import YouTubeChannelSelector, {
   YouTubeChannel,
 } from "./YouTubeChannelSelector";
+import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
 import YouTubeChannelHeader from "./YouTubeChannelHeader";
 import YouTubeSeoOptimizer from "./YouTubeSeoOptimizer";
 import YouTubeVideoGrid from "./YouTubeVideoGrid";
@@ -1098,7 +1099,7 @@ export default function PublishMonitor({
             </>
           ) : (
             <>
-              <Youtube className="h-4.5 w-4.5" />
+              <YouTubeOfficialLogo className="w-5 h-3.5" />
               <span>Publish Video to Channel</span>
             </>
           )}

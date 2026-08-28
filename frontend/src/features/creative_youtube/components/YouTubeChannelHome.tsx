@@ -29,6 +29,7 @@ import {
   Plus,
 } from "lucide-react";
 import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
+import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
 
 export interface YouTubeVideoItem {
   id: string;
@@ -190,8 +191,8 @@ export default function YouTubeChannelHome({
           ) : (
             <div className="w-full h-full bg-gradient-to-r from-red-950/70 via-neutral-900 to-neutral-950 relative flex items-center justify-center">
               <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#ff0000_1px,transparent_1px)] [background-size:20px_20px]" />
-              <div className="flex items-center gap-3 text-red-500/30">
-                <Youtube className="w-20 h-20" />
+              <div className="flex items-center justify-center">
+                <YouTubeOfficialLogo className="w-20 h-14 opacity-20" />
               </div>
             </div>
           )}
@@ -306,8 +307,8 @@ export default function YouTubeChannelHome({
             onClick={() => onNavigateTab("studio")}
             className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-red-950/40 to-neutral-900/80 hover:from-red-900/40 hover:to-neutral-850 border border-red-500/30 hover:border-red-500/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
           >
-            <div className="p-2.5 rounded-xl bg-red-600 text-white shadow-md shadow-red-600/30 shrink-0 group-hover:scale-105 transition-transform">
-              <Youtube className="w-4 h-4 fill-white" />
+            <div className="p-2 rounded-xl bg-[#14141E] border border-white/[0.08] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <YouTubeOfficialLogo className="w-5 h-3.5" />
             </div>
             <div className="min-w-0">
               <span className="text-xs font-bold text-white block truncate">

@@ -10,6 +10,7 @@ import {
   Check,
   User,
 } from "lucide-react";
+import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
 
 export interface ChannelItem {
   id: string;
@@ -455,20 +456,18 @@ export default function YouTubeChannelHeader({
             <button
               onClick={handleConnectYouTube}
               disabled={isConnecting}
-              className="px-4 py-2 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-lg border border-red-500/30 transition-all font-mono active:scale-98 flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-gradient-to-r from-red-600 to-purple-600 hover:from-red-500 hover:to-purple-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl shadow-lg border border-red-500/30 transition-all font-mono active:scale-98 flex items-center gap-2 cursor-pointer"
             >
-              <Youtube
-                className={`w-4 h-4 ${isConnecting ? "animate-spin" : ""}`}
-              />
+              <YouTubeOfficialLogo className="w-4.5 h-3.5" />
               <span>{isConnecting ? "Connecting..." : "Connect YouTube"}</span>
             </button>
           ) : (
             onOpenChannelModal && (
               <button
                 onClick={onOpenChannelModal}
-                className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-mono text-xs font-bold rounded-xl border border-neutral-800 transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 font-mono text-xs font-bold rounded-xl border border-neutral-800 transition-all flex items-center gap-2 cursor-pointer"
               >
-                <Youtube className="w-3.5 h-3.5 text-red-400" />
+                <YouTubeOfficialLogo className="w-4 h-3" />
                 <span>Switch Channel</span>
               </button>
             )

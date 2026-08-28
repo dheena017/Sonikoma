@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
 
 interface YouTubeAppNavBarProps {
   activeTab: string;
@@ -54,12 +55,8 @@ export default function YouTubeAppNavBar({
         <div className="flex items-center gap-3 shrink-0">
           {/* Brand */}
           <div className="flex items-center gap-2.5">
-            <div className="relative group p-2 bg-gradient-to-br from-red-600 via-rose-600 to-red-700 rounded-xl shadow-lg shadow-red-600/30 flex items-center justify-center border border-red-400/30 shrink-0">
-              <Youtube className="w-4 h-4 text-white fill-white" />
-              <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-              </span>
+            <div className="p-1.5 px-2 bg-[#121218] hover:bg-[#181822] rounded-xl flex items-center justify-center border border-white/[0.08] transition-all shrink-0">
+              <YouTubeOfficialLogo className="w-6 h-4.5" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">

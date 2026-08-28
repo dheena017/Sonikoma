@@ -6,6 +6,7 @@ import {
   User,
   ChevronDown,
 } from "lucide-react";
+import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
 
 export interface YouTubeChannel {
   id: string;
@@ -95,8 +96,8 @@ export default function YouTubeChannelSelector({
     <div className="bg-neutral-950/50 backdrop-blur-md p-5 border border-neutral-900 rounded-2xl space-y-3 font-mono text-xs text-neutral-300 transition-all duration-300 hover:border-neutral-800 shadow-xl">
       <div className="flex items-center justify-between border-b border-neutral-900 pb-3">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-red-950/40 border border-red-900/40 text-red-400">
-            <Youtube className="h-4 w-4" />
+          <div className="p-1 rounded-lg bg-[#14141E] border border-white/[0.08] flex items-center justify-center">
+            <YouTubeOfficialLogo className="w-5 h-3.5" />
           </div>
           <div>
             <span className="text-white font-bold text-xs block font-sans">
