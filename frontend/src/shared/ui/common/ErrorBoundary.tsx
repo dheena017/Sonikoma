@@ -85,12 +85,12 @@ class ErrorBoundary extends Component<Props, State> {
                 className="flex items-center justify-center gap-1.5 bg-neutral-800 hover:bg-neutral-750 text-white font-bold py-3 rounded-2xl text-xs transition-all cursor-pointer border border-neutral-700"
                 title="Return to the previous page"
               >
-                <ArrowLeft className="w-4 h-4 text-purple-400" />
+                <ArrowLeft className="w-4 h-4 text-[#3B82F6]" />
                 <span>Go Back</span>
               </button>
               <button
                 onClick={this.handleReset}
-                className="flex items-center justify-center gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-2xl text-xs transition-all cursor-pointer shadow-lg shadow-purple-900/30 border border-purple-500/30"
+                className="btn-primary flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer shadow-lg shadow-[#3B82F6]/20"
                 title="Return to Dashboard Home"
               >
                 <Home className="w-4 h-4" />

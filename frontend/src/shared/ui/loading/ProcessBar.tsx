@@ -81,7 +81,7 @@ export default function ProcessBar({ progressStatus }: ProcessBarProps) {
           className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out ${
             isDone
               ? "bg-emerald-500"
-              : "bg-gradient-to-r from-purple-500 to-indigo-400"
+              : "bg-[#3B82F6]"
           }`}
           style={{ width: `${displayPercent}%` }}
         />
@@ -95,7 +95,7 @@ export default function ProcessBar({ progressStatus }: ProcessBarProps) {
       {/* Percentage */}
       <span
         className={`text-[10px] font-black font-mono shrink-0 ${
-          isDone ? "text-emerald-400" : "text-purple-300"
+          isDone ? "text-emerald-400" : "text-[#3B82F6]"
         }`}
       >
         {Math.round(displayPercent)}%

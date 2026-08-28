@@ -18,7 +18,7 @@ export function ProjectCardSkeleton({ count = 1 }: ProjectCardSkeletonProps) {
             <Skeleton className="w-full h-full" />
             {/* Top Left Badge */}
             <div className="absolute top-2.5 left-2.5">
-              <Skeleton className="h-5 w-16 rounded-full bg-purple-950/70 border border-purple-500/20" />
+              <Skeleton className="h-5 w-16 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20" />
             </div>
             {/* Top Right Status Badge */}
             <div className="absolute top-2.5 right-2.5">

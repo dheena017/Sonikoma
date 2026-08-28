@@ -5,7 +5,7 @@ import { X, AlertTriangle } from "lucide-react";
 interface ConfirmModalProps {
   title: string;
   message: string;
-  accentColor?: string; // "red" | "purple"
+  accentColor?: string; // "red" | "blue"
   onConfirm: () => void;
   onCancel?: () => void;
   isAlert?: boolean;
@@ -14,7 +14,7 @@ interface ConfirmModalProps {
 export default function ConfirmModal({
   title,
   message,
-  accentColor = "purple",
+  accentColor = "blue",
   onConfirm,
   onCancel,
   isAlert = false,
@@ -62,7 +62,7 @@ export default function ConfirmModal({
           className={`absolute top-0 left-0 right-0 h-[2px] blur-[1px] ${
             isRed
               ? "bg-gradient-to-r from-red-500 via-rose-500 to-amber-500"
-              : "bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500"
+              : "bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6]"
           }`}
         />
 
@@ -73,7 +73,7 @@ export default function ConfirmModal({
               className={`p-2 rounded-xl ${
                 isRed
                   ? "bg-red-500/10 text-red-400"
-                  : "bg-purple-500/10 text-purple-400"
+                  : "bg-[#3B82F6]/10 text-[#3B82F6]"
               }`}
             >
               <AlertTriangle className="h-5 w-5" />
@@ -117,7 +117,7 @@ export default function ConfirmModal({
             className={`px-6 py-2.5 border text-white font-bold rounded-xl text-xs tracking-wide transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer ${
               isRed
                 ? "bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border-red-550/30 shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)]"
-                : "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-purple-500/30 shadow-[0_0_20px_-5px_rgba(147,51,234,0.5)]"
+                : "btn-primary shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)]"
             }`}
           >
             <span>{isAlert ? "OK" : "Confirm"}</span>

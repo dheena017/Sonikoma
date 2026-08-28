@@ -18,7 +18,7 @@ export function PanelAnalyzingOverlay({
     <div className="absolute inset-0 bg-neutral-955/85 backdrop-blur-[3px] flex flex-col items-center justify-center p-2 text-center z-10 rounded-xl select-none border border-neutral-800 shadow-xl">
       {/* Icon Badge */}
       <div className="relative mb-2 flex items-center justify-center w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 shadow-sm">
-        <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
+        <Sparkles className="h-4 w-4 text-[#3B82F6] animate-pulse" />
       </div>
 
       {/* Status label */}

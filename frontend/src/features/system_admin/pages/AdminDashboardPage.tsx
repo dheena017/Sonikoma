@@ -875,7 +875,7 @@ const AdminDashboardPage = React.memo(
                           ? "bg-rose-500"
                           : cpuLoad > 50
                           ? "bg-amber-500"
-                          : "bg-violet-500"
+                          : "bg-[#3B82F6]"
                       }`}
                       style={{ width: `${cpuLoad}%` }}
                     />
@@ -893,7 +893,10 @@ const AdminDashboardPage = React.memo(
                     </span>
                   </div>
                   <div className="w-full bg-[#040406] h-1.5 rounded-full overflow-hidden border border-neutral-900">
-                    <div className="bg-violet-500 h-full w-[45%]" />
+                    <div
+                      className="bg-[#3B82F6] h-full transition-all duration-1000"
+                      style={{ width: `${Math.min(((parseFloat(stats.memory) || 0) / 512) * 100, 100)}%` }}
+                    />
                   </div>
                 </div>
 
@@ -906,7 +909,7 @@ const AdminDashboardPage = React.memo(
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-neutral-500">Active Compiles</span>
-                    <span className="text-violet-400 font-mono font-bold">
+                    <span className="text-[#3B82F6] font-mono font-bold">
                       {activeJobsCount} jobs in queue
                     </span>
                   </div>

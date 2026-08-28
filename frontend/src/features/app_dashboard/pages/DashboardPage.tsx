@@ -91,7 +91,7 @@ export default function DashboardPage() {
               onSaveRename={saveProjectName}
             />
 
-            <DashboardActivityFeed analytics={analytics} projects={projects} />
+            <DashboardActivityFeed analytics={analytics} />
           </div>
 
           <div className="lg:col-span-4">

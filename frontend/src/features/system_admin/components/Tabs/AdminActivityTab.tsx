@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { History, Search, Filter, Download, User } from "lucide-react";
+import { Shield, Search, Download, User, RefreshCw } from "lucide-react";
 import { adminGetAuditLogs } from "@/api";
 
 export function AdminActivityTab({ fetchWithInterceptor }: any) {
@@ -34,6 +34,26 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+      {/* Section Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-extrabold text-[#E5E5E5] flex items-center gap-2">
+            <Shield className="w-5 h-5 text-[#3B82F6]" />
+            System Audit &amp; Security Logs
+          </h2>
+          <p className="text-xs text-[#9CA3AF] mt-1">
+            Real-time administrative actions, authentication attempts, and event trail
+          </p>
+        </div>
+        <button
+          onClick={fetchLogs}
+          disabled={loading}
+          className="btn-secondary flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold self-start sm:self-auto"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
+      </div>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#141414] border border-[#2F2F2F] rounded-xl p-4">
         <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
           <div className="relative w-full sm:max-w-md">

@@ -105,7 +105,7 @@ export default function JobInspectorModal({
       {/* Modal Card */}
       <div className="relative w-full max-w-4xl max-h-[90vh] bg-neutral-950/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
         {/* Glow Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 blur-[1px]" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6] blur-[1px]" />
 
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-neutral-850 flex items-center justify-between shrink-0 bg-neutral-900/50">
@@ -169,7 +169,7 @@ export default function JobInspectorModal({
             </div>
             <div className="bg-neutral-900/80 p-3.5 rounded-2xl border border-neutral-800 flex flex-col justify-between">
               <span className="text-[11px] text-neutral-500 uppercase font-semibold flex items-center gap-1">
-                <Cpu className="w-3 h-3 text-purple-400" />
+                <Cpu className="w-3 h-3 text-[#3B82F6]" />
                 Execution Model
               </span>
               <p className="text-xs font-bold text-white mt-1 font-mono truncate">

@@ -23,7 +23,7 @@ export function ExtractionSkeletonCard({
       {/* Header with frame label + spinner badge */}
       <div className="flex items-center justify-between px-0.5">
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
           <span className="text-[11px] font-mono font-medium text-neutral-400 uppercase tracking-wider">
             FRAME #{String(index).padStart(2, "0")}
           </span>
@@ -39,7 +39,7 @@ export function ExtractionSkeletonCard({
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-neutral-800/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
 
         <div className="relative z-10 w-9 h-9 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center shadow-sm">
-          <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+          <Loader2 className="h-4 w-4 text-[#3B82F6] animate-spin" />
         </div>
         <span className="relative z-10 text-[10px] font-mono font-semibold tracking-wider text-neutral-300 uppercase">
           EXTRACTING...

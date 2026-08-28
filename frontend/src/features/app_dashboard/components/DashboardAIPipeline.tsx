@@ -3,10 +3,10 @@ import { Sparkles, Scissors, Sliders, Volume2, Cpu } from "lucide-react";
 
 export default function DashboardAIPipeline() {
   return (
-    <div className="bg-gradient-to-br from-[#0c0c14] via-[#10101c] to-[#141424] border border-white/10 rounded-3xl p-6 md:p-8 shadow-xl backdrop-blur-xl">
+    <div className="bg-[#141414] border border-[#2F2F2F] rounded-3xl p-6 md:p-8 shadow-xl">
       <div className="flex items-center gap-2.5 mb-2">
-        <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
-          <Sparkles className="h-4 w-4 text-purple-400" />
+        <div className="p-2 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">
+          <Sparkles className="h-4 w-4 text-[#3B82F6]" />
         </div>
         <h3 className="text-lg font-black text-white">
           AI Manga-to-Video Engine
@@ -18,8 +18,8 @@ export default function DashboardAIPipeline() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex gap-3.5 p-4 rounded-2xl bg-black/40 border border-white/5 hover:border-purple-500/30 transition-all">
-          <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 h-fit shrink-0">
+        <div className="flex gap-3.5 p-4 rounded-2xl bg-[#181818] border border-[#2F2F2F] hover:border-[#3B82F6]/40 transition-all">
+          <div className="p-2.5 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 h-fit shrink-0">
             <Scissors className="h-4 w-4" />
           </div>
           <div>

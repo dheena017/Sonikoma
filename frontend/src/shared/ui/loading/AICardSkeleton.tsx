@@ -12,7 +12,7 @@ export function AICardSkeleton({ count = 4 }: { count?: number }) {
           {/* Header */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <Skeleton className="w-10 h-10 rounded-xl bg-purple-950/40 border border-purple-500/20" />
+              <Skeleton className="w-10 h-10 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20" />
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
                   <Skeleton className="h-4 w-28 rounded-md" />

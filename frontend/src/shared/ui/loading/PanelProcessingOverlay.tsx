@@ -32,9 +32,9 @@ export function PanelProcessingOverlay({
       {/* Icon wrapper */}
       <div className="relative mb-2 flex items-center justify-center w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800">
         {isAutoCrop ? (
-          <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
+          <Sparkles className="h-4 w-4 text-[#3B82F6] animate-pulse" />
         ) : (
-          <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+          <Loader2 className="h-4 w-4 text-[#3B82F6] animate-spin" />
         )}
       </div>
 

@@ -117,9 +117,9 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
           {/* Solution & Corrective Auto-Tuner Section */}
           {error.suggestion && (
             <div className="bg-neutral-950/60 rounded-2xl border border-neutral-800/40 p-5 space-y-4">
-              <p className="text-xs text-neutral-300 leading-relaxed font-sans bg-purple-950/10 border border-purple-900/15 p-3 rounded-xl">
+              <p className="text-xs text-neutral-300 leading-relaxed font-sans bg-[#3B82F6]/10 border border-[#3B82F6]/20 p-3 rounded-xl">
                 💡{" "}
-                <span className="font-semibold text-purple-300">
+                <span className="font-semibold text-[#60A5FA]">
                   Diagnostic Suggestion:
                 </span>{" "}
                 {error.suggestion}
@@ -149,7 +149,7 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
                 <div className="relative p-4 font-mono text-[10px] text-neutral-400 bg-neutral-950 max-h-40 overflow-y-auto leading-relaxed whitespace-pre-wrap select-all">
                   <button
                     onClick={handleCopy}
-                    className="absolute top-2.5 right-2.5 bg-neutral-900 border border-neutral-800 hover:border-purple-500 text-neutral-300 hover:text-white p-1.5 rounded-lg text-[9px] flex items-center gap-1 cursor-pointer transition-all hover:bg-neutral-950"
+                    className="absolute top-2.5 right-2.5 bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6] text-neutral-300 hover:text-white p-1.5 rounded-lg text-[9px] flex items-center gap-1 cursor-pointer transition-all hover:bg-neutral-950"
                   >
                     {copied ? (
                       <>
@@ -182,7 +182,7 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
             {error.onRetry && (
               <button
                 onClick={handleApplyRetry}
-                className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs tracking-wide shadow-lg shadow-purple-950/55 hover:shadow-indigo-500/25 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="btn-primary w-full sm:w-auto px-6 py-2.5 rounded-xl text-xs font-semibold tracking-wide shadow-lg shadow-[#3B82F6]/20 hover:shadow-[#3B82F6]/30 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <RefreshCw className="h-3.5 w-3.5 animate-spin-slow" />
                 <span>Auto-Apply & Re-clean Target</span>

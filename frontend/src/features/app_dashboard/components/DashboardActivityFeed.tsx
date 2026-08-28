@@ -5,13 +5,10 @@ import {
   Sparkles,
   Volume2,
   Film,
-  Download,
   ArrowUpRight,
   Clock,
-  CheckCircle2,
-  Zap,
+  Download,
 } from "lucide-react";
-import { Project } from "@/features/app_dashboard/hooks/useDashboardPage";
 
 interface ActivityItem {
   id: string;
@@ -27,20 +24,18 @@ interface ActivityItem {
 
 interface DashboardActivityFeedProps {
   analytics?: { activities?: any[] } | null;
-  projects?: Project[];
 }
 
 export default function DashboardActivityFeed({
   analytics,
-  projects = [],
 }: DashboardActivityFeedProps) {
   const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  // Derive dynamic activity items from real projects & analytics
+  // Derive dynamic activity items from real analytics only
   const activities: ActivityItem[] = useMemo(() => {
     const items: ActivityItem[] = [];
 
-    // 1. Explicit activities from analytics
+    // Only use explicit activities from the analytics API — no synthesized/fake items
     if (analytics?.activities && Array.isArray(analytics.activities)) {
       analytics.activities.forEach((act, idx) => {
         items.push({
@@ -55,63 +50,9 @@ export default function DashboardActivityFeed({
       });
     }
 
-    // 2. Synthesize activities from user's actual projects
-    projects.forEach((proj) => {
-      const pTitle = proj.title || "Untitled Project";
-      const createdDate = proj.created_at ? new Date(proj.created_at) : null;
-      const timeStr = createdDate && !isNaN(createdDate.getTime())
-        ? createdDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-        : "Recent";
-
-      // A. Panel Import / Scrape Activity
-      const importedCount = proj.imported_assets_count || proj.panels_count || 0;
-      if (importedCount > 0) {
-        items.push({
-          id: `scrape-${proj.project_id}`,
-          title: `${pTitle}`,
-          desc: `Imported and indexed ${importedCount} panels into the asset deck.`,
-          time: timeStr,
-          type: "scrape",
-          projectId: proj.project_id,
-          coverImage: proj.cover_image,
-          badge: `${importedCount} Panels`,
-          badgeColor: "text-purple-300 bg-purple-500/15 border-purple-500/30",
-        });
-      }
-
-      // B. Storyboard / Panel Segmentation Activity
-      if (proj.panels_count > 0) {
-        items.push({
-          id: `panel-${proj.project_id}`,
-          title: `${pTitle} · Panel Segmentation`,
-          desc: `Cleaned speech bubbles and configured 2.5D camera motions.`,
-          time: timeStr,
-          type: "panel",
-          projectId: proj.project_id,
-          coverImage: proj.cover_image,
-          badge: "Storyboard Ready",
-          badgeColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
-        });
-      }
-
-      // C. Video Render / Complete Activity
-      if (proj.status?.toLowerCase() === "completed" || proj.status?.toLowerCase() === "ready") {
-        items.push({
-          id: `render-${proj.project_id}`,
-          title: `${pTitle} · Final Reel Rendered`,
-          desc: `High-definition anime video composition exported.`,
-          time: timeStr,
-          type: "render",
-          projectId: proj.project_id,
-          coverImage: proj.cover_image,
-          badge: "Completed",
-          badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-        });
-      }
-    });
-
     return items;
-  }, [projects, analytics]);
+  }, [analytics]);
+
 
   // Filter activities
   const filteredActivities = useMemo(() => {
