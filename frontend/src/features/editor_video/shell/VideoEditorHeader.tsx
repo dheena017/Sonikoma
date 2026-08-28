@@ -124,7 +124,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
-  const { status: backendStatus } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const creditsRef = useRef<HTMLDivElement | null>(null);
@@ -227,7 +227,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
         {/* Server Status Indicator */}
         <div className="flex items-center justify-center">
-          <ServerStatusIndicator status={backendStatus} />
+          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2.5">

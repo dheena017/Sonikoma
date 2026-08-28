@@ -28,6 +28,7 @@ from app.schemas.health import (
     CPUUsageStatus,
     MemoryUsageStatus,
     GPUUsageStatus,
+    NetworkStatus,
     DatabaseHealthStatus,
     DatabaseTableCounts,
     StorageStatus,

@@ -30,6 +30,7 @@ import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { HeaderCreditsPopover } from "@/features/ai_core";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { useBackendHealth } from "@/shared/hooks";
 import { AIModelSelector } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 
@@ -98,6 +99,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   );
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
+  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
 
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
@@ -313,7 +315,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       {/* Right Section - Action Buttons (Unified h-9 height and clean spacing) */}
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
         {/* 🟢 Server Status Indicator */}
-        <ServerStatusIndicator status={backendOnline ? "online" : "offline"} />
+        <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
 
         {/* 🤖 Global AI Model Selector */}
         <AIModelSelector compact className="flex" />

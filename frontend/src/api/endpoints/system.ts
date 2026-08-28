@@ -16,7 +16,15 @@ export const startBackend = async (): Promise<ApiResponse<any>> => {
 };
 
 export const checkHealth = async (): Promise<ApiResponse<any>> => {
-  const res = await fetch("/api/v1/system/health");
+  try {
+    const res = await fetch("/api/v1/system/health");
+    if (res.ok) return await res.json();
+  } catch {}
+  try {
+    const res = await fetch("/api/v1/system/status");
+    if (res.ok) return await res.json();
+  } catch {}
+  const res = await fetch("/api/health");
   if (!res.ok) throw new Error("Health check failed");
   return res.json();
 };

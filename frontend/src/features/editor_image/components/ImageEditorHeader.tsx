@@ -109,7 +109,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
-  const { status: backendStatus } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
@@ -267,7 +267,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
       {/* ── Right: AI Routing, Credits, Notifications, Profile & Actions ─── */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         {/* 🟢 Server Status Indicator */}
-        <ServerStatusIndicator status={backendStatus} />
+        <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
 
         {/* 🤖 Global AI Model Selector */}
         <AIModelSelector compact className="flex" />

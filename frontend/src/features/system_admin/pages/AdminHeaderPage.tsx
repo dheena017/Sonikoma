@@ -80,7 +80,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
 
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
-  const { status: backendStatus } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const telemetryRef = useRef<HTMLDivElement>(null);
@@ -321,7 +321,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
       {/* Right side: Controls matching main header layout */}
       <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
         {/* Server Status Indicator */}
-        <ServerStatusIndicator status={backendStatus} />
+        <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
 
         {/* 🤖 Global AI Model Selector */}
         <AIModelSelector className="flex" />
