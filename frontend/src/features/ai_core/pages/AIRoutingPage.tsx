@@ -819,7 +819,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           return (
             <div
               key={route.task}
-              className="rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 sm:p-5 transition-all duration-200 relative overflow-hidden hover:border-[#3B82F6]/60 shadow-lg"
+              className="rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 sm:p-5 transition-all duration-200 relative overflow-visible hover:border-[#3B82F6]/60 shadow-lg"
             >
               {/* Task Header */}
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">

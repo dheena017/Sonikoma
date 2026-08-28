@@ -228,7 +228,9 @@ export default function TierModelCard({
   return (
     <div
       ref={dropdownRef}
-      className="relative flex flex-col rounded-2xl border transition-all duration-200 overflow-visible"
+      className={`relative flex flex-col rounded-2xl border transition-all duration-200 overflow-visible ${
+        isOpen ? "z-40" : "z-10"
+      }`}
       style={{
         backgroundColor: "#141414",
         borderColor: isOpen ? cfg.color : cfg.borderAccent,
