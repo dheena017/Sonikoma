@@ -98,118 +98,116 @@ function ImageEditorToolsPanel(
     <div className="w-full h-full flex flex-col min-h-0 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl overflow-hidden text-left">
       {/* Main Active Tool Panel Area */}
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <div className="bg-[#14151f]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-2xl space-y-4">
-          {activeTab === "merge" && (
-            <MergePanel
-              editingImageIdx={editingImageIdx}
-              scrapedImages={scrapedImages}
-              isMerging={isMerging}
-              onMerge={handleMergeWithNext}
-            />
-          )}
+        {activeTab === "merge" && (
+          <MergePanel
+            editingImageIdx={editingImageIdx}
+            scrapedImages={scrapedImages}
+            isMerging={isMerging}
+            onMerge={handleMergeWithNext}
+          />
+        )}
 
-          {activeTab === "separate" && (
-            <LayerSeparationPanel
-              activeStoryboardPanel={activeStoryboardPanel}
-              setPanels={setPanels}
-              addNotification={addNotification}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          )}
+        {activeTab === "separate" && (
+          <LayerSeparationPanel
+            activeStoryboardPanel={activeStoryboardPanel}
+            setPanels={setPanels}
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />
+        )}
 
-          {activeTab === "train" && (
-            <YoloTrainingPanel
-              activeTab={activeTab}
-              addNotification={addNotification}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          )}
+        {activeTab === "train" && (
+          <YoloTrainingPanel
+            activeTab={activeTab}
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />
+        )}
 
-          {activeTab === "draw" && (
-            <FreehandPanel
-              brushSize={brushSize}
-              setBrushSize={setBrushSize}
-              brushAction={brushAction}
-              setBrushAction={setBrushAction}
-              fillColor={fillColor}
-              setFillColor={setFillColor}
-              textBgColor={textBgColor || "#ffffff"}
-              setTextBgColor={setTextBgColor || (() => {})}
-              activeStoryboardPanel={activeStoryboardPanel}
-              setPanels={setPanels}
-              addNotification={addNotification}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          )}
+        {activeTab === "draw" && (
+          <FreehandPanel
+            brushSize={brushSize}
+            setBrushSize={setBrushSize}
+            brushAction={brushAction}
+            setBrushAction={setBrushAction}
+            fillColor={fillColor}
+            setFillColor={setFillColor}
+            textBgColor={textBgColor || "#ffffff"}
+            setTextBgColor={setTextBgColor || (() => {})}
+            activeStoryboardPanel={activeStoryboardPanel}
+            setPanels={setPanels}
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />
+        )}
 
-          {activeTab === "edit" && (
-            <ImageEditorPanel
-              editCropTop={editCropTop}
-              editCropBottom={editCropBottom}
-              editCropLeft={editCropLeft}
-              editCropRight={editCropRight}
-              setEditCropTop={setEditCropTop}
-              setEditCropBottom={setEditCropBottom}
-              setEditCropLeft={setEditCropLeft}
-              setEditCropRight={setEditCropRight}
-              zoom={zoom}
-              setZoom={setZoom}
-              isTransforming={isTransforming}
-              onRotate={(deg) => handleTransform("rotate", String(deg))}
-              onFlip={(axis) => handleTransform("flip", axis)}
-              onReset={handleResetCropBounds}
-              handleNudge={handleNudge}
-            />
-          )}
+        {activeTab === "edit" && (
+          <ImageEditorPanel
+            editCropTop={editCropTop}
+            editCropBottom={editCropBottom}
+            editCropLeft={editCropLeft}
+            editCropRight={editCropRight}
+            setEditCropTop={setEditCropTop}
+            setEditCropBottom={setEditCropBottom}
+            setEditCropLeft={setEditCropLeft}
+            setEditCropRight={setEditCropRight}
+            zoom={zoom}
+            setZoom={setZoom}
+            isTransforming={isTransforming}
+            onRotate={(deg) => handleTransform("rotate", String(deg))}
+            onFlip={(axis) => handleTransform("flip", axis)}
+            onReset={handleResetCropBounds}
+            handleNudge={handleNudge}
+          />
+        )}
 
-          {activeTab === "adjust" && (
-            <EnhancementsPanel
-              activeStoryboardPanel={activeStoryboardPanel}
-              handleModifyBrightness={handleModifyBrightness}
-              handleModifyContrast={handleModifyContrast}
-              handleModifySaturation={handleModifySaturation}
-              handleModifyFilterPreset={handleModifyFilterPreset}
-              handleModifyGrayscale={handleModifyGrayscale}
-              handleModifyDuration={handleModifyDuration}
-              handleModifyMotionType={handleModifyMotionType}
-              handleModifySpeechText={handleModifySpeechText}
-              handleModifyNarrative={handleModifyNarrative}
-              handleModifyVisualDescription={handleModifyVisualDescription}
-              handleModifySfx={handleModifySfx}
-              handleModifyCropPadding={handleModifyCropPadding}
-              setPanels={setPanels}
-              editingImageIdx={editingImageIdx}
-              totalImages={scrapedImages?.length || 1}
-              addNotification={addNotification}
-              fetchWithInterceptor={fetchWithInterceptor}
-            />
-          )}
+        {activeTab === "adjust" && (
+          <EnhancementsPanel
+            activeStoryboardPanel={activeStoryboardPanel}
+            handleModifyBrightness={handleModifyBrightness}
+            handleModifyContrast={handleModifyContrast}
+            handleModifySaturation={handleModifySaturation}
+            handleModifyFilterPreset={handleModifyFilterPreset}
+            handleModifyGrayscale={handleModifyGrayscale}
+            handleModifyDuration={handleModifyDuration}
+            handleModifyMotionType={handleModifyMotionType}
+            handleModifySpeechText={handleModifySpeechText}
+            handleModifyNarrative={handleModifyNarrative}
+            handleModifyVisualDescription={handleModifyVisualDescription}
+            handleModifySfx={handleModifySfx}
+            handleModifyCropPadding={handleModifyCropPadding}
+            setPanels={setPanels}
+            editingImageIdx={editingImageIdx}
+            totalImages={scrapedImages?.length || 1}
+            addNotification={addNotification}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />
+        )}
 
-          {activeTab === "slice" && (
-            <HorizontalSplitter
-              splitPosition={splitPosition}
-              setSplitPosition={setSplitPosition}
-              splitLines={splitLines}
-              setSplitLines={setSplitLines}
-              showSplitPosition={showSplitPosition}
-              setShowSplitPosition={setShowSplitPosition}
-              setEditCropTop={setEditCropTop}
-              setEditCropBottom={setEditCropBottom}
-              setEditCropLeft={setEditCropLeft}
-              setEditCropRight={setEditCropRight}
-              setSelectedSliceId={setSelectedSliceId}
-              handleAddSplitLine={handleAddSplitLine}
-              handleRemoveSplitLine={handleRemoveSplitLine}
-              handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
-              isSavingEdit={isSavingEdit}
-              imageUrl={imageUrl}
-              magneticSnap={magneticSnap}
-              setMagneticSnap={setMagneticSnap}
-              detectedGutters={detectedGutters}
-              setDetectedGutters={setDetectedGutters}
-            />
-          )}
-        </div>
+        {activeTab === "slice" && (
+          <HorizontalSplitter
+            splitPosition={splitPosition}
+            setSplitPosition={setSplitPosition}
+            splitLines={splitLines}
+            setSplitLines={setSplitLines}
+            showSplitPosition={showSplitPosition}
+            setShowSplitPosition={setShowSplitPosition}
+            setEditCropTop={setEditCropTop}
+            setEditCropBottom={setEditCropBottom}
+            setEditCropLeft={setEditCropLeft}
+            setEditCropRight={setEditCropRight}
+            setSelectedSliceId={setSelectedSliceId}
+            handleAddSplitLine={handleAddSplitLine}
+            handleRemoveSplitLine={handleRemoveSplitLine}
+            handleExecuteHorizontalSplit={handleExecuteHorizontalSplit}
+            isSavingEdit={isSavingEdit}
+            imageUrl={imageUrl}
+            magneticSnap={magneticSnap}
+            setMagneticSnap={setMagneticSnap}
+            detectedGutters={detectedGutters}
+            setDetectedGutters={setDetectedGutters}
+          />
+        )}
       </div>
     </div>
   );

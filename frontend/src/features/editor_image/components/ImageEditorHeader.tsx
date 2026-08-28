@@ -186,20 +186,25 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#0a0b10] border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6)] flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex-shrink-0 z-50 selection:bg-purple-650 relative gap-2 sm:gap-4">
+    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#0c0d12]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_32px_rgba(0,0,0,0.6)] flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex-shrink-0 z-50 selection:bg-purple-650 relative gap-2 sm:gap-4">
       {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
-        {onToggleSidebar && (
-          <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1 sm:mr-2">
-            <button
-              onClick={onToggleSidebar}
-              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/8 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
-              title="Toggle Navigation Menu"
-            >
-              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
-            </button>
-          </div>
-        )}
+        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/10 h-full mr-1 sm:mr-2">
+          <button
+            onClick={() => {
+              if (onToggleSidebar) {
+                onToggleSidebar();
+              } else {
+                useProjectStore.getState().setDrawerOpen(true);
+              }
+            }}
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
+            title="Toggle Navigation Menu"
+            aria-label="Toggle Navigation Menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
 
         <div
           className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"

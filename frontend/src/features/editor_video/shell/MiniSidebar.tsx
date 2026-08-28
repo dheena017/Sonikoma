@@ -122,13 +122,13 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
               setReturnHover(true);
             }}
             onMouseLeave={() => setReturnHover(false)}
-            aria-label="Return to Workspace"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_28px_rgba(59,130,246,0.8)] border border-[#60A5FA]/40 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95"
+            aria-label="Return to Creative Suite"
+            className="w-11 h-11 rounded-2xl bg-gradient-to-b from-[#8B5CF6] to-[#6366F1] hover:from-[#9d74f8] hover:to-[#7376f4] text-white shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:shadow-[0_0_28px_rgba(139,92,246,0.85)] border border-[#A78BFA]/40 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95"
           >
-            <ArrowLeft className="w-5 h-5 text-white" />
+            <ArrowLeft className="w-5 h-5 text-white stroke-[2.5]" />
           </button>
           <TooltipPortal
-            text="Return to Workspace"
+            text="Return to Creative Suite"
             visible={returnHover}
             anchorRect={returnRect}
           />

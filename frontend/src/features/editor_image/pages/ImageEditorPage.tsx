@@ -310,13 +310,17 @@ const ImageEditorPage = React.memo(
         <div className="flex-1 flex flex-row overflow-hidden w-full relative">
           {/* Left Tools Sidebar */}
           <aside
-            className={`h-full bg-[#0a0b10] border-r border-white/8 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`h-full bg-[#0a0b10] border-r border-white/10 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] relative ${
               isToolsPanelOpen
-                ? "w-[360px] lg:w-[420px] opacity-100"
-                : "w-0 opacity-0 border-none"
+                ? "w-[360px] lg:w-[420px]"
+                : "w-0 border-none"
             }`}
           >
-            <div className="w-[360px] lg:w-[420px] h-full flex flex-col min-h-0 overflow-hidden">
+            <div
+              className={`w-[360px] lg:w-[420px] h-full flex flex-col min-h-0 overflow-hidden transition-opacity duration-200 ${
+                !isToolsPanelOpen ? "pointer-events-none opacity-0 invisible" : "opacity-100"
+              }`}
+            >
               <ImageEditorToolsPanel
                 setActiveTab={setActiveTool}
                 slices={editorProps.slices}
@@ -515,28 +519,26 @@ const ImageEditorPage = React.memo(
                 activeTab={activeTool as any}
               />
             </div>
-          </aside>
 
-          {/* Floating Sidebar Collapse/Expand Tab Button on the Border */}
-          <button
-            type="button"
-            onClick={() => setIsToolsPanelOpen((prev) => !prev)}
-            aria-label={
-              isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
-            }
-            className={`absolute top-1/2 -translate-y-1/2 z-30 w-5 h-16 rounded-r-xl bg-[#141522]/95 hover:bg-[#202236] border-y border-r border-white/20 text-neutral-400 hover:text-white flex items-center justify-center shadow-[4px_0_16px_rgba(0,0,0,0.7)] transition-all duration-300 cursor-pointer group active:scale-95 ${
-              isToolsPanelOpen ? "left-[360px] lg:left-[420px]" : "left-0"
-            }`}
-            title={
-              isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
-            }
-          >
-            {isToolsPanelOpen ? (
-              <ChevronLeft className="w-3.5 h-3.5 text-neutral-400 group-hover:text-purple-300 transition-transform group-hover:-translate-x-0.5" />
-            ) : (
-              <ChevronRight className="w-3.5 h-3.5 text-neutral-400 group-hover:text-purple-300 transition-transform group-hover:translate-x-0.5" />
-            )}
-          </button>
+            {/* Floating Sidebar Collapse/Expand Tab Button on the Exact Sidebar Border */}
+            <button
+              type="button"
+              onClick={() => setIsToolsPanelOpen((prev) => !prev)}
+              aria-label={
+                isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
+              }
+              className="absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 h-20 rounded-r-2xl bg-[#141522]/95 hover:bg-[#202236] border-y border-r border-white/20 hover:border-purple-500/50 text-neutral-300 hover:text-white flex items-center justify-center shadow-[6px_0_24px_rgba(0,0,0,0.85)] transition-all cursor-pointer group active:scale-95"
+              title={
+                isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
+              }
+            >
+              {isToolsPanelOpen ? (
+                <ChevronLeft className="w-4 h-4 text-neutral-400 group-hover:text-purple-300 transition-transform group-hover:-translate-x-0.5" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-purple-300 transition-transform group-hover:translate-x-0.5" />
+              )}
+            </button>
+          </aside>
 
           {/* Center Canvas */}
           <main className="flex-1 h-full relative overflow-hidden bg-black/30 backdrop-blur-sm flex items-center justify-center">

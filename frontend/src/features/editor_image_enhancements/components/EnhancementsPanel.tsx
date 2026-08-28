@@ -127,7 +127,19 @@ export default function EnhancementsPanel({
   };
 
   return (
-    <div className="space-y-4 bg-white/[0.01] p-4 rounded-2xl border border-white/[0.05]">
+    <div className="space-y-4 font-sans text-left w-full">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <span className="text-xs uppercase font-mono font-bold text-white tracking-wider">
+            Image Enhancements
+          </span>
+        </div>
+      </div>
+
       {/* Fine-Tuning & Presets */}
       <EnhancementsPresets
         activeStoryboardPanel={activeStoryboardPanel}

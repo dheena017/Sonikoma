@@ -281,7 +281,7 @@ export default function HorizontalSplitter({
   const resultingSegments = getResultingSegments();
 
   return (
-    <div className="space-y-4 bg-[#14151f]/80 backdrop-blur-xl p-5 rounded-3xl border border-white/10 font-sans text-left shadow-2xl">
+    <div className="space-y-4 font-sans text-left w-full">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div className="flex items-center gap-2.5">

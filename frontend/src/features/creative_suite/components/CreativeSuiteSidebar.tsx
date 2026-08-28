@@ -36,13 +36,13 @@ const ActiveProjectSidebarWidget: React.FC<{
   }, [coverUrl]);
 
   return (
-    <div className="p-3.5 rounded-2xl bg-neutral-900/80 border border-white/10 text-xs shadow-md">
+    <div className="p-3 rounded-2xl bg-neutral-900/70 border border-neutral-800/80 text-xs shadow-sm my-2 backdrop-blur-md">
       <div className="flex items-center justify-between mb-2.5">
-        <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5 font-sans">
-          <Zap className="w-3.5 h-3.5 text-purple-400" /> Active Project
+        <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5">
+          <Zap className="w-3 h-3 text-purple-400" /> Active Project
         </span>
         {activeProjectId ? (
-          <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-1">
+          <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Active
           </span>
@@ -51,8 +51,8 @@ const ActiveProjectSidebarWidget: React.FC<{
 
       {activeProjectId && activeProjectData ? (
         <div className="space-y-2.5">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl overflow-hidden bg-neutral-950 border border-white/15 shrink-0 flex items-center justify-center shadow-inner">
+          <div className="flex items-center gap-3 p-2 rounded-xl bg-neutral-950/70 border border-neutral-800/60 hover:border-neutral-700/80 transition-colors">
+            <div className="w-9 h-9 rounded-xl overflow-hidden bg-neutral-900 border border-neutral-700/50 shrink-0 flex items-center justify-center shadow-inner">
               {coverUrl && !imgError ? (
                 <img
                   src={
@@ -65,27 +65,26 @@ const ActiveProjectSidebarWidget: React.FC<{
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-900/60 to-indigo-900/60 border border-purple-500/30 flex items-center justify-center text-purple-300 font-bold text-xs">
-                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
-                    "P"}
+                <div className="w-full h-full bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border border-purple-500/20 flex items-center justify-center text-purple-300 font-bold text-xs">
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
                 </div>
               )}
             </div>
-            <div className="min-w-0 flex flex-col">
-              <h4 className="font-bold text-xs text-white truncate leading-tight">
+            <div className="min-w-0 flex-1">
+              <h4 className="font-semibold text-xs text-neutral-100 truncate leading-tight">
                 {activeProjectData.project?.title || "Untitled Project"}
               </h4>
-              <span className="text-[10.5px] text-neutral-400 truncate mt-0.5 font-sans">
-                {activeProjectData.panels?.length || 0} Panels
+              <span className="text-[10px] text-neutral-400 truncate font-mono">
+                {activeProjectData.panels?.length || activeProjectData.project?.panels_count || 0} panels
               </span>
             </div>
           </div>
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 hover:text-white border border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 shadow-sm"
+            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-purple-600/20 text-neutral-300 hover:text-purple-200 border border-neutral-700/60 hover:border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
           >
-            <FolderSync className="w-3.5 h-3.5 text-purple-400" />
+            <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
           </button>
         </div>

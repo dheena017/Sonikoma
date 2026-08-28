@@ -180,7 +180,19 @@ export default function LayerSeparationPanel({
   const hasSyncMap = !!activeStoryboardPanel?.syncMap;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-sans text-left w-full">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+            <Layers className="h-4 w-4" />
+          </div>
+          <span className="text-xs uppercase font-mono font-bold text-white tracking-wider">
+            Layer Separation
+          </span>
+        </div>
+      </div>
+
       {/* Overview Card */}
       <div className="bg-[#111115] border border-white/5 rounded-2xl p-4 space-y-2">
         <h4 className="text-[11px] font-mono text-purple-400 uppercase font-black tracking-wider">

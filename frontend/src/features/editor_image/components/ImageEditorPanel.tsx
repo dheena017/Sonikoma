@@ -148,6 +148,27 @@ export default function ImageEditorPanel({
 
   return (
     <div className="space-y-4 font-sans text-left">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <Crop className="h-4 w-4" />
+          </div>
+          <span className="text-xs uppercase font-mono font-bold text-white tracking-wider">
+            Rotate &amp; Crop
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onReset}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-neutral-800 border border-white/10 hover:border-white/20 text-neutral-400 hover:text-white text-[10px] font-mono transition-all cursor-pointer active:scale-95"
+          title="Reset All Adjustments"
+        >
+          <RefreshCcw className="h-3 w-3" />
+          <span>Reset</span>
+        </button>
+      </div>
+
       {activeTool === "edit" && (
         <>
           {/* Rotate & Flip Card */}

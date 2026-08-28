@@ -81,15 +81,17 @@ export default function MergePanel({
   };
 
   return (
-    <div className="space-y-4 bg-white/[0.01] p-4 rounded-2xl border border-white/[0.05]">
+    <div className="space-y-4 font-sans text-left w-full">
       {/* ── Header ── */}
-      <div className="flex items-center gap-2">
-        <div className="p-1 rounded-lg bg-teal-500/10 border border-teal-500/15">
-          <Link2 className="h-3 w-3 text-teal-400" />
+      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-400">
+            <Link2 className="h-4 w-4" />
+          </div>
+          <span className="text-xs uppercase font-mono font-bold text-white tracking-wider">
+            Panel Stitching
+          </span>
         </div>
-        <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
-          Advanced Panel Stitching
-        </span>
       </div>
 
       {/* ── Configuration Options ── */}

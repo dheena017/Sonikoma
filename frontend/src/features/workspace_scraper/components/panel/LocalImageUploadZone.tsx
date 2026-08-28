@@ -63,10 +63,10 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
         }}
         onDragLeave={() => setIsDraggingOver(false)}
         onDrop={handleDropFiles}
-        className={`relative border-2 border-dashed rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+        className={`relative border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
           isDraggingOver
-            ? "border-purple-500 bg-purple-950/30 scale-[1.01]"
-            : "border-neutral-800 hover:border-purple-500/50 bg-neutral-950/60 hover:bg-neutral-950"
+            ? "border-purple-500 bg-purple-950/40 shadow-[0_0_30px_rgba(168,85,247,0.3)] scale-[1.01]"
+            : "border-purple-500/25 hover:border-purple-500/50 bg-[#12131e]/50 hover:bg-[#181926]/80 shadow-lg"
         }`}
       >
         <input
@@ -76,14 +76,16 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
           onChange={handleFileChange}
           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
         />
-        <div className="w-14 h-14 rounded-2xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center mb-3 text-purple-400">
-          <UploadCloud className="w-7 h-7" />
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600/20 to-indigo-600/20 border border-purple-500/30 flex items-center justify-center mb-3.5 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.25)]">
+          <UploadCloud className="w-8 h-8" />
         </div>
-        <h3 className="text-base font-bold text-white mb-1 font-sans">
-          Drag & drop your images here, or{" "}
-          <span className="text-purple-400 underline">click to browse</span>
+        <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 font-sans">
+          Drag &amp; drop your images here, or{" "}
+          <span className="text-purple-400 underline hover:text-purple-300 transition-colors">
+            click to browse
+          </span>
         </h3>
-        <p className="text-xs text-neutral-400 max-w-md font-sans">
+        <p className="text-xs text-neutral-400 max-w-md font-sans leading-relaxed">
           Supports PNG, JPG, JPEG, WEBP, GIF, and SVG files. Multiple files
           allowed.
         </p>
