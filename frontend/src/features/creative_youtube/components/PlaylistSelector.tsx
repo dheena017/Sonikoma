@@ -158,43 +158,38 @@ export default function PlaylistSelector({
       </div>
 
       <div className="relative">
-        <select
+        <CyberSelect
           value={playlist}
-          onChange={(e) => setPlaylist(e.target.value)}
-          className="w-full bg-neutral-950/70 border border-neutral-700 hover:border-neutral-600 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl px-4 py-3 text-xs text-neutral-200 focus:outline-none transition-all cursor-pointer appearance-none shadow-inner font-mono"
-        >
-          <option value="" className="bg-neutral-950 text-neutral-400">
-            -- No Playlist (Upload as Standalone Video) --
-          </option>
-          {playlists.map((pl) => (
-            <option
-              key={pl.id}
-              value={pl.id}
-              className="bg-neutral-950 text-white"
-            >
-              {pl.title}{" "}
-              {pl.item_count !== undefined ? `(${pl.item_count} videos)` : ""}
-            </option>
-          ))}
-          {playlists.length === 0 && !isLoading && (
-            <option
-              value="none_available"
-              disabled
-              className="bg-neutral-950 text-neutral-500"
-            >
-              (No playlists found on YouTube channel - Click "New Playlist" to
-              create one)
-            </option>
-          )}
-        </select>
-
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-500">
-          <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-          </svg>
-        </div>
+          onChange={setPlaylist}
+          placeholder="-- No Playlist (Upload as Standalone Video) --"
+          options={[
+            {
+              value: "",
+              label: "-- No Playlist (Upload as Standalone Video) --",
+              description: "Uploads video directly to channel feed without playlist",
+            },
+            ...playlists.map((pl) => ({
+              value: pl.id,
+              label: pl.title,
+              description:
+                pl.item_count !== undefined
+                  ? `${pl.item_count} videos in playlist`
+                  : undefined,
+            })),
+            ...(playlists.length === 0 && !isLoading
+              ? [
+                  {
+                    value: "none_available",
+                    label: "No playlists found on YouTube channel",
+                    description: 'Click "+ New Playlist" above to create one',
+                    disabled: true,
+                  },
+                ]
+              : []),
+          ]}
+        />
         {isLoading && (
-          <div className="absolute right-10 top-1/2 -translate-y-1/2">
+          <div className="absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none">
             <Loader2 className="h-3.5 w-3.5 text-red-400 animate-spin" />
           </div>
         )}
@@ -206,22 +201,21 @@ export default function PlaylistSelector({
           <div className="bg-neutral-900 border border-neutral-700/80 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400">
-                  <FolderPlus className="w-4 h-4" />
-                </div>
-                <h4 className="text-sm font-black text-white font-sans tracking-tight">
-                  Create YouTube Playlist
-                </h4>
+                <FolderPlus className="h-4 w-4 text-red-400" />
+                <h3 className="font-bold text-white text-sm font-sans">
+                  Create New YouTube Playlist
+                </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setShowCreateModal(false)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer"
+                className="text-neutral-400 hover:text-white p-1 rounded-lg hover:bg-neutral-800 transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            <form onSubmit={handleCreatePlaylist} className="space-y-3">
+            <form onSubmit={handleCreatePlaylist} className="space-y-3.5">
               <div className="space-y-1">
                 <label className="text-[11px] font-mono text-neutral-300 font-bold uppercase tracking-wider block">
                   Playlist Title <span className="text-red-400">*</span>
@@ -231,7 +225,7 @@ export default function PlaylistSelector({
                   required
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="e.g. Solo Leveling Manhwa Chapters"
+                  placeholder="e.g. Manga Recap Series, Best Manhwa"
                   className="w-full bg-neutral-950/70 border border-neutral-700 focus:border-red-500/70 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none font-sans"
                 />
               </div>
@@ -253,17 +247,27 @@ export default function PlaylistSelector({
                 <label className="text-[11px] font-mono text-neutral-300 font-bold uppercase tracking-wider block">
                   Privacy
                 </label>
-                <select
+                <CyberSelect
                   value={newPrivacy}
-                  onChange={(e) => setNewPrivacy(e.target.value)}
-                  className="w-full bg-neutral-950/70 border border-neutral-700 focus:border-red-500/70 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none font-mono cursor-pointer"
-                >
-                  <option value="public">
-                    Public - Anyone can find and view
-                  </option>
-                  <option value="unlisted">Unlisted - Only with link</option>
-                  <option value="private">Private - Only you</option>
-                </select>
+                  onChange={setNewPrivacy}
+                  options={[
+                    {
+                      value: "public",
+                      label: "Public",
+                      description: "Anyone can find and view",
+                    },
+                    {
+                      value: "unlisted",
+                      label: "Unlisted",
+                      description: "Only with direct link",
+                    },
+                    {
+                      value: "private",
+                      label: "Private",
+                      description: "Only visible to you",
+                    },
+                  ]}
+                />
               </div>
 
               <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-neutral-800">

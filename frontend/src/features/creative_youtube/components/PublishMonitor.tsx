@@ -22,6 +22,7 @@ import YouTubeOfficialLogo from "./YouTubeOfficialLogo";
 import YouTubeChannelHeader from "./YouTubeChannelHeader";
 import YouTubeSeoOptimizer from "./YouTubeSeoOptimizer";
 import YouTubeVideoGrid from "./YouTubeVideoGrid";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 interface PublishMonitorProps {
   activeVideoUrl: string | null;
@@ -579,39 +580,32 @@ export default function PublishMonitor({
                 </div>
 
                 <div className="space-y-1 md:col-span-2">
-                  <span className="text-neutral-500 block font-bold">
+                  <span className="text-neutral-500 block font-bold text-[10px]">
                     FONT STYLE:
                   </span>
-                  <select
+                  <CyberSelect
                     value={fontFamily}
-                    onChange={(e) => setFontFamily(e.target.value)}
-                    className="w-full bg-neutral-955/40 border border-neutral-900 rounded-lg px-2.5 py-1.5 text-[10px] text-neutral-300 focus:outline-none cursor-pointer"
-                  >
-                    <option
-                      value="Impact, Arial Black, sans-serif"
-                      className="bg-neutral-950"
-                    >
-                      Impact (YouTube Classic)
-                    </option>
-                    <option
-                      value="'Montserrat', sans-serif font-black"
-                      className="bg-neutral-950"
-                    >
-                      Montserrat Black
-                    </option>
-                    <option
-                      value="'Bungee', sans-serif"
-                      className="bg-neutral-950"
-                    >
-                      Bungee Bold
-                    </option>
-                    <option
-                      value="'Comic Sans MS', cursive"
-                      className="bg-neutral-950"
-                    >
-                      Comic Meme Style
-                    </option>
-                  </select>
+                    onChange={setFontFamily}
+                    size="sm"
+                    options={[
+                      {
+                        value: "Impact, Arial Black, sans-serif",
+                        label: "Impact (YouTube Classic)",
+                      },
+                      {
+                        value: "'Montserrat', sans-serif font-black",
+                        label: "Montserrat Black",
+                      },
+                      {
+                        value: "'Bungee', sans-serif",
+                        label: "Bungee Bold",
+                      },
+                      {
+                        value: "'Comic Sans MS', cursive",
+                        label: "Comic Meme Style",
+                      },
+                    ]}
+                  />
                 </div>
 
                 <div className="md:col-span-2 border-t border-neutral-900 pt-2 flex justify-between items-center flex-wrap gap-2">

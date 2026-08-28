@@ -23,6 +23,7 @@ import {
   ArrowRight,
   FolderPlus,
 } from "lucide-react";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 import type { YouTubeVideoItem } from "./YouTubeChannelHome";
 import YouTubeCreatePlaylistPanel from "./YouTubeCreatePlaylistPanel";
 
@@ -514,29 +515,29 @@ export default function YouTubePlaylistsManager({
 
           {/* Privacy Filter */}
           <div className="md:col-span-3">
-            <select
+            <CyberSelect
               value={privacyFilter}
-              onChange={(e) => setPrivacyFilter(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
-            >
-              <option value="all">All Privacy Types</option>
-              <option value="public">Public</option>
-              <option value="unlisted">Unlisted</option>
-              <option value="private">Private</option>
-            </select>
+              onChange={setPrivacyFilter}
+              options={[
+                { value: "all", label: "All Privacy Types" },
+                { value: "public", label: "Public" },
+                { value: "unlisted", label: "Unlisted" },
+                { value: "private", label: "Private" },
+              ]}
+            />
           </div>
 
           {/* Sort By */}
           <div className="md:col-span-3">
-            <select
+            <CyberSelect
               value={sortBy}
-              onChange={(e: any) => setSortBy(e.target.value)}
-              className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
-            >
-              <option value="items">Most Videos First</option>
-              <option value="newest">Recently Published</option>
-              <option value="alpha">Alphabetical (A-Z)</option>
-            </select>
+              onChange={(val: any) => setSortBy(val)}
+              options={[
+                { value: "items", label: "Most Videos First" },
+                { value: "newest", label: "Recently Published" },
+                { value: "alpha", label: "Alphabetical (A-Z)" },
+              ]}
+            />
           </div>
         </div>
 

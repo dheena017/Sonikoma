@@ -25,6 +25,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { YouTubeVideoItem } from "./YouTubeChannelHome";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 interface YouTubeVideosPanelProps {
   onWatchVideo: (videoId: string, video: YouTubeVideoItem) => void;
@@ -303,28 +304,32 @@ export default function YouTubeVideosPanel({
 
           {/* Privacy & Sort Dropdowns */}
           <div className="md:col-span-3 flex items-center gap-2">
-            <select
+            <CyberSelect
               value={privacyFilter}
-              onChange={(e) => setPrivacyFilter(e.target.value)}
-              className="w-1/2 bg-neutral-950 border border-neutral-800 focus:border-red-500/60 rounded-xl px-2.5 py-2.5 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
-            >
-              <option value="all">All Privacy</option>
-              <option value="public">Public</option>
-              <option value="unlisted">Unlisted</option>
-              <option value="private">Private</option>
-            </select>
+              onChange={setPrivacyFilter}
+              size="sm"
+              className="w-1/2"
+              options={[
+                { value: "all", label: "All Privacy" },
+                { value: "public", label: "Public" },
+                { value: "unlisted", label: "Unlisted" },
+                { value: "private", label: "Private" },
+              ]}
+            />
 
-            <select
+            <CyberSelect
               value={sortBy}
-              onChange={(e: any) => setSortBy(e.target.value)}
-              className="w-1/2 bg-neutral-950 border border-neutral-800 focus:border-red-500/60 rounded-xl px-2.5 py-2.5 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="views">Most Views</option>
-              <option value="likes">Most Likes</option>
-              <option value="comments">Most Comments</option>
-            </select>
+              onChange={(val: any) => setSortBy(val)}
+              size="sm"
+              className="w-1/2"
+              options={[
+                { value: "newest", label: "Newest First" },
+                { value: "oldest", label: "Oldest First" },
+                { value: "views", label: "Most Views" },
+                { value: "likes", label: "Most Likes" },
+                { value: "comments", label: "Most Comments" },
+              ]}
+            />
           </div>
 
           {/* View Mode Toggle (Grid vs List) */}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Sparkles, UploadCloud, ChevronRight, Wand2, Image as ImageIcon } from "lucide-react";
 import PlaylistSelector from "../PlaylistSelector";
 import YouTubeThumbnailModal from "../YouTubeThumbnailModal";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 // Full YouTube category list (official IDs)
 const YOUTUBE_CATEGORIES = [
@@ -377,45 +378,37 @@ export default function StudioDetailsTab({
       />
 
       {/* CATEGORY + LANGUAGE */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider block">
             Category
           </label>
-          <select
+          <CyberSelect
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
-          >
-            {YOUTUBE_CATEGORIES.map((cat) => (
-              <option key={cat.id} value={cat.id} className="bg-neutral-950">
-                {cat.label}
-              </option>
-            ))}
-          </select>
+            onChange={setCategory}
+            options={YOUTUBE_CATEGORIES.map((cat) => ({
+              value: cat.id,
+              label: cat.label,
+            }))}
+          />
         </div>
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider block">
             Video language
           </label>
-          <select
+          <CyberSelect
             value={videoLanguage}
-            onChange={(e) => setVideoLanguage(e.target.value)}
-            className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl px-3.5 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
-          >
-            <option value="" className="bg-neutral-950">
-              Select language
-            </option>
-            {YOUTUBE_LANGUAGES.map((lang) => (
-              <option
-                key={lang.code}
-                value={lang.code}
-                className="bg-neutral-950"
-              >
-                {lang.label}
-              </option>
-            ))}
-          </select>
+            onChange={setVideoLanguage}
+            placeholder="Select language..."
+            searchable
+            options={[
+              { value: "", label: "Select language" },
+              ...YOUTUBE_LANGUAGES.map((lang) => ({
+                value: lang.code,
+                label: lang.label,
+              })),
+            ]}
+          />
         </div>
       </div>
 

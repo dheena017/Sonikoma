@@ -4,6 +4,7 @@ import { GeneratedPanel } from "@/types";
 import * as api from "@/api";
 import { fetchWithAuth } from "@/utils";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 interface PanelTranslationToolProps {
   panel: GeneratedPanel;
@@ -138,19 +139,32 @@ export default function PanelTranslationTool({
             </span>
           </div>
 
-          <div className="flex gap-2">
-            <select
+          <div className="flex items-center gap-2">
+            <CyberSelect
               value={lang}
-              onChange={(e) => setLang(e.target.value)}
-              className="flex-1 bg-neutral-950 border border-neutral-800 text-xs rounded-lg px-2.5 py-1.5 text-neutral-300 outline-none"
-            >
-              <option>Spanish</option>
-              <option>French</option>
-              <option>Japanese</option>
-              <option>Hindi</option>
-              <option>German</option>
-              <option>Korean</option>
-            </select>
+              onChange={setLang}
+              size="sm"
+              searchable
+              className="flex-1 min-w-0"
+              options={[
+                { value: "Tamil", label: "Tamil (தமிழ்)", description: "Direct native localization" },
+                { value: "Hindi", label: "Hindi (हिन्दी)", description: "Devanagari localization" },
+                { value: "Japanese", label: "Japanese (日本語)", description: "Authentic manga style" },
+                { value: "Korean", label: "Korean (한국어)", description: "Authentic webtoon style" },
+                { value: "Chinese", label: "Chinese (Simplified / 简体中文)", description: "Manhua localization" },
+                { value: "Spanish", label: "Spanish (Español)", description: "Neutral Spanish" },
+                { value: "French", label: "French (Français)", description: "Standard French" },
+                { value: "German", label: "German (Deutsch)", description: "Standard German" },
+                { value: "Portuguese", label: "Portuguese (Português)", description: "BR/PT localization" },
+                { value: "Arabic", label: "Arabic (العربية)", description: "Modern standard Arabic" },
+                { value: "Russian", label: "Russian (Русский)", description: "Standard Russian" },
+                { value: "Italian", label: "Italian (Italiano)", description: "Standard Italian" },
+                { value: "Indonesian", label: "Indonesian (Bahasa Indonesia)", description: "Standard Indonesian" },
+                { value: "Vietnamese", label: "Vietnamese (Tiếng Việt)", description: "Standard Vietnamese" },
+                { value: "Thai", label: "Thai (ไทย)", description: "Standard Thai" },
+                { value: "English", label: "English", description: "Standard English" },
+              ]}
+            />
             <div className="flex items-center gap-2">
               <Tooltip text="Translate speech for this panel" placement="top">
                 <button

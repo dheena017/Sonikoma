@@ -30,6 +30,7 @@ import {
   X,
 } from "lucide-react";
 import type { YouTubeVideoItem } from "./YouTubeChannelHome";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 interface YouTubeCreatePlaylistPanelProps {
   onPlaylistCreated?: (playlist: any) => void;
@@ -853,16 +854,16 @@ export default function YouTubeCreatePlaylistPanel({
             </div>
 
             <div className="sm:col-span-4">
-              <select
+              <CyberSelect
                 value={privacyFilter}
-                onChange={(e: any) => setPrivacyFilter(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 focus:border-red-500/60 rounded-xl px-3 py-2 text-xs text-neutral-300 font-mono focus:outline-none cursor-pointer"
-              >
-                <option value="all">All Privacy Types</option>
-                <option value="public">Public Only</option>
-                <option value="unlisted">Unlisted Only</option>
-                <option value="private">Private Only</option>
-              </select>
+                onChange={(val: any) => setPrivacyFilter(val)}
+                options={[
+                  { value: "all", label: "All Privacy Types" },
+                  { value: "public", label: "Public Only" },
+                  { value: "unlisted", label: "Unlisted Only" },
+                  { value: "private", label: "Private Only" },
+                ]}
+              />
             </div>
           </div>
 

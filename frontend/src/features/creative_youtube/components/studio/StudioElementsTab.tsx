@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 export interface StudioElementsTabProps {
   description: string;
@@ -122,30 +123,19 @@ export default function StudioElementsTab({
             <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
               Platform
             </label>
-            <select
+            <CyberSelect
               value={webtoonPlatform}
-              onChange={(e) => setWebtoonPlatform(e.target.value)}
-              className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
-            >
-              <option value="" className="bg-neutral-950">
-                Select platform
-              </option>
-              <option value="Webtoon" className="bg-neutral-950">
-                Webtoon
-              </option>
-              <option value="Tapas" className="bg-neutral-950">
-                Tapas
-              </option>
-              <option value="Manga Plus" className="bg-neutral-950">
-                Manga Plus
-              </option>
-              <option value="Crunchyroll" className="bg-neutral-950">
-                Crunchyroll
-              </option>
-              <option value="Other" className="bg-neutral-950">
-                Other
-              </option>
-            </select>
+              onChange={setWebtoonPlatform}
+              placeholder="Select platform..."
+              options={[
+                { value: "", label: "Select platform" },
+                { value: "Webtoon", label: "Webtoon" },
+                { value: "Tapas", label: "Tapas" },
+                { value: "Manga Plus", label: "Manga Plus" },
+                { value: "Crunchyroll", label: "Crunchyroll" },
+                { value: "Other", label: "Other" },
+              ]}
+            />
           </div>
           <div className="space-y-1">
             <label className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block">
@@ -184,166 +174,39 @@ export default function StudioElementsTab({
         <label className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider block">
           Subtitles / CC
         </label>
-        <div className="grid grid-cols-2 gap-3">
-          <select
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <CyberSelect
             value={subtitlesType}
-            onChange={(e) => setSubtitlesType(e.target.value)}
-            className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
-          >
-            <option value="none" className="bg-neutral-950">
-              No subtitles
-            </option>
-            <option value="auto" className="bg-neutral-950">
-              Auto-generated (YouTube ASR)
-            </option>
-            <option value="manual" className="bg-neutral-950">
-              Upload SRT / VTT file
-            </option>
-          </select>
-          <select
+            onChange={setSubtitlesType}
+            options={[
+              { value: "none", label: "No subtitles" },
+              { value: "auto", label: "Auto-generated (YouTube ASR)" },
+              { value: "manual", label: "Upload SRT / VTT file" },
+            ]}
+          />
+          <CyberSelect
             value={subtitlesLanguage}
-            onChange={(e) => setSubtitlesLanguage(e.target.value)}
-            className="w-full bg-neutral-950/60 border border-neutral-700 focus:border-red-500/60 rounded-xl px-3 py-2.5 text-xs text-neutral-300 focus:outline-none transition-all cursor-pointer font-mono"
-          >
-            <option value="" className="bg-neutral-950">
-              Select language
-            </option>
-            <option value="ar" className="bg-neutral-950">
-              Arabic
-            </option>
-            <option value="bn" className="bg-neutral-950">
-              Bengali
-            </option>
-            <option value="zh-Hans" className="bg-neutral-950">
-              Chinese (Simplified)
-            </option>
-            <option value="zh-Hant" className="bg-neutral-950">
-              Chinese (Traditional)
-            </option>
-            <option value="cs" className="bg-neutral-950">
-              Czech
-            </option>
-            <option value="da" className="bg-neutral-950">
-              Danish
-            </option>
-            <option value="nl" className="bg-neutral-950">
-              Dutch
-            </option>
-            <option value="en" className="bg-neutral-950">
-              English
-            </option>
-            <option value="en-GB" className="bg-neutral-950">
-              English (UK)
-            </option>
-            <option value="fil" className="bg-neutral-950">
-              Filipino
-            </option>
-            <option value="fi" className="bg-neutral-950">
-              Finnish
-            </option>
-            <option value="fr" className="bg-neutral-950">
-              French
-            </option>
-            <option value="de" className="bg-neutral-950">
-              German
-            </option>
-            <option value="el" className="bg-neutral-950">
-              Greek
-            </option>
-            <option value="iw" className="bg-neutral-950">
-              Hebrew
-            </option>
-            <option value="hi" className="bg-neutral-950">
-              Hindi
-            </option>
-            <option value="hu" className="bg-neutral-950">
-              Hungarian
-            </option>
-            <option value="id" className="bg-neutral-950">
-              Indonesian
-            </option>
-            <option value="it" className="bg-neutral-950">
-              Italian
-            </option>
-            <option value="ja" className="bg-neutral-950">
-              Japanese
-            </option>
-            <option value="kn" className="bg-neutral-950">
-              Kannada
-            </option>
-            <option value="ko" className="bg-neutral-950">
-              Korean
-            </option>
-            <option value="ms" className="bg-neutral-950">
-              Malay
-            </option>
-            <option value="ml" className="bg-neutral-950">
-              Malayalam
-            </option>
-            <option value="mr" className="bg-neutral-950">
-              Marathi
-            </option>
-            <option value="no" className="bg-neutral-950">
-              Norwegian
-            </option>
-            <option value="fa" className="bg-neutral-950">
-              Persian
-            </option>
-            <option value="pl" className="bg-neutral-950">
-              Polish
-            </option>
-            <option value="pt" className="bg-neutral-950">
-              Portuguese
-            </option>
-            <option value="pt-BR" className="bg-neutral-950">
-              Portuguese (Brazil)
-            </option>
-            <option value="pa" className="bg-neutral-950">
-              Punjabi
-            </option>
-            <option value="ro" className="bg-neutral-950">
-              Romanian
-            </option>
-            <option value="ru" className="bg-neutral-950">
-              Russian
-            </option>
-            <option value="sr" className="bg-neutral-950">
-              Serbian
-            </option>
-            <option value="es" className="bg-neutral-950">
-              Spanish
-            </option>
-            <option value="es-419" className="bg-neutral-950">
-              Spanish (Latin America)
-            </option>
-            <option value="sw" className="bg-neutral-950">
-              Swahili
-            </option>
-            <option value="sv" className="bg-neutral-950">
-              Swedish
-            </option>
-            <option value="ta" className="bg-neutral-950">
-              Tamil
-            </option>
-            <option value="te" className="bg-neutral-950">
-              Telugu
-            </option>
-            <option value="th" className="bg-neutral-950">
-              Thai
-            </option>
-            <option value="tr" className="bg-neutral-950">
-              Turkish
-            </option>
-            <option value="uk" className="bg-neutral-950">
-              Ukrainian
-            </option>
-            <option value="ur" className="bg-neutral-950">
-              Urdu
-            </option>
-            <option value="vi" className="bg-neutral-950">
-              Vietnamese
-            </option>
-          </select>
+            onChange={setSubtitlesLanguage}
+            placeholder="Select language..."
+            searchable
+            options={[
+              { value: "", label: "Select language" },
+              { value: "en", label: "English" },
+              { value: "ja", label: "Japanese" },
+              { value: "ko", label: "Korean" },
+              { value: "zh-Hans", label: "Chinese (Simplified)" },
+              { value: "zh-Hant", label: "Chinese (Traditional)" },
+              { value: "es", label: "Spanish" },
+              { value: "fr", label: "French" },
+              { value: "de", label: "German" },
+              { value: "id", label: "Indonesian" },
+              { value: "vi", label: "Vietnamese" },
+              { value: "th", label: "Thai" },
+              { value: "ar", label: "Arabic" },
+              { value: "pt", label: "Portuguese" },
+              { value: "ru", label: "Russian" },
+            ]}
+          />
         </div>
       </div>
 
