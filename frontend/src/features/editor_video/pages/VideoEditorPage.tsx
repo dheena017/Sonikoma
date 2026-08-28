@@ -6,6 +6,7 @@ import { WorkspacePanel } from "@/features/editor_video/shell/WorkspacePanel";
 import { EditorViewport } from "@/features/editor_video/viewport/EditorViewport";
 import { Timeline } from "@/features/editor_video/timeline/Timeline";
 import { InspectorPanel } from "@/features/editor_video/inspector/InspectorPanel";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 interface VideoEditorPageProps {
   appLogic?: any;
@@ -171,14 +172,30 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
     setLayoutConfig((prev) => ({ ...prev, [panel]: !prev[panel] }));
   };
 
-  // ─── Destructure all live state from appLogic ──────────────────────────────
-  const panels = appLogic?.panels ?? [];
-  const scrapedImages = appLogic?.scrapedImages ?? [];
+  // ─── Destructure all live state from appLogic with store fallback ──────────────
+  const storeActiveProjectData = useProjectStore((s) => s.activeProjectData);
+  const panels =
+    appLogic?.panels && appLogic.panels.length > 0
+      ? appLogic.panels
+      : storeActiveProjectData?.panels ?? [];
+  const scrapedImages =
+    appLogic?.scrapedImages && appLogic.scrapedImages.length > 0
+      ? appLogic.scrapedImages
+      : storeActiveProjectData?.scrapedImages ?? [];
   const videoUrl = appLogic?.videoUrl ?? null;
   const setVideoUrl = appLogic?.setVideoUrl ?? (() => {});
-  const seriesTitle = appLogic?.seriesTitle ?? "";
-  const chapterTitle = appLogic?.chapterTitle ?? "";
-  const chapterNumber = appLogic?.chapterNumber ?? "";
+  const seriesTitle =
+    appLogic?.seriesTitle ||
+    storeActiveProjectData?.project?.title ||
+    "";
+  const chapterTitle =
+    appLogic?.chapterTitle ||
+    storeActiveProjectData?.project?.chapter_title ||
+    "";
+  const chapterNumber =
+    appLogic?.chapterNumber ||
+    storeActiveProjectData?.project?.chapter_number ||
+    "";
   const targetUrl = appLogic?.targetUrl ?? "";
   const isDirty = appLogic?.isDirty ?? false;
   const isSaving = appLogic?.isSaving ?? false;

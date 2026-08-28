@@ -147,15 +147,16 @@ export default function ImageEditorPanel({
       : "Balanced stack for social posts and avatars";
 
   return (
-    <div className="space-y-5 bg-white/[0.01] p-4 rounded-2xl border border-white/[0.05]">
+    <div className="space-y-4 font-sans text-left">
       {activeTool === "edit" && (
         <>
-          <div className="space-y-2.5">
+          {/* Rotate & Flip Card */}
+          <div className="bg-[#181924]/60 border border-white/10 rounded-2xl p-4 space-y-3 shadow-xl">
             <div className="flex items-center gap-2">
-              <div className="p-1 rounded-lg bg-cyan-500/10 border border-cyan-500/15">
-                <RotateCw className="h-3 w-3 text-cyan-400" />
+              <div className="p-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+                <RotateCw className="h-3.5 w-3.5" />
               </div>
-              <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">
+              <span className="text-[10px] uppercase font-mono font-bold text-white tracking-widest">
                 Rotate &amp; Flip
               </span>
               {isTransforming && (
@@ -165,16 +166,16 @@ export default function ImageEditorPanel({
               )}
             </div>
 
-            <div className="grid grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-5 gap-2">
               <button
                 type="button"
                 onClick={() => onRotate(-90)}
                 disabled={isTransforming}
                 title="Rotate 90° Counter-Clockwise"
-                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 rounded-2xl text-neutral-400 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <RotateCcw className="h-4 w-4" />
-                <span className="text-[7px] font-mono">-90°</span>
+                <span className="text-[7.5px] font-mono font-bold">-90°</span>
               </button>
 
               <button
@@ -182,10 +183,10 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(180)}
                 disabled={isTransforming}
                 title="Rotate 180°"
-                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 rounded-2xl text-neutral-400 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <ChevronsUpDown className="h-4 w-4" />
-                <span className="text-[7px] font-mono">180°</span>
+                <span className="text-[7.5px] font-mono font-bold">180°</span>
               </button>
 
               <button
@@ -193,10 +194,10 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(90)}
                 disabled={isTransforming}
                 title="Rotate 90° Clockwise"
-                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-cyan-500/10 border border-white/6 hover:border-cyan-500/30 rounded-xl text-neutral-500 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 rounded-2xl text-neutral-400 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <RotateCw className="h-4 w-4" />
-                <span className="text-[7px] font-mono">+90°</span>
+                <span className="text-[7.5px] font-mono font-bold">+90°</span>
               </button>
 
               <button
@@ -204,10 +205,10 @@ export default function ImageEditorPanel({
                 onClick={() => onFlip("h")}
                 disabled={isTransforming}
                 title="Flip Horizontal"
-                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-violet-500/10 border border-white/6 hover:border-violet-500/30 rounded-xl text-neutral-500 hover:text-violet-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/30 rounded-2xl text-neutral-400 hover:text-purple-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <FlipHorizontal className="h-4 w-4" />
-                <span className="text-[7px] font-mono">Flip H</span>
+                <span className="text-[7.5px] font-mono font-bold">Flip H</span>
               </button>
 
               <button
@@ -215,20 +216,25 @@ export default function ImageEditorPanel({
                 onClick={() => onFlip("v")}
                 disabled={isTransforming}
                 title="Flip Vertical"
-                className="flex flex-col items-center justify-center gap-1 py-2.5 bg-black/30 hover:bg-violet-500/10 border border-white/6 hover:border-violet-500/30 rounded-xl text-neutral-500 hover:text-violet-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/30 rounded-2xl text-neutral-400 hover:text-purple-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <FlipVertical className="h-4 w-4" />
-                <span className="text-[7px] font-mono">Flip V</span>
+                <span className="text-[7.5px] font-mono font-bold">Flip V</span>
               </button>
             </div>
           </div>
 
-          <SectionTitle icon={<Crop className="h-3 w-3 text-purple-400" />}>
-            Target Platform Framing
-          </SectionTitle>
+          {/* Target Platform Framing Section */}
+          <div className="flex items-center justify-center gap-2 py-1">
+            <div className="h-[1px] flex-1 bg-white/10" />
+            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-purple-400 flex items-center gap-1.5">
+              <Crop className="h-3 w-3" /> Target Platform Framing
+            </span>
+            <div className="h-[1px] flex-1 bg-white/10" />
+          </div>
 
-          <div className="space-y-3 rounded-2xl border border-white/5 bg-black/20 p-3">
-            <div className="grid grid-cols-1 gap-1.5">
+          <div className="space-y-3 bg-[#181924]/60 border border-white/10 rounded-2xl p-4 shadow-xl">
+            <div className="grid grid-cols-1 gap-2">
               {FRAME_PRESETS.map((preset) => {
                 const active = selectedFramePreset === preset.id;
                 return (
@@ -236,13 +242,13 @@ export default function ImageEditorPanel({
                     key={preset.id}
                     type="button"
                     onClick={() => handleFramePresetChange(preset.id)}
-                    className={`rounded-xl border px-3 py-2 text-left transition-all cursor-pointer ${
+                    className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${
                       active
-                        ? "bg-gradient-to-r border-purple-500/40 text-white shadow-[0_0_18px_rgba(139,92,246,0.15)]"
-                        : "bg-black/20 border-white/5 text-neutral-400 hover:border-white/10 hover:text-neutral-200"
-                    } ${preset.accent}`}
+                        ? "bg-blue-950/40 border-blue-500/60 text-blue-200 shadow-[0_0_18px_rgba(59,130,246,0.3)] font-bold"
+                        : "bg-[#10111a]/80 border-white/5 text-neutral-400 hover:border-white/15 hover:text-white"
+                    }`}
                   >
-                    <div className="text-[10px] font-bold uppercase tracking-[0.2em] font-mono">
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] font-mono">
                       {preset.label}
                     </div>
                   </button>
@@ -250,12 +256,12 @@ export default function ImageEditorPanel({
               })}
             </div>
 
-            <div className="rounded-xl border border-white/5 bg-black/30 p-2.5">
-              <div className="mb-2 flex items-center gap-2 text-[9px] uppercase font-mono font-bold text-neutral-500">
-                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            <div className="rounded-2xl border border-white/5 bg-[#10111a]/80 p-3 space-y-2.5">
+              <div className="flex items-center gap-2 text-[9px] uppercase font-mono font-bold text-neutral-400">
+                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                 Padding Background Fill
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2">
                 {BACKGROUND_FILL_OPTIONS.map((option) => {
                   const active = backgroundFill === option;
                   return (
@@ -263,10 +269,10 @@ export default function ImageEditorPanel({
                       key={option}
                       type="button"
                       onClick={() => setBackgroundFill(option)}
-                      className={`rounded-lg border px-2.5 py-1.5 text-[9px] font-bold font-mono transition-all cursor-pointer ${
+                      className={`rounded-xl border px-3 py-1.5 text-[9.5px] font-bold font-mono transition-all cursor-pointer ${
                         active
-                          ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300"
-                          : "bg-black/20 border-white/5 text-neutral-500 hover:text-neutral-200 hover:border-white/10"
+                          ? "bg-emerald-500/15 border-emerald-500/50 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]"
+                          : "bg-black/30 border-white/5 text-neutral-400 hover:text-white hover:border-white/10"
                       }`}
                     >
                       {option}
@@ -276,23 +282,26 @@ export default function ImageEditorPanel({
               </div>
             </div>
 
-            <div className="text-[9px] font-mono text-neutral-500">
+            <div className="text-[9.5px] font-mono text-neutral-400 pt-0.5">
               {presetSummary}
             </div>
           </div>
 
-          <SectionTitle
-            icon={<Crosshair className="h-3 w-3 text-violet-400" />}
-          >
-            Focal Point &amp; Safe Zones
-          </SectionTitle>
+          {/* Focal Point & Safe Zones Section */}
+          <div className="flex items-center justify-center gap-2 py-1">
+            <div className="h-[1px] flex-1 bg-white/10" />
+            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-purple-400 flex items-center gap-1.5">
+              <Crosshair className="h-3 w-3" /> Focal Point &amp; Safe Zones
+            </span>
+            <div className="h-[1px] flex-1 bg-white/10" />
+          </div>
 
-          <div className="space-y-3 rounded-2xl border border-white/5 bg-black/20 p-3">
-            <div className="flex items-center gap-2 text-[9px] uppercase font-mono text-neutral-500">
-              <LayoutGrid className="h-3 w-3 text-violet-400" />
+          <div className="space-y-3 bg-[#181924]/60 border border-white/10 rounded-2xl p-4 shadow-xl">
+            <div className="flex items-center gap-2 text-[9px] uppercase font-mono font-bold text-neutral-400">
+              <LayoutGrid className="h-3.5 w-3.5 text-purple-400" />
               Focal Point Picker
             </div>
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-3 gap-2">
               {FOCAL_GRID.map((point) => {
                 const active = selectedFocalPoint === point;
                 return (
@@ -300,10 +309,10 @@ export default function ImageEditorPanel({
                     key={point}
                     type="button"
                     onClick={() => setSelectedFocalPoint(point)}
-                    className={`rounded-lg border px-2 py-2 text-[10px] font-mono font-bold transition-all cursor-pointer ${
+                    className={`rounded-xl border py-2.5 text-xs font-mono font-bold transition-all cursor-pointer ${
                       active
-                        ? "bg-violet-500/20 border-violet-500/40 text-violet-200"
-                        : "bg-black/20 border-white/5 text-neutral-500 hover:border-white/10 hover:text-neutral-200"
+                        ? "bg-purple-950/60 border-purple-500/60 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+                        : "bg-[#10111a]/80 border-white/5 text-neutral-400 hover:border-white/15 hover:text-white"
                     }`}
                   >
                     {point}
@@ -315,25 +324,32 @@ export default function ImageEditorPanel({
             <button
               type="button"
               onClick={() => setShowSafeZones(!showSafeZones)}
-              className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-[10px] font-bold font-mono transition-all cursor-pointer ${
+              className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-bold font-mono transition-all cursor-pointer ${
                 showSafeZones
-                  ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-200"
-                  : "border-white/5 bg-black/20 text-neutral-500 hover:border-white/10 hover:text-neutral-200"
+                  ? "border-cyan-500/50 bg-cyan-950/30 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  : "border-white/5 bg-[#10111a]/80 text-neutral-400 hover:border-white/15 hover:text-white"
               }`}
             >
               <span className="flex items-center gap-2">
-                <Shield className="h-3.5 w-3.5" />
+                <Shield className="h-3.5 w-3.5 text-neutral-400" />
                 Show Shorts/Reels Safe Zone
               </span>
-              <span>{showSafeZones ? "ON" : "OFF"}</span>
+              <span className={showSafeZones ? "text-cyan-300 font-black" : "text-neutral-500"}>
+                {showSafeZones ? "ON" : "OFF"}
+              </span>
             </button>
           </div>
 
-          <SectionTitle icon={<Sparkles className="h-3 w-3 text-amber-400" />}>
-            Line Art &amp; Tone Polish
-          </SectionTitle>
+          {/* Line Art & Tone Polish Section */}
+          <div className="flex items-center justify-center gap-2 py-1">
+            <div className="h-[1px] flex-1 bg-white/10" />
+            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-purple-400 flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3" /> Line Art &amp; Tone Polish
+            </span>
+            <div className="h-[1px] flex-1 bg-white/10" />
+          </div>
 
-          <div className="space-y-2 rounded-2xl border border-white/5 bg-black/20 p-3">
+          <div className="space-y-2 bg-[#181924]/60 border border-white/10 rounded-2xl p-4 shadow-xl">
             <ToggleRow
               label="Line Sharpen"
               enabled={lineSharpen}
@@ -363,9 +379,9 @@ export default function ImageEditorPanel({
               setPopColorBoost(false);
               onReset();
             }}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-900/30 bg-red-950/15 hover:bg-red-950/30 text-red-400/70 hover:text-red-300 text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-red-900/30 bg-red-950/20 hover:bg-red-950/40 text-red-400/80 hover:text-red-300 text-xs font-bold font-mono transition-all cursor-pointer active:scale-95"
           >
-            <RefreshCcw className="h-3 w-3" />
+            <RefreshCcw className="h-3.5 w-3.5" />
             Reset Framing
           </button>
         </>
@@ -387,14 +403,16 @@ function ToggleRow({
     <button
       type="button"
       onClick={onToggle}
-      className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-[10px] font-bold font-mono transition-all cursor-pointer ${
+      className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-bold font-mono transition-all cursor-pointer ${
         enabled
-          ? "border-amber-500/40 bg-amber-500/10 text-amber-200"
-          : "border-white/5 bg-black/20 text-neutral-500 hover:border-white/10 hover:text-neutral-200"
+          ? "border-amber-500/50 bg-amber-950/30 text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+          : "border-white/5 bg-[#10111a]/80 text-neutral-400 hover:border-white/15 hover:text-white"
       }`}
     >
       <span>{label}</span>
-      <span>{enabled ? "ON" : "OFF"}</span>
+      <span className={enabled ? "text-amber-300 font-black" : "text-neutral-500"}>
+        {enabled ? "ON" : "OFF"}
+      </span>
     </button>
   );
 }

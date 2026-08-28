@@ -396,44 +396,6 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             />
           </div>
         </button>
-
-        <div className="w-px h-6 bg-[#2F2F2F] mx-0.5 hidden sm:block" />
-
-        <button
-          onClick={() => {
-            const target = resolveWorkspaceReturnPath({
-              seriesSlug,
-              chapterSlug,
-              searchParams: window.location.search,
-            });
-            if (navigateTo) {
-              navigateTo(target);
-            } else {
-              window.history.pushState({}, "", target);
-              window.dispatchEvent(new Event("popstate"));
-            }
-          }}
-          className="btn-secondary h-8 px-2.5 text-[11px] font-medium rounded-lg flex items-center gap-1 active:scale-95"
-        >
-          <X className="w-3.5 h-3.5 text-[#9CA3AF]" />
-          <span>Cancel</span>
-        </button>
-
-        <button
-          onClick={() => {
-            if (handleExecuteSave) {
-              handleExecuteSave();
-            } else {
-              // Fallback
-              window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE"));
-              setEditingImageIdx(null);
-            }
-          }}
-          className="btn-primary h-8 px-3.5 text-[11px] font-bold rounded-lg flex items-center gap-1.5 shadow-sm active:scale-95 uppercase tracking-wider"
-        >
-          <Check className="w-3.5 h-3.5 text-white" />
-          <span>Apply Changes</span>
-        </button>
       </div>
     </header>
   );

@@ -184,9 +184,15 @@ const ImageEditorPage = React.memo(
           isPipMode={false}
           setIsPipMode={() => { } }
           isToolsPanelOpen={isToolsPanelOpen}
-          setIsToolsPanelOpen={setIsToolsPanelOpen} setEditCropRight={function (val: number): void {
-            throw new Error("Function not implemented.");
-          } }        />
+          setIsToolsPanelOpen={setIsToolsPanelOpen}
+          setEditCropRight={appLogic.setEditCropRight}
+          handleExecuteSave={editorProps.handleExecuteSave}
+          navigateTo={navigateTo}
+          seriesSlug={seriesSlug}
+          chapterSlug={chapterSlug}
+          setEditingImageIdx={appLogic.setEditingImageIdx}
+          isSavingEdit={appLogic.isSavingEdit}
+        />
       );
     }, [
       editorProps.imageUrl,
@@ -210,6 +216,12 @@ const ImageEditorPage = React.memo(
       appLogic.editCropBottom,
       appLogic.editCropLeft,
       appLogic.editCropRight,
+      editorProps.handleExecuteSave,
+      navigateTo,
+      seriesSlug,
+      chapterSlug,
+      appLogic.setEditingImageIdx,
+      appLogic.isSavingEdit,
     ]);
 
     // Empty State if no images exist in the project yet
@@ -234,6 +246,9 @@ const ImageEditorPage = React.memo(
       <ImageEditorLayout
         onToggleSidebar={handleToggleSidebar}
         navigateTo={navigateTo}
+        projectId={
+          new URLSearchParams(window.location.search).get("id") || null
+        }
         seriesSlug={seriesSlug}
         chapterSlug={chapterSlug}
         scrapedCount={appLogic.scrapedImages?.length || 0}

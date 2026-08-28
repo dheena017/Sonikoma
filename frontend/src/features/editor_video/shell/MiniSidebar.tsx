@@ -22,11 +22,12 @@ const SidebarItem: React.FC<{
   };
 
   return (
-    <div className="relative group w-full flex justify-center py-1">
+    <div className="relative group w-full flex justify-center py-0.5">
+      {/* Left edge active indicator bar */}
       <div
-        className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+        className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
           isActive
-            ? "h-6 bg-gradient-to-b from-purple-400 to-fuchsia-400 shadow-[0_0_14px_rgba(192,132,252,0.9)] opacity-100"
+            ? "h-5 bg-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.9)] opacity-100"
             : "h-0 bg-transparent opacity-0"
         }`}
       />
@@ -36,20 +37,18 @@ const SidebarItem: React.FC<{
         onMouseEnter={handleEnter}
         onMouseLeave={() => setHover(false)}
         aria-label={item.title}
-        className="inline-flex p-1.5 transition-all duration-300 cursor-pointer relative items-center justify-center group-active:scale-95 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400"
+        className="p-1 cursor-pointer transition-transform duration-200 active:scale-95 group"
       >
         <div
-          className={`w-11 h-11 rounded-[1.1rem] flex items-center justify-center transition-all duration-300 shadow-sm ${
+          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer ${
             isActive
-              ? "bg-gradient-to-br from-purple-500/20 via-purple-600/20 to-indigo-600/20 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.3),inset_0_1px_0_rgba(255,255,255,0.12)]"
-              : "bg-neutral-900/90 border border-neutral-800/80 hover:bg-purple-500/15 hover:border-purple-500/30 hover:shadow-[0_0_14px_rgba(168,85,247,0.18)]"
+              ? "bg-[#3B82F6] border border-[#60A5FA]/40 shadow-[0_0_20px_rgba(59,130,246,0.6)] text-white scale-105"
+              : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
           }`}
         >
           <Icon
-            className={`w-5 h-5 transition-all duration-300 ${
-              isActive
-                ? "text-purple-300 drop-shadow-[0_0_6px_rgba(192,132,252,0.9)]"
-                : "text-neutral-400 group-hover:text-purple-200"
+            className={`w-[18px] h-[18px] transition-colors duration-200 ${
+              isActive ? "text-white" : "text-neutral-400 group-hover:text-white"
             }`}
           />
         </div>
@@ -77,24 +76,26 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
   const groupedWorkspaces = getGroupedWorkspaces();
 
   return (
-    <aside className="w-16 sm:w-20 shrink-0 bg-[#06060c]/80 border-r border-white/10 backdrop-blur-3xl shadow-[4px_0_34px_rgba(0,0,0,0.45)] flex flex-col items-center py-3.5 z-30 select-none h-full overflow-hidden">
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center gap-1.5 mini-sidebar-scrollbar pt-3 px-0.5">
+    <aside className="w-20 h-full shrink-0 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex flex-col items-center py-3 z-30 select-none overflow-hidden">
+      {/* Workspace Groups List */}
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groupedWorkspaces.map((group, groupIdx) => (
           <div
             key={group.name}
-            className="w-full flex flex-col items-center pb-1.5"
+            className="w-full flex flex-col items-center pb-1"
           >
+            {/* Section divider + monospace label */}
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.375rem" : "0",
-                marginBottom: "0.25rem",
+                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
+                marginBottom: "0.4rem",
               }}
             >
               {groupIdx > 0 && (
-                <div className="w-6 h-[1px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent rounded-full mb-1" />
+                <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
               )}
-              <span className="text-[8px] font-semibold uppercase tracking-[0.22em] text-purple-300 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 py-0.5 bg-purple-950/30 border border-purple-500/20 rounded-full">
+              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
                 {group.name}
               </span>
             </div>
@@ -111,27 +112,28 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
         ))}
       </div>
 
-      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-purple-900/20">
-        <div className="relative group w-full flex justify-center">
+      {/* Bottom Return Button */}
+      {onBackToApp && (
+        <div className="pt-3 w-full flex justify-center border-t border-white/10 shrink-0 pb-1">
           <button
-            onClick={() => onBackToApp?.()}
+            onClick={onBackToApp}
             onMouseEnter={(e) => {
               setReturnRect(e.currentTarget.getBoundingClientRect());
               setReturnHover(true);
             }}
             onMouseLeave={() => setReturnHover(false)}
-            aria-label="Return to Storyboard"
-            className="inline-flex p-2.5 rounded-2xl bg-gradient-to-b from-purple-500 to-indigo-700 hover:from-purple-400 hover:to-indigo-600 text-white transition-all shadow-[0_4px_16px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_22px_rgba(168,85,247,0.6)] active:scale-95 border border-purple-400/30 cursor-pointer items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-300"
+            aria-label="Return to Workspace"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_28px_rgba(59,130,246,0.8)] border border-[#60A5FA]/40 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95"
           >
-            <ArrowLeft className="w-4 h-4 shrink-0" />
+            <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <TooltipPortal
-            text="Return to Storyboard"
+            text="Return to Workspace"
             visible={returnHover}
             anchorRect={returnRect}
           />
         </div>
-      </div>
+      )}
     </aside>
   );
 };

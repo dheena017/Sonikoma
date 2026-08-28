@@ -9,7 +9,10 @@ import {
   Minimize2,
   PanelRightClose,
   PanelRightOpen,
+  Check,
+  X,
 } from "lucide-react";
+import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
 import {
   CropCanvas,
   CanvasMultiLayer,
@@ -18,6 +21,13 @@ import { GeneratedPanel } from "@/types";
 import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
 
 interface ImageEditorCanvasContainerProps {
+  handleExecuteSave?: () => void;
+  handleCancel?: () => void;
+  navigateTo?: (path: string) => void;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+  setEditingImageIdx?: (idx: number | null) => void;
+  isSavingEdit?: boolean;
   activeStoryboardPanel?: GeneratedPanel | null;
   handleAiCrop: () => void;
   isAiDetecting: boolean;
@@ -137,6 +147,13 @@ export default function ImageEditorCanvasContainer({
   setIsPipMode,
   isToolsPanelOpen = true,
   setIsToolsPanelOpen,
+  handleExecuteSave,
+  handleCancel,
+  navigateTo,
+  seriesSlug,
+  chapterSlug,
+  setEditingImageIdx,
+  isSavingEdit = false,
 }: ImageEditorCanvasContainerProps) {
   // Safe handlers that only allow crop drawing when in the correct tabs
   const safeHandleStart = (clientX: number, clientY: number) => {
@@ -247,8 +264,58 @@ export default function ImageEditorCanvasContainer({
           )}
         </div>
 
-        {/* Right: AI Smart Crop & Mode Badges */}
+        {/* Right: Actions, AI Smart Crop & Mode Badges */}
         <div className="flex items-center gap-1.5">
+          {/* Cancel Button */}
+          <button
+            onClick={() => {
+              if (handleCancel) {
+                handleCancel();
+              } else {
+                const target = resolveWorkspaceReturnPath({
+                  seriesSlug,
+                  chapterSlug,
+                  searchParams: window.location.search,
+                });
+                if (navigateTo) {
+                  navigateTo(target);
+                } else {
+                  window.history.pushState({}, "", target);
+                  window.dispatchEvent(new Event("popstate"));
+                }
+              }
+            }}
+            className="h-7 px-2.5 text-[10px] font-mono font-bold rounded-lg flex items-center gap-1 bg-[#1E1E1E] text-[#9CA3AF] hover:text-white hover:bg-[#262626] border border-[#2F2F2F] transition-all cursor-pointer active:scale-95"
+            title="Cancel changes and return"
+          >
+            <X className="w-3 h-3 text-[#9CA3AF]" />
+            <span>Cancel</span>
+          </button>
+
+          {/* Apply Changes Button */}
+          <button
+            onClick={() => {
+              if (handleExecuteSave) {
+                handleExecuteSave();
+              } else {
+                window.dispatchEvent(new Event("FABRIC_REQUEST_SAVE"));
+                if (setEditingImageIdx) setEditingImageIdx(null);
+              }
+            }}
+            disabled={isSavingEdit}
+            className="h-7 px-3 text-[10px] font-mono font-black rounded-lg flex items-center gap-1.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-[0_0_12px_rgba(59,130,246,0.4)] hover:shadow-[0_0_18px_rgba(59,130,246,0.7)] border border-[#60A5FA]/40 transition-all cursor-pointer active:scale-95 uppercase tracking-wider disabled:opacity-50"
+            title="Apply & Save Changes"
+          >
+            {isSavingEdit ? (
+              <RefreshCw className="w-3 h-3 animate-spin text-white" />
+            ) : (
+              <Check className="w-3 h-3 text-white" />
+            )}
+            <span>Apply Changes</span>
+          </button>
+
+          <div className="w-px h-3.5 bg-[#2F2F2F] mx-0.5" />
+
           <button
             onClick={handleAiCrop}
             disabled={isAiDetecting}

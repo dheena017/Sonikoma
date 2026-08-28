@@ -12,8 +12,10 @@ import {
   Brush,
   Link2,
   Database,
+  ArrowLeft,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
+import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
 
 interface ImageEditorMiniSidebarProps {
   onOpenToolsPanel?: () => void;
@@ -36,7 +38,29 @@ interface ToolDef {
 export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
   onOpenToolsPanel,
   onToggleSidebar,
+  navigateTo,
+  projectId,
+  seriesSlug,
+  chapterSlug,
 }) => {
+  const [returnHover, setReturnHover] = useState(false);
+  const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
+
+  const handleReturn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetUrl = resolveWorkspaceReturnPath({
+      searchParams: window.location.search,
+      projectId,
+      seriesSlug,
+      chapterSlug,
+    });
+    if (navigateTo) {
+      navigateTo(targetUrl);
+    } else {
+      window.location.href = targetUrl;
+    }
+  };
   const activeTool = useImageEditorStore((state) => state.activeTool);
   const setActiveTool = useImageEditorStore((state) => state.setActiveTool);
   const slicesCount = useImageEditorStore((state) => state.slicesCount);
@@ -180,6 +204,27 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
             ))}
           </div>
         ))}
+      </div>
+
+      {/* Bottom Return to Storyboard Button */}
+      <div className="pt-3 w-full flex justify-center border-t border-white/10 shrink-0 pb-1">
+        <button
+          onClick={handleReturn}
+          onMouseEnter={(e) => {
+            setReturnRect(e.currentTarget.getBoundingClientRect());
+            setReturnHover(true);
+          }}
+          onMouseLeave={() => setReturnHover(false)}
+          aria-label="Return to Storyboard"
+          className="w-11 h-11 rounded-2xl bg-gradient-to-b from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:shadow-[0_0_28px_rgba(139,92,246,0.8)] border border-[#A78BFA]/40 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95"
+        >
+          <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
+        <TooltipPortal
+          text="Return to Storyboard"
+          visible={returnHover}
+          anchorRect={returnRect}
+        />
       </div>
     </div>
   );

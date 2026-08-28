@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   X,
   Video,
@@ -18,7 +18,10 @@ import {
   LayoutDashboard,
   FolderOpen,
   ArrowLeft,
+  Zap,
+  FolderSync,
 } from "lucide-react";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 interface VideoEditorSidebarProps {
   isOpen: boolean;
@@ -32,6 +35,92 @@ interface VideoEditorSidebarProps {
   navigateTo?: (path: string) => void;
 }
 
+const ActiveProjectSidebarWidget: React.FC<{
+  setDrawerOpen: (open: boolean) => void;
+}> = ({ setDrawerOpen }) => {
+  const { activeProjectId, activeProjectData } = useProjectStore();
+  const [imgError, setImgError] = React.useState(false);
+
+  const coverUrl =
+    activeProjectData?.project?.cover_image ||
+    activeProjectData?.panels?.[0]?.image_url;
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [coverUrl]);
+
+  return (
+    <div className="p-3.5 rounded-2xl bg-neutral-900/80 border border-white/10 text-xs shadow-md">
+      <div className="flex items-center justify-between mb-2.5">
+        <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5 font-sans">
+          <Zap className="w-3.5 h-3.5 text-purple-400" /> Active Project
+        </span>
+        {activeProjectId ? (
+          <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Active
+          </span>
+        ) : null}
+      </div>
+
+      {activeProjectId && activeProjectData ? (
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl overflow-hidden bg-neutral-950 border border-white/15 shrink-0 flex items-center justify-center shadow-inner">
+              {coverUrl && !imgError ? (
+                <img
+                  src={
+                    coverUrl.startsWith("http")
+                      ? `/api/proxy-image?url=${encodeURIComponent(coverUrl)}`
+                      : coverUrl
+                  }
+                  alt={activeProjectData.project?.title || "Project Cover"}
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-purple-900/60 to-indigo-900/60 border border-purple-500/30 flex items-center justify-center text-purple-300 font-bold text-xs">
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
+                    "P"}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex flex-col">
+              <h4 className="font-bold text-xs text-white truncate leading-tight">
+                {activeProjectData.project?.title || "Untitled Project"}
+              </h4>
+              <span className="text-[10.5px] text-neutral-400 truncate mt-0.5 font-sans">
+                {activeProjectData.panels?.length || 0} Panels
+              </span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="w-full py-2 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 hover:text-white border border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 shadow-sm"
+          >
+            <FolderSync className="w-3.5 h-3.5 text-purple-400" />
+            <span>Switch Project</span>
+          </button>
+        </div>
+      ) : (
+        <div>
+          <p className="text-[11px] text-neutral-400 mb-2">
+            No active project selected.
+          </p>
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer active:scale-98"
+          >
+            <FolderOpen className="w-3.5 h-3.5" />
+            <span>Select Active Project</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
   isOpen,
   onClose,
@@ -43,6 +132,17 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
   onBackToApp,
   navigateTo,
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   const navSections = [
     {
       group: "Primary Workspaces",
@@ -95,112 +195,128 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 transition-opacity animate-fade-in"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity animate-fade-in"
           onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-80 shrink-0 bg-[#06060c]/90 border-r border-white/8 z-50 transition-all duration-300 ease-out transform overflow-hidden backdrop-blur-3xl ${
-          isOpen
-            ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)]"
-            : "-translate-x-full"
+        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[300px] z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-full flex-col justify-between p-5 space-y-4 select-none">
-          <div className="space-y-4 flex flex-col flex-grow min-h-0">
-            <div className="flex items-center justify-between pb-3 border-b border-purple-900/20">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-fuchsia-600 to-indigo-600 flex items-center justify-center text-white shadow-[0_0_16px_rgba(168,85,247,0.4)]">
-                  <Video className="h-4 w-4" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs tracking-wide text-white font-mono uppercase">
+        <div className="w-full h-full bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex flex-col justify-between shadow-2xl select-none">
+          {/* Header */}
+          <div className="p-4 flex items-center justify-between border-b border-white/10 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-fuchsia-600 to-indigo-600 flex items-center justify-center text-white shadow-[0_0_16px_rgba(168,85,247,0.4)] shrink-0">
+                <Video className="h-5 w-5" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-extrabold text-sm tracking-tight text-white font-sans uppercase">
                     Sonikoma Studio
                   </h3>
-                  <p className="text-[9px] text-purple-300/80 font-mono">
-                    {seriesTitle ? `${seriesTitle}` : "NLE Production Suite"}
-                  </p>
                 </div>
+                <span className="text-[10px] text-neutral-400 font-sans truncate">
+                  {seriesTitle ? seriesTitle : "Comedy"}
+                </span>
               </div>
-
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg bg-neutral-900/90 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <X className="h-4 w-4" />
-              </button>
             </div>
 
-            <div className="space-y-4 overflow-y-auto flex-grow min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
-              {navSections.map((sec, secIdx) => (
-                <div key={sec.group} className="space-y-1.5">
-                  {secIdx > 0 && (
-                    <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-3" />
-                  )}
-                  <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans pl-2">
-                    {sec.group}
-                  </h4>
-                  <ul className="space-y-1.5">
-                    {sec.items.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = activeNav === item.id;
-                      return (
-                        <li key={item.id}>
-                          <button
-                            onClick={() => {
-                              if (item.onClick) {
-                                item.onClick();
-                              } else {
-                                setActiveNav(item.id);
-                              }
-                              onClose();
-                            }}
-                            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group ${
-                              isActive
-                                ? "text-white bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-purple-500/40 shadow-[0_4px_20px_rgba(168,85,247,0.2)] font-bold"
-                                : "text-neutral-300 hover:text-white hover:bg-neutral-900/80 border border-transparent hover:border-neutral-800/60"
-                            }`}
-                          >
-                            {isActive && (
-                              <div className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-                            )}
-                            <div className="flex items-center gap-3">
-                              <Icon
-                                className={`h-4 w-4 transition-transform duration-200 ${
-                                  isActive
-                                    ? "text-purple-300 scale-110"
-                                    : "text-neutral-400 group-hover:text-purple-300 group-hover:scale-105"
-                                }`}
-                              />
-                              <span>{item.label}</span>
-                            </div>
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              ))}
-            </div>
+            <button
+              onClick={onClose}
+              aria-label="Close sidebar"
+              className="w-8 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          <div className="space-y-3 pt-3 border-t border-purple-900/20">
-            {panelsCount > 0 && (
-              <div className="px-3 py-2 rounded-xl bg-purple-950/30 border border-purple-500/30 text-purple-300 text-[9px] font-mono flex items-center justify-between">
-                <span>Active Sequence:</span>
-                <span className="font-bold">{panelsCount} Panel Clips</span>
+          {/* Active Project Widget */}
+          <div className="px-4 pt-3 shrink-0">
+            <ActiveProjectSidebarWidget
+              setDrawerOpen={(open) =>
+                useProjectStore.getState().setDrawerOpen(open)
+              }
+            />
+          </div>
+
+          {/* Navigation Items List */}
+          <div className="flex-1 overflow-y-auto py-4 px-4 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {navSections.map((sec, secIdx) => (
+              <div key={sec.group} className="space-y-2">
+                {secIdx > 0 && (
+                  <div className="w-full flex flex-col pt-1 pb-1">
+                    <div className="w-8 h-[1px] bg-white/10 rounded-full ml-3" />
+                  </div>
+                )}
+                <h4 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-sans">
+                  {sec.group}
+                </h4>
+                <ul className="space-y-1">
+                  {sec.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeNav === item.id;
+
+                    return (
+                      <li key={item.id} className="relative">
+                        {/* Active Side Accent Indicator */}
+                        <div
+                          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+                            isActive
+                              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                              : "h-0 bg-transparent opacity-0"
+                          }`}
+                        />
+
+                        <button
+                          onClick={() => {
+                            if (item.onClick) {
+                              item.onClick();
+                            } else {
+                              setActiveNav(item.id);
+                            }
+                            onClose();
+                          }}
+                          className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
+                            isActive
+                              ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.12)] border border-purple-500/30 font-bold"
+                              : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon
+                              className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
+                                isActive
+                                  ? "text-purple-400"
+                                  : "text-neutral-400 group-hover:scale-110 group-hover:text-purple-300"
+                              }`}
+                            />
+                            <span className="text-xs font-semibold tracking-wide font-sans">
+                              {item.label}
+                            </span>
+                          </div>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-            )}
+            ))}
+          </div>
+
+          {/* Sidebar Footer: Return Button */}
+          <div className="p-4 border-t border-white/10 shrink-0">
             <button
               onClick={() => {
                 onClose();
                 onBackToApp?.();
               }}
-              className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-500 hover:to-indigo-600 text-white text-xs font-bold font-mono flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_14px_rgba(168,85,247,0.35)]"
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 text-white text-xs font-black tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:shadow-[0_0_28px_rgba(168,85,247,0.65)] active:scale-95 border border-purple-400/40 cursor-pointer font-sans"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Return to Storyboard</span>
+              <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
+              <span>RETURN TO STORYBOARD</span>
             </button>
           </div>
         </div>

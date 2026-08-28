@@ -82,22 +82,22 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-3 pb-3 border-b border-neutral-800/80">
-        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-purple-500/60 flex items-center justify-center shadow-[0_0_18px_rgba(168,85,247,0.35)] shrink-0">
-          <Database className="h-5 w-5 text-purple-300" />
+      <div className="flex items-center gap-3 pb-3 border-b border-white/10">
+        <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
+          <Database className="h-5 w-5 text-purple-400" />
         </div>
         <div>
           <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
             AI Model Fine-Tuning
           </h4>
-          <p className="text-[9px] text-purple-300/80 font-mono mt-0.5">
+          <p className="text-[9.5px] text-neutral-400 font-mono mt-0.5">
             YOLO v8 Segment Neural Engine
           </p>
         </div>
       </div>
 
-      {/* Stats / Flywheel Card */}
-      <div className="bg-neutral-900/60 border border-neutral-800/80 rounded-3xl p-4 flex items-center justify-between shadow-xl">
+      {/* Stats / Training Dataset Card */}
+      <div className="bg-[#181924]/60 border border-white/10 rounded-2xl p-4 flex items-center justify-between shadow-xl">
         <div className="space-y-0.5">
           <span className="text-[9px] font-mono text-neutral-400 uppercase font-bold tracking-wider block">
             Training Dataset
@@ -106,9 +106,9 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
             Saved correction pairs:
           </span>
         </div>
-        <div className="bg-purple-950/40 border border-purple-500/30 px-3 py-1.5 rounded-2xl flex items-center gap-1.5 shadow-[0_0_12px_rgba(168,85,247,0.2)]">
-          <span className="text-sm font-mono font-black text-purple-300">
-            {sampleCount !== null ? sampleCount : "..."}
+        <div className="bg-purple-500/20 border border-purple-500/40 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-[0_0_12px_rgba(168,85,247,0.25)]">
+          <span className="text-xs font-mono font-black text-purple-300">
+            {sampleCount !== null ? sampleCount : "0"}
           </span>
           <span className="text-[9px] font-mono text-purple-400 uppercase font-bold">
             PAIRS
@@ -116,8 +116,8 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
         </div>
       </div>
 
-      {/* Fine-Tuning Controller */}
-      <div className="bg-neutral-900/60 border border-neutral-800/80 rounded-3xl p-4 space-y-4 shadow-xl">
+      {/* Fine-Tuning Controller Card */}
+      <div className="bg-[#181924]/60 border border-white/10 rounded-2xl p-4 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-mono text-purple-400 uppercase font-bold tracking-wider block">
             Fine-Tuning Controls

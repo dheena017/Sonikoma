@@ -9,6 +9,7 @@ import {
   Link2,
   Database,
   ExternalLink,
+  ArrowLeft,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -320,21 +321,21 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           ))}
         </div>
 
-        {/* Bottom Action Footer - Return to Workspace */}
+        {/* Bottom Action Footer - Return to Storyboard */}
         <div className="p-3.5 border-t border-neutral-800/60 bg-neutral-950/90 flex justify-center w-full shrink-0">
           <button
             onClick={handleReturnToWorkspace}
-            className={`flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white transition-all active:scale-95 border border-purple-400/30 cursor-pointer shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] ${
+            className={`flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 text-white transition-all active:scale-95 border border-purple-400/30 cursor-pointer shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:shadow-[0_0_28px_rgba(168,85,247,0.65)] ${
               isCollapsed
                 ? "w-11 h-11 p-0"
-                : "w-full py-3.5 px-4 gap-3 text-xs font-black tracking-widest uppercase"
+                : "w-full py-3.5 px-4 gap-2.5 text-xs font-mono font-bold tracking-wide"
             }`}
-            title="Return to Workspace"
+            title="Return to Storyboard"
           >
-            <ExternalLink className="w-5 h-5 shrink-0 text-purple-200" />
+            <ArrowLeft className="w-4 h-4 shrink-0 text-white stroke-[2.5]" />
             {!isCollapsed && (
-              <span className="text-xs font-black tracking-widest uppercase">
-                Return to Workspace
+              <span className="text-xs font-mono font-bold tracking-wide">
+                Return to Storyboard
               </span>
             )}
           </button>
