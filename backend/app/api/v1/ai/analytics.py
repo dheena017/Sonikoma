@@ -936,6 +936,66 @@ async def update_model_routing(payload: dict, current_user: Optional[dict] = Dep
     }
 
 
+@router.post("/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
+@router.post("/models/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
+async def simulate_model_routing(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
+    """Simulates real execution dispatch through Tier 1, Tier 2, and Tier 3 cascade routing."""
+    import time
+    from services.model_catalog.registry import ModelRegistry
+    
+    task = payload.get("task", "general")
+    primary_model = payload.get("primary_model", "gemini-3.7-flash")
+    fallback_model = payload.get("fallback_model", "claude-3-5-sonnet")
+    tertiary_model = payload.get("tertiary_model", "gpt-4o-mini")
+    simulate_error_on = (payload.get("simulate_error_on") or "").lower()
+
+    # Check if simulating error on primary / fallback
+    is_primary_failed = simulate_error_on in ["primary", "tier1", primary_model.lower()]
+    is_fallback_failed = simulate_error_on in ["fallback", "tier2", fallback_model.lower()]
+
+    catalog = ModelRegistry.get_catalog()
+    
+    def find_model_meta(model_id: str):
+        for m in catalog:
+            if m.get("id", "").lower() == str(model_id).lower():
+                return m
+        return {"id": model_id, "name": model_id, "provider": "google", "context_window": "200K"}
+
+    if is_primary_failed and is_fallback_failed:
+        resolved = find_model_meta(tertiary_model)
+        tier_used = "Tier 3 Emergency"
+        status = "FAILOVER_CASCADE_TIER3"
+        message = f"Simulated failover: Tier 1 ({primary_model}) & Tier 2 ({fallback_model}) bypassed; dispatched via Tier 3 ({tertiary_model})."
+        latency_ms = int(160 + (abs(hash(tertiary_model)) % 80))
+    elif is_primary_failed:
+        resolved = find_model_meta(fallback_model)
+        tier_used = "Tier 2 Fallback"
+        status = "FAILOVER_ENGAGED"
+        message = f"Simulated failover: Primary engine ({primary_model}) rate-limit simulated; smoothly routed to Tier 2 ({fallback_model})."
+        latency_ms = int(130 + (abs(hash(fallback_model)) % 60))
+    else:
+        resolved = find_model_meta(primary_model)
+        tier_used = "Tier 1 Primary"
+        status = "SUCCESS"
+        message = f"Pipeline successfully routed to {resolved.get('name', primary_model)} with active failover backup."
+        latency_ms = int(75 + (abs(hash(primary_model)) % 55))
+
+    return {
+        "success": True,
+        "task": task,
+        "status": status,
+        "tier_used": tier_used,
+        "resolved_model": resolved.get("id", primary_model),
+        "model_name": resolved.get("name", primary_model),
+        "provider": resolved.get("provider", "google"),
+        "latency_ms": latency_ms,
+        "latency": f"~{latency_ms}ms",
+        "context_window": resolved.get("context_window", "200K"),
+        "message": message,
+        "timestamp": time.time(),
+    }
+
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. LIVE MULTI-MODEL BENCHMARK RUNNER

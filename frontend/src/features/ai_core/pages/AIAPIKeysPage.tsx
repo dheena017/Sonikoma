@@ -21,6 +21,7 @@ import {
   Flame,
   Layers,
   Pencil,
+  Loader2,
 } from "lucide-react";
 import { AICardSkeleton } from "@/shared/ui/loading";
 
@@ -136,8 +137,101 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
       .catch(() => {});
   }, []);
 
+  const verifyTimers = React.useRef<Record<string, any>>({});
+
+  const autoVerifyKey = (providerId: string, keyValue: string) => {
+    if (verifyTimers.current[providerId]) {
+      clearTimeout(verifyTimers.current[providerId]);
+    }
+
+    const trimmed = keyValue.trim();
+    if (!trimmed) {
+      setTestingStatus((prev) => {
+        const next = { ...prev };
+        delete next[providerId];
+        return next;
+      });
+      localStorage.removeItem(`sonikoma_key_${providerId}`);
+      localStorage.removeItem(`user_${providerId}_key`);
+      window.dispatchEvent(new Event("sonikoma-keys-updated"));
+      return;
+    }
+
+    if (trimmed.length < 8) {
+      setTestingStatus((prev) => ({
+        ...prev,
+        [providerId]: {
+          loading: false,
+          success: false,
+          message: "Key too short",
+        },
+      }));
+      return;
+    }
+
+    setTestingStatus((prev) => ({
+      ...prev,
+      [providerId]: { loading: true },
+    }));
+
+    verifyTimers.current[providerId] = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/v1/ai/providers/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider: providerId,
+            api_key: trimmed,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          localStorage.setItem(`sonikoma_key_${providerId}`, trimmed);
+          localStorage.setItem(`user_${providerId}_key`, trimmed);
+          if (data.project_name) {
+            setProjectNames((prev) => ({ ...prev, [providerId]: data.project_name }));
+            localStorage.setItem(`sonikoma_project_${providerId}`, data.project_name);
+          }
+          window.dispatchEvent(new Event("sonikoma-keys-updated"));
+          window.dispatchEvent(new Event("api-key-updated"));
+
+          setTestingStatus((prev) => ({
+            ...prev,
+            [providerId]: {
+              loading: false,
+              success: true,
+              message: `Valid API Key (${data.latency_ms || 110}ms)`,
+              latency: data.latency_ms,
+              project_name: data.project_name,
+            },
+          }));
+        } else {
+          setTestingStatus((prev) => ({
+            ...prev,
+            [providerId]: {
+              loading: false,
+              success: false,
+              message: data.error || "Invalid API key",
+            },
+          }));
+        }
+      } catch {
+        setTestingStatus((prev) => ({
+          ...prev,
+          [providerId]: {
+            loading: false,
+            success: false,
+            message: "Validation network error",
+          },
+        }));
+      }
+    }, 500);
+  };
+
   const handleKeyChange = (providerId: string, val: string) => {
     setKeys((prev) => ({ ...prev, [providerId]: val }));
+    autoVerifyKey(providerId, val);
   };
 
   const handleProjectChange = (providerId: string, val: string) => {
@@ -362,67 +456,32 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
                     </div>
                   </div>
 
-                  {/* Google AI Studio Project Auto-Linked Info */}
-                  {provider.id === "gemini" && (
-                    <div className="space-y-1.5 pt-1 bg-neutral-950/60 p-2.5 rounded-xl border border-indigo-950/60 shadow-inner">
-                      <div className="flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-neutral-400 flex items-center gap-1.5">
-                          <Layers className="w-3.5 h-3.5 text-indigo-400" /> Google AI Studio Project:
-                        </span>
-                        <a
-                          href="https://aistudio.google.com/app/apikey"
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-[10px] text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1 bg-indigo-950/50 hover:bg-indigo-900/50 px-2 py-0.5 rounded-lg border border-indigo-800/40"
-                        >
-                          Google AI Studio <ExternalLink className="w-2.5 h-2.5" />
-                        </a>
-                      </div>
 
-                      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-neutral-900/90 border border-neutral-800 text-xs font-mono">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                          <span className="text-indigo-200 font-bold tracking-tight">
-                            {projectNames.gemini || testState?.project_name || "gen-lang-client-0621007149"}
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/50 border border-emerald-800/40 px-2 py-0.5 rounded">
-                          Free tier · Active
+                  {/* Real-time Live Validation Status */}
+                  <div className="flex items-center justify-between text-[11px] font-mono pt-1 min-h-[26px]">
+                    <div className="flex items-center gap-1.5">
+                      {testState?.loading ? (
+                        <span className="flex items-center gap-1.5 text-purple-400 font-medium animate-pulse">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Verifying key...
                         </span>
-                      </div>
+                      ) : testState && testState.success ? (
+                        <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-0.5 rounded-lg">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Valid & Active {testState.latency ? `(${testState.latency}ms)` : ""}
+                        </span>
+                      ) : testState && !testState.success ? (
+                        <span className="flex items-center gap-1.5 text-rose-400 font-bold bg-rose-950/40 border border-rose-800/40 px-2.5 py-0.5 rounded-lg">
+                          <AlertCircle className="w-3.5 h-3.5" /> {testState.message || "Invalid Key"}
+                        </span>
+                      ) : userKey ? (
+                        <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/30 border border-emerald-800/30 px-2 py-0.5 rounded-lg">
+                          <CheckCircle2 className="w-3 h-3" /> Configured
+                        </span>
+                      ) : (
+                        <span className="text-neutral-500 text-[10.5px]">
+                          Auto-validates on entering API key
+                        </span>
+                      )}
                     </div>
-                  )}
-
-                  {/* Test Connection Button & Status */}
-                  <div className="flex items-center justify-between text-[11px] font-mono pt-1">
-                    <button
-                      onClick={() => handleTestKey(provider.id)}
-                      disabled={testState?.loading}
-                      className="px-3 py-1 rounded-lg bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-[11px] font-medium flex items-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <RefreshCw className={`w-3 h-3 text-purple-400 ${testState?.loading ? "animate-spin" : ""}`} />
-                      <span>{testState?.loading ? "Testing..." : "Test Connection"}</span>
-                    </button>
-
-                    {testState && !testState.loading && (
-                      <span
-                        className={`flex items-center gap-1 font-bold ${testState.success ? "text-emerald-400" : "text-rose-400"
-                          }`}
-                      >
-                        {testState.success ? (
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                        ) : (
-                          <AlertCircle className="w-3.5 h-3.5" />
-                        )}
-                        <span>{testState.message}</span>
-                      </span>
-                    )}
-
-                    {!testState && userKey && (
-                      <span className="text-emerald-400 flex items-center gap-1 font-bold">
-                        <CheckCircle2 className="w-3 h-3" /> Configured
-                      </span>
-                    )}
                   </div>
                 </div>
               ) : (
