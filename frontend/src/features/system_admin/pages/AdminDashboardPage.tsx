@@ -668,17 +668,19 @@ const AdminDashboardPage = React.memo(
     }
 
     const dashboardContent = (
-      <div className="w-full max-w-7xl mx-auto py-6 space-y-6">
-        {/* Admin Header with Action Toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-white/[0.06] pb-5">
-          <div className="text-left">
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-              Admin Console
-            </h1>
-            <p className="text-neutral-400 text-xs mt-0.5">
-              Monitor system health, database latency, active worker jobs, and user accounts
-            </p>
-          </div>
+      <div className="w-full max-w-7xl mx-auto py-4 sm:py-6 text-left text-[#E5E5E5] animate-fade-in">
+        {/* ── MAIN COVER WRAPPER CARD ── */}
+        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+          {/* Admin Header with Action Toolbar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 border-b border-[#2F2F2F] pb-5">
+            <div className="text-left">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight leading-tight">
+                Admin Console
+              </h1>
+              <p className="text-[#9CA3AF] text-xs mt-0.5">
+                Monitor system health, database latency, active worker jobs, and user accounts
+              </p>
+            </div>
 
           {/* Header Right Action Toolbar */}
           <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-center shrink-0">
@@ -1178,6 +1180,7 @@ const AdminDashboardPage = React.memo(
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     );

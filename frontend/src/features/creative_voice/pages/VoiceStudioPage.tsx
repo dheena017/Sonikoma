@@ -181,53 +181,111 @@ const VoiceStudioPage = React.memo(
       addNotification?.(`Switched AI Model to ${model}`, "info");
     };
 
-    if (panels.length === 0) {
-      return (
-        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
-          <Mic className="h-10 w-10 text-neutral-600 mb-3" />
-          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
-            No Panels Available
-          </h3>
-          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
-            Please import a series or add panels to your storyboard timeline to
-            start voice dramaturgy.
-          </p>
-        </div>
-      );
-    }
+    const handleLoadDemoPanels = () => {
+      if (typeof setPanels === "function") {
+        setPanels([
+          {
+            id: 1,
+            prompt: "Dark celestial monarch standing atop ancient ruins",
+            duration: 3.5,
+            speech_text: "The shadow monarch has awakened from his eternal slumber.",
+            visual_description:
+              "Dark celestial energy swirls around the armored sovereign standing atop the ruins.",
+            image_url: "",
+            sfx: "Dark Energy Rumble",
+            motion_type: "zoom_in",
+          },
+          {
+            id: 2,
+            prompt: "Hunter recoiling in awe as purple lightning strikes",
+            duration: 4.0,
+            speech_text: "Is this... the true power of the ancient monarchs?",
+            visual_description:
+              "The hunter recoils in awe as purple lightning illuminates the battlefield.",
+            image_url: "",
+            sfx: "Lightning Crash",
+            motion_type: "pan_right",
+          },
+          {
+            id: 3,
+            prompt: "Close up of glowing crimson eyes charging energy",
+            duration: 3.0,
+            speech_text: "Prepare to perish in the void of darkness.",
+            visual_description:
+              "Close-up of glowing crimson eyes charging a destructive blast.",
+            image_url: "",
+            sfx: "Energy Charge",
+            motion_type: "static",
+          },
+        ]);
+        addNotification?.("Loaded demo panels for Voice Studio!", "success");
+      }
+    };
 
     return (
-      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
-        {/* PAGE HERO HEADER */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-6">
-          <div className="space-y-2 max-w-2xl text-left">
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-              Voice{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">
-                Studio
-              </span>
-            </h1>
-            <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
-              Character voice actor casting, script dramatization, emotional inflection, and neural audio synthesis.
-            </p>
-          </div>
+      <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-fade-in text-left text-[#E5E5E5]">
+        {/* ── MAIN COVER WRAPPER CARD ── */}
+        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+          {/* PAGE HERO HEADER */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#2F2F2F] pb-6">
+            <div className="space-y-2 max-w-2xl text-left">
+              <h1 className="text-3xl sm:text-4xl font-black text-[#E5E5E5] tracking-tight leading-tight">
+                Voice{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                  Studio
+                </span>
+              </h1>
+              <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed">
+                Character voice actor casting, script dramatization, emotional inflection, and neural audio synthesis.
+              </p>
+            </div>
 
-          <div className="flex items-center gap-3 self-start md:self-center">
-            {/* Inline AI Model Switcher */}
-            <AIModelSelector value={selectedModel} onChange={handleModelChange} />
+            <div className="flex items-center gap-3 self-start md:self-center">
+              {/* Inline AI Model Switcher */}
+              <AIModelSelector value={selectedModel} onChange={handleModelChange} />
 
-            <div className="px-3.5 py-1.5 rounded-full bg-neutral-950 border border-neutral-850 text-neutral-300 text-xs font-mono flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-pink-400 animate-pulse" />
-              <span>Genre: {scrapedGenre || "Fantasy Action"}</span>
+              <div className="px-3.5 py-1.5 rounded-full bg-[#121212] border border-[#2F2F2F] text-[#9CA3AF] text-xs font-mono flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
+                <span>Genre: {scrapedGenre || "Fantasy Action"}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
-        <div className="relative flex items-center gap-4 bg-neutral-950 border border-neutral-850 rounded-2xl p-3 shadow-md">
+          {safePanels.length === 0 ? (
+            /* ── EMPTY STATE INSIDE COVER FRAME ── */
+            <div className="p-10 sm:p-14 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] flex flex-col items-center justify-center text-center shadow-lg animate-fade-in">
+              <div className="w-16 h-16 rounded-2xl bg-[#121212] border border-[#2F2F2F] flex items-center justify-center text-[#3B82F6] mb-4 shadow-inner">
+                <Mic className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-[#E5E5E5] font-sans tracking-tight mb-2">
+                No Storyboard Panels Loaded
+              </h3>
+              <p className="text-xs sm:text-sm text-[#9CA3AF] max-w-md mx-auto leading-relaxed mb-6 font-sans">
+                Please import a chapter or open an existing project from your dashboard to cast voice actors, dramatize scripts, and synthesize audio.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={onNavigateHome}
+                  className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase tracking-wider text-xs"
+                >
+                  <span>Open Dashboard Projects</span>
+                </button>
+                <button
+                  onClick={handleLoadDemoPanels}
+                  className="btn-secondary flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold font-mono"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  <span>Load Interactive Demo Panels</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
+              <div className="relative flex items-center gap-4 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
+            className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-sm"
             title="Scroll left"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -243,10 +301,10 @@ const VoiceStudioPage = React.memo(
                 <button
                   key={p?.id || idx}
                   onClick={() => setSelectedIdx(idx)}
-                  className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/60 flex items-center justify-center ${
+                  className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-[#121212] flex items-center justify-center ${
                     isSel
-                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105 bg-purple-500/10"
-                      : "border-neutral-850 opacity-60 hover:opacity-100 hover:border-purple-500/50"
+                      ? "border-2 border-[#3B82F6] scale-105 bg-[#3B82F6]/10 shadow-md"
+                      : "border-[#2F2F2F] opacity-70 hover:opacity-100 hover:border-[#3B82F6]/60 hover:scale-102"
                   }`}
                 >
                   {p?.image_url ? (
@@ -256,11 +314,11 @@ const VoiceStudioPage = React.memo(
                       className="w-full h-full object-contain"
                     />
                   ) : (
-                    <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-[10px] text-neutral-600 font-mono">
+                    <div className="w-full h-full bg-[#121212] flex items-center justify-center text-[10px] text-[#6B7280] font-mono">
                       Panel #{idx + 1}
                     </div>
                   )}
-                  <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-neutral-300 border border-neutral-800">
+                  <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-[#E5E5E5] border border-[#2F2F2F]">
                     #{idx + 1}
                   </div>
                 </button>
@@ -270,7 +328,7 @@ const VoiceStudioPage = React.memo(
 
           <button
             onClick={() => scrollFilmstrip("right")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
+            className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-sm"
             title="Scroll right"
           >
             <ChevronRight className="w-4 h-4" />
@@ -427,15 +485,15 @@ const VoiceStudioPage = React.memo(
           </div>
 
           {/* COLUMN 2 (RIGHT - 8 COLS / 67% WIDTH): VOICE WORKFLOW CANVAS */}
-          <div className="lg:col-span-8 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 shadow-xl flex flex-col min-h-[480px]">
+          <div className="lg:col-span-8 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-5 shadow-xl flex flex-col min-h-[480px]">
             {/* TABS SELECTOR HEADER */}
-            <div className="flex border-b border-neutral-850 mb-5 overflow-x-auto scrollbar-none font-mono">
+            <div className="flex border-b border-[#2F2F2F] mb-5 overflow-x-auto scrollbar-none font-mono">
               <button
                 onClick={() => setActiveTab("dramatize")}
                 className={`px-5 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap flex items-center gap-2 ${
                   activeTab === "dramatize"
-                    ? "border-purple-500 text-purple-300 bg-purple-500/10"
-                    : "border-transparent text-neutral-400 hover:text-white"
+                    ? "border-[#3B82F6] text-[#3B82F6] bg-[#3B82F6]/10"
+                    : "border-transparent text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#252525]"
                 }`}
               >
                 <Wand2 className="w-3.5 h-3.5" />
@@ -445,8 +503,8 @@ const VoiceStudioPage = React.memo(
                 onClick={() => setActiveTab("cast")}
                 className={`px-5 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap flex items-center gap-2 ${
                   activeTab === "cast"
-                    ? "border-purple-500 text-purple-300 bg-purple-500/10"
-                    : "border-transparent text-neutral-400 hover:text-white"
+                    ? "border-[#3B82F6] text-[#3B82F6] bg-[#3B82F6]/10"
+                    : "border-transparent text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#252525]"
                 }`}
               >
                 <Users className="w-3.5 h-3.5" />
@@ -456,8 +514,8 @@ const VoiceStudioPage = React.memo(
                 onClick={() => setActiveTab("sound")}
                 className={`px-5 py-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer whitespace-nowrap flex items-center gap-2 ${
                   activeTab === "sound"
-                    ? "border-purple-500 text-purple-300 bg-purple-500/10"
-                    : "border-transparent text-neutral-400 hover:text-white"
+                    ? "border-[#3B82F6] text-[#3B82F6] bg-[#3B82F6]/10"
+                    : "border-transparent text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#252525]"
                 }`}
               >
                 <Headphones className="w-3.5 h-3.5" />
@@ -500,9 +558,12 @@ const VoiceStudioPage = React.memo(
             </div>
           </div>
         </div>
+            </>
+          )}
+        </div>
       </div>
-    );
-  }
+  );
+}
 );
 
 export default VoiceStudioPage;

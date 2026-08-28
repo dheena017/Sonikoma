@@ -43,17 +43,17 @@ export default function NotificationDropdown({
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-[400px] bg-[#0c0d16]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top sm:origin-top-right">
-      <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-neutral-950/40 backdrop-blur-md">
+    <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-[400px] bg-[#181818] border border-[#2F2F2F] rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in origin-top sm:origin-top-right">
+      <div className="px-4 py-3 border-b border-[#2F2F2F] flex items-center justify-between bg-[#141414]">
         <div className="flex items-center gap-2">
           {notificationsMuted ? (
-            <BellOff className="h-4 w-4 text-rose-500" />
+            <BellOff className="h-4 w-4 text-[#EF4444]" />
           ) : (
-            <Bell className="h-4 w-4 text-purple-400" />
+            <Bell className="h-4 w-4 text-[#3B82F6]" />
           )}
-          <h3 className="font-bold text-sm text-white">Notifications</h3>
+          <h3 className="font-bold text-sm text-[#E5E5E5]">Notifications</h3>
           {unreadCount > 0 && (
-            <span className="bg-purple-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+            <span className="bg-[#3B82F6] text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
               {unreadCount}
             </span>
           )}
@@ -61,10 +61,10 @@ export default function NotificationDropdown({
         <div className="flex items-center gap-1">
           <button
             onClick={onToggleMute}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               notificationsMuted
-                ? "text-rose-500 hover:text-rose-450 hover:bg-neutral-800"
-                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                ? "text-[#EF4444] hover:bg-[#262626]"
+                : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#262626]"
             }`}
             title={
               notificationsMuted
@@ -81,7 +81,7 @@ export default function NotificationDropdown({
           {notifications.length > 0 && (
             <button
               onClick={onMarkAllAsRead}
-              className="p-1.5 text-neutral-400 hover:text-emerald-400 hover:bg-neutral-800 rounded-lg transition-colors"
+              className="p-1.5 text-[#9CA3AF] hover:text-[#10B981] hover:bg-[#262626] rounded-lg transition-colors cursor-pointer"
               title="Mark all as read"
             >
               <Check className="h-4 w-4" />
@@ -89,7 +89,7 @@ export default function NotificationDropdown({
           )}
           <button
             onClick={onClose}
-            className="p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors"
+            className="p-1.5 text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#262626] rounded-lg transition-colors cursor-pointer"
           >
             <X className="h-4 w-4" />
           </button>
@@ -99,18 +99,18 @@ export default function NotificationDropdown({
       <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
         {notifications.length === 0 ? (
           <div className="px-4 py-12 text-center">
-            <Bell className="h-10 w-10 text-neutral-700 mx-auto mb-3 opacity-20" />
-            <p className="text-neutral-500 text-sm italic font-mono">
+            <Bell className="h-10 w-10 text-[#6B7280] mx-auto mb-3 opacity-30" />
+            <p className="text-[#9CA3AF] text-xs font-mono">
               No notifications yet
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-neutral-800/50">
+          <div className="divide-y divide-[#2F2F2F]">
             {notifications.slice(0, 10).map((note) => (
               <div
                 key={note.id}
                 className={`p-4 transition-colors relative group ${
-                  !note.isRead ? "bg-purple-500/5" : "hover:bg-neutral-800/30"
+                  !note.isRead ? "bg-[#3B82F6]/5" : "hover:bg-[#262626]"
                 }`}
               >
                 <div className="flex gap-3">
@@ -120,8 +120,8 @@ export default function NotificationDropdown({
                       <p
                         className={`text-sm leading-tight break-words pr-4 ${
                           !note.isRead
-                            ? "text-white font-bold"
-                            : "text-neutral-300 font-medium"
+                            ? "text-[#E5E5E5] font-bold"
+                            : "text-[#9CA3AF] font-medium"
                         }`}
                       >
                         {note.message}
@@ -130,7 +130,7 @@ export default function NotificationDropdown({
                         onClick={() =>
                           toggleExpand(note.id, () => onMarkAsRead(note.id))
                         }
-                        className="text-neutral-500 hover:text-white shrink-0"
+                        className="text-[#9CA3AF] hover:text-white shrink-0 cursor-pointer"
                       >
                         {expandedId === note.id ? (
                           <ChevronUp className="h-4 w-4" />
@@ -141,23 +141,23 @@ export default function NotificationDropdown({
                     </div>
 
                     <div className="flex items-center gap-2 mt-1.5">
-                      <Clock className="h-3 w-3 text-neutral-500" />
-                      <span className="text-[10px] text-neutral-500 font-mono">
+                      <Clock className="h-3 w-3 text-[#6B7280]" />
+                      <span className="text-[10px] text-[#9CA3AF] font-mono">
                         {formatDistanceToNow(note.timestamp, {
                           addSuffix: true,
                         })}
                       </span>
                       {note.errorCode && (
-                        <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-1 rounded uppercase tracking-tighter">
+                        <span className="text-[10px] font-bold text-[#EF4444] bg-[#EF4444]/10 border border-[#EF4444]/20 px-1 rounded uppercase tracking-tighter">
                           Error {note.errorCode}
                         </span>
                       )}
                     </div>
 
                     {expandedId === note.id && (
-                      <div className="mt-3 space-y-2 animate-in slide-in-from-top-1 duration-200">
+                      <div className="mt-3 space-y-2 animate-fade-in">
                         {note.details && (
-                          <div className="p-2.5 rounded-lg bg-neutral-950/50 border border-neutral-800 text-[11px] font-mono text-neutral-400 break-words leading-relaxed">
+                          <div className="p-2.5 rounded-lg bg-[#121212] border border-[#2F2F2F] text-[11px] font-mono text-[#9CA3AF] break-words leading-relaxed">
                             {note.details}
                           </div>
                         )}
@@ -165,7 +165,7 @@ export default function NotificationDropdown({
                           {note.link && (
                             <a
                               href={note.link}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold uppercase tracking-wider transition-all shadow-lg shadow-purple-900/20"
+                              className="btn-primary flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onClose();
@@ -180,7 +180,7 @@ export default function NotificationDropdown({
                               e.stopPropagation();
                               onDelete(note.id);
                             }}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-rose-900/30 hover:text-rose-400 text-neutral-400 text-[10px] font-bold uppercase tracking-wider transition-all"
+                            className="btn-secondary flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider hover:text-[#EF4444]"
                           >
                             <Trash2 className="h-3 w-3" />
                             Remove
@@ -191,7 +191,7 @@ export default function NotificationDropdown({
                   </div>
                 </div>
                 {!note.isRead && (
-                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-purple-500" />
+                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#3B82F6]" />
                 )}
               </div>
             ))}
@@ -200,16 +200,16 @@ export default function NotificationDropdown({
       </div>
 
       {notifications.length > 0 && (
-        <div className="p-3 border-t border-neutral-800 bg-neutral-900/80 backdrop-blur-md flex items-center justify-between gap-2">
+        <div className="p-3 border-t border-[#2F2F2F] bg-[#141414] flex items-center justify-between gap-2">
           <button
             onClick={onClearAll}
-            className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 hover:text-rose-400 transition-colors px-2"
+            className="text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF] hover:text-[#EF4444] transition-colors px-2 cursor-pointer"
           >
             Clear All
           </button>
           <button
             onClick={onNavigateToAll}
-            className="flex-1 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-[11px] font-bold uppercase tracking-widest transition-all text-center"
+            className="btn-secondary flex-1 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest text-center"
           >
             View All History
           </button>

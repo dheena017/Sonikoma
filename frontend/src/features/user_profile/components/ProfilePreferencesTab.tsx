@@ -293,58 +293,22 @@ export default function ProfilePreferencesTab({
               </h4>
               <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
                 <div className="flex items-start gap-3">
-                  <div
-                    className={`mt-0.5 p-2 ${
-                      themeMode === "light"
-                        ? "bg-amber-500/10 text-amber-500"
-                        : "bg-purple-500/10 text-purple-400"
-                    } rounded-lg`}
-                  >
-                    {themeMode === "light" ? (
-                      <Sun className="w-4 h-4" />
-                    ) : (
-                      <Moon className="w-4 h-4" />
-                    )}
+                  <div className="mt-0.5 p-2 bg-purple-500/15 text-purple-400 border border-purple-500/30 rounded-lg">
+                    <Moon className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-white">
-                      Dark / Light Mode
+                      Dark Studio Theme
                     </h4>
-                    <p className="text-[10px] text-neutral-500 font-semibold mt-1">
-                      {themeMode === "dark"
-                        ? "Dark mode active"
-                        : "Light mode active"}
+                    <p className="text-[10px] text-purple-400 font-semibold mt-1">
+                      Always active & optimized for HDR production
                     </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={toggleThemeMode}
-                  title={
-                    themeMode === "dark"
-                      ? "Switch to Light Mode"
-                      : "Switch to Dark Mode"
-                  }
-                  className={`relative inline-flex items-center w-14 h-7 rounded-full border-2 transition-all duration-300 cursor-pointer focus:outline-none ${
-                    themeMode === "light"
-                      ? "bg-amber-400 border-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.4)]"
-                      : "bg-neutral-800 border-neutral-700"
-                  }`}
-                >
-                  <span
-                    className={`inline-flex items-center justify-center w-5 h-5 rounded-full shadow-md transform transition-transform duration-300 ${
-                      themeMode === "light"
-                        ? "translate-x-7 bg-white"
-                        : "translate-x-1 bg-neutral-600"
-                    }`}
-                  >
-                    {themeMode === "light" ? (
-                      <Sun className="h-3 w-3 text-amber-500" />
-                    ) : (
-                      <Moon className="h-3 w-3 text-neutral-300" />
-                    )}
-                  </span>
-                </button>
+                <div className="px-3 py-1 bg-purple-950/60 border border-purple-500/40 rounded-full text-[10px] font-mono font-bold text-purple-300 shadow-sm flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+                  <span>DARK MODE</span>
+                </div>
               </div>
             </div>
 

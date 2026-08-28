@@ -92,33 +92,34 @@ const NotificationsPage = React.memo(
     };
 
     return (
-      <div className="w-full flex-1 text-white py-6 max-w-7xl mx-auto relative">
-        <div className="w-full space-y-6 animate-in fade-in duration-300 relative z-10">
+      <div className="w-full flex-1 text-[#E5E5E5] py-4 sm:py-6 max-w-7xl mx-auto relative animate-fade-in text-left">
+        {/* ── MAIN COVER WRAPPER CARD ── */}
+        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
           {/* Unified Page Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2F2F2F] pb-5">
             <div>
-              <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
+              <div className="flex items-center gap-2 text-xs font-mono text-[#9CA3AF] mb-1.5">
                 <span
-                  className="hover:text-purple-400 cursor-pointer"
+                  className="hover:text-white cursor-pointer"
                   onClick={onNavigateHome}
                 >
                   Dashboard
                 </span>
-                <span>&gt;</span>
-                <span className="text-purple-400">Notifications</span>
+                <span className="text-[#6B7280]">&gt;</span>
+                <span className="text-[#3B82F6] font-bold">Notifications</span>
               </div>
-              <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-                <div className="icon-pill icon-pill--purple">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#121212] border border-[#2F2F2F] flex items-center justify-center text-[#3B82F6] shadow-inner">
                   <Bell className="h-5 w-5" />
                 </div>
-                Notification Hub
+                <span>Notification Hub</span>
                 {notifications.filter((n) => !n.isRead).length > 0 && (
-                  <span className="bg-purple-600 text-white text-[9px] px-2.5 py-0.5 rounded-full font-bold shadow-sm shadow-purple-900/50">
+                  <span className="bg-[#3B82F6] text-white text-[9px] px-2.5 py-0.5 rounded-full font-bold shadow-sm">
                     {notifications.filter((n) => !n.isRead).length} UNREAD
                   </span>
                 )}
               </h2>
-              <p className="text-xs text-neutral-400 font-mono mt-0.5">
+              <p className="text-xs text-[#9CA3AF] font-mono mt-1">
                 Track system activity, AI processing updates, and error logs
               </p>
             </div>
@@ -126,17 +127,17 @@ const NotificationsPage = React.memo(
             <div className="flex items-center flex-wrap gap-2.5">
               <button
                 onClick={onToggleMute}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                className={`btn-secondary flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono ${
                   notificationsMuted
-                    ? "bg-rose-950/20 border-rose-900/30 text-rose-455 hover:bg-rose-900/40"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
+                    ? "text-[#EF4444] border-[#EF4444]/30"
+                    : ""
                 }`}
                 title={notificationsMuted ? "Unmute sounds" : "Mute sounds"}
               >
                 {notificationsMuted ? (
-                  <BellOff className="h-3.5 w-3.5" />
+                  <BellOff className="h-3.5 w-3.5 text-[#EF4444]" />
                 ) : (
-                  <Bell className="h-3.5 w-3.5 text-purple-400" />
+                  <Bell className="h-3.5 w-3.5 text-[#3B82F6]" />
                 )}
                 <span>{notificationsMuted ? "Muted" : "Mute Sound"}</span>
               </button>
@@ -144,10 +145,10 @@ const NotificationsPage = React.memo(
               {filteredNotifications.length > 0 && (
                 <button
                   onClick={exportLogs}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-blue-400 text-xs font-mono transition-all cursor-pointer"
+                  className="btn-secondary flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono"
                   title="Export logs as JSON"
                 >
-                  <Download className="h-3.5 w-3.5" />
+                  <Download className="h-3.5 w-3.5 text-[#3B82F6]" />
                   <span>Export JSON</span>
                 </button>
               )}
@@ -156,7 +157,7 @@ const NotificationsPage = React.memo(
                 <>
                   <button
                     onClick={onMarkAllAsRead}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-emerald-400 text-xs font-mono transition-all cursor-pointer"
+                    className="btn-secondary flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono hover:text-[#10B981]"
                     title="Mark all as read"
                   >
                     <Check className="h-3.5 w-3.5" />
@@ -165,7 +166,7 @@ const NotificationsPage = React.memo(
                   {notifications.some((n) => n.isRead) && (
                     <button
                       onClick={handleClearRead}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-rose-455 text-xs font-mono transition-all cursor-pointer"
+                      className="btn-secondary flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono hover:text-[#EF4444]"
                       title="Clear read notifications"
                     >
                       <Trash className="h-3.5 w-3.5" />
@@ -174,7 +175,7 @@ const NotificationsPage = React.memo(
                   )}
                   <button
                     onClick={onClearAll}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-955/20 border border-rose-900/30 text-rose-450 hover:bg-rose-900/40 text-xs font-mono transition-all cursor-pointer"
+                    className="btn-secondary flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono text-[#EF4444] hover:bg-[#EF4444]/10"
                     title="Clear history"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -185,7 +186,7 @@ const NotificationsPage = React.memo(
 
               <button
                 onClick={onNavigateHome}
-                className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
+                className="btn-primary flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Dashboard
@@ -193,15 +194,15 @@ const NotificationsPage = React.memo(
             </div>
           </div>
 
-          <div className="mt-6 flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative group">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500 group-focus-within:text-purple-400 transition-colors" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280] group-focus-within:text-[#3B82F6] transition-colors" />
               <input
                 type="text"
                 placeholder="Search logs, errors, or messages..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl py-2.5 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/50 transition-all placeholder:text-neutral-600"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl py-2.5 pl-11 pr-4 text-xs sm:text-sm text-[#E5E5E5] focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all placeholder:text-[#6B7280]"
               />
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -211,7 +212,7 @@ const NotificationsPage = React.memo(
                     prev === "newest" ? "oldest" : "newest"
                   )
                 }
-                className="px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer border bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-2"
+                className="btn-secondary px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2"
               >
                 {sortOrder === "newest" ? (
                   <ChevronDown className="h-3.5 w-3.5" />
@@ -222,12 +223,12 @@ const NotificationsPage = React.memo(
               </button>
             </div>
             <div className="flex items-center gap-2 min-w-[220px]">
-              <Filter className="h-4 w-4 text-neutral-500 shrink-0" />
+              <Filter className="h-4 w-4 text-[#3B82F6] shrink-0" />
               <div className="relative w-full">
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="w-full appearance-none bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl py-2.5 pl-4 pr-10 text-sm font-bold uppercase tracking-widest outline-none transition-all cursor-pointer"
+                  className="w-full appearance-none bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] rounded-xl py-2.5 pl-4 pr-10 text-xs sm:text-sm font-bold uppercase tracking-widest outline-none focus:border-[#3B82F6] transition-all cursor-pointer"
                 >
                   <option value="all">All Logs</option>
                   <option value="unread">Unread</option>
@@ -236,20 +237,20 @@ const NotificationsPage = React.memo(
                   <option value="success">Success</option>
                   <option value="info">Info</option>
                 </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-500" />
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
               </div>
             </div>
           </div>
 
           {filteredNotifications.length === 0 ? (
-            <div className="py-20 flex flex-col items-center justify-center text-center">
-              <div className="h-20 w-20 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-6 text-neutral-700">
-                <Bell className="h-10 w-10 opacity-20" />
+            <div className="py-16 sm:py-20 p-8 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] flex flex-col items-center justify-center text-center shadow-lg animate-fade-in">
+              <div className="h-16 w-16 rounded-2xl bg-[#121212] border border-[#2F2F2F] flex items-center justify-center mb-4 text-[#3B82F6] shadow-inner">
+                <Bell className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-bold text-neutral-300">
+              <h3 className="text-lg sm:text-xl font-bold text-[#E5E5E5]">
                 No matching notifications
               </h3>
-              <p className="text-neutral-500 max-w-sm mt-2">
+              <p className="text-xs sm:text-sm text-[#9CA3AF] max-w-sm mt-2">
                 We couldn't find any notifications matching your current filters
                 or search query.
               </p>
@@ -259,7 +260,7 @@ const NotificationsPage = React.memo(
                     setSearchQuery("");
                     setFilter("all");
                   }}
-                  className="mt-6 text-purple-400 font-bold text-sm hover:text-purple-300 underline underline-offset-4"
+                  className="mt-6 text-[#3B82F6] font-bold text-xs hover:underline cursor-pointer uppercase tracking-wider font-mono"
                 >
                   Clear all filters
                 </button>
@@ -273,7 +274,7 @@ const NotificationsPage = React.memo(
                   return (
                     <div key={groupName} className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-xs font-bold text-neutral-500 uppercase tracking-widest pl-2">
+                        <h3 className="text-xs font-bold text-[#9CA3AF] uppercase tracking-widest pl-2 font-mono">
                           {groupName}
                         </h3>
                         {notes.some((n) => !n.isRead) && (
@@ -283,7 +284,7 @@ const NotificationsPage = React.memo(
                                 .filter((n) => !n.isRead)
                                 .forEach((n) => onMarkAsRead(n.id))
                             }
-                            className="text-[10px] text-purple-400 hover:text-purple-300 font-bold px-3 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 cursor-pointer transition-colors border border-purple-500/20 uppercase tracking-widest"
+                            className="btn-secondary text-[10px] font-bold px-3 py-1 rounded-lg uppercase tracking-widest"
                           >
                             Mark Read
                           </button>
@@ -293,10 +294,10 @@ const NotificationsPage = React.memo(
                         {notes.map((note) => (
                           <div
                             key={note.id}
-                            className={`group relative rounded-2xl border transition-all duration-300 overflow-hidden ${
+                            className={`group relative rounded-2xl border transition-all duration-200 overflow-hidden ${
                               !note.isRead
-                                ? "bg-purple-950/10 border-purple-500/30 ring-1 ring-purple-500/20 shadow-[0_0_20px_rgba(168,85,247,0.05)]"
-                                : "bg-neutral-900/40 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60"
+                                ? "bg-[#1E1E1E] border-[#3B82F6]/70 ring-1 ring-[#3B82F6]/30 shadow-md"
+                                : "bg-[#1E1E1E] border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626]"
                             }`}
                           >
                             <div
@@ -483,7 +484,7 @@ const NotificationsPage = React.memo(
                             )}
 
                             {!note.isRead && (
-                              <div className="absolute top-0 left-0 bottom-0 w-1 bg-purple-500" />
+                              <div className="absolute top-0 left-0 bottom-0 w-1 bg-[#3B82F6]" />
                             )}
                           </div>
                         ))}

@@ -361,20 +361,24 @@ const AdminPage = React.memo(
     };
 
     return (
-      <div className="w-full max-w-7xl mx-auto py-6 space-y-6 animate-fade-in relative z-10">
-        {!isOverview && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.06] pb-5">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {currentTabInfo.title}
-              </h1>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                {currentTabInfo.desc}
-              </p>
+      <div className="w-full max-w-7xl mx-auto py-4 sm:py-6 space-y-6 animate-fade-in relative z-10 text-left">
+        {isOverview ? (
+          renderActiveModule()
+        ) : (
+          <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2F2F2F] pb-5">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
+                  {currentTabInfo.title}
+                </h1>
+                <p className="text-xs text-[#9CA3AF] font-sans mt-1">
+                  {currentTabInfo.desc}
+                </p>
+              </div>
             </div>
+            {renderActiveModule()}
           </div>
         )}
-        {renderActiveModule()}
       </div>
     );
   }

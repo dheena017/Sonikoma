@@ -173,18 +173,17 @@ export default function ScriptDramatizerForm({
   return (
     <div className="space-y-5">
       {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-850 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2F2F2F] pb-4">
         <div className="flex items-center gap-2.5">
-          <span className="p-2 bg-purple-500/10 border border-purple-500/30 rounded-xl text-purple-400">
+          <span className="p-2 bg-[#3B82F6]/10 border border-[#3B82F6]/30 rounded-xl text-[#3B82F6]">
             <Wand2 className="h-4 w-4" />
           </span>
           <div>
-            <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-              Dialogue & Script Dramatizer
-            </h4>
-            <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
-              Enhance raw OCR webtoon speech bubbles into high-retention
-              cinematic voice scripts.
+            <h3 className="text-sm font-bold text-[#E5E5E5] font-sans">
+              Dialogue Dramatization Engine
+            </h3>
+            <p className="text-[11px] text-[#9CA3AF] font-sans">
+              Generate punchy anime & webtoon lines with tone cues.
             </p>
           </div>
         </div>
@@ -192,22 +191,22 @@ export default function ScriptDramatizerForm({
         <div className="flex items-center gap-2">
           <button
             onClick={handleSyncTimeline}
-            className="px-3 py-2 bg-neutral-900 hover:bg-neutral-850 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-            title="Sync raw dialogue lines from current storyboard panels"
+            className="px-3 py-2 bg-[#121212] hover:bg-[#252525] text-[#E5E5E5] border border-[#2F2F2F] hover:border-[#3B82F6]/60 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+            title="Reload raw speech texts from storyboard panels"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-purple-400" />
-            <span>Sync Timeline</span>
+            <RotateCcw className="w-3.5 h-3.5 text-[#9CA3AF]" />
+            <span>Sync ({rawLines.length})</span>
           </button>
 
           <button
             onClick={handleDramatize}
             disabled={loading || rawLines.length === 0}
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
+            className="px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#3B82F6]/30 rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 cursor-pointer shadow-md active:scale-95 shrink-0"
           >
             {loading ? (
               <RefreshCw className="w-4 h-4 animate-spin" />
             ) : (
-              <Sparkles className="w-4 h-4 text-purple-200" />
+              <Sparkles className="w-4 h-4 text-white" />
             )}
             <span>{loading ? "Dramatizing..." : "✦ Enhance Script"}</span>
           </button>
@@ -217,10 +216,10 @@ export default function ScriptDramatizerForm({
       {/* 2-COLUMN BALANCED INPUT & OUTPUT LAYOUT */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
         {/* LEFT COLUMN (5 COLS): GENRE + CONTEXT + RAW DIALOGUE INPUTS */}
-        <div className="xl:col-span-5 space-y-4 bg-neutral-950 border border-neutral-800 p-4 rounded-xl shadow-inner">
+        <div className="xl:col-span-5 space-y-4 bg-[#121212] border border-[#2F2F2F] p-4 rounded-xl shadow-inner">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-mono text-purple-300 uppercase tracking-widest block font-bold">
+              <label className="text-[10px] font-mono text-[#3B82F6] uppercase tracking-widest block font-bold">
                 GENRE CONTEXT
               </label>
               {/* Preset pills */}
@@ -230,7 +229,7 @@ export default function ScriptDramatizerForm({
                     key={g}
                     type="button"
                     onClick={() => setGenre(g)}
-                    className="px-1.5 py-0.5 rounded text-[8px] font-mono bg-neutral-900 text-purple-300 border border-purple-500/20 hover:border-purple-400"
+                    className="px-1.5 py-0.5 rounded text-[8px] font-mono bg-[#1E1E1E] text-[#9CA3AF] border border-[#2F2F2F] hover:border-[#3B82F6] hover:text-white"
                   >
                     {g}
                   </button>
@@ -241,19 +240,19 @@ export default function ScriptDramatizerForm({
               type="text"
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
-              className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
+              className="w-full bg-[#1E1E1E] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono text-purple-300 uppercase tracking-widest block font-bold">
+            <label className="text-[10px] font-mono text-[#3B82F6] uppercase tracking-widest block font-bold">
               SCENE CONTEXT / PLOT DETAILS
             </label>
             <textarea
               rows={2}
               value={context}
               onChange={(e) => setContext(e.target.value)}
-              className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans leading-relaxed resize-y"
+              className="w-full bg-[#1E1E1E] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans leading-relaxed resize-y"
             />
           </div>
 

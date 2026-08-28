@@ -250,21 +250,6 @@ export default function LandingPage({
 
           <div className="flex items-center gap-3">
             <button
-              onClick={toggleThemeMode}
-              className={`p-2 sm:p-2.5 rounded-xl border transition-all cursor-pointer ${
-                isLight
-                  ? "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
-                  : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:bg-neutral-800 hover:text-white"
-              }`}
-              title={isLight ? "Switch to Dark Mode" : "Switch to Light Mode"}
-            >
-              {isLight ? (
-                <Moon className="w-4 h-4" />
-              ) : (
-                <Sun className="w-4 h-4 text-amber-400" />
-              )}
-            </button>
-            <button
               onClick={onLogin}
               className={`hidden sm:inline-flex px-5 py-2.5 text-sm font-bold transition-colors cursor-pointer ${
                 isLight

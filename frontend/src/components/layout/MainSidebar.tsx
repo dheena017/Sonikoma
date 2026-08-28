@@ -346,8 +346,7 @@ const SidebarInner = ({
             className="flex items-center gap-3.5 cursor-pointer group"
             onClick={handleNavigateToDashboardOverview}
           >
-            <div className="relative">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
+            <div className="relative shrink-0 rounded-full border border-[#2F2F2F] group-hover:border-[#3B82F6] transition-colors p-0.5 bg-[#1E1E1E]">
               <img
                 src={
                   themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"
@@ -355,20 +354,20 @@ const SidebarInner = ({
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
                 }}
-                className="relative h-11 w-11 rounded-full border border-purple-500/30 shrink-0 object-cover bg-black"
+                className="h-10 w-10 rounded-full shrink-0 object-cover bg-black"
                 alt="Sonikoma Logo"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base tracking-tight text-white font-sans group-hover:text-purple-300 transition-colors">
+                <span className="font-extrabold text-base tracking-tight text-[#E5E5E5] font-sans group-hover:text-[#3B82F6] transition-colors">
                   Sonikoma
                 </span>
-                <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
+                <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30 rounded-md font-mono">
                   Suite
                 </span>
               </div>
-              <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
+              <p className="text-[10px] text-[#9CA3AF] font-sans tracking-wide">
                 Comic to Video Studio
               </p>
             </div>

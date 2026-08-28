@@ -1310,6 +1310,7 @@ export default function AppRouter(props: AppRouterProps) {
               ) : isOptimizerPath ? (
                 <AIOptimizerPage
                   panels={panels}
+                  setPanels={setPanels}
                   onNavigateHome={handleNavigateHome}
                   addNotification={addNotification}
                   scrapedTitle={seriesTitle}

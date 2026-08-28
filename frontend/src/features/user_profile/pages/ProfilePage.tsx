@@ -8,7 +8,6 @@ import {
   FolderGit2,
   BarChart3,
   CreditCard,
-  Settings,
   ShieldCheck,
   LogOut,
   Home,
@@ -25,7 +24,6 @@ import {
   ProfileAccountTab,
   ProfileAnalyticsTab,
   ProfileBillingTab,
-  ProfilePreferencesTab,
   ProfileSecurityTab,
 } from "../components";
 
@@ -90,12 +88,6 @@ export default function ProfilePage(props: ProfilePageProps) {
         badge: `${state.userCredits} CR`,
       },
       {
-        id: "preferences" as ProfileTabId,
-        label: "Preferences",
-        icon: Settings,
-        badge: null,
-      },
-      {
         id: "security" as ProfileTabId,
         label: "Security",
         icon: ShieldCheck,
@@ -106,25 +98,21 @@ export default function ProfilePage(props: ProfilePageProps) {
   );
 
   return (
-    <div className="w-full flex-1 text-white flex flex-col font-sans selection:bg-purple-500/30">
-      {/* Background glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-[200px] left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-purple-900/15 via-indigo-900/10 to-transparent blur-[100px] rounded-full" />
-      </div>
-
-      <div className="relative z-10 w-full max-w-6xl mx-auto py-6 flex-1 flex flex-col space-y-6">
+    <div className="w-full flex-1 text-[#E5E5E5] flex flex-col font-sans py-4 sm:py-6 max-w-7xl mx-auto animate-fade-in text-left">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
         {/* Compact Breadcrumb & Quick Actions Bar */}
-        <div className="flex items-center justify-between border-b border-white/5 pb-3">
-          <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
+        <div className="flex items-center justify-between border-b border-[#2F2F2F] pb-3">
+          <div className="flex items-center gap-2 text-xs font-mono text-[#9CA3AF]">
             <button
               onClick={onNavigateHome}
-              className="flex items-center gap-1.5 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
             >
               <Home className="w-3.5 h-3.5" />
               <span>Dashboard</span>
             </button>
-            <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
-            <span className="text-purple-400 font-semibold">
+            <ChevronRight className="w-3.5 h-3.5 text-[#6B7280]" />
+            <span className="text-[#3B82F6] font-semibold">
               User Profile & Settings
             </span>
           </div>
@@ -132,7 +120,7 @@ export default function ProfilePage(props: ProfilePageProps) {
           {onLogout && (
             <button
               onClick={onLogout}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 text-xs font-medium transition-all"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#EF4444]/20 bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20 text-xs font-medium transition-all cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>
@@ -141,8 +129,8 @@ export default function ProfilePage(props: ProfilePageProps) {
         </div>
 
         {/* Compact Glassmorphic Hero Banner */}
-        <div className="relative w-full rounded-2xl border border-white/10 bg-[#0c0c12]/90 backdrop-blur-md p-4 sm:p-5 shadow-xl overflow-hidden">
-          <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 opacity-70" />
+        <div className="relative w-full rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-4 sm:p-5 shadow-md overflow-hidden">
+          <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {/* User Profile Block */}
@@ -172,19 +160,19 @@ export default function ProfilePage(props: ProfilePageProps) {
 
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#E5E5E5]">
                     {state.profileUser.fullName}
                   </h1>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wider uppercase font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-purple-400" />
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wider uppercase font-semibold bg-[#121212] text-[#3B82F6] border border-[#3B82F6]/30 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-[#3B82F6]" />
                     {state.subscriptionTier}
                   </span>
                 </div>
-                <p className="text-xs text-neutral-400 font-mono">
+                <p className="text-xs text-[#9CA3AF] font-mono">
                   {state.profileUser.email}
                 </p>
-                <p className="text-[11px] text-neutral-300 flex items-center gap-1">
-                  <Globe className="w-3 h-3 text-purple-400" />
+                <p className="text-[11px] text-[#9CA3AF] flex items-center gap-1">
+                  <Globe className="w-3 h-3 text-[#3B82F6]" />
                   <span>{state.profileUser.role}</span>
                 </p>
               </div>
@@ -192,35 +180,35 @@ export default function ProfilePage(props: ProfilePageProps) {
 
             {/* Compact Quick Stats Pills */}
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-center min-w-[75px]">
-                <div className="flex items-center justify-center gap-1 text-[10px] text-neutral-400 font-mono">
-                  <Zap className="w-3 h-3 text-amber-400" />
+              <div className="bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-1.5 text-center min-w-[75px]">
+                <div className="flex items-center justify-center gap-1 text-[10px] text-[#9CA3AF] font-mono">
+                  <Zap className="w-3 h-3 text-[#F59E0B]" />
                   <span>Credits</span>
                 </div>
-                <p className="text-sm font-bold text-white mt-0.5">
+                <p className="text-sm font-bold text-[#E5E5E5] mt-0.5 font-mono">
                   {state.userCredits}{" "}
-                  <span className="text-[10px] text-purple-400 font-normal">
+                  <span className="text-[10px] text-[#3B82F6] font-normal">
                     CR
                   </span>
                 </p>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-center min-w-[75px]">
-                <div className="flex items-center justify-center gap-1 text-[10px] text-neutral-400 font-mono">
-                  <Flame className="w-3 h-3 text-orange-400" />
+              <div className="bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-1.5 text-center min-w-[75px]">
+                <div className="flex items-center justify-center gap-1 text-[10px] text-[#9CA3AF] font-mono">
+                  <Flame className="w-3 h-3 text-[#EF4444]" />
                   <span>Streak</span>
                 </div>
-                <p className="text-sm font-bold text-white mt-0.5">
+                <p className="text-sm font-bold text-[#E5E5E5] mt-0.5 font-mono">
                   {state.streakDays}d
                 </p>
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-center min-w-[75px]">
-                <div className="flex items-center justify-center gap-1 text-[10px] text-neutral-400 font-mono">
-                  <Award className="w-3 h-3 text-emerald-400" />
+              <div className="bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-1.5 text-center min-w-[75px]">
+                <div className="flex items-center justify-center gap-1 text-[10px] text-[#9CA3AF] font-mono">
+                  <Award className="w-3 h-3 text-[#10B981]" />
                   <span>XP</span>
                 </div>
-                <p className="text-sm font-bold text-white mt-0.5">
+                <p className="text-sm font-bold text-[#E5E5E5] mt-0.5 font-mono">
                   {state.achievementPoints}
                 </p>
               </div>
@@ -229,16 +217,16 @@ export default function ProfilePage(props: ProfilePageProps) {
 
           {/* Daily Reward Alert Banner */}
           {!state.hasClaimedToday && (
-            <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2 bg-purple-950/20 border border-purple-500/20 rounded-xl px-3 py-2">
+            <div className="mt-3 pt-3 border-t border-[#2F2F2F] flex items-center justify-between gap-2 bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-2">
               <div className="flex items-center gap-2 text-xs">
-                <Flame className="w-4 h-4 text-amber-400 animate-pulse shrink-0" />
-                <span className="text-neutral-200">
+                <Flame className="w-4 h-4 text-[#F59E0B] animate-pulse shrink-0" />
+                <span className="text-[#E5E5E5]">
                   Daily Bonus Ready: Claim +25 free credits today!
                 </span>
               </div>
               <button
                 onClick={state.handleClaimCredits}
-                className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md transition-all shrink-0 flex items-center gap-1"
+                className="btn-primary px-3 py-1 rounded-lg text-xs font-bold shrink-0 flex items-center gap-1 uppercase tracking-wider"
               >
                 <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
                 <span>Claim</span>
@@ -248,7 +236,7 @@ export default function ProfilePage(props: ProfilePageProps) {
         </div>
 
         {/* Sleek Navigation Bar */}
-        <div className="w-full border-b border-white/10 pb-1 overflow-x-auto no-scrollbar">
+        <div className="w-full border-b border-[#2F2F2F] pb-1 overflow-x-auto no-scrollbar">
           <nav className="flex items-center gap-1.5 min-w-max">
             {tabsList.map((tab) => {
               const Icon = tab.icon;
@@ -257,24 +245,24 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <button
                   key={tab.id}
                   onClick={() => state.setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl font-medium text-xs transition-all duration-200 ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? "bg-purple-600/20 text-white border border-purple-500/40 shadow-sm font-bold"
-                      : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
+                      ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm font-bold"
+                      : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#262626] border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 ${
-                      isActive ? "text-purple-400" : "text-neutral-500"
+                      isActive ? "text-white" : "text-[#9CA3AF]"
                     }`}
                   />
                   <span>{tab.label}</span>
                   {tab.badge !== null && (
                     <span
-                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
                         isActive
-                          ? "bg-purple-500/30 text-purple-200 border border-purple-500/30"
-                          : "bg-white/10 text-neutral-400"
+                          ? "bg-white/20 text-white"
+                          : "bg-[#121212] text-[#9CA3AF] border border-[#2F2F2F]"
                       }`}
                     >
                       {tab.badge}
@@ -324,26 +312,6 @@ export default function ProfilePage(props: ProfilePageProps) {
               user={user}
               fetchWithInterceptor={fetchWithInterceptor}
               addNotification={props.addNotification}
-            />
-          )}
-
-          {state.activeTab === "preferences" && (
-            <ProfilePreferencesTab
-              notifications={state.notifications}
-              setNotifications={state.setNotifications}
-              workspace={state.workspace}
-              setWorkspace={state.setWorkspace}
-              privacy={privacy}
-              setPrivacy={setPrivacy}
-              theme={themeMode || "obsidian"}
-              setTheme={toggleThemeMode || (() => {})}
-              themeMode={themeMode}
-              toggleThemeMode={toggleThemeMode}
-              isSaving={false}
-              onSavePreferences={state.handleSavePreferences}
-              saveSuccess={state.prefSaveSuccess}
-              selectedModel={selectedModel}
-              setSelectedModel={setSelectedModel}
             />
           )}
 

@@ -152,28 +152,30 @@ export default function SettingsAccountPage({
   };
 
   return (
-    <div className="w-full flex-1 text-neutral-200 py-6 max-w-5xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
-        <div className="space-y-2 max-w-2xl">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight font-sans">
-            Account{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
-              Settings
-            </span>
-          </h1>
-          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
-            Manage your personal profile, security credentials, and active studio sessions.
-          </p>
-        </div>
+    <div className="w-full flex-1 text-[#E5E5E5] py-4 sm:py-6 max-w-7xl mx-auto space-y-8 animate-fade-in text-left">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#2F2F2F]">
+          <div className="space-y-2 max-w-2xl">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
+              Account{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                Settings
+              </span>
+            </h1>
+            <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed">
+              Manage your personal profile, security credentials, and active studio sessions.
+            </p>
+          </div>
 
-        <button
-          onClick={() => navigateTo("/dashboard")}
-          className="px-4 py-2.5 rounded-2xl bg-neutral-900 border border-white/10 text-xs font-bold text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all flex items-center gap-2 cursor-pointer shadow-sm shrink-0"
-        >
-          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-        </button>
-      </div>
+          <button
+            onClick={() => navigateTo("/dashboard")}
+            className="px-4 py-2.5 rounded-xl bg-[#1E1E1E] border border-[#2F2F2F] text-xs font-bold text-[#9CA3AF] hover:text-white hover:bg-[#242424] transition-all flex items-center gap-2 cursor-pointer shadow-sm shrink-0"
+          >
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+          </button>
+        </div>
 
       {/* Content Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -518,6 +520,7 @@ export default function SettingsAccountPage({
             </table>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

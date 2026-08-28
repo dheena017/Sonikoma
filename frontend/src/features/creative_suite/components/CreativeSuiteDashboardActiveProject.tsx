@@ -42,14 +42,14 @@ const CreativeSuiteDashboardActiveProject: React.FC<
   const safePanels = panels || [];
 
   return (
-    <div className="relative bg-neutral-900/60 border border-neutral-850 rounded-2xl p-6 shadow-md text-left overflow-hidden">
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-600 to-purple-400 opacity-90" />
+    <div className="relative bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 shadow-md hover:border-[#3B82F6]/40 transition-all duration-200 text-left overflow-hidden">
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#3B82F6] to-[#A855F7] opacity-90" />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
-          <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono flex items-center gap-1.5">
+          <h3 className="text-xs font-black text-[#3B82F6] uppercase tracking-widest font-mono flex items-center gap-1.5">
             <Tv className="w-4 h-4" /> Active Timeline
           </h3>
-          <span className="text-[10px] font-mono font-bold bg-gradient-to-r from-purple-600 to-pink-500 text-white px-2.5 py-1 rounded-full shadow-sm">
+          <span className="text-[10px] font-mono font-bold bg-[#3B82F6] text-white px-2.5 py-1 rounded-full shadow-sm">
             Active
           </span>
         </div>

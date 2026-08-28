@@ -45,69 +45,67 @@ const ShortcutsPageContent = React.memo(
     });
 
     return (
-      <div className="flex-1 w-full max-w-7xl mx-auto py-6 flex flex-col space-y-6 animate-[fadeIn_0.22s_ease-out]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-neutral-500 mb-1.5">
-              <span
-                className="hover:text-purple-400 cursor-pointer"
-                onClick={onNavigateHome}
-              >
-                Dashboard
-              </span>
-              <span>&gt;</span>
-              <span className="text-purple-400">Keys</span>
-            </div>
-            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-              <div className="icon-pill icon-pill--purple">
-                <Keyboard className="h-5 w-5" />
+      <div className="w-full flex-1 flex flex-col py-4 sm:py-6 max-w-7xl mx-auto text-[#E5E5E5] animate-fade-in text-left">
+        {/* ── MAIN COVER WRAPPER CARD ── */}
+        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2F2F2F] pb-5">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-mono text-[#9CA3AF] mb-1.5">
+                <span
+                  className="hover:text-[#3B82F6] cursor-pointer"
+                  onClick={onNavigateHome}
+                >
+                  Dashboard
+                </span>
+                <span>&gt;</span>
+                <span className="text-[#3B82F6]">Keys</span>
               </div>
-              Shortcuts & Macros
-            </h2>
-            <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Boost your productivity with custom keybindings. Control the
-              editor, navigate the workspace, and trigger AI workflows
-            </p>
-          </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
+                Keyboard Shortcuts
+              </h1>
+              <p className="text-sm text-[#737373] mt-1 font-medium">
+                Customize your workspace interaction and AI macros.
+              </p>
+            </div>
 
-          <div className="flex items-center flex-wrap gap-2.5">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800 hover:border-neutral-700 cursor-pointer"
-            >
-              <Upload className="h-3.5 w-3.5" />
-              Import
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleImport}
-              accept=".json"
-              className="hidden"
-            />
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-neutral-800 hover:border-neutral-700 cursor-pointer"
-            >
-              <Download className="h-3.5 w-3.5" />
-              Export
-            </button>
-            <button
-              onClick={handleResetToDefaults}
-              className="flex items-center gap-1.5 px-4 py-2 bg-neutral-900 border border-neutral-800 text-rose-455 hover:text-rose-300 rounded-xl text-xs font-mono transition-all hover:bg-neutral-800 hover:border-neutral-700 cursor-pointer"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Factory Reset
-            </button>
-            <button
-              onClick={onNavigateHome}
-              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-lg shadow-purple-950/30"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              Dashboard
-            </button>
+            <div className="flex items-center flex-wrap gap-2.5">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#1E1E1E] border border-[#2F2F2F] text-[#E5E5E5] hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-[#252525] hover:border-[#3B82F6]/60 cursor-pointer shadow-sm"
+              >
+                <Upload className="h-3.5 w-3.5 text-[#9CA3AF]" />
+                Import
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImport}
+                accept=".json"
+                className="hidden"
+              />
+              <button
+                onClick={handleExport}
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#1E1E1E] border border-[#2F2F2F] text-[#E5E5E5] hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-[#252525] hover:border-[#3B82F6]/60 cursor-pointer shadow-sm"
+              >
+                <Download className="h-3.5 w-3.5 text-[#9CA3AF]" />
+                Export
+              </button>
+              <button
+                onClick={handleResetToDefaults}
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#1E1E1E] border border-[#2F2F2F] text-[#EF4444] hover:text-white hover:bg-[#EF4444] rounded-xl text-xs font-mono transition-all cursor-pointer shadow-sm"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                Factory Reset
+              </button>
+              <button
+                onClick={onNavigateHome}
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-mono transition-all cursor-pointer font-bold shadow-md active:scale-95"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Dashboard
+              </button>
+            </div>
           </div>
-        </div>
 
         <div className="flex flex-col md:flex-row gap-6">
           <ShortcutCategoryTabs
@@ -143,6 +141,7 @@ const ShortcutsPageContent = React.memo(
             onCancel={handleCancelRecording}
           />
         )}
+        </div>
       </div>
     );
   }

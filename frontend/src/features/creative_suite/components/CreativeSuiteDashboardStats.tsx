@@ -23,21 +23,21 @@ const CreativeSuiteDashboardStats: React.FC<
         return (
           <div
             key={idx}
-            className="bg-neutral-900/60 border border-neutral-850 rounded-2xl p-5 hover:border-purple-500/40 transition-all duration-300 shadow-md"
+            className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-5 hover:border-[#3B82F6]/50 hover:bg-[#242424] transition-all duration-200 shadow-md group"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className={`p-2 rounded-xl border ${stat.color}`}>
+              <div className={`p-2.5 rounded-xl border ${stat.color}`}>
                 <Icon className="w-4 h-4" />
               </div>
-              <span className="text-[10px] text-neutral-500 font-mono">
+              <span className="text-[10px] text-[#6B7280] font-mono font-bold tracking-wider uppercase">
                 Telemetry
               </span>
             </div>
-            <div className="text-2xl font-black text-white">{stat.value}</div>
-            <div className="text-[10px] font-bold text-neutral-400 font-mono uppercase tracking-wide mt-1">
+            <div className="text-2xl sm:text-3xl font-black text-[#E5E5E5] font-mono tracking-tight">{stat.value}</div>
+            <div className="text-[10px] font-bold text-[#9CA3AF] font-mono uppercase tracking-wider mt-1">
               {stat.label}
             </div>
-            <p className="text-[10px] text-neutral-500 font-medium mt-0.5">
+            <p className="text-[10px] text-[#6B7280] font-medium mt-0.5 font-sans">
               {stat.desc}
             </p>
           </div>

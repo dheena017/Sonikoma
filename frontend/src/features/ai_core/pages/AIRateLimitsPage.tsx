@@ -99,9 +99,11 @@ export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPagePr
     currentProviderSpec.tiers.find((t) => t.id === selectedTierId) || currentProviderSpec.tiers[0];
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200 text-left">
-      {/* ── STEP 1: TOP-LEVEL PROVIDER SELECTION MATRIX ────────────────────── */}
-      <div className="space-y-3 p-5 rounded-2xl bg-[#121212] border border-neutral-850 shadow-sm">
+    <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-in fade-in duration-200 text-left text-[#E5E5E5]">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+        {/* ── STEP 1: TOP-LEVEL PROVIDER SELECTION MATRIX ── */}
+        <div className="space-y-3 p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Layers className="w-4 h-4 text-purple-400" />
@@ -181,15 +183,16 @@ export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPagePr
         activeTier={activeTier}
       />
 
-      {/* ── STEP 4: MODEL INTERACTIVE LIMITS (RPM / TPM / RPD) ───────────── */}
-      <ProviderInteractiveLimits
-        currentProvider={currentProviderSpec}
-        filteredModels={filteredModels}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        selectedTierId={selectedTierId}
-        isPriorityInference={isPriorityInference}
-      />
+        {/* ── STEP 4: MODEL INTERACTIVE LIMITS (RPM / TPM / RPD) ───────────── */}
+        <ProviderInteractiveLimits
+          currentProvider={currentProviderSpec}
+          filteredModels={filteredModels}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedTierId={selectedTierId}
+          isPriorityInference={isPriorityInference}
+        />
+      </div>
     </div>
   );
 }

@@ -3,14 +3,11 @@ import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import {
   Sparkles,
   Film,
-  Scissors,
-  Users,
   Globe,
   Music,
   Mic,
   BarChart3,
   Youtube,
-  Settings,
 } from "lucide-react";
 import CreativeSuiteDashboardStats from "@/features/creative_suite/components/CreativeSuiteDashboardStats";
 import CreativeSuiteDashboardTools from "@/features/creative_suite/components/CreativeSuiteDashboardTools";
@@ -30,14 +27,9 @@ interface CreativeSuiteDashboardPageProps {
 }
 
 const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
-  user,
   navigateTo,
   panels = [],
   setPanels,
-  projectId = null,
-  seriesTitle = null,
-  chapterTitle = null,
-  seriesCoverImage = null,
   addNotification = () => {},
 }) => {
   const activeProjectData = useProjectStore((state) => state.activeProjectData);
@@ -97,28 +89,28 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
         totalAudioSeconds > 0 ? `${totalAudioSeconds.toFixed(1)}s` : "0.0s",
       desc: "Soundtrack & Voice tracks",
       icon: Music,
-      color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+      color: "text-[#3B82F6] bg-[#3B82F6]/10 border-[#3B82F6]/20",
     },
     {
       label: "Timeline Panels",
       value: totalPanelsCount.toString(),
       desc: "Active storyboard frames",
       icon: Film,
-      color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+      color: "text-[#A855F7] bg-[#A855F7]/10 border-[#A855F7]/20",
     },
     {
       label: "Engagement Score",
       value: totalPanelsCount > 0 ? "88.4%" : "N/A",
       desc: "Predicted CTR rating",
       icon: BarChart3,
-      color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+      color: "text-[#10B981] bg-[#10B981]/10 border-[#10B981]/20",
     },
     {
       label: "AI Processing Load",
       value: "Idle",
       desc: "No active compiles",
       icon: Sparkles,
-      color: "text-pink-400 bg-pink-500/10 border-pink-500/20",
+      color: "text-[#00FFFF] bg-[#00FFFF]/10 border-[#00FFFF]/20",
     },
   ];
 
@@ -185,47 +177,52 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   ];
 
   return (
-    <div className="flex-1 w-full space-y-6 animate-fade-in text-left">
-      {/* Welcome Hero Panel */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
-        <div className="space-y-2 max-w-2xl">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
-            Creative{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400">
-              Suite
-            </span>
-          </h1>
-          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-xl">
-            Fine-tune visual boundaries, compose orchestral backings, cast AI narrators, and translate speech dialogues.
-          </p>
-        </div>
-      </div>
-
-      {/* Statistics Ribbon */}
-      <CreativeSuiteDashboardStats stats={statsRibbon} />
-
-      {/* Main Grid: Launcher and Project Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-xs font-black text-purple-400 uppercase tracking-widest font-mono pl-1">
-            Creative AI Tools Launcher
-          </h3>
-          <CreativeSuiteDashboardTools
-            tools={tools}
-            activePanelsCount={activePanels.length}
-            navigateTo={navigateTo}
-          />
+    <div className="flex-1 w-full max-w-7xl mx-auto animate-fade-in text-left">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden">
+        {/* Welcome Hero Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#2F2F2F] relative z-10">
+          <div className="space-y-2 max-w-2xl">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight">
+              Creative{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                Suite
+              </span>
+            </h1>
+            <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-xl">
+              Fine-tune visual boundaries, compose orchestral backings, cast AI narrators, and translate speech dialogues.
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          <CreativeSuiteDashboardActiveProject
-            activeProject={activeProject}
-            panels={activePanels}
-            activePanelsCount={activePanels.length}
-            exitActiveProject={exitActiveProject}
-            navigateTo={navigateTo}
-          />
-          <CreativeSuiteDashboardActivityLog activities={recentActivities} />
+        {/* Statistics Ribbon */}
+        <div className="relative z-10">
+          <CreativeSuiteDashboardStats stats={statsRibbon} />
+        </div>
+
+        {/* Main Grid: Launcher and Project Status */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+          <div className="lg:col-span-2 space-y-4">
+            <h3 className="text-xs font-black text-[#3B82F6] uppercase tracking-widest font-mono pl-1">
+              Creative AI Tools Launcher
+            </h3>
+            <CreativeSuiteDashboardTools
+              tools={tools}
+              activePanelsCount={activePanels.length}
+              navigateTo={navigateTo}
+            />
+          </div>
+
+          <div className="space-y-6">
+            <CreativeSuiteDashboardActiveProject
+              activeProject={activeProject}
+              panels={activePanels}
+              activePanelsCount={activePanels.length}
+              exitActiveProject={exitActiveProject}
+              navigateTo={navigateTo}
+            />
+            <CreativeSuiteDashboardActivityLog activities={recentActivities} />
+          </div>
         </div>
       </div>
     </div>

@@ -237,7 +237,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
               alt={title}
-              className="h-10 w-10 rounded-xl bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover border border-white/10 shrink-0"
+              className="h-10 w-10 rounded-xl bg-[#1E1E1E] object-cover border border-[#2F2F2F] shrink-0 shadow-md"
             />
           ) : (
             <img
@@ -246,7 +246,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
               alt="Sonikoma Logo"
-              className="h-10 w-10 rounded-full bg-neutral-900 shadow-lg shadow-purple-900/30 object-cover border border-white/5 shrink-0"
+              className="h-10 w-10 rounded-full bg-[#1E1E1E] object-cover border border-[#2F2F2F] shrink-0 shadow-md"
             />
           )}
 

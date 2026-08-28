@@ -298,12 +298,11 @@ export const ActiveProjectSelectorDrawer: React.FC<
       />
 
       {/* Drawer Panel */}
-      <div className="relative w-full max-w-lg h-full bg-[#090910]/85 backdrop-blur-3xl border-l border-white/10 text-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300">
+      <div className="relative w-full max-w-lg h-full bg-[#141414] border-l border-[#2F2F2F] text-[#E5E5E5] shadow-2xl flex flex-col z-10 animate-fade-in">
         {/* ─── Website Logo & Header ─── */}
-        <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#090910]/60 backdrop-blur-md">
+        <div className="p-4 border-b border-[#2F2F2F] flex items-center justify-between bg-[#181818]">
           <div className="flex items-center gap-3.5">
             <div className="relative">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-500 opacity-60 blur-sm" />
               <img
                 src={
                   themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"
@@ -311,17 +310,17 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 onError={(e) => {
                   (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
                 }}
-                className="relative h-10 w-10 rounded-full border border-purple-500/40 object-cover bg-black shrink-0 shadow-lg"
+                className="relative h-10 w-10 rounded-full border border-[#2F2F2F] object-cover bg-black shrink-0 shadow-md"
                 alt="Sonikoma Logo"
               />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-black text-base text-white font-sans tracking-tight">
+                <h3 className="font-black text-base text-[#E5E5E5] font-sans tracking-tight">
                   Select Active Project
                 </h3>
               </div>
-              <p className="text-[11px] text-neutral-400 font-sans leading-tight">
+              <p className="text-[11px] text-[#9CA3AF] font-sans leading-tight">
                 Global workspace active context switcher
               </p>
             </div>
@@ -335,10 +334,10 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     setDrawerOpen(false);
                     navigateTo("/projects");
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border border-neutral-750 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
+                  className="btn-secondary px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5"
                   title="View All Projects Workspace"
                 >
-                  <FolderOpen className="w-3.5 h-3.5 text-purple-400" />
+                  <FolderOpen className="w-3.5 h-3.5 text-[#3B82F6]" />
                   <span className="hidden sm:inline">All Projects</span>
                 </button>
                 <button
@@ -346,7 +345,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     setDrawerOpen(false);
                     navigateTo("/scraper");
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-500/30 text-xs font-extrabold transition-all flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+                  className="btn-primary px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 uppercase tracking-wider"
                   title="Scrape Webtoon / New Project"
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
@@ -356,7 +355,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
             )}
             <button
               onClick={() => setDrawerOpen(false)}
-              className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#262626] transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -528,10 +527,10 @@ export const ActiveProjectSelectorDrawer: React.FC<
             .join(" · ");
 
           return (
-            <div className="p-4 border-b border-white/10 bg-gradient-to-b from-purple-950/20 via-[#0c0d16]/80 to-[#07070a]/90 space-y-3.5">
+            <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] space-y-3.5">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] uppercase font-black text-purple-300 tracking-wider flex items-center gap-2 font-mono">
-                  <span className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                <span className="text-[11px] uppercase font-black text-[#3B82F6] tracking-wider flex items-center gap-2 font-mono">
+                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] shadow-[0_0_6px_#3B82F6]" />
                   Active Project Context
                 </span>
                 <span
@@ -543,9 +542,9 @@ export const ActiveProjectSelectorDrawer: React.FC<
               </div>
 
               {/* Title, Source, Cover & Actions */}
-              <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-xl backdrop-blur-xl transition-all">
+              <div className="bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-md transition-all">
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-neutral-950 border border-white/15 shrink-0 relative shadow-md">
+                  <div className="w-14 h-14 rounded-xl overflow-hidden bg-black border border-[#2F2F2F] shrink-0 relative shadow-md">
                     {activeCover ? (
                       <img
                         src={getProxiedImageUrl(activeCover, proj?.url)}
@@ -553,28 +552,28 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center text-purple-300 font-black text-lg">
+                      <div className="w-full h-full bg-[#121212] flex items-center justify-center text-[#3B82F6] font-black text-lg border border-[#2F2F2F]">
                         {proj?.title?.charAt(0).toUpperCase() || "P"}
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <ActiveSourceIcon className="w-3 h-3 text-neutral-400 shrink-0" />
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">
+                      <ActiveSourceIcon className="w-3 h-3 text-[#9CA3AF] shrink-0" />
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-[#9CA3AF]">
                         {activeSourceName}
                       </span>
                       {hasVideo && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#121212] text-[#3B82F6] border border-[#3B82F6]/30 font-mono">
                           VIDEO ✓
                         </span>
                       )}
                     </div>
-                    <h4 className="font-extrabold text-sm text-white truncate font-sans leading-tight">
+                    <h4 className="font-extrabold text-sm text-[#E5E5E5] truncate font-sans leading-tight">
                       {proj?.title || "Untitled Project"}
                     </h4>
                     {infoLine && (
-                      <p className="text-[11px] text-neutral-400 font-mono truncate">
+                      <p className="text-[11px] text-[#9CA3AF] font-mono truncate">
                         {infoLine}
                       </p>
                     )}
@@ -593,7 +592,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             )}`
                           );
                         }}
-                        className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all shadow-md shadow-purple-900/30 border border-purple-400/30 flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
+                        className="btn-primary px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5 justify-center"
                         title="Open Studio Editor"
                       >
                         <Film className="w-3.5 h-3.5" />
@@ -609,10 +608,10 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             )}`
                           );
                         }}
-                        className="px-2.5 py-1.5 bg-neutral-800/80 hover:bg-purple-500/20 text-neutral-200 hover:text-white border border-white/10 hover:border-purple-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
+                        className="btn-secondary px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 justify-center"
                         title="Open Image Cropper & Cleaner"
                       >
-                        <Zap className="w-3.5 h-3.5 text-amber-400" />
+                        <Zap className="w-3.5 h-3.5 text-[#F59E0B]" />
                         <span>Image</span>
                       </button>
 
@@ -625,10 +624,10 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             )}`
                           );
                         }}
-                        className="px-2.5 py-1.5 bg-neutral-800/80 hover:bg-indigo-500/20 text-neutral-200 hover:text-white border border-white/10 hover:border-indigo-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
+                        className="btn-secondary px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 justify-center"
                         title="Open AI Voice Studio"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
                         <span>Voice</span>
                       </button>
 
@@ -642,16 +641,16 @@ export const ActiveProjectSelectorDrawer: React.FC<
                               )}`
                             );
                           }}
-                          className="px-2.5 py-1.5 bg-neutral-800/80 hover:bg-neutral-750 text-neutral-300 border border-white/10 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
+                          className="btn-secondary px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 justify-center"
                           title="Open Series Details Page"
                         >
-                          <FolderOpen className="w-3.5 h-3.5 text-purple-400" />
+                          <FolderOpen className="w-3.5 h-3.5 text-[#3B82F6]" />
                           <span>Series</span>
                         </button>
                       ) : (
                         <button
                           onClick={() => clearActiveProject()}
-                          className="px-2.5 py-1.5 bg-neutral-800/80 hover:bg-rose-500/20 text-neutral-300 hover:text-rose-300 border border-white/10 hover:border-rose-500/30 rounded-xl text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 justify-center"
+                          className="btn-secondary px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 justify-center hover:text-[#EF4444]"
                           title="Deactivate / Clear active project"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -662,7 +661,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   )}
                   <button
                     onClick={() => clearActiveProject()}
-                    className="p-1 rounded-xl text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer self-end"
+                    className="p-1 rounded-xl text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors cursor-pointer self-end"
                     title="Deactivate / Clear active project"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -674,17 +673,17 @@ export const ActiveProjectSelectorDrawer: React.FC<
               {activePanelsCount > 0 && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-neutral-400">
+                    <span className="text-[#9CA3AF]">
                       Composition Progress
                     </span>
-                    <span className="text-purple-300 font-bold">
+                    <span className="text-[#3B82F6] font-bold">
                       {activeProgressPct}% · ~
                       {formatDuration(activeDurationSeconds)}
                     </span>
                   </div>
-                  <div className="w-full h-2 rounded-full bg-neutral-900 overflow-hidden border border-white/5">
+                  <div className="w-full h-2 rounded-full bg-[#121212] overflow-hidden border border-[#2F2F2F]">
                     <div
-                      className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-400 transition-all duration-500 rounded-full"
+                      className="h-full bg-gradient-to-r from-[#3B82F6] to-[#00FFFF] transition-all duration-500 rounded-full"
                       style={{ width: `${activeProgressPct}%` }}
                     />
                   </div>
@@ -693,49 +692,49 @@ export const ActiveProjectSelectorDrawer: React.FC<
 
               {/* Real Stats Grid — 4 columns with contextual data */}
               <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 p-2.5 rounded-xl backdrop-blur-md transition-all">
-                  <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
+                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 p-2.5 rounded-xl transition-all">
+                  <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
                     Panels
                   </span>
-                  <span className="font-bold text-white font-mono text-sm">
+                  <span className="font-bold text-[#E5E5E5] font-mono text-sm">
                     {activePanelsCount}
                   </span>
                 </div>
-                <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 p-2.5 rounded-xl backdrop-blur-md transition-all">
-                  <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
+                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 p-2.5 rounded-xl transition-all">
+                  <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
                     Imported
                   </span>
                   <span
                     className={`font-bold font-mono text-sm ${
-                      importedCount > 0 ? "text-purple-300" : "text-neutral-500"
+                      importedCount > 0 ? "text-[#3B82F6]" : "text-[#6B7280]"
                     }`}
                   >
                     {importedCount}
                   </span>
                 </div>
-                <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 p-2.5 rounded-xl backdrop-blur-md transition-all">
-                  <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
+                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 p-2.5 rounded-xl transition-all">
+                  <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
                     Speech
                   </span>
                   <span
                     className={`font-bold font-mono text-sm ${
                       activeSpeechCount > 0
-                        ? "text-emerald-400"
-                        : "text-neutral-500"
+                        ? "text-[#10B981]"
+                        : "text-[#6B7280]"
                     }`}
                   >
                     {activeSpeechCount}
                   </span>
                 </div>
-                <div className="bg-neutral-900/60 border border-white/10 hover:border-purple-500/30 p-2.5 rounded-xl backdrop-blur-md transition-all">
-                  <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">
+                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 p-2.5 rounded-xl transition-all">
+                  <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
                     Audio
                   </span>
                   <span
                     className={`font-bold font-mono text-sm ${
                       activeAudioCount > 0
-                        ? "text-pink-400"
-                        : "text-neutral-500"
+                        ? "text-[#F59E0B]"
+                        : "text-[#6B7280]"
                     }`}
                   >
                     {activeAudioCount}
@@ -747,11 +746,10 @@ export const ActiveProjectSelectorDrawer: React.FC<
               {activePanels.length > 0 && (
                 <div className="space-y-1.5 pt-1">
                   <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-neutral-400 uppercase tracking-wider flex items-center gap-1">
-                      <Film className="w-3 h-3 text-purple-400" /> Storyboard
-                      Panels
+                    <span className="text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1">
+                      <Film className="w-3 h-3 text-[#3B82F6]" /> Storyboard Panels
                     </span>
-                    <span className="text-purple-300 font-bold">
+                    <span className="text-[#3B82F6] font-bold">
                       {activePanels.length} panels
                     </span>
                   </div>
@@ -769,7 +767,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             );
                           }
                         }}
-                        className="w-11 h-11 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 hover:border-purple-500 shrink-0 relative transition-all group cursor-pointer"
+                        className="w-11 h-11 rounded-lg overflow-hidden bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6] shrink-0 relative transition-all group cursor-pointer"
                         title={`Panel #${i + 1} — Click to edit`}
                       >
                         {panel.image_url ? (
@@ -784,18 +782,18 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             }}
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[10px] text-neutral-500 font-mono">
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-[#6B7280] font-mono">
                             #{i + 1}
                           </div>
                         )}
-                        <span className="absolute bottom-0.5 right-0.5 bg-black/80 px-1 rounded text-[8px] font-bold font-mono text-purple-300">
+                        <span className="absolute bottom-0.5 right-0.5 bg-black/80 px-1 rounded text-[8px] font-bold font-mono text-[#E5E5E5]">
                           #{i + 1}
                         </span>
                       </button>
                     ))}
                     {activePanels.length > 10 && (
-                      <div className="w-11 h-11 rounded-lg bg-purple-500/10 border border-purple-500/20 shrink-0 flex items-center justify-center">
-                        <span className="text-[10px] text-purple-300 font-bold font-mono">
+                      <div className="w-11 h-11 rounded-lg bg-[#121212] border border-[#2F2F2F] shrink-0 flex items-center justify-center">
+                        <span className="text-[10px] text-[#3B82F6] font-bold font-mono">
                           +{activePanels.length - 10}
                         </span>
                       </div>
@@ -814,10 +812,10 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 return (
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-[10px] font-mono">
-                      <span className="text-neutral-400 uppercase tracking-wider">
+                      <span className="text-[#9CA3AF] uppercase tracking-wider">
                         Scraped Images
                       </span>
-                      <span className="text-purple-300 font-bold">
+                      <span className="text-[#3B82F6] font-bold">
                         {scraped.length} images
                       </span>
                     </div>
@@ -825,7 +823,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       {preview.map((src, i) => (
                         <div
                           key={i}
-                          className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0"
+                          className="w-10 h-10 rounded-lg overflow-hidden bg-[#121212] border border-[#2F2F2F] shrink-0"
                         >
                           <img
                             src={getProxiedImageUrl(src, proj?.url)}
@@ -840,8 +838,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         </div>
                       ))}
                       {remaining > 0 && (
-                        <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 shrink-0 flex items-center justify-center">
-                          <span className="text-[10px] text-purple-300 font-bold font-mono">
+                        <div className="w-10 h-10 rounded-lg bg-[#121212] border border-[#2F2F2F] shrink-0 flex items-center justify-center">
+                          <span className="text-[10px] text-[#3B82F6] font-bold font-mono">
                             +{remaining}
                           </span>
                         </div>
@@ -855,21 +853,21 @@ export const ActiveProjectSelectorDrawer: React.FC<
         })()}
 
         {/* ─── Search & Filter Controls ─── */}
-        <div className="p-4 pb-2 border-b border-white/5 bg-[#0e0f17] space-y-3">
+        <div className="p-4 pb-2 border-b border-[#2F2F2F] bg-[#181818] space-y-3">
           <div className="flex items-center gap-2">
             <div className="relative flex-grow">
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-neutral-400" />
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#3B82F6]" />
               <input
                 type="text"
                 placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-neutral-900/90 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full pl-9 pr-8 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6] transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-2.5 text-neutral-400 hover:text-white"
+                  className="absolute right-2.5 top-2.5 text-[#9CA3AF] hover:text-[#E5E5E5]"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -881,7 +879,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-neutral-900 border border-white/10 rounded-xl text-xs text-neutral-300 px-3 py-2 focus:outline-none focus:border-purple-500 cursor-pointer font-mono"
+                className="bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] px-3 py-2 focus:outline-none focus:border-[#3B82F6] cursor-pointer font-mono"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -906,8 +904,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-1.5 rounded-xl transition-all text-xs font-medium whitespace-nowrap cursor-pointer ${
                   activeTab === tab.id
-                    ? "bg-purple-600 text-white shadow-md shadow-purple-600/30 font-bold"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm font-bold"
+                    : "text-[#9CA3AF] hover:text-white hover:bg-[#262626]"
                 }`}
               >
                 {tab.label}
@@ -917,24 +915,24 @@ export const ActiveProjectSelectorDrawer: React.FC<
         </div>
 
         {/* ─── Real Projects List ─── */}
-        <div className="flex-grow overflow-y-auto p-4 space-y-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex-grow overflow-y-auto p-4 space-y-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-[#141414]">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-neutral-400 gap-3">
-              <Loader2 className="w-7 h-7 animate-spin text-purple-400" />
+            <div className="flex flex-col items-center justify-center py-20 text-[#9CA3AF] gap-3">
+              <Loader2 className="w-7 h-7 animate-spin text-[#3B82F6]" />
               <span className="text-xs font-mono">
                 Loading real projects...
               </span>
             </div>
           ) : filteredProjects.length === 0 ? (
-            <div className="text-center py-16 px-4 text-neutral-400 space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-neutral-900 border border-white/5 flex items-center justify-center mx-auto text-neutral-500">
+            <div className="text-center py-16 px-4 text-[#9CA3AF] space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-[#181818] border border-[#2F2F2F] flex items-center justify-center mx-auto text-[#6B7280]">
                 <FolderOpen className="w-7 h-7" />
               </div>
               <div>
-                <p className="text-sm font-bold text-white">
+                <p className="text-sm font-bold text-[#E5E5E5]">
                   No projects found
                 </p>
-                <p className="text-xs text-neutral-500 mt-1">
+                <p className="text-xs text-[#9CA3AF] mt-1">
                   {searchQuery
                     ? "No matches for your search term."
                     : "No projects in this category."}
@@ -946,7 +944,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     setDrawerOpen(false);
                     navigateTo("/scraper");
                   }}
-                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all shadow-md cursor-pointer inline-flex items-center gap-1.5"
+                  className="btn-primary px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 uppercase tracking-wider"
                 >
                   <PlusCircle className="w-4 h-4" />
                   <span>Create Project</span>
@@ -961,7 +959,6 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 p.cover_image ||
                 p.first_panel_image ||
                 p.panels?.[0]?.image_url;
-              // Use real DB panels_count field (returned by the list API)
               const panelCount =
                 p.panels_count ?? p.panel_count ?? p.panels?.length ?? 0;
               const importedCount = p.imported_assets_count ?? 0;
@@ -970,15 +967,14 @@ export const ActiveProjectSelectorDrawer: React.FC<
               const itemSourceName = getSourceName(p.url);
               const itemTimeAgo = timeAgo(p.created_at || p.updated_at);
 
-              // Status badge color
               const statusColor =
                 status === "processing"
-                  ? "text-amber-400 bg-amber-500/10 border-amber-500/30"
+                  ? "text-[#F59E0B] bg-[#F59E0B]/10 border-[#F59E0B]/30"
                   : status === "draft"
-                  ? "text-neutral-400 bg-neutral-800 border-neutral-700"
+                  ? "text-[#9CA3AF] bg-[#181818] border-[#2F2F2F]"
                   : status === "completed" || status === "ready"
-                  ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30"
-                  : "text-neutral-400 bg-neutral-800 border-neutral-700";
+                  ? "text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30"
+                  : "text-[#9CA3AF] bg-[#181818] border-[#2F2F2F]";
 
               return (
                 <div
@@ -986,12 +982,12 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   onClick={() => handleSelectProject(p.project_id)}
                   className={`group relative p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                     isActive
-                      ? "bg-purple-500/10 border-purple-500/50 shadow-lg shadow-purple-500/10 ring-1 ring-purple-500/30"
-                      : "bg-[#12131e]/80 hover:bg-[#181a28] border-white/5 hover:border-white/15"
+                      ? "bg-[#1E1E1E] border-[#3B82F6] shadow-md ring-1 ring-[#3B82F6]/50"
+                      : "bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-[#3B82F6]/60"
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-neutral-950 border border-white/10 shrink-0 relative">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-black border border-[#2F2F2F] shrink-0 relative">
                       {cover ? (
                         <img
                           src={getProxiedImageUrl(cover, p.url)}
@@ -999,7 +995,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-purple-900/40 to-indigo-900/40 flex items-center justify-center text-purple-300 font-bold text-sm">
+                        <div className="w-full h-full bg-[#121212] flex items-center justify-center text-[#3B82F6] font-bold text-sm border border-[#2F2F2F]">
                           {p.title?.charAt(0).toUpperCase() || "P"}
                         </div>
                       )}
@@ -1007,37 +1003,36 @@ export const ActiveProjectSelectorDrawer: React.FC<
 
                     <div className="min-w-0 flex flex-col space-y-0.5">
                       <div className="flex items-center gap-1.5">
-                        <ItemSourceIcon className="w-3 h-3 text-neutral-500 shrink-0" />
-                        <span className="text-[10px] text-neutral-500 font-mono uppercase truncate">
+                        <ItemSourceIcon className="w-3 h-3 text-[#9CA3AF] shrink-0" />
+                        <span className="text-[10px] text-[#9CA3AF] font-mono uppercase truncate">
                           {itemSourceName}
                         </span>
-                        {/* Real status badge */}
                         <span
                           className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border font-mono capitalize ${statusColor}`}
                         >
                           {status}
                         </span>
                       </div>
-                      <h4 className="font-extrabold text-xs text-white truncate group-hover:text-purple-300 transition-colors">
+                      <h4 className="font-extrabold text-xs text-[#E5E5E5] truncate group-hover:text-[#3B82F6] transition-colors">
                         {p.title}
                       </h4>
 
-                      <div className="flex items-center gap-2 text-[11px] text-neutral-400 flex-wrap">
+                      <div className="flex items-center gap-2 text-[11px] text-[#9CA3AF] flex-wrap">
                         <span className="inline-flex items-center gap-1 font-mono">
-                          <Layers className="w-3 h-3 text-neutral-500" />
+                          <Layers className="w-3 h-3 text-[#9CA3AF]" />
                           {panelCount} {panelCount === 1 ? "Panel" : "Panels"}
                         </span>
                         {importedCount > 0 && (
                           <>
                             <span>•</span>
-                            <span className="font-mono text-purple-400">
+                            <span className="font-mono text-[#3B82F6]">
                               {importedCount} imported
                             </span>
                           </>
                         )}
                         <span>•</span>
-                        <span className="inline-flex items-center gap-1 font-mono text-neutral-400">
-                          <Clock className="w-3 h-3 text-neutral-500" />
+                        <span className="inline-flex items-center gap-1 font-mono text-[#9CA3AF]">
+                          <Clock className="w-3 h-3 text-[#9CA3AF]" />
                           {itemTimeAgo}
                         </span>
                       </div>
@@ -1050,20 +1045,20 @@ export const ActiveProjectSelectorDrawer: React.FC<
                       onClick={(e) => toggleFavorite(e, p.project_id)}
                       className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
                         isFav
-                          ? "text-amber-400 hover:text-amber-300"
-                          : "text-neutral-600 hover:text-neutral-400"
+                          ? "text-[#F59E0B]"
+                          : "text-[#6B7280] hover:text-[#9CA3AF]"
                       }`}
                       title={
                         isFav ? "Remove from Favorites" : "Add to Favorites"
                       }
                     >
                       <Star
-                        className={`w-4 h-4 ${isFav ? "fill-amber-400" : ""}`}
+                        className={`w-4 h-4 ${isFav ? "fill-[#F59E0B]" : ""}`}
                       />
                     </button>
 
                     {isActive ? (
-                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30">
                         <Check className="w-3.5 h-3.5" />
                         <span>Active</span>
                       </span>
@@ -1073,7 +1068,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                           e.stopPropagation();
                           handleSelectProject(p.project_id);
                         }}
-                        className="px-3.5 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+                        className="btn-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold"
                       >
                         Activate
                       </button>

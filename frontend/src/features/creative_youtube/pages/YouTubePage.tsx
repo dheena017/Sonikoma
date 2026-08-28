@@ -342,7 +342,7 @@ const YouTubePage = React.memo(
         />
 
         {/* ── MAIN TAB CANVAS CONTAINER (KEEP-ALIVE SPA PERSISTENCE) ──────── */}
-        <div className="rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl min-h-[600px]">
+        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl min-h-[600px]">
           {/* 1. TAB: HOME / OVERVIEW */}
           {visitedTabs.has("home") && (
             <div

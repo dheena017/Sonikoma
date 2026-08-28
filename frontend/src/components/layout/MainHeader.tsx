@@ -461,21 +461,20 @@ const HeaderInner = ({
           onClick={() => navigateTo("/dashboard")}
           onMouseEnter={() => (window as any).prefetchRoute?.("/dashboard")}
         >
-          <div className="relative flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full bg-purple-600/30 blur-md pointer-events-none" />
+          <div className="relative shrink-0 rounded-full border border-[#2F2F2F] group-hover/brand:border-[#3B82F6] p-0.5 bg-[#1E1E1E] transition-colors">
             <img
               src="/logo-dark.png"
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
-              className="h-10 w-10 rounded-full shadow-lg shadow-purple-900/50 shrink-0 object-cover relative z-10 transition-all duration-300 group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
+              className="h-9 w-9 rounded-full shrink-0 object-cover relative z-10 transition-transform duration-300 group-hover/brand:scale-105"
               style={{
                 background: "#000000",
               }}
               alt="Sonikoma Logo"
             />
           </div>
-          <span className="font-black text-xl tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
+          <span className="font-black text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF] transition-all duration-300 font-sans hidden sm:inline-block">
             Sonikoma
           </span>
         </div>

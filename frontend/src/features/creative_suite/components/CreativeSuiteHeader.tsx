@@ -201,16 +201,18 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
           onClick={() => navigateTo("/creative-suite")}
         >
-          <img
-            src="/logo-dark.png"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-            }}
-            className="h-10 w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
-            style={{ background: "#000000" }}
-            alt="Sonikoma Logo"
-          />
-          <span className="font-black text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
+          <div className="relative shrink-0 rounded-full border border-[#2F2F2F] group-hover/brand:border-[#3B82F6] p-0.5 bg-[#1E1E1E] transition-colors">
+            <img
+              src="/logo-dark.png"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
+              }}
+              className="h-9 w-9 rounded-full shrink-0 object-cover transition-transform duration-300 group-hover/brand:scale-105"
+              style={{ background: "#000000" }}
+              alt="Sonikoma Logo"
+            />
+          </div>
+          <span className="font-black text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF] transition-all duration-300 font-sans hidden sm:inline-block">
             Sonikoma
           </span>
         </div>

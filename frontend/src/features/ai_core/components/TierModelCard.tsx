@@ -56,29 +56,29 @@ const TIER_CONFIG: Record<
   primary: {
     title: "Tier 1 · Primary",
     subtitle: "Active Default Engine",
-    color: "#c084fc", // Purple neon
-    bgAccent: "rgba(192, 132, 252, 0.06)",
-    borderAccent: "rgba(192, 132, 252, 0.35)",
+    color: "#3B82F6", // Electric Blue
+    bgAccent: "rgba(59, 130, 246, 0.08)",
+    borderAccent: "rgba(59, 130, 246, 0.35)",
     icon: Zap,
-    badgeBg: "rgba(192, 132, 252, 0.15)",
+    badgeBg: "rgba(59, 130, 246, 0.18)",
   },
   fallback: {
     title: "Tier 2 · Fallback",
     subtitle: "High-Speed Backup",
-    color: "#34d399", // Emerald
-    bgAccent: "rgba(52, 211, 153, 0.06)",
-    borderAccent: "rgba(52, 211, 153, 0.35)",
+    color: "#10B981", // Emerald
+    bgAccent: "rgba(16, 185, 129, 0.08)",
+    borderAccent: "rgba(16, 185, 129, 0.35)",
     icon: ShieldCheck,
-    badgeBg: "rgba(52, 211, 153, 0.15)",
+    badgeBg: "rgba(16, 185, 129, 0.18)",
   },
   tertiary: {
     title: "Tier 3 · Emergency",
     subtitle: "Failover Redundancy",
-    color: "#fbbf24", // Amber
-    bgAccent: "rgba(251, 191, 36, 0.06)",
-    borderAccent: "rgba(251, 191, 36, 0.35)",
+    color: "#F59E0B", // Amber
+    bgAccent: "rgba(245, 158, 11, 0.08)",
+    borderAccent: "rgba(245, 158, 11, 0.35)",
     icon: Layers,
-    badgeBg: "rgba(251, 191, 36, 0.15)",
+    badgeBg: "rgba(245, 158, 11, 0.18)",
   },
 };
 
@@ -230,7 +230,7 @@ export default function TierModelCard({
       ref={dropdownRef}
       className="relative flex flex-col rounded-2xl border transition-all duration-200 overflow-visible"
       style={{
-        backgroundColor: "#08090f",
+        backgroundColor: "#141414",
         borderColor: isOpen ? cfg.color : cfg.borderAccent,
         boxShadow: isOpen
           ? `0 0 20px ${cfg.color}33, 0 0 0 1px ${cfg.color}`
@@ -242,7 +242,7 @@ export default function TierModelCard({
         className="flex items-center justify-between px-3.5 py-2.5 border-b"
         style={{
           backgroundColor: cfg.bgAccent,
-          borderColor: "rgba(255, 255, 255, 0.05)",
+          borderColor: "#2F2F2F",
         }}
       >
         <div className="flex items-center gap-2">
@@ -263,8 +263,8 @@ export default function TierModelCard({
         </div>
 
         {/* Live Health Status Dot */}
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-500/20 text-[9px] font-mono text-emerald-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#121212] border border-[#10B981]/30 text-[9px] font-mono text-[#10B981]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
           <span>READY</span>
         </div>
       </div>
@@ -284,12 +284,12 @@ export default function TierModelCard({
             >
               {provTheme.name}
             </span>
-            <span className="text-[10px] text-neutral-400 font-sans truncate">
+            <span className="text-[10px] text-[#9CA3AF] font-sans truncate">
               {selectedModel?.category || "Specialized Engine"}
             </span>
           </div>
 
-          <h4 className="text-xs sm:text-sm font-bold text-neutral-100 truncate tracking-tight pt-0.5">
+          <h4 className="text-xs sm:text-sm font-bold text-[#E5E5E5] truncate tracking-tight pt-0.5">
             {selectedModel?.name || modelId || "Select Model"}
           </h4>
         </div>
@@ -298,15 +298,11 @@ export default function TierModelCard({
         <div className="grid grid-cols-3 gap-1.5 py-1 text-[10px] font-mono">
           {/* Speed */}
           <div
-            className="flex items-center gap-1 px-2 py-1 rounded-lg border truncate"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.02)",
-              borderColor: "rgba(255, 255, 255, 0.06)",
-            }}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
             title={selectedModel?.speed_rating || "Fast inference"}
           >
-            <Gauge className="w-3 h-3 text-orange-400 shrink-0" />
-            <span className="text-neutral-300 truncate">
+            <Gauge className="w-3 h-3 text-[#F59E0B] shrink-0" />
+            <span className="text-[#E5E5E5] truncate">
               {selectedModel?.speed_rating
                 ? selectedModel.speed_rating.split("(")[0].trim()
                 : "Ultra Fast"}
@@ -315,30 +311,22 @@ export default function TierModelCard({
 
           {/* Pricing */}
           <div
-            className="flex items-center gap-1 px-2 py-1 rounded-lg border truncate"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.02)",
-              borderColor: "rgba(255, 255, 255, 0.06)",
-            }}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
             title="Estimated Prompt / Token Cost"
           >
-            <DollarSign className="w-3 h-3 text-emerald-400 shrink-0" />
-            <span className="text-neutral-300 truncate">
+            <DollarSign className="w-3 h-3 text-[#10B981] shrink-0" />
+            <span className="text-[#E5E5E5] truncate">
               {getPricingLabel(selectedModel)}
             </span>
           </div>
 
           {/* Context Window */}
           <div
-            className="flex items-center gap-1 px-2 py-1 rounded-lg border truncate"
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.02)",
-              borderColor: "rgba(255, 255, 255, 0.06)",
-            }}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
             title="Maximum Token Context"
           >
-            <Cpu className="w-3 h-3 text-purple-400 shrink-0" />
-            <span className="text-neutral-300 truncate">
+            <Cpu className="w-3 h-3 text-[#3B82F6] shrink-0" />
+            <span className="text-[#E5E5E5] truncate">
               {getContextLabel(selectedModel)}
             </span>
           </div>
@@ -349,11 +337,11 @@ export default function TierModelCard({
           type="button"
           disabled={disabled}
           onClick={() => setIsOpen((prev) => !prev)}
-          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all duration-150 cursor-pointer text-left"
+          className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all duration-150 cursor-pointer text-left font-mono"
           style={{
-            backgroundColor: isOpen ? `${cfg.color}15` : "#0e1017",
-            borderColor: isOpen ? cfg.color : "rgba(255, 255, 255, 0.1)",
-            color: isOpen ? "#ffffff" : "#d1d5db",
+            backgroundColor: isOpen ? `${cfg.color}15` : "#181818",
+            borderColor: isOpen ? cfg.color : "#2F2F2F",
+            color: isOpen ? "#ffffff" : "#E5E5E5",
           }}
         >
           <span className="truncate text-[11px]">
@@ -374,7 +362,7 @@ export default function TierModelCard({
         <div
           className="absolute z-50 top-full left-0 right-0 mt-2 rounded-2xl border shadow-2xl overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
           style={{
-            backgroundColor: "#0a0b12",
+            backgroundColor: "#181818",
             borderColor: `${cfg.color}55`,
             boxShadow: `0 20px 40px rgba(0, 0, 0, 0.8), 0 0 15px ${cfg.color}25`,
           }}
@@ -382,7 +370,7 @@ export default function TierModelCard({
           {/* Search Box */}
           <div
             className="flex items-center gap-2 px-3 py-2.5 border-b"
-            style={{ borderColor: "rgba(255, 255, 255, 0.08)" }}
+            style={{ borderColor: "#2F2F2F" }}
           >
             <Search className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
             <input

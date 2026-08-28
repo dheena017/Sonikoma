@@ -234,29 +234,28 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
   const sidebarContent = (
     <div className="flex h-full flex-col bg-neutral-950/85 backdrop-blur-3xl border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.45)]">
       {/* Sidebar Header */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-neutral-900/80 shrink-0">
+      <div className="h-16 flex items-center justify-between px-5 border-b border-[#2F2F2F] shrink-0">
         <div className="flex items-center gap-3.5">
-          <div className="relative">
-            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
+          <div className="relative shrink-0 rounded-full border border-[#2F2F2F] p-0.5 bg-[#1E1E1E]">
             <img
               src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
-              className="relative h-10 w-10 rounded-full border border-purple-500/30 shrink-0 object-cover bg-black"
+              className="h-10 w-10 rounded-full shrink-0 object-cover bg-black"
               alt="Sonikoma Logo"
             />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm tracking-tight text-white font-sans">
+              <span className="font-extrabold text-sm tracking-tight text-[#E5E5E5] font-sans">
                 Creative Suite
               </span>
-              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
+              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30 rounded-md font-mono">
                 SUITE
               </span>
             </div>
-            <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
+            <p className="text-[10px] text-[#9CA3AF] font-sans tracking-wide">
               AI Creative Workspace
             </p>
           </div>

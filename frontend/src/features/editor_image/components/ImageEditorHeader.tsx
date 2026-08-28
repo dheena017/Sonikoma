@@ -211,18 +211,18 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
             }}
-            className="h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
+            className="h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-md shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105"
             style={{
               background: themeMode === "light" ? "#ffffff" : "#000000",
             }}
             alt="Sonikoma Logo"
           />
-          <span className="font-black text-base sm:text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
+          <span className="font-black text-base sm:text-lg tracking-wider text-[#E5E5E5] group-hover/brand:text-[#3B82F6] transition-all duration-300 font-sans hidden sm:inline-block">
             Sonikoma
           </span>
         </div>
 
-        <span className="hidden sm:inline-block px-2.5 py-1 text-[10px] font-black tracking-wider text-purple-300 bg-purple-950/70 rounded-full border border-purple-700/50 shadow-xs uppercase">
+        <span className="hidden sm:inline-block px-2.5 py-1 text-[10px] font-black tracking-wider text-[#3B82F6] bg-[#121212] rounded-full border border-[#3B82F6]/30 shadow-xs uppercase font-mono">
           IMAGE EDITOR
         </span>
 
@@ -353,7 +353,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="h-9 w-9 flex items-center justify-center text-neutral-400 hover:text-purple-300 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/40 hover:bg-purple-500/10 transition-all relative cursor-pointer active:scale-95"
+            className="h-9 w-9 flex items-center justify-center text-[#9CA3AF] hover:text-white rounded-xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] transition-all relative cursor-pointer active:scale-95"
             title={
               activeProjectId && activeProjectData
                 ? `Active Project: ${
@@ -362,26 +362,26 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 : "Select Active Project"
             }
           >
-            <FolderSync className="h-4 w-4 text-purple-400" />
+            <FolderSync className="h-4 w-4 text-[#3B82F6]" />
             {activeProjectId && activeProjectData && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-black animate-pulse" />
             )}
           </button>
         </div>
 
-        {/* User Profile Pill at Far Right (Image 2 Style) */}
+        {/* User Profile Pill at Far Right */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
+          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#181818] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+          <span className="text-xs font-bold text-[#E5E5E5] group-hover:text-white truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#121212] border border-[#2F2F2F]">
             {user?.full_name ||
               user?.username ||
               (user?.email ? user.email.split("@")[0] : "Studio Creator")}
           </span>
-          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#3B82F6] bg-[#121212] shrink-0 shadow-sm flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
             <img
               key={user?.avatar_url || user?.full_name || "avatar"}
               src={getUserAvatarUrl(user)}
@@ -397,7 +397,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           </div>
         </button>
 
-        <div className="w-px h-6 bg-white/10 mx-0.5 hidden sm:block" />
+        <div className="w-px h-6 bg-[#2F2F2F] mx-0.5 hidden sm:block" />
 
         <button
           onClick={() => {
@@ -413,9 +413,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               window.dispatchEvent(new Event("popstate"));
             }
           }}
-          className="h-8 px-2.5 text-[11px] font-medium text-neutral-300 hover:text-white bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer flex items-center gap-1 active:scale-95 shadow-xs"
+          className="btn-secondary h-8 px-2.5 text-[11px] font-medium rounded-lg flex items-center gap-1 active:scale-95"
         >
-          <X className="w-3.5 h-3.5 text-neutral-400" />
+          <X className="w-3.5 h-3.5 text-[#9CA3AF]" />
           <span>Cancel</span>
         </button>
 
@@ -429,9 +429,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               setEditingImageIdx(null);
             }
           }}
-          className="h-8 px-3 text-[11px] font-semibold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 rounded-lg transition-all flex items-center gap-1 shadow-[0_2px_10px_rgba(139,92,246,0.25)] hover:shadow-[0_4px_16px_rgba(139,92,246,0.45)] border border-purple-400/30 cursor-pointer active:scale-95"
+          className="btn-primary h-8 px-3.5 text-[11px] font-bold rounded-lg flex items-center gap-1.5 shadow-sm active:scale-95 uppercase tracking-wider"
         >
-          <Check className="w-3.5 h-3.5 text-purple-200" />
+          <Check className="w-3.5 h-3.5 text-white" />
           <span>Apply Changes</span>
         </button>
       </div>

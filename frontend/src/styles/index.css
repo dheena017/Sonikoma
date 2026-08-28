@@ -4,9 +4,8 @@
 @import "./typography.css";
 @import "./theme.css";
 
-/* --- Dark & Light Mode Theme Overrides --- */
+/* --- Pure Dark Studio Theme --- */
 @import "./dark-mode.css";
-@import "./light-mode.css";
 
 /* --- UI Component & Custom Styles --- */
 @import "./cursor.css";

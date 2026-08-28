@@ -98,20 +98,22 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
   const maxVal = Math.max(...inputTokens, ...outputTokens, 100);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200 text-left">
-      {/* ── HEADER ────────────────────────────────────────────────────────── */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
-        <div className="space-y-2 max-w-2xl">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight font-sans">
-            AI Token{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
-              Usage &amp; Spending
-            </span>
-          </h1>
-          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
-            Track token consumption, response latencies, estimated costs in USD, and credit burn rates across all features.
-          </p>
-        </div>
+    <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-in fade-in duration-200 text-left text-[#E5E5E5]">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+        {/* ── HEADER ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#2F2F2F]">
+          <div className="space-y-2 max-w-2xl">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
+              AI Token{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                Usage &amp; Spending
+              </span>
+            </h1>
+            <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
+              Track token consumption, response latencies, estimated costs in USD, and credit burn rates across all features.
+            </p>
+          </div>
 
         <div className="flex flex-wrap items-center gap-3 shrink-0">
             {/* Timeframe Selector */}
@@ -294,6 +296,7 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
           </div>
         </div>
       </div>
-    </div>
+        </div>
+      </div>
   );
 }

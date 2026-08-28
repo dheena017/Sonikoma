@@ -1,58 +1,51 @@
-/* ===============================
-   Theme Variables & Base Settings
-   =============================== */
+/* ==========================================================================
+   SONIKOMA DESIGN SYSTEM — BASE PALETTE & TOKENS
+   ========================================================================== */
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Custom color extensions to map non-standard values (e.g. neutral-850) */
-  --color-neutral-150: #ededed;
-  --color-neutral-250: #dcdcdc;
-  --color-neutral-305: #d4d4d8;
-  --color-neutral-350: #b5b5b5;
-  --color-neutral-450: #8a8a8a;
-  --color-neutral-750: #333333;
-  --color-neutral-805: #141416;
-  --color-neutral-850: #1f1f1f;
-  --color-neutral-855: #1a1a1f;
-  --color-neutral-925: #0f0f0f;
-  --color-neutral-955: #060608;
+  /* 🌑 Base Palette */
+  --color-canvas: #0A0A0A;
+  --color-canvas-subtle: #121212;
+  --color-surface-panel: #1E1E1E;
+  --color-surface-elevated: #2A2A2A;
+  --color-border-subtle: #2F2F2F;
 
-  --color-rose-250: #fecdd3;
-  --color-rose-350: #fb7185;
+  /* 🎨 Accent Colors */
+  --color-accent-blue: #3B82F6;
+  --color-accent-cyan: #00FFFF;
+  --color-accent-purple: #A855F7;
+  --color-accent-magenta: #FF00FF;
+  --color-accent-success: #10B981;
+  --color-accent-warning: #F59E0B;
+  --color-accent-error: #EF4444;
+
+  /* ✨ Typography */
+  --color-text-primary: #E5E5E5;
+  --color-text-secondary: #9CA3AF;
+  --color-text-dim: #6B7280;
+
+  /* Compatibility scale mappings */
+  --color-neutral-800: #2A2A2A;
+  --color-neutral-850: #222222;
+  --color-neutral-900: #1E1E1E;
+  --color-neutral-925: #161616;
+  --color-neutral-950: #121212;
+  --color-neutral-955: #0A0A0A;
 }
 
-/* Visual Theme Customizations */
 :root {
-  --theme-primary: 139, 92, 246; /* purple-500 default */
-  --theme-glow: rgba(139, 92, 246, 0.2);
-}
-
-[data-theme="obsidian"] {
-  --theme-primary: 168, 85, 247; /* purple-500 */
-  --theme-glow: rgba(168, 85, 247, 0.22);
-}
-
-[data-theme="cyberpunk"] {
-  --theme-primary: 6, 182, 212; /* cyan-500 */
-  --theme-glow: rgba(6, 182, 212, 0.25);
-}
-
-[data-theme="slate"] {
-  --theme-primary: 161, 161, 170; /* zinc-400 */
-  --theme-glow: rgba(161, 161, 170, 0.15);
-}
-
-[data-theme="indigo"] {
-  --theme-primary: 99, 102, 241; /* indigo-500 */
-  --theme-glow: rgba(99, 102, 241, 0.25);
+  --theme-primary: 59, 130, 246; /* Electric Blue #3B82F6 default */
+  --theme-secondary: 168, 85, 247; /* Vibrant Purple #A855F7 */
+  color-scheme: dark;
 }
 
 html,
 body,
 #root {
-  background-color: #09090b;
-  color: #fafafa;
+  background-color: #0A0A0A;
+  color: #E5E5E5;
   font-family: var(--font-sans);
   overflow: hidden !important;
   height: 100% !important;
@@ -62,101 +55,182 @@ body,
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box;
-  color-scheme: dark;
-  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ==========================================================================
+   ✨ PREMIUM TYPOGRAPHY SYSTEM
+   ========================================================================== */
+h1, h2, h3, h4, h5, h6 {
+  color: #E5E5E5;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  text-wrap: balance;
+}
+
+p {
+  color: #9CA3AF;
+  line-height: 1.6;
+}
+
+/* Premium Gradient Heading Tokens */
+.text-gradient-brand {
+  background: linear-gradient(135deg, #3B82F6 0%, #A855F7 50%, #00FFFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-silver {
+  background: linear-gradient(180deg, #FFFFFF 0%, #9CA3AF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-accent {
+  background: linear-gradient(135deg, #3B82F6 0%, #00FFFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Metadata Chips & Monospace Counters */
+.text-meta-caps {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9CA3AF;
+}
+
+.text-stat-number {
+  font-family: var(--font-mono);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #E5E5E5;
+}
+
+/* ==========================================================================
+   🎯 BUTTON & INTERACTIVE HOVER DESIGN SYSTEM
+   ========================================================================== */
+
+/* ── Primary Button (Electric Blue) ─────────────────────── */
+.btn-primary,
+button.btn-primary {
+  background-color: #3B82F6 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(59, 130, 246, 0.5) !important;
+  border-radius: 0.75rem !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover {
+  background-color: #2563EB !important;
+  border-color: #60A5FA !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45) !important;
+  filter: none !important;
+}
+
+.btn-primary:active,
+button.btn-primary:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* ── Secondary Button (Dark Gray Surface) ───────────────── */
+.btn-secondary,
+button.btn-secondary {
+  background-color: #1E1E1E !important;
+  color: #E5E5E5 !important;
+  border: 1px solid #2F2F2F !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+}
+
+.btn-secondary:hover,
+button.btn-secondary:hover {
+  background-color: #2A2A2A !important;
+  border-color: #3B82F6 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+.btn-secondary:active,
+button.btn-secondary:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* ── Danger Button (Crimson) ────────────────────────────── */
+.btn-danger,
+button.btn-danger {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+  color: #EF4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  border-radius: 0.75rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-danger:hover,
+button.btn-danger:hover {
+  background-color: #EF4444 !important;
+  border-color: #F87171 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ── Success Button (Emerald) ───────────────────────────── */
+.btn-success,
+button.btn-success {
+  background-color: #10B981 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+  border-radius: 0.75rem !important;
+  font-weight: 700 !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.btn-success:hover,
+button.btn-success:hover {
+  background-color: #059669 !important;
+  border-color: #34D399 !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* ── Interactive Card Surface Hover Class ───────────────── */
+.card-interactive {
+  background-color: #1E1E1E;
+  border: 1px solid #2F2F2F;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-interactive:hover {
+  background-color: #262626 !important;
+  border-color: rgba(59, 130, 246, 0.7) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -6px rgba(0, 0, 0, 0.65) !important;
 }
 
 /* Hide default browser password reveal icons */
-input[type="password"]::-ms-reveal {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-}
-
+input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-}
-
-input::-ms-reveal {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-}
-
-input::-ms-clear {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-}
-
-::-ms-reveal {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-}
-
-::-ms-clear {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-}
-
-input::-webkit-credentials-auto-fill-button {
-  visibility: hidden !important;
-  display: none !important;
-  pointer-events: none !important;
-  height: 0 !important;
-  width: 0 !important;
-  margin: 0 !important;
-}
-
-input::-webkit-contacts-auto-fill-button {
-  visibility: hidden !important;
-  display: none !important;
-  pointer-events: none !important;
-  height: 0 !important;
-  width: 0 !important;
-  margin: 0 !important;
-}
-
-:root[data-mode="light"] {
-  color-scheme: light;
-}
-
-/* Theme-change overlay (injected by useThemeMode hook) */
-#theme-transition-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  pointer-events: none;
-  will-change: opacity;
-  transform: translateZ(0); /* force GPU layer */
-}
-
-/* Lock element transitions during theme switch */
-[data-theme-switching="true"] *,
-[data-theme-switching="true"] *::before,
-[data-theme-switching="true"] *::after {
-  transition-duration: 0ms !important;
 }

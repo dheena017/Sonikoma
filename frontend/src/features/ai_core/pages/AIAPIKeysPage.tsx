@@ -247,32 +247,34 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
   const configuredCount = Object.values(keys).filter((k) => k && k.trim()).length;
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200 text-left">
-      {/* ── HEADER ────────────────────────────────────────────────────────── */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-white/5">
-        <div className="space-y-2 max-w-2xl">
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight font-sans">
-            API Keys &amp;{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
-              Provider Vault
-            </span>
-          </h1>
-          <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
-            Connect your own API keys (BYOK) for Google Gemini, OpenAI, Claude, Groq, and more. Keys and configurations remain securely stored in your local browser storage.
-          </p>
-        </div>
+    <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-in fade-in duration-200 text-left text-[#E5E5E5]">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+        {/* ── HEADER ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#2F2F2F]">
+          <div className="space-y-2 max-w-2xl">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
+              API Keys &amp;{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                Provider Vault
+              </span>
+            </h1>
+            <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
+              Connect your own API keys (BYOK) for Google Gemini, OpenAI, Claude, Groq, and more. Keys and configurations remain securely stored in your local browser storage.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={handleSaveAll}
-            disabled={isSaving}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-black uppercase tracking-wider shadow-lg shadow-purple-900/40 border border-purple-400/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-40"
-          >
-            <Save className={`w-4 h-4 ${isSaving ? "animate-spin" : ""}`} />
-            <span>Save All Keys</span>
-          </button>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={handleSaveAll}
+              disabled={isSaving}
+              className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs sm:text-sm font-bold uppercase tracking-wider shadow-md border border-[#3B82F6]/30 flex items-center gap-2 transition-all cursor-pointer active:scale-95 disabled:opacity-40"
+            >
+              <Save className={`w-4 h-4 ${isSaving ? "animate-spin" : ""}`} />
+              <span>Save All Keys</span>
+            </button>
+          </div>
         </div>
-      </div>
 
       {/* ── PROVIDER CARDS GRID ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -435,6 +437,7 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
           );
         })
       )}
+        </div>
       </div>
     </div>
   );

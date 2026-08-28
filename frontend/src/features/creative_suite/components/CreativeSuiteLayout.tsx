@@ -95,14 +95,13 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
   if (hideSidebarAndHeader) {
     return (
       <div className="flex-1 w-full max-w-7xl mx-auto flex flex-col py-6">
-        {!isOverviewHub && renderHeader()}
         {children}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#070709] text-white flex flex-col selection:bg-purple-500/30">
+    <div className="min-h-screen bg-[#0A0A0A] text-[#E5E5E5] flex flex-col selection:bg-[#3B82F6]/30">
       <CreativeSuiteHeader
         currentPath={currentPath}
         navigateTo={navigateTo}
@@ -137,15 +136,14 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
 
       {/* Main page offset container */}
       <div className="flex-1 flex flex-col pt-16 lg:pl-20 min-h-screen transition-all duration-300">
-        <main className="flex-1 px-6 pb-6 pt-6 md:px-8 md:pb-8 md:pt-8">
-          <div className="w-full animate-[fadeIn_0.3s_ease-out]">
-            {!currentPath.includes("/youtube") && renderHeader()}
+        <main className="flex-1 px-4 sm:px-6 pb-6 pt-4 md:px-8 md:pb-8">
+          <div className="w-full animate-fade-in">
             {children}
           </div>
         </main>
 
-        <footer className="py-6 px-8 border-t border-neutral-900 text-center bg-[#070709]/40 mt-auto">
-          <p className="text-[10px] text-neutral-600 font-black uppercase tracking-[0.3em] font-mono">
+        <footer className="py-6 px-8 border-t border-[#2F2F2F] text-center bg-[#121212] mt-auto">
+          <p className="text-[10px] text-[#6B7280] font-black uppercase tracking-[0.3em] font-mono">
             Sonikoma Creative Suite &bull; AI Powered Storyboard Pipeline
           </p>
         </footer>

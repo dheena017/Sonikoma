@@ -93,10 +93,10 @@ export default function ProjectCard({
   return (
     <div
       onClick={() => onOpenProject(project)}
-      className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-neutral-900/70 backdrop-blur-xl shadow-xl shadow-purple-950/10 cursor-pointer transition-all duration-300 glass-interactive hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col h-full ${
+      className={`group relative overflow-hidden rounded-3xl border border-[#2F2F2F] bg-[#1E1E1E] hover:bg-[#252525] shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/60 hover:shadow-xl flex flex-col h-full ${
         isSelected
-          ? "border-purple-500/50 shadow-purple-900/30 ring-1 ring-purple-500/50"
-          : "hover:border-purple-500/40"
+          ? "border-[#3B82F6] ring-1 ring-[#3B82F6]"
+          : ""
       }`}
     >
       {/* Selection checkbox */}
@@ -141,26 +141,24 @@ export default function ProjectCard({
             />
             {/* Seamless gradient overlay at bottom */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none z-[2]" />
-            {/* Soft glow overlay */}
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.15),_transparent_45%)] z-[2]" />
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-950 p-4 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-2xl bg-neutral-900/80 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-950/30 transition-transform group-hover:scale-110 duration-300">
-              <Sparkles className="w-5 h-5 text-purple-400/80" />
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-[#121212] p-4 relative overflow-hidden">
+            <div className="w-10 h-10 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] flex items-center justify-center shadow-md transition-transform group-hover:scale-110 duration-300">
+              <Sparkles className="w-5 h-5 text-[#3B82F6]" />
             </div>
-            <span className="text-[11px] text-neutral-300 font-bold font-mono tracking-wider text-center line-clamp-1">
+            <span className="text-[11px] text-[#E5E5E5] font-bold font-mono tracking-wider text-center line-clamp-1">
               {formatEpisodeLabel(project.episode) || project.title || "CHAPTER PROJECT"}
             </span>
-            <span className="text-[9px] text-neutral-500 font-mono">
+            <span className="text-[9px] text-[#9CA3AF] font-mono">
               Ready for Creative Studio
             </span>
           </div>
         )}
 
         {/* Hover play overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/20 backdrop-blur-[2px] z-10">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-purple-900/60 scale-75 group-hover:scale-100 transition-transform duration-300 border border-purple-400/40">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 bg-black/40 backdrop-blur-[2px] z-10">
+          <div className="h-11 w-11 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] flex items-center justify-center shadow-xl scale-75 group-hover:scale-100 transition-transform duration-200 border border-[#60A5FA]/40">
             <Play className="h-4 w-4 text-white fill-white ml-0.5" />
           </div>
         </div>
@@ -177,7 +175,7 @@ export default function ProjectCard({
           {/* 3-dot menu */}
           <button
             onClick={(e) => onToggleMenu?.(e, project.project_id)}
-            className="w-6 h-6 rounded-full bg-black/60 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/15 transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
+            className="w-6 h-6 rounded-full bg-black/60 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/15 hover:border-[#3B82F6] transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
           >
             <MoreVertical className="w-3 h-3" />
           </button>
@@ -186,16 +184,16 @@ export default function ProjectCard({
         {/* Bottom thumbnail badges */}
         <div className="absolute bottom-2 inset-x-2 z-10 flex items-center justify-between pointer-events-none">
           {project.episode !== undefined && project.episode !== null ? (
-            <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+            <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-[#2F2F2F] rounded-lg text-[9px] font-extrabold text-white tracking-wider shadow-md flex items-center gap-1 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
               <span>{formatEpisodeLabel(project.episode)}</span>
             </div>
           ) : (
             <div />
           )}
 
-          <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-bold text-purple-300 tracking-wider shadow-lg flex items-center gap-1 font-mono">
-            <Clock className="w-2.5 h-2.5 text-purple-400" />
+          <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-[#2F2F2F] rounded-lg text-[9px] font-bold text-[#9CA3AF] tracking-wider shadow-md flex items-center gap-1 font-mono">
+            <Clock className="w-2.5 h-2.5 text-[#6B7280]" />
             <span>{timeAgo(project.created_at)}</span>
           </div>
         </div>
@@ -204,7 +202,7 @@ export default function ProjectCard({
       {/* Dropdown menu — at card level so thumbnail overflow-hidden doesn't clip it */}
       {openMenuId === project.project_id && (
         <div
-          className="absolute right-2.5 top-10 w-44 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100"
+          className="absolute right-2.5 top-10 w-44 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl shadow-2xl py-1.5 z-30 animate-fade-in"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -288,7 +286,7 @@ export default function ProjectCard({
           />
         ) : (
           <h3
-            className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-purple-300 transition-colors duration-200"
+            className="text-sm sm:text-base font-extrabold text-[#E5E5E5] leading-snug line-clamp-1 group-hover:text-[#3B82F6] transition-colors duration-200"
             title={titleText}
           >
             {titleText}
@@ -298,12 +296,12 @@ export default function ProjectCard({
         {/* Genre + Author row */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
           {project.genre && (
-            <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md font-bold">
+            <span className="text-[10px] bg-[#121212] text-[#3B82F6] border border-[#3B82F6]/30 px-2 py-0.5 rounded-md font-bold font-mono">
               {project.genre}
             </span>
           )}
           {project.author && (
-            <span className="text-[11px] text-neutral-400 font-medium truncate">
+            <span className="text-[11px] text-[#9CA3AF] font-medium truncate">
               {project.author}
             </span>
           )}
@@ -319,11 +317,11 @@ export default function ProjectCard({
 
             return (
               <div
-                className="flex items-center gap-1.5 text-neutral-300 font-mono text-xs truncate"
+                className="flex items-center gap-1.5 text-[#9CA3AF] font-mono text-xs truncate"
                 title={`${displayCount} panels`}
               >
-                <Scissors className="h-3.5 w-3.5 text-purple-400 shrink-0" />
-                <span className="font-bold text-white whitespace-nowrap">
+                <Scissors className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
+                <span className="font-bold text-[#E5E5E5] whitespace-nowrap">
                   {displayCount} panels
                 </span>
               </div>
@@ -337,7 +335,7 @@ export default function ProjectCard({
               e.stopPropagation();
               onOpenProject(project);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-4 rounded-xl border border-purple-400/40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40 active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-4 rounded-xl border border-[#3B82F6]/30 bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-bold text-white transition-all cursor-pointer shadow-md active:scale-95 shrink-0"
           >
             <span>Resume</span>
             <ArrowRight className="w-3 h-3 text-white" />

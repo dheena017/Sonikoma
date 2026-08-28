@@ -161,27 +161,27 @@ export default function ImageEditorCanvasContainer({
         pointerEvents: "auto",
       }}
     >
-      <div className="flex justify-between items-center bg-neutral-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/8 shadow-sm">
+      <div className="flex justify-between items-center bg-[#141414] px-3 py-1.5 rounded-xl border border-[#2F2F2F] shadow-sm">
         {/* Left: Canvas Title */}
         <div className="flex items-center gap-2">
-          <div className="p-1 rounded-lg bg-purple-500/10">
-            <Move className="h-3.5 w-3.5 text-purple-400" />
+          <div className="p-1 rounded-lg bg-[#1E1E1E] border border-[#2F2F2F]">
+            <Move className="h-3.5 w-3.5 text-[#3B82F6]" />
           </div>
-          <span className="text-[11px] uppercase font-mono font-bold text-neutral-200 tracking-wider">
+          <span className="text-[11px] uppercase font-mono font-bold text-[#E5E5E5] tracking-wider">
             Interactive Viewport Canvas
           </span>
         </div>
 
         {/* Center: Canvas Action & Status Toolbar */}
-        <div className="flex items-center gap-1.5 bg-neutral-950/90 px-2.5 py-1 rounded-xl border border-white/10 shadow-inner">
+        <div className="flex items-center gap-1.5 bg-[#121212] px-2.5 py-1 rounded-xl border border-[#2F2F2F] shadow-inner">
           {handleUndo && (
             <button
               onClick={handleUndo}
               disabled={historyLength === 0}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 historyLength > 0
-                  ? "text-neutral-300 hover:text-white hover:bg-white/10 active:scale-95"
-                  : "text-neutral-600 cursor-not-allowed opacity-35"
+                  ? "text-[#9CA3AF] hover:text-white hover:bg-[#262626] active:scale-95"
+                  : "text-[#6B7280] cursor-not-allowed opacity-35"
               }`}
               title="Undo (Ctrl+Z)"
             >
@@ -194,8 +194,8 @@ export default function ImageEditorCanvasContainer({
               disabled={redoHistoryLength === 0}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 redoHistoryLength > 0
-                  ? "text-neutral-300 hover:text-white hover:bg-white/10 active:scale-95"
-                  : "text-neutral-600 cursor-not-allowed opacity-35"
+                  ? "text-[#9CA3AF] hover:text-white hover:bg-[#262626] active:scale-95"
+                  : "text-[#6B7280] cursor-not-allowed opacity-35"
               }`}
               title="Redo (Ctrl+Y)"
             >
@@ -203,12 +203,12 @@ export default function ImageEditorCanvasContainer({
             </button>
           )}
 
-          <div className="w-px h-3.5 bg-white/10 mx-0.5" />
+          <div className="w-px h-3.5 bg-[#2F2F2F] mx-0.5" />
 
           {handleDeleteCurrentImage && (
             <button
               onClick={handleDeleteCurrentImage}
-              className="p-1.5 text-rose-400 hover:text-rose-300 rounded-lg hover:bg-rose-500/15 transition-all cursor-pointer active:scale-95"
+              className="p-1.5 text-[#EF4444] hover:text-white rounded-lg hover:bg-[#EF4444]/20 transition-all cursor-pointer active:scale-95"
               title="Delete Current Image"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -218,20 +218,20 @@ export default function ImageEditorCanvasContainer({
           {setIsPipMode && (
             <button
               onClick={() => setIsPipMode(true)}
-              className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/10 transition-all cursor-pointer active:scale-95"
+              className="p-1.5 text-[#9CA3AF] hover:text-white rounded-lg hover:bg-[#262626] transition-all cursor-pointer active:scale-95"
               title="Picture-in-Picture Mode"
             >
               <Minimize2 className="w-3.5 h-3.5" />
             </button>
           )}
 
-          <div className="w-px h-3.5 bg-white/10 mx-0.5" />
+          <div className="w-px h-3.5 bg-[#2F2F2F] mx-0.5" />
 
           {/* Toggle properties panel */}
           {setIsToolsPanelOpen && (
             <button
               onClick={() => setIsToolsPanelOpen((prev) => !prev)}
-              className="p-1.5 text-neutral-400 hover:text-purple-300 rounded-lg hover:bg-purple-500/15 transition-all border border-transparent hover:border-purple-500/30 cursor-pointer active:scale-95"
+              className="p-1.5 text-[#9CA3AF] hover:text-white rounded-lg hover:bg-[#262626] transition-all border border-transparent hover:border-[#2F2F2F] cursor-pointer active:scale-95"
               title={
                 isToolsPanelOpen
                   ? "Close Properties Panel"
@@ -252,19 +252,19 @@ export default function ImageEditorCanvasContainer({
           <button
             onClick={handleAiCrop}
             disabled={isAiDetecting}
-            className="flex items-center gap-1.5 bg-purple-900/30 text-purple-300 hover:bg-purple-800/50 hover:text-purple-200 px-2.5 py-1 rounded-lg border border-purple-700/30 text-[9px] font-mono font-bold cursor-pointer transition-all"
+            className="btn-secondary flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold"
           >
             {isAiDetecting ? (
-              <RefreshCw className="h-3 w-3 animate-spin" />
+              <RefreshCw className="h-3 w-3 animate-spin text-[#3B82F6]" />
             ) : (
-              <Layers className="h-3 w-3" />
+              <Layers className="h-3 w-3 text-[#3B82F6]" />
             )}
             <span>AI Smart Crop</span>
           </button>
-          <span className="text-[9px] bg-purple-950/80 text-purple-400 font-mono font-bold px-2 py-1 rounded-lg border border-purple-800/30">
+          <span className="text-[9px] bg-[#1E1E1E] text-[#3B82F6] font-mono font-bold px-2 py-1 rounded-lg border border-[#2F2F2F]">
             Draw
           </span>
-          <span className="text-[9px] bg-emerald-950/80 text-emerald-400 font-mono font-bold px-2 py-1 rounded-lg border border-emerald-800/30">
+          <span className="text-[9px] bg-[#1E1E1E] text-[#10B981] font-mono font-bold px-2 py-1 rounded-lg border border-[#2F2F2F]">
             Move
           </span>
         </div>

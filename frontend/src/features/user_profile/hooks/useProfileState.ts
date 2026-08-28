@@ -24,7 +24,6 @@ export type ProfileTabId =
   | "projects"
   | "analytics"
   | "billing"
-  | "preferences"
   | "security";
 
 export interface UseProfileStateOptions {
@@ -60,7 +59,6 @@ export function useProfileState({
         "projects",
         "analytics",
         "billing",
-        "preferences",
         "security",
       ];
       if (tabParam && validTabs.includes(tabParam)) {

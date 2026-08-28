@@ -64,20 +64,35 @@ const PanelAssistantPage = React.memo(
       }
     }, [safePanels.length]);
 
-    if (safePanels.length === 0) {
-      return (
-        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
-          <Sparkles className="h-10 w-10 text-neutral-600 mb-3" />
-          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
-            No Panels Available
-          </h3>
-          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
-            Please import a series or add panels to your storyboard timeline to
-            start editing.
-          </p>
-        </div>
-      );
-    }
+    const handleLoadDemoPanels = () => {
+      if (typeof setPanels === "function") {
+        setPanels([
+          {
+            id: 1,
+            prompt: "Mystic runes glowing across the ancient temple chamber",
+            duration: 3.5,
+            speech_text: "The awakening of the ancient realm begins now.",
+            visual_description:
+              "Mystic runes glow across the temple chamber.",
+            image_url: "",
+            sfx: "Magic Hum",
+            motion_type: "zoom_in",
+          },
+          {
+            id: 2,
+            prompt: "Warriors raising shields against approaching shadows",
+            duration: 4.0,
+            speech_text: "We must protect the artifact at all costs!",
+            visual_description:
+              "Warriors raise their shields as shadowy beasts approach.",
+            image_url: "",
+            sfx: "Shield Clang",
+            motion_type: "pan_left",
+          },
+        ]);
+        addNotification?.("Loaded demo panels for Translation Studio!", "success");
+      }
+    };
 
     const activePanel = safePanels[selectedIdx] || ({} as GeneratedPanel);
 
@@ -92,31 +107,63 @@ const PanelAssistantPage = React.memo(
     };
 
     return (
-      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
-        {/* PAGE HERO HEADER */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-6">
-          <div className="space-y-2 max-w-2xl text-left">
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-              Translation{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
-                Studio
-              </span>
-            </h1>
-            <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
-              Multi-language dialogue translator and narrative editor per comic panel frame.
-            </p>
-          </div>
+      <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-fade-in text-left text-[#E5E5E5]">
+        {/* ── MAIN COVER WRAPPER CARD ── */}
+        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+          {/* PAGE HERO HEADER */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#2F2F2F] pb-6">
+            <div className="space-y-2 max-w-2xl text-left">
+              <h1 className="text-3xl sm:text-4xl font-black text-[#E5E5E5] tracking-tight leading-tight">
+                Translation{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                  Studio
+                </span>
+              </h1>
+              <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed">
+                Multi-language dialogue translator and narrative editor per comic panel frame.
+              </p>
+            </div>
 
-          <div className="flex items-center gap-3 self-start md:self-center">
-            <div className="px-3.5 py-1.5 rounded-full bg-neutral-900 border border-white/10 text-neutral-300 text-xs font-mono flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-              <span>Total Panels: {safePanels.length}</span>
+            <div className="flex items-center gap-3 self-start md:self-center">
+              <div className="px-3.5 py-1.5 rounded-full bg-[#121212] border border-[#2F2F2F] text-[#9CA3AF] text-xs font-mono flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
+                <span>Total Panels: {safePanels.length}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
-        <div className="relative flex items-center gap-4 bg-neutral-950 border border-neutral-850 rounded-2xl p-3 shadow-md">
+          {safePanels.length === 0 ? (
+            /* ── EMPTY STATE INSIDE COVER FRAME ── */
+            <div className="p-10 sm:p-14 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] flex flex-col items-center justify-center text-center shadow-lg animate-fade-in">
+              <div className="w-16 h-16 rounded-2xl bg-[#121212] border border-[#2F2F2F] flex items-center justify-center text-[#3B82F6] mb-4 shadow-inner">
+                <Sparkles className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg sm:text-xl font-bold text-[#E5E5E5] font-sans tracking-tight mb-2">
+                No Storyboard Panels Loaded
+              </h3>
+              <p className="text-xs sm:text-sm text-[#9CA3AF] max-w-md mx-auto leading-relaxed mb-6 font-sans">
+                Please import a series or add panels to your storyboard timeline to translate dialogue and narrative text.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  onClick={onNavigateHome}
+                  className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase tracking-wider text-xs"
+                >
+                  <span>Open Dashboard Projects</span>
+                </button>
+                <button
+                  onClick={handleLoadDemoPanels}
+                  className="btn-secondary flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold font-mono"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  <span>Load Interactive Demo Panels</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
+              <div className="relative flex items-center gap-4 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
             className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
@@ -266,9 +313,12 @@ const PanelAssistantPage = React.memo(
             </div>
           </div>
         </div>
+            </>
+          )}
+        </div>
       </div>
-    );
-  }
+  );
+}
 );
 
 export default PanelAssistantPage;

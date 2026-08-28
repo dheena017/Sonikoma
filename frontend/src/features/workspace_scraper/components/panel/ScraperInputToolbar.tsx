@@ -230,7 +230,6 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     <div className="flex flex-col gap-2.5 w-full">
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative group flex-grow z-30" ref={containerRef}>
-          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 opacity-20 blur group-focus-within:opacity-40 transition-opacity duration-500" />
           <input
             id="target_url_input"
             type="text"
@@ -248,25 +247,25 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               }
             }}
             placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic reader URL..."
-            className="relative w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-6 py-4 text-sm text-neutral-200 outline-none placeholder:text-neutral-700 focus:border-purple-500 transition-all shadow-inner"
+            className="w-full bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 rounded-2xl px-6 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-[#6B7280] transition-all shadow-inner"
           />
 
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute left-0 right-0 top-full mt-2 bg-gradient-to-b from-neutral-900/95 to-neutral-950/85 border border-neutral-800/60 rounded-xl shadow-2xl z-[1000] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150 backdrop-blur-sm">
-              <div className="px-4 py-3 border-b border-neutral-800/40 bg-gradient-to-r from-purple-950/30 to-neutral-950/30">
+            <div className="absolute left-0 right-0 top-full mt-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl shadow-2xl z-[1000] overflow-hidden animate-fade-in">
+              <div className="px-4 py-3 border-b border-[#2F2F2F] bg-[#121212]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-purple-400" />
-                    <span className="text-[11px] font-bold text-neutral-300 uppercase tracking-wider">
+                    <Clock className="w-4 h-4 text-[#3B82F6]" />
+                    <span className="text-[11px] font-bold text-[#E5E5E5] uppercase tracking-wider font-mono">
                       Recent &amp; Bookmarked Episodes
                     </span>
-                    <span className="px-2 py-0.5 text-[9px] font-bold bg-purple-500/20 text-purple-300 rounded-full border border-purple-500/30">
+                    <span className="px-2 py-0.5 text-[9px] font-bold bg-[#3B82F6]/15 text-[#3B82F6] rounded-full border border-[#3B82F6]/30">
                       {suggestions.length}
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="max-h-72 overflow-y-auto divide-y divide-neutral-800/30 bg-neutral-950/60">
+              <div className="max-h-72 overflow-y-auto divide-y divide-[#2F2F2F]/40 bg-[#1E1E1E]">
                 {suggestions.map((series, idx) => {
                   const seriesTitleText = series.title || series.url || "Webtoon Series";
                   const chapterText = "Saved Series";
@@ -284,26 +283,26 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                         }
                         setShowSuggestions(false);
                       }}
-                      className="w-full px-4 py-3 hover:bg-purple-600/15 border-b border-neutral-800/20 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-neutral-950/40 hover:bg-neutral-900/60 relative"
+                      className="w-full px-4 py-3 hover:bg-[#262626] border-b border-[#2F2F2F]/30 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-[#1E1E1E]"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-8 h-8 bg-gradient-to-br from-purple-600/30 to-purple-700/20 rounded-lg flex items-center justify-center border border-purple-500/30 flex-shrink-0 shadow-sm">
-                          <Book className="w-4 h-4 text-purple-400" />
+                        <div className="w-8 h-8 bg-[#121212] rounded-lg flex items-center justify-center border border-[#2F2F2F] group-hover:border-[#3B82F6]/60 flex-shrink-0 shadow-sm">
+                          <Book className="w-4 h-4 text-[#3B82F6]" />
                         </div>
                         <div className="flex-grow min-w-0">
-                          <p className="text-xs font-bold text-neutral-100 group-hover:text-purple-300 truncate leading-snug transition-colors">
+                          <p className="text-xs font-bold text-[#E5E5E5] group-hover:text-[#3B82F6] truncate leading-snug transition-colors">
                             {seriesTitleText}
                           </p>
-                          <p className="text-[10px] text-neutral-500 group-hover:text-neutral-400 truncate mt-0.5 transition-colors">
+                          <p className="text-[10px] text-[#9CA3AF] truncate mt-0.5 transition-colors">
                             {chapterText}
                           </p>
-                          <p className="text-[9px] text-neutral-600 font-mono truncate mt-0.5 select-all group-hover:text-neutral-500 transition-colors">
+                          <p className="text-[9px] text-[#6B7280] font-mono truncate mt-0.5 select-all transition-colors">
                             {series.url}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded border bg-purple-500/15 text-purple-300 border-purple-500/30 group-hover:bg-purple-500/25 transition-colors">
+                        <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded border bg-[#121212] text-[#9CA3AF] border-[#2F2F2F] group-hover:border-[#3B82F6]/40 transition-colors">
                           Recent
                         </span>
                         <button
@@ -314,7 +313,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                               openSuggestionMenuIdx === idx ? null : idx
                             );
                           }}
-                          className="w-7 h-7 rounded-lg bg-purple-500/15 hover:bg-purple-500/30 text-neutral-400 hover:text-purple-300 border border-purple-500/20 flex items-center justify-center transition-all cursor-pointer active:scale-95"
+                          className="w-7 h-7 rounded-lg bg-[#121212] hover:bg-[#262626] text-[#9CA3AF] hover:text-[#E5E5E5] border border-[#2F2F2F] flex items-center justify-center transition-all cursor-pointer active:scale-95"
                         >
                           <MoreVertical className="w-3.5 h-3.5" />
                         </button>
@@ -333,20 +332,20 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               type="button"
               onClick={handleImportClick}
               disabled={isScraping || !targetUrl.trim()}
-              className={`relative px-6 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer ${
+              className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer ${
                 separatedData?.is_chapter_url || !separatedData?.is_series_url
-                  ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
-                  : "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
+                  ? "btn-primary"
+                  : "btn-secondary"
               }`}
             >
               {isScraping ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin text-purple-200" />
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
                   <span>Extracting...</span>
                 </>
               ) : (
                 <>
-                  <ImageIcon className="h-4 w-4" /> Import chapter Images
+                  <ImageIcon className="h-4 w-4" /> Import Chapter Images
                 </>
               )}
             </button>
@@ -355,14 +354,14 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               type="button"
               onClick={handleOpenChapterScraperClick}
               disabled={!targetUrl.trim()}
-              className={`relative px-5 py-3.5 border rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg glass-interactive active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
+              className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
                 separatedData?.is_series_url && !separatedData?.is_chapter_url
-                  ? "bg-purple-600 hover:bg-purple-500 border-purple-500/50 text-white shadow-purple-900/20"
-                  : "bg-neutral-950 hover:bg-neutral-900 border-purple-500/30 hover:border-purple-500/60 text-purple-300 hover:text-purple-200"
+                  ? "btn-primary"
+                  : "btn-secondary"
               }`}
               title="Browse and select specific chapters for this series URL"
             >
-              <Zap className="h-4 w-4 text-purple-400" />
+              <Zap className="h-4 w-4 text-[#3B82F6]" />
               Import Chapter Scraper
             </button>
           </div>

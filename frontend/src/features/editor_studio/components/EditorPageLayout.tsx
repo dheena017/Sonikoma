@@ -82,9 +82,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
   }, []);
 
   return (
-    <div className="flex h-screen max-h-screen overflow-hidden bg-[#06060c] text-white selection:bg-purple-500/30 relative">
-      {/* Subtle ambient background glow for editor */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(88,28,235,0.08),transparent)] z-0" />
+    <div className="flex h-screen max-h-screen overflow-hidden bg-[#0A0A0A] text-[#E5E5E5] relative">
 
       {/* Blurred Background Overlay when expanded sidebar is open */}
       {isSidebarOpen && (

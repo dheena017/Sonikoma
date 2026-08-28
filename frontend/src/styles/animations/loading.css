@@ -4,7 +4,7 @@
 
 .loading-page-shell {
   isolation: isolate;
-  background-color: #050507;
+  background-color: #0A0A0A;
 }
 
 .loading-page-shell-light {
@@ -19,23 +19,19 @@
   flex-direction: column;
   align-items: center;
   padding: 48px 44px 40px;
-  border-radius: 32px;
+  border-radius: 28px;
   width: 90%;
   max-width: 480px;
-  background: rgba(10, 10, 16, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(28px) saturate(1.25);
-  -webkit-backdrop-filter: blur(28px) saturate(1.25);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset, 0 0 70px rgba(124, 58, 237, 0.18);
+  background: #181818;
+  border: 1px solid #2F2F2F;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
   animation: loading-card-fade-in 0.45s ease-out forwards;
 }
 
 .loading-page-shell-light .loading-studio-card {
   background: rgba(255, 255, 255, 0.92);
   border-color: rgba(148, 163, 184, 0.24);
-  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.14),
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset, 0 0 50px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.14);
 }
 
 /* Central Logo Wrapper */
@@ -56,9 +52,9 @@
   border-radius: 36px;
   background: radial-gradient(
     circle,
-    rgba(168, 85, 247, 0.4) 0%,
-    rgba(56, 189, 248, 0.2) 50%,
-    transparent 72%
+    rgba(59, 130, 246, 0.3) 0%,
+    rgba(0, 255, 255, 0.15) 50%,
+    transparent 70%
   );
   filter: blur(20px);
   animation: loading-glow-pulse 3.2s ease-in-out infinite;
@@ -70,26 +66,25 @@
   position: relative;
   width: 108px;
   height: 108px;
-  border-radius: 28px;
+  border-radius: 24px;
   overflow: hidden;
   padding: 6px;
-  background: rgba(18, 18, 26, 0.96);
-  border: 1.5px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 25px rgba(168, 85, 247, 0.25);
+  background: #121212;
+  border: 1.5px solid #2F2F2F;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
   animation: loading-logo-float 3.5s ease-in-out infinite;
 }
 
 .loading-page-shell-light .loading-logo-box {
   background: #ffffff;
   border-color: rgba(148, 163, 184, 0.28);
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.15),
-    0 0 20px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.15);
 }
 
 .loading-logo-img {
   width: 100%;
   height: 100%;
-  border-radius: 22px;
+  border-radius: 20px;
   object-fit: cover;
   display: block;
 }
@@ -118,18 +113,12 @@
   font-size: 1.75rem;
   font-weight: 800;
   letter-spacing: -0.025em;
-  color: #ffffff;
+  color: #E5E5E5;
   margin-bottom: 10px;
-  background: linear-gradient(180deg, #ffffff 40%, #d4d4d8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .loading-page-shell-light .loading-title {
   color: #09090b;
-  background: linear-gradient(180deg, #09090b 40%, #3f3f46 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 /* Status Pill */
@@ -139,8 +128,8 @@
   gap: 9px;
   padding: 6px 16px;
   border-radius: 9999px;
-  background: rgba(168, 85, 247, 0.1);
-  border: 1px solid rgba(168, 85, 247, 0.25);
+  background: #121212;
+  border: 1px solid #2F2F2F;
   margin-bottom: 28px;
 }
 
@@ -148,8 +137,8 @@
   width: 8px;
   height: 8px;
   border-radius: 9999px;
-  background-color: #a855f7;
-  box-shadow: 0 0 10px #a855f7;
+  background-color: #3B82F6;
+  box-shadow: 0 0 8px #3B82F6;
   animation: loading-dot-pulse 1.6s ease-in-out infinite;
 }
 
@@ -158,7 +147,8 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #c084fc;
+  color: #E5E5E5;
+  font-family: monospace;
 }
 
 .loading-page-shell-light .loading-status-pill {
@@ -174,7 +164,8 @@
 .loading-progress-track {
   width: 100%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #121212;
+  border: 1px solid #2F2F2F;
   border-radius: 9999px;
   overflow: hidden;
   position: relative;
@@ -187,8 +178,7 @@
 .loading-progress-determinate {
   height: 100%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #a855f7, #06b6d4);
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.6);
+  background: linear-gradient(90deg, #3B82F6, #00FFFF);
   transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -201,8 +191,8 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(168, 85, 247, 0.85) 40%,
-    rgba(56, 189, 248, 0.95) 60%,
+    rgba(59, 130, 246, 0.85) 40%,
+    rgba(0, 255, 255, 0.95) 60%,
     transparent 100%
   );
   animation: loading-bar-shimmer 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;

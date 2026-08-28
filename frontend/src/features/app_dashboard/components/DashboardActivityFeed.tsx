@@ -122,53 +122,53 @@ export default function DashboardActivityFeed({
   const getActivityIcon = (type: string) => {
     switch (type) {
       case "scrape":
-        return <Download className="w-4 h-4 text-purple-400" />;
+        return <Download className="w-4 h-4 text-[#3B82F6]" />;
       case "panel":
-        return <Layers className="w-4 h-4 text-amber-400" />;
+        return <Layers className="w-4 h-4 text-[#F59E0B]" />;
       case "voice":
-        return <Volume2 className="w-4 h-4 text-pink-400" />;
+        return <Volume2 className="w-4 h-4 text-[#A855F7]" />;
       case "render":
-        return <Film className="w-4 h-4 text-emerald-400" />;
+        return <Film className="w-4 h-4 text-[#10B981]" />;
       default:
-        return <Sparkles className="w-4 h-4 text-indigo-400" />;
+        return <Sparkles className="w-4 h-4 text-[#3B82F6]" />;
     }
   };
 
   const getActivityIconBg = (type: string) => {
     switch (type) {
       case "scrape":
-        return "bg-purple-500/10 border-purple-500/20";
+        return "bg-[#3B82F6]/10 border-[#3B82F6]/25";
       case "panel":
-        return "bg-amber-500/10 border-amber-500/20";
+        return "bg-[#F59E0B]/10 border-[#F59E0B]/25";
       case "voice":
-        return "bg-pink-500/10 border-pink-500/20";
+        return "bg-[#A855F7]/10 border-[#A855F7]/25";
       case "render":
-        return "bg-emerald-500/10 border-emerald-500/20";
+        return "bg-[#10B981]/10 border-[#10B981]/25";
       default:
-        return "bg-indigo-500/10 border-indigo-500/20";
+        return "bg-[#3B82F6]/10 border-[#3B82F6]/25";
     }
   };
 
   return (
-    <div className="bg-[#0e0f19]/90 border border-white/[0.08] hover:border-purple-500/20 rounded-3xl p-6 sm:p-7 shadow-2xl backdrop-blur-2xl transition-all duration-300">
+    <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-7 shadow-2xl transition-all duration-300">
       {/* Header & Filter Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/30 shadow-sm">
+          <div className="p-2.5 rounded-2xl bg-[#121212] text-[#3B82F6] border border-[#2F2F2F] shadow-inner">
             <Activity className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+            <h2 className="text-base sm:text-lg font-black text-[#E5E5E5] flex items-center gap-2">
               Recent Activity
             </h2>
-            <p className="text-xs text-neutral-400 font-sans mt-0.5">
+            <p className="text-xs text-[#9CA3AF] font-sans mt-0.5">
               Real-time pipeline timeline &amp; production events
             </p>
           </div>
         </div>
 
         {/* Category Filters */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-[#090a12]/80 border border-white/[0.08] rounded-2xl self-start sm:self-auto overflow-x-auto max-w-full">
+        <div className="flex items-center gap-1.5 p-1.5 bg-[#121212] border border-[#2F2F2F] rounded-2xl self-start sm:self-auto overflow-x-auto max-w-full">
           {[
             { id: "all", label: "All" },
             { id: "scrape", label: "Scraped" },
@@ -180,8 +180,8 @@ export default function DashboardActivityFeed({
               onClick={() => setActiveFilter(tab.id)}
               className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
                 activeFilter === tab.id
-                  ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
-                  : "text-neutral-400 hover:text-neutral-200 hover:bg-white/5"
+                  ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm"
+                  : "text-[#9CA3AF] hover:text-white hover:bg-[#262626] border border-transparent"
               }`}
             >
               {tab.label}
@@ -203,12 +203,12 @@ export default function DashboardActivityFeed({
                   );
                 }
               }}
-              className="flex items-start justify-between gap-4 p-4 rounded-2xl bg-[#131524]/60 border border-white/[0.06] hover:border-purple-500/40 hover:bg-[#1a1c30]/80 transition-all group cursor-pointer shadow-sm"
+              className="flex items-start justify-between gap-4 p-4 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] hover:-translate-y-0.5 transition-all group cursor-pointer shadow-sm"
             >
               <div className="flex items-start gap-3.5 min-w-0">
                 {/* Thumbnail or Category Icon */}
                 {act.coverImage ? (
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#090910] border border-white/10 shrink-0 relative shadow-md group-hover:scale-105 transition-transform">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#121212] border border-[#2F2F2F] shrink-0 relative shadow-md group-hover:scale-105 transition-transform">
                     <img
                       src={
                         act.coverImage.startsWith("http")
@@ -232,20 +232,20 @@ export default function DashboardActivityFeed({
                 {/* Event Details */}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                    <h4 className="text-xs sm:text-sm font-extrabold text-white truncate group-hover:text-purple-300 transition-colors">
+                    <h4 className="text-xs sm:text-sm font-extrabold text-[#E5E5E5] truncate group-hover:text-[#3B82F6] transition-colors">
                       {act.title}
                     </h4>
                     {act.badge && (
                       <span
                         className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${
-                          act.badgeColor || "text-neutral-400 bg-neutral-800 border-neutral-700"
+                          act.badgeColor || "text-[#9CA3AF] bg-[#121212] border-[#2F2F2F]"
                         }`}
                       >
                         {act.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-neutral-400 leading-relaxed truncate">
+                  <p className="text-xs text-[#9CA3AF] leading-relaxed truncate">
                     {act.desc}
                   </p>
                 </div>
@@ -253,12 +253,12 @@ export default function DashboardActivityFeed({
 
               {/* Timestamp & Open Indicator */}
               <div className="flex items-center gap-2 shrink-0 self-center">
-                <span className="text-[10px] font-mono text-neutral-500 flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-neutral-600" />
+                <span className="text-[10px] font-mono text-[#6B7280] flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-[#6B7280]" />
                   {act.time}
                 </span>
                 {act.projectId && (
-                  <div className="p-1.5 rounded-lg bg-neutral-800/80 group-hover:bg-purple-600 text-neutral-400 group-hover:text-white transition-all">
+                  <div className="p-1.5 rounded-lg bg-[#121212] border border-[#2F2F2F] group-hover:border-[#3B82F6] group-hover:bg-[#3B82F6] text-[#9CA3AF] group-hover:text-white transition-all">
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </div>
                 )}
@@ -266,8 +266,8 @@ export default function DashboardActivityFeed({
             </div>
           ))
         ) : (
-          <div className="py-10 text-center bg-white/[0.01] rounded-2xl border border-white/5">
-            <p className="text-xs text-neutral-500 font-mono">
+          <div className="py-10 text-center bg-[#1E1E1E] rounded-2xl border border-[#2F2F2F]">
+            <p className="text-xs text-[#9CA3AF] font-mono">
               No events found for this filter category.
             </p>
           </div>

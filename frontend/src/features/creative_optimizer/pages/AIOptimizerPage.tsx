@@ -31,6 +31,7 @@ import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
+  setPanels?: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   onNavigateHome: () => void;
   addNotification?: (msg: string, type: any) => void;
   scrapedTitle?: string;
@@ -41,6 +42,7 @@ interface AIOptimizerPageProps {
 const AIOptimizerPage = React.memo(
   ({
     panels,
+    setPanels,
     onNavigateHome,
     addNotification,
     scrapedTitle,
@@ -65,21 +67,6 @@ const AIOptimizerPage = React.memo(
     const [copiedAll, setCopiedAll] = useState(false);
     const filmstripRef = useRef<HTMLDivElement>(null);
 
-    if (safePanels.length === 0) {
-      return (
-        <div className="flex-1 w-full px-4 sm:px-6 py-6 md:py-10 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
-          <Sparkles className="h-10 w-10 text-neutral-600 mb-3" />
-          <h3 className="text-neutral-450 font-mono text-sm font-semibold mb-1">
-            No Panels Available
-          </h3>
-          <p className="text-neutral-500 text-xs text-center max-w-xs leading-relaxed">
-            Please import a series or add panels to your storyboard timeline to
-            optimize video settings.
-          </p>
-        </div>
-      );
-    }
-
     const scrollFilmstrip = (direction: "left" | "right") => {
       if (filmstripRef.current) {
         const scrollAmount = direction === "left" ? -240 : 240;
@@ -97,24 +84,24 @@ const AIOptimizerPage = React.memo(
     };
 
     // Compile overall storyboard details for prompts
-    const title = scrapedTitle || "Overpowered S-Rank Recap";
+    const title = scrapedTitle || activeProjectData?.title || "Solo Leveling";
     const genre = scrapedGenre || "Fantasy Action";
 
     const storyboardSummary = useMemo(() => {
-      return panels
+      return (safePanels || [])
         .map(
           (p, idx) =>
             `Panel ${idx + 1}: Dialogue: "${
-              p.speech_text || "Silent scene"
-            }" | Visual action: ${p.visual_description || "No visual details"}`
+              cleanDialogueDisplay(p.speech_text).speech || p.visual_description || "Scene shot"
+            }"`
         )
         .join("\n");
-    }, [panels]);
+    }, [safePanels]);
 
     // Compile chronological script timestamps for chapter splits
     const compiledScript = useMemo(() => {
       let currentAccumulator = 0.0;
-      return panels
+      return (safePanels || [])
         .map((p, idx) => {
           const minutes = Math.floor(currentAccumulator / 60);
           const seconds = Math.floor(currentAccumulator % 60);
@@ -123,11 +110,11 @@ const AIOptimizerPage = React.memo(
             .padStart(2, "0")}`;
           currentAccumulator += p.duration ?? 0;
           return `${timestamp} - Panel ${idx + 1}: ${
-            p.speech_text || "(Silent)"
+            cleanDialogueDisplay(p.speech_text).speech || "(Silent)"
           }`;
         })
         .join("\n");
-    }, [panels]);
+    }, [safePanels]);
 
     const handleCopyAllPackage = () => {
       const pkg = `=== YOUTUBE VIDEO PACKAGE ===\nTITLE: ${title}\nGENRE: ${genre}\n\nTIMESTAMPS:\n${compiledScript}\n\nSTORYBOARD SUMMARY:\n${storyboardSummary}`;
@@ -179,20 +166,22 @@ const AIOptimizerPage = React.memo(
     const activeToolMeta = tools.find((t) => t.id === activeTab) ?? tools[0];
 
     return (
-      <div className="flex-1 w-full space-y-6 animate-fade-in rounded-[24px] border border-white/10 bg-[#0b0b0e] p-5 sm:p-7 shadow-2xl">
-        {/* PAGE HERO HEADER */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-white/5 pb-6">
-          <div className="space-y-2 max-w-2xl text-left">
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-              Video{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
-                Optimizer
-              </span>
-            </h1>
-            <p className="text-neutral-400 text-xs sm:text-sm font-sans leading-relaxed">
-              AI-driven video metadata, chapter splitters, shorts script generators, and sound direction.
-            </p>
-          </div>
+      <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-fade-in text-left text-[#E5E5E5]">
+        {/* ── MAIN COVER WRAPPER CARD ── */}
+        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+          {/* PAGE HERO HEADER */}
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#2F2F2F] pb-6">
+            <div className="space-y-2 max-w-2xl text-left">
+              <h1 className="text-3xl sm:text-4xl font-black text-[#E5E5E5] tracking-tight leading-tight">
+                Video{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                  Optimizer
+                </span>
+              </h1>
+              <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed">
+                AI-driven video metadata, chapter splitters, shorts script generators, and sound direction.
+              </p>
+            </div>
 
           <div className="flex flex-wrap items-center gap-3 self-start lg:self-center">
             {/* Inline AI Model Switcher */}
@@ -201,66 +190,124 @@ const AIOptimizerPage = React.memo(
             {/* Quick Copy YouTube Package Button */}
             <button
               onClick={handleCopyAllPackage}
-              className="px-4 py-2.5 bg-neutral-900/80 hover:bg-neutral-800 text-purple-300 hover:text-white rounded-2xl border border-purple-500/30 text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md"
+              className="px-4 py-2.5 bg-[#1E1E1E] hover:bg-[#252525] text-[#E5E5E5] hover:text-white rounded-2xl border border-[#2F2F2F] hover:border-[#3B82F6]/60 text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm"
             >
               {copiedAll ? (
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
               ) : (
-                <Copy className="w-3.5 h-3.5 text-purple-400" />
+                <Copy className="w-3.5 h-3.5 text-[#3B82F6]" />
               )}
               <span>{copiedAll ? "Copied Package!" : "Copy Package"}</span>
             </button>
           </div>
         </div>
 
-        {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
-        <div className="relative flex items-center gap-4 bg-neutral-950 border border-neutral-850 rounded-2xl p-3 shadow-md">
-          <button
-            onClick={() => scrollFilmstrip("left")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
-            title="Scroll left"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          <div
-            ref={filmstripRef}
-            className="flex gap-3.5 overflow-x-auto py-1.5 scrollbar-none flex-1 scroll-smooth px-1"
-          >
-            {panels.map((panel, idx) => (
+        {safePanels.length === 0 ? (
+          /* ── EMPTY STATE INSIDE COVER FRAME ── */
+          <div className="p-10 sm:p-14 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] flex flex-col items-center justify-center text-center shadow-lg animate-fade-in">
+            <div className="w-16 h-16 rounded-2xl bg-[#121212] border border-[#2F2F2F] flex items-center justify-center text-[#3B82F6] mb-4 shadow-inner">
+              <Sparkles className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-[#E5E5E5] font-sans tracking-tight mb-2">
+              No Storyboard Panels Loaded
+            </h3>
+            <p className="text-xs sm:text-sm text-[#9CA3AF] max-w-md mx-auto leading-relaxed mb-6 font-sans">
+              Please import a series or add panels to your storyboard timeline to generate viral shorts, metadata, and sound direction.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
               <button
-                key={panel.id ?? idx}
-                onClick={() => setSelectedIdx(idx)}
-                className={`w-20 shrink-0 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-black/60 ${
-                  selectedIdx === idx
-                    ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.35)] scale-105 bg-purple-500/10"
-                    : "border-neutral-850 opacity-50 hover:opacity-100 hover:border-purple-500/40"
-                }`}
+                onClick={onNavigateHome}
+                className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold uppercase tracking-wider text-xs"
               >
-                {panel.image_url ? (
-                  <img
-                    src={panel.image_url}
-                    alt={`Panel ${idx + 1}`}
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <Film className="w-5 h-5 text-neutral-600" />
-                )}
-                <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-neutral-300 border border-neutral-800">
-                  #{idx + 1}
-                </div>
+                <span>Open Dashboard Projects</span>
               </button>
-            ))}
+              <button
+                onClick={() => {
+                  if (typeof setPanels === "function") {
+                    setPanels([
+                      {
+                        id: 1,
+                        prompt: "Dramatic cosmic rift tearing open across the sky",
+                        duration: 3.5,
+                        speech_text: "The seal has broken. Prepare for the final convergence.",
+                        visual_description:
+                          "Dramatic cosmic rift tearing open across the sky.",
+                        image_url: "",
+                        sfx: "Rift Crack",
+                        motion_type: "zoom_in",
+                      },
+                      {
+                        id: 2,
+                        prompt: "Heroes charging into celestial portal with weapons drawn",
+                        duration: 4.2,
+                        speech_text: "We will not fall back. Stand your ground!",
+                        visual_description:
+                          "Heroes charge into the celestial portal with weapons drawn.",
+                        image_url: "",
+                        sfx: "Battle Cry",
+                        motion_type: "pan_right",
+                      },
+                    ]);
+                    addNotification?.("Loaded demo panels for Video Optimizer!", "success");
+                  }
+                }}
+                className="btn-secondary flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold font-mono"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+                <span>Load Interactive Demo Panels</span>
+              </button>
+            </div>
           </div>
+        ) : (
+          <>
+            {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
+            <div className="relative flex items-center gap-4 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3 shadow-md">
+              <button
+                onClick={() => scrollFilmstrip("left")}
+                className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-sm"
+                title="Scroll left"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
 
-          <button
-            onClick={() => scrollFilmstrip("right")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
-            title="Scroll right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+              <div
+                ref={filmstripRef}
+                className="flex gap-3.5 overflow-x-auto py-1.5 scrollbar-none flex-1 scroll-smooth px-1"
+              >
+                {panels.map((panel, idx) => (
+                  <button
+                    key={panel.id ?? idx}
+                    onClick={() => setSelectedIdx(idx)}
+                    className={`w-20 shrink-0 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-[#121212] ${
+                      selectedIdx === idx
+                        ? "border-2 border-[#3B82F6] scale-105 bg-[#3B82F6]/10 shadow-md"
+                        : "border-[#2F2F2F] opacity-70 hover:opacity-100 hover:border-[#3B82F6]/60 hover:scale-102"
+                    }`}
+                  >
+                    {panel.image_url ? (
+                      <img
+                        src={panel.image_url}
+                        alt={`Panel ${idx + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Film className="w-5 h-5 text-[#6B7280]" />
+                    )}
+                    <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-[#E5E5E5] border border-[#2F2F2F]">
+                      #{idx + 1}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => scrollFilmstrip("right")}
+                className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-sm"
+                title="Scroll right"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
 
         {/* THREE-COLUMN BALANCED WORKSPACE GRID (3 : 3 : 6) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -502,9 +549,12 @@ const AIOptimizerPage = React.memo(
             </div>
           </div>
         </div>
+            </>
+          )}
+        </div>
       </div>
-    );
-  }
+  );
+}
 );
 
 export default AIOptimizerPage;

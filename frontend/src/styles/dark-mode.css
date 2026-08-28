@@ -1,95 +1,141 @@
-/* =========================================================
-   DARK MODE — DEEP COVERAGE
-   Covers dark pattern tokens across all components.
-   Applied when <html data-mode="dark"> or default.
-   ========================================================= */
-:root[data-mode="dark"] {
-  color-scheme: dark;
+/* ==========================================================================
+   SONIKOMA DARK MODE SYSTEM & UNIVERSAL HOVER DYNAMICS
+   🌑 Base Palette: Rich Black (#0A0A0A), Charcoal (#121212), Dark Gray (#1E1E1E), Gunmetal (#2A2A2A)
+   🎨 Borders: Subtle Gray (#2F2F2F) | Accent: Electric Blue (#3B82F6), Cyan (#00FFFF)
+   ✨ Typography: Primary (#E5E5E5), Secondary (#9CA3AF), Dim (#6B7280)
+   ========================================================================== */
+
+:root,
+html,
+body {
+  color-scheme: dark !important;
+  background-color: #0A0A0A !important;
+  color: #E5E5E5 !important;
 }
 
 /* ── Body & App root ─────────────────────────────────────── */
-[data-mode="dark"] body {
-  background-color: #070709;
-  color: #f4f4f5;
-  color-scheme: dark;
-}
-[data-mode="dark"] #app_root {
-  background-color: #070709;
-  color: #f4f4f5;
-}
-[data-mode="dark"] .min-h-screen {
-  background-color: #070709;
+body,
+#app_root,
+.min-h-screen {
+  background-color: #0A0A0A !important;
+  color: #E5E5E5 !important;
 }
 
 /* ── Header ──────────────────────────────────────────────── */
-[data-mode="dark"] #header_pane {
-  background-color: rgba(10, 10, 14, 0.92) !important;
-  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(12px);
+#header_pane,
+header {
+  background-color: #121212 !important;
+  border-bottom: 1px solid #2F2F2F !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-/* ── Sidebar / aside ─────────────────────────────────────── */
-[data-mode="dark"] #sidebar_pane,
-[data-mode="dark"] aside {
-  background-color: #0b0b0e !important;
-  border-right-color: rgba(255, 255, 255, 0.08) !important;
+/* ── Sidebar / Aside ─────────────────────────────────────── */
+#sidebar_pane,
+aside {
+  background-color: #121212 !important;
+  border-right: 1px solid #2F2F2F !important;
 }
 
-/* ── Neutral backgrounds (Tailwind scale) ─────────────────── */
-[data-mode="dark"] .bg-neutral-950,
-[data-mode="dark"] .bg-neutral-925 {
-  background-color: #070709 !important;
-}
-[data-mode="dark"] .bg-neutral-900 {
-  background-color: #0b0b0e !important;
-}
-[data-mode="dark"] .bg-neutral-850 {
-  background-color: #121217 !important;
-}
-[data-mode="dark"] .bg-neutral-800 {
-  background-color: #181820 !important;
+/* ── Surface Hierarchy ───────────────────────────────────── */
+.bg-neutral-955 {
+  background-color: #0A0A0A !important;
 }
 
-/* ── Inputs / selects / textareas ─────────────────────────── */
-[data-mode="dark"]
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+.bg-neutral-950,
+.bg-neutral-925 {
+  background-color: #121212 !important;
+}
+
+.bg-neutral-900 {
+  background-color: #1E1E1E !important;
+}
+
+.bg-neutral-850 {
+  background-color: #242424 !important;
+}
+
+.bg-neutral-800 {
+  background-color: #2A2A2A !important;
+}
+
+/* ── Universal Inputs / Selects / Textareas Hover & Focus ──── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
     [type="color"]
   ),
-[data-mode="dark"] select,
-[data-mode="dark"] textarea {
-  background-color: #0b0b0e !important;
-  color: #f4f4f5 !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-[data-mode="dark"] input::placeholder,
-[data-mode="dark"] textarea::placeholder {
-  color: #71717a !important;
+select,
+textarea {
+  background-color: #1E1E1E !important;
+  color: #E5E5E5 !important;
+  border: 1px solid #2F2F2F !important;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* ── Scrollbars in Dark Mode ─────────────────────────────── */
-[data-mode="dark"] .scrollbar-thin::-webkit-scrollbar,
-[data-mode="dark"] .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-  background: transparent;
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="color"]
+  ):hover,
+select:hover,
+textarea:hover {
+  background-color: #242424 !important;
+  border-color: rgba(59, 130, 246, 0.6) !important;
 }
-[data-mode="dark"] .scrollbar-thin::-webkit-scrollbar-track,
-[data-mode="dark"] .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+
+input:focus,
+select:focus,
+textarea:focus {
+  background-color: #262626 !important;
+  border-color: #3B82F6 !important; /* Electric Blue */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+  outline: none !important;
 }
-[data-mode="dark"] .scrollbar-thin::-webkit-scrollbar-thumb,
-[data-mode="dark"] .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+
+input::placeholder,
+textarea::placeholder {
+  color: #6B7280 !important; /* Dim Gray */
+}
+
+/* ── Navigation Links & Action Items Hover State ─────────── */
+nav a:hover,
+nav button:hover,
+aside nav a:hover,
+aside nav button:hover {
+  background-color: #262626 !important;
+  color: #FFFFFF !important;
+  border-color: #3B82F6 !important;
+  transition: all 0.15s ease-in-out;
+}
+
+/* ── Table Rows & Lists Hover State ──────────────────────── */
+tr:hover,
+[role="row"]:hover {
+  background-color: #252525 !important;
+  transition: background-color 0.15s ease;
+}
+
+/* ── Smooth Studio Scrollbars ─────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2F2F2F;
   border-radius: 9999px;
-}
-[data-mode="dark"] .scrollbar-thin::-webkit-scrollbar-thumb:hover,
-[data-mode="dark"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  transition: background 0.2s ease;
 }
 
-/* ── Terminal / log output ────────────────────────────────── */
-[data-mode="dark"] code,
-[data-mode="dark"] pre {
-  background-color: #050507 !important;
-  color: #dcdcdc !important;
+::-webkit-scrollbar-thumb:hover {
+  background: #3B82F6;
+}
+
+/* ── Terminal / Code Output ───────────────────────────────── */
+code,
+pre {
+  background-color: #0A0A0A !important;
+  color: #E5E5E5 !important;
+  border-color: #2F2F2F !important;
 }

@@ -39,8 +39,10 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
   }, []);
 
   return (
-    <div className="w-full flex-1 flex flex-col py-4 max-w-7xl mx-auto">
-      <ChapterScraper
+    <div className="w-full flex-1 flex flex-col py-4 sm:py-6 max-w-7xl mx-auto text-[#E5E5E5] animate-fade-in text-left">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+        <ChapterScraper
         addNotification={addNotification}
         fetchWithInterceptor={fetchWithInterceptor}
         isStandalone={true}
@@ -118,7 +120,8 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
             navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
           }
         }}
-      />
+        />
+      </div>
     </div>
   );
 };

@@ -617,9 +617,10 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   return (
     <main
       id="main_workspace"
-      className="flex-1 w-full max-w-7xl mx-auto py-6 flex flex-col gap-10 items-center justify-start"
+      className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 flex flex-col gap-6 items-center justify-start text-[#E5E5E5] animate-fade-in"
     >
-      <div className="w-full space-y-12 stagger-container animate-in fade-in slide-in-from-bottom-8 duration-700">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="w-full rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-10 relative overflow-hidden text-left">
         {matchingProject && (
           <WorkspaceResumeCard
             matchingProject={matchingProject as any}

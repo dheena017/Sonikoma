@@ -233,16 +233,16 @@ export default function VoiceSettingsPanel({
   return (
     <div className="space-y-5">
       {/* HEADER BAR */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-850 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2F2F2F] pb-4">
         <div className="flex items-center gap-2.5">
-          <span className="p-2 bg-purple-500/10 border border-purple-500/30 rounded-xl text-purple-400">
+          <span className="p-2 bg-[#3B82F6]/10 border border-[#3B82F6]/30 rounded-xl text-[#3B82F6]">
             <Users className="h-4 w-4" />
           </span>
           <div>
-            <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+            <h4 className="text-xs font-mono font-bold text-[#E5E5E5] uppercase tracking-wider">
               Voice Actor Casting & Matching
             </h4>
-            <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
+            <p className="text-[10px] text-[#9CA3AF] font-mono mt-0.5">
               Match AI voice actors based on character personality, appearance
               description, and dialogue tone.
             </p>
@@ -253,23 +253,23 @@ export default function VoiceSettingsPanel({
           <button
             onClick={handleCast}
             disabled={loading || !name}
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
+            className="px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5 cursor-pointer shadow-md active:scale-95 shrink-0"
           >
             {loading ? (
               <RefreshCw className="w-4 h-4 animate-spin" />
             ) : (
-              <Sparkles className="w-4 h-4 text-purple-200" />
+              <Sparkles className="w-4 h-4 text-white" />
             )}
-            <span>{loading ? "Searching..." : "✦ Cast Voice"}</span>
+            <span>{loading ? "Matching..." : "✦ AI Cast Match"}</span>
           </button>
 
-          {activePanel && (
+          {setPanels && (
             <button
               onClick={handleAssignVoice}
-              className="px-3 py-2 bg-neutral-900 hover:bg-neutral-850 text-purple-300 hover:text-white border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-2 bg-[#10B981] hover:bg-[#059669] text-white border border-[#10B981]/30 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-md shrink-0 active:scale-95"
               title="Assign selected voice to active panel"
             >
-              <BookmarkCheck className="w-3.5 h-3.5 text-purple-400" />
+              <BookmarkCheck className="w-3.5 h-3.5 text-white" />
               <span>Assign to Panel #{panelNumber}</span>
             </button>
           )}
@@ -280,7 +280,7 @@ export default function VoiceSettingsPanel({
         {/* CHARACTER & DIALOGUE INPUT FORM */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono text-purple-300 uppercase tracking-widest block font-bold">
+            <label className="text-[10px] font-mono text-[#3B82F6] uppercase tracking-widest block font-bold">
               CHARACTER NAME
             </label>
             <input
@@ -288,11 +288,11 @@ export default function VoiceSettingsPanel({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Jinwoo / Shadow Sovereign"
-              className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono text-purple-300 uppercase tracking-widest block font-bold">
+            <label className="text-[10px] font-mono text-[#3B82F6] uppercase tracking-widest block font-bold">
               DIALOGUE SAMPLE
             </label>
             <input
@@ -300,13 +300,13 @@ export default function VoiceSettingsPanel({
               value={dialogue}
               onChange={(e) => setDialogue(e.target.value)}
               placeholder="e.g. Prepare to perish."
-              className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium"
             />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] font-mono text-purple-300 uppercase tracking-widest block font-bold">
+          <label className="text-[10px] font-mono text-[#3B82F6] uppercase tracking-widest block font-bold">
             VISUAL APPEARANCE DESCRIPTION
           </label>
           <textarea
@@ -314,32 +314,32 @@ export default function VoiceSettingsPanel({
             value={visual}
             onChange={(e) => setVisual(e.target.value)}
             placeholder="Describe character's gender, style, aura, look..."
-            className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium leading-relaxed"
+            className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium leading-relaxed"
           />
         </div>
 
         {/* AI RECOMMENDED CAST RESULT BANNER */}
         {castData && !loading && (
-          <div className="bg-purple-950/20 p-4 rounded-xl border border-purple-500/40 space-y-2.5 animate-fade-in shadow-lg">
-            <div className="flex justify-between items-center border-b border-purple-900/40 pb-2">
-              <span className="text-[10px] font-mono text-purple-300 uppercase font-bold tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-purple-400" /> AI
+          <div className="bg-[#121212] p-4 rounded-xl border border-[#2F2F2F] space-y-2.5 animate-fade-in shadow-md">
+            <div className="flex justify-between items-center border-b border-[#2F2F2F] pb-2">
+              <span className="text-[10px] font-mono text-[#3B82F6] uppercase font-bold tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" /> AI
                 Recommended Voice Actor Match
               </span>
-              <span className="text-[9px] font-mono bg-purple-500/20 text-purple-300 px-2 py-0.5 border border-purple-500/30 rounded-full font-bold">
+              <span className="text-[9px] font-mono bg-[#3B82F6]/15 text-[#3B82F6] px-2 py-0.5 border border-[#3B82F6]/30 rounded-full font-bold">
                 Confidence:{" "}
                 {Math.round((castData.match_confidence || 0.9) * 100)}%
               </span>
             </div>
             <div className="flex items-start gap-3">
-              <div className="h-10 w-10 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center font-bold text-base text-purple-200 uppercase shrink-0 shadow-md">
+              <div className="h-10 w-10 rounded-xl bg-[#3B82F6]/15 border border-[#3B82F6]/30 flex items-center justify-center font-bold text-base text-[#3B82F6] uppercase shrink-0 shadow-sm">
                 {castData.suggested_actor?.charAt(0) || "V"}
               </div>
               <div className="space-y-1 flex-1">
-                <h5 className="text-xs font-bold text-white font-sans">
+                <h5 className="text-xs font-bold text-[#E5E5E5] font-sans">
                   {castData.suggested_actor || "Male Deep Hero"}
                 </h5>
-                <p className="text-[11px] font-sans text-neutral-300 leading-relaxed">
+                <p className="text-[11px] font-sans text-[#9CA3AF] leading-relaxed">
                   {castData.tone_description ||
                     "A deep, authoritative resonance that commands presence, suitable for main protagonists with mysterious powers."}
                 </p>
@@ -349,11 +349,11 @@ export default function VoiceSettingsPanel({
         )}
 
         {/* LIVE VOICE TESTER & CATEGORY FILTER */}
-        <div className="border-t border-neutral-850 pt-4 space-y-4">
+        <div className="border-t border-[#2F2F2F] pt-4 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5 text-purple-400" />
-              <h5 className="text-[10px] font-mono font-bold text-neutral-300 uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
+              <h5 className="text-[10px] font-mono font-bold text-[#E5E5E5] uppercase tracking-wider">
                 Voice Actor Selection & Live Synthesis Tester
               </h5>
             </div>
@@ -367,8 +367,8 @@ export default function VoiceSettingsPanel({
                     onClick={() => setFilterCategory(cat)}
                     className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all border cursor-pointer whitespace-nowrap ${
                       filterCategory === cat
-                        ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                        : "bg-neutral-950 text-neutral-400 border-neutral-800 hover:text-white"
+                        ? "bg-[#3B82F6]/15 text-[#3B82F6] border-[#3B82F6]/40 shadow-sm"
+                        : "bg-[#121212] text-[#9CA3AF] border-[#2F2F2F] hover:text-white hover:border-[#3B82F6]/60"
                     }`}
                   >
                     {cat}
@@ -380,19 +380,19 @@ export default function VoiceSettingsPanel({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-mono text-purple-300 uppercase tracking-widest block font-bold">
+              <label className="text-[10px] font-mono text-[#3B82F6] uppercase tracking-widest block font-bold">
                 SELECT VOICE ACTOR
               </label>
               <select
                 value={selectedVoice}
                 onChange={(e) => setSelectedVoice(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans cursor-pointer"
+                className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans cursor-pointer"
               >
                 {filteredVoices.map((v) => (
                   <option
                     key={v.code}
                     value={v.code}
-                    className="bg-neutral-950 text-white"
+                    className="bg-[#121212] text-[#E5E5E5]"
                   >
                     {v.label}
                   </option>
@@ -401,7 +401,7 @@ export default function VoiceSettingsPanel({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[10px] font-mono text-purple-300 uppercase tracking-widest block font-bold">
+              <label className="text-[10px] font-mono text-[#3B82F6] uppercase tracking-widest block font-bold">
                 TEST DIALOGUE SCRIPT
               </label>
               <div className="relative flex items-center">
@@ -410,12 +410,12 @@ export default function VoiceSettingsPanel({
                   value={testScript}
                   onChange={(e) => setTestScript(e.target.value)}
                   placeholder="Type preview dialogue..."
-                  className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-xl p-2.5 pr-24 text-neutral-200 outline-none focus:border-purple-500 transition-all font-sans font-medium"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 pr-24 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium"
                 />
                 <button
                   onClick={handlePreviewToggle}
                   disabled={isGenerating || !testScript}
-                  className="absolute right-1.5 px-3 py-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-40 text-white rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer shadow-md"
+                  className="absolute right-1.5 px-3 py-1 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-40 text-white rounded-lg text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer shadow-sm active:scale-95"
                 >
                   {isGenerating ? (
                     <RefreshCw className="w-3 h-3 animate-spin" />
@@ -435,28 +435,28 @@ export default function VoiceSettingsPanel({
 
           {/* Sound Wave Visualizer when playing preview */}
           {isPlaying && (
-            <div className="flex items-center justify-between bg-purple-950/20 border border-purple-500/30 rounded-xl p-3 animate-fade-in shadow-md">
+            <div className="flex items-center justify-between bg-[#121212] border border-[#2F2F2F] rounded-xl p-3 animate-fade-in shadow-md">
               <div className="flex items-center gap-2">
-                <Volume2 className="w-4 h-4 text-purple-400 animate-pulse" />
-                <span className="text-[10px] font-mono text-purple-300 font-bold">
-                  Synthesizing & Playing Audio Preview ({selectedVoice})...
+                <Volume2 className="w-4 h-4 text-[#3B82F6] animate-pulse" />
+                <span className="text-[10px] font-mono text-[#E5E5E5] font-bold">
+                  Synthesizing &amp; Playing Audio Preview ({selectedVoice})...
                 </span>
               </div>
               <div className="flex items-end gap-1 h-4">
                 <span
-                  className="w-1 bg-purple-400 rounded-full animate-bounce h-3"
+                  className="w-1 bg-[#3B82F6] rounded-full animate-bounce h-3"
                   style={{ animationDelay: "0.1s" }}
                 />
                 <span
-                  className="w-1 bg-purple-400 rounded-full animate-bounce h-4"
+                  className="w-1 bg-[#3B82F6] rounded-full animate-bounce h-4"
                   style={{ animationDelay: "0.2s" }}
                 />
                 <span
-                  className="w-1 bg-purple-400 rounded-full animate-bounce h-2"
+                  className="w-1 bg-[#3B82F6] rounded-full animate-bounce h-2"
                   style={{ animationDelay: "0.3s" }}
                 />
                 <span
-                  className="w-1 bg-purple-400 rounded-full animate-bounce h-3.5"
+                  className="w-1 bg-[#3B82F6] rounded-full animate-bounce h-3.5"
                   style={{ animationDelay: "0.4s" }}
                 />
               </div>

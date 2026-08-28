@@ -194,10 +194,10 @@ const CATEGORY_COLORS: Record<
   { border: string; bg: string; text: string; dot: string }
 > = {
   "Creative Narration": {
-    border: "rgba(168, 85, 247, 0.35)",
-    bg: "rgba(168, 85, 247, 0.08)",
-    text: "#c4b5fd",
-    dot: "#a855f7",
+    border: "rgba(59, 130, 246, 0.35)",
+    bg: "rgba(59, 130, 246, 0.08)",
+    text: "#93c5fd",
+    dot: "#3B82F6",
   },
   "Vision & Extraction": {
     border: "rgba(6, 182, 212, 0.35)",
@@ -517,19 +517,21 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   }
 
   return (
-    <div className="space-y-6 text-left animate-in fade-in duration-200">
-      {/* ── 1. HERO HEADER & TELEMETRY BANNER ──────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/5">
+    <div className="flex-1 w-full max-w-7xl mx-auto animate-in fade-in duration-200 text-left">
+      {/* ── MAIN COVER WRAPPER CARD ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden">
+        {/* ── 1. HERO HEADER & TELEMETRY BANNER ──────────────────────────────── */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#2F2F2F] relative z-10">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
               AI Smart Model{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-indigo-300 to-purple-500">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
                 Routing
               </span>
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-purple-950/60 border border-purple-500/30 text-[10px] font-mono font-bold text-purple-300 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+            <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-mono font-bold text-[#3B82F6] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
               11 ACTIVE PIPELINES
             </span>
           </div>
@@ -545,10 +547,10 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           <button
             type="button"
             onClick={handleResetDefaults}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold font-mono text-neutral-300 bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold font-mono text-[#E5E5E5] bg-[#1E1E1E] border border-[#2F2F2F] hover:bg-[#2A2A2A] transition-all cursor-pointer shadow-sm"
             title="Reset all 11 task routes to default specialized configurations"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-neutral-400" />
+            <RotateCcw className="w-3.5 h-3.5 text-[#9CA3AF]" />
             <span>Reset Defaults</span>
           </button>
 
@@ -556,17 +558,13 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-white shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-40"
-            style={{
-              background: saved
-                ? "linear-gradient(135deg, #16a34a, #15803d)"
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 cursor-pointer disabled:opacity-40 shadow-md ${
+              saved
+                ? "bg-[#10B981] border border-[#10B981]/30"
                 : hasUnsavedChanges
-                ? "linear-gradient(135deg, #9333ea, #4f46e5)"
-                : "linear-gradient(135deg, #7c3aed, #4338ca)",
-              boxShadow: hasUnsavedChanges
-                ? "0 0 16px rgba(147, 51, 234, 0.45)"
-                : "0 0 12px rgba(124, 58, 237, 0.3)",
-            }}
+                ? "bg-[#3B82F6] hover:bg-[#2563EB] border border-[#3B82F6]/30"
+                : "bg-[#3B82F6]/80 hover:bg-[#3B82F6] border border-[#3B82F6]/30"
+            }`}
           >
             {saved ? (
               <>
@@ -593,109 +591,79 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
       {/* ── 2. TELEMETRY KPI METRICS GRID ──────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* KPI 1: Active Pipelines */}
-        <div
-          className="p-3.5 rounded-2xl border"
-          style={{
-            backgroundColor: "#0a0b12",
-            borderColor: "rgba(255, 255, 255, 0.08)",
-          }}
-        >
-          <div className="flex items-center justify-between text-neutral-400 mb-1">
-            <span className="text-[11px] font-mono uppercase tracking-wider">
+        <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+          <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
               Routed Pipelines
             </span>
-            <Cpu className="w-4 h-4 text-purple-400" />
+            <Cpu className="w-4 h-4 text-[#3B82F6]" />
           </div>
-          <div className="text-xl font-bold text-white font-mono">
+          <div className="text-xl font-bold text-[#E5E5E5] font-mono">
             {routes.length} / 11
           </div>
-          <div className="text-[10px] text-neutral-400 mt-0.5">
+          <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
             Full comic workflow coverage
           </div>
         </div>
 
         {/* KPI 2: 3-Tier Redundancy */}
-        <div
-          className="p-3.5 rounded-2xl border"
-          style={{
-            backgroundColor: "#0a0b12",
-            borderColor: "rgba(255, 255, 255, 0.08)",
-          }}
-        >
-          <div className="flex items-center justify-between text-neutral-400 mb-1">
-            <span className="text-[11px] font-mono uppercase tracking-wider">
+        <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+          <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
               Cascade Redundancy
             </span>
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-[#10B981]" />
           </div>
-          <div className="text-xl font-bold text-emerald-400 font-mono">
+          <div className="text-xl font-bold text-[#10B981] font-mono">
             100% 3-Tier
           </div>
-          <div className="text-[10px] text-neutral-400 mt-0.5">
+          <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
             Auto-failover enabled on rate limit
           </div>
         </div>
 
         {/* KPI 3: Available Models */}
-        <div
-          className="p-3.5 rounded-2xl border"
-          style={{
-            backgroundColor: "#0a0b12",
-            borderColor: "rgba(255, 255, 255, 0.08)",
-          }}
-        >
-          <div className="flex items-center justify-between text-neutral-400 mb-1">
-            <span className="text-[11px] font-mono uppercase tracking-wider">
+        <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+          <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
               Model Catalog
             </span>
-            <Sparkles className="w-4 h-4 text-indigo-400" />
+            <Sparkles className="w-4 h-4 text-[#3B82F6]" />
           </div>
-          <div className="text-xl font-bold text-white font-mono">
+          <div className="text-xl font-bold text-[#E5E5E5] font-mono">
             {availableModels.length} Engines
           </div>
-          <div className="text-[10px] text-neutral-400 mt-0.5">
+          <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
             Loaded from providers directory
           </div>
         </div>
 
         {/* KPI 4: Orchestrator State */}
-        <div
-          className="p-3.5 rounded-2xl border"
-          style={{
-            backgroundColor: "#0a0b12",
-            borderColor: "rgba(255, 255, 255, 0.08)",
-          }}
-        >
-          <div className="flex items-center justify-between text-neutral-400 mb-1">
-            <span className="text-[11px] font-mono uppercase tracking-wider">
+        <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+          <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+            <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
               Orchestrator Sync
             </span>
-            <Activity className="w-4 h-4 text-cyan-400" />
+            <Activity className="w-4 h-4 text-[#00FFFF]" />
           </div>
-          <div className="text-xl font-bold text-cyan-400 font-mono flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <div className="text-xl font-bold text-[#00FFFF] font-mono flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#00FFFF] animate-pulse" />
             SYNCHRONIZED
           </div>
-          <div className="text-[10px] text-neutral-400 mt-0.5">
+          <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
             Live Central AI Core binding
           </div>
         </div>
       </div>
 
       {/* ── 3. SEARCH & CATEGORY FILTER BAR ────────────────────────────────── */}
-      <div
-        className="p-3.5 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-3"
-        style={{
-          backgroundColor: "#0a0b12",
-          borderColor: "rgba(255, 255, 255, 0.08)",
-        }}
-      >
+      <div className="p-3.5 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-md">
         {/* Category Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 flex-wrap">
           {categories.map((cat) => {
             const isActive = selectedCategory === cat;
             const catCfg = CATEGORY_COLORS[cat];
-            const activeColor = cat === "All" ? "#a855f7" : catCfg?.dot || "#a855f7";
+            const activeColor = cat === "All" ? "#3B82F6" : catCfg?.dot || "#3B82F6";
 
             const count =
               cat === "All"
@@ -707,22 +675,22 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer font-sans"
                 style={{
                   borderWidth: 1,
                   borderStyle: "solid",
-                  borderColor: isActive ? activeColor : "rgba(255, 255, 255, 0.08)",
+                  borderColor: isActive ? activeColor : "#2F2F2F",
                   backgroundColor: isActive
                     ? `${activeColor}20`
-                    : "rgba(255, 255, 255, 0.02)",
-                  color: isActive ? activeColor : "#9ca3af",
+                    : "#121212",
+                  color: isActive ? "#ffffff" : "#9CA3AF",
                 }}
               >
                 {cat !== "All" && (
                   <span
                     className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{
-                      backgroundColor: isActive ? activeColor : "#4b5563",
+                      backgroundColor: isActive ? activeColor : "#6B7280",
                     }}
                   />
                 )}
@@ -744,26 +712,20 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
         </div>
 
         {/* Search input */}
-        <div
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl border w-full md:w-64"
-          style={{
-            backgroundColor: "#07080d",
-            borderColor: "rgba(255, 255, 255, 0.1)",
-          }}
-        >
-          <Search className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#2F2F2F] bg-[#121212] w-full md:w-64 focus-within:border-[#3B82F6] transition-colors">
+          <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search pipelines..."
-            className="bg-transparent text-xs text-neutral-200 placeholder-neutral-500 outline-none w-full font-sans"
+            className="bg-transparent text-xs text-[#E5E5E5] placeholder-[#6B7280] outline-none w-full font-sans"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery("")}
-              className="text-[10px] text-neutral-400 hover:text-white"
+              className="text-[10px] text-[#9CA3AF] hover:text-white"
             >
               <X className="w-3 h-3" />
             </button>
@@ -781,17 +743,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           return (
             <div
               key={route.task}
-              className="rounded-2xl border p-4 sm:p-5 transition-all duration-200 relative overflow-hidden"
-              style={{
-                backgroundColor: "#0a0b12",
-                borderColor: "rgba(255, 255, 255, 0.08)",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.borderColor = `${catColor.dot}44`)
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.08)")
-              }
+              className="rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 sm:p-5 transition-all duration-200 relative overflow-hidden hover:border-[#3B82F6]/60 shadow-lg"
             >
               {/* Task Header */}
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
@@ -809,7 +761,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
 
                   <div className="min-w-0 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm sm:text-base font-bold text-white leading-tight">
+                      <h3 className="text-sm sm:text-base font-bold text-[#E5E5E5] leading-tight">
                         {route.name}
                       </h3>
                       <span
@@ -823,7 +775,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                         {route.category}
                       </span>
                     </div>
-                    <p className="text-xs text-neutral-400 leading-relaxed">
+                    <p className="text-xs text-[#9CA3AF] leading-relaxed">
                       {route.description}
                     </p>
                   </div>
@@ -831,30 +783,24 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
 
                 {/* Header Action Badges: Suitable count, slug, and Simulator Button */}
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
-                  <span
-                    className="text-[10px] font-mono px-2 py-1 rounded-lg border text-neutral-400"
-                    style={{
-                      backgroundColor: "rgba(255, 255, 255, 0.03)",
-                      borderColor: "rgba(255, 255, 255, 0.06)",
-                    }}
-                  >
+                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] text-[#9CA3AF]">
                     {suitable.length} suitable models
                   </span>
 
                   <button
                     type="button"
                     onClick={() => handleStartSimulation(route)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg border text-[10px] font-mono font-bold text-purple-300 bg-purple-950/40 border-purple-500/30 hover:bg-purple-900/40 transition-all cursor-pointer"
+                    className="btn-secondary flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-[#3B82F6] hover:text-white border-[#3B82F6]/30 hover:bg-[#3B82F6]/10"
                     title="Simulate / dry-run this routing cascade"
                   >
-                    <Play className="w-2.5 h-2.5 fill-purple-300" />
+                    <Play className="w-3 h-3 fill-current" />
                     <span>Test Route</span>
                   </button>
                 </div>
               </div>
 
               {/* ── 3-TIER CASCADE MODELS GRID ─────────────────────────────── */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-white/5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-[#2F2F2F]">
                 {/* TIER 1: PRIMARY */}
                 <TierModelCard
                   tierType="primary"
@@ -893,24 +839,17 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
       {/* ── 5. CASCADE DRY-RUN SIMULATOR MODAL ─────────────────────────────── */}
       {simModalOpen && simTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-          <div
-            className="w-full max-w-lg rounded-3xl border p-6 space-y-5 shadow-2xl relative"
-            style={{
-              backgroundColor: "#0b0c14",
-              borderColor: "rgba(168, 85, 247, 0.4)",
-              boxShadow: "0 0 30px rgba(168, 85, 247, 0.2)",
-            }}
-          >
+          <div className="w-full max-w-lg rounded-3xl border border-[#2F2F2F] bg-[#181818] p-6 space-y-5 shadow-2xl relative">
             {/* Modal Header */}
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{simTask.emoji}</span>
-                  <h3 className="text-base font-bold text-white">
+                  <h3 className="text-base font-bold text-[#E5E5E5]">
                     Cascade Simulator: {simTask.name}
                   </h3>
                 </div>
-                <p className="text-xs text-neutral-400 font-sans">
+                <p className="text-xs text-[#9CA3AF] font-sans">
                   Simulate a dispatch request through the 3-tier cascade and
                   inspect model resolution.
                 </p>
@@ -918,28 +857,22 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
               <button
                 type="button"
                 onClick={() => setSimModalOpen(false)}
-                className="p-1 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10"
+                className="btn-secondary p-1.5 rounded-xl text-[#9CA3AF] hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Cascade Flow Blueprint */}
-            <div
-              className="p-3.5 rounded-2xl border space-y-2 text-xs font-mono"
-              style={{
-                backgroundColor: "#07080e",
-                borderColor: "rgba(255, 255, 255, 0.08)",
-              }}
-            >
-              <div className="text-[10px] text-neutral-400 uppercase tracking-wider">
+            <div className="p-3.5 rounded-2xl border border-[#2F2F2F] bg-[#121212] space-y-2 text-xs font-mono">
+              <div className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-bold">
                 Configured Execution Path:
               </div>
               <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-purple-300">
+                <div className="flex items-center gap-2 text-[#3B82F6]">
                   <Zap className="w-3.5 h-3.5 shrink-0" />
                   <span className="font-bold">Tier 1 (Primary):</span>
-                  <span className="text-white truncate">
+                  <span className="text-[#E5E5E5] truncate">
                     {simTask.primary_model}
                   </span>
                 </div>
@@ -987,7 +920,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
               <button
                 type="button"
                 onClick={() => setSimModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-neutral-300 bg-white/5 hover:bg-white/10"
+                className="btn-secondary px-4 py-2 rounded-xl text-xs font-semibold"
               >
                 Close
               </button>
@@ -996,7 +929,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                 type="button"
                 onClick={handleExecuteSimulation}
                 disabled={simRunning}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-900/30 cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] shadow-md border border-[#3B82F6]/30 cursor-pointer disabled:opacity-50 transition-all active:scale-95"
               >
                 {simRunning ? (
                   <>
@@ -1014,6 +947,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
