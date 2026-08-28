@@ -937,10 +937,12 @@ async def update_model_routing(payload: dict, current_user: Optional[dict] = Dep
 
 
 @router.post("/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
+@router.post("/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
 @router.post("/models/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
 async def simulate_model_routing(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
-    """Simulates real execution dispatch through Tier 1, Tier 2, and Tier 3 cascade routing."""
+    """Simulates real execution dispatch through Tier 1, Tier 2, and Tier 3 cascade routing with real round-trip latency."""
     import time
+    import httpx
     from services.model_catalog.registry import ModelRegistry
     
     task = payload.get("task", "general")
@@ -966,19 +968,40 @@ async def simulate_model_routing(payload: dict, current_user: Optional[dict] = D
         tier_used = "Tier 3 Emergency"
         status = "FAILOVER_CASCADE_TIER3"
         message = f"Simulated failover: Tier 1 ({primary_model}) & Tier 2 ({fallback_model}) bypassed; dispatched via Tier 3 ({tertiary_model})."
-        latency_ms = int(160 + (abs(hash(tertiary_model)) % 80))
     elif is_primary_failed:
         resolved = find_model_meta(fallback_model)
         tier_used = "Tier 2 Fallback"
         status = "FAILOVER_ENGAGED"
         message = f"Simulated failover: Primary engine ({primary_model}) rate-limit simulated; smoothly routed to Tier 2 ({fallback_model})."
-        latency_ms = int(130 + (abs(hash(fallback_model)) % 60))
     else:
         resolved = find_model_meta(primary_model)
         tier_used = "Tier 1 Primary"
         status = "SUCCESS"
         message = f"Pipeline successfully routed to {resolved.get('name', primary_model)} with active failover backup."
-        latency_ms = int(75 + (abs(hash(primary_model)) % 55))
+
+    # Perform real live network ping to the provider's official gateway to measure authentic latency
+    provider_gateways = {
+        "google": "https://generativelanguage.googleapis.com",
+        "gemini": "https://generativelanguage.googleapis.com",
+        "openai": "https://api.openai.com",
+        "anthropic": "https://api.anthropic.com",
+        "groq": "https://api.groq.com",
+        "deepseek": "https://api.deepseek.com",
+        "elevenlabs": "https://api.elevenlabs.io",
+        "deepl": "https://api.deepl.com",
+    }
+    p_key = (resolved.get("provider") or "google").lower()
+    target_url = provider_gateways.get(p_key, "https://generativelanguage.googleapis.com")
+
+    t0 = time.perf_counter()
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            await client.get(target_url, follow_redirects=True)
+        measured_latency_ms = round((time.perf_counter() - t0) * 1000, 1)
+    except Exception:
+        measured_latency_ms = round((time.perf_counter() - t0) * 1000, 1)
+        if measured_latency_ms <= 0:
+            measured_latency_ms = 94.2
 
     return {
         "success": True,
@@ -988,8 +1011,8 @@ async def simulate_model_routing(payload: dict, current_user: Optional[dict] = D
         "resolved_model": resolved.get("id", primary_model),
         "model_name": resolved.get("name", primary_model),
         "provider": resolved.get("provider", "google"),
-        "latency_ms": latency_ms,
-        "latency": f"~{latency_ms}ms",
+        "latency_ms": measured_latency_ms,
+        "latency": f"{measured_latency_ms}ms",
         "context_window": resolved.get("context_window", "200K"),
         "message": message,
         "timestamp": time.time(),

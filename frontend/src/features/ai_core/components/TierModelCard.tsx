@@ -162,11 +162,44 @@ export default function TierModelCard({
   const cfg = TIER_CONFIG[tierType];
   const TierIcon = cfg.icon;
 
+  // Infer provider key directly from modelId if selectedModel is missing or incomplete
+  const inferProvider = (id: string = "") => {
+    const lower = id.toLowerCase();
+    if (lower.includes("claude") || lower.includes("anthropic")) return "anthropic";
+    if (
+      lower.includes("gpt") ||
+      lower.includes("o1") ||
+      lower.includes("o3") ||
+      lower.includes("openai") ||
+      lower.includes("dall")
+    )
+      return "openai";
+    if (
+      lower.includes("gemini") ||
+      lower.includes("imagen") ||
+      lower.includes("google")
+    )
+      return "gemini";
+    if (
+      lower.includes("groq") ||
+      lower.includes("llama") ||
+      lower.includes("mixtral")
+    )
+      return "groq";
+    if (lower.includes("deepseek")) return "deepseek";
+    if (lower.includes("eleven")) return "elevenlabs";
+    if (lower.includes("deepl")) return "deepl";
+    return "gemini";
+  };
+
   // Selected model details
   const selectedModel = availableModels.find((m) => m.id === modelId);
-  const providerKey = selectedModel?.provider?.toLowerCase() || "gemini";
+  const providerKey =
+    selectedModel?.provider?.toLowerCase() || inferProvider(modelId);
   const provTheme = PROVIDER_THEMES[providerKey] || {
-    name: selectedModel?.provider_name?.toUpperCase() || "AI PROVIDER",
+    name:
+      selectedModel?.provider_name?.toUpperCase() ||
+      providerKey.toUpperCase(),
     bg: "rgba(139, 92, 246, 0.15)",
     text: "#a78bfa",
     border: "rgba(139, 92, 246, 0.35)",
@@ -239,59 +272,54 @@ export default function TierModelCard({
           : "none",
       }}
     >
-      {/* ── CARD HEADER (TIER BADGE & HEALTH STATUS) ── */}
+      {/* ── CARD HEADER (TIER BADGE, PROVIDER TAG & HEALTH STATUS) ── */}
       <div
-        className="flex items-center justify-between px-3.5 py-2.5 border-b"
+        className="flex items-center justify-between px-3.5 py-2.5 border-b gap-2"
         style={{
           backgroundColor: cfg.bgAccent,
           borderColor: "#2F2F2F",
         }}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <span
-            className="flex items-center justify-center w-5 h-5 rounded-lg text-xs"
+            className="flex items-center justify-center w-5 h-5 rounded-lg text-xs shrink-0"
             style={{ backgroundColor: cfg.badgeBg, color: cfg.color }}
           >
             <TierIcon className="w-3.5 h-3.5" />
           </span>
-          <div>
-            <span
-              className="text-[11px] font-bold font-mono tracking-wider uppercase block leading-none"
-              style={{ color: cfg.color }}
-            >
-              {cfg.title}
-            </span>
-          </div>
+          <span
+            className="text-[11px] font-bold font-mono tracking-wider uppercase truncate leading-none"
+            style={{ color: cfg.color }}
+          >
+            {cfg.title}
+          </span>
+          <span
+            className="text-[8.5px] font-black font-mono tracking-wider px-1.5 py-0.5 rounded border uppercase shrink-0"
+            style={{
+              backgroundColor: provTheme.bg,
+              color: provTheme.text,
+              borderColor: provTheme.border,
+            }}
+          >
+            {provTheme.name}
+          </span>
         </div>
 
         {/* Live Health Status Dot */}
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#121212] border border-[#10B981]/30 text-[9px] font-mono text-[#10B981]">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#121212] border border-[#10B981]/30 text-[9px] font-mono text-[#10B981] shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
           <span>READY</span>
         </div>
       </div>
 
-      {/* ── CARD BODY (PROVIDER, MODEL NAME & SPECS) ── */}
+      {/* ── CARD BODY (MODEL NAME & SPECS) ── */}
       <div className="p-3.5 flex-1 flex flex-col justify-between space-y-3">
-        {/* Provider badge & Model Title */}
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span
-              className="text-[9px] font-black font-mono tracking-wider px-2 py-0.5 rounded-md border uppercase"
-              style={{
-                backgroundColor: provTheme.bg,
-                color: provTheme.text,
-                borderColor: provTheme.border,
-              }}
-            >
-              {provTheme.name}
-            </span>
-            <span className="text-[10px] text-[#9CA3AF] font-sans truncate">
-              {selectedModel?.category || "Specialized Engine"}
-            </span>
+        {/* Model Title & Category */}
+        <div className="space-y-0.5">
+          <div className="text-[10px] text-[#9CA3AF] font-sans truncate">
+            {selectedModel?.category || "Specialized Engine"}
           </div>
-
-          <h4 className="text-xs sm:text-sm font-bold text-[#E5E5E5] truncate tracking-tight pt-0.5">
+          <h4 className="text-xs sm:text-sm font-bold text-[#E5E5E5] truncate tracking-tight">
             {selectedModel?.name || modelId || "Select Model"}
           </h4>
         </div>
