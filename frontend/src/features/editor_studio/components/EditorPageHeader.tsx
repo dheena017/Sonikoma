@@ -33,6 +33,7 @@ import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { useBackendHealth } from "@/shared/hooks";
 import { AIModelSelector } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -323,17 +324,19 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>
-            <button
-              onClick={() => {
-                setShowCreditsPopover(!showCreditsPopover);
-                setShowNotifications(false);
-              }}
-              title="Your credit balance & daily rewards — click to view"
-              className="flex h-9 items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
-            >
-              <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
-              <span>{credits.toLocaleString()}</span>
-            </button>
+            <Tooltip text="Credits & Daily Bonus" placement="bottom">
+              <button
+                onClick={() => {
+                  setShowCreditsPopover(!showCreditsPopover);
+                  setShowNotifications(false);
+                }}
+                aria-label="Your credit balance & daily rewards"
+                className="flex h-9 items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
+              >
+                <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
+                <span>{credits.toLocaleString()}</span>
+              </button>
+            </Tooltip>
 
             {showCreditsPopover && (
               <div className="absolute right-0 top-full mt-2 z-50">
@@ -353,85 +356,93 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         )}
 
         {/* Player Toggle Button */}
-        <button
-          type="button"
-          onClick={() => {
-            const current =
-              useImageEditorStore.getState().playerSettings.isPlayerOpen;
-            useImageEditorStore
-              .getState()
-              .setPlayerSettings({ isPlayerOpen: !current });
-          }}
-          title="Toggle Floating Player"
-          className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
-            isPlayerOpen
-              ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-              : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
-          }`}
-        >
-          <Monitor className="h-4 w-4" />
-        </button>
+        <Tooltip text="Toggle Floating Video Preview" placement="bottom">
+          <button
+            type="button"
+            onClick={() => {
+              const current =
+                useImageEditorStore.getState().playerSettings.isPlayerOpen;
+              useImageEditorStore
+                .getState()
+                .setPlayerSettings({ isPlayerOpen: !current });
+            }}
+            aria-label="Toggle Floating Player"
+            className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+              isPlayerOpen
+                ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
+                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+            }`}
+          >
+            <Monitor className="h-4 w-4" />
+          </button>
+        </Tooltip>
 
         {/* Focus Mode */}
-        <button
-          type="button"
-          onClick={() => setIsFocusMode((value) => !value)}
-          title={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
-          className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
-            isFocusMode
-              ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-              : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
-          }`}
-        >
-          <Focus className="h-4 w-4" />
-        </button>
+        <Tooltip text={isFocusMode ? "Exit Focus Mode" : "Focus Mode"} placement="bottom">
+          <button
+            type="button"
+            onClick={() => setIsFocusMode((value) => !value)}
+            aria-label={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
+            className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+              isFocusMode
+                ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
+                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+            }`}
+          >
+            <Focus className="h-4 w-4" />
+          </button>
+        </Tooltip>
 
         {/* Save Button */}
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={isSaving}
-          title={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"}
-          className={`flex items-center gap-1.5 px-3 h-9 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${
-            isSaving
-              ? "bg-purple-600/30 border-purple-500/40 text-purple-200 cursor-wait opacity-80"
-              : isDirty
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-lg shadow-purple-900/40 animate-pulse"
-              : "bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white"
-          }`}
-        >
-          <Save
-            className={`h-3.5 w-3.5 ${
+        <Tooltip text={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"} placement="bottom">
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            aria-label={isDirty ? "Save Unsaved Changes" : "Project Saved"}
+            className={`flex items-center gap-1.5 px-3 h-9 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${
               isSaving
-                ? "animate-spin text-purple-200"
+                ? "bg-purple-600/30 border-purple-500/40 text-purple-200 cursor-wait opacity-80"
                 : isDirty
-                ? "text-purple-300"
-                : "text-neutral-400"
+                ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-lg shadow-purple-900/40 animate-pulse"
+                : "bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white"
             }`}
-          />
-          <span className="hidden sm:inline font-sans text-[11px]">
-            {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
-          </span>
-        </button>
+          >
+            <Save
+              className={`h-3.5 w-3.5 ${
+                isSaving
+                  ? "animate-spin text-purple-200"
+                  : isDirty
+                  ? "text-purple-300"
+                  : "text-neutral-400"
+              }`}
+            />
+            <span className="hidden sm:inline font-sans text-[11px]">
+              {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
+            </span>
+          </button>
+        </Tooltip>
 
         {/* Notifications */}
         <div className="relative" ref={notificationsRef}>
-          <button
-            onClick={() => setShowNotifications((v) => !v)}
-            title="Notifications"
-            className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
-          >
-            {notificationsMuted ? (
-              <BellOff className="h-4 w-4 text-rose-500" />
-            ) : (
-              <Bell className="h-4 w-4" />
-            )}
-            {notifications.filter((n) => !n.isRead).length > 0 && (
-              <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold">
-                {notifications.filter((n) => !n.isRead).length}
-              </span>
-            )}
-          </button>
+          <Tooltip text="Notifications" placement="bottom">
+            <button
+              onClick={() => setShowNotifications((v) => !v)}
+              aria-label="Notifications"
+              className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
+            >
+              {notificationsMuted ? (
+                <BellOff className="h-4 w-4 text-rose-500" />
+              ) : (
+                <Bell className="h-4 w-4" />
+              )}
+              {notifications.filter((n) => !n.isRead).length > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold">
+                  {notifications.filter((n) => !n.isRead).length}
+                </span>
+              )}
+            </button>
+          </Tooltip>
           {showNotifications && (
             <NotificationDropdown
               notifications={notifications}
@@ -449,51 +460,55 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
         {/* Active Project Selector Icon Button */}
         <div className="relative">
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
-            title={
+          <Tooltip
+            text={
               activeProjectId && activeProjectData
-                ? `Active Project: ${
-                    activeProjectData.project?.title || "Active"
-                  } — Click to switch`
+                ? `Active Project: ${activeProjectData.project?.title || "Active"}`
                 : "Select Active Project"
             }
+            placement="bottom"
           >
-            <FolderSync className="h-4 w-4 text-purple-400" />
-            {activeProjectId && activeProjectData && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
-            )}
-          </button>
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
+              aria-label="Active Project Selector"
+            >
+              <FolderSync className="h-4 w-4 text-purple-400" />
+              {activeProjectId && activeProjectData && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+              )}
+            </button>
+          </Tooltip>
         </div>
 
         {/* User Profile Pill at Far Right End (Image 2 Style) */}
-        <button
-          onClick={() => navigateTo?.("/profile")}
-          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
-          title="View Profile & Account Settings"
-          aria-label="Open User profile"
-        >
-          <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
-            {user?.full_name ||
-              user?.username ||
-              (user?.email ? user.email.split("@")[0] : "Studio Creator")}
-          </span>
-          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
-            <img
-              key={user?.avatar_url || user?.full_name || "avatar"}
-              src={getUserAvatarUrl(user)}
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                const target = e.currentTarget as HTMLImageElement;
-                target.onerror = null;
-                target.src = DEFAULT_USER_AVATAR_DATA_URI;
-              }}
-              alt="User Avatar"
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </button>
+        <Tooltip text="View Profile & Settings" placement="bottom">
+          <button
+            onClick={() => navigateTo?.("/profile")}
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
+            aria-label="Open User profile"
+          >
+            <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+              {user?.full_name ||
+                user?.username ||
+                (user?.email ? user.email.split("@")[0] : "Studio Creator")}
+            </span>
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+              <img
+                key={user?.avatar_url || user?.full_name || "avatar"}
+                src={getUserAvatarUrl(user)}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = DEFAULT_USER_AVATAR_DATA_URI;
+                }}
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </button>
+        </Tooltip>
       </div>
     </header>
   );

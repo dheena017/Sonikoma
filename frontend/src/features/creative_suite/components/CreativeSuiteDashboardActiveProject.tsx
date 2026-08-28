@@ -1,5 +1,6 @@
 import React from "react";
 import { LogOut, Play, Tv, Film, Sparkles } from "lucide-react";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface CreativeSuiteDashboardActiveProjectProps {
   activeProject: any | null;
@@ -209,33 +210,39 @@ const CreativeSuiteDashboardActiveProject: React.FC<
             </div>
 
             <div className="space-y-3">
-              <button
-                onClick={() => {
-                  const seriesSlug =
-                    activeProject?.series_slug ||
-                    localStorage.getItem("active_series_slug") ||
-                    "active";
-                  const chapterSlug =
-                    activeProject?.chapter_slug ||
-                    localStorage.getItem("active_chapter_slug") ||
-                    "active";
-                  navigateTo(
-                    `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
-                  );
-                }}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-950/50 cursor-pointer"
-              >
-                <Play className="w-4 h-4 fill-white" />{" "}
-                <span>Resume Editing</span>
-              </button>
+              <Tooltip text="Resume video editor for this active chapter" placement="top">
+                <button
+                  onClick={() => {
+                    const seriesSlug =
+                      activeProject?.series_slug ||
+                      localStorage.getItem("active_series_slug") ||
+                      "active";
+                    const chapterSlug =
+                      activeProject?.chapter_slug ||
+                      localStorage.getItem("active_chapter_slug") ||
+                      "active";
+                    navigateTo(
+                      `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
+                    );
+                  }}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-950/50 cursor-pointer"
+                  aria-label="Resume Editing"
+                >
+                  <Play className="w-4 h-4 fill-white" />{" "}
+                  <span>Resume Editing</span>
+                </button>
+              </Tooltip>
 
-              <button
-                onClick={exitActiveProject}
-                className="w-full py-3 rounded-xl border border-neutral-800 bg-neutral-900 hover:border-rose-400 hover:bg-rose-500/10 text-rose-300 text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                Exit Active Project
-              </button>
+              <Tooltip text="Unload current project and return to clean workspace" placement="bottom">
+                <button
+                  onClick={exitActiveProject}
+                  className="w-full py-3 rounded-xl border border-neutral-800 bg-neutral-900 hover:border-rose-400 hover:bg-rose-500/10 text-rose-300 text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                  aria-label="Exit Active Project"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Exit Active Project</span>
+                </button>
+              </Tooltip>
             </div>
           </div>
         ) : (
@@ -247,12 +254,15 @@ const CreativeSuiteDashboardActiveProject: React.FC<
               No active project is selected. Choose a project from the Projects
               page to unlock full Creative features.
             </p>
-            <button
-              onClick={() => navigateTo("/projects")}
-              className="mt-4 px-4 py-2 border border-purple-500/30 bg-purple-500/10 rounded-xl text-[10px] font-mono font-bold text-purple-300 hover:bg-purple-500/20 transition-all active:scale-95 cursor-pointer"
-            >
-              Choose Project
-            </button>
+            <Tooltip text="Go to projects catalog" placement="bottom">
+              <button
+                onClick={() => navigateTo("/projects")}
+                className="mt-4 px-4 py-2 border border-purple-500/30 bg-purple-500/10 rounded-xl text-[10px] font-mono font-bold text-purple-300 hover:bg-purple-500/20 transition-all active:scale-95 cursor-pointer"
+                aria-label="Choose Project"
+              >
+                Choose Project
+              </button>
+            </Tooltip>
           </div>
         )}
       </div>

@@ -20,6 +20,7 @@ import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 type ProjectCardItem = Project;
 import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/utils";
 import { timeAgo } from "@/utils/dateUtils";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ProjectCardProps {
   project: Project;
@@ -173,12 +174,15 @@ export default function ProjectCard({
           </div>
 
           {/* 3-dot menu */}
-          <button
-            onClick={(e) => onToggleMenu?.(e, project.project_id)}
-            className="w-6 h-6 rounded-full bg-black/60 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/15 hover:border-[#3B82F6] transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
-          >
-            <MoreVertical className="w-3 h-3" />
-          </button>
+          <Tooltip text="Project actions & options" placement="top">
+            <button
+              onClick={(e) => onToggleMenu?.(e, project.project_id)}
+              aria-label="Project actions & options"
+              className="w-6 h-6 rounded-full bg-black/60 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/15 hover:border-[#3B82F6] transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
+            >
+              <MoreVertical className="w-3 h-3" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* Bottom thumbnail badges */}

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { FavoritesManager } from "@/features/workspace_scraper/chapter-scraper/utils/FavoritesManager";
 import { separateComicUrl, type SeparateUrlResult } from "@/api/endpoints/scraper";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 export interface ScraperInputToolbarProps {
   targetUrl: string;
@@ -328,42 +329,47 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
         {actionSlot || (
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={handleImportClick}
-              disabled={isScraping || !targetUrl.trim()}
-              className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer ${
-                separatedData?.is_chapter_url || !separatedData?.is_series_url
-                  ? "btn-primary"
-                  : "btn-secondary"
-              }`}
-            >
-              {isScraping ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin text-white" />
-                  <span>Extracting...</span>
-                </>
-              ) : (
-                <>
-                  <ImageIcon className="h-4 w-4" /> Import Chapter Images
-                </>
-              )}
-            </button>
+            <Tooltip text="Extract and import panel images directly from this chapter URL" placement="bottom">
+              <button
+                type="button"
+                onClick={handleImportClick}
+                disabled={isScraping || !targetUrl.trim()}
+                className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer ${
+                  separatedData?.is_chapter_url || !separatedData?.is_series_url
+                    ? "btn-primary"
+                    : "btn-secondary"
+                }`}
+                aria-label="Import Chapter Images"
+              >
+                {isScraping ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <span>Extracting...</span>
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon className="h-4 w-4" /> Import Chapter Images
+                  </>
+                )}
+              </button>
+            </Tooltip>
 
-            <button
-              type="button"
-              onClick={handleOpenChapterScraperClick}
-              disabled={!targetUrl.trim()}
-              className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
-                separatedData?.is_series_url && !separatedData?.is_chapter_url
-                  ? "btn-primary"
-                  : "btn-secondary"
-              }`}
-              title="Browse and select specific chapters for this series URL"
-            >
-              <Zap className="h-4 w-4 text-[#3B82F6]" />
-              Import Chapter Scraper
-            </button>
+            <Tooltip text="Browse series catalog & select multiple chapters to scrape" placement="bottom">
+              <button
+                type="button"
+                onClick={handleOpenChapterScraperClick}
+                disabled={!targetUrl.trim()}
+                className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
+                  separatedData?.is_series_url && !separatedData?.is_chapter_url
+                    ? "btn-primary"
+                    : "btn-secondary"
+                }`}
+                aria-label="Import Chapter Scraper"
+              >
+                <Zap className="h-4 w-4 text-[#3B82F6]" />
+                <span>Import Chapter Scraper</span>
+              </button>
+            </Tooltip>
           </div>
         )}
       </div>

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { cleanDialogueDisplay, fetchWithAuth } from "@/utils";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ScriptDramatizerFormProps {
   panels: GeneratedPanel[];
@@ -346,42 +347,49 @@ export default function ScriptDramatizerForm({
                         ENHANCED LINE #{idx + 1}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => handlePreviewLineTTS(resLine, idx)}
-                          className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                            playingIdx === idx
-                              ? "bg-purple-600 text-white animate-pulse"
-                              : "bg-neutral-950 text-purple-300 border border-purple-500/30 hover:text-white"
-                          }`}
-                        >
-                          {playingIdx === idx ? (
-                            <Square className="w-2.5 h-2.5 fill-current" />
-                          ) : (
-                            <Play className="w-2.5 h-2.5 fill-current" />
-                          )}
-                          <span>{playingIdx === idx ? "Stop" : "Listen"}</span>
-                        </button>
-                        {setPanels && panels[idx] && (
+                        <Tooltip text={playingIdx === idx ? "Stop playback" : "Listen to preview TTS"} placement="top">
                           <button
-                            onClick={() => handleApplySingleLine(idx, resLine)}
-                            className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-300 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer"
-                            title="Apply to panel timeline"
+                            onClick={() => handlePreviewLineTTS(resLine, idx)}
+                            className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
+                              playingIdx === idx
+                                ? "bg-purple-600 text-white animate-pulse"
+                                : "bg-neutral-950 text-purple-300 border border-purple-500/30 hover:text-white"
+                            }`}
+                            aria-label={playingIdx === idx ? "Stop playback" : "Listen"}
                           >
-                            <BookmarkCheck className="w-2.5 h-2.5" />
-                            <span>Panel #{idx + 1}</span>
+                            {playingIdx === idx ? (
+                              <Square className="w-2.5 h-2.5 fill-current" />
+                            ) : (
+                              <Play className="w-2.5 h-2.5 fill-current" />
+                            )}
+                            <span>{playingIdx === idx ? "Stop" : "Listen"}</span>
                           </button>
+                        </Tooltip>
+                        {setPanels && panels[idx] && (
+                          <Tooltip text={`Apply this text to Panel #${idx + 1}`} placement="top">
+                            <button
+                              onClick={() => handleApplySingleLine(idx, resLine)}
+                              className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-300 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer"
+                              aria-label="Apply to panel timeline"
+                            >
+                              <BookmarkCheck className="w-2.5 h-2.5" />
+                              <span>Panel #{idx + 1}</span>
+                            </button>
+                          </Tooltip>
                         )}
-                        <button
-                          onClick={() => copyToClipboard(resLine, idx)}
-                          className="p-1 text-neutral-400 hover:text-white rounded transition-colors cursor-pointer"
-                          title="Copy Line"
-                        >
-                          {copiedIndex === idx ? (
-                            <Check className="h-3.5 w-3.5 text-emerald-400" />
-                          ) : (
-                            <Copy className="h-3.5 w-3.5" />
-                          )}
-                        </button>
+                        <Tooltip text={copiedIndex === idx ? "Copied!" : "Copy line text"} placement="top">
+                          <button
+                            onClick={() => copyToClipboard(resLine, idx)}
+                            className="p-1 text-neutral-400 hover:text-white rounded transition-colors cursor-pointer"
+                            aria-label="Copy Line"
+                          >
+                            {copiedIndex === idx ? (
+                              <Check className="h-3.5 w-3.5 text-emerald-400" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        </Tooltip>
                       </div>
                     </div>
                     <p className="text-xs text-neutral-200 leading-relaxed font-sans font-medium pr-2">

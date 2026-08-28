@@ -12,6 +12,7 @@ import {
   Radio,
   Sparkles,
 } from "lucide-react";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface YouTubeAppNavBarProps {
   activeTab: string;
@@ -78,44 +79,46 @@ export default function YouTubeAppNavBar({
           <div className="h-5 w-px bg-white/10 hidden sm:block shrink-0" />
 
           {/* Connected Channel Pill */}
-          <button
-            onClick={onOpenChannelModal}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/8 hover:border-red-500/40 transition-all cursor-pointer group shadow-inner shrink-0"
-            title="Switch Channel / Manage Account"
-          >
-            <div className="relative shrink-0">
-              {channelThumbnail ? (
-                <img
-                  src={channelThumbnail}
-                  alt={channelTitle}
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display =
-                      "none";
-                  }}
-                  className="w-6 h-6 rounded-full object-cover border border-neutral-700 group-hover:border-red-500/50 transition-colors shadow-sm"
-                />
-              ) : (
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 to-purple-600 flex items-center justify-center font-bold text-white text-[9px] font-sans uppercase shadow-sm">
-                  {channelTitle ? channelTitle.charAt(0) : "Y"}
+          <Tooltip text={isConnected ? `Active: ${channelTitle} — Click to switch` : "Connect YouTube channel"} placement="bottom">
+            <button
+              onClick={onOpenChannelModal}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/8 hover:border-red-500/40 transition-all cursor-pointer group shadow-inner shrink-0"
+              aria-label="Switch Channel"
+            >
+              <div className="relative shrink-0">
+                {channelThumbnail ? (
+                  <img
+                    src={channelThumbnail}
+                    alt={channelTitle}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display =
+                        "none";
+                    }}
+                    className="w-6 h-6 rounded-full object-cover border border-neutral-700 group-hover:border-red-500/50 transition-colors shadow-sm"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 to-purple-600 flex items-center justify-center font-bold text-white text-[9px] font-sans uppercase shadow-sm">
+                    {channelTitle ? channelTitle.charAt(0) : "Y"}
+                  </div>
+                )}
+                {isConnected && (
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-neutral-950 shadow-sm" />
+                )}
+              </div>
+
+              <div className="text-left min-w-0 max-w-[110px] sm:max-w-[140px]">
+                <div className="text-xs font-bold text-white leading-tight truncate group-hover:text-red-300 transition-colors">
+                  {isConnected ? channelTitle : "Select Channel"}
                 </div>
-              )}
-              {isConnected && (
-                <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-neutral-950 shadow-sm" />
-              )}
-            </div>
-
-            <div className="text-left min-w-0 max-w-[110px] sm:max-w-[140px]">
-              <div className="text-xs font-bold text-white leading-tight truncate group-hover:text-red-300 transition-colors">
-                {isConnected ? channelTitle : "Select Channel"}
+                <div className="text-[9.5px] text-neutral-400 font-mono leading-tight truncate">
+                  {channelHandle || (isConnected ? "Active" : "Click to connect")}
+                </div>
               </div>
-              <div className="text-[9.5px] text-neutral-400 font-mono leading-tight truncate">
-                {channelHandle || (isConnected ? "Active" : "Click to connect")}
-              </div>
-            </div>
 
-            <ChevronDown className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-300 transition-transform group-hover:translate-y-0.5 shrink-0" />
-          </button>
+              <ChevronDown className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-300 transition-transform group-hover:translate-y-0.5 shrink-0" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* ── CENTER: NAVIGATION TABS ── */}
@@ -158,14 +161,17 @@ export default function YouTubeAppNavBar({
             </div>
           )}
 
-          <button
-            onClick={onPublish}
-            className="group relative flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black font-mono rounded-xl shadow-[0_0_18px_rgba(239,68,68,0.35)] hover:shadow-[0_0_24px_rgba(239,68,68,0.55)] border border-red-400/40 transition-all duration-300 cursor-pointer active:scale-98 overflow-hidden shrink-0"
-          >
-            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Zap className="w-3.5 h-3.5 fill-current text-white" />
-            <span>Publish Video</span>
-          </button>
+          <Tooltip text="Publish or schedule video to connected YouTube channel" placement="bottom">
+            <button
+              onClick={onPublish}
+              className="group relative flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black font-mono rounded-xl shadow-[0_0_18px_rgba(239,68,68,0.35)] hover:shadow-[0_0_24px_rgba(239,68,68,0.55)] border border-red-400/40 transition-all duration-300 cursor-pointer active:scale-98 overflow-hidden shrink-0"
+              aria-label="Publish Video"
+            >
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Zap className="w-3.5 h-3.5 fill-current text-white" />
+              <span>Publish Video</span>
+            </button>
+          </Tooltip>
         </div>
       </div>
     </header>

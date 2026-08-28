@@ -28,6 +28,7 @@ import {
 } from "../components";
 
 import { useProfileState, ProfileTabId } from "../hooks/useProfileState";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 export interface ProfilePageProps {
   user?: any;
@@ -104,13 +105,16 @@ export default function ProfilePage(props: ProfilePageProps) {
         {/* Compact Breadcrumb & Quick Actions Bar */}
         <div className="flex items-center justify-between border-b border-[#2F2F2F] pb-3">
           <div className="flex items-center gap-2 text-xs font-mono text-[#9CA3AF]">
-            <button
-              onClick={onNavigateHome}
-              className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
-            >
-              <Home className="w-3.5 h-3.5" />
-              <span>Dashboard</span>
-            </button>
+            <Tooltip text="Return to Main Dashboard" placement="bottom">
+              <button
+                onClick={onNavigateHome}
+                className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+                aria-label="Dashboard Home"
+              >
+                <Home className="w-3.5 h-3.5" />
+                <span>Dashboard</span>
+              </button>
+            </Tooltip>
             <ChevronRight className="w-3.5 h-3.5 text-[#6B7280]" />
             <span className="text-[#3B82F6] font-semibold">
               User Profile & Settings
@@ -118,13 +122,16 @@ export default function ProfilePage(props: ProfilePageProps) {
           </div>
 
           {onLogout && (
-            <button
-              onClick={onLogout}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#EF4444]/20 bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20 text-xs font-medium transition-all cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
-            </button>
+            <Tooltip text="Log out of your account" placement="bottom">
+              <button
+                onClick={onLogout}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#EF4444]/20 bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20 text-xs font-medium transition-all cursor-pointer"
+                aria-label="Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
+            </Tooltip>
           )}
         </div>
 
@@ -149,13 +156,15 @@ export default function ProfilePage(props: ProfilePageProps) {
                     }}
                   />
                 </div>
-                <button
-                  onClick={() => state.setActiveTab("account")}
-                  title="Edit Avatar"
-                  className="absolute -bottom-1 -right-1 p-1 rounded-md bg-neutral-900 border border-white/20 text-purple-400 hover:text-white transition-all shadow-xs"
-                >
-                  <Camera className="w-3 h-3" />
-                </button>
+                <Tooltip text="Change avatar in Account settings" placement="top">
+                  <button
+                    onClick={() => state.setActiveTab("account")}
+                    aria-label="Edit Avatar"
+                    className="absolute -bottom-1 -right-1 p-1 rounded-md bg-neutral-900 border border-white/20 text-purple-400 hover:text-white transition-all shadow-xs cursor-pointer"
+                  >
+                    <Camera className="w-3 h-3" />
+                  </button>
+                </Tooltip>
               </div>
 
               <div className="space-y-0.5">
@@ -224,13 +233,16 @@ export default function ProfilePage(props: ProfilePageProps) {
                   Daily Bonus Ready: Claim +25 free credits today!
                 </span>
               </div>
-              <button
-                onClick={state.handleClaimCredits}
-                className="btn-primary px-3 py-1 rounded-lg text-xs font-bold shrink-0 flex items-center gap-1 uppercase tracking-wider"
-              >
-                <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
-                <span>Claim</span>
-              </button>
+              <Tooltip text="Claim daily login bonus" placement="top">
+                <button
+                  onClick={state.handleClaimCredits}
+                  className="btn-primary px-3 py-1 rounded-lg text-xs font-bold shrink-0 flex items-center gap-1 uppercase tracking-wider cursor-pointer"
+                  aria-label="Claim Daily Credits"
+                >
+                  <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
+                  <span>Claim</span>
+                </button>
+              </Tooltip>
             </div>
           )}
         </div>

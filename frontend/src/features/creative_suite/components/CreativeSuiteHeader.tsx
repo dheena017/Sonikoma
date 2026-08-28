@@ -24,6 +24,7 @@ import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { useBackendHealth } from "@/shared/hooks";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 export interface CreativeSuiteHeaderProps {
   currentPath: string;
@@ -294,17 +295,19 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
         {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>
-            <button
-              onClick={() => {
-                setShowCreditsPopover(!showCreditsPopover);
-                setShowNotifications(false);
-              }}
-              title="Your credit balance & daily rewards — click to view"
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
-            >
-              <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
-              <span>{credits.toLocaleString()}</span>
-            </button>
+            <Tooltip text="Credits & Daily Bonus" placement="bottom">
+              <button
+                onClick={() => {
+                  setShowCreditsPopover(!showCreditsPopover);
+                  setShowNotifications(false);
+                }}
+                aria-label="Your credit balance & daily rewards"
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
+              >
+                <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
+                <span>{credits.toLocaleString()}</span>
+              </button>
+            </Tooltip>
 
             {showCreditsPopover && (
               <div className="absolute right-0 top-full mt-2 z-50">
@@ -325,27 +328,29 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
         {/* Notifications Bell */}
         <div className="relative" ref={notificationsRef}>
-          <button
-            onClick={() => {
-              setShowNotifications(!showNotifications);
-              setShowCreditsPopover(false);
-            }}
-            className={`icon-pill cursor-pointer relative transition-all ${
-              showNotifications ? "icon-pill--active" : ""
-            }`}
-            title="Notifications"
-          >
-            {notificationsMuted ? (
-              <BellOff className="h-4 w-4 text-rose-500" />
-            ) : (
-              <Bell className="h-4 w-4" />
-            )}
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </button>
+          <Tooltip text="Creative Notifications" placement="bottom">
+            <button
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                setShowCreditsPopover(false);
+              }}
+              className={`icon-pill cursor-pointer relative transition-all ${
+                showNotifications ? "icon-pill--active" : ""
+              }`}
+              aria-label="Notifications"
+            >
+              {notificationsMuted ? (
+                <BellOff className="h-4 w-4 text-rose-500" />
+              ) : (
+                <Bell className="h-4 w-4" />
+              )}
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </button>
+          </Tooltip>
 
           {showNotifications && (
             <NotificationDropdown
@@ -370,57 +375,61 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
         {/* Active Project Selector Icon Button */}
         <div className="relative">
-          <button
-            onClick={() => setDrawerOpen(true)}
-            className="icon-pill cursor-pointer transition-all relative hover:bg-purple-500/20 hover:text-purple-300"
-            title={
+          <Tooltip
+            text={
               activeProjectId && activeProjectData
-                ? `Active Project: ${
-                    activeProjectData.project?.title || "Active"
-                  } — Click to switch`
+                ? `Active Project: ${activeProjectData.project?.title || "Active"}`
                 : "Select Active Project"
             }
+            placement="bottom"
           >
-            <FolderSync className="h-4 w-4 text-purple-400" />
-            {activeProjectId && activeProjectData && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
-            )}
-          </button>
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="icon-pill cursor-pointer transition-all relative hover:bg-purple-500/20 hover:text-purple-300"
+              aria-label="Active Project Selector"
+            >
+              <FolderSync className="h-4 w-4 text-purple-400" />
+              {activeProjectId && activeProjectData && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+              )}
+            </button>
+          </Tooltip>
         </div>
 
         {/* User Profile Pill at Far Right End (Image 2 Style) */}
-        <button
-          onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
-          title="View Profile & Account Settings"
-          aria-label="Open User profile"
-        >
-          <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
-            {activeUser?.full_name ||
-              activeUser?.username ||
-              (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
-          </span>
-          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
-            <img
-              key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
-              src={getUserAvatarUrl(activeUser)}
-              referrerPolicy="no-referrer"
-              onLoad={(e) => {
-                e.currentTarget.classList.remove("opacity-0");
-                e.currentTarget.classList.add("opacity-100");
-              }}
-              onError={(e) => {
-                const target = e.currentTarget as HTMLImageElement;
-                target.onerror = null;
-                target.src = DEFAULT_USER_AVATAR_DATA_URI;
-                target.classList.remove("opacity-0");
-                target.classList.add("opacity-100");
-              }}
-              alt="User Avatar"
-              className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
-            />
-          </div>
-        </button>
+        <Tooltip text="View Profile & Settings" placement="bottom">
+          <button
+            onClick={() => navigateTo && navigateTo("/profile")}
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
+            aria-label="Open User profile"
+          >
+            <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+              {activeUser?.full_name ||
+                activeUser?.username ||
+                (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
+            </span>
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+              <img
+                key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
+                src={getUserAvatarUrl(activeUser)}
+                referrerPolicy="no-referrer"
+                onLoad={(e) => {
+                  e.currentTarget.classList.remove("opacity-0");
+                  e.currentTarget.classList.add("opacity-100");
+                }}
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = DEFAULT_USER_AVATAR_DATA_URI;
+                  target.classList.remove("opacity-0");
+                  target.classList.add("opacity-100");
+                }}
+                alt="User Avatar"
+                className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
+              />
+            </div>
+          </button>
+        </Tooltip>
       </div>
     </header>
   );

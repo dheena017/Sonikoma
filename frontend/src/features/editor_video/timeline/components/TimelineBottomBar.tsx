@@ -4,6 +4,8 @@
 import React from "react";
 import { Music, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+
 interface TimelineBottomBarProps {
   currentPanelIndex: number;
   /** Actual accumulated time (seconds) for the current panel */
@@ -51,14 +53,16 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
     <div className="h-8 px-3 border-t border-white/[0.05] bg-[#0d0d12] flex items-center justify-between shrink-0 gap-2">
       {/* Add audio */}
       <div className="flex items-center gap-2 min-w-0">
-        <button
-          onClick={onOpenMediaPicker}
-          title="Add audio track"
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/15 border border-white/8 hover:border-purple-500/40 text-neutral-400 hover:text-purple-200 transition-all cursor-pointer text-[11px] font-medium shrink-0"
-        >
-          <Music className="h-3 w-3" />
-          <span>Add media / audio</span>
-        </button>
+        <Tooltip text="Add audio track or sound effect" placement="top">
+          <button
+            onClick={onOpenMediaPicker}
+            aria-label="Add audio track"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/15 border border-white/8 hover:border-purple-500/40 text-neutral-400 hover:text-purple-200 transition-all cursor-pointer text-[11px] font-medium shrink-0"
+          >
+            <Music className="h-3 w-3" />
+            <span>Add media / audio</span>
+          </button>
+        </Tooltip>
 
         <div className="flex items-center gap-1 text-[9px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20 shrink-0">
           <Sparkles className="h-2.5 w-2.5" />
@@ -86,20 +90,24 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
 
         {/* Left / Right Scroll Navigation Buttons */}
         <div className="flex items-center gap-1">
-          <button
-            onClick={handleScrollLeft}
-            title="Scroll timeline left (◀)"
-            className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
-          >
-            <ChevronLeft className="h-3.5 w-3.5 stroke-[2.5]" />
-          </button>
-          <button
-            onClick={handleScrollRight}
-            title="Scroll timeline right (▶)"
-            className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
-          >
-            <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
-          </button>
+          <Tooltip text="Scroll timeline left (◀)" placement="top">
+            <button
+              onClick={handleScrollLeft}
+              aria-label="Scroll timeline left"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
+            >
+              <ChevronLeft className="h-3.5 w-3.5 stroke-[2.5]" />
+            </button>
+          </Tooltip>
+          <Tooltip text="Scroll timeline right (▶)" placement="top">
+            <button
+              onClick={handleScrollRight}
+              aria-label="Scroll timeline right"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
+            >
+              <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
+            </button>
+          </Tooltip>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { Sparkles, Check, AlertTriangle, Layers3 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import * as api from "@/api";
 import { fetchWithAuth } from "@/utils";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface PanelTranslationToolProps {
   panel: GeneratedPanel;
@@ -151,30 +152,35 @@ export default function PanelTranslationTool({
               <option>Korean</option>
             </select>
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleTranslate}
-                disabled={translating || !panel.speech_text}
-                title="Translate this panel"
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 disabled:opacity-40 text-white transition-all cursor-pointer"
-              >
-                {translating ? (
-                  <Sparkles className="h-4 w-4 animate-pulse" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-              </button>
-              <button
-                onClick={handleBatchTranslate}
-                disabled={batchTranslating || !panels?.length}
-                title="Translate all panels"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 disabled:opacity-40 transition-all cursor-pointer"
-              >
-                {batchTranslating ? (
-                  <Layers3 className="h-4 w-4 animate-pulse" />
-                ) : (
-                  <Layers3 className="h-4 w-4" />
-                )}
-              </button>
+              <Tooltip text="Translate speech for this panel" placement="top">
+                <button
+                  onClick={handleTranslate}
+                  disabled={translating || !panel.speech_text}
+                  aria-label="Translate this panel"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 disabled:opacity-40 text-white transition-all cursor-pointer"
+                >
+                  {translating ? (
+                    <Sparkles className="h-4 w-4 animate-pulse" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                </button>
+              </Tooltip>
+
+              <Tooltip text="Translate all panels in timeline" placement="top">
+                <button
+                  onClick={handleBatchTranslate}
+                  disabled={batchTranslating || !panels?.length}
+                  aria-label="Translate all panels"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 disabled:opacity-40 transition-all cursor-pointer"
+                >
+                  {batchTranslating ? (
+                    <Layers3 className="h-4 w-4 animate-pulse" />
+                  ) : (
+                    <Layers3 className="h-4 w-4" />
+                  )}
+                </button>
+              </Tooltip>
             </div>
           </div>
 
@@ -209,14 +215,16 @@ export default function PanelTranslationTool({
             </span>
           </div>
 
-          <button
-            onClick={handleScrub}
-            disabled={scrubbing || !panel.speech_text}
-            title="Scan compliance for this panel"
-            className="w-full px-3 py-1.5 bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
-          >
-            {scrubbing ? "Scanning script..." : "✦ Scan Compliance"}
-          </button>
+          <Tooltip text="Scan speech dialogue against safety policies" placement="top">
+            <button
+              onClick={handleScrub}
+              disabled={scrubbing || !panel.speech_text}
+              aria-label="Scan compliance for this panel"
+              className="w-full px-3 py-1.5 bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              {scrubbing ? "Scanning script..." : "✦ Scan Compliance"}
+            </button>
+          </Tooltip>
 
           {scrubResult && (
             <div className="bg-neutral-950 p-3 rounded-lg border border-neutral-850 space-y-1.5 animate-fade-in">

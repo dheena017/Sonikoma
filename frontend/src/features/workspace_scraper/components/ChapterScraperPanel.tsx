@@ -4,6 +4,7 @@ import { NotificationType } from "@/features/app_notification";
 import { ScraperInputToolbar } from "./panel/ScraperInputToolbar";
 import { LocalImageUploadZone } from "./panel/LocalImageUploadZone";
 import type { SeparateUrlResult } from "@/api/endpoints/scraper";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 export interface UrlInputPanelProps {
   targetUrl: string;
@@ -119,35 +120,42 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2F2F2F] pb-3">
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setInputMode("url")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                inputMode === "url"
-                  ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm"
-                  : "bg-[#1E1E1E] text-[#9CA3AF] hover:text-white hover:bg-[#262626] border border-[#2F2F2F]"
-              }`}
-            >
-              <Book className="w-3.5 h-3.5" />
-              <span>Scrape Comic / Manhwa URL</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setInputMode("upload")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                inputMode === "upload"
-                  ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm"
-                  : "bg-[#1E1E1E] text-[#9CA3AF] hover:text-white hover:bg-[#262626] border border-[#2F2F2F]"
-              }`}
-            >
-              <UploadCloud className="w-3.5 h-3.5" />
-              <span>Upload Local Images</span>
-              {selectedFiles.length > 0 && (
-                <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-[#3B82F6] text-white rounded-full font-mono">
-                  {selectedFiles.length}
-                </span>
-              )}
-            </button>
+            <Tooltip text="Import panels via online webtoon, manga, or comic reader URL" placement="top">
+              <button
+                type="button"
+                onClick={() => setInputMode("url")}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                  inputMode === "url"
+                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm"
+                    : "bg-[#1E1E1E] text-[#9CA3AF] hover:text-white hover:bg-[#262626] border border-[#2F2F2F]"
+                }`}
+                aria-label="Scrape Comic / Manhwa URL"
+              >
+                <Book className="w-3.5 h-3.5" />
+                <span>Scrape Comic / Manhwa URL</span>
+              </button>
+            </Tooltip>
+
+            <Tooltip text="Upload raw PNG/JPG image files from your computer" placement="top">
+              <button
+                type="button"
+                onClick={() => setInputMode("upload")}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                  inputMode === "upload"
+                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm"
+                    : "bg-[#1E1E1E] text-[#9CA3AF] hover:text-white hover:bg-[#262626] border border-[#2F2F2F]"
+                }`}
+                aria-label="Upload Local Images"
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Upload Local Images</span>
+                {selectedFiles.length > 0 && (
+                  <span className="px-1.5 py-0.5 text-[9px] font-extrabold bg-[#3B82F6] text-white rounded-full font-mono">
+                    {selectedFiles.length}
+                  </span>
+                )}
+              </button>
+            </Tooltip>
           </div>
 
           {/* Option B: Platform Badge Aligned in Tab Header Row */}

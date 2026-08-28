@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Menu,
   LayoutGrid,
   Film,
   Scissors,
@@ -11,7 +12,9 @@ import {
   BarChart3,
   Youtube,
   ExternalLink,
-  ArrowLeft,
+  Sparkles,
+  Settings,
+  Zap,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
@@ -70,7 +73,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<
       ],
     },
     {
-      name: "Dist",
+      name: "Distribution",
       items: [
         {
           id: "youtube",
@@ -82,28 +85,6 @@ const CreativeSuiteMiniSidebarInner: React.FC<
       ],
     },
   ];
-
-  // Helper custom icon wrapper for sparkles to match Lucide Sparkles icon
-  function SparklesIcon(props: any) {
-    return (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        {...props}
-      >
-        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
-        <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5.5Z" />
-        <path d="m19 17 1 2.5 2.5.5-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1Z" />
-      </svg>
-    );
-  }
 
   const isActive = (path: string) => {
     if (path === "/creative-suite") {
@@ -134,11 +115,11 @@ const CreativeSuiteMiniSidebarInner: React.FC<
 
     return (
       <div className="relative group w-full flex justify-center py-0.5">
-        {/* Active side indicator */}
+        {/* Left edge active indicator bar */}
         <div
-          className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-200 z-10 ${
+          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             active
-              ? "h-5 bg-gradient-to-b from-purple-400 to-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.8)] opacity-100"
+              ? "h-5 bg-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.9)] opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -148,24 +129,24 @@ const CreativeSuiteMiniSidebarInner: React.FC<
           onMouseEnter={handleEnter}
           onMouseLeave={() => setHover(false)}
           aria-label={item.label}
-          className="p-1 transition-all duration-150 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
+          className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none"
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
               active
-                ? "bg-purple-600/20 border border-purple-500/50 shadow-[0_0_14px_rgba(168,85,247,0.25)] text-purple-200 scale-105"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 shadow-[0_0_20px_rgba(59,130,246,0.6)] text-white scale-105"
                 : isLocked
                 ? "bg-neutral-950 border border-neutral-900 opacity-40 cursor-not-allowed"
-                : "bg-neutral-900/90 border border-neutral-800 text-neutral-400 group-hover:bg-neutral-800/90 group-hover:border-neutral-700 group-hover:text-neutral-100 group-hover:shadow-md"
+                : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
             }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-150 ${
+              className={`w-[18px] h-[18px] transition-colors duration-200 ${
                 active
-                  ? "text-purple-300"
+                  ? "text-white"
                   : isLocked
                   ? "text-neutral-700"
-                  : "text-neutral-400 group-hover:text-neutral-200"
+                  : "text-neutral-400 group-hover:text-white"
               }`}
             />
           </div>
@@ -179,26 +160,55 @@ const CreativeSuiteMiniSidebarInner: React.FC<
     );
   };
 
+  const [returnHover, setReturnHover] = useState(false);
+  const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
+  const [menuHover, setMenuHover] = useState(false);
+  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
+
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#070709] border-r border-neutral-900 hidden lg:flex flex-col items-center py-3 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.3)] select-none overflow-hidden">
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-1">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 shadow-xl select-none overflow-hidden">
+      {/* Top Sidebar Drawer Toggle Button */}
+      {onOpenSidebar && (
+        <div className="w-full flex justify-center pb-3 pt-0.5 border-b border-white/10 shrink-0">
+          <button
+            onClick={onOpenSidebar}
+            onMouseEnter={(e) => {
+              setMenuRect(e.currentTarget.getBoundingClientRect());
+              setMenuHover(true);
+            }}
+            onMouseLeave={() => setMenuHover(false)}
+            aria-label="Open Full Sidebar"
+            className="w-11 h-11 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+          <TooltipPortal
+            text="Expand Sidebar"
+            visible={menuHover}
+            anchorRect={menuRect}
+          />
+        </div>
+      )}
+
+      {/* Navigation Groups */}
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div
             key={group.name}
             className="w-full flex flex-col items-center pb-1"
           >
-            {/* Section divider (only between groups) + label for every group */}
+            {/* Section divider + label */}
             <div
               className="w-full flex flex-col items-center"
               style={{
-                marginTop: groupIdx > 0 ? "0.375rem" : "0",
-                marginBottom: "0.25rem",
+                marginTop: groupIdx > 0 ? "0.6rem" : "0.2rem",
+                marginBottom: "0.4rem",
               }}
             >
               {groupIdx > 0 && (
-                <div className="w-6 h-px bg-neutral-700/60 rounded-full mb-1" />
+                <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
               )}
-              <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-neutral-500 select-none text-center w-full px-1">
+              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
                 {group.name}
               </span>
             </div>
@@ -211,15 +221,25 @@ const CreativeSuiteMiniSidebarInner: React.FC<
       </div>
 
       {/* Return to App Dashboard */}
-      <div className="mt-auto pt-3 flex justify-center w-full pb-1 border-t border-neutral-900">
+      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-white/10 shrink-0">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/dashboard")}
+            onMouseEnter={(e) => {
+              setReturnRect(e.currentTarget.getBoundingClientRect());
+              setReturnHover(true);
+            }}
+            onMouseLeave={() => setReturnHover(false)}
             aria-label="Main Dashboard"
-            className="w-11 h-11 rounded-2xl bg-neutral-900 border border-neutral-800 text-neutral-400 hover:bg-purple-600/20 hover:border-purple-500/40 hover:text-purple-300 hover:shadow-[0_0_14px_rgba(168,85,247,0.25)] transition-all duration-200 active:scale-90 cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_28px_rgba(59,130,246,0.8)] active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>
+          <TooltipPortal
+            text="Main Dashboard"
+            visible={returnHover}
+            anchorRect={returnRect}
+          />
         </div>
       </div>
     </aside>

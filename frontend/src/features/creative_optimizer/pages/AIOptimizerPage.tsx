@@ -28,6 +28,7 @@ import ThumbnailStudioTab from "@/features/creative_optimizer/components/Thumbna
 import { AIModelSelector } from "@/features/ai_core";
 
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface AIOptimizerPageProps {
   panels: GeneratedPanel[];
@@ -192,17 +193,20 @@ const AIOptimizerPage = React.memo(
             <AIModelSelector value={selectedModel} onChange={handleModelChange} />
 
             {/* Quick Copy YouTube Package Button */}
-            <button
-              onClick={handleCopyAllPackage}
-              className="px-4 py-2.5 bg-[#1E1E1E] hover:bg-[#252525] text-[#E5E5E5] hover:text-white rounded-2xl border border-[#2F2F2F] hover:border-[#3B82F6]/60 text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm"
-            >
-              {copiedAll ? (
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-              ) : (
-                <Copy className="w-3.5 h-3.5 text-[#3B82F6]" />
-              )}
-              <span>{copiedAll ? "Copied Package!" : "Copy Package"}</span>
-            </button>
+            <Tooltip text="Copy complete YouTube title, description, chapters & summary package" placement="bottom">
+              <button
+                onClick={handleCopyAllPackage}
+                className="px-4 py-2.5 bg-[#1E1E1E] hover:bg-[#252525] text-[#E5E5E5] hover:text-white rounded-2xl border border-[#2F2F2F] hover:border-[#3B82F6]/60 text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+                aria-label="Copy Package"
+              >
+                {copiedAll ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-[#3B82F6]" />
+                )}
+                <span>{copiedAll ? "Copied Package!" : "Copy Package"}</span>
+              </button>
+            </Tooltip>
           </div>
         </div>
 
@@ -266,13 +270,15 @@ const AIOptimizerPage = React.memo(
           <>
             {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
             <div className="relative flex items-center gap-4 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3 shadow-md">
-              <button
-                onClick={() => scrollFilmstrip("left")}
-                className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-sm"
-                title="Scroll left"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
+              <Tooltip text="Scroll panels left" placement="top">
+                <button
+                  onClick={() => scrollFilmstrip("left")}
+                  className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-sm"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+              </Tooltip>
 
               <div
                 ref={filmstripRef}
@@ -304,13 +310,15 @@ const AIOptimizerPage = React.memo(
                 ))}
               </div>
 
-              <button
-                onClick={() => scrollFilmstrip("right")}
-                className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-sm"
-                title="Scroll right"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
+              <Tooltip text="Scroll panels right" placement="top">
+                <button
+                  onClick={() => scrollFilmstrip("right")}
+                  className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-sm"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </Tooltip>
             </div>
 
         {/* THREE-COLUMN BALANCED WORKSPACE GRID (3 : 3 : 6) */}

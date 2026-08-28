@@ -5,6 +5,7 @@ import {
   renderKeyCombo,
   highlightText,
 } from "@/features/app_shortcuts/components/shortcutUtils";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ShortcutItemProps {
   id: string;
@@ -90,29 +91,35 @@ export default function ShortcutItem({
             {renderKeyCombo(value)}
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all ml-2">
               {value && (
-                <button
-                  onClick={(e) => onDisableSingle(id, e)}
-                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-rose-400 transition-all"
-                  title="Disable Shortcut"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip text="Disable this shortcut" placement="top">
+                  <button
+                    onClick={(e) => onDisableSingle(id, e)}
+                    className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-rose-400 transition-all cursor-pointer"
+                    aria-label="Disable Shortcut"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
               )}
               {isModified && (
-                <button
-                  onClick={(e) => onResetSingle(id, e)}
-                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-amber-400 transition-all"
-                  title="Reset to Default"
-                >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                </button>
+                <Tooltip text="Reset to default key combination" placement="top">
+                  <button
+                    onClick={(e) => onResetSingle(id, e)}
+                    className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-amber-400 transition-all cursor-pointer"
+                    aria-label="Reset to Default"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  </button>
+                </Tooltip>
               )}
-              <button
-                className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-purple-400 transition-all"
-                title="Edit Shortcut"
-              >
-                <Edit3 className="h-3.5 w-3.5" />
-              </button>
+              <Tooltip text="Record new shortcut key" placement="top">
+                <button
+                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-purple-400 transition-all cursor-pointer"
+                  aria-label="Edit Shortcut"
+                >
+                  <Edit3 className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             </div>
           </div>
         )}

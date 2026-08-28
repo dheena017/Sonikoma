@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Trash2, X, Edit2 } from "lucide-react";
 import { NotificationType } from "@/features/app_notification";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface PanelCardActionsProps {
   idx: number;
@@ -66,26 +67,30 @@ export function PanelCardActions({
         onClick={(e) => e.stopPropagation()}
       >
         {/* NEW SAFELY WIRED EDIT BUTTON */}
-        <button
-          type="button"
-          onClick={handleEditClick}
-          title="Open Image Editor"
-          className="flex-1 flex items-center justify-center gap-2 h-10 rounded-2xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-neutral-300 transition-all duration-150 hover:bg-purple-950/60 hover:text-purple-300 hover:border-purple-500/30 active:scale-[0.98]"
-        >
-          <Edit2 className="h-4 w-4 shrink-0" />
-          <span>Edit</span>
-        </button>
+        <Tooltip text="Open in Image Editor canvas" placement="top">
+          <button
+            type="button"
+            onClick={handleEditClick}
+            aria-label="Open Image Editor"
+            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-2xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-neutral-300 transition-all duration-150 hover:bg-purple-950/60 hover:text-purple-300 hover:border-purple-500/30 active:scale-[0.98] cursor-pointer"
+          >
+            <Edit2 className="h-4 w-4 shrink-0" />
+            <span>Edit</span>
+          </button>
+        </Tooltip>
 
         {/* Delete button */}
-        <button
-          type="button"
-          onClick={handleDeleteClick}
-          title="Remove panel from deck"
-          className="flex-1 flex items-center justify-center gap-2 h-10 rounded-2xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-neutral-300 transition-all duration-150 hover:bg-red-950/60 hover:text-red-300 hover:border-red-500/30 active:scale-[0.98]"
-        >
-          <Trash2 className="h-4 w-4 shrink-0" />
-          <span>Delete</span>
-        </button>
+        <Tooltip text="Remove panel from deck" placement="top">
+          <button
+            type="button"
+            onClick={handleDeleteClick}
+            aria-label="Remove panel from deck"
+            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-2xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-neutral-300 transition-all duration-150 hover:bg-red-950/60 hover:text-red-300 hover:border-red-500/30 active:scale-[0.98] cursor-pointer"
+          >
+            <Trash2 className="h-4 w-4 shrink-0" />
+            <span>Delete</span>
+          </button>
+        </Tooltip>
       </div>
 
       {showDeleteConfirm &&

@@ -1,5 +1,6 @@
 import React from "react";
 import { Search, Plus, X } from "lucide-react";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface DashboardHeaderProps {
   themeMode?: string;
@@ -41,27 +42,33 @@ export default function DashboardHeader({
             className="w-full bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/50 focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 rounded-xl py-2.5 pl-10 pr-9 text-xs sm:text-sm text-[#E5E5E5] outline-none font-sans transition-all placeholder:text-[#6B7280]"
           />
           {searchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-white p-0.5 rounded transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+            <Tooltip text="Clear search query" placement="top">
+              <button
+                type="button"
+                onClick={() => onSearchChange("")}
+                aria-label="Clear search query"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-white p-0.5 rounded transition-colors cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </Tooltip>
           )}
         </div>
       </div>
 
       {/* Right CTA Actions */}
       <div className="flex items-center gap-3 shrink-0">
-        <button
-          type="button"
-          onClick={onNewSeries}
-          className="flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider shadow-md border border-[#3B82F6]/30 transition-all cursor-pointer active:scale-95"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Chapter</span>
-        </button>
+        <Tooltip text="Scrape webtoon URL or start a new storyboard series" placement="bottom">
+          <button
+            type="button"
+            onClick={onNewSeries}
+            aria-label="Start new chapter"
+            className="flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider shadow-md border border-[#3B82F6]/30 transition-all cursor-pointer active:scale-95"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Chapter</span>
+          </button>
+        </Tooltip>
       </div>
     </div>
   );

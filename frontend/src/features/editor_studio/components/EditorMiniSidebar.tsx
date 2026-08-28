@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
-import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
+import { useImageEditorStore, type EditorTool } from "@/features/editor_studio/hooks/useEditorState";
 
 interface EditorMiniSidebarProps {
   isCollapsed: boolean;
@@ -74,8 +74,69 @@ const EditorMiniSidebarInner = ({
   const slicesCount = useImageEditorStore((state) => state.slicesCount);
   const editingImageIdx = useImageEditorStore((state) => state.editingImageIdx);
 
-  const [hoveredTool, setHoveredTool] = useState<string | null>(null);
-  const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
+  const [returnHover, setReturnHover] = useState(false);
+  const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
+
+  const CropSidebarToolItem = ({ tool }: { tool: { key: EditorTool; label: string; icon: any } }) => {
+    const [hover, setHover] = useState(false);
+    const [rect, setRect] = useState<DOMRect | null>(null);
+    const isActive = activeTool === tool.key;
+    const Icon = tool.icon;
+
+    return (
+      <div className="relative group w-full flex justify-center py-1">
+        {/* Active Pill */}
+        <div
+          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+            isActive
+              ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
+              : "h-0 bg-transparent opacity-0"
+          }`}
+        />
+
+        <button
+          onClick={() => {
+            setActiveTool(tool.key);
+          }}
+          onMouseEnter={(e) => {
+            setRect(e.currentTarget.getBoundingClientRect());
+            setHover(true);
+          }}
+          onMouseLeave={() => setHover(false)}
+          className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
+        >
+          {/* Icon pill */}
+          <div
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+              isActive
+                ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
+            }`}
+          >
+            <Icon
+              className={`w-5 h-5 transition-colors duration-300 ${
+                isActive
+                  ? "text-purple-400"
+                  : "text-neutral-400 group-hover:text-purple-300"
+              }`}
+            />
+          </div>
+
+          {/* Crop Slices Count Badge */}
+          {tool.key === "crop" && slicesCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-br from-purple-500 to-purple-700 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
+              {slicesCount}
+            </span>
+          )}
+        </button>
+        <TooltipPortal
+          text={tool.label}
+          visible={hover}
+          anchorRect={rect}
+        />
+      </div>
+    );
+  };
 
   if (isEditing) {
     const cropToolGroups = [
@@ -100,8 +161,9 @@ const EditorMiniSidebarInner = ({
     return (
       <aside
         style={{ top: `${topOffsetPx}px` }}
-        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${isCollapsed ? "w-20" : "w-24"
-          }`}
+        className={`hidden md:flex fixed bottom-0 left-0 bg-neutral-950 backdrop-blur-xl border-r border-neutral-800/60 flex-col items-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[60] py-6 shadow-[4px_0_24px_rgba(0,0,0,0.3)] ${
+          isCollapsed ? "w-20" : "w-24"
+        }`}
       >
         <div className="flex-1 w-full flex flex-col items-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-4">
           {cropToolGroups.map((group, gi) => (
@@ -125,67 +187,9 @@ const EditorMiniSidebarInner = ({
                 </span>
               </div>
               <div className="w-full flex flex-col items-center space-y-0.5">
-                {group.tools.map((tool) => {
-                  const isActive = activeTool === tool.key;
-                  const Icon = tool.icon;
-                  const isHovered = hoveredTool === tool.key;
-
-                  return (
-                    <div
-                      key={tool.key}
-                      className="relative group w-full flex justify-center py-1"
-                    >
-                      {/* Active Pill */}
-                      <div
-                        className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
-                            ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.8)] opacity-100"
-                            : "h-0 bg-transparent opacity-0"
-                          }`}
-                      />
-
-                      <button
-                        onClick={() => {
-                          setActiveTool(tool.key);
-                        }}
-                        onMouseEnter={(e) => {
-                          setHoveredRect(
-                            e.currentTarget.getBoundingClientRect()
-                          );
-                          setHoveredTool(tool.key);
-                        }}
-                        onMouseLeave={() => setHoveredTool(null)}
-                        className="p-1.5 transition-all duration-300 cursor-pointer relative flex items-center justify-center group-active:scale-95"
-                      >
-                        {/* Icon pill */}
-                        <div
-                          className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${isActive
-                              ? "bg-purple-500/20 border border-purple-500/40 shadow-[0_0_14px_rgba(168,85,247,0.25)]"
-                              : "bg-neutral-800 border border-neutral-700 group-hover:bg-purple-500/10 group-hover:border-purple-500/20"
-                            }`}
-                        >
-                          <Icon
-                            className={`w-5 h-5 transition-colors duration-300 ${isActive
-                                ? "text-purple-400"
-                                : "text-neutral-400 group-hover:text-purple-300"
-                              }`}
-                          />
-                        </div>
-
-                        {/* Crop Slices Count Badge */}
-                        {tool.key === "crop" && slicesCount > 0 && (
-                          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-gradient-to-br from-purple-500 to-purple-700 text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
-                            {slicesCount}
-                          </span>
-                        )}
-                      </button>
-                      <TooltipPortal
-                        text={tool.label}
-                        visible={isHovered}
-                        anchorRect={hoveredRect}
-                      />
-                    </div>
-                  );
-                })}
+                {group.tools.map((tool) => (
+                  <CropSidebarToolItem key={tool.key} tool={tool} />
+                ))}
               </div>
             </div>
           ))}
@@ -462,15 +466,21 @@ const EditorMiniSidebarInner = ({
         <div className="relative group w-full flex justify-center">
           <button
             onClick={handleReturnToWorkspace}
-            className="w-11 h-11 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all duration-300 shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 outline-none focus:outline-none flex items-center justify-center"
+            onMouseEnter={(e) => {
+              setReturnRect(e.currentTarget.getBoundingClientRect());
+              setReturnHover(true);
+            }}
+            onMouseLeave={() => setReturnHover(false)}
+            aria-label="Return to Workspace"
+            className="w-11 h-11 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all duration-300 shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 outline-none focus:outline-none flex items-center justify-center cursor-pointer"
           >
             <ExternalLink className="w-5 h-5 shrink-0" strokeWidth={2.5} />
           </button>
-
-          {/* Hover Tooltip for the Return Button */}
-          <div className="absolute left-16 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-300 -translate-x-2 group-hover:translate-x-0 bg-neutral-900 border border-white/10 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-50 shadow-2xl font-medium tracking-wide">
-            Return to Workspace
-          </div>
+          <TooltipPortal
+            text="Return to Workspace"
+            visible={returnHover}
+            anchorRect={returnRect}
+          />
         </div>
       </div>
     </aside>

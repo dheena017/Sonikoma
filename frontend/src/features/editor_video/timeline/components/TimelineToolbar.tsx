@@ -16,6 +16,8 @@ import {
   Pause,
 } from "lucide-react";
 
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+
 interface TimelineToolbarProps {
   currentPanelIndex: number;
   totalPanels: number;
@@ -41,9 +43,11 @@ const ToolBtn: React.FC<{
   className?: string;
   children: React.ReactNode;
 }> = ({ title, onClick, className = "", children }) => (
-  <button title={title} onClick={onClick} className={className}>
-    {children}
-  </button>
+  <Tooltip text={title} placement="top">
+    <button aria-label={title} onClick={onClick} className={className}>
+      {children}
+    </button>
+  </Tooltip>
 );
 
 const TimelineToolbar: React.FC<TimelineToolbarProps> = ({

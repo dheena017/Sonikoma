@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { getProxiedImageUrl } from "@/utils";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ActiveProjectWorkspaceBarProps {
   navigateTo?: (path: string) => void;
@@ -330,55 +331,66 @@ export const ActiveProjectWorkspaceBar: React.FC<
         <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 border-t md:border-t-0 border-white/5 pt-2 md:pt-0">
           <div className="flex items-center gap-2">
             {isTemp && (
-              <button
-                onClick={handleSaveProject}
-                disabled={isSaving}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-semibold shadow-md shadow-amber-500/20 transition-all text-xs disabled:opacity-50 cursor-pointer"
-                title="Save this workspace as a permanent project"
-              >
-                {isSaving ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Save className="w-3.5 h-3.5" />
-                )}
-                <span>Save Project</span>
-              </button>
+              <Tooltip text="Save this workspace as a permanent project" placement="bottom">
+                <button
+                  onClick={handleSaveProject}
+                  disabled={isSaving}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-semibold shadow-md shadow-amber-500/20 transition-all text-xs disabled:opacity-50 cursor-pointer"
+                  aria-label="Save Project"
+                >
+                  {isSaving ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Save className="w-3.5 h-3.5" />
+                  )}
+                  <span>Save Project</span>
+                </button>
+              </Tooltip>
             )}
 
-            <button
-              onClick={() => handleNavigate(editorUrl)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800/80 hover:bg-neutral-700 text-neutral-200 hover:text-white border border-white/10 transition-all text-xs font-medium"
-              title="Open in Video Editor"
-            >
-              <Film className="w-3.5 h-3.5 text-purple-400" />
-              <span className="hidden sm:inline">Video Editor</span>
-            </button>
+            <Tooltip text="Open in Video Timeline Editor" placement="bottom">
+              <button
+                onClick={() => handleNavigate(editorUrl)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800/80 hover:bg-neutral-700 text-neutral-200 hover:text-white border border-white/10 transition-all text-xs font-medium cursor-pointer"
+                aria-label="Open in Video Editor"
+              >
+                <Film className="w-3.5 h-3.5 text-purple-400" />
+                <span className="hidden sm:inline">Video Editor</span>
+              </button>
+            </Tooltip>
 
-            <button
-              onClick={() => handleNavigate(creativeSuiteUrl)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-all text-xs font-medium"
-              title="Open Creative Suite"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <span className="hidden sm:inline">Creative Suite</span>
-            </button>
+            <Tooltip text="Open in AI Creative Suite" placement="bottom">
+              <button
+                onClick={() => handleNavigate(creativeSuiteUrl)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-all text-xs font-medium cursor-pointer"
+                aria-label="Open Creative Suite"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                <span className="hidden sm:inline">Creative Suite</span>
+              </button>
+            </Tooltip>
 
-            <button
-              onClick={() => setDrawerOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium shadow-sm transition-all text-xs"
-            >
-              <FolderSync className="w-3.5 h-3.5" />
-              <span>Switch</span>
-            </button>
+            <Tooltip text="Switch or Activate another Project" placement="bottom">
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium shadow-sm transition-all text-xs cursor-pointer"
+                aria-label="Switch Project"
+              >
+                <FolderSync className="w-3.5 h-3.5" />
+                <span>Switch</span>
+              </button>
+            </Tooltip>
           </div>
 
-          <button
-            onClick={clearActiveProject}
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors ml-1"
-            title="Deactivate / Unload Project"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <Tooltip text="Deactivate / Unload Active Project" placement="bottom">
+            <button
+              onClick={clearActiveProject}
+              className="p-1.5 rounded-lg text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors ml-1 cursor-pointer"
+              aria-label="Deactivate / Unload Project"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </Tooltip>
         </div>
       </div>
     </div>

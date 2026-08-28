@@ -25,22 +25,23 @@ const ActiveProjectSidebarWidget: React.FC<{
   const { activeProjectId, activeProjectData } = useProjectStore();
 
   return (
-    <div className="p-3 rounded-2xl bg-[#0e0f17] border border-white/10 text-xs shadow-md my-2">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1">
-          <Zap className="w-3 h-3 text-purple-400" /> Active Context
+    <div className="p-3.5 rounded-2xl bg-neutral-900/80 border border-white/10 text-xs shadow-md">
+      <div className="flex items-center justify-between mb-2.5">
+        <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5 font-sans">
+          <Zap className="w-3.5 h-3.5 text-purple-400" /> Active Context
         </span>
         {activeProjectId ? (
-          <span className="text-[9px] text-emerald-400 font-medium px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-            ● Active
+          <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Active
           </span>
         ) : null}
       </div>
 
       {activeProjectId && activeProjectData ? (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-900 border border-white/10 shrink-0">
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl overflow-hidden bg-neutral-950 border border-white/15 shrink-0 flex items-center justify-center shadow-inner">
               {activeProjectData.project?.cover_image ||
               activeProjectData.panels?.[0]?.image_url ? (
                 <img
@@ -52,17 +53,17 @@ const ActiveProjectSidebarWidget: React.FC<{
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-900 to-indigo-900 flex items-center justify-center text-purple-300 font-bold text-xs">
+                <div className="w-full h-full bg-gradient-to-br from-purple-900/60 to-indigo-900/60 border border-purple-500/30 flex items-center justify-center text-purple-300 font-bold text-xs">
                   {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
                     "P"}
                 </div>
               )}
             </div>
             <div className="min-w-0 flex flex-col">
-              <h4 className="font-semibold text-xs text-white truncate">
+              <h4 className="font-bold text-xs text-white truncate leading-tight">
                 {activeProjectData.project?.title || "Untitled Project"}
               </h4>
-              <span className="text-[10px] text-neutral-400 truncate">
+              <span className="text-[10.5px] text-neutral-400 truncate mt-0.5 font-sans">
                 {activeProjectData.panels?.length || 0} Panels
               </span>
             </div>
@@ -70,9 +71,9 @@ const ActiveProjectSidebarWidget: React.FC<{
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-1.5 px-2 rounded-xl bg-purple-600/20 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/30 text-xs font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-2 px-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 hover:text-white border border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 shadow-sm"
           >
-            <FolderSync className="w-3.5 h-3.5" />
+            <FolderSync className="w-3.5 h-3.5 text-purple-400" />
             <span>Switch Project</span>
           </button>
         </div>
@@ -83,7 +84,7 @@ const ActiveProjectSidebarWidget: React.FC<{
           </p>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-1.5 px-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer"
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer active:scale-98"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -109,7 +110,7 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
 }) => {
   const { themeMode } = useThemeMode();
 
-  // Lock body scroll when sidebar drawer is open
+  // Lock body scroll when drawer is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -123,67 +124,61 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
 
   const groups = [
     {
-      name: "Intelligence Studio",
+      name: "Intelligence Hub",
       items: [
         {
-          id: "overview",
-          label: "AI Command Center",
+          id: "dashboard",
+          label: "Neural Overview",
           icon: LayoutGrid,
           path: "/ai-core",
+        },
+        {
+          id: "models",
+          label: "Model Matrix",
+          icon: Cpu,
+          path: "/ai-core/models",
         },
       ],
     },
     {
-      name: "Engines & Speed Limits",
+      name: "Infrastructure & Security",
       items: [
         {
           id: "api_keys",
-          label: "API Keys & Providers",
+          label: "API Gateway & Keys",
           icon: Key,
           path: "/ai-core/api-keys",
         },
         {
           id: "rate_limits",
-          label: "Rate Limits & Quotas",
+          label: "Quotas & Boundaries",
           icon: ShieldCheck,
-          path: "/ai-core/limits",
-        },
-        {
-          id: "routing",
-          label: "Smart Model Routing",
-          icon: Workflow,
-          path: "/ai-core/routing",
+          path: "/ai-core/rate-limits",
         },
       ],
     },
     {
-      name: "Usage & Credit Wallet",
+      name: "Analytics & Economy",
       items: [
         {
-          id: "usage",
-          label: "AI Usage & Analytics",
-          icon: TrendingUp,
-          path: "/ai-core/usage",
+          id: "analytics",
+          label: "Token Consumption",
+          icon: BarChart3,
+          path: "/ai-core/analytics",
         },
         {
-          id: "wallet",
-          label: "Credit Wallet & Billing",
+          id: "billing",
+          label: "Ledger & Subscriptions",
           icon: CreditCard,
-          path: "/ai-core/wallet",
+          path: "/ai-core/billing",
         },
       ],
     },
   ];
 
-
-
   const isActive = (path: string) => {
     if (path === "/ai-core") {
-      return (
-        currentPath === "/ai-core" ||
-        currentPath === "/ai-core/" ||
-        currentPath === "/ai-core/overview"
-      );
+      return currentPath === "/ai-core" || currentPath === "/ai-core/";
     }
     return (
       currentPath === path ||
@@ -193,45 +188,45 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-neutral-950/85 backdrop-blur-3xl border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.45)]">
+    <div className="flex h-full flex-col bg-[#0d0d12]/95 backdrop-blur-3xl border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.6)]">
       {/* Sidebar Header */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-[#2F2F2F] shrink-0">
-        <div className="flex items-center gap-3.5">
-          <div className="relative shrink-0 rounded-full border border-[#2F2F2F] p-0.5 bg-[#1E1E1E]">
+      <div className="h-16 flex items-center justify-between px-5 border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="relative shrink-0 rounded-full border border-purple-500/30 p-0.5 bg-[#18191e] shadow-[0_0_12px_rgba(168,85,247,0.3)]">
             <img
               src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
               onError={(e) => {
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
-              className="h-10 w-10 rounded-full shrink-0 object-cover bg-black"
+              className="h-9 w-9 rounded-full shrink-0 object-cover bg-black"
               alt="Sonikoma Logo"
             />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm tracking-tight text-[#E5E5E5] font-sans">
-                AI Core Suite
+              <span className="font-extrabold text-sm tracking-tight text-white font-sans">
+                AI Core
               </span>
-              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30 rounded-md font-mono">
-                MULTI-AI
+              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-md font-mono">
+                ENGINE
               </span>
             </div>
-            <p className="text-[10px] text-[#9CA3AF] font-sans tracking-wide">
+            <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
               Neural Orchestrator
             </p>
           </div>
         </div>
         <button
           onClick={onClose}
-          className="w-9 h-9 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+          className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
           title="Close sidebar drawer"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Active Project Widget in AICoreSidebar */}
-      <div className="px-4 pt-3">
+      {/* Active Project Widget */}
+      <div className="px-4 pt-3 shrink-0">
         <ActiveProjectSidebarWidget
           setDrawerOpen={(open) =>
             useProjectStore.getState().setDrawerOpen(open)
@@ -240,15 +235,15 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
       </div>
 
       {/* Navigation Groups */}
-      <div className="flex-1 overflow-y-auto py-4 px-4 space-y-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto py-4 px-4 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {groups.map((group, groupIdx) => (
-          <div key={group.name} className="space-y-2.5">
+          <div key={group.name} className="space-y-2">
             {groupIdx > 0 && (
-              <div className="w-full flex flex-col pt-1">
-                <div className="w-8 h-[1px] bg-neutral-800 rounded-full mb-2 ml-3" />
+              <div className="w-full flex flex-col pt-1 pb-1">
+                <div className="w-8 h-[1px] bg-white/10 rounded-full ml-3" />
               </div>
             )}
-            <h4 className="px-3 text-[9px] font-black text-purple-400/50 uppercase tracking-[0.25em] font-mono">
+            <h4 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-sans">
               {group.name}
             </h4>
             <ul className="space-y-1">
@@ -257,11 +252,11 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
 
                 return (
                   <li key={item.id} className="relative">
-                    {/* Premium Active Side Indicator */}
+                    {/* Active Side Accent Indicator */}
                     <div
-                      className={`absolute left-2 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+                      className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                         active
-                          ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.8)] opacity-100"
+                          ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
                           : "h-0 bg-transparent opacity-0"
                       }`}
                     />
@@ -271,21 +266,21 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
                         navigateTo(item.path);
                         onClose();
                       }}
-                      className={`w-full flex items-center justify-between gap-3.5 px-4 py-2.5 rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
+                      className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
                         active
-                          ? "bg-purple-500/10 text-neutral-100 shadow-[inset_0_0_16px_rgba(168,85,247,0.08)] border border-purple-500/20"
-                          : "text-neutral-500 hover:text-neutral-250 hover:bg-neutral-900 border border-transparent"
+                          ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.12)] border border-purple-500/30 font-bold"
+                          : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <item.icon
-                          className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
+                          className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                             active
                               ? "text-purple-400"
-                              : "text-neutral-500 group-hover:scale-110 group-hover:text-neutral-400"
+                              : "text-neutral-400 group-hover:scale-110 group-hover:text-purple-300"
                           }`}
                         />
-                        <span className="text-xs font-bold tracking-wide font-sans">
+                        <span className="text-xs font-semibold tracking-wide font-sans">
                           {item.label}
                         </span>
                       </div>
@@ -298,20 +293,17 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
         ))}
       </div>
 
-      {/* Footer Info Pill */}
-      <div className="p-4 border-t border-neutral-900 shrink-0 bg-neutral-950/40">
+      {/* Footer Return Button */}
+      <div className="p-4 border-t border-white/10 shrink-0">
         <button
           onClick={() => {
             navigateTo("/creative-suite");
             onClose();
           }}
-          className="w-full py-2.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono text-neutral-300 hover:text-white transition-all flex items-center justify-between cursor-pointer"
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 text-white text-xs font-black tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:shadow-[0_0_28px_rgba(168,85,247,0.65)] active:scale-95 border border-purple-400/40 cursor-pointer font-sans"
         >
-          <span className="flex items-center gap-2">
-            <ArrowLeft className="w-3.5 h-3.5 text-purple-400" />
-            <span>Creative Suite</span>
-          </span>
-          <span className="text-[10px] text-neutral-500 font-bold">Return →</span>
+          <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
+          <span>CREATIVE SUITE</span>
         </button>
       </div>
     </div>
@@ -331,7 +323,7 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
       {/* Sidebar Drawer */}
       <div
         id="ai_core_sidebar_pane"
-        className={`fixed inset-y-0 left-0 z-50 w-72 lg:w-80 transform transition-transform duration-300 ease-out shadow-2xl ${
+        className={`fixed inset-y-0 left-0 z-50 w-[280px] sm:w-[300px] transform transition-transform duration-300 ease-out shadow-2xl ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         role="dialog"
