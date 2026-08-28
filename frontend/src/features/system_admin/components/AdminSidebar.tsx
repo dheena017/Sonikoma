@@ -221,11 +221,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   <li key={item.id} className="relative">
                     {/* Active Side Accent Indicator */}
                     <div
-                      className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
-                        active
-                          ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
-                          : "h-0 bg-transparent opacity-0"
-                      }`}
+                      className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${active
+                        ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                        : "h-0 bg-transparent opacity-0"
+                        }`}
                     />
 
                     <button
@@ -233,19 +232,17 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         navigateTo(item.path);
                         onClose();
                       }}
-                      className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
-                        active
-                          ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.12)] border border-purple-500/30 font-bold"
-                          : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
-                      }`}
+                      className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${active
+                        ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.12)] border border-purple-500/30 font-bold"
+                        : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <item.icon
-                          className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
-                            active
-                              ? "text-purple-400"
-                              : "text-neutral-400 group-hover:scale-110 group-hover:text-purple-300"
-                          }`}
+                          className={`w-4 h-4 shrink-0 transition-transform duration-200 ${active
+                            ? "text-purple-400"
+                            : "text-neutral-400 group-hover:scale-110 group-hover:text-purple-300"
+                            }`}
                         />
                         <span className="text-xs font-semibold tracking-wide font-sans truncate">
                           {item.label}
@@ -295,11 +292,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
       {/* Sidebar Drawer */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[320px] z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${
-          isOpen
-            ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]"
-            : "-translate-x-full"
-        }`}
+        className={`fixed top-0 bottom-0 left-0 h-screen w-[280px] sm:w-[320px] z-50 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] transform overflow-hidden ${isOpen
+          ? "translate-x-0 shadow-[10px_0_40px_rgba(0,0,0,0.8)]"
+          : "-translate-x-full"
+          }`}
       >
         {sidebarContent}
       </aside>

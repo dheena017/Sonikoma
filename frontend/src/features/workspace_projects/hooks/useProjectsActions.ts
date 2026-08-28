@@ -27,6 +27,33 @@ export interface UseProjectsActionsHandlers {
   ) => Promise<void>;
 }
 
+function navigate(url: string) {
+  const nav = (window as any).navigateTo;
+  if (typeof nav === "function") {
+    nav(url);
+  } else {
+    window.history.pushState({}, "", url);
+    window.dispatchEvent(new Event("popstate"));
+  }
+}
+
+function showNotification(
+  message: string,
+  title = "Notice",
+  variant: "emerald" | "rose" | "blue" = "emerald"
+) {
+  if (typeof (window as any).alertAsync === "function") {
+    (window as any).alertAsync(message, title, variant);
+  } else if (typeof (window as any).addNotification === "function") {
+    (window as any).addNotification(
+      message,
+      variant === "rose" ? "error" : "success"
+    );
+  } else {
+    console.log(`[${title}] ${message}`);
+  }
+}
+
 export function useProjectsActions(): UseProjectsActionsHandlers {
   const handleNewSeries = useCallback(() => {
     useProjectStore.getState().clearActiveProject();
@@ -37,13 +64,7 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     localStorage.removeItem("auto_import_url");
     localStorage.removeItem("auto_import_batch");
 
-    const nav = (window as any).navigateTo;
-    if (typeof nav === "function") {
-      nav("/scraper");
-    } else {
-      window.history.pushState({}, "", "/scraper");
-      window.dispatchEvent(new Event("popstate"));
-    }
+    navigate("/scraper");
   }, []);
 
   const handleOpenProject = useCallback((project: Project) => {
@@ -52,7 +73,7 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     useProjectStore.getState().hydrateActiveProject(project.project_id);
 
     if (project.series_slug && project.chapter_slug) {
-      (window as any).navigateTo?.(
+      navigate(
         `/scraper/editor/series/${project.series_slug}/chapters/${
           project.chapter_slug
         }?project_id=${encodeURIComponent(project.project_id)}${
@@ -60,13 +81,13 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
         }`
       );
     } else if (jobId) {
-      (window as any).navigateTo?.(
+      navigate(
         `/scraper/editor?project_id=${encodeURIComponent(
           project.project_id
         )}&job_id=${encodeURIComponent(jobId)}`
       );
     } else {
-      (window as any).navigateTo?.(
+      navigate(
         `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}`
       );
     }
@@ -78,36 +99,18 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
       useProjectStore.getState().setActiveProjectId(project.project_id);
       await useProjectStore.getState().hydrateActiveProject(project.project_id);
 
-      const nav = (window as any).navigateTo;
-      const targetUrl = `/creative-suite?project_id=${encodeURIComponent(
-        project.project_id
-      )}`;
-      if (typeof nav === "function") {
-        nav(targetUrl);
-      } else {
-        window.history.pushState({}, "", targetUrl);
-        window.dispatchEvent(new Event("popstate"));
-      }
+      navigate(
+        `/creative-suite?project_id=${encodeURIComponent(project.project_id)}`
+      );
     },
     []
   );
 
   const handleExport = useCallback((e: MouseEvent, project: Project) => {
     e.stopPropagation();
-    const jobId = project.job_id;
-    if (project.series_slug && project.chapter_slug) {
-      (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${
-          project.chapter_slug
-        }${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
-      );
-    } else {
-      (window as any).navigateTo?.(
-        `/scraper/editor?project_id=${project.project_id}${
-          jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
-        }`
-      );
-    }
+    navigate(
+      `/scraper?id=${encodeURIComponent(project.project_id)}&export=true`
+    );
   }, []);
 
   const handleRename = useCallback(
@@ -120,19 +123,10 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
 
   const handleOpenDetails = useCallback((e: MouseEvent, project: Project) => {
     e.stopPropagation();
-    const jobId = project.job_id;
-    if (project.series_slug && project.chapter_slug) {
-      (window as any).navigateTo?.(
-        `/scraper/editor/series/${project.series_slug}/chapters/${
-          project.chapter_slug
-        }${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
-      );
+    if (project.series_slug) {
+      navigate(`/projects/${encodeURIComponent(project.series_slug)}`);
     } else {
-      (window as any).navigateTo?.(
-        `/scraper/editor?project_id=${project.project_id}${
-          jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
-        }`
-      );
+      navigate(`/scraper?id=${encodeURIComponent(project.project_id)}`);
     }
   }, []);
 
@@ -146,15 +140,11 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
           }/chapters/${project.chapter_slug}${
             jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""
           }`
-        : `${window.location.origin}/scraper?project_id=${project.project_id}${
-            jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
-          }`;
+        : `${window.location.origin}/scraper?id=${encodeURIComponent(
+            project.project_id
+          )}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`;
     navigator.clipboard.writeText(url);
-    (window as any).alertAsync?.(
-      "Link copied to clipboard!",
-      "Success",
-      "emerald"
-    );
+    showNotification("Project link copied to clipboard!", "Success", "emerald");
   }, []);
 
   const handleDeleteSingle = useCallback(
@@ -167,13 +157,20 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
       e.stopPropagation();
       onMenuClose();
 
-      if (
-        await (window as any).confirmAsync?.(
+      let confirmed = false;
+      if (typeof (window as any).confirmAsync === "function") {
+        confirmed = await (window as any).confirmAsync(
           "Are you sure you want to permanently delete this project? This action cannot be undone.",
           "Delete Project",
           "rose"
-        )
-      ) {
+        );
+      } else {
+        confirmed = window.confirm(
+          "Are you sure you want to permanently delete this project? This action cannot be undone."
+        );
+      }
+
+      if (confirmed) {
         try {
           const token =
             localStorage.getItem("sonikoma_token") ||
@@ -183,17 +180,14 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
           const data = await res.json();
-          if (data.success) {
+          if (data.success || res.ok) {
             onDeleteSuccess(projectId);
-            (window as any).alertAsync?.(
-              "Project deleted successfully.",
-              "Deleted"
-            );
+            showNotification("Project deleted successfully.", "Deleted", "emerald");
           } else {
             throw new Error(data.detail || "Failed to delete");
           }
         } catch (err: any) {
-          (window as any).alertAsync?.(
+          showNotification(
             err.message || "Failed to delete project.",
             "Error",
             "rose"
@@ -208,13 +202,20 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
     async (selectedIds: string[], onDeleteSuccess: (ids: string[]) => void) => {
       if (selectedIds.length === 0) return;
 
-      if (
-        await (window as any).confirmAsync?.(
+      let confirmed = false;
+      if (typeof (window as any).confirmAsync === "function") {
+        confirmed = await (window as any).confirmAsync(
           `Are you sure you want to delete ${selectedIds.length} selected projects? This action cannot be undone.`,
           "Bulk Delete",
           "rose"
-        )
-      ) {
+        );
+      } else {
+        confirmed = window.confirm(
+          `Are you sure you want to delete ${selectedIds.length} selected projects? This action cannot be undone.`
+        );
+      }
+
+      if (confirmed) {
         try {
           const token =
             localStorage.getItem("sonikoma_token") ||
@@ -231,17 +232,18 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
             body: JSON.stringify({ project_ids: selectedIds }),
           });
           const data = await res.json();
-          if (data.success) {
+          if (data.success || res.ok) {
             onDeleteSuccess(selectedIds);
-            (window as any).alertAsync?.(
-              `Successfully deleted ${data.deleted_count} projects.`,
-              "Deleted"
+            showNotification(
+              `Successfully deleted ${data.deleted_count || selectedIds.length} projects.`,
+              "Deleted",
+              "emerald"
             );
           } else {
             throw new Error(data.detail || "Failed to batch delete");
           }
         } catch (err: any) {
-          (window as any).alertAsync?.(
+          showNotification(
             err.message || "Failed to delete projects.",
             "Error",
             "rose"

@@ -14,6 +14,8 @@ import {
   Trash2,
   Clock,
   Sparkles,
+  Film,
+  Layers,
 } from "lucide-react";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 
@@ -219,7 +221,10 @@ export default function ProjectCard({
           onClick={(e) => e.stopPropagation()}
         >
           <button
+            type="button"
             onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
               onOpenProject(project);
               onToggleMenu?.(e, project.project_id);
             }}
@@ -230,64 +235,116 @@ export default function ProjectCard({
             </div>
             <span className="font-semibold">Resume</span>
           </button>
-          {onOpenDetails && (
-            <button
-              onClick={(e) => onOpenDetails(e, project)}
-              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
-                <FolderOpen className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold">Details</span>
-            </button>
-          )}
-          {onRename && (
-            <button
-              onClick={(e) => onRename(e, project)}
-              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
-                <Edit2 className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold">Rename</span>
-            </button>
-          )}
-          {onExport && (
-            <button
-              onClick={(e) => onExport(e, project)}
-              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover/item:bg-emerald-500/20 group-hover/item:text-emerald-300 transition-colors">
-                <Download className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold">Export</span>
-            </button>
-          )}
-          {onCopyLink && (
-            <button
-              onClick={(e) => onCopyLink(e, project)}
-              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover/item:bg-amber-500/20 group-hover/item:text-amber-300 transition-colors">
-                <Link className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold">Copy Link</span>
-            </button>
-          )}
-          {onDelete && (
-            <>
-              <div className="h-px bg-white/10 my-1" />
-              <button
-                onClick={(e) => onDelete(e, project.project_id)}
-                className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-              >
-                <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover/item:bg-rose-500/20 group-hover/item:text-rose-300 transition-colors">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </div>
-                <span className="font-semibold">Delete</span>
-              </button>
-            </>
-          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onOpenDetails) {
+                onOpenDetails(e, project);
+              } else {
+                onOpenProject(project);
+              }
+              onToggleMenu?.(e, project.project_id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
+              <FolderOpen className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Details</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onRename) {
+                onRename(e, project);
+              }
+              onToggleMenu?.(e, project.project_id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
+              <Edit2 className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Rename</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onExport) {
+                onExport(e, project);
+              } else {
+                const nav = (window as any).navigateTo;
+                const target = `/scraper?id=${encodeURIComponent(
+                  project.project_id
+                )}&export=true`;
+                if (typeof nav === "function") nav(target);
+                else {
+                  window.history.pushState({}, "", target);
+                  window.dispatchEvent(new Event("popstate"));
+                }
+              }
+              onToggleMenu?.(e, project.project_id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover/item:bg-emerald-500/20 group-hover/item:text-emerald-300 transition-colors">
+              <Download className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Export</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onCopyLink) {
+                onCopyLink(e, project);
+              } else {
+                const url = `${window.location.origin}/scraper?id=${encodeURIComponent(
+                  project.project_id
+                )}`;
+                navigator.clipboard.writeText(url);
+                if (typeof (window as any).alertAsync === "function") {
+                  (window as any).alertAsync(
+                    "Link copied to clipboard!",
+                    "Success",
+                    "emerald"
+                  );
+                }
+              }
+              onToggleMenu?.(e, project.project_id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover/item:bg-amber-500/20 group-hover/item:text-amber-300 transition-colors">
+              <Link className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Copy Link</span>
+          </button>
+          <div className="h-px bg-white/10 my-1" />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onDelete) {
+                onDelete(e, project.project_id);
+              }
+              onToggleMenu?.(e, project.project_id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover/item:bg-rose-500/20 group-hover/item:text-rose-300 transition-colors">
+              <Trash2 className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Delete</span>
+          </button>
         </div>
       )}
 
@@ -340,24 +397,32 @@ export default function ProjectCard({
 
         {/* ─── Footer ───────────────────────────────────── */}
         <div className="pt-1.5 mt-auto flex items-center justify-between gap-2">
-          {/* Panels Count */}
-          {(() => {
-            const timelineCount = project.panels_count ?? 0;
-            const importedCount = project.imported_assets_count ?? 0;
-            const displayCount = timelineCount || importedCount || 0;
+          {/* Storyboard Panels & Imported Assets Counts */}
+          <div className="flex items-center gap-2.5 text-xs font-mono truncate">
+            {/* Storyboard Count */}
+            <div
+              className="flex items-center gap-1 text-purple-400"
+              title={`${project.panels_count ?? 0} Storyboard Panels`}
+            >
+              <Film className="h-3.5 w-3.5 shrink-0 text-purple-400" />
+              <span className="font-bold text-neutral-200">
+                {project.panels_count ?? 0}
+              </span>
+              <span className="text-[10px] text-neutral-400">panels</span>
+            </div>
 
-            return (
-              <div
-                className="flex items-center gap-1.5 text-[#9CA3AF] font-mono text-xs truncate"
-                title={`${displayCount} panels`}
-              >
-                <Scissors className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
-                <span className="font-bold text-[#E5E5E5] whitespace-nowrap">
-                  {displayCount} panels
-                </span>
-              </div>
-            );
-          })()}
+            {/* Imported Assets Count */}
+            <div
+              className="flex items-center gap-1 text-blue-400"
+              title={`${project.imported_assets_count ?? 0} Imported Assets`}
+            >
+              <Layers className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+              <span className="font-bold text-neutral-200">
+                {project.imported_assets_count ?? 0}
+              </span>
+              <span className="text-[10px] text-neutral-400">assets</span>
+            </div>
+          </div>
 
           {/* Compact Resume Action Button */}
           <button
@@ -366,7 +431,7 @@ export default function ProjectCard({
               e.stopPropagation();
               onOpenProject(project);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-4 rounded-xl border border-[#3B82F6]/30 bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-bold text-white transition-all cursor-pointer shadow-md active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-purple-400/40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40 active:scale-95 shrink-0"
           >
             <span>Resume</span>
             <ArrowRight className="w-3 h-3 text-white" />

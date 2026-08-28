@@ -183,25 +183,34 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
         </button>
 
         {/* Secondary Action Button: Merge with Next */}
-        {index < totalImagesCount - 1 && (
-          <button
-            type="button"
-            onClick={(e) => onMergeWithNext(index, e)}
-            disabled={isProcessing}
-            className={`w-full py-1 px-2 rounded-lg font-mono text-[9px] font-bold flex items-center justify-center gap-1 transition cursor-pointer border ${
-              isMerging
-                ? "bg-indigo-950 border-indigo-400 text-indigo-200 cursor-wait"
-                : "bg-indigo-950/80 hover:bg-indigo-900 border-indigo-500/30 text-indigo-300 hover:text-white"
-            }`}
-          >
-            {isMerging ? (
-              <Loader2 className="h-2.5 w-2.5 animate-spin text-indigo-300" />
-            ) : (
-              <Link2 className="h-2.5 w-2.5" />
-            )}
-            <span>{isMerging ? "Merging..." : "Merge with Next"}</span>
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={(e) => {
+            if (index >= totalImagesCount - 1) return;
+            onMergeWithNext(index, e);
+          }}
+          disabled={isProcessing || isMerging || index >= totalImagesCount - 1}
+          className={`w-full py-1 px-2 rounded-lg font-mono text-[9px] font-bold flex items-center justify-center gap-1 transition border ${
+            index >= totalImagesCount - 1
+              ? "bg-white/[0.02] border-white/[0.05] text-neutral-600 cursor-not-allowed select-none opacity-40"
+              : isMerging
+              ? "bg-indigo-950 border-indigo-400 text-indigo-200 cursor-wait"
+              : "bg-indigo-950/80 hover:bg-indigo-900 border-indigo-500/30 text-indigo-300 hover:text-white cursor-pointer"
+          }`}
+        >
+          {isMerging ? (
+            <Loader2 className="h-2.5 w-2.5 animate-spin text-indigo-300" />
+          ) : (
+            <Link2 className="h-2.5 w-2.5" />
+          )}
+          <span>
+            {isMerging
+              ? "Merging..."
+              : index >= totalImagesCount - 1
+              ? "End of Chapter"
+              : "Merge with Next"}
+          </span>
+        </button>
 
         {/* Edit & Delete Mini Buttons */}
         <div className="grid grid-cols-2 gap-1 pt-0.5">

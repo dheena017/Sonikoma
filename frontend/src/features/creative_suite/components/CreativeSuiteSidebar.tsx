@@ -42,10 +42,24 @@ const ActiveProjectSidebarWidget: React.FC<{
           <Zap className="w-3 h-3 text-purple-400" /> Active Project
         </span>
         {activeProjectId ? (
-          <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Active
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-emerald-400 font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Active
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                useProjectStore.getState().clearActiveProject();
+              }}
+              title="Close Active Project"
+              aria-label="Close Active Project"
+              className="p-1 rounded-lg text-neutral-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer flex items-center justify-center"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
         ) : null}
       </div>
 

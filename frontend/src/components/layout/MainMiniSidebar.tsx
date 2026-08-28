@@ -90,6 +90,20 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     }
   };
 
+  const isAdmin = React.useMemo(() => {
+    if (typeof window !== "undefined") {
+      if (localStorage.getItem("sonikoma_admin_token")) return true;
+      try {
+        const savedUserStr = localStorage.getItem("sonikoma_user");
+        if (savedUserStr) {
+          const u = JSON.parse(savedUserStr);
+          if (u?.creator_role === "admin" || u?.role === "admin") return true;
+        }
+      } catch (e) {}
+    }
+    return false;
+  }, []);
+
   const groups = [
     {
       group: "Main",
@@ -121,11 +135,25 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       group: "Studios",
       items: [
         {
-          label: "Video Studio",
-          icon: Film,
-          active: isVideoEditorPath,
-          path: "/video-editor",
-          onClick: () => navigateTo("/video-editor"),
+          label: "Creative Suite",
+          icon: Sparkles,
+          active:
+            currentPath === "/creative-suite" ||
+            currentPath.startsWith("/creative-suite/") ||
+            currentPath.startsWith("/ai-") ||
+            currentPath === "/panel-assistant" ||
+            currentPath === "/youtube",
+          path: "/creative-suite",
+          onClick: () => navigateTo("/creative-suite"),
+        },
+        {
+          label: "AI Core & Multi-Engine",
+          icon: Brain,
+          active:
+            currentPath === "/ai-core" ||
+            currentPath.startsWith("/ai-core/"),
+          path: "/ai-core",
+          onClick: () => navigateTo("/ai-core"),
         },
         {
           label: "Image Editor",
@@ -135,37 +163,49 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           onClick: () => navigateTo("/image-editor"),
         },
         {
-          label: "Auto-Crop Studio",
-          icon: Scissors,
-          active: isAutoCrop,
-          path: "/auto-crop",
-          onClick: () => navigateTo("/auto-crop"),
+          label: "Video Editor",
+          icon: Film,
+          active: isVideoEditorPath,
+          path: "/video-editor",
+          onClick: () => navigateTo("/video-editor"),
         },
+        ...(isAdmin
+          ? [
+              {
+                label: "Admin",
+                icon: Shield,
+                active: isAdminPath,
+                path: "/admin",
+                onClick: () => navigateTo("/admin"),
+              },
+            ]
+          : []),
       ],
     },
     {
-      group: "System",
+      group: "Account & Alerts",
       items: [
         {
-          label: "Creative Suite",
-          icon: Sparkles,
-          active: currentPath.startsWith("/creative-suite"),
-          path: "/creative-suite",
-          onClick: () => navigateTo("/creative-suite"),
+          label: "Notifications",
+          icon: Bell,
+          active: currentPath === "/notifications",
+          path: "/notifications",
+          onClick: () => navigateTo("/notifications"),
+          badge: notificationsCount > 0 ? notificationsCount : undefined,
         },
         {
-          label: "AI Neural Core",
-          icon: Brain,
-          active: currentPath.startsWith("/ai-core"),
-          path: "/ai-core",
-          onClick: () => navigateTo("/ai-core"),
-        },
-        {
-          label: "Keyboard Shortcuts",
+          label: "Shortcuts",
           icon: Keyboard,
           active: isShortcuts,
           path: "/shortcuts",
           onClick: () => navigateTo("/shortcuts"),
+        },
+        {
+          label: "Profile",
+          icon: User,
+          active: currentPath === "/profile",
+          path: "/profile",
+          onClick: () => navigateTo("/profile"),
         },
       ],
     },

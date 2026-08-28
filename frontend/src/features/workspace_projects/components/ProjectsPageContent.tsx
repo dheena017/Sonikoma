@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import ProjectsPageView from "@/features/workspace_projects/components/ProjectsPageView";
 import useProjectsPage from "@/features/workspace_projects/hooks/useProjectsPage";
 
@@ -6,7 +6,16 @@ export default function ProjectsPageContent() {
   const page = useProjectsPage();
 
   const handleOpenSeries = (series: any) => {
-    (window as any).navigateTo?.(`/projects/${series.slug}`);
+    const target = series.slug
+      ? `/projects/${encodeURIComponent(series.slug)}`
+      : `/scraper?id=${encodeURIComponent(series.id)}`;
+    const nav = (window as any).navigateTo;
+    if (typeof nav === "function") {
+      nav(target);
+    } else {
+      window.history.pushState({}, "", target);
+      window.dispatchEvent(new Event("popstate"));
+    }
   };
 
   return (

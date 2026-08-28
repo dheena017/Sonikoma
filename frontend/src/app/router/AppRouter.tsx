@@ -1196,22 +1196,6 @@ export default function AppRouter(props: AppRouterProps) {
         </div>
       )}
 
-        {/* PAGE VIEW 1.25: Storyboard & Video Production Editor Studio */}
-        {isEditorPath && (
-          <div className="page-transition w-full flex-1 flex flex-col">
-            <EditorPage
-              appLogic={memoizedAppLogic}
-              navigateTo={navigateTo}
-              onRequestProjectConfirmation={() => setShowScrapeConfirmModal(true)}
-              seriesSlug={seriesSlugState}
-              chapterSlug={chapterSlugState}
-              rating={scrapedRating}
-              likes={scrapedLikes}
-              views={scrapedViews}
-            />
-          </div>
-        )}
-
         {/* PAGE VIEW 1.5: Dashboard Overview */}
         {(isDashboardOverviewPath || currentPath === "/") && (
           <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]">

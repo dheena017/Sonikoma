@@ -234,7 +234,10 @@ export default function SeriesCard({
           onClick={(e) => e.stopPropagation()}
         >
           <button
+            type="button"
             onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
               onOpenSeries(series);
               onToggleMenu?.(e, series.id);
             }}
@@ -245,64 +248,118 @@ export default function SeriesCard({
             </div>
             <span className="font-semibold">Open Series</span>
           </button>
-          {onOpenDetails && (
-            <button
-              onClick={(e) => onOpenDetails(e, series)}
-              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
-                <FolderOpen className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold">Details</span>
-            </button>
-          )}
-          {onRename && (
-            <button
-              onClick={(e) => onRename(e, series)}
-              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
-                <Edit2 className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold">Rename</span>
-            </button>
-          )}
-          {onExport && (
-            <button
-              onClick={(e) => onExport(e, series)}
-              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover/item:bg-emerald-500/20 group-hover/item:text-emerald-300 transition-colors">
-                <Download className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold">Export</span>
-            </button>
-          )}
-          {onCopyLink && (
-            <button
-              onClick={(e) => onCopyLink(e, series)}
-              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover/item:bg-amber-500/20 group-hover/item:text-amber-300 transition-colors">
-                <Link className="w-3.5 h-3.5" />
-              </div>
-              <span className="font-semibold">Copy Link</span>
-            </button>
-          )}
-          {onDelete && (
-            <>
-              <div className="h-px bg-white/10 my-1" />
-              <button
-                onClick={(e) => onDelete(e, series.id)}
-                className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
-              >
-                <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover/item:bg-rose-500/20 group-hover/item:text-rose-300 transition-colors">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </div>
-                <span className="font-semibold">Delete</span>
-              </button>
-            </>
-          )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onOpenDetails) {
+                onOpenDetails(e, series);
+              } else {
+                onOpenSeries(series);
+              }
+              onToggleMenu?.(e, series.id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
+              <FolderOpen className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Details</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onRename) {
+                onRename(e, series);
+              } else {
+                onOpenSeries(series);
+              }
+              onToggleMenu?.(e, series.id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
+              <Edit2 className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Rename</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onExport) {
+                onExport(e, series);
+              } else if (series.latestChapter) {
+                const nav = (window as any).navigateTo;
+                const target = `/scraper?id=${encodeURIComponent(
+                  series.latestChapter.project_id
+                )}&export=true`;
+                if (typeof nav === "function") nav(target);
+                else {
+                  window.history.pushState({}, "", target);
+                  window.dispatchEvent(new Event("popstate"));
+                }
+              }
+              onToggleMenu?.(e, series.id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover/item:bg-emerald-500/20 group-hover/item:text-emerald-300 transition-colors">
+              <Download className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Export</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onCopyLink) {
+                onCopyLink(e, series);
+              } else {
+                const url = series.slug
+                  ? `${window.location.origin}/projects/${series.slug}`
+                  : `${window.location.origin}/projects`;
+                navigator.clipboard.writeText(url);
+                if (typeof (window as any).alertAsync === "function") {
+                  (window as any).alertAsync(
+                    "Series link copied to clipboard!",
+                    "Success",
+                    "emerald"
+                  );
+                }
+              }
+              onToggleMenu?.(e, series.id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover/item:bg-amber-500/20 group-hover/item:text-amber-300 transition-colors">
+              <Link className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Copy Link</span>
+          </button>
+          <div className="h-px bg-white/10 my-1" />
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              if (onDelete) {
+                onDelete(e, series.id);
+              }
+              onToggleMenu?.(e, series.id);
+            }}
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+          >
+            <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover/item:bg-rose-500/20 group-hover/item:text-rose-300 transition-colors">
+              <Trash2 className="w-3.5 h-3.5" />
+            </div>
+            <span className="font-semibold">Delete</span>
+          </button>
         </div>
       )}
 

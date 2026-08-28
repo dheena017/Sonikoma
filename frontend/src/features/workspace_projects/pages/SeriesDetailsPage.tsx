@@ -77,6 +77,10 @@ export default function SeriesDetailsPage({
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
   const [isBatchMode, setIsBatchMode] = useState(false);
 
+  // Card menu and rename state
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [renamingProjectId, setRenamingProjectId] = useState<string | null>(null);
+
   // Modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
@@ -84,11 +88,51 @@ export default function SeriesDetailsPage({
 
   const actions = useProjectsActions();
 
+  const handleToggleMenu = (e: React.MouseEvent, projectId: string) => {
+    e.stopPropagation();
+    setOpenMenuId((current) => (current === projectId ? null : projectId));
+  };
+
+  const handleSaveRename = async (projectId: string, newName: string) => {
+    if (!newName.trim()) {
+      setRenamingProjectId(null);
+      return;
+    }
+    try {
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token");
+      await fetch(`/api/projects/${projectId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ title: newName.trim() }),
+      });
+      setSeries((prev) =>
+        prev
+          ? {
+              ...prev,
+              chapters: prev.chapters.map((c) =>
+                c.project_id === projectId ? { ...c, title: newName.trim() } : c
+              ),
+            }
+          : null
+      );
+      notify.success(`Renamed chapter to "${newName.trim()}"`);
+    } catch (err) {
+      console.error("Failed to rename chapter:", err);
+    }
+    setRenamingProjectId(null);
+  };
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
         setIsSortOpen(false);
       }
+      setOpenMenuId(null);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -726,8 +770,12 @@ export default function SeriesDetailsPage({
                 )}
                 <ProjectCard
                   project={chapter}
+                  openMenuId={openMenuId}
+                  onToggleMenu={handleToggleMenu}
+                  renamingProjectId={renamingProjectId}
+                  onSaveRename={handleSaveRename}
                   onOpenProject={(p) => actions.handleOpenProject(p)}
-                  onRename={(e, p) => actions.handleRename(e, p, () => {})}
+                  onRename={(e, p) => setRenamingProjectId(p.project_id)}
                   onExport={(e, p) => actions.handleExport(e, p)}
                   onOpenDetails={(e, p) => actions.handleOpenDetails(e, p)}
                   onDelete={(e, pid) =>
@@ -746,7 +794,7 @@ export default function SeriesDetailsPage({
                             : null
                         );
                       },
-                      () => {}
+                      () => setOpenMenuId(null)
                     )
                   }
                   onCopyLink={(e, p) => actions.handleCopyLink(e, p)}

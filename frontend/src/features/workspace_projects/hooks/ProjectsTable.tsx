@@ -195,57 +195,101 @@ export default function ProjectsTable({
 
                   {openMenuId === project.project_id && (
                     <div
-                      className={`absolute right-4 w-48 bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.9)] p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 ${
+                      className={`absolute right-4 w-52 bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-0.5 ${
                         openUpward ? "bottom-12" : "top-12"
                       }`}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
+                          e.preventDefault();
                           onOpenProject(project);
                           onToggleMenu(e, project.project_id);
                         }}
-                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+                        className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Play className="w-3.5 h-3.5 text-purple-400" />
-                        <span>Resume</span>
+                        <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover/item:bg-purple-500/20 group-hover/item:text-purple-300 transition-colors">
+                          <Play className="w-3.5 h-3.5 fill-purple-400/20" />
+                        </div>
+                        <span className="font-semibold">Resume</span>
                       </button>
                       <button
-                        onClick={(e) => onOpenDetails(e, project)}
-                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onOpenDetails(e, project);
+                          onToggleMenu(e, project.project_id);
+                        }}
+                        className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
-                        <span>Details</span>
+                        <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
+                          <FolderOpen className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold">Details</span>
                       </button>
                       <button
-                        onClick={(e) => onRename(e, project)}
-                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onRename(e, project);
+                          onToggleMenu(e, project.project_id);
+                        }}
+                        className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Edit2 className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>Rename</span>
+                        <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold">Rename</span>
                       </button>
                       <button
-                        onClick={(e) => onExport(e, project)}
-                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onExport(e, project);
+                          onToggleMenu(e, project.project_id);
+                        }}
+                        className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Download className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Export</span>
+                        <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover/item:bg-emerald-500/20 group-hover/item:text-emerald-300 transition-colors">
+                          <Download className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold">Export</span>
                       </button>
                       <button
-                        onClick={(e) => onCopyLink(e, project)}
-                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onCopyLink(e, project);
+                          onToggleMenu(e, project.project_id);
+                        }}
+                        className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Link className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Copy Link</span>
+                        <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover/item:bg-amber-500/20 group-hover/item:text-amber-300 transition-colors">
+                          <Link className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold">Copy Link</span>
                       </button>
                       <div className="h-px bg-white/10 my-1" />
                       <button
-                        onClick={(e) => onDelete(e, project.project_id)}
-                        className="w-full text-left px-3 py-2 text-xs font-mono text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          onDelete(e, project.project_id);
+                          onToggleMenu(e, project.project_id);
+                        }}
+                        className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-                        <span>Delete</span>
+                        <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover/item:bg-rose-500/20 group-hover/item:text-rose-300 transition-colors">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold">Delete</span>
                       </button>
                     </div>
                   )}

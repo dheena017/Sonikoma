@@ -190,6 +190,15 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       finalPlacement = finalPlacement.replace("bottom", "top") as TooltipPlacement;
     }
 
+    // Auto align start/end if centered tooltip would overflow viewport sides
+    if (finalPlacement === "bottom" || finalPlacement === "top") {
+      if (left + width / 2 - 110 < 12) {
+        finalPlacement = (finalPlacement + "-start") as TooltipPlacement;
+      } else if (left + width / 2 + 110 > vpWidth - 12) {
+        finalPlacement = (finalPlacement + "-end") as TooltipPlacement;
+      }
+    }
+
     const posStyle: React.CSSProperties = {
       position: "fixed",
       zIndex: 999999,
@@ -235,36 +244,36 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
         arrowPos = "right-end";
         break;
       case "top":
-        posStyle.left = left + width / 2 + crossOffset;
+        posStyle.left = Math.max(12, Math.min(vpWidth - 12, left + width / 2 + crossOffset));
         posStyle.top = top - offset;
         posStyle.transform = "translate(-50%, -100%)";
         arrowPos = "bottom";
         break;
       case "top-start":
-        posStyle.left = left + crossOffset;
+        posStyle.left = Math.max(12, left + crossOffset);
         posStyle.top = top - offset;
         posStyle.transform = "translateY(-100%)";
         arrowPos = "bottom-start";
         break;
       case "top-end":
-        posStyle.left = right + crossOffset;
+        posStyle.left = Math.min(vpWidth - 12, right + crossOffset);
         posStyle.top = top - offset;
         posStyle.transform = "translate(-100%, -100%)";
         arrowPos = "bottom-end";
         break;
       case "bottom":
-        posStyle.left = left + width / 2 + crossOffset;
+        posStyle.left = Math.max(12, Math.min(vpWidth - 12, left + width / 2 + crossOffset));
         posStyle.top = bottom + offset;
         posStyle.transform = "translateX(-50%)";
         arrowPos = "top";
         break;
       case "bottom-start":
-        posStyle.left = left + crossOffset;
+        posStyle.left = Math.max(12, left + crossOffset);
         posStyle.top = bottom + offset;
         arrowPos = "top-start";
         break;
       case "bottom-end":
-        posStyle.left = right + crossOffset;
+        posStyle.left = Math.min(vpWidth - 12, right + crossOffset);
         posStyle.top = bottom + offset;
         posStyle.transform = "translateX(-100%)";
         arrowPos = "top-end";
@@ -308,15 +317,15 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       case "top":
         return { className: `${base} -top-1 left-1/2 -translate-x-1/2 border-b-0 border-r-0`, style: {} };
       case "top-start":
-        return { className: `${base} -top-1 left-2.5 border-b-0 border-r-0`, style: {} };
+        return { className: `${base} -top-1 left-5 border-b-0 border-r-0`, style: {} };
       case "top-end":
-        return { className: `${base} -top-1 right-2.5 border-b-0 border-r-0`, style: {} };
+        return { className: `${base} -top-1 right-5 border-b-0 border-r-0`, style: {} };
       case "bottom":
         return { className: `${base} -bottom-1 left-1/2 -translate-x-1/2 border-t-0 border-l-0`, style: {} };
       case "bottom-start":
-        return { className: `${base} -bottom-1 left-2.5 border-t-0 border-l-0`, style: {} };
+        return { className: `${base} -bottom-1 left-5 border-t-0 border-l-0`, style: {} };
       case "bottom-end":
-        return { className: `${base} -bottom-1 right-2.5 border-t-0 border-l-0`, style: {} };
+        return { className: `${base} -bottom-1 right-5 border-t-0 border-l-0`, style: {} };
       default:
         return { className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`, style: {} };
     }
