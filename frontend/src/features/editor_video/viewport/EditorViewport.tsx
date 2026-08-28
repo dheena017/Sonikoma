@@ -33,6 +33,9 @@ export interface EditorViewportProps {
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onZoomReset?: () => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  isDirty?: boolean;
 }
 
 /**
@@ -67,6 +70,9 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
   onZoomIn,
   onZoomOut,
   onZoomReset,
+  onSave,
+  isSaving = false,
+  isDirty = false,
 }) => {
   const isEmbedded = variant === "embedded";
 
@@ -99,6 +105,9 @@ const EditorViewport: React.FC<EditorViewportProps> = ({
         onZoomIn={onZoomIn}
         onZoomOut={onZoomOut}
         onZoomReset={onZoomReset}
+        onSave={onSave}
+        isSaving={isSaving}
+        isDirty={isDirty}
       />
 
       {/* Cinema Player or Blank Viewport */}

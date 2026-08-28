@@ -6,6 +6,7 @@ import {
   Loader2,
   Layout,
   Video,
+  Save,
 } from "lucide-react";
 import VideoPreviewMetadataPanel from "./MetadataPanel";
 import ProcessBar from "@/shared/ui/loading/ProcessBar";
@@ -38,6 +39,9 @@ export interface VideoPreviewHeaderProps {
   onZoomIn?: () => void;
   onZoomOut?: () => void;
   onZoomReset?: () => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  isDirty?: boolean;
 }
 
 const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
@@ -66,6 +70,9 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   onZoomIn,
   onZoomOut,
   onZoomReset,
+  onSave,
+  isSaving = false,
+  isDirty = false,
 }) => {
   const isFloating = variant !== "embedded";
 
@@ -188,7 +195,37 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   );
 
   const rightBlock = (
-    <>
+    <div className="flex items-center gap-2">
+      {/* 💾 Save Project Action Button */}
+      {onSave && (
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving}
+          className={`relative overflow-hidden h-7 px-3.5 rounded-lg font-black text-[10px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border shrink-0 cursor-pointer active:scale-95 ${
+            isSaving
+              ? "bg-purple-900/40 text-purple-200 cursor-wait border-purple-500/30"
+              : isDirty
+              ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-[0_0_14px_rgba(168,85,247,0.4)] animate-pulse"
+              : "bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border-white/10"
+          }`}
+          title={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"}
+        >
+          <Save
+            className={`h-3 w-3 ${
+              isSaving
+                ? "animate-spin text-purple-200"
+                : isDirty
+                ? "text-purple-200"
+                : "text-neutral-400"
+            }`}
+          />
+          <span className="whitespace-nowrap">
+            {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
+          </span>
+        </button>
+      )}
+
       <VideoPreviewMetadataPanel
         musicTheme={musicTheme}
         voiceActor={voiceActor}
@@ -253,7 +290,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
           <X className="h-3.5 w-3.5" />
         </button>
       )}
-    </>
+    </div>
   );
 
   return (

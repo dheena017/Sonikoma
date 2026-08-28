@@ -431,33 +431,6 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           </div>
 
-          {/* Save Button (to the left of Profile Picture & Name) */}
-          {onSave && (
-            <button
-              onClick={onSave}
-              disabled={isSaving}
-              className={`px-3.5 h-8 rounded-lg font-extrabold text-xs transition-all flex items-center gap-1.5 border shrink-0 cursor-pointer active:scale-95 ${
-                isSaving
-                  ? "bg-purple-900/40 text-purple-200 cursor-wait border-purple-500/30"
-                  : isDirty
-                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-[0_0_12px_rgba(168,85,247,0.3)] animate-pulse"
-                  : "bg-neutral-850 hover:bg-neutral-800 text-neutral-300 border-neutral-750"
-              }`}
-              title={isDirty ? "Save Unsaved Changes" : "Project Saved"}
-            >
-              <Save
-                className={`h-3.5 w-3.5 ${
-                  isSaving
-                    ? "animate-spin text-purple-200"
-                    : isDirty
-                    ? "text-purple-300"
-                    : "text-neutral-400"
-                }`}
-              />
-              <span>{isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}</span>
-            </button>
-          )}
-
           {/* User Profile Pill at Far Right End (Matches MainHeader) */}
           <button
             onClick={() => navigateTo && navigateTo("/profile")}

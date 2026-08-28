@@ -364,6 +364,9 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               onZoomIn={handleZoomIn}
               onZoomOut={handleZoomOut}
               onZoomReset={handleZoomReset}
+              onSave={handleSave}
+              isSaving={isSaving}
+              isDirty={isDirty}
             />
 
             {/* Right Vertical Resizer Splitter */}
