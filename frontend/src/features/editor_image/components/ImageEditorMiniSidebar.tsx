@@ -9,7 +9,6 @@ import {
   Sparkles,
   Settings2,
   Scissors,
-  Crop,
   Brush,
   Link2,
   Database,
@@ -65,12 +64,6 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           id: "slice",
           label: "Horizontal Cutter",
           icon: Scissors,
-        },
-        {
-          id: "crop",
-          label: "Panel Cuts Registry",
-          icon: Crop,
-          badge: slicesCount > 0 ? slicesCount : undefined,
         },
         {
           id: "merge",

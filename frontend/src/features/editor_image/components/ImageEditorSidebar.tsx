@@ -6,7 +6,6 @@ import {
   Settings2,
   Brush,
   Scissors,
-  Crop,
   Link2,
   Database,
   ExternalLink,
@@ -89,13 +88,6 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           id: "slice",
           label: "Horizontal Cutter",
           icon: Scissors,
-          type: "tool",
-        },
-        {
-          id: "crop",
-          label: "Panel Cuts Registry",
-          icon: Crop,
-          badge: slicesCount > 0 ? slicesCount : undefined,
           type: "tool",
         },
         {

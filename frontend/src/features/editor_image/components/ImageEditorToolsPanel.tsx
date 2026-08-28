@@ -6,8 +6,6 @@ import EnhancementsPanel from "@/features/editor_image_enhancements/components/E
 import LayerSeparationPanel from "@/features/editor_layer_separation/components/LayerSeparationPanel";
 import HorizontalSplitter from "@/features/editor_horizontal_splitter";
 import YoloTrainingPanel from "./YoloTrainingPanel";
-import PanelCutsPanel from "./PanelCutsPanel";
-import ImageEditorSidebarHeader from "./ImageEditorSidebarHeader";
 import { ImageEditorSidebarProps } from "./ImageEditorSidebarTypes";
 
 function ImageEditorToolsPanel(
@@ -209,40 +207,6 @@ function ImageEditorToolsPanel(
               setMagneticSnap={setMagneticSnap}
               detectedGutters={detectedGutters}
               setDetectedGutters={setDetectedGutters}
-            />
-          )}
-
-          {activeTab === "crop" && (
-            <PanelCutsPanel
-              slices={slices}
-              setSlices={setSlices}
-              selectedSliceId={selectedSliceId}
-              setSelectedSliceId={setSelectedSliceId}
-              editCropTop={editCropTop}
-              setEditCropTop={setEditCropTop}
-              editCropBottom={editCropBottom}
-              setEditCropBottom={setEditCropBottom}
-              editCropLeft={editCropLeft}
-              setEditCropLeft={setEditCropLeft}
-              editCropRight={editCropRight}
-              setEditCropRight={setEditCropRight}
-              editAutoTrim={editAutoTrim}
-              handlePushToSlices={handlePushToSlices}
-              autoPushOnDraw={autoPushOnDraw}
-              setAutoPushOnDraw={setAutoPushOnDraw}
-              handleClearAllSlices={handleClearAllSlices}
-              handleNudge={handleNudge}
-              handleSelectSlice={handleSelectSlice}
-              handleDeleteSlice={handleDeleteSlice}
-              handleCropSingleSlice={handleCropSingleSlice}
-              isCroppingSlice={isCroppingSlice}
-              isSavingEdit={isSavingEdit}
-              handleDetectPanels={handleDetectPanels}
-              handleCancelDetect={handleCancelDetect}
-              isDetecting={isDetecting}
-              handleCommitDetectedBoxes={handleCommitDetectedBoxes}
-              detectedBoxes={detectedBoxes}
-              handleClearDetectedBoxes={handleClearDetectedBoxes}
             />
           )}
         </div>
