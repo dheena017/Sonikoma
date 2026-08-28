@@ -174,15 +174,24 @@ export default function ProjectCard({
           </div>
 
           {/* 3-dot menu */}
-          <Tooltip text="Project actions & options" placement="top">
+          <div
+            className="relative z-30"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
-              onClick={(e) => onToggleMenu?.(e, project.project_id)}
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onToggleMenu?.(e, project.project_id);
+              }}
               aria-label="Project actions & options"
-              className="w-6 h-6 rounded-full bg-black/60 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/15 hover:border-[#3B82F6] transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
+              title="Project actions & options"
+              className="w-7 h-7 rounded-full bg-black/70 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/20 hover:border-purple-400 transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
             >
-              <MoreVertical className="w-3 h-3" />
+              <MoreVertical className="w-3.5 h-3.5" />
             </button>
-          </Tooltip>
+          </div>
         </div>
 
         {/* Bottom thumbnail badges */}
@@ -206,7 +215,7 @@ export default function ProjectCard({
       {/* Dropdown menu — at card level so thumbnail overflow-hidden doesn't clip it */}
       {openMenuId === project.project_id && (
         <div
-          className="absolute right-2.5 top-10 w-44 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl shadow-2xl py-1.5 z-30 animate-fade-in"
+          className="absolute right-2 top-11 w-52 bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-0.5"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -214,50 +223,68 @@ export default function ProjectCard({
               onOpenProject(project);
               onToggleMenu?.(e, project.project_id);
             }}
-            className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
           >
-            <Play className="w-3.5 h-3.5" /> Resume
+            <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover/item:bg-purple-500/20 group-hover/item:text-purple-300 transition-colors">
+              <Play className="w-3.5 h-3.5 fill-purple-400/20" />
+            </div>
+            <span className="font-semibold">Resume</span>
           </button>
           {onOpenDetails && (
             <button
               onClick={(e) => onOpenDetails(e, project)}
-              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
             >
-              <FolderOpen className="w-3.5 h-3.5" /> Details
+              <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
+                <FolderOpen className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-semibold">Details</span>
             </button>
           )}
           {onRename && (
             <button
               onClick={(e) => onRename(e, project)}
-              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
             >
-              <Edit2 className="w-3.5 h-3.5" /> Rename
+              <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
+                <Edit2 className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-semibold">Rename</span>
             </button>
           )}
           {onExport && (
             <button
               onClick={(e) => onExport(e, project)}
-              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5" /> Export
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover/item:bg-emerald-500/20 group-hover/item:text-emerald-300 transition-colors">
+                <Download className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-semibold">Export</span>
             </button>
           )}
           {onCopyLink && (
             <button
               onClick={(e) => onCopyLink(e, project)}
-              className="w-full text-left px-3.5 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+              className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
             >
-              <Link className="w-3.5 h-3.5" /> Copy Link
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover/item:bg-amber-500/20 group-hover/item:text-amber-300 transition-colors">
+                <Link className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-semibold">Copy Link</span>
             </button>
           )}
           {onDelete && (
             <>
-              <div className="h-px bg-white/5 my-1" />
+              <div className="h-px bg-white/10 my-1" />
               <button
                 onClick={(e) => onDelete(e, project.project_id)}
-                className="w-full text-left px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors"
+                className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
               >
-                <Trash2 className="w-3.5 h-3.5" /> Delete
+                <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover/item:bg-rose-500/20 group-hover/item:text-rose-300 transition-colors">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </div>
+                <span className="font-semibold">Delete</span>
               </button>
             </>
           )}

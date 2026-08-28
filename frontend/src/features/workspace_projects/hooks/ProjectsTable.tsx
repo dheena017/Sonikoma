@@ -4,6 +4,7 @@ import {
   Download,
   Edit2,
   ExternalLink,
+  Film,
   FolderOpen,
   Link,
   MoreVertical,
@@ -48,14 +49,14 @@ export default function ProjectsTable({
     projects.length > 0 && selectedProjects.size === projects.length;
 
   return (
-    <div className="overflow-x-auto bg-[#111115] border border-neutral-800 rounded-xl">
+    <div className="overflow-x-auto bg-[#0c0d12]/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-2xl min-h-[340px] pb-12">
       <table className="w-full text-left text-sm whitespace-nowrap">
-        <thead className="bg-[#1c1c21] border-b border-neutral-800 text-neutral-400 uppercase tracking-wider font-semibold text-[10px]">
+        <thead className="bg-[#12131e]/90 border-b border-white/10 text-neutral-400 uppercase tracking-wider font-semibold text-[10px] font-mono">
           <tr>
             <th className="p-4 w-12 text-center">
               <button
                 onClick={toggleSelectAll}
-                className="hover:text-white transition-colors"
+                className="hover:text-white transition-colors cursor-pointer"
               >
                 {allSelected ? (
                   <CheckSquare className="w-5 h-5 text-purple-400" />
@@ -72,13 +73,14 @@ export default function ProjectsTable({
             <th className="p-4 w-12"></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-neutral-800/50">
-          {projects.map((project) => {
+        <tbody className="divide-y divide-white/5">
+          {projects.map((project, idx) => {
             const isSelected = selectedProjects.has(project.project_id);
             const isProcessing =
               project.status?.toLowerCase() === "processing" ||
               project.status?.toLowerCase() === "exporting";
             const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
+            const openUpward = idx >= projects.length - 2 && projects.length > 2;
 
             return (
               <tr
@@ -87,20 +89,20 @@ export default function ProjectsTable({
                 className={`group cursor-pointer transition-colors relative ${
                   isSelected
                     ? "bg-purple-900/10 hover:bg-purple-900/20"
-                    : "hover:bg-white/5"
+                    : "hover:bg-white/[0.04]"
                 }`}
               >
                 <td className="p-4 text-center">
                   <button
                     onClick={(e) => toggleSelection(e, project.project_id)}
-                    className={`transition-colors ${
+                    className={`transition-colors cursor-pointer ${
                       isSelected
                         ? "text-purple-400"
                         : "text-neutral-600 hover:text-white"
                     }`}
                   >
                     {isSelected ? (
-                      <CheckSquare className="w-5 h-5" />
+                      <CheckSquare className="w-5 h-5 text-purple-400" />
                     ) : (
                       <Square className="w-5 h-5" />
                     )}
@@ -108,45 +110,55 @@ export default function ProjectsTable({
                 </td>
                 <td className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 shrink-0 rounded-lg bg-neutral-900 overflow-hidden relative border border-neutral-800">
+                    <div className="w-12 h-16 rounded-xl bg-neutral-900 border border-white/10 overflow-hidden flex-shrink-0 relative shadow-md">
                       {project.cover_image ? (
                         <img
-                          src={getProxiedImageUrl(project.cover_image)}
+                          src={
+                            project.cover_image.startsWith("http")
+                              ? `/api/proxy-image?url=${encodeURIComponent(
+                                  project.cover_image
+                                )}`
+                              : project.cover_image
+                          }
                           alt={project.title}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <FolderOpen className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-neutral-700" />
+                        <div className="w-full h-full flex items-center justify-center text-neutral-600">
+                          <Film className="w-5 h-5" />
+                        </div>
                       )}
                     </div>
                     <div>
-                      <div className="font-bold text-white group-hover:text-purple-400 transition-colors flex items-center gap-2">
-                        {project.title || "Untitled Series"}
-                        <SourceIcon className="h-3 w-3 text-neutral-600" />
-                      </div>
-                      <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
+                      <div className="font-bold text-white group-hover:text-purple-300 transition-colors flex items-center gap-2">
+                        {project.title}
                         {project.episode !== undefined &&
-                        project.episode !== null
-                          ? `EP ${project.episode} • `
-                          : ""}
-                        {project.author || "Unknown"}
+                          project.episode !== null && (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/30 text-purple-300">
+                              EP {project.episode}
+                            </span>
+                          )}
+                      </div>
+                      <div className="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
+                        <SourceIcon className="w-3 h-3 text-purple-400" />
+                        <span>{project.author || "Webtoon Project"}</span>
                       </div>
                     </div>
                   </div>
                 </td>
                 <td className="p-4">
-                  <div className="flex flex-col gap-1.5 min-w-[100px]">
-                    <div
-                      className={`inline-flex px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded border self-start ${
-                        project.status?.toLowerCase() === "completed"
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                          : project.status?.toLowerCase() === "processing"
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20 animate-pulse"
-                          : "bg-neutral-800 text-neutral-400 border-neutral-700"
+                  <div className="space-y-1">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
+                        project.status === "ready"
+                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          : project.status === "failed"
+                          ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                          : "bg-purple-500/10 text-purple-300 border border-purple-500/20"
                       }`}
                     >
-                      {project.status || "Draft"}
-                    </div>
+                      {project.status || "draft"}
+                    </span>
                     {isProcessing && (
                       <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
                         <div
@@ -162,13 +174,13 @@ export default function ProjectsTable({
                   {new Date(project.created_at).toLocaleDateString()}
                 </td>
                 <td className="p-4 text-right">
-                  <div className="font-bold text-white">
+                  <div className="font-bold text-white font-mono">
                     {project.panels_count || project.imported_assets_count || 0}
                   </div>
                   {project.imported_assets_count &&
                   project.panels_count &&
                   project.panels_count !== project.imported_assets_count ? (
-                    <div className="text-[10px] text-neutral-500 font-normal">
+                    <div className="text-[10px] text-neutral-500 font-normal font-mono">
                       {project.imported_assets_count} imported
                     </div>
                   ) : null}
@@ -176,53 +188,64 @@ export default function ProjectsTable({
                 <td className="p-4 relative">
                   <button
                     onClick={(e) => onToggleMenu(e, project.project_id)}
-                    className="p-1 rounded-md text-neutral-500 hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
                   >
                     <MoreVertical className="w-5 h-5" />
                   </button>
 
                   {openMenuId === project.project_id && (
-                    <div className="absolute right-8 top-10 w-40 bg-[#16161b] border border-white/10 rounded-xl shadow-2xl py-1.5 z-30 animate-in fade-in zoom-in duration-100">
+                    <div
+                      className={`absolute right-4 w-48 bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.9)] p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 ${
+                        openUpward ? "bottom-12" : "top-12"
+                      }`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onOpenProject(project);
                           onToggleMenu(e, project.project_id);
                         }}
-                        className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Play className="w-3.5 h-3.5" /> Resume
+                        <Play className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Resume</span>
                       </button>
                       <button
                         onClick={(e) => onOpenDetails(e, project)}
-                        className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <FolderOpen className="w-3.5 h-3.5" /> Details
+                        <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                        <span>Details</span>
                       </button>
                       <button
                         onClick={(e) => onRename(e, project)}
-                        className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Edit2 className="h-3.5 h-3.5" /> Rename
+                        <Edit2 className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Rename</span>
                       </button>
                       <button
                         onClick={(e) => onExport(e, project)}
-                        className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Download className="h-3.5 h-3.5" /> Export
+                        <Download className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Export</span>
                       </button>
                       <button
                         onClick={(e) => onCopyLink(e, project)}
-                        className="w-full text-left px-4 py-2 text-xs text-neutral-300 hover:bg-white/5 hover:text-white flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Link className="w-3.5 h-3.5" /> Copy Link
+                        <Link className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Copy Link</span>
                       </button>
-                      <div className="h-px bg-white/5 my-1" />
+                      <div className="h-px bg-white/10 my-1" />
                       <button
                         onClick={(e) => onDelete(e, project.project_id)}
-                        className="w-full text-left px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 flex items-center gap-2"
+                        className="w-full text-left px-3 py-2 text-xs font-mono text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                        <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                        <span>Delete</span>
                       </button>
                     </div>
                   )}
