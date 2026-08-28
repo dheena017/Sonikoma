@@ -6,7 +6,6 @@ import { WorkspacePanel } from "@/features/editor_video/shell/WorkspacePanel";
 import { EditorViewport } from "@/features/editor_video/viewport/EditorViewport";
 import { Timeline } from "@/features/editor_video/timeline/Timeline";
 import { InspectorPanel } from "@/features/editor_video/inspector/InspectorPanel";
-import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 
 interface VideoEditorPageProps {
   appLogic?: any;
@@ -242,10 +241,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#06060c]/85 text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
-      {/* Global Anime Background Scene */}
-      <LandingAnimeScene variant="editor" />
-
+    <div className="flex flex-col h-screen w-screen bg-[#06060c] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
       {/* Subtle ambient background glow */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(88,28,235,0.08),transparent)] z-0" />
 

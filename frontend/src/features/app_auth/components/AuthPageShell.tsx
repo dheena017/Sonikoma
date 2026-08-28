@@ -1,6 +1,5 @@
 import React from "react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
-import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 import { ThemeKey, THEMES } from "@/features/app_auth/components/constants";
 
 interface AuthPageShellProps {
@@ -21,9 +20,7 @@ export default function AuthPageShell({
   const currentTheme = THEMES[activeTheme];
 
   return (
-    <div className="auth-anime-shell min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden relative">
-      <LandingAnimeScene variant="auth" />
-
+    <div className="min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden relative">
       <AuthShowcase activeTheme={activeTheme} iconType={iconType} />
 
       {/* RIGHT PANEL */}

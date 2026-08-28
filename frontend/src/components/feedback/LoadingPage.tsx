@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 import "@/styles/animations/loading.css";
 
 export type ThemeMode = "dark" | "light";
@@ -50,9 +49,6 @@ export default function LoadingPage({
           "'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif",
       }}
     >
-      {/* Background Anime Scene matching the app */}
-      <LandingAnimeScene themeMode={activeMode} variant="app" />
-
       {/* Luxury Glass Studio Card */}
       <div className="loading-studio-card">
         {/* Central Logo with Ambient Glow & Floating Specular Shine */}

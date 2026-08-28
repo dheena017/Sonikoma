@@ -19,7 +19,6 @@ import {
   Volume2,
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
-import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 import {
   THEMES,
   ThemeKey,
@@ -95,9 +94,7 @@ export default function LoginPage({
   };
 
   return (
-    <div className="auth-anime-shell min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden relative">
-      <LandingAnimeScene variant="auth" />
-
+    <div className="min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden relative">
       {/* LEFT PANEL: Auth Product Slideshow (extracted child component) */}
       <AuthShowcase activeTheme={activeTheme} iconType="login" />
 

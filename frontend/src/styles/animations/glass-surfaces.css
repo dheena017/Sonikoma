@@ -2,24 +2,13 @@
    GLASS SURFACES & TRANSPARENT LAYOUT OVERRIDES — UNIFIED FROSTED GLASS
    ========================================================================== */
 
-.app-anime-shell,
-.auth-anime-shell {
-  isolation: isolate;
-  background: transparent !important;
-}
-
 #app_root {
-  background: transparent !important;
+  background-color: #07080c !important;
 }
 
-.auth-anime-shell > *:not(.anime-hero-scene) {
-  position: relative;
-  z-index: 10;
-}
-
-.app-anime-shell #main-content-layout,
-.app-anime-shell #main-scrollable-area {
-  background: transparent !important;
+#main-content-layout,
+#main-scrollable-area {
+  background-color: #010104ff !important;
 }
 
 /* ── 1. Top Header Frosted Glass ────────────────────────────────────────── */

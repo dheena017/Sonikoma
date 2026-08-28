@@ -1,6 +1,5 @@
 import React from "react";
 import { ImageEditorMiniSidebar } from "@/features/editor_image/components/ImageEditorMiniSidebar";
-import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 
 interface ImageEditorLayoutProps {
   children: React.ReactNode;
