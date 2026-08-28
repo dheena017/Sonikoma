@@ -430,27 +430,6 @@ const EditorMiniSidebarInner = ({
       style={{ top: `${topOffsetPx}px` }}
       className="hidden md:flex fixed bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-[90] shadow-xl select-none overflow-hidden"
     >
-      {/* Top Drawer Toggle Button */}
-      <div className="w-full flex justify-center pb-3 pt-0.5 border-b border-white/10 shrink-0">
-        <button
-          onClick={() => setIsCollapsed(false)}
-          onMouseEnter={(e) => {
-            setMenuRect(e.currentTarget.getBoundingClientRect());
-            setMenuHover(true);
-          }}
-          onMouseLeave={() => setMenuHover(false)}
-          aria-label="Expand Sidebar"
-          className="w-11 h-11 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-        <TooltipPortal
-          text="Expand Sidebar"
-          visible={menuHover}
-          anchorRect={menuRect}
-        />
-      </div>
-
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {menuGroups.map((group, gi) => (

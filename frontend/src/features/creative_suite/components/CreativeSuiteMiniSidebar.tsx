@@ -167,29 +167,6 @@ const CreativeSuiteMiniSidebarInner: React.FC<
 
   return (
     <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 shadow-xl select-none overflow-hidden">
-      {/* Top Sidebar Drawer Toggle Button */}
-      {onOpenSidebar && (
-        <div className="w-full flex justify-center pb-3 pt-0.5 border-b border-white/10 shrink-0">
-          <button
-            onClick={onOpenSidebar}
-            onMouseEnter={(e) => {
-              setMenuRect(e.currentTarget.getBoundingClientRect());
-              setMenuHover(true);
-            }}
-            onMouseLeave={() => setMenuHover(false)}
-            aria-label="Open Full Sidebar"
-            className="w-11 h-11 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <TooltipPortal
-            text="Expand Sidebar"
-            visible={menuHover}
-            anchorRect={menuRect}
-          />
-        </div>
-      )}
-
       {/* Navigation Groups */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (

@@ -50,6 +50,7 @@ interface SidebarProps {
   notifications?: Notification[];
   seriesSlug?: string | null;
   chapterSlug?: string | null;
+  user?: any;
 }
 
 const ActiveProjectSidebarWidget: React.FC<{
@@ -162,6 +163,7 @@ const SidebarInner = ({
   notifications = [],
   seriesSlug = null,
   chapterSlug = null,
+  user = null,
 }: SidebarProps) => {
   const { themeMode } = useThemeMode();
   const setDrawerOpen = useProjectStore((s) => s.setDrawerOpen);
@@ -191,6 +193,21 @@ const SidebarInner = ({
     currentPath.startsWith("/video-editor/");
   const isShortcuts = currentPath === "/shortcuts";
   const isProjects = currentPath === "/projects";
+
+  const isAdmin = useMemo(() => {
+    if (user?.creator_role === "admin" || user?.role === "admin") return true;
+    if (typeof window !== "undefined") {
+      if (localStorage.getItem("sonikoma_admin_token")) return true;
+      try {
+        const savedUserStr = localStorage.getItem("sonikoma_user");
+        if (savedUserStr) {
+          const u = JSON.parse(savedUserStr);
+          if (u?.creator_role === "admin" || u?.role === "admin") return true;
+        }
+      } catch (e) {}
+    }
+    return false;
+  }, [user]);
 
   const activeProjectId = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
@@ -314,14 +331,18 @@ const SidebarInner = ({
           onClick: () => navigateTo("/video-editor"),
           enabled: true,
         },
-        {
-          label: "Admin",
-          icon: Shield,
-          active: isAdminDashboardPath || isAdminPath,
-          path: "/admin",
-          onClick: () => navigateTo("/admin"),
-          enabled: true,
-        },
+        ...(isAdmin
+          ? [
+              {
+                label: "Admin",
+                icon: Shield,
+                active: isAdminDashboardPath || isAdminPath,
+                path: "/admin",
+                onClick: () => navigateTo("/admin"),
+                enabled: true,
+              },
+            ]
+          : []),
       ],
     },
     {

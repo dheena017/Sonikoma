@@ -98,9 +98,6 @@ function ImageEditorToolsPanel(
 
   return (
     <div className="w-full h-full flex flex-col min-h-0 bg-[#121212] border-r border-[#2F2F2F] shadow-xl overflow-hidden text-left">
-      {/* Sidebar Header */}
-      <ImageEditorSidebarHeader activeTab={activeTab} />
-
       {/* Main Active Tool Panel Area */}
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
         <div className="bg-[#181818] border border-[#2F2F2F] rounded-2xl p-4 sm:p-5 shadow-lg space-y-4">

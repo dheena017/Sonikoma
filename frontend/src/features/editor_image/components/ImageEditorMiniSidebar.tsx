@@ -157,34 +157,8 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
     );
   };
 
-  const [menuHover, setMenuHover] = useState(false);
-  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
-
   return (
     <div className="w-20 h-full flex flex-col items-center py-3 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 select-none shrink-0 z-30 overflow-hidden">
-      {/* Top Drawer Toggle Button */}
-      {(onToggleSidebar || onOpenToolsPanel) && (
-        <div className="w-full flex justify-center pb-3 pt-0.5 border-b border-white/10 shrink-0">
-          <button
-            onClick={onToggleSidebar || onOpenToolsPanel}
-            onMouseEnter={(e) => {
-              setMenuRect(e.currentTarget.getBoundingClientRect());
-              setMenuHover(true);
-            }}
-            onMouseLeave={() => setMenuHover(false)}
-            aria-label="Toggle Tool Options"
-            className="w-11 h-11 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <TooltipPortal
-            text="Toggle Tool Options"
-            visible={menuHover}
-            anchorRect={menuRect}
-          />
-        </div>
-      )}
-
       {/* Tool Icons List */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (

@@ -455,6 +455,7 @@ export default function MainLayout(props: MainLayoutProps) {
               notifications={notifications}
               seriesSlug={seriesSlugState}
               chapterSlug={chapterSlugState}
+              user={user}
             />
             {!isSidebarOpen &&
               !isDrawerOpen &&
