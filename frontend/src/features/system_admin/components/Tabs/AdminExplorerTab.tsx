@@ -87,20 +87,20 @@ export function AdminExplorerTab({
         <div className="flex bg-[#0b0b0e] rounded-lg p-1">
           <button
             onClick={() => setView("index")}
-            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 font-mono ${
               view === "index"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
-                : "text-neutral-500 hover:text-neutral-300"
+                ? "bg-[#3B82F6] text-white shadow-sm"
+                : "text-[#9CA3AF] hover:text-white"
             }`}
           >
             <Layers className="w-3.5 h-3.5" /> Project Index
           </button>
           <button
             onClick={() => setView("table")}
-            className={`px-4 py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 font-mono ${
               view === "table"
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
-                : "text-neutral-500 hover:text-neutral-300"
+                ? "bg-[#3B82F6] text-white shadow-sm"
+                : "text-[#9CA3AF] hover:text-white"
             }`}
           >
             <Table className="w-3.5 h-3.5" /> DB Browser
@@ -116,10 +116,10 @@ export function AdminExplorerTab({
                   setActiveTable(t);
                   setOffset(0);
                 }}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-tighter transition-all border ${
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-tighter transition-all border font-mono ${
                   activeTable === t
-                    ? "bg-purple-500/10 border-purple-500/50 text-purple-400"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-500 hover:text-neutral-400"
+                    ? "bg-[#3B82F6]/15 border-[#3B82F6]/50 text-[#3B82F6]"
+                    : "bg-[#141414] border-[#2F2F2F] text-[#9CA3AF] hover:text-white"
                 }`}
               >
                 {t}
@@ -129,11 +129,11 @@ export function AdminExplorerTab({
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-[#111115] border border-neutral-800 rounded-xl p-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1 space-y-4">
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-4 shadow-sm">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
               <input
                 type="text"
                 placeholder={
@@ -141,27 +141,27 @@ export function AdminExplorerTab({
                 }
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
+                className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-[#3B82F6] font-sans"
               />
             </div>
           </div>
 
-          <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden max-h-[600px] overflow-y-auto">
-            <div className="p-3 border-b border-neutral-800 bg-[#0b0b0e] flex items-center justify-between">
-              <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2">
-                <Database className="w-3 h-3" />{" "}
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl overflow-hidden max-h-[600px] overflow-y-auto shadow-sm">
+            <div className="p-3 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between">
+              <h3 className="text-xs font-bold text-[#E5E5E5] uppercase tracking-wider flex items-center gap-2 font-mono">
+                <Database className="w-3.5 h-3.5 text-[#3B82F6]" />{" "}
                 {view === "index"
                   ? "Object Registry"
                   : `${activeTable} Records`}
               </h3>
-              <span className="text-[10px] text-neutral-500">
+              <span className="text-[10px] text-[#9CA3AF] font-mono">
                 {view === "index" ? filteredProjects.length : tableData.length}{" "}
                 records
               </span>
             </div>
-            <div className="divide-y divide-neutral-800/50">
+            <div className="divide-y divide-[#2F2F2F]">
               {loading ? (
-                <div className="p-8 text-center text-neutral-500 text-sm">
+                <div className="p-8 text-center text-[#9CA3AF] text-sm">
                   Loading...
                 </div>
               ) : view === "index" ? (
@@ -169,28 +169,28 @@ export function AdminExplorerTab({
                   <button
                     key={p.id}
                     onClick={() => setSelectedObject(p)}
-                    className={`w-full p-4 text-left hover:bg-white/[0.02] transition-colors flex items-center justify-between group ${
-                      selectedObject?.id === p.id ? "bg-purple-500/5" : ""
+                    className={`w-full p-4 text-left hover:bg-[#181818] transition-colors flex items-center justify-between group ${
+                      selectedObject?.id === p.id ? "bg-[#3B82F6]/10" : ""
                     }`}
                   >
                     <div className="min-w-0">
                       <p
                         className={`text-sm font-medium truncate ${
                           selectedObject?.id === p.id
-                            ? "text-purple-400"
-                            : "text-neutral-200"
+                            ? "text-[#3B82F6]"
+                            : "text-[#E5E5E5]"
                         }`}
                       >
                         {p.title || "Untitled"}
                       </p>
-                      <p className="text-[10px] text-neutral-500 font-mono mt-0.5 truncate">
+                      <p className="text-[10px] text-[#9CA3AF] font-mono mt-0.5 truncate">
                         {p.id}
                       </p>
                     </div>
                     <ChevronRight
-                      className={`w-4 h-4 text-neutral-600 transition-transform ${
+                      className={`w-4 h-4 text-[#6B7280] transition-transform ${
                         selectedObject?.id === p.id
-                          ? "translate-x-1 text-purple-500"
+                          ? "translate-x-1 text-[#3B82F6]"
                           : "group-hover:translate-x-1"
                       }`}
                     />
@@ -201,21 +201,21 @@ export function AdminExplorerTab({
                   <button
                     key={i}
                     onClick={() => setSelectedObject(row)}
-                    className={`w-full p-4 text-left hover:bg-white/[0.02] transition-colors flex items-center justify-between group ${
-                      selectedObject === row ? "bg-purple-500/5" : ""
+                    className={`w-full p-4 text-left hover:bg-[#181818] transition-colors flex items-center justify-between group ${
+                      selectedObject === row ? "bg-[#3B82F6]/10" : ""
                     }`}
                   >
                     <div className="min-w-0">
                       <p
                         className={`text-sm font-mono truncate ${
                           selectedObject === row
-                            ? "text-purple-400"
-                            : "text-neutral-300"
+                            ? "text-[#3B82F6]"
+                            : "text-[#E5E5E5]"
                         }`}
                       >
                         {row.id || row.email || row.user_id || i}
                       </p>
-                      <p className="text-[10px] text-neutral-500 mt-0.5 truncate">
+                      <p className="text-[10px] text-[#9CA3AF] mt-0.5 truncate">
                         {Object.keys(row)
                           .slice(0, 3)
                           .map((k) => `${k}: ${row[k]}`)
@@ -223,9 +223,9 @@ export function AdminExplorerTab({
                       </p>
                     </div>
                     <ChevronRight
-                      className={`w-4 h-4 text-neutral-600 transition-transform ${
+                      className={`w-4 h-4 text-[#6B7280] transition-transform ${
                         selectedObject === row
-                          ? "translate-x-1 text-purple-500"
+                          ? "translate-x-1 text-[#3B82F6]"
                           : "group-hover:translate-x-1"
                       }`}
                     />
@@ -263,7 +263,7 @@ export function AdminExplorerTab({
             <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden h-full flex flex-col">
               <div className="p-4 border-b border-neutral-800 bg-[#0b0b0e] flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                  <div className="p-2 bg-[#3B82F6]/10 rounded-lg text-[#3B82F6]">
                     <FileJson className="w-5 h-5" />
                   </div>
                   <div>
@@ -300,7 +300,7 @@ export function AdminExplorerTab({
                     }_${new Date().toISOString().split("T")[0]}.json`;
                     a.click();
                   }}
-                  className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                  className="text-[#3B82F6] hover:text-[#60A5FA] font-medium transition-colors"
                 >
                   Export JSON
                 </button>

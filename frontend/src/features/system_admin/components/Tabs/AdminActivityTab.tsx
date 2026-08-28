@@ -34,22 +34,22 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#111115] border border-neutral-800 rounded-xl p-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#141414] border border-[#2F2F2F] rounded-xl p-4">
         <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
           <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
             <input
               type="text"
               placeholder="Search by action or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-[#3B82F6]/60"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500/50"
+            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-lg px-4 py-2 focus:outline-none focus:border-[#3B82F6]/60"
           >
             <option value="ALL">All Statuses</option>
             <option value="Success">Success</option>
@@ -73,16 +73,16 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
               }
             });
           }}
-          className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+          className="btn-secondary px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
         >
           <Download className="w-4 h-4" /> Export CSV
         </button>
       </div>
 
-      <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-[#141414] border border-[#2F2F2F] rounded-xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-[#0b0b0e] text-neutral-400 border-b border-neutral-800 text-xs uppercase font-semibold">
+            <thead className="bg-[#181818] text-[#9CA3AF] border-b border-[#2F2F2F] text-xs uppercase font-semibold">
               <tr>
                 <th className="px-6 py-4">Timestamp</th>
                 <th className="px-6 py-4">User</th>
@@ -91,7 +91,7 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
                 <th className="px-6 py-4">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-800/50">
+            <tbody className="divide-y divide-[#2F2F2F]/60">
               {loading ? (
                 <tr>
                   <td

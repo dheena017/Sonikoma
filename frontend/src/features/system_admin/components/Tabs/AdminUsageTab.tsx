@@ -50,62 +50,62 @@ export function AdminUsageTab({ fetchWithInterceptor, analytics }: any) {
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+            <div className="p-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl text-[#3B82F6]">
               <Cpu className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium">LLM Token Input</h3>
+            <h3 className="text-[#9CA3AF] font-medium">LLM Token Input</h3>
           </div>
-          <div className="text-3xl font-bold text-white mb-1">
+          <div className="text-3xl font-bold text-[#E5E5E5] mb-1 font-mono">
             {tokenData.input.toLocaleString()}
           </div>
-          <div className="text-xs text-neutral-500">
+          <div className="text-xs text-[#9CA3AF]">
             Global consumption (Gemini/OpenAI)
           </div>
         </div>
 
-        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+            <div className="p-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl text-[#3B82F6]">
               <BarChart className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium">LLM Token Output</h3>
+            <h3 className="text-[#9CA3AF] font-medium">LLM Token Output</h3>
           </div>
-          <div className="text-3xl font-bold text-white mb-1">
+          <div className="text-3xl font-bold text-[#E5E5E5] mb-1 font-mono">
             {tokenData.output.toLocaleString()}
           </div>
-          <div className="text-xs text-neutral-500">
+          <div className="text-xs text-[#9CA3AF]">
             Generated analysis & scripts
           </div>
         </div>
 
-        <div className="bg-[#111115] border border-emerald-500/20 rounded-xl p-6">
+        <div className="bg-[#141414] border border-[#10B981]/30 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+            <div className="p-2 bg-[#10B981]/10 rounded-xl text-[#10B981]">
               <Coins className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium">Estimated AI Cost</h3>
+            <h3 className="text-[#9CA3AF] font-medium">Estimated AI Cost</h3>
           </div>
-          <div className="text-3xl font-bold text-emerald-400 mb-1">
+          <div className="text-3xl font-bold text-[#10B981] mb-1 font-mono">
             ${tokenData.cost.toFixed(4)}
           </div>
-          <div className="text-xs text-neutral-500">
+          <div className="text-xs text-[#9CA3AF]">
             Direct API inference expenses
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-neutral-800 bg-[#0b0b0e] flex items-center justify-between">
-            <h3 className="font-bold text-white flex items-center gap-2">
-              <History className="w-4 h-4 text-purple-400" /> Recent Usage Logs
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between">
+            <h3 className="font-bold text-[#E5E5E5] flex items-center gap-2">
+              <History className="w-4 h-4 text-[#3B82F6]" /> Recent Usage Logs
             </h3>
           </div>
           <div className="overflow-x-auto max-h-[400px]">
-            <table className="w-full text-left text-[11px]">
-              <thead className="bg-black/20 text-neutral-500 uppercase tracking-widest font-bold border-b border-neutral-800">
+            <table className="w-full text-left text-[11px] text-[#E5E5E5]">
+              <thead className="bg-[#181818] text-[#9CA3AF] uppercase tracking-widest font-mono font-bold border-b border-[#2F2F2F]">
                 <tr>
                   <th className="px-4 py-3">Timestamp</th>
                   <th className="px-4 py-3">Project</th>

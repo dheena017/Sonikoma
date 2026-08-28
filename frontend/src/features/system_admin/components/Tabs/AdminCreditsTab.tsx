@@ -554,11 +554,11 @@ export function AdminCreditsTab({
       {/* ── Header / Intro ── */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-xl font-black text-white flex items-center gap-2">
-            <Coins className="w-6 h-6 text-purple-400" />
+          <h2 className="text-xl font-black text-[#E5E5E5] flex items-center gap-2">
+            <Coins className="w-6 h-6 text-[#3B82F6]" />
             Credits System Management
           </h2>
-          <p className="text-xs text-neutral-400 font-semibold mt-1">
+          <p className="text-xs text-[#9CA3AF] font-semibold mt-1">
             Global ledger inspection, balance administration, and manual credit
             grants.
           </p>
@@ -567,35 +567,35 @@ export function AdminCreditsTab({
 
       {/* ── Statistics Summary Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+            <div className="p-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl text-[#3B82F6]">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium text-sm">
+            <h3 className="text-[#9CA3AF] font-medium text-sm">
               System Users
             </h3>
           </div>
-          <div className="text-2xl font-black text-white">
+          <div className="text-2xl font-black text-[#E5E5E5] font-mono">
             {stats.totalUsers.toLocaleString()}
           </div>
-          <p className="text-[10px] text-neutral-500 mt-1">
+          <p className="text-[10px] text-[#9CA3AF] mt-1 font-mono">
             Users registered on ledger
           </p>
         </div>
 
-        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 relative overflow-hidden">
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+            <div className="p-2 bg-[#10B981]/10 rounded-xl text-[#10B981]">
               <Coins className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium text-sm">
+            <h3 className="text-[#9CA3AF] font-medium text-sm">
               Total Balance
             </h3>
           </div>
-          <div className="text-2xl font-black text-white">
+          <div className="text-2xl font-black text-[#E5E5E5] font-mono">
             {stats.totalBalance.toLocaleString()}{" "}
-            <span className="text-xs text-neutral-500 font-normal">
+            <span className="text-xs text-[#9CA3AF] font-normal">
               Credits
             </span>
           </div>
@@ -661,7 +661,7 @@ export function AdminCreditsTab({
         {/* Credit Consumption Breakdown Panel */}
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-5 shadow-xl space-y-4">
           <h3 className="font-bold text-white text-sm flex items-center gap-2 border-b border-neutral-800 pb-3">
-            <BarChart2 className="w-4 h-4 text-purple-400" />
+            <BarChart2 className="w-4 h-4 text-[#3B82F6]" />
             Credit Consumption Breakdown (by Feature)
           </h3>
           <div className="space-y-3">
@@ -680,7 +680,7 @@ export function AdminCreditsTab({
                   </div>
                   <div className="w-full bg-neutral-900 rounded-full h-1.5 overflow-hidden border border-neutral-850">
                     <div
-                      className="bg-gradient-to-r from-purple-500 to-indigo-500 h-full rounded-full"
+                      className="bg-[#3B82F6] h-full rounded-full"
                       style={{ width: `${item.percentage}%` }}
                     />
                   </div>
@@ -708,7 +708,7 @@ export function AdminCreditsTab({
                   onClick={() => setSelectedUserId(u.id)}
                   className={`flex justify-between items-center bg-[#0b0b0e] border border-neutral-850 rounded-lg p-2.5 hover:bg-neutral-900 transition-all cursor-pointer ${
                     selectedUserId === u.id
-                      ? "ring-1 ring-purple-500/50 border-purple-500/50"
+                       ? "ring-1 ring-[#3B82F6]/50 border-[#3B82F6]/50"
                       : ""
                   }`}
                 >
@@ -736,7 +736,7 @@ export function AdminCreditsTab({
             {/* Filters Bar */}
             <div className="p-4 border-b border-neutral-800 bg-[#0b0b0e] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <h3 className="font-bold text-white flex items-center gap-2 text-sm">
-                <History className="w-4 h-4 text-purple-400" />
+                <History className="w-4 h-4 text-[#3B82F6]" />
                 Global Transaction Ledger
               </h3>
 
@@ -748,14 +748,14 @@ export function AdminCreditsTab({
                     placeholder="Search ID/Feature..."
                     value={ledgerSearchQuery}
                     onChange={(e) => setLedgerSearchQuery(e.target.value)}
-                    className="bg-[#111115] border border-neutral-800 text-[11px] text-neutral-200 rounded-lg pl-7 pr-3 py-1 focus:outline-none focus:border-purple-500/50 w-36"
+                    className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg pl-7 pr-3 py-1 focus:outline-none focus:border-[#3B82F6]/60 w-36"
                   />
                 </div>
 
                 <select
                   value={ledgerFilterType}
                   onChange={(e) => setLedgerFilterType(e.target.value)}
-                  className="bg-[#111115] border border-neutral-800 text-[11px] text-neutral-350 rounded-lg px-2 py-1 focus:outline-none focus:border-purple-500/50"
+                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-[#3B82F6]/60"
                 >
                   <option value="all">All Tx</option>
                   <option value="additions">Additions</option>
@@ -766,14 +766,14 @@ export function AdminCreditsTab({
                   type="date"
                   value={ledgerStartDate}
                   onChange={(e) => setLedgerStartDate(e.target.value)}
-                  className="bg-[#111115] border border-neutral-800 text-[11px] text-neutral-200 rounded-lg px-2 py-1 focus:outline-none focus:border-purple-500/50"
+                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-[#3B82F6]/60"
                 />
 
                 <input
                   type="date"
                   value={ledgerEndDate}
                   onChange={(e) => setLedgerEndDate(e.target.value)}
-                  className="bg-[#111115] border border-neutral-800 text-[11px] text-neutral-200 rounded-lg px-2 py-1 focus:outline-none focus:border-purple-500/50"
+                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-[#3B82F6]/60"
                 />
 
                 <label className="inline-flex items-center gap-2 text-[11px] text-neutral-300 px-2 py-1 rounded-lg border border-neutral-800 bg-[#111115] cursor-pointer">
@@ -781,7 +781,7 @@ export function AdminCreditsTab({
                     type="checkbox"
                     checked={showSelectedUserOnly}
                     onChange={(e) => setShowSelectedUserOnly(e.target.checked)}
-                    className="form-checkbox h-4 w-4 text-purple-500 bg-[#111115] border-neutral-700 rounded"
+                    className="form-checkbox h-4 w-4 text-[#3B82F6] bg-[#121212] border-[#2F2F2F] rounded"
                   />
                   <span>Selected user only</span>
                 </label>
@@ -797,7 +797,7 @@ export function AdminCreditsTab({
                 <button
                   type="button"
                   onClick={handleRefreshLedger}
-                  className="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded text-[11px] font-bold transition-all"
+                  className="btn-primary px-2.5 py-1 rounded text-[11px] font-bold"
                 >
                   Refresh
                 </button>
@@ -937,7 +937,7 @@ export function AdminCreditsTab({
                         key={tx.id}
                         className={`hover:bg-white/[0.02] transition-colors cursor-pointer ${
                           selectedUserId === tx.user_id
-                            ? "bg-purple-500/10"
+                            ? "bg-[#3B82F6]/10"
                             : ""
                         }`}
                         onClick={() => setSelectedUserId(tx.user_id)}
@@ -998,7 +998,7 @@ export function AdminCreditsTab({
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <Coins className="w-4 h-4 text-purple-400" />
+                <Coins className="w-4 h-4 text-[#3B82F6]" />
                 {bulkMode
                   ? "Bulk Adjustment Console"
                   : "Manual Adjustment Console"}
@@ -1010,7 +1010,7 @@ export function AdminCreditsTab({
                   type="checkbox"
                   checked={bulkMode}
                   onChange={(e) => setBulkMode(e.target.checked)}
-                  className="form-checkbox h-3.5 w-3.5 text-purple-500 bg-[#111115] border-neutral-700 rounded"
+                  className="form-checkbox h-3.5 w-3.5 text-[#3B82F6] bg-[#121212] border-[#2F2F2F] rounded"
                 />
                 <span>Bulk Mode</span>
               </label>
@@ -1029,14 +1029,14 @@ export function AdminCreditsTab({
                     placeholder="Search user email/name..."
                     value={userSearchQuery}
                     onChange={(e) => setUserSearchQuery(e.target.value)}
-                    className="w-full bg-[#0b0b0e] border border-neutral-800 text-xs text-neutral-200 rounded-lg pl-8 pr-3 py-2.5 focus:outline-none focus:border-purple-500/50"
+                    className="w-full bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-lg pl-8 pr-3 py-2.5 focus:outline-none focus:border-[#3B82F6]/60"
                   />
                 </div>
 
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="w-full bg-[#0b0b0e] border border-neutral-800 text-xs text-neutral-200 rounded-lg p-2.5 focus:outline-none focus:border-purple-500/50"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-lg p-2.5 focus:outline-none focus:border-[#3B82F6]/60"
                 >
                   <option value="">-- Choose User --</option>
                   {filteredUsers.map((u) => (
@@ -1063,7 +1063,7 @@ export function AdminCreditsTab({
                     placeholder="Filter target users..."
                     value={userSearchQuery}
                     onChange={(e) => setUserSearchQuery(e.target.value)}
-                    className="w-full bg-[#111115] border border-neutral-800 text-[11px] text-neutral-250 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-purple-500/50"
+                    className="w-full bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-[#3B82F6]/60"
                   />
                 </div>
               </div>
@@ -1076,7 +1076,7 @@ export function AdminCreditsTab({
                   Current Bal
                 </div>
                 <div className="font-bold text-neutral-200 flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5 text-purple-400" />
+                  <User className="w-3.5 h-3.5 text-[#3B82F6]" />
                   {selectedUserObj.full_name || "Anonymous"}
                 </div>
                 <div className="text-[10px] text-neutral-500">
@@ -1210,7 +1210,7 @@ export function AdminCreditsTab({
                   const val = Math.max(0, parseInt(e.target.value) || 0);
                   setAmount(amount < 0 ? -val : val);
                 }}
-                className="w-full bg-[#0b0b0e] border border-neutral-800 rounded-lg p-2.5 text-xs text-white font-mono text-center focus:border-purple-500/50 outline-none"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-lg p-2.5 text-xs text-[#E5E5E5] font-mono text-center focus:border-[#3B82F6]/60 outline-none"
               />
             </div>
 
@@ -1235,7 +1235,7 @@ export function AdminCreditsTab({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Support ticket # or grant details..."
-                className="w-full bg-[#0b0b0e] border border-neutral-800 rounded-lg p-2.5 text-xs text-white h-20 focus:border-purple-500/50 outline-none resize-none"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-lg p-2.5 text-xs text-[#E5E5E5] h-20 focus:border-[#3B82F6]/60 outline-none resize-none"
               />
             </div>
           </div>
@@ -1255,7 +1255,7 @@ export function AdminCreditsTab({
               disabled={
                 isSubmitting || (!bulkMode && !selectedUserId) || amount === 0
               }
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:from-neutral-800 disabled:to-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-900/10"
+              className="btn-primary w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting
                 ? "Processing..."

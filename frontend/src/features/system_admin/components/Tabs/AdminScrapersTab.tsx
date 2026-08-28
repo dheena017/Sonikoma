@@ -76,7 +76,7 @@ const BlueprintPreview = ({ blueprint }: { blueprint: Record<string, any> | null
             {blueprint.container_selector && (
               <div>
                 <div className="text-[9px] text-neutral-500 uppercase font-bold mb-0.5">Container Selector</div>
-                <code className="text-[11px] text-purple-300 font-mono break-all">{blueprint.container_selector}</code>
+                <code className="text-[11px] text-[#60A5FA] font-mono break-all">{blueprint.container_selector}</code>
               </div>
             )}
             {blueprint.image_url_pattern && (
@@ -315,13 +315,13 @@ export function AdminScrapersTab({
 
       {/* ── Active Registered Domains Quick Filter Bar ── */}
       {domains.length > 0 && (
-        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-4 space-y-2.5">
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-4 space-y-2.5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-xs font-bold text-[#E5E5E5] uppercase tracking-wider flex items-center gap-1.5 font-mono">
+              <Globe className="w-3.5 h-3.5 text-[#3B82F6]" />
               Registered Platform Domains ({domains.length})
             </span>
-            <span className="text-[10px] text-neutral-500 font-mono">
+            <span className="text-[10px] text-[#9CA3AF] font-mono">
               Click any domain to filter table
             </span>
           </div>
@@ -330,14 +330,14 @@ export function AdminScrapersTab({
               <button
                 key={d.domain}
                 onClick={() => setSearch(search === d.domain ? "" : d.domain)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer hover:scale-[1.02] active:scale-95 ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer hover:scale-[1.02] active:scale-95 font-mono ${
                   search === d.domain
-                    ? "bg-purple-600/30 border-purple-500 text-white shadow-sm"
+                    ? "bg-[#3B82F6] border-[#60A5FA]/40 text-white shadow-sm"
                     : d.status === "approved"
-                    ? "border-emerald-500/30 text-emerald-300 bg-emerald-500/10"
+                    ? "border-[#10B981]/30 text-[#10B981] bg-[#10B981]/10"
                     : d.status === "pending"
-                    ? "border-amber-500/30 text-amber-300 bg-amber-500/10"
-                    : "border-red-500/30 text-red-300 bg-red-500/10"
+                    ? "border-[#F59E0B]/30 text-[#F59E0B] bg-[#F59E0B]/10"
+                    : "border-[#EF4444]/30 text-[#EF4444] bg-[#EF4444]/10"
                 }`}
                 title={`Filter table for ${d.domain}`}
               >
@@ -351,11 +351,11 @@ export function AdminScrapersTab({
       )}
 
       {/* ── Domain Table ── */}
-      <div className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden">
+      <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl overflow-hidden shadow-sm">
         {/* Table header / controls */}
-        <div className="p-4 border-b border-neutral-800 bg-[#0b0b0e] flex flex-wrap gap-3 items-center justify-between">
-          <h3 className="font-bold text-white flex items-center gap-2 text-sm">
-            <Database className="w-4 h-4 text-purple-400" />
+        <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] flex flex-wrap gap-3 items-center justify-between">
+          <h3 className="font-bold text-[#E5E5E5] flex items-center gap-2 text-sm">
+            <Database className="w-4 h-4 text-[#3B82F6]" />
             Domain Configuration Registry
           </h3>
 
@@ -617,7 +617,7 @@ export function AdminScrapersTab({
             {[
               { step: "1", label: "User requests URL", desc: "System auto-detects domain, queues for review", color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
               { step: "2", label: "Admin reviews", desc: "Approve, block, or update blueprint selectors", color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
-              { step: "3", label: "AI Auto-Inspect", desc: "Gemini analyzes HTML to generate blueprint", color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
+              { step: "3", label: "AI Auto-Inspect", desc: "Gemini analyzes HTML to generate blueprint", color: "text-[#3B82F6] bg-[#3B82F6]/10 border-[#3B82F6]/20" },
               { step: "4", label: "Goes Live", desc: "All users can now scrape from this domain", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
             ].map((item) => (
               <div key={item.step} className="flex items-start gap-3">

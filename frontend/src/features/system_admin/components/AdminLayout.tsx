@@ -125,7 +125,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-white flex flex-col selection:bg-purple-500/30">
+    <div className="min-h-screen bg-transparent text-white flex flex-col selection:bg-[#3B82F6]/30">
       <AdminHeaderPage
         currentPath={currentPath}
         navigateTo={navigateTo}

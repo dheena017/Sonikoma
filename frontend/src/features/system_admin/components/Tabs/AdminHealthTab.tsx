@@ -126,22 +126,22 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
       {/* Row 1: Core Vital Telemetry Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* CPU Load */}
-        <div className="bg-[#111115] border border-neutral-800/80 rounded-xl p-5 flex flex-col justify-between">
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
-              <Cpu className="w-4 h-4 text-purple-400" /> CPU Load
+            <span className="text-xs font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5 font-mono">
+              <Cpu className="w-4 h-4 text-[#3B82F6]" /> CPU Load
             </span>
-            <span className="text-lg font-bold text-white font-mono">{cpu.usage_percent || 0}%</span>
+            <span className="text-lg font-bold text-[#E5E5E5] font-mono">{cpu.usage_percent || 0}%</span>
           </div>
-          <div className="w-full bg-neutral-900 h-2 rounded-full overflow-hidden mb-3">
+          <div className="w-full bg-[#121212] border border-[#2F2F2F] h-2 rounded-full overflow-hidden mb-3">
             <div
               className={`h-full transition-all duration-700 ${
-                (cpu.usage_percent || 0) > 80 ? "bg-rose-500" : "bg-gradient-to-r from-purple-500 to-indigo-500"
+                (cpu.usage_percent || 0) > 80 ? "bg-[#EF4444]" : "bg-[#3B82F6]"
               }`}
               style={{ width: `${Math.min(cpu.usage_percent || 0, 100)}%` }}
             />
           </div>
-          <div className="flex justify-between text-[11px] text-neutral-400">
+          <div className="flex justify-between text-[11px] text-[#9CA3AF] font-mono">
             <span>{cpu.cores_logical || 1} Logical Cores</span>
             <span>{cpu.cores_physical ? `${cpu.cores_physical} Physical` : "Active"}</span>
           </div>
@@ -238,7 +238,7 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
           <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
             {[
               { label: "Users", count: counts.users, color: "text-blue-400" },
-              { label: "Series", count: counts.series, color: "text-purple-400" },
+              { label: "Series", count: counts.series, color: "text-[#3B82F6]" },
               { label: "Chapters", count: counts.chapters, color: "text-indigo-400" },
               { label: "Panels", count: counts.panels, color: "text-emerald-400" },
               { label: "Jobs", count: counts.jobs, color: "text-amber-400" },

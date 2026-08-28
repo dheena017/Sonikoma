@@ -233,7 +233,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
         <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
           <button
             onClick={onToggleSidebar}
-            className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"
+            className="icon-pill cursor-pointer hover:icon-pill--blue transition-all"
             title="Toggle Navigation Menu"
           >
             <Menu className="h-5 w-5" />
@@ -278,19 +278,19 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
               setShowSearchDropdown(true);
             }}
             onFocus={() => setShowSearchDropdown(true)}
-            className="w-full bg-neutral-900 text-xs text-neutral-205 pl-9 pr-8 py-2 rounded-xl border border-neutral-850 focus:border-purple-500/60 focus:bg-neutral-900/90 focus:outline-none transition-all placeholder:text-neutral-500 font-sans shadow-inner shadow-black/45"
+            className="w-full bg-[#121212] text-xs text-[#E5E5E5] pl-9 pr-8 py-2 rounded-xl border border-[#2F2F2F] focus:border-[#3B82F6] focus:outline-none transition-all placeholder:text-[#6B7280] font-sans"
           />
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[9px] font-mono font-bold text-neutral-500 bg-neutral-950 border border-neutral-850 rounded">
+            <kbd className="hidden lg:inline-block px-1.5 py-0.5 text-[9px] font-mono font-bold text-[#6B7280] bg-[#181818] border border-[#2F2F2F] rounded">
               ⌘K
             </kbd>
           </div>
         </div>
 
         {showSearchDropdown && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto scrollbar-thin">
-            <div className="p-2 border-b border-neutral-850/60">
-              <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-purple-400 tracking-wider uppercase block">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-[#181818] border border-[#2F2F2F] rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-150 max-h-[360px] overflow-y-auto">
+            <div className="p-2 border-b border-[#2F2F2F]">
+              <span className="px-3 py-1.5 text-[9px] font-extrabold font-sans text-[#3B82F6] tracking-wider uppercase block">
                 Jump To Page
               </span>
               <div className="space-y-0.5">
@@ -409,7 +409,7 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
         <div className="relative">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="icon-pill cursor-pointer transition-all relative hover:bg-purple-500/20 hover:text-purple-300"
+            className="icon-pill cursor-pointer transition-all relative hover:bg-[#1E1E1E] hover:text-[#3B82F6]"
             title={
               activeProjectId && activeProjectData
                 ? `Active Project: ${
@@ -418,26 +418,26 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
                 : "Select Active Project"
             }
           >
-            <FolderSync className="h-4 w-4 text-purple-400" />
+            <FolderSync className="h-4 w-4 text-[#3B82F6]" />
             {activeProjectId && activeProjectData && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-black animate-pulse" />
             )}
           </button>
         </div>
 
-        {/* User Profile Pill at Far Right End (Image 2 Style) */}
+        {/* User Profile Pill at Far Right End */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
+          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#181818] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+          <span className="text-xs font-bold text-[#E5E5E5] group-hover:text-white truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#141414] border border-[#2F2F2F]">
             {user?.full_name ||
               user?.username ||
               (user?.email ? user.email.split("@")[0] : "Admin")}
           </span>
-          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#3B82F6] bg-[#1E1E1E] shrink-0 flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
             <img
               key={user?.avatar_url || user?.full_name || "avatar"}
               src={getUserAvatarUrl(user)}

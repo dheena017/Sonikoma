@@ -144,9 +144,9 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Premium Floating Active Pill */}
         <div
-          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${
+          className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 ${
             active
-              ? "h-5 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
+              ? "h-5 bg-[#3B82F6] opacity-100 shadow-[0_0_10px_rgba(59,130,246,0.8)]"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -164,15 +164,15 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
               active
-                ? "bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 shadow-[0_0_18px_rgba(168,85,247,0.3)] scale-105"
-                : "bg-neutral-800/80 border border-neutral-700/80 group-hover:bg-purple-500/15 group-hover:border-purple-500/30"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 shadow-md scale-105"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] group-hover:bg-[#262626] group-hover:border-[#3B82F6]/60"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-300 ${
                 active
-                  ? "text-purple-300"
-                  : "text-neutral-400 group-hover:text-purple-300"
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-white"
               }`}
             />
           </div>
@@ -184,7 +184,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
 
   return (
     // Fixed below the header, hidden scrollbars, premium glassmorphism
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-neutral-950/80 backdrop-blur-xl border-r border-white/10 hidden lg:flex flex-col items-center py-4 z-40 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#121212] border-r border-[#2F2F2F] hidden lg:flex flex-col items-center py-4 z-40 shadow-lg">
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
           <div
@@ -200,9 +200,9 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
               }}
             >
               {groupIdx > 0 && (
-                <div className="w-8 h-[1px] bg-neutral-700/60 rounded-full mb-1.5" />
+                <div className="w-8 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
               )}
-              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-violet-400/80 font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1 drop-shadow-sm">
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-[#3B82F6] font-mono select-none text-center w-full truncate whitespace-nowrap overflow-hidden px-1">
                 {group.name}
               </span>
             </div>
@@ -219,7 +219,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/dashboard")}
-            className="p-3 rounded-2xl bg-gradient-to-b from-purple-500 to-purple-700 hover:from-purple-400 hover:to-purple-600 text-white transition-all shadow-[0_4px_14px_rgba(168,85,247,0.4)] hover:shadow-[0_6px_20px_rgba(168,85,247,0.6)] active:scale-90 border border-purple-400/30 cursor-pointer"
+            className="p-3 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-[0_4px_14px_rgba(59,130,246,0.4)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.6)] active:scale-90 border border-[#60A5FA]/30 cursor-pointer"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>

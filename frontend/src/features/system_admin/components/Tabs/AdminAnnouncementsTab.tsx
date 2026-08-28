@@ -92,13 +92,13 @@ export function AdminAnnouncementsTab({
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
       {/* Top Action Ribbon */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-lg">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 shadow-sm">
         <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Megaphone className="w-5 h-5 text-purple-400" />
+          <h3 className="text-base font-bold text-[#E5E5E5] flex items-center gap-2">
+            <Megaphone className="w-5 h-5 text-[#3B82F6]" />
             Active Platform Broadcasts
           </h3>
-          <p className="text-xs text-neutral-400 font-sans mt-0.5">
+          <p className="text-xs text-[#9CA3AF] font-sans mt-0.5">
             Broadcast messages to all creators. Active announcements will appear
             as a banner across their workspace.
           </p>
@@ -107,7 +107,7 @@ export function AdminAnnouncementsTab({
           <button
             type="button"
             onClick={() => setIsCreating(true)}
-            className="px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl text-white font-mono font-bold text-xs shadow-lg shadow-purple-900/30 transition-all cursor-pointer flex items-center gap-2 border border-purple-400/30 active:scale-95"
+            className="btn-primary px-4 py-2.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             <span>New Announcement</span>
@@ -118,16 +118,16 @@ export function AdminAnnouncementsTab({
       {isCreating && (
         <form
           onSubmit={handleCreate}
-          className="bg-neutral-900/80 backdrop-blur-xl border border-purple-500/40 rounded-2xl p-6 shadow-2xl shadow-purple-950/20 animate-[fadeIn_0.2s_ease-out]"
+          className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 shadow-xl animate-[fadeIn_0.2s_ease-out]"
         >
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Megaphone className="w-4 h-4 text-purple-400" />
+          <h3 className="text-lg font-bold text-[#E5E5E5] mb-4 flex items-center gap-2">
+            <Megaphone className="w-4 h-4 text-[#3B82F6]" />
             Create New Broadcast
           </h3>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-mono font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-mono font-bold text-[#9CA3AF] uppercase tracking-wider mb-1.5">
                 Title
               </label>
               <input
@@ -135,65 +135,65 @@ export function AdminAnnouncementsTab({
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="e.g. Scheduled Engine Maintenance (Sunday 02:00 UTC)"
-                className="w-full bg-neutral-950/70 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                className="w-full bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#3B82F6] transition-all font-sans"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-mono font-bold text-[#9CA3AF] uppercase tracking-wider mb-1.5">
                 Message Body
               </label>
               <textarea
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Enter detailed announcement message..."
-                className="w-full bg-neutral-950/70 border border-white/10 text-white text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20 min-h-[100px] transition-all resize-none"
+                className="w-full bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#3B82F6] min-h-[100px] transition-all resize-none font-sans"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono font-bold text-neutral-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-mono font-bold text-[#9CA3AF] uppercase tracking-wider mb-1.5">
                 Severity / Type
               </label>
               <div className="flex flex-wrap gap-4 pt-1">
-                <label className="flex items-center gap-2 cursor-pointer bg-neutral-950/60 border border-white/10 px-3.5 py-1.5 rounded-xl hover:border-blue-500/40 transition-all">
+                <label className="flex items-center gap-2 cursor-pointer bg-[#121212] border border-[#2F2F2F] px-3.5 py-1.5 rounded-xl hover:border-[#3B82F6]/60 transition-all">
                   <input
                     type="radio"
                     name="type"
                     value="info"
                     checked={newType === "info"}
                     onChange={(e) => setNewType(e.target.value)}
-                    className="accent-purple-500 cursor-pointer"
+                    className="accent-[#3B82F6] cursor-pointer"
                   />
-                  <span className="text-xs font-bold text-blue-400">
+                  <span className="text-xs font-bold text-[#3B82F6]">
                     💡 Information
                   </span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer bg-neutral-950/60 border border-white/10 px-3.5 py-1.5 rounded-xl hover:border-amber-500/40 transition-all">
+                <label className="flex items-center gap-2 cursor-pointer bg-[#121212] border border-[#2F2F2F] px-3.5 py-1.5 rounded-xl hover:border-[#F59E0B]/60 transition-all">
                   <input
                     type="radio"
                     name="type"
                     value="warning"
                     checked={newType === "warning"}
                     onChange={(e) => setNewType(e.target.value)}
-                    className="accent-purple-500 cursor-pointer"
+                    className="accent-[#F59E0B] cursor-pointer"
                   />
-                  <span className="text-xs font-bold text-amber-400">
+                  <span className="text-xs font-bold text-[#F59E0B]">
                     ⚠️ Warning
                   </span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer bg-neutral-950/60 border border-white/10 px-3.5 py-1.5 rounded-xl hover:border-emerald-500/40 transition-all">
+                <label className="flex items-center gap-2 cursor-pointer bg-[#121212] border border-[#2F2F2F] px-3.5 py-1.5 rounded-xl hover:border-[#10B981]/60 transition-all">
                   <input
                     type="radio"
                     name="type"
                     value="success"
                     checked={newType === "success"}
                     onChange={(e) => setNewType(e.target.value)}
-                    className="accent-purple-500 cursor-pointer"
+                    className="accent-[#10B981] cursor-pointer"
                   />
-                  <span className="text-xs font-bold text-emerald-400">
+                  <span className="text-xs font-bold text-[#10B981]">
                     ✅ Feature Launch
                   </span>
                 </label>
@@ -201,10 +201,10 @@ export function AdminAnnouncementsTab({
             </div>
           </div>
 
-          <div className="flex gap-3 mt-6 pt-4 border-t border-white/10">
+          <div className="flex gap-3 mt-6 pt-4 border-t border-[#2F2F2F]">
             <button
               type="submit"
-              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl text-white font-mono font-bold text-xs shadow-lg shadow-purple-900/30 transition-all cursor-pointer flex items-center gap-2 active:scale-95 border border-purple-400/30"
+              className="btn-primary px-5 py-2.5 rounded-xl text-xs font-mono font-bold flex items-center gap-2"
             >
               <Send className="w-4 h-4" />
               <span>Broadcast Now</span>
@@ -212,7 +212,7 @@ export function AdminAnnouncementsTab({
             <button
               type="button"
               onClick={() => setIsCreating(false)}
-              className="px-4 py-2.5 bg-neutral-900/80 hover:bg-neutral-800 border border-white/10 rounded-xl text-neutral-300 hover:text-white font-mono font-bold text-xs transition-all cursor-pointer"
+              className="btn-secondary px-4 py-2.5 rounded-xl text-xs font-mono font-bold"
             >
               Cancel
             </button>
@@ -222,14 +222,14 @@ export function AdminAnnouncementsTab({
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin"></div>
+          <div className="w-8 h-8 rounded-full border-2 border-[#3B82F6] border-t-transparent animate-spin"></div>
         </div>
       ) : (
         <div className="space-y-4">
           {announcements.map((announcement) => (
             <div
               key={announcement.id}
-              className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 hover:border-purple-500/40 transition-all shadow-lg text-left"
+              className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 hover:border-[#3B82F6]/40 transition-all shadow-lg text-left"
             >
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-3">
                 <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export function AdminAnnouncementsTab({
                         ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
                         : announcement.type === "success"
                         ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                        : "bg-[#3B82F6]/10 text-[#3B82F6] border-[#3B82F6]/20"
                     }`}
                   >
                     {announcement.type === "warning" ? (

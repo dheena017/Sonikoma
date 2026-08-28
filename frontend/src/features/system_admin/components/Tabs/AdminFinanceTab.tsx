@@ -54,17 +54,17 @@ export function AdminFinanceTab({ fetchWithInterceptor, analytics }: any) {
           </div>
         </div>
 
-        <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+            <div className="p-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl text-[#3B82F6]">
               <CreditCard className="w-5 h-5" />
             </div>
-            <h3 className="text-neutral-400 font-medium">Active Subs</h3>
+            <h3 className="text-[#9CA3AF] font-medium">Active Subs</h3>
           </div>
-          <div className="text-3xl font-bold text-white mb-1">
+          <div className="text-3xl font-bold text-[#E5E5E5] mb-1 font-mono">
             {analytics?.active_subscriptions || 0}
           </div>
-          <div className="text-xs text-neutral-500">Premium & Studio plans</div>
+          <div className="text-xs text-[#9CA3AF]">Premium & Studio plans</div>
         </div>
 
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">

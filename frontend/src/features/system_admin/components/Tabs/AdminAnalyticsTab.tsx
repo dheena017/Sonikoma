@@ -58,9 +58,9 @@ export function AdminAnalyticsTab({
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#3B82F6]/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110" />
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+            <div className="p-2 bg-[#3B82F6]/10 rounded-lg text-[#3B82F6]">
               <Users className="w-5 h-5" />
             </div>
             <h3 className="font-semibold text-neutral-400 text-sm uppercase tracking-wider">
@@ -78,7 +78,7 @@ export function AdminAnalyticsTab({
           </div>
           <div className="mt-4 w-full bg-neutral-800 rounded-full h-1.5 overflow-hidden">
             <div
-              className="bg-purple-500 h-1.5 rounded-full"
+              className="bg-[#3B82F6] h-1.5 rounded-full"
               style={{
                 width: `${Math.min(
                   ((analytics.total_users || 0) / 5000) * 100,
@@ -259,7 +259,7 @@ export function AdminAnalyticsTab({
                   className="flex-1 flex flex-col items-center justify-end h-full relative group"
                 >
                   <div
-                    className="w-full bg-purple-600/80 hover:bg-purple-500 rounded-t-sm transition-all"
+                    className="w-full bg-[#3B82F6]/70 hover:bg-[#3B82F6] rounded-t-sm transition-all"
                     style={{ height: `${Math.max(heightPct, 2)}%` }}
                   />
                   <div className="absolute -bottom-6 text-[10px] text-neutral-500 font-mono rotate-45 origin-left whitespace-nowrap">
@@ -277,7 +277,7 @@ export function AdminAnalyticsTab({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
         <div className="bg-[#111115] border border-neutral-800 rounded-xl p-6">
           <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-            <Users className="w-5 h-5 text-purple-400" /> Top Creators
+            <Users className="w-5 h-5 text-[#3B82F6]" /> Top Creators
           </h3>
           <div className="space-y-4">
             {analytics.top_creators && analytics.top_creators.length > 0 ? (
@@ -285,7 +285,7 @@ export function AdminAnalyticsTab({
                 const name =
                   creator.full_name || creator.username || "Unknown User";
                 const colors = [
-                  "bg-purple-500/20 text-purple-400",
+                  "bg-[#3B82F6]/20 text-[#3B82F6]",
                   "bg-blue-500/20 text-blue-400",
                   "bg-emerald-500/20 text-emerald-400",
                   "bg-amber-500/20 text-amber-400",
@@ -367,7 +367,7 @@ export function AdminAnalyticsTab({
                 +15% from last month
               </div>
             </div>
-            <div className="p-4 bg-[#0b0b0e] border border-neutral-800 rounded-lg border-l-2 border-l-purple-500">
+            <div className="p-4 bg-[#121212] border border-[#2F2F2F] rounded-lg border-l-2 border-l-[#3B82F6]">
               <div className="text-neutral-400 text-sm mb-1">
                 Active Subscriptions
               </div>

@@ -369,7 +369,7 @@ export function AdminContentTab({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="e.g. Terms of Service violation, User request, Ticket #1234..."
-                className="w-full bg-[#0b0b0e] border border-neutral-800 rounded-lg p-3 text-sm text-white h-24 focus:border-purple-500/50 outline-none transition-colors"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-3 text-sm text-white h-24 focus:border-[#3B82F6] outline-none transition-colors"
               />
             </div>
 
@@ -379,13 +379,13 @@ export function AdminContentTab({
                   setPendingAction(null);
                   setReason("");
                 }}
-                className="flex-1 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg font-medium transition-colors"
+                className="btn-secondary flex-1 py-2 rounded-xl text-xs font-semibold"
               >
                 Cancel
               </button>
               <button
                 onClick={executeProjectAction}
-                className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-medium transition-colors shadow-lg shadow-purple-500/20"
+                className="btn-primary flex-1 py-2 rounded-xl text-xs font-bold"
               >
                 Confirm Action
               </button>

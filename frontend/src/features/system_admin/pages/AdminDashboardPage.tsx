@@ -657,7 +657,7 @@ const AdminDashboardPage = React.memo(
                     alert("Error self-promoting to admin");
                   }
                 }}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/30 rounded-xl text-sm font-bold text-white transition-all cursor-pointer"
+                className="btn-primary w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold cursor-pointer"
               >
                 🛡️ Self-Promote to Admin (Dev Bypass)
               </button>
@@ -688,9 +688,9 @@ const AdminDashboardPage = React.memo(
               type="button"
               onClick={handleClearCache}
               disabled={processingAction === "cache"}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-neutral-900/80 hover:bg-neutral-850 text-neutral-300 hover:text-white border border-white/10 hover:border-purple-500/40 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+              className="btn-secondary flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold disabled:opacity-40"
             >
-              <Wind className="w-3.5 h-3.5 text-purple-400" />
+              <Wind className="w-3.5 h-3.5 text-[#3B82F6]" />
               <span>
                 {processingAction === "cache" ? "Purging..." : "Purge Cache"}
               </span>
@@ -700,9 +700,9 @@ const AdminDashboardPage = React.memo(
               type="button"
               onClick={handleFlushTemp}
               disabled={processingAction === "flush"}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-neutral-900/80 hover:bg-neutral-850 text-neutral-300 hover:text-white border border-white/10 hover:border-amber-500/40 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+              className="btn-secondary flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold disabled:opacity-40"
             >
-              <Trash2 className="w-3.5 h-3.5 text-amber-400" />
+              <Trash2 className="w-3.5 h-3.5 text-[#F59E0B]" />
               <span>Flush Temp</span>
             </button>
 
@@ -710,7 +710,7 @@ const AdminDashboardPage = React.memo(
               type="button"
               onClick={refreshData}
               disabled={loadingStats}
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-black uppercase tracking-wider shadow-lg shadow-purple-900/30 transition-all cursor-pointer active:scale-95 border border-purple-400/30"
+              className="btn-primary flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-mono font-black uppercase tracking-wider shadow-sm"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${loadingStats ? "animate-spin" : ""}`}
@@ -744,64 +744,64 @@ const AdminDashboardPage = React.memo(
           <DashboardStatsSkeleton count={4} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-purple-500/50 transition-all shadow-lg text-left">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#3B82F6]/50 transition-all shadow-sm text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Users className="w-16 h-16 text-purple-400" />
+                <Users className="w-16 h-16 text-[#3B82F6]" />
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-purple-500/10 rounded-xl text-purple-400 border border-purple-500/20">
+                <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
                   <Users className="w-4 h-4" />
                 </div>
-                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
+                <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
                   Total Creators
                 </h3>
               </div>
-              <div className="text-3xl font-extrabold text-white leading-none mb-2">
+              <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
                 {stats.users?.toLocaleString() || "0"}
               </div>
-              <p className="text-[10px] text-purple-400 font-bold flex items-center gap-1 font-mono">
+              <p className="text-[10px] text-[#3B82F6] font-bold flex items-center gap-1 font-mono">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Active platform subscription tier</span>
               </p>
             </div>
 
-            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-indigo-500/50 transition-all shadow-lg text-left">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#3B82F6]/50 transition-all shadow-sm text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <FolderGit2 className="w-16 h-16 text-indigo-400" />
+                <FolderGit2 className="w-16 h-16 text-[#3B82F6]" />
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400 border border-indigo-500/20">
+                <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
                   <FolderGit2 className="w-4 h-4" />
                 </div>
-                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
+                <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
                   Total Projects
                 </h3>
               </div>
-              <div className="text-3xl font-extrabold text-white leading-none mb-2">
+              <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
                 {stats.projects?.toLocaleString() || "0"}
               </div>
-              <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono">
+              <p className="text-[10px] text-[#10B981] font-bold flex items-center gap-1 font-mono">
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span>Storyboards compiled</span>
               </p>
             </div>
 
-            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-emerald-500/50 transition-all shadow-lg text-left">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#10B981]/50 transition-all shadow-sm text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <DollarSign className="w-16 h-16 text-emerald-400" />
+                <DollarSign className="w-16 h-16 text-[#10B981]" />
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20">
+                <div className="p-2 bg-[#10B981]/10 rounded-xl text-[#10B981] border border-[#10B981]/20">
                   <DollarSign className="w-4 h-4" />
                 </div>
-                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
+                <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
                   Revenue MRR
                 </h3>
               </div>
-              <div className="text-3xl font-extrabold text-white leading-none mb-2">
+              <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
                 ${(analytics?.mrr || 0).toLocaleString()}
               </div>
-              <p className="text-[10px] text-emerald-400 font-bold flex items-center gap-1 font-mono">
+              <p className="text-[10px] text-[#10B981] font-bold flex items-center gap-1 font-mono">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>
                   {analytics?.active_subscriptions || 0} active paying plans
@@ -809,22 +809,22 @@ const AdminDashboardPage = React.memo(
               </p>
             </div>
 
-            <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-5 relative overflow-hidden group hover:border-cyan-500/50 transition-all shadow-lg text-left">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#3B82F6]/50 transition-all shadow-sm text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Activity className="w-16 h-16 text-cyan-400" />
+                <Activity className="w-16 h-16 text-[#3B82F6]" />
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-cyan-500/10 rounded-xl text-cyan-400 border border-cyan-500/20">
+                <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
                   <Activity className="w-4 h-4" />
                 </div>
-                <h3 className="text-neutral-400 font-bold text-xs uppercase tracking-wider font-mono">
+                <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
                   Pipeline Health
                 </h3>
               </div>
-              <div className="text-3xl font-extrabold text-white leading-none mb-2">
+              <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
                 {analytics?.success_rate || 100}%
               </div>
-              <p className="text-[10px] text-violet-400 font-bold flex items-center gap-1">
+              <p className="text-[10px] text-[#3B82F6] font-bold flex items-center gap-1 font-mono">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 <span>Process compilation rate</span>
               </p>
@@ -834,16 +834,16 @@ const AdminDashboardPage = React.memo(
 
         {/* Core Analytics SVG Trends Chart */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between shadow-xl text-left">
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between shadow-sm text-left">
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-md font-extrabold text-neutral-100 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-purple-400" /> Platform
+                <h3 className="text-md font-extrabold text-[#E5E5E5] flex items-center gap-2 font-mono">
+                  <TrendingUp className="w-4 h-4 text-[#3B82F6]" /> Platform
                   Signups & Project Activity
                 </h3>
                 <button
                   onClick={refreshData}
-                  className="p-1 rounded bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer active:scale-95 transition-all"
+                  className="btn-secondary p-1.5 rounded-lg cursor-pointer"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                 </button>
@@ -853,10 +853,10 @@ const AdminDashboardPage = React.memo(
           </div>
 
           {/* Performance status & Telemetry details */}
-          <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-sm text-left">
             <div>
-              <h3 className="text-md font-extrabold text-neutral-100 mb-4 flex items-center gap-2">
-                <Server className="w-4 h-4 text-purple-400" /> Infrastructure
+              <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2 font-mono">
+                <Server className="w-4 h-4 text-[#3B82F6]" /> Infrastructure
                 Pulse
               </h3>
               <div className="space-y-4">
@@ -936,25 +936,25 @@ const AdminDashboardPage = React.memo(
 
         {/* Quick Actions Panel & Announcements Broadcaster */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-6 lg:col-span-2 shadow-xl text-left">
-            <h3 className="text-md font-extrabold text-neutral-100 mb-4 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-violet-400" /> Executive Actions
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 lg:col-span-2 shadow-xl text-left">
+            <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[#3B82F6]" /> Executive Actions
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={handleClearCache}
                 disabled={processingAction === "cache"}
-                className="p-4 border border-neutral-800 rounded-xl hover:border-violet-500 hover:bg-violet-500/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#3B82F6] hover:bg-[#3B82F6]/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-neutral-200 font-bold text-xs group-hover:text-violet-400 transition-colors">
+                  <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
                     {processingAction === "cache"
                       ? "Clearing..."
                       : "Purge RAM Cache"}
                   </h4>
-                  <Trash2 className="w-3.5 h-3.5 text-neutral-600 group-hover:text-violet-400" />
+                  <Trash2 className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
                 </div>
-                <p className="text-[10px] text-neutral-500 mt-1">
+                <p className="text-[10px] text-[#9CA3AF] mt-1">
                   Force garbage collect and invalidate platform key caches.
                 </p>
               </button>
@@ -962,17 +962,17 @@ const AdminDashboardPage = React.memo(
               <button
                 onClick={handleFlushTemp}
                 disabled={processingAction === "flush"}
-                className="p-4 border border-neutral-800 rounded-xl hover:border-rose-500 hover:bg-rose-500/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#F59E0B] hover:bg-[#F59E0B]/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-neutral-200 font-bold text-xs group-hover:text-rose-400 transition-colors">
+                  <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#F59E0B] transition-colors">
                     {processingAction === "flush"
                       ? "Flushing..."
                       : "Flush Temporary Files"}
                   </h4>
-                  <Wind className="w-3.5 h-3.5 text-neutral-600 group-hover:text-rose-400" />
+                  <Wind className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#F59E0B]" />
                 </div>
-                <p className="text-[10px] text-neutral-500 mt-1">
+                <p className="text-[10px] text-[#9CA3AF] mt-1">
                   Remove intermediate frame logs, cached audio slices, and
                   exports.
                 </p>
@@ -980,30 +980,30 @@ const AdminDashboardPage = React.memo(
 
               <button
                 onClick={handleExportLogs}
-                className="p-4 border border-neutral-800 rounded-xl hover:border-blue-500 hover:bg-blue-500/5 transition-all text-left group cursor-pointer"
+                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#3B82F6] hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-neutral-200 font-bold text-xs group-hover:text-blue-400 transition-colors">
+                  <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
                     Export Audit Log CSV
                   </h4>
-                  <Download className="w-3.5 h-3.5 text-neutral-600 group-hover:text-blue-400" />
+                  <Download className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
                 </div>
-                <p className="text-[10px] text-neutral-500 mt-1">
+                <p className="text-[10px] text-[#9CA3AF] mt-1">
                   Download the complete security audit events history as a file.
                 </p>
               </button>
 
               <button
                 onClick={() => navigateTo("/admin/jobs")}
-                className="p-4 border border-neutral-800 rounded-xl hover:border-purple-500 hover:bg-purple-500/5 transition-all text-left group cursor-pointer"
+                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#3B82F6] hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-neutral-200 font-bold text-xs group-hover:text-purple-400 transition-colors">
+                  <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
                     Manage Background Jobs
                   </h4>
-                  <Activity className="w-3.5 h-3.5 text-neutral-600 group-hover:text-purple-400" />
+                  <Activity className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
                 </div>
-                <p className="text-[10px] text-neutral-500 mt-1">
+                <p className="text-[10px] text-[#9CA3AF] mt-1">
                   Monitor live tasks, cancel queued workers, and purge completed jobs.
                 </p>
               </button>
@@ -1011,17 +1011,17 @@ const AdminDashboardPage = React.memo(
               <button
                 onClick={handleEmergencyStop}
                 disabled={processingAction === "stop"}
-                className="p-4 bg-rose-500/5 border border-rose-500/20 rounded-xl hover:bg-rose-500/10 hover:border-rose-500/40 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                className="p-4 bg-[#EF4444]/5 border border-[#EF4444]/20 rounded-xl hover:bg-[#EF4444]/10 hover:border-[#EF4444]/40 transition-all text-left group disabled:opacity-50 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-rose-500 font-bold text-xs">
+                  <h4 className="text-[#EF4444] font-bold text-xs">
                     {processingAction === "stop"
                       ? "STOPPING..."
                       : "EMERGENCY SHUTDOWN"}
                   </h4>
-                  <Flame className="w-3.5 h-3.5 text-rose-500/60 group-hover:scale-110 transition-transform" />
+                  <Flame className="w-3.5 h-3.5 text-[#EF4444]/70 group-hover:scale-110 transition-transform" />
                 </div>
-                <p className="text-[10px] text-rose-400/70 mt-1">
+                <p className="text-[10px] text-[#EF4444]/80 mt-1">
                   Halt and kill all active child process compilation routines.
                 </p>
               </button>
@@ -1029,9 +1029,9 @@ const AdminDashboardPage = React.memo(
           </div>
 
           {/* Broadcast announcements */}
-          <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-6 shadow-xl text-left">
-            <h3 className="text-md font-extrabold text-neutral-100 mb-4 flex items-center gap-2">
-              <Mail className="w-4 h-4 text-violet-400" /> Push Broadcast
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 shadow-xl text-left">
+            <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
+              <Mail className="w-4 h-4 text-[#3B82F6]" /> Push Broadcast
             </h3>
             <form onSubmit={handleBroadcastAnnouncement} className="space-y-3">
               <input
@@ -1039,20 +1039,20 @@ const AdminDashboardPage = React.memo(
                 placeholder="Headline/Title"
                 value={announcementTitle}
                 onChange={(e) => setAnnouncementTitle(e.target.value)}
-                className="w-full px-3 py-2 bg-[#040406] border border-neutral-800 rounded-lg text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-violet-500"
+                className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6]"
               />
               <textarea
                 placeholder="Announcement message..."
                 rows={2}
                 value={announcementMsg}
                 onChange={(e) => setAnnouncementMsg(e.target.value)}
-                className="w-full px-3 py-2 bg-[#040406] border border-neutral-800 rounded-lg text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-violet-500 resize-none"
+                className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6] resize-none"
               />
               <div className="flex gap-2">
                 <select
                   value={announcementType}
                   onChange={(e: any) => setAnnouncementType(e.target.value)}
-                  className="px-2 py-1.5 bg-[#040406] border border-neutral-800 rounded-lg text-xs text-neutral-300 focus:outline-none"
+                  className="px-2.5 py-1.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] focus:outline-none focus:border-[#3B82F6]"
                 >
                   <option value="info">💡 Info</option>
                   <option value="warning">⚠️ Warning</option>
@@ -1062,7 +1062,7 @@ const AdminDashboardPage = React.memo(
                 <button
                   type="submit"
                   disabled={processingAction === "broadcast"}
-                  className="flex-1 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-xs font-bold transition-all py-1.5 cursor-pointer active:scale-95 disabled:opacity-50"
+                  className="btn-primary flex-1 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
                 >
                   {processingAction === "broadcast"
                     ? "Broadcasting..."
@@ -1076,55 +1076,55 @@ const AdminDashboardPage = React.memo(
         {/* Audit Logs and Users Impersonation Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* User Impersonation Table */}
-          <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-md font-extrabold text-neutral-100 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-violet-400" /> Creator
+                <h3 className="text-md font-extrabold text-[#E5E5E5] flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[#3B82F6]" /> Creator
                   Switchboard
                 </h3>
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-2 top-2" />
+                  <Search className="w-3.5 h-3.5 text-[#6B7280] absolute left-2.5 top-2.5" />
                   <input
                     type="text"
                     placeholder="Search users..."
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
-                    className="bg-[#040406] border border-neutral-800 rounded-lg pl-7 pr-3 py-1 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-violet-500 w-44"
+                    className="bg-[#121212] border border-[#2F2F2F] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6] w-44"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
                 {loadingUsers ? (
-                  <div className="text-center py-6 text-xs text-neutral-500 italic">
+                  <div className="text-center py-6 text-xs text-[#6B7280] italic">
                     Fetching creators community...
                   </div>
                 ) : filteredUsers.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-neutral-500 italic">
+                  <div className="text-center py-6 text-xs text-[#6B7280] italic">
                     No creators match search.
                   </div>
                 ) : (
                   filteredUsers.map((u) => (
                     <div
                       key={u.id}
-                      className="p-3 bg-[#040406] border border-neutral-800 rounded-xl flex items-center justify-between group hover:border-neutral-700 transition-all"
+                      className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-center justify-between group hover:border-[#3B82F6]/50 transition-all"
                     >
                       <div className="space-y-0.5 min-w-0 flex-1 pr-2">
-                        <div className="font-bold text-xs text-neutral-200">
+                        <div className="font-bold text-xs text-[#E5E5E5]">
                           {u.full_name || "Anonymous"}
                         </div>
-                        <div className="text-[10px] text-neutral-500 font-mono truncate">
+                        <div className="text-[10px] text-[#9CA3AF] font-mono truncate">
                           {u.email}
                         </div>
-                        <div className="text-[9px] text-neutral-600 font-mono flex items-center gap-1">
+                        <div className="text-[9px] text-[#6B7280] font-mono flex items-center gap-1">
                           <Clock className="w-2.5 h-2.5" />
                           Joined {formatDate(u.created_at)}
                         </div>
                       </div>
                       <button
                         onClick={() => handleImpersonate(u.id)}
-                        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 bg-violet-600/10 hover:bg-violet-600 text-violet-400 hover:text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer active:scale-95 border border-violet-500/25"
+                        className="btn-secondary flex-shrink-0 flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold text-[#3B82F6] hover:text-white border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 rounded-lg"
                       >
                         Impersonate <ArrowRight className="w-3 h-3" />
                       </button>
@@ -1136,31 +1136,31 @@ const AdminDashboardPage = React.memo(
           </div>
 
           {/* Audit Logs list */}
-          <div className="bg-[#0b0b0f] border border-neutral-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
             <div>
-              <h3 className="text-md font-extrabold text-neutral-100 mb-4 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-violet-400" /> Security
+              <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#3B82F6]" /> Security
                 Audit Events
               </h3>
               <div className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1">
                 {recentLogs.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-neutral-500 italic">
+                  <div className="text-center py-6 text-xs text-[#6B7280] italic">
                     No security audit events logs found.
                   </div>
                 ) : (
                   recentLogs.map((log) => (
                     <div
                       key={log.id}
-                      className="p-3 bg-[#040406] border border-neutral-800/80 rounded-xl flex items-start justify-between text-xs hover:border-neutral-700 transition-all gap-2"
+                      className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-start justify-between text-xs hover:border-[#3B82F6]/40 transition-all gap-2"
                     >
                       <div className="space-y-0.5 min-w-0 flex-1">
-                        <div className="font-bold text-neutral-200 text-xs">
+                        <div className="font-bold text-[#E5E5E5] text-xs">
                           {log.action}
                         </div>
-                        <div className="text-[10px] text-neutral-500">
+                        <div className="text-[10px] text-[#9CA3AF]">
                           {log.email || "System"} · {log.ip_address}
                         </div>
-                        <div className="text-[9px] text-neutral-600 font-mono flex items-center gap-1">
+                        <div className="text-[9px] text-[#6B7280] font-mono flex items-center gap-1">
                           <Clock className="w-2.5 h-2.5 inline" />
                           {formatDate(log.created_at)}
                         </div>
@@ -1168,8 +1168,8 @@ const AdminDashboardPage = React.memo(
                       <span
                         className={`flex-shrink-0 px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
                           log.status === "Success"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10"
-                            : "bg-rose-500/10 text-rose-400 border border-rose-500/10"
+                            ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+                            : "bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30"
                         }`}
                       >
                         {log.status}

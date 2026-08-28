@@ -117,7 +117,7 @@ export function AdminSettingsTab({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="w-8 h-8 border-4 border-[#3B82F6] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -218,7 +218,7 @@ export function AdminSettingsTab({
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-purple-800 text-white rounded-lg font-medium transition-all shadow-lg shadow-purple-500/20"
+          className="btn-primary flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium shadow-md"
         >
           {saving ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -233,19 +233,19 @@ export function AdminSettingsTab({
         {sections.map((section) => (
           <div
             key={section.id}
-            className="bg-[#111115] border border-neutral-800 rounded-xl overflow-hidden"
+            className="bg-[#141414] border border-[#2F2F2F] rounded-2xl overflow-hidden shadow-sm"
           >
-            <div className="p-4 border-b border-neutral-800 bg-[#0b0b0e] flex items-center gap-3">
-              <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+            <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] flex items-center gap-3">
+              <div className="p-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl text-[#3B82F6]">
                 <section.icon className="w-4 h-4" />
               </div>
-              <h3 className="font-bold text-white">{section.title}</h3>
+              <h3 className="font-bold text-[#E5E5E5]">{section.title}</h3>
             </div>
             <div className="p-6 space-y-4">
               {section.fields.map((field) => (
                 <div key={field.key} className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-neutral-400">
+                    <label className="text-xs font-mono font-medium text-[#9CA3AF]">
                       {field.label}
                     </label>
                   </div>
@@ -265,7 +265,7 @@ export function AdminSettingsTab({
                         }
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-neutral-400 after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 peer-checked:after:bg-white"></div>
+                      <div className="w-11 h-6 bg-[#1E1E1E] border border-[#2F2F2F] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#9CA3AF] after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#3B82F6] peer-checked:after:bg-white"></div>
                     </label>
                   ) : (
                     <input
@@ -277,7 +277,7 @@ export function AdminSettingsTab({
                           [field.key]: e.target.value,
                         })
                       }
-                      className="w-full bg-[#0b0b0e] border border-neutral-800 text-sm text-neutral-200 rounded-lg px-4 py-2.5 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all"
+                      className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#3B82F6] transition-all font-sans"
                     />
                   )}
                 </div>

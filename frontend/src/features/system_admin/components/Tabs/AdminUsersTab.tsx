@@ -236,22 +236,22 @@ export function AdminUsersTab({
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-lg">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-[#141414] border border-[#2F2F2F] rounded-2xl p-4 shadow-lg">
         <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
           <div className="relative w-full sm:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
             <input
               type="text"
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-neutral-950/60 border border-white/10 text-sm text-neutral-200 rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-[#3B82F6]"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-neutral-950/60 border border-white/10 text-sm text-neutral-200 rounded-xl px-4 py-2 focus:outline-none focus:border-purple-500/50"
+            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2 focus:outline-none focus:border-[#3B82F6]"
           >
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
@@ -261,22 +261,22 @@ export function AdminUsersTab({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-neutral-950/60 border border-white/10 text-sm text-neutral-200 rounded-xl px-4 py-2 focus:outline-none focus:border-purple-500/50"
+            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2 focus:outline-none focus:border-[#3B82F6]"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
             <option value="locked">Locked</option>
           </select>
         </div>
-        <p className="text-xs font-mono text-neutral-400 font-bold whitespace-nowrap bg-purple-500/10 border border-purple-500/20 px-3 py-1 rounded-full">
+        <p className="text-xs font-mono text-[#3B82F6] font-bold whitespace-nowrap bg-[#121212] border border-[#2F2F2F] px-3 py-1 rounded-full">
           Showing {filteredUsers.length} users
         </p>
       </div>
 
-      <div className="bg-neutral-900/70 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-neutral-950/70 text-neutral-400 border-b border-white/10 text-xs uppercase font-mono font-bold">
+            <thead className="bg-[#181818] text-[#9CA3AF] border-b border-[#2F2F2F] text-xs uppercase font-mono font-bold">
               <tr>
                 <th className="px-4 py-4 w-10">
                   <button
@@ -285,7 +285,7 @@ export function AdminUsersTab({
                   >
                     {selectedUsers.size === filteredUsers.length &&
                     filteredUsers.length > 0 ? (
-                      <CheckSquare className="w-4 h-4 text-purple-400" />
+                      <CheckSquare className="w-4 h-4 text-[#3B82F6]" />
                     ) : (
                       <Square className="w-4 h-4" />
                     )}
@@ -323,48 +323,48 @@ export function AdminUsersTab({
                 filteredUsers.map((u) => (
                   <tr
                     key={u.id}
-                    className={`hover:bg-white/[0.02] transition-colors group ${
-                      selectedUsers.has(u.id) ? "bg-purple-500/5" : ""
+                    className={`hover:bg-[#181818] transition-colors group ${
+                      selectedUsers.has(u.id) ? "bg-[#3B82F6]/5" : ""
                     }`}
                   >
                     <td className="px-4 py-4">
                       <button
                         onClick={() => toggleSelectUser(u.id)}
-                        className="text-neutral-500 hover:text-white"
+                        className="text-[#9CA3AF] hover:text-white"
                       >
                         {selectedUsers.has(u.id) ? (
-                          <CheckSquare className="w-4 h-4 text-purple-400" />
+                          <CheckSquare className="w-4 h-4 text-[#3B82F6]" />
                         ) : (
                           <Square className="w-4 h-4" />
                         )}
                       </button>
                     </td>
-                    <td className="px-4 py-4 font-medium text-neutral-200">
+                    <td className="px-4 py-4 font-medium text-[#E5E5E5]">
                       {u.full_name || "No Name"}
                     </td>
-                    <td className="px-4 py-4 text-neutral-400">{u.email}</td>
+                    <td className="px-4 py-4 text-[#9CA3AF]">{u.email}</td>
                     <td className="px-4 py-4">
                       <span
                         className={`px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider ${
                           u.creator_role === "admin"
-                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                            : "bg-neutral-800 text-neutral-300 border border-neutral-700"
+                            ? "bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/20"
+                            : "bg-[#1E1E1E] text-[#E5E5E5] border border-[#2F2F2F]"
                         }`}
                       >
                         {u.creator_role || "user"}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-emerald-400 font-mono">
+                    <td className="px-4 py-4 text-[#10B981] font-mono">
                       <Coins className="w-3 h-3 inline mr-1" />
                       {u.credits}
                     </td>
                     <td className="px-4 py-4">
                       {u.is_locked ? (
-                        <span className="text-rose-400 flex items-center gap-1 text-xs">
+                        <span className="text-[#EF4444] flex items-center gap-1 text-xs">
                           <Lock className="w-3 h-3" /> Locked
                         </span>
                       ) : (
-                        <span className="text-emerald-400 flex items-center gap-1 text-xs">
+                        <span className="text-[#10B981] flex items-center gap-1 text-xs">
                           <Unlock className="w-3 h-3" /> Active
                         </span>
                       )}
@@ -373,14 +373,14 @@ export function AdminUsersTab({
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleImpersonate(u.id)}
-                          className="p-1.5 hover:bg-yellow-500/10 text-yellow-500 rounded-md"
+                          className="p-1.5 hover:bg-[#F59E0B]/10 text-[#F59E0B] rounded-md"
                           title="Impersonate"
                         >
                           <Ghost className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleFetchLogs(u)}
-                          className="p-1.5 hover:bg-blue-500/10 text-blue-500 rounded-md"
+                          className="p-1.5 hover:bg-[#3B82F6]/10 text-[#3B82F6] rounded-md"
                           title="Logs"
                         >
                           <History className="w-4 h-4" />
@@ -391,7 +391,7 @@ export function AdminUsersTab({
                             setGrantAmount(100);
                             setGrantReason("Manual admin credit grant");
                           }}
-                          className="p-1.5 hover:bg-purple-500/10 text-purple-400 rounded-md"
+                          className="p-1.5 hover:bg-[#3B82F6]/10 text-[#3B82F6] rounded-md"
                           title="Grant Credits"
                         >
                           <Coins className="w-4 h-4" />
@@ -514,7 +514,7 @@ export function AdminUsersTab({
                   value={justificationReason}
                   onChange={(e) => setJustificationReason(e.target.value)}
                   placeholder="Reason for change (required for sensitive actions)..."
-                  className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm h-20 focus:border-purple-500/50 outline-none"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm h-20 focus:border-[#3B82F6] outline-none"
                 />
               </div>
             </div>
@@ -524,13 +524,13 @@ export function AdminUsersTab({
                   setEditingUser(null);
                   setJustificationReason("");
                 }}
-                className="flex-1 p-2 bg-neutral-800 rounded"
+                className="btn-secondary flex-1 py-2 rounded-xl text-xs font-semibold"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateUser}
-                className="flex-1 p-2 bg-purple-600 rounded shadow-lg shadow-purple-500/20"
+                className="btn-primary flex-1 py-2 rounded-xl text-xs font-bold"
               >
                 Save Changes
               </button>
@@ -540,26 +540,26 @@ export function AdminUsersTab({
       )}
 
       {deletingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#111115] border border-rose-500/20 rounded-xl w-full max-w-md p-6">
-            <div className="flex items-center gap-3 text-rose-500 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#141414] border border-[#EF4444]/30 rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div className="flex items-center gap-3 text-[#EF4444] mb-4">
               <ShieldAlert className="w-6 h-6" />
               <h3 className="font-bold">Delete User?</h3>
             </div>
-            <p className="text-sm text-neutral-400 mb-6">
+            <p className="text-sm text-[#9CA3AF] mb-6">
               Are you sure you want to delete{" "}
-              <strong>{deletingUser.email}</strong>? This is irreversible.
+              <strong className="text-white">{deletingUser.email}</strong>? This is irreversible.
             </p>
 
             <div className="mb-6">
-              <label className="text-xs text-neutral-500 block mb-1">
+              <label className="text-xs text-[#9CA3AF] block mb-1">
                 Audit Reason
               </label>
               <textarea
                 value={justificationReason}
                 onChange={(e) => setJustificationReason(e.target.value)}
                 placeholder="Ticket # or deletion reason..."
-                className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm h-16 focus:border-rose-500/50 outline-none"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm h-16 focus:border-[#EF4444] outline-none"
               />
             </div>
 
@@ -569,13 +569,13 @@ export function AdminUsersTab({
                   setDeletingUser(null);
                   setJustificationReason("");
                 }}
-                className="flex-1 p-2 bg-neutral-800 rounded"
+                className="btn-secondary flex-1 py-2 rounded-xl text-xs font-semibold"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteUser}
-                className="flex-1 p-2 bg-rose-600 rounded"
+                className="flex-1 py-2 bg-[#EF4444] hover:bg-[#DC2626] text-white rounded-xl text-xs font-bold transition-all"
               >
                 Delete
               </button>
@@ -585,19 +585,19 @@ export function AdminUsersTab({
       )}
 
       {grantCreditsUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#111115] border border-neutral-800 rounded-xl w-full max-w-md p-6">
-            <div className="flex items-center gap-3 text-purple-400 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <div className="flex items-center gap-3 text-[#3B82F6] mb-4">
               <Coins className="w-6 h-6" />
               <h3 className="font-bold text-white">Grant / Adjust Credits</h3>
             </div>
-            <p className="text-sm text-neutral-400 mb-4">
-              Adjust credits for <strong>{grantCreditsUser.email}</strong>. Use
+            <p className="text-sm text-[#9CA3AF] mb-4">
+              Adjust credits for <strong className="text-white">{grantCreditsUser.email}</strong>. Use
               positive numbers to add, or negative numbers to deduct.
             </p>
             <div className="space-y-4">
               <div>
-                <label className="text-xs text-neutral-500 block mb-1">
+                <label className="text-xs text-[#9CA3AF] block mb-1">
                   Amount
                 </label>
                 <input
@@ -606,18 +606,18 @@ export function AdminUsersTab({
                   onChange={(e) =>
                     setGrantAmount(parseInt(e.target.value) || 0)
                   }
-                  className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm focus:border-purple-500/50 outline-none"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm focus:border-[#3B82F6] outline-none"
                 />
               </div>
               <div>
-                <label className="text-xs text-neutral-500 block mb-1">
+                <label className="text-xs text-[#9CA3AF] block mb-1">
                   Reason / Justification
                 </label>
                 <textarea
                   value={grantReason}
                   onChange={(e) => setGrantReason(e.target.value)}
                   placeholder="Reason for manual adjustment..."
-                  className="w-full bg-[#0b0b0e] border border-neutral-800 rounded p-2 text-white text-sm h-20 focus:border-purple-500/50 outline-none"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm h-20 focus:border-[#3B82F6] outline-none"
                 />
               </div>
             </div>
@@ -627,7 +627,7 @@ export function AdminUsersTab({
                   setGrantCreditsUser(null);
                   setGrantReason("");
                 }}
-                className="flex-1 p-2 bg-neutral-800 rounded"
+                className="btn-secondary flex-1 py-2 rounded-xl text-xs font-semibold"
                 disabled={isGranting}
               >
                 Cancel
@@ -635,7 +635,7 @@ export function AdminUsersTab({
               <button
                 onClick={async () => {
                   if (grantAmount === 0) {
-                    addNotification("Amount cannot be zero", "warning");
+                    addNotification?.("Amount cannot be zero", "warning");
                     return;
                   }
                   setIsGranting(true);
@@ -652,7 +652,7 @@ export function AdminUsersTab({
                       }
                     );
                     if (res.ok) {
-                      addNotification(
+                      addNotification?.(
                         "Credits updated successfully",
                         "success"
                       );
@@ -660,18 +660,18 @@ export function AdminUsersTab({
                       fetchUsers();
                     } else {
                       const err = await res.json();
-                      addNotification(
+                      addNotification?.(
                         err.detail || "Failed to update credits",
                         "error"
                       );
                     }
                   } catch (err) {
-                    addNotification("Failed to update credits", "error");
+                    addNotification?.("Failed to update credits", "error");
                   } finally {
                     setIsGranting(false);
                   }
                 }}
-                className="flex-1 p-2 bg-purple-650 hover:bg-purple-600 text-white rounded transition-all shadow-lg shadow-purple-500/20"
+                className="btn-primary flex-1 py-2 rounded-xl text-xs font-bold"
                 disabled={isGranting}
               >
                 {isGranting ? "Updating..." : "Grant"}
@@ -682,7 +682,7 @@ export function AdminUsersTab({
       )}
 
       {selectedUsers.size > 0 && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#1a1a24] border border-purple-500/30 px-6 py-3 rounded-full flex items-center gap-4 shadow-2xl">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#181818] border border-[#3B82F6]/40 px-6 py-3 rounded-full flex items-center gap-4 shadow-2xl">
           <span className="text-sm font-bold text-white">
             {selectedUsers.size} Selected
           </span>

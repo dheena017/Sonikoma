@@ -100,15 +100,18 @@ export function AdminConsoleTab() {
       case "WARN":
       case "WARNING":
         return "text-amber-400";
+      case "WARN":
+      case "WARNING":
+        return "text-amber-400";
       case "SUCCESS":
         return "text-emerald-400";
       case "NOTICE":
-        return "text-purple-400";
+        return "text-[#3B82F6]";
       case "DEBUG":
       case "TRACE":
         return "text-neutral-500";
       default:
-        return "text-cyan-400";
+        return "text-[#00FFFF]";
     }
   };
 
@@ -121,18 +124,18 @@ export function AdminConsoleTab() {
   };
 
   return (
-    <div className="flex flex-col h-[700px] bg-[#0b0b0e] border border-neutral-800 rounded-xl overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+    <div className="flex flex-col h-[700px] bg-[#141414] border border-[#2F2F2F] rounded-2xl overflow-hidden shadow-sm animate-[fadeIn_0.2s_ease-out]">
       {/* Header */}
-      <div className="p-4 border-b border-neutral-800 bg-[#111115] flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+          <div className="p-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl text-[#3B82F6]">
             <Terminal className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-white leading-tight">
+            <h3 className="font-bold text-[#E5E5E5] leading-tight">
               System Console
             </h3>
-            <p className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">
+            <p className="text-[10px] text-[#9CA3AF] uppercase tracking-widest font-mono font-bold">
               Real-time Service Logs
             </p>
           </div>
@@ -140,20 +143,20 @@ export function AdminConsoleTab() {
 
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6B7280]" />
             <input
               type="text"
               placeholder="Filter logs..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="bg-[#0b0b0e] border border-neutral-800 text-xs text-neutral-300 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-purple-500/50 w-48"
+              className="bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-[#3B82F6] w-48 font-sans"
             />
           </div>
 
           <select
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
-            className="bg-[#0b0b0e] border border-neutral-800 text-xs text-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:border-purple-500/50"
+            className="bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-xl px-3 py-2 focus:outline-none focus:border-[#3B82F6] font-sans"
           >
             <option value="ALL">All Levels</option>
             <option value="INFO">Info</option>
@@ -216,7 +219,7 @@ export function AdminConsoleTab() {
       {/* Terminal View */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-auto p-4 font-mono text-[13px] selection:bg-purple-500/30 whitespace-pre"
+        className="flex-1 overflow-auto p-4 font-mono text-[13px] selection:bg-[#3B82F6]/30 whitespace-pre"
       >
         {filteredLogs.length === 0 ? (
           <div className="h-full flex items-center justify-center text-neutral-600 italic">
@@ -247,7 +250,7 @@ export function AdminConsoleTab() {
                 <span className="text-neutral-300 break-all inline-flex items-center gap-2">
                   <span>{log.message}</span>
                   {log.count && log.count > 1 && (
-                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 select-none">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30 select-none">
                       ×{log.count}
                     </span>
                   )}

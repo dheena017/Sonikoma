@@ -154,7 +154,7 @@ const AdminPage = React.memo(
                     alert("Error self-promoting to admin");
                   }
                 }}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-500/30 rounded-xl text-sm font-bold text-white transition-all active:scale-95 cursor-pointer"
+                className="btn-primary w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold shadow-md cursor-pointer"
               >
                 🛡️ Self-Promote to Admin (Dev Bypass)
               </button>
