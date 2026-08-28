@@ -84,7 +84,11 @@ const AIOptimizerPage = React.memo(
     };
 
     // Compile overall storyboard details for prompts
-    const title = scrapedTitle || activeProjectData?.title || "Solo Leveling";
+    const title =
+      scrapedTitle ||
+      (activeProjectData as any)?.title ||
+      (activeProjectData as any)?.project_name ||
+      "Solo Leveling";
     const genre = scrapedGenre || "Fantasy Action";
 
     const storyboardSummary = useMemo(() => {
