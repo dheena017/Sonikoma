@@ -55,6 +55,9 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
 
   return (
     <div className="hidden lg:flex w-1/2 h-screen flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-[#0A0A0A] text-left select-none border-r border-[#2F2F2F]">
+      {/* Background Animated Anime Hero Scene */}
+      <LandingAnimeScene variant="auth" themeMode="dark" />
+
       {/* Top Header Branding */}
       <div className="relative z-10 flex items-center justify-between w-full">
         <div className="flex items-center gap-3">
