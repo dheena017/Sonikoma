@@ -10,6 +10,7 @@ import {
   ThemeKey,
 } from "@/features/app_auth/components/constants";
 import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
+import { SonikomaLogo } from "@/shared/ui/branding";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface AuthShowcaseProps {
@@ -62,21 +63,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
 
       {/* Top Header Branding */}
       <div className="relative z-10 flex items-center justify-between w-full">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 overflow-hidden shadow-sm">
-            <img
-              src="/logo-dark.png"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              alt="Sonikoma Logo"
-              className="w-7 h-7 object-contain"
-            />
-          </div>
-          <span className="text-xl font-black tracking-tight text-white uppercase">
-            Sonikoma
-          </span>
-        </div>
+        <SonikomaLogo size="md" />
       </div>
 
       {/* Carousel Slide Area with High-Contrast Background Card */}

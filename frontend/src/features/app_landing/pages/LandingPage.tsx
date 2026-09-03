@@ -24,6 +24,7 @@ import {
   TranslationAfter,
 } from "@/features/app_landing/components";
 import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
+import { SonikomaLogo } from "@/shared/ui/branding";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface LandingPageProps {
@@ -106,40 +107,15 @@ export default function LandingPage({
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
-          <div
-            className="flex items-center gap-3 cursor-pointer group"
+          <SonikomaLogo
+            size="md"
+            showSubtitle={true}
+            subtitleText="Comic to Video AI"
             onClick={() => {
               const el = document.getElementById("landing-scroll-area");
               if (el) el.scrollTo({ top: 0, behavior: "smooth" });
             }}
-          >
-            <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 group-hover:border-blue-500/50 group-hover:bg-blue-500/20 flex items-center justify-center shadow-sm transition-all duration-200">
-              <img
-                src={isLight ? "/logo-light.png" : "/logo-dark.png"}
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                }}
-                className="w-6 h-6 object-contain"
-                alt="Sonikoma Logo"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span
-                className={`text-lg sm:text-xl font-black tracking-tight uppercase transition-colors ${
-                  isLight ? "text-slate-950 group-hover:text-blue-600" : "text-white group-hover:text-blue-400"
-                }`}
-              >
-                Sonikoma
-              </span>
-              <span
-                className={`hidden sm:block text-[9px] font-mono font-bold tracking-widest uppercase -mt-1 ${
-                  isLight ? "text-blue-700" : "text-blue-400"
-                }`}
-              >
-                Comic to Video AI
-              </span>
-            </div>
-          </div>
+          />
 
           <div className="hidden md:flex items-center gap-1.5">
             {[
@@ -217,7 +193,7 @@ export default function LandingPage({
             </div>
 
             <h1
-              className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] max-w-4xl mx-auto transition-colors drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] ${
+              className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] max-w-4xl mx-auto transition-colors ${
                 isLight ? "text-slate-950" : "text-white"
               }`}
             >
@@ -234,8 +210,8 @@ export default function LandingPage({
             </h1>
 
             <p
-              className={`text-base md:text-lg max-w-2xl mx-auto font-medium leading-relaxed transition-colors drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] ${
-                isLight ? "text-slate-700" : "text-neutral-200"
+              className={`text-base md:text-lg max-w-2xl mx-auto font-medium leading-relaxed transition-colors ${
+                isLight ? "text-slate-700" : "text-neutral-300"
               }`}
             >
               Paste a link or upload images. Sonikoma cuts each panel, erases speech bubbles, adds realistic character voiceovers, and generates videos ready for TikTok and Shorts.

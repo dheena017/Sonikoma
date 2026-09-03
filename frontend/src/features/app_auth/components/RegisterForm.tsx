@@ -14,6 +14,7 @@ import {
 import AuthPageShell from "@/features/app_auth/components/AuthPageShell";
 import { useRegisterForm } from "@/features/app_auth/hooks";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 interface RegisterFormProps {
   onRegister: (data: any) => Promise<any>;
@@ -71,20 +72,8 @@ export default function RegisterForm({
               </Tooltip>
             )}
 
-            <div className="flex lg:hidden items-center gap-2">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 overflow-hidden">
-                <img
-                  src="/logo-dark.png"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                  }}
-                  alt="Sonikoma Logo"
-                  className="w-6 h-6 object-contain"
-                />
-              </div>
-              <span className="text-lg font-black text-white tracking-tight uppercase">
-                Sonikoma
-              </span>
+            <div className="flex lg:hidden items-center">
+              <SonikomaLogo size="sm" />
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Twitter, Youtube } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 function FooterSocial({ icon }: { icon: React.ReactElement<any> }) {
   const { themeMode } = useThemeMode();
@@ -32,25 +33,7 @@ export function LandingFooter() {
     >
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
         <div className="col-span-1 md:col-span-2 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-              <img
-                src={isLight ? "/logo-light.png" : "/logo-dark.png"}
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                }}
-                className="w-5 h-5 object-contain"
-                alt="Sonikoma Logo"
-              />
-            </div>
-            <span
-              className={`text-lg font-black tracking-tight uppercase transition-colors ${
-                isLight ? "text-slate-950" : "text-white"
-              }`}
-            >
-              Sonikoma
-            </span>
-          </div>
+          <SonikomaLogo size="sm" />
           <p
             className={`text-sm leading-relaxed max-w-sm transition-colors ${
               isLight ? "text-slate-700" : "text-neutral-400"
