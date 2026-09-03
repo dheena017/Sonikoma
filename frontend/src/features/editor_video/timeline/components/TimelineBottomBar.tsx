@@ -1,8 +1,5 @@
-// ─── TimelineBottomBar ────────────────────────────────────────────────────────
-// Canonical location: timeline/components/TimelineBottomBar.tsx
-
 import React from "react";
-import { Music, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Music, Sparkles, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
@@ -17,6 +14,10 @@ interface TimelineBottomBarProps {
   onOpenMediaPicker: () => void;
   /** Ref to the scroll container so scroll buttons can control it */
   scrollRef?: React.RefObject<HTMLDivElement>;
+  zoomLevel?: number;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onZoomReset?: () => void;
 }
 
 function formatTime(secs: number): string {
@@ -41,6 +42,10 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
   pacingScore,
   onOpenMediaPicker,
   scrollRef,
+  zoomLevel,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
 }) => {
   const handleScrollLeft = () => {
     scrollRef?.current?.scrollBy({ left: -SCROLL_STEP, behavior: "smooth" });
@@ -87,6 +92,37 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
         <span className={`text-[10px] font-mono ${snapEnabled ? "text-purple-400/70" : "text-neutral-600"}`}>
           Snap {snapEnabled ? "ON" : "OFF"}
         </span>
+
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-1 border-r border-white/10 pr-2 mr-1">
+          <Tooltip text="Zoom Out (-)" placement="top">
+            <button
+              onClick={onZoomOut}
+              aria-label="Zoom Out"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90"
+            >
+              <ZoomOut className="h-3 w-3" />
+            </button>
+          </Tooltip>
+          {zoomLevel !== undefined && (
+            <button
+              onClick={onZoomReset}
+              title="Reset Zoom (30px/s)"
+              className="px-1.5 py-0.5 rounded text-[9px] font-mono text-neutral-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+            >
+              {Math.round((zoomLevel / 30) * 100)}%
+            </button>
+          )}
+          <Tooltip text="Zoom In (+)" placement="top">
+            <button
+              onClick={onZoomIn}
+              aria-label="Zoom In"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90"
+            >
+              <ZoomIn className="h-3 w-3" />
+            </button>
+          </Tooltip>
+        </div>
 
         {/* Left / Right Scroll Navigation Buttons */}
         <div className="flex items-center gap-1">

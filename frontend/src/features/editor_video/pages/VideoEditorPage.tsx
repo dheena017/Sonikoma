@@ -218,8 +218,13 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   };
 
   // Audio / Video properties
-  const aspectRatio = appLogic?.aspectRatio ?? "16:9";
-  const setAspectRatio = appLogic?.setAspectRatio;
+  const [currentAspectRatio, setCurrentAspectRatio] = useState<string>(() => {
+    return appLogic?.aspectRatio || "original";
+  });
+  const handleAspectRatioChange = (ratio: string) => {
+    setCurrentAspectRatio(ratio);
+    appLogic?.setAspectRatio?.(ratio);
+  };
   const volume = appLogic?.volume ?? 80;
   const setVolume = appLogic?.setVolume;
   const voiceActor = appLogic?.voiceActor ?? "";
@@ -369,6 +374,8 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               onSave={handleSave}
               isSaving={isSaving}
               isDirty={isDirty}
+              aspectRatio={currentAspectRatio}
+              onAspectRatioChange={handleAspectRatioChange}
             />
 
             {/* Right Vertical Resizer Splitter */}

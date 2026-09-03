@@ -103,9 +103,18 @@ export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
       } else if (matchesShortcut(e, shortcuts.nav_editor)) {
         e.preventDefault();
         props.navigateTo?.("/editor");
+      } else if (matchesShortcut(e, shortcuts.nav_autocrop)) {
+        e.preventDefault();
+        props.setShowAutoCropModal?.(true);
+      } else if (matchesShortcut(e, shortcuts.nav_bubble)) {
+        e.preventDefault();
+        props.setShowBubbleModal?.(true);
       } else if (matchesShortcut(e, shortcuts.nav_shortcuts)) {
         e.preventDefault();
         setIsShortcutsHelpOpen((prev) => !prev);
+      } else if (matchesShortcut(e, shortcuts.nav_profile)) {
+        e.preventDefault();
+        props.navigateTo?.("/profile");
       } else if (matchesShortcut(e, shortcuts.playback_toggle)) {
         e.preventDefault();
         props.toggleStoryboardPlayback?.();
@@ -115,6 +124,9 @@ export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
       } else if (matchesShortcut(e, shortcuts.trigger_compile)) {
         e.preventDefault();
         props.handleGenerateVideo?.();
+      } else if (matchesShortcut(e, shortcuts.trigger_scrape)) {
+        e.preventDefault();
+        props.scrapeImages?.();
       } else if (matchesShortcut(e, shortcuts.volume_up) && props.setVolume) {
         e.preventDefault();
         props.setVolume((v) => Math.min(100, v + 10));

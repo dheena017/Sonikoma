@@ -17,13 +17,17 @@
       "@shared/*": ["../shared/*"]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo"
   },
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
     ".venv",
-    "src/editor_video",
-    "editor_video"
+    "public"
   ]
 }

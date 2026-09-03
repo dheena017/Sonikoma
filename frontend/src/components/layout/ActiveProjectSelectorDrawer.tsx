@@ -436,7 +436,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     Loading...
                   </span>
                 </div>
-                <div className="bg-[#17192e] border border-white/10 rounded-2xl p-4 flex items-center gap-3 animate-pulse">
+                <div className="bg-[#14201d] border border-white/10 rounded-2xl p-4 flex items-center gap-3 animate-pulse">
                   <div className="w-12 h-12 rounded-xl bg-neutral-800 shrink-0" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 bg-neutral-800 rounded w-1/2" />
@@ -459,7 +459,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     Idle
                   </span>
                 </div>
-                <div className="bg-[#17192e] border border-white/10 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                <div className="bg-[#14201d] border border-white/10 rounded-2xl p-3.5 flex items-center justify-between gap-3">
                   <div>
                     <h4 className="font-extrabold text-xs text-white">
                       No project currently active

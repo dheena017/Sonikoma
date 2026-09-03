@@ -106,26 +106,7 @@ export function useTimelineState(
 
   // Sub-states
   const keyframesState = useKeyframes();
-  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([
-    {
-      id: "ai-1",
-      clipKey: "v1-0",
-      time: 0.5,
-      property: "scale",
-      value: 1.2,
-      label: "Zoom Punch",
-      confidence: 0.92,
-    },
-    {
-      id: "ai-2",
-      clipKey: "v1-1",
-      time: 1.0,
-      property: "opacity",
-      value: 0.0,
-      label: "Fade Out",
-      confidence: 0.88,
-    },
-  ]);
+  const [aiSuggestions, setAiSuggestions] = useState<AISuggestion[]>([]);
 
   const trackAreaRef = useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
@@ -246,41 +227,65 @@ export function useTimelineState(
 
   // ── Context menu actions ────────────────────────────────────────────────────
   const handleCopy = useCallback(() => {
-    if (contextMenu) setClipboard(contextMenu.clipKey);
+    const targetClip = contextMenu?.clipKey || selectedClip;
+    if (targetClip) setClipboard(targetClip);
     closeContextMenu();
-  }, [contextMenu, closeContextMenu]);
+  }, [contextMenu, selectedClip, closeContextMenu]);
 
-  const handlePaste = useCallback(() => closeContextMenu(), [closeContextMenu]);
-
-  const handleDuplicate = useCallback(() => {
-    if (contextMenu) {
-      const d = getClipDuration(contextMenu.clipKey);
-      setClipDurations((p) => ({ ...p, [`${contextMenu.clipKey}-dup`]: d }));
+  const handlePaste = useCallback(() => {
+    if (clipboard && selectedClip) {
+      const d = getClipDuration(clipboard);
+      if (d > 0) {
+        setClipDurations((p) => ({ ...p, [selectedClip]: d }));
+      }
     }
     closeContextMenu();
-  }, [contextMenu, getClipDuration, closeContextMenu]);
+  }, [clipboard, selectedClip, getClipDuration, closeContextMenu]);
+
+  const handleDuplicate = useCallback(() => {
+    const targetClip = contextMenu?.clipKey || selectedClip;
+    if (targetClip) {
+      const d = getClipDuration(targetClip);
+      setClipDurations((p) => ({ ...p, [`${targetClip}-dup`]: d }));
+    }
+    closeContextMenu();
+  }, [contextMenu, selectedClip, getClipDuration, closeContextMenu]);
 
   const handleRemoveDuration = useCallback(() => {
-    if (contextMenu)
-      setClipDurations((p) => ({ ...p, [contextMenu.clipKey]: 0 }));
+    const targetClip = contextMenu?.clipKey || selectedClip;
+    if (targetClip)
+      setClipDurations((p) => ({ ...p, [targetClip]: 0 }));
     closeContextMenu();
-  }, [contextMenu, closeContextMenu]);
+  }, [contextMenu, selectedClip, closeContextMenu]);
 
   const handleApplyDurationToAll = useCallback(
     (panels: any[]) => {
-      if (contextMenu) {
-        const d = getClipDuration(contextMenu.clipKey);
-        const track = contextMenu.clipKey.replace(/-\d+$/, "");
+      const targetClip = contextMenu?.clipKey || selectedClip;
+      if (targetClip) {
+        const d = getClipDuration(targetClip);
+        const track = targetClip.replace(/-\d+.*$/, "");
         const updates: Record<string, number> = {};
         for (let i = 0; i < panels.length; i++) updates[`${track}-${i}`] = d;
         setClipDurations((p) => ({ ...p, ...updates }));
       }
       closeContextMenu();
     },
-    [contextMenu, getClipDuration, closeContextMenu]
+    [contextMenu, selectedClip, getClipDuration, closeContextMenu]
   );
 
-  const handleSplit = useCallback(() => closeContextMenu(), [closeContextMenu]);
+  const handleSplit = useCallback(() => {
+    const targetClip = contextMenu?.clipKey || selectedClip;
+    if (targetClip) {
+      const currentDur = getClipDuration(targetClip) || 3.0;
+      const halfDur = Math.max(0.5, parseFloat((currentDur / 2).toFixed(1)));
+      setClipDurations((p) => ({
+        ...p,
+        [targetClip]: halfDur,
+        [`${targetClip}-split`]: halfDur,
+      }));
+    }
+    closeContextMenu();
+  }, [contextMenu, selectedClip, getClipDuration, closeContextMenu]);
 
   // ── Workspace launchers via event bus ─────────────────────────────────────
   /** Publish OPEN_WORKSPACE so WorkspacePanel switches to the right tab */

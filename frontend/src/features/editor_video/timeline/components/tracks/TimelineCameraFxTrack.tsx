@@ -158,25 +158,34 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
     window.addEventListener("mouseup", onMouseUp);
   };
 
+  const hasAnyFx = useMemo(
+    () => panels.some((p: any) => !!(p.camera_motion || p.camera_fx || p.fx)),
+    [panels]
+  );
+
   // Reactively compute lanes whenever clips are moved, resized, or when space opens up
   const clipLanes = useMemo(() => {
-    const allClips = panels.map((p: any, i: number) => {
-      const t: PanelTiming | undefined = panelTimings[i];
-      const k = `v2-${i}`;
-      const dur = p.camera_duration || p.fx_duration || (t?.duration ?? p.duration ?? 0);
-      const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
-      const offset = clipOffsets[k] ?? 0;
-      const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
-      const isResizingThis = resizingInfo?.key === k;
-      const resizeLeftDelta =
-        isResizingThis && resizingInfo?.side === "left"
-          ? (dur - resizingInfo.initialDuration) * 30
-          : 0;
+    const allClips = panels
+      .map((p: any, i: number) => {
+        const hasFx = !!(p.camera_motion || p.camera_fx || p.fx);
+        if (!hasFx) return null;
+        const t: PanelTiming | undefined = panelTimings[i];
+        const k = `v2-${i}`;
+        const dur = p.camera_duration || p.fx_duration || (t?.duration ?? p.duration ?? 0);
+        const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
+        const offset = clipOffsets[k] ?? 0;
+        const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
+        const isResizingThis = resizingInfo?.key === k;
+        const resizeLeftDelta =
+          isResizingThis && resizingInfo?.side === "left"
+            ? (dur - resizingInfo.initialDuration) * 30
+            : 0;
 
-      const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
-      const width = dur * 30;
-      return { key: k, left, width };
-    });
+        const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
+        const width = dur * 30;
+        return { key: k, left, width };
+      })
+      .filter((c): c is { key: string; left: number; width: number } => c !== null);
     return assignLanes(allClips);
   }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo]);
 
@@ -206,7 +215,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
         onAdd={onAddFx}
       />
       <div className="flex-1 relative overflow-hidden transition-all duration-300" style={{ height: `${Math.max(38, innerHeightPx)}px` }}>
-        {panels.length === 0 ? (
+        {!hasAnyFx ? (
           <button
             type="button"
             onClick={onAddFx}
@@ -217,10 +226,8 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
           </button>
         ) : (
           panels.map((panel: any, idx: number) => {
-            const fx =
-              panel.camera_motion ||
-              panel.camera_fx ||
-              (idx % 2 === 0 ? "zoom_in" : "zoom_out");
+            const fx = panel.camera_motion || panel.camera_fx || panel.fx;
+            if (!fx) return null;
             // clip-specific camera duration may override the panel frame duration
             const dur =
               panel.camera_duration ||

@@ -443,14 +443,9 @@ const Timeline: React.FC<TimelineProps> = ({
         onToggleCaptions={() => s.setCaptionsVisible((v) => !v)}
         onToggleKeyframes={s.keyframesState.toggleKeyframeRows}
         onSplit={s.handleSplit}
-        onDelete={() => {}}
+        onDelete={s.handleRemoveDuration}
         onPlay={handlePlayClick}
-        onDuplicate={() => {
-          if (s.selectedClip) {
-            const d = s.getClipDuration(s.selectedClip);
-            s.updateClipDuration(`${s.selectedClip}-dup`, d);
-          }
-        }}
+        onDuplicate={s.handleDuplicate}
       />
 
       {/* ── Track Workspace ──────────────────────────────────────────────────── */}
@@ -615,6 +610,10 @@ const Timeline: React.FC<TimelineProps> = ({
         pacingScore={`${pacing.pacingScore} (${pacing.avgDuration}s avg)`}
         onOpenMediaPicker={s.openMediaPicker}
         scrollRef={timelineScrollRef}
+        zoomLevel={s.zoomLevel}
+        onZoomIn={() => s.setZoomLevel((z) => Math.min(80, z + 5))}
+        onZoomOut={() => s.setZoomLevel((z) => Math.max(15, z - 5))}
+        onZoomReset={() => s.setZoomLevel(30)}
       />
 
       {/* ── Keyframe Inspector Slide-over ───────────────────────────────────── */}

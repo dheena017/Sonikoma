@@ -26,6 +26,8 @@ export interface EditorViewportProps {
   chapterNumber?: string | number;
   chapterTitle?: string;
   targetUrl?: string;
+  aspectRatio?: string;
+  onAspectRatioChange?: (ratio: string) => void;
 }
 
 export const EditorViewport: React.FC<EditorViewportProps> = ({
@@ -43,18 +45,36 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
   handleRenderFinalVideo,
   onExport,
   isRendering = false,
-  musicTheme = "orchestral_battle",
-  voiceActor = "en-US-GuyNeural",
+  musicTheme = "",
+  voiceActor = "",
   seriesTitle,
   chapterNumber,
   chapterTitle,
   targetUrl,
+  aspectRatio = "original",
+  onAspectRatioChange,
 }) => {
   const [monitorTab, setMonitorTab] = useState<"timeline" | "video">("timeline");
   const [zoomLevel, setZoomLevel] = useState(1);
   const resetZoom = () => setZoomLevel(1);
   const finalExport = onExportVideo || handleRenderFinalVideo || onExport;
   const finalSave = onSave || handleSave;
+
+  const getAspectClass = (ratio?: string) => {
+    switch (ratio) {
+      case "9:16":
+        return "aspect-[9/16]";
+      case "16:9":
+        return "aspect-video";
+      case "1:1":
+        return "aspect-square";
+      case "4:3":
+        return "aspect-[4/3]";
+      case "original":
+      default:
+        return "";
+    }
+  };
 
   return (
     <div className="w-full h-full flex flex-col bg-[#0b0c14] overflow-hidden">
@@ -77,6 +97,8 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
         chapterTitle={chapterTitle}
         targetUrl={targetUrl}
         navigateTo={navigateTo}
+        aspectRatio={aspectRatio}
+        setAspectRatio={onAspectRatioChange}
       />
 
       <div className="flex-1 w-full relative overflow-hidden bg-black flex items-center justify-center p-2">
@@ -84,7 +106,7 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
           className="w-full h-full flex items-center justify-center transition-transform duration-150"
           style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center center" }}
         >
-          <div className="w-full h-full max-w-full max-h-full aspect-video">
+          <div className={`w-full h-full max-w-full max-h-full flex items-center justify-center ${getAspectClass(aspectRatio)}`}>
             <PlaybackMonitor
               panels={panels}
               videoUrl={videoUrl}

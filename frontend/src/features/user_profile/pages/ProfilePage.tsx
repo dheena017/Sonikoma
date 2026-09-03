@@ -143,7 +143,7 @@ export default function ProfilePage(props: ProfilePageProps) {
             {/* User Profile Block */}
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-0.5 bg-gradient-to-tr from-purple-600 via-indigo-500 to-pink-500 shadow-md overflow-hidden shrink-0">
+                <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-0.5 bg-gradient-to-tr from-purple-600 via-indigo-500 to-pink-500 shadow-md overflow-hidden shrink-0">
                   <img
                     src={state.profileUser.avatarUrl}
                     alt={state.profileUser.fullName}
@@ -155,16 +155,16 @@ export default function ProfilePage(props: ProfilePageProps) {
                       target.src = DEFAULT_USER_AVATAR_DATA_URI;
                     }}
                   />
+                  <Tooltip text="Change avatar in Account settings" placement="top">
+                    <button
+                      onClick={() => state.setActiveTab("account")}
+                      aria-label="Edit Avatar"
+                      className="absolute bottom-1 right-1 p-2 rounded-lg bg-neutral-950/90 border border-white/20 text-purple-300 hover:text-white transition-all shadow-md cursor-pointer"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </button>
+                  </Tooltip>
                 </div>
-                <Tooltip text="Change avatar in Account settings" placement="top">
-                  <button
-                    onClick={() => state.setActiveTab("account")}
-                    aria-label="Edit Avatar"
-                    className="absolute -bottom-1 -right-1 p-1 rounded-md bg-neutral-900 border border-white/20 text-purple-400 hover:text-white transition-all shadow-xs cursor-pointer"
-                  >
-                    <Camera className="w-3 h-3" />
-                  </button>
-                </Tooltip>
               </div>
 
               <div className="space-y-0.5">

@@ -32,6 +32,8 @@ export interface VideoEditorViewportHeaderProps {
   chapterTitle?: string;
   targetUrl?: string;
   navigateTo?: (path: string) => void;
+  aspectRatio?: string;
+  setAspectRatio?: (ratio: string) => void;
 }
 
 export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps> = ({
@@ -48,14 +50,16 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
   handleRenderFinalVideo,
   onExport,
   isRendering = false,
-  musicTheme = "orchestral_battle",
-  voiceActor = "en-US-GuyNeural",
+  musicTheme = "",
+  voiceActor = "",
   videoUrl = null,
   seriesTitle,
   chapterNumber,
   chapterTitle,
   targetUrl,
   navigateTo,
+  aspectRatio = "original",
+  setAspectRatio,
 }) => {
   const finalExport = onExportVideo || handleRenderFinalVideo || onExport;
   const finalSave = onSave || handleSave;
@@ -110,8 +114,34 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
         </button>
       </div>
 
-      {/* Right: Zoom Tools, Metadata, Save & Export */}
+      {/* Right: Aspect Ratio, Zoom Tools, Metadata, Save & Export */}
       <div className="flex items-center gap-1.5">
+        {/* Aspect Ratio Selector */}
+        {setAspectRatio && (
+          <div className="hidden md:flex items-center bg-neutral-900/90 border border-white/10 rounded-lg p-0.5 text-neutral-400 mr-1 text-[10px] font-mono">
+            {[
+              { id: "original", label: "Original" },
+              { id: "9:16", label: "9:16" },
+              { id: "16:9", label: "16:9" },
+              { id: "1:1", label: "1:1" },
+            ].map((ratio) => (
+              <button
+                key={ratio.id}
+                type="button"
+                onClick={() => setAspectRatio(ratio.id)}
+                className={`px-2 py-0.5 rounded transition cursor-pointer font-bold ${
+                  aspectRatio === ratio.id
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "hover:text-white hover:bg-white/5"
+                }`}
+                title={`Aspect Ratio: ${ratio.label}`}
+              >
+                {ratio.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="hidden sm:flex items-center bg-neutral-900/90 border border-white/10 rounded-lg p-0.5 text-neutral-400 mr-1">
           <button
             onClick={() => setZoomLevel((z) => Math.max(0.5, z - 0.1))}
