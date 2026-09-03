@@ -331,7 +331,6 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                   )
                 }
                 className="p-1 rounded-lg bg-[#181818]/90 hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-bold px-2.5 border border-[#2F2F2F]"
-                title="Previous slide"
               >
                 &larr;
               </button>
@@ -343,7 +342,6 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                   setCurrentSlide((prev) => (prev + 1) % SIMPLE_SLIDES.length)
                 }
                 className="p-1 rounded-lg bg-[#181818]/90 hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-bold px-2.5 border border-[#2F2F2F]"
-                title="Next slide"
               >
                 &rarr;
               </button>

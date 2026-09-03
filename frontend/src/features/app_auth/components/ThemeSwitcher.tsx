@@ -1,5 +1,6 @@
 import React from "react";
 import { ThemeKey, THEMES } from "@/features/app_auth/components/constants";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ThemeSwitcherProps {
   activeTheme: ThemeKey;
@@ -26,19 +27,19 @@ export default function ThemeSwitcher({
       }`}
     >
       {(Object.keys(THEMES) as ThemeKey[]).map((theme) => (
-        <button
-          key={theme}
-          type="button"
-          onClick={() => onChange(theme)}
-          className={`w-4 h-4 rounded-full transition-transform active:scale-90 cursor-pointer ${
-            paletteStyles[theme]
-          } ${
-            activeTheme === theme
-              ? "scale-110 ring-2 ring-white/40"
-              : "scale-90 opacity-60 hover:opacity-100"
-          }`}
-          title={`Switch to ${theme} theme`}
-        />
+        <Tooltip key={theme} text={`Switch to ${theme} accent`} placement="top">
+          <button
+            type="button"
+            onClick={() => onChange(theme)}
+            className={`w-4 h-4 rounded-full transition-transform active:scale-90 cursor-pointer ${
+              paletteStyles[theme]
+            } ${
+              activeTheme === theme
+                ? "scale-110 ring-2 ring-white/40"
+                : "scale-90 opacity-60 hover:opacity-100"
+            }`}
+          />
+        </Tooltip>
       ))}
     </div>
   );
