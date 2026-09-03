@@ -1124,11 +1124,11 @@ export default function VideoPreviewCinemaPlayer({
       )}
 
       {/* MAIN SCREEN CANVAS */}
-      <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden bg-[#09090f] p-4">
+      <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden bg-[#09090f]">
         {/* Workspace dot grid pattern */}
         <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:16px_16px]" />
 
-        <div className="relative w-full h-full flex items-center justify-center bg-[#14141f] border border-purple-500/35 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.85)] overflow-hidden">
+        <div className="relative w-full h-full flex items-center justify-center bg-transparent overflow-hidden">
           {mode === "video" ? (
             videoUrl && !videoHasError ? (
               <video
@@ -1174,7 +1174,7 @@ export default function VideoPreviewCinemaPlayer({
             )
           ) : activePanelNow &&
             (activePanelImg || activePanelNow.layers?.background_url) ? (
-            <div className="relative w-full h-full flex items-center justify-center overflow-hidden border border-purple-500/35 rounded-2xl shadow-2xl bg-[#080811]">
+            <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-[#080811]">
               {/* Ambient Blurred Backdrop */}
               <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
                 <img

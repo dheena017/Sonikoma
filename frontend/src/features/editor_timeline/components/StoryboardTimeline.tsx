@@ -878,7 +878,7 @@ const StoryboardTimeline = React.memo(
       return (
         <div
           id="panels_timeline_section"
-          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-6 space-y-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[500px] flex-1 flex flex-col"
+          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 lg:p-6 space-y-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[500px] flex-1 flex flex-col"
         >
           <StoryboardHeader
             panelsLength={0}
@@ -895,7 +895,7 @@ const StoryboardTimeline = React.memo(
     return (
       <div
         id="panels_timeline_section"
-        className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-6 space-y-4 transition-all pb-24 relative shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[500px] flex-1 flex flex-col"
+        className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 lg:p-6 space-y-4 transition-all pb-24 relative shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[500px] flex-1 flex flex-col"
       >
         <StoryboardAnalysisBanner
           isAnalyzingAll={isAnalyzingAll}
@@ -1073,4 +1073,5 @@ const StoryboardTimeline = React.memo(
   }
 );
 
+export { StoryboardTimeline };
 export default StoryboardTimeline;

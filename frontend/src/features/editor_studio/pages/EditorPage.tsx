@@ -1,7 +1,7 @@
 import React from "react";
 import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesSidebar";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
-import EditorViewport from "@/features/editor_video/viewport/EditorViewport";
+import StudioVideoPreview from "@/features/editor_video_preview/components/StudioVideoPreview";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
 import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
@@ -679,29 +679,35 @@ const EditorPage: React.FC<EditorPageProps> = ({
             <>
               {/* TOP: Video Preview Player / Viewport Monitor */}
               {playerSettings.isPlayerOpen ? (
-                <EditorViewport
-                  panels={panels}
-                  videoUrl={videoUrl}
-                  setVideoUrl={setVideoUrl}
-                  currentPanelIndex={currentPanelIndex}
-                  setCurrentPanelIndex={setCurrentPanelIndex}
-                  activePreviewTab={activePreviewTab}
-                  setActivePreviewTab={setActivePreviewTab}
-                  musicTheme={musicTheme}
-                  voiceActor={voiceActor}
-                  navigateTo={navigateTo}
-                  seriesTitle={seriesTitle}
-                  chapterNumber={chapterNumber}
-                  chapterTitle={chapterTitle}
-                  targetUrl={targetUrl}
-                  isRendering={isRendering}
-                  renderProgress={renderProgress}
-                  handleRenderFinalVideo={handleRenderFinalVideo}
-                  progressStatus={progressStatus}
-                  hasEnoughCredits={hasEnoughCredits}
-                  addNotification={addNotification}
-                  onOpenVideoEditor={() => setCurrentSection("video-editor")}
-                />
+                <div
+                  id="section-monitor"
+                  data-section="section-monitor"
+                  className="w-full scroll-mt-20 min-h-0 flex flex-col"
+                >
+                  <StudioVideoPreview
+                    panels={panels}
+                    videoUrl={videoUrl}
+                    setVideoUrl={setVideoUrl}
+                    currentPanelIndex={currentPanelIndex}
+                    setCurrentPanelIndex={setCurrentPanelIndex}
+                    activePreviewTab={activePreviewTab}
+                    setActivePreviewTab={setActivePreviewTab}
+                    musicTheme={musicTheme}
+                    voiceActor={voiceActor}
+                    navigateTo={navigateTo}
+                    seriesTitle={seriesTitle}
+                    chapterNumber={chapterNumber}
+                    chapterTitle={chapterTitle}
+                    targetUrl={targetUrl}
+                    isRendering={isRendering}
+                    renderProgress={renderProgress}
+                    handleRenderFinalVideo={handleRenderFinalVideo}
+                    progressStatus={progressStatus}
+                    hasEnoughCredits={hasEnoughCredits}
+                    addNotification={addNotification}
+                    onOpenVideoEditor={() => setCurrentSection("video-editor")}
+                  />
+                </div>
               ) : (
                 <div className="w-full mb-2">
                   <button
@@ -719,7 +725,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                       </div>
                       <div className="text-left">
                         <span className="text-xs font-bold font-mono tracking-wider uppercase block text-white">
-                          Program Monitor Viewport
+                          Video Preview Viewport
                         </span>
                         <span className="text-[10px] text-neutral-400 font-mono">
                           Click to expand video preview player & visual canvas
@@ -729,7 +735,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/80 border border-purple-500/40 text-xs font-mono text-purple-300 group-hover:bg-purple-900/80 group-hover:text-purple-100 transition-colors shadow-sm">
                       <Eye className="h-3.5 w-3.5" />
-                      <span>Expand Monitor</span>
+                      <span>Expand Preview</span>
                     </div>
                   </button>
                 </div>

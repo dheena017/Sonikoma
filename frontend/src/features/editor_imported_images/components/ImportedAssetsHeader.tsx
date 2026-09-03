@@ -123,8 +123,8 @@ export default function ImportedAssetsHeader({
   if (selectedScrapedLength > 0) {
     const selectionLeft = (
       <div className="flex items-center gap-2.5 flex-wrap">
-        <div className="flex items-center gap-2 bg-emerald-950/80 border border-emerald-500/40 rounded-xl px-3 py-1.5 shadow-[0_0_15px_rgba(52,211,153,0.2)]">
-          <div className="h-5 w-5 rounded bg-emerald-500 flex items-center justify-center text-white text-[10px] font-mono font-black">
+        <div className="flex items-center gap-2 bg-purple-950/80 border border-purple-500/40 rounded-xl px-3 py-1.5 shadow-[0_0_15px_rgba(168,85,247,0.25)]">
+          <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[10px] font-mono font-black">
             {selectedScrapedLength}
           </div>
           <span className="text-xs font-mono font-bold text-white whitespace-nowrap">
@@ -134,7 +134,7 @@ export default function ImportedAssetsHeader({
             type="button"
             onClick={handleClearAll}
             title="Clear Selection"
-            className="ml-1 p-0.5 rounded-md hover:bg-emerald-900/60 text-emerald-300 hover:text-white transition-colors cursor-pointer"
+            className="ml-1 p-0.5 rounded-md hover:bg-purple-900/60 text-purple-300 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -180,8 +180,8 @@ export default function ImportedAssetsHeader({
 
         {/* Busy / Progress Indicator */}
         {isBusy && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono animate-pulse">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-500/40 text-purple-300 text-[11px] font-mono animate-pulse">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-purple-400" />
             <span>
               {isBatchCropping && batchProgress
                 ? `Cropping ${batchProgress.current}/${batchProgress.total}`
@@ -204,7 +204,7 @@ export default function ImportedAssetsHeader({
             type="button"
             onClick={handleAddToStoryboard}
             disabled={isBusy}
-            className="relative overflow-hidden h-8 px-4 rounded-xl font-black text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border border-emerald-400/40 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white cursor-pointer shadow-[0_0_16px_rgba(16,185,129,0.4)] active:scale-95 disabled:opacity-50"
+            className="relative overflow-hidden h-8 px-4 rounded-xl font-black text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 border border-purple-400/40 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_16px_rgba(168,85,247,0.4)] active:scale-95 disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
             <span>+ Add to Storyboard ({selectedScrapedLength})</span>
@@ -229,7 +229,7 @@ export default function ImportedAssetsHeader({
               disabled={isBusy}
               className="px-3 py-1.5 text-[11px] font-mono font-bold flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-xl transition-all cursor-pointer disabled:opacity-40"
             >
-              <Scissors className="w-3.5 h-3.5 text-emerald-400" />
+              <Scissors className="w-3.5 h-3.5 text-purple-400" />
               <span>Auto-Crop</span>
             </button>
           ))}
@@ -252,7 +252,7 @@ export default function ImportedAssetsHeader({
               disabled={isBusy}
               className="px-3 py-1.5 text-[11px] font-mono font-bold flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-xl transition-all cursor-pointer disabled:opacity-40"
             >
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
               <span>Clean Bubbles</span>
             </button>
           ))}
@@ -264,7 +264,7 @@ export default function ImportedAssetsHeader({
             onClick={handleBatchMergeSelected}
             className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
           >
-            <Link2 className="w-3.5 h-3.5 text-emerald-400" />
+            <Link2 className="w-3.5 h-3.5 text-purple-400" />
             <span>Stitch</span>
           </button>
         )}
@@ -289,7 +289,7 @@ export default function ImportedAssetsHeader({
       <EditorHeaderFrame
         left={selectionLeft}
         right={selectionRight}
-        className="border-b-0 rounded-2xl bg-gradient-to-r from-emerald-950/80 via-neutral-950/95 to-neutral-950/95 border border-emerald-500/35 p-3 shadow-lg"
+        className="border-b-0 rounded-2xl bg-gradient-to-r from-purple-950/80 via-neutral-950/95 to-neutral-950/95 border border-purple-500/35 p-3 shadow-lg"
       />
     );
   }
@@ -299,16 +299,16 @@ export default function ImportedAssetsHeader({
   // ──────────────────────────────────────────────────────────────────────────
   const titleBlock = (
     <div className="flex items-center gap-3 min-w-0">
-      <div className="h-9 w-9 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-300 shadow-[0_0_16px_rgba(52,211,153,0.3)] shrink-0">
-        <Images className="h-4.5 w-4.5 text-emerald-400" />
+      <div className="h-9 w-9 rounded-xl bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
+        <Images className="h-4.5 w-4.5 text-purple-400" />
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate">
             Imported Assets
           </h3>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-300 font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
             {filteredCount !== undefined
               ? `${filteredCount} / ${scrapedImagesLength}`
               : scrapedImagesLength}{" "}
@@ -355,9 +355,9 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={handleSelectAllToggle}
-          className="text-[11px] font-mono font-bold border border-emerald-500/35 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 hover:text-emerald-100 rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(52,211,153,0.15)] active:scale-95 cursor-pointer"
+          className="text-[11px] font-mono font-bold border border-purple-500/35 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_12px_rgba(168,85,247,0.15)] active:scale-95 cursor-pointer"
         >
-          <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+          <CheckSquare className="w-3.5 h-3.5 text-purple-400" />
           <span>Select All</span>
         </button>
       )}
@@ -374,8 +374,8 @@ export default function ImportedAssetsHeader({
           }
           className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
             isEpisodeCollapsed
-              ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-emerald-300 hover:border-emerald-700"
-              : "bg-emerald-600/20 border-emerald-600/50 text-emerald-300 hover:bg-emerald-600/30"
+              ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-purple-300 hover:border-purple-700"
+              : "bg-purple-600/20 border-purple-600/50 text-purple-300 hover:bg-purple-600/30"
           }`}
         >
           {isEpisodeCollapsed ? (
@@ -410,7 +410,7 @@ export default function ImportedAssetsHeader({
       left={titleBlock}
       center={centerBlock}
       right={rightBlock}
-      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-emerald-950/40 border border-emerald-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
   );
 }

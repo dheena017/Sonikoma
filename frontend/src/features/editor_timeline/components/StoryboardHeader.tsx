@@ -83,8 +83,8 @@ export default function StoryboardHeader({
   if (selectedCount > 0) {
     const selectionLeftBlock = (
       <div className="flex items-center gap-2.5 flex-wrap">
-        <div className="flex items-center gap-2 bg-indigo-950/80 border border-indigo-500/40 rounded-xl px-3 py-1.5 shadow-[0_0_15px_rgba(99,102,241,0.25)]">
-          <div className="h-5 w-5 rounded bg-indigo-500 flex items-center justify-center text-white text-[10px] font-mono font-black">
+        <div className="flex items-center gap-2 bg-purple-950/80 border border-purple-500/40 rounded-xl px-3 py-1.5 shadow-[0_0_15px_rgba(168,85,247,0.25)]">
+          <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[10px] font-mono font-black">
             {selectedCount}
           </div>
           <span className="text-xs font-mono font-bold text-white whitespace-nowrap">
@@ -95,7 +95,7 @@ export default function StoryboardHeader({
               type="button"
               onClick={clearSelection}
               title="Clear Selection"
-              className="ml-1 p-0.5 rounded-md hover:bg-indigo-900/60 text-indigo-300 hover:text-white transition-colors cursor-pointer"
+              className="ml-1 p-0.5 rounded-md hover:bg-purple-900/60 text-purple-300 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -109,17 +109,17 @@ export default function StoryboardHeader({
           className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
         >
           {isAllSelected ? (
-            <Square className="w-3.5 h-3.5 text-indigo-400" />
+            <Square className="w-3.5 h-3.5 text-purple-400" />
           ) : (
-            <CheckSquare className="w-3.5 h-3.5 text-indigo-400" />
+            <CheckSquare className="w-3.5 h-3.5 text-purple-400" />
           )}
           <span>{isAllSelected ? "Deselect All" : "Select All"}</span>
         </button>
 
         {/* Busy / Progress Indicator */}
         {isBusy && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-950/40 border border-indigo-500/40 text-indigo-300 text-[11px] font-mono animate-pulse">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-indigo-400" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-500/40 text-purple-300 text-[11px] font-mono animate-pulse">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-purple-400" />
             <span>
               {isBatchCropping && batchProgress
                 ? `Cropping ${batchProgress.current}/${batchProgress.total}`
@@ -137,83 +137,71 @@ export default function StoryboardHeader({
     const selectionRightBlock = (
       <div className="flex items-center gap-2 flex-wrap">
         {/* Analyze Selected */}
-        {handleAnalyzeSelected &&
-          (isAnalyzingAll ? (
-            <button
-              type="button"
-              onClick={handleCancelAnalysis}
-              className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-rose-500 bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-md"
-            >
-              <X className="w-3.5 h-3.5" />
-              <span>Stop</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleAnalyzeSelected}
-              className="px-3.5 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-indigo-500/40 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(99,102,241,0.3)] cursor-pointer active:scale-95"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-200 animate-pulse" />
-              <span>Analyze Selected</span>
-            </button>
-          ))}
-
-        {/* Auto-Crop */}
-        {handleAutoCropSelected &&
-          (isBatchCropping ? (
-            <button
-              type="button"
-              onClick={handleCancelBatch}
-              className="px-3 py-1.5 text-[11px] font-mono font-bold flex items-center gap-1.5 bg-rose-900/50 border border-rose-500 hover:bg-rose-900 text-white rounded-xl cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-              <span>Stop Crop</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleAutoCropSelected}
-              disabled={isBusy}
-              className="px-3 py-1.5 text-[11px] font-mono font-bold flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-xl transition-all cursor-pointer disabled:opacity-40"
-            >
-              <Scissors className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Auto-Crop</span>
-            </button>
-          ))}
-
-        {/* Clean Bubbles */}
-        {handleCleanBubblesSelected &&
-          (isCleaningBubbles ? (
-            <button
-              type="button"
-              onClick={handleCancelBatch}
-              className="px-3 py-1.5 text-[11px] font-mono font-bold flex items-center gap-1.5 bg-rose-900/50 border border-rose-500 hover:bg-rose-900 text-white rounded-xl cursor-pointer"
-            >
-              <X className="w-3.5 h-3.5" />
-              <span>Stop Clean</span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleCleanBubblesSelected}
-              disabled={isBusy}
-              className="px-3 py-1.5 text-[11px] font-mono font-bold flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-xl transition-all cursor-pointer disabled:opacity-40"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Clean Bubbles</span>
-            </button>
-          ))}
-
-        {/* Stitch */}
-        {handleBatchMergeSelected && (
+        {handleAnalyzeSelected && (
           <button
             type="button"
-            disabled={isBusy || selectedCount < 2}
-            onClick={handleBatchMergeSelected}
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white flex items-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
+            onClick={handleAnalyzeSelected}
+            disabled={isBusy}
+            title="Analyze selected scenes"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Link2 className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Stitch</span>
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Analyze Selected</span>
+          </button>
+        )}
+
+        {/* Auto-Crop Selected */}
+        {handleAutoCropSelected && (
+          <button
+            type="button"
+            onClick={handleAutoCropSelected}
+            disabled={isBusy}
+            title="Auto-crop selected scenes"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+          >
+            <Scissors className="w-3.5 h-3.5 text-purple-400" />
+            <span>Auto Crop</span>
+          </button>
+        )}
+
+        {/* Clean Bubbles */}
+        {handleCleanBubblesSelected && (
+          <button
+            type="button"
+            onClick={handleCleanBubblesSelected}
+            disabled={isBusy}
+            title="Clean text speech bubbles"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Clean Bubbles</span>
+          </button>
+        )}
+
+        {/* Batch Vertical Merge */}
+        {handleBatchMergeSelected && selectedCount >= 2 && (
+          <button
+            type="button"
+            onClick={handleBatchMergeSelected}
+            disabled={isBusy}
+            title="Stitch selected scenes vertically"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+          >
+            <Link2 className="w-3.5 h-3.5 text-purple-400" />
+            <span>Merge ({selectedCount})</span>
+          </button>
+        )}
+
+        {/* Cancel Batch Operation */}
+        {isBusy && handleCancelBatch && (
+          <button
+            type="button"
+            onClick={handleCancelBatch}
+            title="Cancel Operation"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-rose-500/40 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+          >
+            <X className="w-3.5 h-3.5 text-rose-400" />
+            <span>Cancel</span>
           </button>
         )}
 
@@ -237,7 +225,7 @@ export default function StoryboardHeader({
       <EditorHeaderFrame
         left={selectionLeftBlock}
         right={selectionRightBlock}
-        className="border-b-0 rounded-2xl bg-gradient-to-r from-indigo-950/40 via-neutral-900/80 to-neutral-900/80 border border-indigo-500/40 p-2 shadow-lg"
+        className="border-b-0 rounded-2xl bg-gradient-to-r from-purple-950/80 via-neutral-950/95 to-neutral-950/95 border border-purple-500/35 p-3 shadow-lg"
       />
     );
   }
@@ -245,16 +233,16 @@ export default function StoryboardHeader({
   // Standard Mode Left Title Block
   const titleBlock = (
     <div className="flex items-center gap-3 min-w-0">
-      <div className="h-9 w-9 rounded-xl bg-indigo-500/15 border border-indigo-500/35 flex items-center justify-center text-indigo-300 shadow-[0_0_16px_rgba(99,102,241,0.3)] shrink-0">
-        <Film className="h-4.5 w-4.5 text-indigo-400" />
+      <div className="h-9 w-9 rounded-xl bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
+        <Film className="h-4.5 w-4.5 text-purple-400" />
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate">
             Storyboard
           </h3>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-[10px] font-bold text-indigo-300 font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
             {panelsLength} {panelsLength === 1 ? "Scene" : "Scenes"}
           </span>
         </div>
@@ -303,13 +291,13 @@ export default function StoryboardHeader({
           type="button"
           onClick={handleAnalyzeAllPanels}
           disabled={isAnalyzingAll}
-          className="text-[11px] font-mono font-bold border border-indigo-500/40 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(99,102,241,0.25)] hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+          className="text-[11px] font-mono font-bold border border-purple-500/40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(168,85,247,0.25)] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
         >
           <Sparkles
             className={`w-3.5 h-3.5 ${
               isAnalyzingAll
                 ? "animate-spin text-amber-300"
-                : "text-indigo-200"
+                : "text-purple-200"
             }`}
           />
           <span>
@@ -347,7 +335,7 @@ export default function StoryboardHeader({
       )}
 
       {/* Timeline Sequencer Badge */}
-      <span className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-indigo-500/25 text-indigo-300 text-[10px] font-bold uppercase tracking-wider font-mono shadow-inner">
+      <span className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-purple-500/25 text-purple-300 text-[10px] font-bold uppercase tracking-wider font-mono shadow-inner">
         Timeline Sequencer
       </span>
     </div>
@@ -358,7 +346,7 @@ export default function StoryboardHeader({
       left={titleBlock}
       center={viewToggle}
       right={rightBlock}
-      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-indigo-950/40 border border-indigo-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
   );
 }

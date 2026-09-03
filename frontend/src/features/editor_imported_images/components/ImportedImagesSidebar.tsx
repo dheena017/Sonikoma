@@ -1497,5 +1497,5 @@ const ChapterScraperDeck = React.memo(
   }
 );
 
-export { ChapterScraperDeck as ImportedImagesDeck };
+export { ChapterScraperDeck, ChapterScraperDeck as ImportedImagesDeck };
 export default ChapterScraperDeck;

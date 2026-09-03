@@ -1,22 +1,11 @@
 import React from "react";
-import {
-  X,
-  Film,
-  Sparkles,
-  Loader2,
-  Layout,
-  Video,
-  Save,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-} from "lucide-react";
-import VideoPreviewMetadataPanel from "./MetadataPanel";
+import { Film, Sparkles, Loader2, Video, Save, X } from "lucide-react";
+import MetadataPanel from "@/features/editor_video/viewport/monitor/MetadataPanel";
 import ProcessBar from "@/shared/ui/loading/ProcessBar";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import EditorHeaderFrame from "@/features/editor_studio/components/EditorHeaderFrame";
 
-export interface VideoPreviewHeaderProps {
+export interface StudioVideoPreviewHeaderProps {
   videoUrl: string | null;
   musicTheme: string;
   voiceActor: string;
@@ -31,23 +20,15 @@ export interface VideoPreviewHeaderProps {
   progressStatus?: any;
   hasEnoughCredits?: boolean;
   onOpenVideoEditor?: () => void;
-  variant?: "floating" | "embedded";
-  isSidebarOpen?: boolean;
-  onToggleSidebar?: () => void;
   activePreviewTab?: string;
   setActivePreviewTab?: (tab: string) => void;
   panelsCount?: number;
-  allowEditorTab?: boolean;
-  zoomLevel?: number;
-  onZoomIn?: () => void;
-  onZoomOut?: () => void;
-  onZoomReset?: () => void;
   onSave?: () => void;
   isSaving?: boolean;
   isDirty?: boolean;
 }
 
-const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
+const StudioVideoPreviewHeader: React.FC<StudioVideoPreviewHeaderProps> = ({
   videoUrl,
   musicTheme,
   voiceActor,
@@ -62,37 +43,44 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
   progressStatus,
   hasEnoughCredits = true,
   onOpenVideoEditor,
-  variant = "floating",
-  isSidebarOpen = true,
-  onToggleSidebar,
   activePreviewTab = "timeline",
   setActivePreviewTab,
   panelsCount = 0,
-  allowEditorTab = false,
-  zoomLevel,
-  onZoomIn,
-  onZoomOut,
-  onZoomReset,
   onSave,
   isSaving = false,
   isDirty = false,
 }) => {
-  const isFloating = variant !== "embedded";
-
   const leftBlock = (
-    <div className="flex items-center gap-2.5 min-w-0">
-      <div className="h-8 w-8 rounded-lg bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.3)] shrink-0">
-        <Film className="h-4 w-4 text-purple-400" />
+    <div className="flex items-center gap-3 min-w-0">
+      <div className="h-9 w-9 rounded-xl bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
+        <Film className="h-4.5 w-4.5 text-purple-400" />
       </div>
-      <div className="min-w-0 flex items-center gap-2">
-        <h3 className="text-xs font-black text-white uppercase tracking-[0.14em] font-mono truncate">
-          {allowEditorTab ? "Viewport Monitor" : "Video Preview"}
-        </h3>
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[9px] font-bold text-purple-300 font-mono shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-          Live
-        </span>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate">
+            Quick Video Preview
+          </h3>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+            Live Preview
+          </span>
+        </div>
+        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
+          Fast real-time scene player & audio-visual playback monitor
+        </p>
       </div>
+
+      {onOpenVideoEditor && (
+        <button
+          type="button"
+          onClick={onOpenVideoEditor}
+          className="hidden md:flex items-center gap-1.5 px-2.5 h-6 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 hover:border-purple-500/50 text-purple-300 text-[10px] font-bold font-mono transition-all cursor-pointer shadow-[0_0_10px_rgba(168,85,247,0.2)] shrink-0"
+          title="Open Pro Video Editor Studio"
+        >
+          <Film className="h-3 w-3 text-purple-400" />
+          <span>Pro Editor</span>
+        </button>
+      )}
     </div>
   );
 
@@ -160,36 +148,6 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
 
   const rightBlock = (
     <div className="flex items-center gap-2">
-      {/* 🔍 Zoom Controls for NLE Viewport */}
-      {onZoomIn && onZoomOut && (
-        <div className="flex items-center gap-1 bg-neutral-950/80 p-0.5 rounded-lg border border-white/10 font-mono text-[10px]">
-          <button
-            type="button"
-            onClick={onZoomOut}
-            title="Zoom Out"
-            className="h-6 w-6 rounded flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-          >
-            <ZoomOut className="h-3 w-3" />
-          </button>
-          <button
-            type="button"
-            onClick={onZoomReset}
-            title="Reset Zoom (100%)"
-            className="px-1.5 h-6 text-neutral-300 hover:text-white flex items-center justify-center font-bold cursor-pointer"
-          >
-            {zoomLevel ?? 100}%
-          </button>
-          <button
-            type="button"
-            onClick={onZoomIn}
-            title="Zoom In"
-            className="h-6 w-6 rounded flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-          >
-            <ZoomIn className="h-3 w-3" />
-          </button>
-        </div>
-      )}
-
       {/* 💾 Save Project Action Button */}
       {onSave && (
         <button
@@ -220,7 +178,7 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         </button>
       )}
 
-      <VideoPreviewMetadataPanel
+      <MetadataPanel
         musicTheme={musicTheme}
         voiceActor={voiceActor}
         videoUrl={videoUrl}
@@ -273,20 +231,18 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
         </>
       )}
 
-      {isFloating && (
-        <button
-          type="button"
-          onClick={() => {
-            useImageEditorStore
-              .getState()
-              .setPlayerSettings({ isPlayerOpen: false });
-          }}
-          className="h-7 w-7 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
-          title="Hide Preview Player"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => {
+          useImageEditorStore
+            .getState()
+            .setPlayerSettings({ isPlayerOpen: false });
+        }}
+        className="h-7 w-7 rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
+        title="Hide Preview Player"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 
@@ -295,13 +251,10 @@ const VideoPreviewHeader: React.FC<VideoPreviewHeaderProps> = ({
       left={leftBlock}
       center={centerBlock}
       right={rightBlock}
-      className={
-        variant === "embedded"
-          ? "rounded-none border-b border-white/10 bg-[#0b0c14] px-3.5 py-1.5 shrink-0 shadow-none border-t-0 border-l-0 border-r-0 h-11"
-          : "border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
-      }
+      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
   );
 };
-export default React.memo(VideoPreviewHeader);
-export { VideoPreviewHeader };
+
+export default React.memo(StudioVideoPreviewHeader);
+export { StudioVideoPreviewHeader };
