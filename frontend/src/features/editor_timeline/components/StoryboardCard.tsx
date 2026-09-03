@@ -844,24 +844,6 @@ const StoryboardCard = ({
     height: number;
   } | null>(null);
 
-  React.useEffect(() => {
-    if (!panel.image_url) {
-      setDimensions(null);
-      return;
-    }
-    let cancelled = false;
-    const img = new Image();
-    img.src = panel.image_url;
-    img.onload = () => {
-      if (!cancelled) {
-        setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
-      }
-    };
-    return () => {
-      cancelled = true;
-    };
-  }, [panel.image_url]);
-
   const aspectRatioLabel = React.useMemo(() => {
     if (!dimensions) return null;
     const ratio = dimensions.width / dimensions.height;
@@ -877,7 +859,7 @@ const StoryboardCard = ({
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[240px] sm:w-[260px] shrink-0"
-      } group relative rounded-2xl overflow-hidden border p-3 space-y-2.5 transition-all duration-200 ease-out select-none outline-none backdrop-blur-md shadow-md [content-visibility:auto] [contain-intrinsic-size:260px_350px] ${
+      } group relative rounded-2xl overflow-hidden border p-3 space-y-2.5 transition-all duration-200 ease-out select-none outline-none backdrop-blur-md shadow-md [content-visibility:auto] [contain-intrinsic-size:260px_350px] will-change-transform ${
         panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll
           ? "border-2 border-purple-500 bg-purple-950/30 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.02]"
           : isCurrent && isSelected
@@ -903,6 +885,15 @@ const StoryboardCard = ({
           onDragStart={(e) => e.preventDefault()}
           className="w-full h-full object-contain object-center group-hover/thumb:scale-[1.05] transition-transform duration-300 rounded-xl"
           style={{ filter: getPanelFilterStyle(panel) }}
+          onLoad={(e) => {
+            const img = e.currentTarget;
+            if (img.naturalWidth && img.naturalHeight) {
+              setDimensions({
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+              });
+            }
+          }}
           onError={(e) => {
             const img = e.currentTarget;
             if (img.dataset.retried) return;

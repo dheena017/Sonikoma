@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import * as api from "@/api/index";
 
-interface HealthStatus {
+export interface HealthStatus {
   status: "online" | "offline" | "checking";
   latency: number | null;
   lastChecked: Date | null;
@@ -9,69 +9,96 @@ interface HealthStatus {
   error?: string;
 }
 
-export function useBackendHealth() {
-  const [health, setHealth] = useState<HealthStatus>({
-    status: "checking",
-    latency: null,
-    lastChecked: null,
-  });
+let globalHealth: HealthStatus = {
+  status: "checking",
+  latency: null,
+  lastChecked: null,
+};
 
-  const checkHealth = useCallback(async (): Promise<boolean> => {
-    const start = performance.now();
-    try {
-      const data = await api.checkHealth();
-      const end = performance.now();
+const listeners = new Set<(health: HealthStatus) => void>();
+let pollTimer: any = null;
+let isPollingActive = false;
 
-      setHealth({
-        status: "online",
-        latency: Math.round(end - start),
-        lastChecked: new Date(),
-        version: data.version || "1.0.0",
-      });
-      return true;
-    } catch (err: any) {
-      if (err.message && err.message.includes("429")) {
-        setHealth({
-          status: "offline",
-          latency: null,
-          lastChecked: new Date(),
-          error: "Rate limited (429)",
-        });
-        return false;
-      }
-      setHealth({
+async function checkHealthGlobal(): Promise<boolean> {
+  const start = performance.now();
+  try {
+    const data = await api.checkHealth();
+    const end = performance.now();
+
+    globalHealth = {
+      status: "online",
+      latency: Math.round(end - start),
+      lastChecked: new Date(),
+      version: data.version || "1.0.0",
+    };
+    notifyListeners();
+    return true;
+  } catch (err: any) {
+    if (err.message && err.message.includes("429")) {
+      globalHealth = {
         status: "offline",
         latency: null,
         lastChecked: new Date(),
-        error: err.message,
-      });
-      return true; // Return true to keep normal polling on other errors
+        error: "Rate limited (429)",
+      };
+      notifyListeners();
+      return false;
     }
-  }, []);
+    globalHealth = {
+      status: "offline",
+      latency: null,
+      lastChecked: new Date(),
+      error: err.message,
+    };
+    notifyListeners();
+    return true;
+  }
+}
+
+function notifyListeners() {
+  listeners.forEach((listener) => listener(globalHealth));
+}
+
+function startGlobalPolling() {
+  if (isPollingActive) return;
+  isPollingActive = true;
+
+  const poll = async () => {
+    if (listeners.size === 0) {
+      isPollingActive = false;
+      return;
+    }
+    const shouldContinueNormal = await checkHealthGlobal();
+    if (listeners.size === 0) {
+      isPollingActive = false;
+      return;
+    }
+    const delay = shouldContinueNormal ? 30000 : 60000;
+    pollTimer = setTimeout(poll, delay);
+  };
+
+  poll();
+}
+
+export function useBackendHealth() {
+  const [health, setHealth] = useState<HealthStatus>(globalHealth);
 
   useEffect(() => {
-    let timeout: any;
-    let isMounted = true;
-
-    const poll = async () => {
-      if (!isMounted) return;
-
-      const shouldContinueNormalPolling = await checkHealth();
-
-      if (!isMounted) return;
-
-      // If we got a 429, wait 60s for penalty box to clear, otherwise 30s
-      const delay = shouldContinueNormalPolling ? 30000 : 60000;
-      timeout = setTimeout(poll, delay);
-    };
-
-    poll();
+    listeners.add(setHealth);
+    startGlobalPolling();
 
     return () => {
-      isMounted = false;
-      if (timeout) clearTimeout(timeout);
+      listeners.delete(setHealth);
+      if (listeners.size === 0 && pollTimer) {
+        clearTimeout(pollTimer);
+        isPollingActive = false;
+      }
     };
-  }, [checkHealth]);
+  }, []);
+
+  const checkHealth = useCallback(async (): Promise<boolean> => {
+    return await checkHealthGlobal();
+  }, []);
 
   return useMemo(() => ({ ...health, checkHealth }), [health, checkHealth]);
 }

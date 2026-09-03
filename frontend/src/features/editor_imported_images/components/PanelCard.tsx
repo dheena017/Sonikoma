@@ -80,31 +80,12 @@ function PanelCard({
     height: number;
   } | null>(null);
 
-  React.useEffect(() => {
-    if (!imgUrl) {
-      setDimensions(null);
-      return;
-    }
-
-    let cancelled = false;
-    const img = new Image();
-    img.src = imgUrl;
-
-    img.onload = () => {
-      if (!cancelled) {
-        setDimensions({ width: img.naturalWidth, height: img.naturalHeight });
-      }
-    };
-    img.onerror = () => {
-      if (!cancelled) {
-        setDimensions(null);
-      }
-    };
-
-    return () => {
-      cancelled = true;
-    };
-  }, [imgUrl]);
+  const handleDimensionsLoaded = React.useCallback(
+    (dims: { width: number; height: number }) => {
+      setDimensions(dims);
+    },
+    []
+  );
 
   const aspectRatioLabel = React.useMemo(() => {
     if (!dimensions) return null;
@@ -308,6 +289,7 @@ function PanelCard({
         handleFlipHorizontal={handleFlipHorizontal}
         handleUndo={handleUndo}
         onCheckboxClick={handleCheckboxClick}
+        onLoadDimensions={handleDimensionsLoaded}
       />
 
       {/* Dynamic Resolution & Aspect Ratio Badges */}

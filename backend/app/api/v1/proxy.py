@@ -85,29 +85,42 @@ def get_alternate_referer(url: str) -> Optional[str]:
         return None
 
 
+_proxy_http_client: Optional[httpx.AsyncClient] = None
+
+def get_proxy_http_client() -> httpx.AsyncClient:
+    global _proxy_http_client
+    if _proxy_http_client is None or _proxy_http_client.is_closed:
+        _proxy_http_client = httpx.AsyncClient(
+            follow_redirects=True,
+            timeout=httpx.Timeout(25.0, connect=10.0),
+            limits=httpx.Limits(max_keepalive_connections=60, max_connections=120, keepalive_expiry=60.0),
+            http2=True,
+        )
+    return _proxy_http_client
+
+
 async def fetch_with_retry(
     url: str,
     headers: dict,
     retries: int = PROXY_MAX_RETRIES,
     base_delay: float = PROXY_RETRY_BASE_SEC
 ) -> httpx.Response:
-    """Fetch with exponential back-off retry on 5xx or network errors."""
+    """Fetch with exponential back-off retry using high-speed persistent connection pool."""
+    client = get_proxy_http_client()
     last_err = None
     for attempt in range(retries):
         try:
-            async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
-                resp = await client.get(url, headers=headers)
-
-                # Retry on 5xx
-                if resp.status_code >= 500 and attempt < retries - 1:
-                    delay = base_delay * (2 ** attempt)
-                    logger.warning(
-                        f"[Proxy] Retry {attempt + 1}/{retries} | "
-                        f"status {resp.status_code} — waiting {delay:.2f}s"
-                    )
-                    await asyncio.sleep(delay)
-                    continue
-                return resp
+            resp = await client.get(url, headers=headers)
+            # Retry on 5xx
+            if resp.status_code >= 500 and attempt < retries - 1:
+                delay = base_delay * (2 ** attempt)
+                logger.warning(
+                    f"[Proxy] Retry {attempt + 1}/{retries} | "
+                    f"status {resp.status_code} — waiting {delay:.2f}s"
+                )
+                await asyncio.sleep(delay)
+                continue
+            return resp
         except Exception as e:
             last_err = e
             if attempt < retries - 1:

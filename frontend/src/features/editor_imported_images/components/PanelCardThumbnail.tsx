@@ -25,6 +25,7 @@ interface PanelCardThumbnailProps {
   handleFlipHorizontal: () => void;
   handleUndo: () => void;
   onCheckboxClick?: (e: React.MouseEvent) => void;
+  onLoadDimensions?: (dimensions: { width: number; height: number }) => void;
 }
 
 const getScrapedImageStatus = (url: string) => {
@@ -64,19 +65,23 @@ export function PanelCardThumbnail({
   handleFlipHorizontal,
   handleUndo,
   onCheckboxClick,
+  onLoadDimensions,
 }: PanelCardThumbnailProps) {
   const status = getScrapedImageStatus(imgUrl);
 
   const [hasError, setHasError] = React.useState(false);
+  const [isLoaded, setIsLoaded] = React.useState(false);
   const [retryKey, setRetryKey] = React.useState(0);
 
   React.useEffect(() => {
     setHasError(false);
+    setIsLoaded(false);
   }, [imgUrl]);
 
   const handleRetry = (e: React.MouseEvent) => {
     e.stopPropagation();
     setHasError(false);
+    setIsLoaded(false);
     setRetryKey((prev) => prev + 1);
   };
 
@@ -88,6 +93,13 @@ export function PanelCardThumbnail({
     <div className="relative h-44 sm:h-48 rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent z-10 pointer-events-none" />
+
+      {/* Shimmer skeleton while loading */}
+      {!isLoaded && !hasError && (
+        <div className="absolute inset-0 bg-gradient-to-r from-neutral-900 via-neutral-850 to-neutral-900 animate-pulse z-0 flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+        </div>
+      )}
 
       {hasError ? (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-neutral-950/90 backdrop-blur-md rounded-2xl p-4 text-center z-20 animate-in fade-in duration-200">
@@ -110,13 +122,25 @@ export function PanelCardThumbnail({
           src={resolvedImgSrc}
           alt={`Panel #${resolvedDisplayIdx + 1}`}
           loading="lazy"
-          className={`w-full h-full object-contain transition-all duration-300 ease-out ${
+          className={`w-full h-full object-contain transition-all duration-300 ease-out z-10 ${
+            !isLoaded ? "opacity-0 scale-98" : "opacity-100 scale-100"
+          } ${
             isProcessing
               ? "opacity-20 scale-95 blur-[3px]"
               : "group-hover:scale-105"
           }`}
           decoding="async"
           draggable={false}
+          onLoad={(e) => {
+            setIsLoaded(true);
+            const img = e.currentTarget;
+            if (img.naturalWidth && img.naturalHeight) {
+              onLoadDimensions?.({
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+              });
+            }
+          }}
           onError={(e) => {
             const img = e.currentTarget;
             const currentSrc = img.src;

@@ -107,30 +107,17 @@ export const HorizontalScrollContainer: React.FC<{
     };
 
     el.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", checkScroll);
+    window.addEventListener("resize", checkScroll, { passive: true });
 
+    // Smooth horizontal translation for vertical mouse wheel without main-thread blocking
     const handleNativeWheel = (e: WheelEvent) => {
-      const delta =
-        Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (delta !== 0) {
-        const maxScroll = el.scrollWidth - el.clientWidth;
-        if (maxScroll <= 0) return;
-
-        const isScrollingRight = delta > 0;
-        const isScrollingLeft = delta < 0;
-
-        const canRight = el.scrollLeft < maxScroll - 1;
-        const canLeft = el.scrollLeft > 1;
-
-        if ((isScrollingRight && canRight) || (isScrollingLeft && canLeft)) {
-          e.preventDefault();
-          // Fast responsive scroll
-          el.scrollLeft += delta * 1.5;
-        }
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.deltaY !== 0) {
+        // Translate vertical wheel scroll to horizontal scroll directly
+        el.scrollLeft += e.deltaY;
       }
     };
 
-    el.addEventListener("wheel", handleNativeWheel, { passive: false });
+    el.addEventListener("wheel", handleNativeWheel, { passive: true });
 
     const observer = new ResizeObserver(() => checkScroll());
     observer.observe(el);
