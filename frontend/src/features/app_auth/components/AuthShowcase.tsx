@@ -9,7 +9,7 @@ import {
 import {
   ThemeKey,
 } from "@/features/app_auth/components/constants";
-import LandingAnimeScene from "@/features/app_landing/components/LandingAnimeScene";
+import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface AuthShowcaseProps {

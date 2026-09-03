@@ -22,8 +22,8 @@ import {
   BubblesAfter,
   TranslationBefore,
   TranslationAfter,
-  LandingAnimeScene,
 } from "@/features/app_landing/components";
+import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface LandingPageProps {
