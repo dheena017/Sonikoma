@@ -1,6 +1,6 @@
 import React from "react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
-import { ThemeKey, THEMES } from "@/features/app_auth/components/constants";
+import { ThemeKey } from "@/features/app_auth/components/constants";
 
 interface AuthPageShellProps {
   activeTheme: ThemeKey;
@@ -22,10 +22,7 @@ export default function AuthPageShell({
       <AuthShowcase activeTheme={activeTheme} iconType={iconType} />
 
       {/* RIGHT PANEL */}
-      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#121212] relative border-l border-[#2F2F2F] text-left">
-        {/* Subtle top-edge accent line */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#3B82F6] to-transparent pointer-events-none" />
-
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left">
         {/* Pinned header — never scrolls */}
         <div className="relative z-10 px-8 lg:px-16 pt-8 lg:pt-10 flex-shrink-0">
           {rightHeader}
@@ -39,8 +36,8 @@ export default function AuthPageShell({
 
           {rightFooter}
 
-          <div className="flex lg:hidden text-center justify-center mt-8 text-[10px] text-[#6B7280] font-semibold">
-            © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
+          <div className="flex lg:hidden text-center justify-center mt-8 text-xs text-neutral-500 font-mono">
+            © {new Date().getFullYear()} Sonikoma Studio. All rights reserved.
           </div>
         </div>
       </div>

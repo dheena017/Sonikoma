@@ -2,18 +2,34 @@ import React from "react";
 
 export function BubblesBefore() {
   return (
-    <div className="w-full h-full flex items-center justify-center p-6 bg-gradient-to-br from-neutral-900 to-neutral-950 relative overflow-hidden">
-      {/* Comic Illustration */}
-      <div className="w-64 h-64 rounded-3xl bg-gradient-to-br from-purple-800 via-indigo-900 to-black border border-white/10 flex items-center justify-center relative overflow-hidden">
-        <div className="absolute top-6 left-6 w-20 h-20 rounded-full bg-orange-400/80 blur-md" />
-        <div className="absolute bottom-0 right-0 w-32 h-44 bg-neutral-800 rounded-t-[50px] border border-white/5" />
-        <div className="absolute bottom-36 right-8 w-16 h-16 rounded-full bg-neutral-700" />
+    <div className="w-full h-full flex items-center justify-center p-6 bg-[#0d0e15] relative overflow-hidden">
+      {/* Comic Illustration Scene */}
+      <div className="w-72 h-72 rounded-2xl bg-gradient-to-br from-purple-900 via-slate-900 to-indigo-950 border border-neutral-700/80 p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl">
+        {/* Scene Background Artwork Simulation */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(168,85,247,0.35),transparent_60%)]" />
+        <div className="absolute bottom-0 right-0 w-36 h-48 bg-gradient-to-t from-slate-950 to-indigo-900/60 rounded-tl-3xl border-l border-t border-purple-500/30" />
 
-        {/* Speech Bubble */}
-        <div className="absolute top-8 right-6 bg-white text-black p-4 rounded-[20px] rounded-tr-none shadow-2xl max-w-[150px] border-2 border-black flex flex-col justify-center items-center">
-          <span className="text-sm font-bold text-center">Amazing!</span>
-          <span className="text-xs text-gray-600">This is awesome</span>
-          <div className="absolute -right-2 top-0 w-4 h-4 bg-white border-r-2 border-t-2 border-black rotate-45 pointer-events-none" />
+        {/* Character Aura */}
+        <div className="relative z-10 space-y-1">
+          <span className="text-[10px] font-mono font-bold text-purple-400 bg-black/50 px-2 py-0.5 rounded border border-purple-500/30 inline-block">
+            CHAPTER 1 • CLIMAX
+          </span>
+        </div>
+
+        {/* Character Silhouette & Energy */}
+        <div className="absolute bottom-4 left-6 z-10 flex flex-col items-center">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-400 flex items-center justify-center text-2xl shadow-lg border border-white/20">
+            🦸‍♂️
+          </div>
+          <span className="text-[10px] font-black text-white uppercase tracking-wider mt-1.5">Jin-Woo</span>
+        </div>
+
+        {/* Speech Bubble Covering Artwork */}
+        <div className="absolute top-8 right-5 z-20 bg-white text-slate-950 p-3.5 rounded-2xl rounded-tr-none shadow-2xl max-w-[160px] border-2 border-slate-900">
+          <p className="text-xs font-black leading-tight text-center">
+            "I will never give up, no matter the cost!"
+          </p>
+          <div className="absolute -right-2 top-0 w-3.5 h-3.5 bg-white border-r-2 border-t-2 border-slate-900 rotate-45 pointer-events-none" />
         </div>
       </div>
     </div>

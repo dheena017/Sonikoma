@@ -6,6 +6,7 @@ interface FeatureCardProps {
   title: string;
   description: string;
   color: string;
+  themeMode?: "dark" | "light";
 }
 
 export function FeatureCard({
@@ -13,40 +14,39 @@ export function FeatureCard({
   title,
   description,
   color,
+  themeMode: propThemeMode,
 }: FeatureCardProps) {
-  const { themeMode } = useThemeMode();
+  const { themeMode: hookThemeMode } = useThemeMode();
+  const themeMode = propThemeMode || hookThemeMode || "dark";
   const isLight = themeMode === "light";
 
   return (
     <div
-      className={`p-8 rounded-[28px] transition-all duration-300 group border relative overflow-hidden ${
+      className={`p-7 rounded-2xl transition-all duration-300 border relative overflow-hidden ${
         isLight
-          ? "bg-white border-slate-200 shadow-sm hover:shadow-xl hover:border-purple-300 hover:-translate-y-1"
-          : "bg-[#0c0d16]/90 backdrop-blur-2xl border-white/10 hover:border-purple-500/40 hover:bg-[#121422]/95 shadow-[0_10px_35px_rgba(0,0,0,0.5)] hover:shadow-[0_15px_40px_rgba(168,85,247,0.25)] hover:-translate-y-1"
+          ? "bg-white border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md"
+          : "bg-[#181818] border-[#2F2F2F] hover:border-blue-500/50 shadow-md"
       }`}
     >
-      {/* Subtle top-edge accent glow on hover */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
       <div
-        className={`mb-6 p-4 rounded-2xl inline-flex group-hover:scale-110 transition-transform duration-300 border shadow-md ${
+        className={`mb-5 p-3.5 rounded-xl inline-flex border ${
           isLight
             ? "bg-slate-50 border-slate-200"
-            : "bg-[#141624] border-white/10 shadow-purple-900/10"
+            : "bg-blue-500/10 border-blue-500/20 text-blue-400"
         } ${color}`}
       >
         {icon}
       </div>
       <h3
-        className={`text-xl font-bold mb-3 transition-colors duration-200 ${
-          isLight ? "text-slate-900" : "text-white group-hover:text-purple-300"
+        className={`text-lg font-bold mb-2.5 transition-colors ${
+          isLight ? "text-slate-950" : "text-white"
         }`}
       >
         {title}
       </h3>
       <p
-        className={`text-sm leading-relaxed transition-colors duration-200 ${
-          isLight ? "text-slate-600" : "text-neutral-300"
+        className={`text-sm leading-relaxed font-normal transition-colors ${
+          isLight ? "text-slate-700" : "text-neutral-400"
         }`}
       >
         {description}

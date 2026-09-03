@@ -1,22 +1,42 @@
 import React from "react";
+import { Sparkles } from "lucide-react";
 
 export function SlicingBefore() {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-start p-6 space-y-6 bg-neutral-950 overflow-y-auto scrollbar-thin">
-      <div className="text-[10px] font-mono text-neutral-500 uppercase tracking-widest mb-2 border-b border-white/5 w-full pb-2 text-center">
-        Raw Vertical Strip Layout
+    <div className="w-full h-full bg-[#0d0e15] p-5 flex flex-col items-center justify-start gap-4 overflow-y-auto custom-scrollbar">
+      <div className="text-[11px] font-mono text-neutral-400 uppercase tracking-wider flex items-center gap-1.5 self-start">
+        <span className="w-2 h-2 rounded-full bg-amber-500" />
+        Raw Vertical Webtoon Strip (Continuous)
       </div>
-      <div className="w-48 h-32 rounded-xl bg-gradient-to-br from-indigo-950 to-blue-900 flex items-center justify-center border border-white/10 relative overflow-hidden shrink-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.2),transparent_70%)]" />
-        <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 animate-pulse" />
+
+      {/* Comic Panel 1 */}
+      <div className="w-full max-w-[280px] bg-gradient-to-br from-purple-900/80 via-slate-900 to-indigo-950 border border-neutral-700/60 rounded-xl p-3.5 space-y-2 shadow-md relative overflow-hidden">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-mono font-bold text-purple-300">SCENE 01 • PROTAGONIST</span>
+          <span className="text-[9px] font-mono text-neutral-400">Panel 1</span>
+        </div>
+        <div className="h-24 rounded-lg bg-gradient-to-r from-purple-800/40 to-indigo-800/40 border border-purple-500/20 flex flex-col items-center justify-center relative">
+          <div className="text-2xl">⚡️</div>
+          <span className="text-xs font-black text-white tracking-wide uppercase mt-1">Awakening</span>
+          <div className="absolute top-2 right-2 bg-black/60 px-2 py-0.5 rounded text-[9px] text-neutral-300">
+            "Is this... my power?"
+          </div>
+        </div>
       </div>
-      <div className="w-48 h-40 rounded-xl bg-gradient-to-br from-purple-950 to-indigo-900 flex items-center justify-center border border-white/10 relative overflow-hidden shrink-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(168,85,247,0.2),transparent_70%)]" />
-        <div className="w-12 h-24 bg-white/5 rounded-lg border border-white/10" />
-      </div>
-      <div className="w-48 h-36 rounded-xl bg-gradient-to-br from-emerald-950 to-teal-900 flex items-center justify-center border border-white/10 relative overflow-hidden shrink-0">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.2),transparent_70%)]" />
-        <div className="w-20 h-10 bg-white/5 rounded border border-white/10" />
+
+      {/* Comic Panel 2 */}
+      <div className="w-full max-w-[280px] bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 border border-neutral-700/60 rounded-xl p-3.5 space-y-2 shadow-md relative overflow-hidden">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-mono font-bold text-blue-300">SCENE 02 • BATTLE CLASH</span>
+          <span className="text-[9px] font-mono text-neutral-400">Panel 2</span>
+        </div>
+        <div className="h-28 rounded-lg bg-gradient-to-r from-blue-800/40 to-indigo-800/40 border border-blue-500/20 flex flex-col items-center justify-center relative">
+          <div className="text-3xl">⚔️</div>
+          <span className="text-xs font-black text-white tracking-wide uppercase mt-1">Shadow Strike</span>
+          <div className="absolute bottom-2 left-2 bg-rose-950/80 border border-rose-500/40 px-2 py-0.5 rounded text-[9px] font-mono font-bold text-rose-300">
+            *CRASH!*
+          </div>
+        </div>
       </div>
     </div>
   );

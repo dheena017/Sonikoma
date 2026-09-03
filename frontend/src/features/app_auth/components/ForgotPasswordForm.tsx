@@ -1,25 +1,17 @@
 import React from "react";
 import {
-  KeyRound,
   Mail,
   ArrowLeft,
-  Send,
+  ArrowRight,
   Loader2,
   CheckCircle2,
   Lock,
-  RefreshCw,
-  HelpCircle,
-  Phone,
-  ShieldAlert,
-  Smartphone,
+  Sparkles,
   Eye,
   EyeOff,
-  Info,
-  Sparkles,
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { useForgotPasswordForm } from "@/features/app_auth/hooks";
-import { THEMES, ThemeKey } from "@/features/app_auth/components/constants";
 
 interface ForgotPasswordPageProps {
   onForgotPassword: (email: string) => Promise<void>;
@@ -35,47 +27,23 @@ export default function ForgotPasswordPage({
   const {
     email,
     setEmail,
-    phoneNumber,
-    setPhoneNumber,
-    countryCode,
-    setCountryCode,
     isLoading,
     isSent,
     error,
-    resetMethod,
-    setResetMethod,
     verificationCode,
     setVerificationCode,
     isCodeSent,
-    setIsCodeSent,
-    securityAnswers,
-    setSecurityAnswers,
     newPassword,
     setNewPassword,
     confirmPassword,
     setConfirmPassword,
-    isResetReady,
     isCompleted,
     showPassword,
     setShowPassword,
-    sliderVal,
-    isVerified,
-    resendTimer,
     activeTheme,
-    setActiveTheme,
     isEmailValid,
-    isPhoneValid,
-    isQuestionValid,
-    handleSliderChange,
     handleSubmit,
-    handleVerifyCodeSubmit,
     handleNewPasswordSubmit,
-    handleResend,
-    handleCodeAutoFill,
-    handleSimulateEmailArrival,
-    currentTheme,
-    onNavigateToLogin: navigateToLogin,
-    onNavigateHome: navigateHome,
   } = useForgotPasswordForm({
     onForgotPassword,
     onNavigateToLogin,
@@ -83,696 +51,213 @@ export default function ForgotPasswordPage({
   });
 
   return (
-    <div className="min-h-screen flex bg-[#070709] text-white font-sans overflow-hidden relative">
-      {/* LEFT PANEL: Auth Product Slideshow (extracted child component) */}
+    <div className="min-h-screen flex bg-[#0A0A0A] text-[#E5E5E5] font-sans overflow-hidden relative">
+      {/* LEFT PANEL: Auth Product Showcase */}
       <AuthShowcase activeTheme={activeTheme} iconType="forgot" />
 
       {/* RIGHT PANEL: Reset Form Interface */}
-      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#040406] relative text-left">
-        {/* Soft background glow (Theme-driven) */}
-        <div
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] rounded-full ${currentTheme.glowPrimary} blur-[120px] pointer-events-none transition-all duration-1000`}
-        />
-
-        {/* Top Controls Toolbar — pinned, never scrolls */}
-        <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-5 flex-shrink-0">
-          {/* Header branding & Back Button */}
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left">
+        {/* Top Controls Toolbar */}
+        <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-6 flex-shrink-0">
           <div className="flex items-center gap-2 lg:gap-3">
-            {onNavigateHome && (
-              <button
-                onClick={onNavigateHome}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900/60 hover:bg-neutral-800/80 border border-white/5 hover:border-white/10 rounded-xl text-neutral-400 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
-              >
-                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                <span>Back</span>
-              </button>
-            )}
-
-            <div className="flex lg:hidden items-center gap-1.5">
-              <div
-                className={`flex items-center justify-center w-8 h-8 rounded-lg ${currentTheme.accentBg} border ${currentTheme.accentBorder} overflow-hidden`}
-              >
-                <img
-                  src="/logo-dark.png"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src =
-                      "/logo-dark.png";
-                  }}
-                  alt="Sonikoma Logo"
-                  className="w-6 h-6 object-contain drop-shadow-md"
-                />
-              </div>
-              <span className="text-lg font-bold text-white tracking-tight mr-0.5">
-                Sonikoma
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Color Palette Theme Switcher */}
-            <div className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 border border-white/5 p-1 rounded-full backdrop-blur-md">
-              {(Object.keys(THEMES) as ThemeKey[]).map((theme) => {
-                const colors = {
-                  purple: "bg-purple-500",
-                  blue: "bg-blue-500",
-                  emerald: "bg-emerald-500",
-                  amber: "bg-amber-500",
-                };
-
-                return (
-                  <button
-                    key={theme}
-                    onClick={() => setActiveTheme(theme)}
-                    className={`w-4 h-4 rounded-full transition-transform active:scale-90 cursor-pointer ${
-                      colors[theme]
-                    } ${
-                      activeTheme === theme
-                        ? "scale-110 ring-2 ring-white/40"
-                        : "scale-90 opacity-60 hover:opacity-100"
-                    }`}
-                    title={`Switch to ${theme} theme`}
-                  />
-                );
-              })}
-            </div>
-
             <button
-              onClick={() => onNavigateToLogin()}
-              className={`flex items-center gap-1 text-xs ${currentTheme.accentText} ${currentTheme.accentBg} border ${currentTheme.accentBorder} px-3 py-1.5 rounded-full cursor-pointer hover:bg-white/5 transition-all`}
+              onClick={onNavigateToLogin}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Sign In
+              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              <span>Back to Login</span>
             </button>
           </div>
         </div>
 
-        {/* Scrollable form body — starts below toolbar */}
-        <div className="custom-scrollbar flex-1 overflow-y-auto px-8 lg:px-16 pb-8 lg:pb-16 flex flex-col justify-between">
-          {/* Form Container */}
-          <div className="my-auto w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 py-6">
-            {/* Welcome Text */}
+        {/* Scrollable form body */}
+        <div className="custom-scrollbar flex-1 overflow-y-auto px-8 lg:px-16 pb-8 lg:pb-16 flex flex-col justify-center">
+          <div className="my-auto w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 py-4 text-left">
+            {/* Header */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-purple-600/20 border border-purple-500/40 p-2 shadow-[0_0_25px_rgba(168,85,247,0.35)] flex items-center justify-center backdrop-blur-md">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 p-2 shadow-sm flex items-center justify-center">
                   <img
                     src="/logo-dark.png"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src =
-                        "/logo-dark.png";
+                      (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
                     }}
                     alt="Sonikoma"
-                    className="w-full h-full object-contain drop-shadow"
+                    className="w-full h-full object-contain"
                   />
                 </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold tracking-wide shadow-[0_0_15px_rgba(168,85,247,0.15)]">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Account Recovery</span>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Security & Recovery</span>
                 </div>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                {isCompleted
-                  ? "Reset Successful"
-                  : isResetReady
-                  ? "Create New Password"
-                  : isSent
-                  ? "Check Inbox"
-                  : isCodeSent
-                  ? "Enter Verification"
-                  : "Reset Password"}
+                Reset Password
               </h2>
-              <p className="text-neutral-300 text-sm font-medium leading-relaxed">
-                {isCompleted
-                  ? "Your credentials have been successfully updated! You can now log into your Sonikoma account."
-                  : isResetReady
-                  ? "Input your new secure password profile below. Ensure matching values."
-                  : isSent
-                  ? `An email was dispatched containing details to restore your workspace access.`
-                  : isCodeSent
-                  ? `Enter the 6-digit confirmation code texted to ${countryCode} ${phoneNumber}.`
-                  : "Select recovery channel and provide necessary details to gain access."}
+              <p className="text-neutral-400 text-sm font-medium leading-relaxed">
+                Enter your email address to receive password recovery instructions.
               </p>
             </div>
 
-            {/* Recovery Method Tabs (Only visible when starting recovery) */}
-            {!isSent && !isCodeSent && !isResetReady && !isCompleted && (
-              <div className="grid grid-cols-3 gap-2 bg-neutral-900/60 p-1 rounded-2xl border border-white/5">
-                <button
-                  type="button"
-                  onClick={() => setResetMethod("email")}
-                  className={`py-2 px-1 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-bold tracking-tight transition-all cursor-pointer ${
-                    resetMethod === "email"
-                      ? `${currentTheme.dot} text-white shadow-md`
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Mail className="w-3.5 h-3.5 text-neutral-350" />
-                  Email
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setResetMethod("phone")}
-                  className={`py-2 px-1 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-bold tracking-tight transition-all cursor-pointer ${
-                    resetMethod === "phone"
-                      ? `${currentTheme.dot} text-white shadow-md`
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Smartphone className="w-3.5 h-3.5 text-neutral-350" />
-                  SMS OTP
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setResetMethod("question")}
-                  className={`py-2 px-1 rounded-xl flex items-center justify-center gap-1.5 text-[10px] font-bold tracking-tight transition-all cursor-pointer ${
-                    resetMethod === "question"
-                      ? `${currentTheme.dot} text-white shadow-md`
-                      : "text-neutral-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <HelpCircle className="w-3.5 h-3.5 text-neutral-350" />
-                  Challenge
-                </button>
-              </div>
-            )}
-
-            {/* Main Card */}
-            <div className="bg-neutral-900/50 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden transition-all duration-500">
-              <div
-                className={`absolute top-0 inset-x-0 h-px bg-gradient-to-r ${currentTheme.cardBorder}`}
-              />
-
+            {/* Form Card */}
+            <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl space-y-5">
               {isCompleted ? (
-                // STEP 5: Success Flow Completed
-                <div className="space-y-5">
-                  <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs leading-relaxed font-medium text-center flex flex-col items-center gap-3">
-                    <CheckCircle2 className="w-10 h-10 text-emerald-400 animate-bounce" />
-                    <div>
-                      <strong className="block text-sm text-white">
-                        Password Updated Successfully
-                      </strong>
-                      Your credentials have been securely refreshed. Session
-                      caches are clear.
-                    </div>
+                <div className="text-center space-y-4 py-4">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                   </div>
-
+                  <h3 className="text-lg font-bold text-white">Password Reset Complete!</h3>
+                  <p className="text-xs text-neutral-400">
+                    Your password has been successfully updated. You can now log in with your new credentials.
+                  </p>
                   <button
                     onClick={onNavigateToLogin}
-                    className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer duration-300 active:scale-[0.99]`}
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md transition-all cursor-pointer text-sm"
                   >
-                    <ArrowLeft className="w-4 h-4" />
-                    Sign In to Studio Dashboard
+                    Go to Login
                   </button>
                 </div>
-              ) : isResetReady ? (
-                // STEP 3: Input New Password Form
-                <form className="space-y-5" onSubmit={handleNewPasswordSubmit}>
+              ) : isCodeSent ? (
+                <form className="space-y-4" onSubmit={handleNewPasswordSubmit}>
                   {error && (
-                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center font-medium animate-shake">
+                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
                       {error}
                     </div>
                   )}
 
-                  {/* New password input */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
-                      New Secure Password
+                    <label className="text-xs font-bold tracking-wider uppercase text-neutral-300">
+                      Verification Code
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value)}
+                      className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono tracking-widest text-center"
+                      placeholder="6-digit code"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold tracking-wider uppercase text-neutral-300">
+                      New Password
                     </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 pl-3.5 flex items-center z-10">
-                        <Lock className="w-4 h-4 text-neutral-500" />
-                      </div>
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                       <input
                         type={showPassword ? "text" : "password"}
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
-                        placeholder="Enter new password (min 6 chars)"
+                        className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        placeholder="Enter new password"
                       />
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="no-hover-lift p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-none cursor-pointer flex items-center justify-center"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-white"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
 
-                  {/* Confirm password input */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
+                    <label className="text-xs font-bold tracking-wider uppercase text-neutral-300">
                       Confirm Password
                     </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 pl-3.5 flex items-center z-10">
-                        <Lock className="w-4 h-4 text-neutral-500" />
-                      </div>
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                       <input
                         type={showPassword ? "text" : "password"}
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
+                        className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                         placeholder="Confirm new password"
                       />
-                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="no-hover-lift p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-white/10 transition-colors focus:outline-none cursor-pointer flex items-center justify-center"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    {newPassword && confirmPassword && (
-                      <div className="text-[9px] font-bold ml-1">
-                        {newPassword === confirmPassword ? (
-                          <span className="text-emerald-400">
-                            Passwords match perfectly
-                          </span>
-                        ) : (
-                          <span className="text-amber-500">
-                            Passwords do not match
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={
-                      newPassword.length < 6 ||
-                      newPassword !== confirmPassword ||
-                      isLoading
-                    }
-                    className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer duration-300 active:scale-[0.99] disabled:opacity-50`}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        Update Secure Password
-                        <CheckCircle2 className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </form>
-              ) : isSent ? (
-                // STEP 4: Check Email Inbox
-                <div className="space-y-5">
-                  <div className="p-4 rounded-xl bg-[#0f0f13] border border-white/5 text-neutral-400 text-xs leading-relaxed font-semibold">
-                    <div className="flex items-center gap-2 text-white font-bold mb-2">
-                      <Mail className={`w-4 h-4 ${currentTheme.accentText}`} />
-                      Reset Instructions Dispatched
-                    </div>
-                    Instructions to reset credentials have been sent to{" "}
-                    <strong>{email}</strong>. Check spam or filter folders if
-                    the message fails to load.
-                  </div>
-
-                  {/* Simulated direct link click to allow seamless sandbox testing */}
-                  <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl text-center flex flex-col gap-2">
-                    <div className="text-[10px] text-purple-400 font-bold flex items-center justify-center gap-1.5">
-                      <Info className="w-3.5 h-3.5" />
-                      Simulate Email Code Link
-                    </div>
-                    <button
-                      onClick={handleSimulateEmailArrival}
-                      className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-lg text-[10px] cursor-pointer"
-                    >
-                      Auto-simulate Click on Recovery Link
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={handleResend}
-                    disabled={resendTimer > 0 || isLoading}
-                    className="w-full bg-white/5 hover:bg-white/10 disabled:bg-white/5 disabled:opacity-60 text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 border border-white/5 hover:border-white/10 cursor-pointer disabled:cursor-not-allowed duration-300"
-                  >
-                    <RefreshCw
-                      className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-                    />
-                    {resendTimer > 0
-                      ? `Resend Code in ${resendTimer}s`
-                      : "Resend Verification Email"}
-                  </button>
-
-                  <button
-                    onClick={onNavigateToLogin}
-                    className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer duration-300 active:scale-[0.99]`}
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to Sign In
-                  </button>
-                </div>
-              ) : isCodeSent ? (
-                // STEP 2: Phone Verification Code Input Screen
-                <form className="space-y-5" onSubmit={handleVerifyCodeSubmit}>
-                  {error && (
-                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center font-medium animate-shake">
-                      {error}
-                    </div>
-                  )}
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
-                      6-Digit Verification Code
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-                      <input
-                        type="text"
-                        required
-                        maxLength={6}
-                        value={verificationCode}
-                        onChange={(e) =>
-                          setVerificationCode(e.target.value.replace(/\D/g, ""))
-                        }
-                        className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-4 text-center tracking-[0.4em] text-lg font-mono font-bold text-white placeholder:text-neutral-800 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
-                        placeholder="000000"
-                      />
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    disabled={verificationCode.length < 6 || isLoading}
-                    className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer duration-300 active:scale-[0.99] disabled:opacity-50`}
+                    disabled={isLoading}
+                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        Verify Code
-                        <CheckCircle2 className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-
-                  {/* Subtext tips */}
-                  <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-                    <span className="text-neutral-500">Demo Code: 123456</span>
-                    <button
-                      type="button"
-                      onClick={handleCodeAutoFill}
-                      className={`font-bold hover:underline cursor-pointer ${currentTheme.accentText}`}
-                    >
-                      Quick Auto-fill Test Code
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsCodeSent(false)}
-                    className="w-full bg-transparent hover:bg-white/5 text-neutral-400 hover:text-white text-xs font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Change Phone Number
+                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Update Password</span>}
                   </button>
                 </form>
               ) : (
-                // STEP 1: Input Account Recovery Details (Email, Phone, or Security Questions)
-                <form className="space-y-5" onSubmit={handleSubmit}>
+                <form className="space-y-4" onSubmit={handleSubmit}>
                   {error && (
-                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center font-medium animate-shake">
+                    <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
                       {error}
                     </div>
                   )}
 
-                  {resetMethod === "email" && (
-                    /* EMAIL INPUT */
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between ml-1">
-                        <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400">
-                          Email Address
-                        </label>
-                        {email && (
-                          <span
-                            className={`text-[9px] font-bold ${
-                              isEmailValid
-                                ? "text-emerald-400"
-                                : "text-amber-500"
-                            }`}
-                          >
-                            {isEmailValid ? "Valid Format" : "Invalid Email"}
-                          </span>
-                        )}
-                      </div>
-                      <div className="relative">
-                        <Mail
-                          className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                            isEmailValid
-                              ? "text-emerald-400"
-                              : "text-neutral-500"
-                          }`}
-                        />
-                        <input
-                          type="email"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
-                            isEmailValid
-                              ? "border-emerald-500/20 focus:ring-emerald-500/25 focus:border-emerald-500/40"
-                              : `border-white/5 ${currentTheme.focus}`
-                          }`}
-                          placeholder="name@example.com"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {resetMethod === "phone" && (
-                    /* PHONE NUMBER INPUT */
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between ml-1">
-                        <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400">
-                          Phone Number
-                        </label>
-                        {phoneNumber && (
-                          <span
-                            className={`text-[9px] font-bold ${
-                              isPhoneValid
-                                ? "text-emerald-400"
-                                : "text-amber-500"
-                            }`}
-                          >
-                            {isPhoneValid
-                              ? "Valid Format"
-                              : "Digits only (7-15)"}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <select
-                          value={countryCode}
-                          onChange={(e) => setCountryCode(e.target.value)}
-                          className="bg-[#0b0b0e] border border-white/5 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 font-medium"
-                        >
-                          <option value="+1">+1 (US)</option>
-                          <option value="+91">+91 (IN)</option>
-                          <option value="+44">+44 (UK)</option>
-                          <option value="+82">+82 (KR)</option>
-                        </select>
-                        <div className="relative flex-grow">
-                          <Phone
-                            className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${
-                              isPhoneValid
-                                ? "text-emerald-400"
-                                : "text-neutral-500"
-                            }`}
-                          />
-                          <input
-                            type="tel"
-                            required
-                            value={phoneNumber}
-                            onChange={(e) =>
-                              setPhoneNumber(
-                                e.target.value.replace(/[^\d\-()\s]/g, "")
-                              )
-                            }
-                            className={`w-full bg-black/40 border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all font-medium ${
-                              isPhoneValid
-                                ? "border-emerald-500/20 focus:ring-emerald-500/25 focus:border-emerald-500/40"
-                                : `border-white/5 ${currentTheme.focus}`
-                            }`}
-                            placeholder="(555) 000-0000"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {resetMethod === "question" && (
-                    /* SECURITY QUESTIONS CHALLENGE */
-                    <div className="space-y-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
-                          Question 1: Title of your first Webtoon?
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={securityAnswers.comicTitle}
-                          onChange={(e) =>
-                            setSecurityAnswers((prev) => ({
-                              ...prev,
-                              comicTitle: e.target.value,
-                            }))
-                          }
-                          className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
-                          placeholder="Try default answer: webtoon"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
-                          Question 2: City where you launched your studio?
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={securityAnswers.studioCity}
-                          onChange={(e) =>
-                            setSecurityAnswers((prev) => ({
-                              ...prev,
-                              studioCity: e.target.value,
-                            }))
-                          }
-                          className={`w-full bg-black/40 border border-white/5 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-700 focus:outline-none focus:ring-2 transition-all ${currentTheme.focus}`}
-                          placeholder="Try default answer: newyork"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Custom Slide-to-Verify Security Widget */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 ml-1">
-                      Security Verification
-                    </label>
-
-                    <div
-                      className={`relative w-full h-12 rounded-xl flex items-center justify-center overflow-hidden transition-all duration-500 border ${
-                        isVerified
-                          ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                          : "bg-black/40 border-white/5 text-neutral-500"
-                      }`}
-                    >
-                      <span className="text-[10px] font-bold uppercase tracking-wider select-none z-10 pointer-events-none">
-                        {isVerified
-                          ? "Verification Passed!"
-                          : "Slide right to verify"}
-                      </span>
-
-                      {!isVerified && (
-                        <div
-                          className="absolute left-0 top-0 bottom-0 bg-purple-500/10 transition-all pointer-events-none"
-                          style={{ width: `${sliderVal}%` }}
-                        />
+                    <div className="flex items-center justify-between ml-0.5">
+                      <label className="text-xs font-bold tracking-wider uppercase text-neutral-300">
+                        Email Address
+                      </label>
+                      {email && (
+                        <span
+                          className={`text-[10px] font-bold ${
+                            isEmailValid ? "text-emerald-400" : "text-amber-400"
+                          }`}
+                        >
+                          {isEmailValid ? "Valid Format" : "Invalid Email"}
+                        </span>
                       )}
-
-                      <div
-                        className={`absolute left-1 top-1 bottom-1 w-10 rounded-lg flex items-center justify-center transition-all ${
-                          isVerified
-                            ? "bg-emerald-500 text-white left-[calc(100%-44px)]"
-                            : "bg-purple-600 text-white"
-                        }`}
-                        style={
-                          !isVerified
-                            ? { left: `calc(${sliderVal}% * 0.88 + 4px)` }
-                            : undefined
-                        }
-                      >
-                        {isVerified ? (
-                          <CheckCircle2 className="w-5 h-5 stroke-[2.5px]" />
-                        ) : (
-                          <Lock className="w-4 h-4" />
-                        )}
-                      </div>
-
-                      {!isVerified && (
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={sliderVal}
-                          onChange={handleSliderChange}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-grab active:cursor-grabbing z-20"
-                        />
-                      )}
+                    </div>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        placeholder="name@example.com"
+                      />
                     </div>
                   </div>
 
-                  {/* Submit button */}
                   <button
                     type="submit"
-                    disabled={
-                      (resetMethod === "email"
-                        ? !isEmailValid
-                        : resetMethod === "phone"
-                        ? !isPhoneValid
-                        : !isQuestionValid) ||
-                      !isVerified ||
-                      isLoading
-                    }
-                    className={`w-full ${currentTheme.button} text-white font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 group cursor-pointer duration-300 active:scale-[0.99] mt-3 disabled:opacity-50`}
+                    disabled={isLoading || !isEmailValid}
+                    className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
                     {isLoading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       <>
-                        {resetMethod === "email"
-                          ? "Send Reset Link"
-                          : resetMethod === "phone"
-                          ? "Send Verification SMS"
-                          : "Verify Challenge Answers"}
-                        <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <span>Send Recovery Code</span>
+                        <ArrowRight className="w-4 h-4" />
                       </>
                     )}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={onNavigateToLogin}
-                    className="w-full bg-transparent hover:bg-white/5 text-neutral-500 hover:text-white text-xs font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer duration-300"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Return to Sign In
                   </button>
                 </form>
               )}
             </div>
+
+            {/* Back to Login Link */}
+            <p className="text-center text-sm text-neutral-400 font-medium">
+              Remember your password?{" "}
+              <button
+                onClick={onNavigateToLogin}
+                className="text-blue-400 hover:text-blue-300 font-bold underline underline-offset-4 decoration-blue-500/50 hover:decoration-blue-400 transition-colors cursor-pointer ml-1"
+              >
+                Sign In
+              </button>
+            </p>
           </div>
 
-          {/* Security Warning banner */}
-          <div className="relative z-10 w-full max-w-md mx-auto mt-4 p-4 bg-neutral-900/20 border border-white/5 rounded-2xl flex gap-3 text-[10px] text-neutral-500 leading-relaxed font-semibold">
-            <ShieldAlert className="w-6 h-6 text-amber-500/60 shrink-0" />
-            <span>
-              <strong>Security Alert:</strong> Sonikoma will never request your
-              dashboard password or credentials via email, SMS, or support chat
-              channels. Keep your recovery methods private.
-            </span>
-          </div>
-
-          {/* Footer for mobile only */}
-          <div className="flex lg:hidden text-center justify-center mt-8 text-[10px] text-neutral-600 font-semibold">
-            © {new Date().getFullYear()} Sonikoma AI Corp. All rights reserved.
+          <div className="flex lg:hidden text-center justify-center mt-6 text-xs text-neutral-500 font-mono">
+            © {new Date().getFullYear()} Sonikoma Studio
           </div>
         </div>
-        {/* end scrollable body */}
       </div>
     </div>
   );

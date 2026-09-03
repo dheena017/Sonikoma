@@ -8,7 +8,7 @@ import {
   KeyRound,
 } from "lucide-react";
 
-export type ThemeKey = "purple" | "blue" | "emerald" | "amber";
+export type ThemeKey = "blue" | "purple" | "emerald" | "amber";
 export type Language = "en" | "ko" | "ja";
 
 export const THEMES: Record<
@@ -26,53 +26,53 @@ export const THEMES: Record<
     badgeBg: string;
   }
 > = {
-  purple: {
-    glowPrimary: "bg-purple-600/15",
-    glowSecondary: "bg-indigo-600/15",
-    accentText: "text-purple-400",
-    accentBg: "bg-purple-500/10",
-    accentBorder: "border-purple-500/20",
-    button:
-      "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-lg shadow-purple-900/30",
-    focus: "focus:border-purple-500/50 focus:ring-purple-600/20",
-    dot: "bg-purple-500",
-    cardBorder: "from-purple-500/30 via-indigo-500/20 to-transparent",
-    badgeBg: "bg-purple-500/10 border-purple-500/20 text-purple-400",
-  },
   blue: {
-    glowPrimary: "bg-blue-600/15",
-    glowSecondary: "bg-cyan-600/15",
+    glowPrimary: "bg-blue-600/10",
+    glowSecondary: "bg-indigo-600/10",
     accentText: "text-blue-400",
     accentBg: "bg-blue-500/10",
     accentBorder: "border-blue-500/20",
     button:
-      "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-900/30",
-    focus: "focus:border-blue-500/50 focus:ring-blue-600/20",
+      "bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md",
+    focus: "focus:border-blue-500/60 focus:ring-blue-600/20",
     dot: "bg-blue-500",
-    cardBorder: "from-blue-500/30 via-cyan-500/20 to-transparent",
+    cardBorder: "from-blue-500/30 via-indigo-500/20 to-transparent",
+    badgeBg: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+  },
+  purple: {
+    glowPrimary: "bg-purple-600/10",
+    glowSecondary: "bg-indigo-600/10",
+    accentText: "text-purple-400",
+    accentBg: "bg-purple-500/10",
+    accentBorder: "border-purple-500/20",
+    button:
+      "bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md",
+    focus: "focus:border-blue-500/60 focus:ring-blue-600/20",
+    dot: "bg-blue-500",
+    cardBorder: "from-blue-500/30 via-indigo-500/20 to-transparent",
     badgeBg: "bg-blue-500/10 border-blue-500/20 text-blue-400",
   },
   emerald: {
-    glowPrimary: "bg-emerald-600/15",
-    glowSecondary: "bg-teal-600/15",
+    glowPrimary: "bg-emerald-600/10",
+    glowSecondary: "bg-teal-600/10",
     accentText: "text-emerald-400",
     accentBg: "bg-emerald-500/10",
     accentBorder: "border-emerald-500/20",
     button:
-      "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-900/30",
+      "bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-md",
     focus: "focus:border-emerald-500/50 focus:ring-emerald-600/20",
     dot: "bg-emerald-500",
     cardBorder: "from-emerald-500/30 via-teal-500/20 to-transparent",
     badgeBg: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
   },
   amber: {
-    glowPrimary: "bg-amber-600/15",
-    glowSecondary: "bg-orange-600/15",
+    glowPrimary: "bg-amber-600/10",
+    glowSecondary: "bg-orange-600/10",
     accentText: "text-amber-400",
     accentBg: "bg-amber-500/10",
     accentBorder: "border-amber-500/20",
     button:
-      "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-lg shadow-amber-900/30",
+      "bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-md",
     focus: "focus:border-amber-500/50 focus:ring-amber-600/20",
     dot: "bg-amber-500",
     cardBorder: "from-amber-500/30 via-orange-500/20 to-transparent",
@@ -87,7 +87,7 @@ export const SHOWCASE_SLIDES = [
     description:
       "Instantly segment vertical webtoon strips into independent, perfectly cropped storyboard panels using our custom CV engine.",
     badge: "Smart Detection",
-    color: "from-purple-500 to-indigo-500",
+    color: "from-blue-400 to-cyan-400",
   },
   {
     icon: Film,
@@ -95,7 +95,7 @@ export const SHOWCASE_SLIDES = [
     description:
       "Bring static frames to life with keyframe camera animations, auto zooms, responsive pans, and cinematic camera shakes.",
     badge: "Motion Director",
-    color: "from-blue-500 to-cyan-500",
+    color: "from-blue-400 to-indigo-400",
   },
   {
     icon: Volume2,
@@ -103,7 +103,7 @@ export const SHOWCASE_SLIDES = [
     description:
       "Generate natural voice narration, synchronize multi-character dialogue, and mix contextual sound effects automatically.",
     badge: "Voice & SFX",
-    color: "from-pink-500 to-rose-500",
+    color: "from-indigo-400 to-cyan-400",
   },
   {
     icon: Cpu,
@@ -111,7 +111,7 @@ export const SHOWCASE_SLIDES = [
     description:
       "Review auto-generated scripts, translate text into target languages, and export high-definition video files ready for publishing.",
     badge: "Instant Render",
-    color: "from-amber-500 to-orange-500",
+    color: "from-blue-400 to-teal-400",
   },
 ];
 
@@ -121,35 +121,35 @@ export const TOUR_STEPS = [
     title: "1. Upload Webtoon Strips",
     description:
       "Paste a webtoon link or upload a long strip image. Our scraper automatically retrieves high-resolution content panels in seconds.",
-    color: "from-purple-500 to-indigo-500",
+    color: "from-blue-400 to-cyan-400",
   },
   {
     icon: Sparkles,
     title: "2. Smart Gutter-Agnostic Slicing",
     description:
       "Click Auto-Crop to let our local computer vision algorithm trace row variance and cut strips into clean panel storyboards automatically.",
-    color: "from-blue-500 to-cyan-500",
+    color: "from-blue-400 to-indigo-400",
   },
   {
     icon: KeyRound,
     title: "3. Dramatize & Translate",
     description:
       "Use Gemini AI to transcribe bubble texts, translate storyboard dialogues into multiple languages, and generate detailed descriptions.",
-    color: "from-pink-500 to-rose-500",
+    color: "from-indigo-400 to-cyan-400",
   },
   {
     icon: Volume2,
     title: "4. Cinematic Motion & SFX",
     description:
       "Apply responsive pan/zoom effects and mix background tracks or speech scripts to transform static panels into animated movies.",
-    color: "from-amber-500 to-orange-500",
+    color: "from-blue-400 to-teal-400",
   },
 ];
 
 export const TRANSLATIONS = {
   en: {
-    welcome: "Welcome Back",
-    subtitle: "Log in to access your dashboard and video projects.",
+    welcome: "Welcome to Sonikoma Studio",
+    subtitle: "Log in to access your dashboard, projects, and production tools.",
     email: "Email Address",
     emailPlaceholder: "name@example.com",
     password: "Password",
@@ -164,7 +164,7 @@ export const TRANSLATIONS = {
     capsLock: "Warning: Caps Lock is ON",
   },
   ko: {
-    welcome: "다시 오신 것을 환영합니다",
+    welcome: "Sonikoma Studio에 오신 것을 환영합니다",
     subtitle: "대시보드와 비디오 프로젝트에 액세스하려면 로그인하세요.",
     email: "이메일 주소",
     emailPlaceholder: "name@example.com",
@@ -180,7 +180,7 @@ export const TRANSLATIONS = {
     capsLock: "주의: Caps Lock이 켜져 있습니다",
   },
   ja: {
-    welcome: "おかえりなさい",
+    welcome: "Sonikoma Studioへようこそ",
     subtitle: "ダッシュボードと動画プロジェクトにアクセスします。",
     email: "メールアドレス",
     emailPlaceholder: "name@example.com",
