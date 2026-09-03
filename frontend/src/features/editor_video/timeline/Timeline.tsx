@@ -152,6 +152,7 @@ const Timeline: React.FC<TimelineProps> = ({
   const currentPanelIndexRef = useRef(currentPanelIndex);
   const animationFrameRef = useRef<number | null>(null);
   const [rulerHoverPct, setRulerHoverPct] = useState<number | null>(null);
+  const [scrollLeft, setScrollLeft] = useState(0);
   const [trackBounds, setTrackBounds] = useState<{
     left: number;
     width: number;
@@ -185,10 +186,12 @@ const Timeline: React.FC<TimelineProps> = ({
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
           // Native touchpad horizontal swipe
           el.scrollLeft += e.deltaX;
+          setScrollLeft(el.scrollLeft);
           e.preventDefault();
         } else if (Math.abs(e.deltaY) > 0) {
           // Standard mouse wheel up/down -> scroll left/right along timeline
           el.scrollLeft += e.deltaY;
+          setScrollLeft(el.scrollLeft);
           e.preventDefault();
         }
       }
@@ -532,6 +535,7 @@ const Timeline: React.FC<TimelineProps> = ({
               timelineScrollRef.current.scrollTop += e.deltaY;
             }
           }}
+          onScroll={(e) => setScrollLeft(e.currentTarget.scrollLeft)}
           className="timeline-scroll-area flex-1 overflow-auto min-h-0 relative"
           style={{
             scrollbarWidth: "thin",
@@ -574,6 +578,7 @@ const Timeline: React.FC<TimelineProps> = ({
               currentTime={timelineTime}
               playheadPercent={playheadPct}
               zoomLevel={s.zoomLevel}
+              scrollLeft={scrollLeft}
               onScrubStart={handlePlayheadScrubStart}
             />
 

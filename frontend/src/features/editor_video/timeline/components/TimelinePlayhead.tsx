@@ -10,6 +10,7 @@ interface TimelinePlayheadProps {
   /** 0–100 percentage position within the scrollable track area. */
   playheadPercent?: number;
   zoomLevel?: number;
+  scrollLeft?: number;
   onScrubStart?: (e: React.MouseEvent) => void;
   trackBounds?: { left: number; width: number } | null;
 }
@@ -18,6 +19,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
   currentTime,
   playheadPercent = 0,
   zoomLevel = 30,
+  scrollLeft,
   onScrubStart,
   trackBounds,
 }) => {
@@ -38,16 +40,24 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
   const pxPerSec = zoomLevel;
   const left = 224 + Math.max(0, (currentTime ?? 0)) * pxPerSec;
 
+  // Screen position relative to visible timeline rail
+  const screenX = scrollLeft !== undefined ? left - scrollLeft : left;
+
+  // Instantly hide playhead at the exact 224px header boundary line
+  if (screenX < 224) {
+    return null;
+  }
+
   return (
     <div
       onMouseDown={handleMouseDown}
-      className={`absolute top-0 bottom-0 w-[2px] z-[60] pointer-events-auto -translate-x-1/2 cursor-ew-resize group/playhead ${
+      className={`absolute top-0 bottom-0 w-[2px] z-50 pointer-events-auto -translate-x-1/2 cursor-ew-resize group/playhead ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       style={{ left: `${left}px` }}
     >
-      {/* Playhead Pin Head — stays on top above everything (z-[60]) */}
-      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-auto z-[60]">
+      {/* Playhead Pin Head — stays on top above ruler (z-50) */}
+      <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-auto z-50">
         <svg
           width="16"
           height="18"
