@@ -42,7 +42,7 @@ export default function ThumbnailCompositionGuide({
     <div className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 space-y-4 md:col-span-2">
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
-          <Grid className="h-4.5 w-4.5 text-purple-400" />
+          <Grid className="h-4.5 w-4.5 text-[#3B82F6]" />
           <h4 className="text-xs font-mono font-bold text-white uppercase">
             Canvas Splits & Borders Guide
           </h4>
@@ -61,7 +61,7 @@ export default function ThumbnailCompositionGuide({
           <div className="bg-neutral-955 p-3 rounded-lg border border-neutral-850 space-y-2">
             <div className="flex justify-between border-b border-neutral-900 pb-1.5">
               <span>Split Screen Ratio</span>
-              <span className="text-purple-300 font-bold">
+              <span className="text-[#60A5FA] font-bold">
                 {data.split_screen_ratio}
               </span>
             </div>

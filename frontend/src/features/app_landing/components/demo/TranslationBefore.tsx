@@ -14,7 +14,7 @@ export function TranslationBefore() {
 
         {/* Character Visual */}
         <div className="absolute bottom-4 left-6 z-10 flex flex-col items-center">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-rose-600 to-purple-500 flex items-center justify-center text-2xl shadow-lg border border-white/20">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-rose-600 to-blue-500 flex items-center justify-center text-2xl shadow-lg border border-white/20">
             🥷
           </div>
           <span className="text-[10px] font-black text-white uppercase tracking-wider mt-1.5">Cha Hae-In</span>

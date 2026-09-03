@@ -326,8 +326,8 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
             }}
             className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
               isDraggingLeft
-                ? "bg-purple-500/80 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
-                : "bg-white/[0.04] hover:bg-purple-500/50"
+                ? "bg-purple-500/80 "
+                : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
             }`}
             title="Drag to resize Left Panel (Double click to reset)"
           >
@@ -388,8 +388,8 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
                 }}
                 className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
                   isDraggingRight
-                    ? "bg-purple-500/80 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
-                    : "bg-white/[0.04] hover:bg-purple-500/50"
+                    ? "bg-purple-500/80 "
+                    : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
                 }`}
                 title="Drag to resize Inspector Panel (Double click to reset)"
               >
@@ -418,8 +418,8 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               }}
               className={`h-2 w-full relative cursor-row-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-t border-b border-white/[0.06] ${
                 isDraggingTimeline
-                  ? "bg-purple-500/80 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
-                  : "bg-[#0c0c14] hover:bg-purple-500/30"
+                  ? "bg-purple-500/80 "
+                  : "bg-[#0c0c14] hover:bg-[#3B82F6]/30"
               }`}
               title="Drag to resize Timeline (Double click to reset)"
             >

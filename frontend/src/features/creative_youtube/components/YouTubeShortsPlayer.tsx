@@ -151,12 +151,12 @@ export default function YouTubeShortsPlayer({
               onClick={() => setShowComments(!showComments)}
               className={`p-3 border rounded-full text-white shadow-lg transition-all cursor-pointer hover:scale-110 ${
                 showComments
-                  ? "bg-purple-600 border-purple-500 text-white"
+                  ? "bg-purple-600 border-[#3B82F6] text-white"
                   : "bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800"
               }`}
               title="View Comments"
             >
-              <MessageSquare className="w-5 h-5 text-purple-300" />
+              <MessageSquare className="w-5 h-5 text-[#60A5FA]" />
             </button>
             <span className="text-[10px] font-mono font-bold text-neutral-300">
               {currentShort.comment_count || "0"}
@@ -212,7 +212,7 @@ export default function YouTubeShortsPlayer({
         <div className="fixed inset-y-0 right-0 w-full sm:w-[380px] z-30 bg-neutral-950/95 border-l border-neutral-800 p-5 overflow-y-auto shadow-2xl flex flex-col animate-fade-in">
           <div className="flex items-center justify-between border-b border-neutral-800 pb-3 mb-3">
             <h4 className="text-xs font-black font-mono uppercase text-white flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-purple-400" />
+              <MessageSquare className="w-4 h-4 text-[#3B82F6]" />
               Short Comments ({currentShort.comment_count})
             </h4>
             <button

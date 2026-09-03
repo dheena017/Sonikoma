@@ -361,7 +361,7 @@ export default function SeriesDetailsPage({
           </button>
           <button
             onClick={() => navigateTo("/projects")}
-            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all cursor-pointer"
+            className="px-6 py-2.5 bg-purple-600 hover:bg-[#3B82F6] text-white rounded-xl font-bold transition-all cursor-pointer"
           >
             Back to Projects
           </button>
@@ -380,13 +380,13 @@ export default function SeriesDetailsPage({
           <button
             type="button"
             onClick={() => navigateTo("/projects")}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all cursor-pointer shadow-sm group"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer shadow-sm group"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
             <span>Projects</span>
           </button>
           <span className="text-neutral-600 font-bold">&rsaquo;</span>
-          <span className="px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-300 font-bold truncate max-w-xs sm:max-w-md">
+          <span className="px-2.5 py-1 rounded-lg bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[#60A5FA] font-bold truncate max-w-xs sm:max-w-md">
             {series.title}
           </span>
         </div>
@@ -412,9 +412,9 @@ export default function SeriesDetailsPage({
           <button
             type="button"
             onClick={() => setIsEditModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 border border-white/10 hover:border-purple-500/40 text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer hover:bg-neutral-850"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 border border-white/10 hover:border-[#3B82F6]/40 text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer hover:bg-neutral-850"
           >
-            <Edit3 className="w-3.5 h-3.5 text-purple-400" />
+            <Edit3 className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Edit Info</span>
           </button>
         </div>
@@ -442,13 +442,13 @@ export default function SeriesDetailsPage({
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-955">
-                <FolderOpen className="w-12 h-12 text-purple-400/50" />
+                <FolderOpen className="w-12 h-12 text-[#3B82F6]/50" />
                 <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
                   No Cover
                 </span>
               </div>
             )}
-            <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[9px] font-extrabold font-mono text-purple-300 uppercase tracking-wider">
+            <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[9px] font-extrabold font-mono text-[#60A5FA] uppercase tracking-wider">
               WEBTOON
             </div>
           </div>
@@ -457,7 +457,7 @@ export default function SeriesDetailsPage({
           <div className="flex flex-col gap-4 flex-1 min-w-0">
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold font-mono">
+                <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold font-mono">
                   {series.genre || "Fantasy Action"}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-neutral-750 text-neutral-300 text-xs font-mono">
@@ -479,7 +479,7 @@ export default function SeriesDetailsPage({
             {/* Metadata Chips Row */}
             <div className="flex flex-wrap gap-3 items-center pt-2">
               <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
-                <Layers className="w-3.5 h-3.5 text-purple-400" />
+                <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
                 <span>{series.chapterCount} Chapters</span>
               </div>
 
@@ -507,7 +507,7 @@ export default function SeriesDetailsPage({
             <div className="flex flex-wrap gap-3 pt-3 border-t border-white/10">
               <button
                 onClick={handleNewChapter}
-                className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-purple-900/40 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-purple-900/40 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95"
               >
                 <Plus className="h-4 w-4" />
                 <span>New Chapter</span>
@@ -515,15 +515,15 @@ export default function SeriesDetailsPage({
 
               <button
                 onClick={() => setIsPublishModalOpen(true)}
-                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-purple-500/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
               >
-                <Film className="h-4 w-4 text-purple-400" />
+                <Film className="h-4 w-4 text-[#3B82F6]" />
                 <span>Export Full Series</span>
               </button>
 
               <button
                 onClick={() => setIsReaderModalOpen(true)}
-                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-purple-500/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
               >
                 <BookOpen className="h-4 w-4 text-emerald-400" />
                 <span>Read Series</span>
@@ -531,7 +531,7 @@ export default function SeriesDetailsPage({
 
               <button
                 onClick={() => navigateTo("/creative-suite/ai-voice")}
-                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-purple-500/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
               >
                 <Volume2 className="h-4 w-4 text-amber-400" />
                 <span>Audio Studio</span>
@@ -544,7 +544,7 @@ export default function SeriesDetailsPage({
       {/* 2. Deep Series Analytics Dashboard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 shrink-0">
+          <div className="p-3 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0">
             <Layers className="w-6 h-6" />
           </div>
           <div>
@@ -604,7 +604,7 @@ export default function SeriesDetailsPage({
             </div>
             <div className="w-full h-2 rounded-full bg-neutral-955 overflow-hidden border border-neutral-800">
               <div
-                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
+                className="h-full bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full"
                 style={{
                   width: `${Math.round(
                     (readyChaptersCount / Math.max(1, series.chapterCount)) *
@@ -623,7 +623,7 @@ export default function SeriesDetailsPage({
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold text-white font-sans flex items-center gap-3">
             Chapters
-            <span className="text-xs font-mono bg-neutral-800 border border-neutral-750 px-3 py-1 rounded-full text-purple-400 font-bold">
+            <span className="text-xs font-mono bg-neutral-800 border border-neutral-750 px-3 py-1 rounded-full text-[#3B82F6] font-bold">
               {filteredChapters.length} of {series.chapterCount}
             </span>
           </h2>
@@ -639,7 +639,7 @@ export default function SeriesDetailsPage({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search chapter..."
-              className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500 transition-colors font-sans"
+              className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
             />
           </div>
 
@@ -667,7 +667,7 @@ export default function SeriesDetailsPage({
               onClick={() => setIsSortOpen((prev) => !prev)}
               className={`flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 border rounded-xl px-3 py-2 text-xs font-mono transition-all cursor-pointer select-none ${
                 isSortOpen
-                  ? "border-purple-500/60 ring-2 ring-purple-500/20 text-white"
+                  ? "border-[#3B82F6]/60 ring-2 ring-purple-500/20 text-white"
                   : "border-neutral-800 text-neutral-300 hover:border-neutral-700"
               }`}
             >
@@ -685,7 +685,7 @@ export default function SeriesDetailsPage({
               </span>
               <ChevronDown
                 className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
-                  isSortOpen ? "rotate-180 text-purple-300" : ""
+                  isSortOpen ? "rotate-180 text-[#60A5FA]" : ""
                 }`}
               />
             </button>
@@ -710,7 +710,7 @@ export default function SeriesDetailsPage({
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
                           isSelected
-                            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-md shadow-purple-900/30"
+                            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-purple-900/30"
                             : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
                         }`}
                       >
@@ -811,7 +811,7 @@ export default function SeriesDetailsPage({
               <div
                 key={chapter.project_id}
                 onClick={() => actions.handleOpenProject(chapter)}
-                className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/40 flex items-center justify-between gap-4 transition-all cursor-pointer group"
+                className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/40 flex items-center justify-between gap-4 transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   {isBatchMode && (
@@ -840,7 +840,7 @@ export default function SeriesDetailsPage({
                   </div>
 
                   <div className="min-w-0">
-                    <h4 className="text-sm font-bold text-white truncate group-hover:text-purple-300 transition-colors">
+                    <h4 className="text-sm font-bold text-white truncate group-hover:text-[#93C5FD] transition-colors">
                       {chapter.title}
                     </h4>
                     <p className="text-xs text-neutral-400 font-mono">
@@ -865,7 +865,7 @@ export default function SeriesDetailsPage({
                       e.stopPropagation();
                       actions.handleOpenProject(chapter);
                     }}
-                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all"
+                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold transition-all"
                   >
                     Open Studio
                   </button>

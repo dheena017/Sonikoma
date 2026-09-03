@@ -21,13 +21,13 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
         <div className="relative z-10 flex justify-center mb-8">
           <div className="relative p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 shadow-inner group">
             {/* Pulsing outer glow */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-purple-500/20 to-indigo-500/20 blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-            <Compass className="h-16 w-16 text-purple-400 animate-float" />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-500/20 to-indigo-500/20 blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <Compass className="h-16 w-16 text-[#3B82F6] animate-float" />
           </div>
         </div>
 
         {/* 404 Header Text with Gradient */}
-        <h1 className="relative z-10 font-sans font-extrabold text-8xl md:text-9xl tracking-tighter bg-gradient-to-r from-purple-400 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent select-none filter drop-shadow-[0_0_20px_rgba(168,85,247,0.25)] leading-none mb-4">
+        <h1 className="relative z-10 font-sans font-extrabold text-8xl md:text-9xl tracking-tighter bg-gradient-to-r from-purple-400 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent select-none filter drop- leading-none mb-4">
           404
         </h1>
 
@@ -45,7 +45,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
         <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
             onClick={onNavigateHome}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium hover:from-purple-500 hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 hover:scale-[1.02] cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-medium hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 hover:scale-[1.02] cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Return to Dashboard
@@ -62,7 +62,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
         {/* Details Footer */}
         <div className="relative z-10 mt-10 pt-6 border-t border-neutral-800/60 flex items-center justify-center gap-2 text-xs text-neutral-500 font-mono">
           <span>Requested:</span>
-          <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-purple-400">
+          <span className="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-[#3B82F6]">
             {window.location.pathname}
           </span>
         </div>

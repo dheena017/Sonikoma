@@ -415,27 +415,7 @@ export default function MainLayout(props: MainLayoutProps) {
               />
             )}
           </>
-        ) : isImageEditorPage ? (
-          <Sidebar
-            isProcessing={appLogic.isProcessing}
-            panels={panels}
-            scrapedImages={scrapedImages}
-            totalCalculatedDuration={totalCalculatedDuration}
-            currentPath={currentPath}
-            editingImageIdx={editingImageIdx}
-            lastEditorPath={lastEditorPath}
-            isBatchCropping={isBatchCropping}
-            isCleaningBubbles={isCleaningBubbles}
-            isOpen={isSidebarOpen}
-            onClose={handleCloseSidebar}
-            projectId={projectId}
-            isDirty={isWorkspaceDirty}
-            navigateTo={navigateTo}
-            notifications={notifications}
-            seriesSlug={seriesSlugState}
-            chapterSlug={chapterSlugState}
-          />
-        ) : (
+        ) : isImageEditorPage || isVideoEditorPage ? null : (
           <>
             <Sidebar
               isProcessing={appLogic.isProcessing}
@@ -460,7 +440,6 @@ export default function MainLayout(props: MainLayoutProps) {
             {!isSidebarOpen &&
               !isDrawerOpen &&
               !isProEditorPage &&
-              !isVideoEditorPage &&
               !isAnyAdmin && (
                 <MiniSidebar
                   currentPath={currentPath}

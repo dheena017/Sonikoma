@@ -25,7 +25,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
     : "Draft";
   const projectStatusClass = projectStatus.toLowerCase().includes("publish")
     ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300"
-    : "bg-purple-500/10 border-purple-500/20 text-purple-300";
+    : "bg-[#3B82F6]/10 border-[#3B82F6]/20 text-[#60A5FA]";
   const seriesTitleVal = activeProject?.title ?? "Untitled Series";
   const seriesCoverImageVal = activeProject?.cover_image ?? null;
   const chapterTitleVal = activeProject?.episode
@@ -44,7 +44,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
 
   return (
     <div className="relative bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 shadow-md hover:border-[#3B82F6]/40 transition-all duration-200 text-left overflow-hidden">
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#3B82F6] to-[#A855F7] opacity-90" />
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#3B82F6] to-[#3B82F6] opacity-90" />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
           <h3 className="text-xs font-black text-[#3B82F6] uppercase tracking-widest font-mono flex items-center gap-1.5">
@@ -84,19 +84,19 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                   </span>
                 </div>
 
-                <p className="text-xs text-purple-300 truncate mt-0.5 font-mono">
+                <p className="text-xs text-[#60A5FA] truncate mt-0.5 font-mono">
                   {chapterTitleVal}
                 </p>
 
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   <div className="text-[10px] text-neutral-400 font-mono bg-neutral-950 border border-neutral-850 px-2.5 py-1 rounded-full inline-flex items-center gap-2">
-                    <span className="text-purple-300 font-bold">
+                    <span className="text-[#60A5FA] font-bold">
                       {activePanelsCount}
                     </span>
                     <span className="text-neutral-400">panels</span>
                   </div>
                   <div className="text-[10px] text-neutral-400 font-mono bg-neutral-950 border border-neutral-850 px-2.5 py-1 rounded-full inline-flex items-center gap-2">
-                    <span className="text-purple-300 font-bold">
+                    <span className="text-[#60A5FA] font-bold">
                       {authorLabel}
                     </span>
                   </div>
@@ -130,8 +130,8 @@ const CreativeSuiteDashboardActiveProject: React.FC<
             {/* ACTIVE TIMELINE PANELS FILMSTRIP */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest flex items-center gap-1.5">
-                  <Film className="w-3.5 h-3.5 text-purple-400" /> Active Panel
+                <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest flex items-center gap-1.5">
+                  <Film className="w-3.5 h-3.5 text-[#3B82F6]" /> Active Panel
                   Frames ({safePanels.length})
                 </span>
                 {safePanels.length > 0 && (
@@ -169,7 +169,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                             }`
                           );
                         }}
-                        className="relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-950 hover:border-purple-500/60 transition-all cursor-pointer group shadow-md"
+                        className="relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-950 hover:border-[#3B82F6]/60 transition-all cursor-pointer group shadow-md"
                         title={`Panel #${idx + 1}: ${
                           p?.speech_text || p?.visual_description || "Frame"
                         }`}
@@ -182,13 +182,13 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                           />
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center p-1 text-center bg-neutral-950 text-neutral-500">
-                            <Sparkles className="w-4 h-4 text-purple-400/50 mb-1" />
+                            <Sparkles className="w-4 h-4 text-[#3B82F6]/50 mb-1" />
                             <span className="text-[9px] font-mono">
                               Frame #{idx + 1}
                             </span>
                           </div>
                         )}
-                        <div className="absolute top-1 left-1 bg-black/80 backdrop-blur-xs px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-sm">
+                        <div className="absolute top-1 left-1 bg-black/80 backdrop-blur-xs px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-[#60A5FA] border border-[#3B82F6]/20 shadow-sm">
                           #{idx + 1}
                         </div>
                         {p?.duration && (
@@ -225,7 +225,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                       `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
                     );
                   }}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-950/50 cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-950/50 cursor-pointer"
                   aria-label="Resume Editing"
                 >
                   <Play className="w-4 h-4 fill-white" />{" "}
@@ -257,7 +257,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
             <Tooltip text="Go to projects catalog" placement="bottom">
               <button
                 onClick={() => navigateTo("/projects")}
-                className="mt-4 px-4 py-2 border border-purple-500/30 bg-purple-500/10 rounded-xl text-[10px] font-mono font-bold text-purple-300 hover:bg-purple-500/20 transition-all active:scale-95 cursor-pointer"
+                className="mt-4 px-4 py-2 border border-[#3B82F6]/30 bg-[#3B82F6]/10 rounded-xl text-[10px] font-mono font-bold text-[#60A5FA] hover:bg-[#3B82F6]/20 transition-all active:scale-95 cursor-pointer"
                 aria-label="Choose Project"
               >
                 Choose Project

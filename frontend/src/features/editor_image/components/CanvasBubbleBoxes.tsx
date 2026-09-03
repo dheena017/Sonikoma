@@ -41,7 +41,7 @@ export default function CanvasBubbleBoxes({
             className={`absolute border-2 pointer-events-auto cursor-pointer transition-all ${
               isSelected
                 ? "border-amber-400 bg-amber-400/20 z-40 shadow-[0_0_10px_rgba(251,191,36,0.5)]"
-                : "border-purple-400/40 bg-purple-500/5 hover:border-purple-300 hover:bg-purple-500/20"
+                : "border-[#60A5FA]/40 bg-purple-500/5 hover:border-purple-300 hover:bg-[#3B82F6]/20"
             }`}
             style={{
               top: `${top}%`,
@@ -62,7 +62,7 @@ export default function CanvasBubbleBoxes({
                 : "Detected Bubble (Click to Clean/Select)"
             }
           >
-            <div className="absolute left-1 top-1 bg-black/85 text-[8px] text-purple-300 font-bold px-1 py-0.5 rounded border border-purple-500/20 max-w-[90%] overflow-hidden text-ellipsis whitespace-nowrap opacity-75 group-hover:opacity-100 transition-opacity">
+            <div className="absolute left-1 top-1 bg-black/85 text-[8px] text-[#60A5FA] font-bold px-1 py-0.5 rounded border border-[#3B82F6]/20 max-w-[90%] overflow-hidden text-ellipsis whitespace-nowrap opacity-75 group-hover:opacity-100 transition-opacity">
               Bubble #{idx + 1}
             </div>
             {bubble.text && (

@@ -292,18 +292,18 @@ export const AutoCropEngineSelector = React.memo(
             onClick={() => setUseLocalCV(true)}
             className={`group flex flex-col gap-2.5 p-4 sm:p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer select-none relative overflow-hidden ${
               useLocalCV
-                ? "bg-cyan-950/20 border-cyan-500/80 shadow-[0_0_24px_rgba(6,182,212,0.15)] ring-1 ring-cyan-500/30"
+                ? "bg-cyan-950/20 border-blue-500/80 shadow-[0_0_24px_rgba(6,182,212,0.15)] ring-1 ring-cyan-500/30"
                 : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
             }`}
           >
             {useLocalCV && (
-              <div className="absolute top-0 right-0 w-28 h-28 bg-cyan-500/10 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none" />
+              <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full blur-2xl -mr-4 -mt-4 pointer-events-none" />
             )}
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <span
                   className={`text-[12px] font-bold uppercase tracking-wider ${
-                    useLocalCV ? "text-cyan-400" : "text-white"
+                    useLocalCV ? "text-blue-400" : "text-white"
                   }`}
                 >
                   OpenCV Engine
@@ -311,7 +311,7 @@ export const AutoCropEngineSelector = React.memo(
                 <span
                   className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
                     useLocalCV
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+                      ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
                       : "bg-neutral-800 text-neutral-400"
                   }`}
                 >
@@ -321,12 +321,12 @@ export const AutoCropEngineSelector = React.memo(
               <span
                 className={`h-4 w-4 rounded-full border flex items-center justify-center transition-all ${
                   useLocalCV
-                    ? "border-cyan-400 bg-cyan-950 text-cyan-400"
+                    ? "border-blue-400 bg-cyan-950 text-blue-400"
                     : "border-neutral-700 bg-neutral-900"
                 }`}
               >
                 {useLocalCV && (
-                  <div className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
+                  <div className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]" />
                 )}
               </span>
             </div>
@@ -398,7 +398,7 @@ export const AutoCropEngineSelector = React.memo(
             }`}
           >
             <div className="flex items-center gap-2 border-b border-neutral-900 pb-3">
-              <Settings2 className="h-3.5 w-3.5 text-cyan-400" />
+              <Settings2 className="h-3.5 w-3.5 text-blue-400" />
               <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
                 OpenCV Configuration
               </h4>
@@ -445,7 +445,7 @@ export const AutoCropEngineSelector = React.memo(
                     onClick={() => setCvStrategyMode(strategy.id as any)}
                     className={`py-1.5 text-center rounded-lg transition-all cursor-pointer truncate ${
                       cvStrategyMode === strategy.id
-                        ? "bg-cyan-950/60 border border-cyan-800/40 text-cyan-400 font-bold"
+                        ? "bg-cyan-950/60 border border-cyan-800/40 text-blue-400 font-bold"
                         : "text-neutral-500 hover:text-neutral-355"
                     }`}
                   >
@@ -470,7 +470,7 @@ export const AutoCropEngineSelector = React.memo(
                         onClick={() => setAspectRatioLock(ratio)}
                         className={`flex-1 min-w-[40px] py-1 text-center rounded-lg transition-all cursor-pointer truncate ${
                           aspectRatioLock === ratio
-                            ? "bg-cyan-950/60 border border-cyan-800/40 text-cyan-400 font-bold"
+                            ? "bg-cyan-950/60 border border-cyan-800/40 text-blue-400 font-bold"
                             : "text-neutral-500 hover:text-neutral-355"
                         }`}
                       >
@@ -499,7 +499,7 @@ export const AutoCropEngineSelector = React.memo(
                     onClick={() => setCropBackgroundMode(mode.id)}
                     className={`flex-1 py-1.5 text-center rounded-lg transition-all cursor-pointer truncate ${
                       cropBackgroundMode === mode.id
-                        ? "bg-cyan-950/60 border border-cyan-800/40 text-cyan-400 font-bold"
+                        ? "bg-cyan-950/60 border border-cyan-800/40 text-blue-400 font-bold"
                         : "text-neutral-500 hover:text-neutral-355"
                     }`}
                   >
@@ -661,7 +661,7 @@ export const AutoCropEngineSelector = React.memo(
                       <span className="text-neutral-500 uppercase font-bold">
                         Canny Low Edge
                       </span>
-                      <span className="text-cyan-400 font-bold">
+                      <span className="text-blue-400 font-bold">
                         {cropCannyLow}
                       </span>
                     </div>
@@ -680,7 +680,7 @@ export const AutoCropEngineSelector = React.memo(
                       <span className="text-neutral-500 uppercase font-bold">
                         Canny High Edge
                       </span>
-                      <span className="text-cyan-400 font-bold">
+                      <span className="text-blue-400 font-bold">
                         {cropCannyHigh}
                       </span>
                     </div>
@@ -699,7 +699,7 @@ export const AutoCropEngineSelector = React.memo(
                       <span className="text-neutral-500 uppercase font-bold">
                         Close Kernel
                       </span>
-                      <span className="text-cyan-400 font-bold">
+                      <span className="text-blue-400 font-bold">
                         {cropCloseKernelSize}px
                       </span>
                     </div>
@@ -722,7 +722,7 @@ export const AutoCropEngineSelector = React.memo(
                       <span className="text-neutral-500 uppercase font-bold">
                         Noise Speckle Filter
                       </span>
-                      <span className="text-cyan-400 font-bold">
+                      <span className="text-blue-400 font-bold">
                         {noiseThreshold}px
                       </span>
                     </div>
@@ -744,7 +744,7 @@ export const AutoCropEngineSelector = React.memo(
                       <span className="text-neutral-500 uppercase font-bold">
                         Paper Pre-Blur
                       </span>
-                      <span className="text-cyan-400 font-bold uppercase">
+                      <span className="text-blue-400 font-bold uppercase">
                         {bilateralBlur}
                       </span>
                     </div>
@@ -756,7 +756,7 @@ export const AutoCropEngineSelector = React.memo(
                           onClick={() => setBilateralBlur(b as any)}
                           className={`flex-1 py-0.5 text-center rounded transition-all cursor-pointer uppercase ${
                             bilateralBlur === b
-                              ? "bg-cyan-950 text-cyan-400 font-bold"
+                              ? "bg-cyan-950 text-blue-400 font-bold"
                               : "text-neutral-600 hover:text-neutral-400"
                           }`}
                         >
@@ -772,13 +772,13 @@ export const AutoCropEngineSelector = React.memo(
                       <span className="text-neutral-500 uppercase font-bold">
                         Bounding Box Color
                       </span>
-                      <span className="text-cyan-400 font-bold capitalize">
+                      <span className="text-blue-400 font-bold capitalize">
                         {overlayTheme}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 pt-0.5">
                       {[
-                        { id: "cyan", bg: "bg-cyan-500" },
+                        { id: "cyan", bg: "bg-blue-500" },
                         { id: "emerald", bg: "bg-emerald-500" },
                         { id: "violet", bg: "bg-purple-500" },
                         { id: "gold", bg: "bg-amber-450" },

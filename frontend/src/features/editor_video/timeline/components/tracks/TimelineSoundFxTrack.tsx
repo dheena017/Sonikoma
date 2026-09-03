@@ -195,7 +195,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
       <TrackLabel
         id="A2"
         label="Sound FX"
-        color="text-cyan-400"
+        color="text-blue-400"
         type="audio"
         locked={locked}
         hidden={hidden}
@@ -210,9 +210,9 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
           <button
             type="button"
             onClick={onAddSfx}
-            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-cyan-300 italic px-2 hover:bg-cyan-950/20 rounded-md transition-colors cursor-pointer group"
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-[#93C5FD] italic px-2 hover:bg-cyan-950/20 rounded-md transition-colors cursor-pointer group"
           >
-            <Plus className="h-2.5 w-2.5 text-cyan-400/70 group-hover:text-cyan-300 transition-colors" />
+            <Plus className="h-2.5 w-2.5 text-blue-400/70 group-hover:text-[#93C5FD] transition-colors" />
             <span>Add sound effect / ambient SFX</span>
           </button>
         ) : (
@@ -273,7 +273,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                     ? "cursor-col-resize border-cyan-300 shadow-[0_0_14px_rgba(103,232,249,0.5)] z-30"
                     : selectedClip === key
                     ? "cursor-grab border-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.3)] z-20"
-                    : "cursor-grab border-cyan-500/40 hover:border-cyan-300/80 z-10"
+                    : "cursor-grab border-blue-500/40 hover:border-cyan-300/80 z-10"
                 } bg-[#0e7490]`}
                 style={{
                   left: `${finalLeftPx}px`,
@@ -297,8 +297,8 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
 
                 {/* SFX Label & Controls */}
                 <div className="absolute inset-0 flex items-center justify-between px-1.5 z-10 pointer-events-none">
-                  <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-cyan-400/60 transition-colors">
-                    <GripVertical className="h-3 w-3 text-cyan-300 group-hover:text-white shrink-0 transition-colors" />
+                  <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-[#3B82F6]/60 transition-colors">
+                    <GripVertical className="h-3 w-3 text-blue-300 group-hover:text-white shrink-0 transition-colors" />
                     <Zap className="h-2.5 w-2.5 text-amber-300 shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                     <span className="text-[8.5px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">
                       {sfx}
@@ -316,7 +316,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                     )}
 
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
-                      <span className="text-[7px] font-mono font-bold text-cyan-200 bg-cyan-950 px-1 py-0.2 rounded-sm border border-cyan-400/50 animate-pulse">
+                      <span className="text-[7px] font-mono font-bold text-cyan-200 bg-cyan-950 px-1 py-0.2 rounded-sm border border-blue-400/50 animate-pulse">
                         {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
@@ -365,10 +365,10 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
         <button
           type="button"
           onClick={onAddSfx}
-          className="w-full h-8 rounded-md border border-cyan-500/30 hover:border-cyan-400/80 bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover:shadow-[0_0_14px_rgba(103,232,249,0.35)] select-none group/add"
+          className="w-full h-8 rounded-md border border-blue-500/30 hover:border-[#3B82F6]/80 bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover:shadow-[0_0_14px_rgba(103,232,249,0.35)] select-none group/add"
           title="Add Sound FX"
         >
-          <Zap className="h-3 w-3 text-cyan-400 group-hover/add:scale-110 transition-transform" />
+          <Zap className="h-3 w-3 text-blue-400 group-hover/add:scale-110 transition-transform" />
           <span>Add SFX</span>
         </button>
       </div>

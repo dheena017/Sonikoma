@@ -215,15 +215,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         onClose();
                       }}
                       className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${active
-                        ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.12)] border border-purple-500/30 font-bold"
+                        ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(59,130,246,0.12)] border border-[#3B82F6]/30 font-bold"
                         : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
                         }`}
                     >
                       <div className="flex items-center gap-3">
                         <item.icon
                           className={`w-4 h-4 shrink-0 transition-transform duration-200 ${active
-                            ? "text-purple-400"
-                            : "text-neutral-400 group-hover:scale-110 group-hover:text-purple-300"
+                            ? "text-[#3B82F6]"
+                            : "text-neutral-400 group-hover:scale-110 group-hover:text-[#93C5FD]"
                             }`}
                         />
                         <span className="text-xs font-semibold tracking-wide font-sans truncate">
@@ -246,7 +246,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             navigateTo("/dashboard");
             onClose();
           }}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 text-white text-xs font-black tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:shadow-[0_0_28px_rgba(168,85,247,0.65)] active:scale-95 border border-purple-400/40 cursor-pointer font-sans"
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 text-white text-xs font-black tracking-widest uppercase transition-all  hover: active:scale-95 border border-[#60A5FA]/40 cursor-pointer font-sans"
         >
           <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
           <span>RETURN TO APP</span>

@@ -59,9 +59,9 @@ function formatMessage(level: string, filename: string, args: any[]): any[] {
 
   const prefix = `%c${time} %c[FRONTEND] %c[${level}] %c[${filename}]`;
   const timeStyle = "color: #888888; font-weight: normal;";
-  const categoryStyle = "color: #ff00ff; font-weight: bold;"; // Magenta
+  const categoryStyle = "color: #3B82F6; font-weight: bold;"; // Magenta
 
-  let levelColor = "#00ffff"; // Cyan
+  let levelColor = "#3B82F6"; // Cyan
   if (level === "WARN") levelColor = "#ffff00"; // Yellow
   if (level === "ERROR") levelColor = "#ff0000"; // Red
 

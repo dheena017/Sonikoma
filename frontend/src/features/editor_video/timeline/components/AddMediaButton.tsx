@@ -20,7 +20,7 @@ const AddMediaButton: React.FC<AddMediaButtonProps> = ({
     <button
       onClick={onClick}
       aria-label={label}
-      className={`group relative flex items-center justify-center w-7 h-7 rounded-full bg-neutral-800 border border-white/15 hover:bg-purple-600 hover:border-purple-400 text-neutral-300 hover:text-white transition-all shadow-md cursor-pointer ${className}`}
+      className={`group relative flex items-center justify-center w-7 h-7 rounded-full bg-neutral-800 border border-white/15 hover:bg-[#3B82F6] hover:border-[#60A5FA] text-neutral-300 hover:text-white transition-all shadow-md cursor-pointer ${className}`}
     >
       <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
     </button>

@@ -490,10 +490,10 @@ export default function YouTubeVideosPanel({
                       </span>
                       <button
                         onClick={() => onViewComments(vid.id)}
-                        className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
+                        className="flex items-center gap-1 hover:text-[#93C5FD] transition-colors cursor-pointer"
                         title="View Comments"
                       >
-                        <MessageSquare className="w-3 h-3 text-purple-400" />{" "}
+                        <MessageSquare className="w-3 h-3 text-[#3B82F6]" />{" "}
                         {vid.comment_count}
                       </button>
                     </div>
@@ -590,9 +590,9 @@ export default function YouTubeVideosPanel({
                     </span>
                     <button
                       onClick={() => onViewComments(vid.id)}
-                      className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
+                      className="flex items-center gap-1 hover:text-[#93C5FD] transition-colors cursor-pointer"
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-purple-400" />{" "}
+                      <MessageSquare className="w-3.5 h-3.5 text-[#3B82F6]" />{" "}
                       {vid.comment_count}
                     </button>
                   </div>

@@ -181,7 +181,7 @@ export default function HorizontalSplitterControls({
         <button
           type="button"
           onClick={handleAddSplitLine}
-          className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 font-mono shadow-[0_0_16px_rgba(59,130,246,0.4)] transition-all cursor-pointer active:scale-98"
+          className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 font-mono  transition-all cursor-pointer active:scale-98"
         >
           <Plus className="h-4 w-4" />
           <span>Add Split Line</span>

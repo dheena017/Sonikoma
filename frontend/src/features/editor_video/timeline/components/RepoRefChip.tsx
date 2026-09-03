@@ -15,7 +15,7 @@ const RepoRefChip: React.FC<RepoRefChipProps> = ({
 }) => (
   <div className="flex items-center gap-2 text-[9px] font-mono text-neutral-500 bg-white/[0.03] px-2 py-0.5 rounded border border-white/5">
     <span
-      className="flex items-center gap-1 text-purple-300/80"
+      className="flex items-center gap-1 text-[#60A5FA]/80"
       title="Active Git Commit"
     >
       <GitCommit className="h-2.5 w-2.5" />

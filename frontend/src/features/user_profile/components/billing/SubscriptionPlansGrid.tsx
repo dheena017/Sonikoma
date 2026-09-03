@@ -27,7 +27,7 @@ export default function SubscriptionPlansGrid({
             Free Tier
           </span>
           {subscriptionTier !== "pro" ? (
-            <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 rounded-full font-bold">
+            <span className="text-[10px] bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 px-2 rounded-full font-bold">
               Active
             </span>
           ) : (
@@ -45,11 +45,11 @@ export default function SubscriptionPlansGrid({
       </div>
 
       {/* Pro Plan */}
-      <div className="bg-gradient-to-b from-[#121218]/80 to-[#070709]/80 border border-purple-500/20 rounded-3xl p-6 text-left space-y-4 shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="bg-gradient-to-b from-[#121218]/80 to-[#070709]/80 border border-[#3B82F6]/20 rounded-3xl p-6 text-left space-y-4 shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[#3B82F6]/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold tracking-wider uppercase text-purple-400">
+          <span className="text-[10px] font-bold tracking-wider uppercase text-[#3B82F6]">
             Studio Pro
           </span>
           {subscriptionTier === "pro" ? (
@@ -74,7 +74,7 @@ export default function SubscriptionPlansGrid({
       <div className="bg-black/30 border border-white/5 rounded-3xl p-6 text-left space-y-4 flex flex-col justify-between">
         <div className="space-y-1">
           <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-500 flex items-center gap-1">
-            <Ticket className="w-3.5 h-3.5 text-purple-400" />
+            <Ticket className="w-3.5 h-3.5 text-[#3B82F6]" />
             Promo Coupons
           </span>
           <p className="text-[10px] text-neutral-500 font-semibold leading-relaxed">
@@ -89,11 +89,11 @@ export default function SubscriptionPlansGrid({
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
             placeholder="e.g. COMIC50"
-            className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700 uppercase"
+            className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700 uppercase"
           />
           <button
             type="submit"
-            className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
+            className="w-full bg-purple-600 hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
           >
             Apply Coupon
           </button>

@@ -29,7 +29,7 @@ export default function RouteLoadingFallback({
 
         {/* Active Moving Progress Bar */}
         <div className="w-full h-1.5 rounded-full bg-[#121212] border border-[#2F2F2F] overflow-hidden relative z-10 mt-1">
-          <div className="h-full bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF] rounded-full animate-progress-slider w-full" />
+          <div className="h-full bg-gradient-to-r from-[#3B82F6] to-[#3B82F6] rounded-full animate-progress-slider w-full" />
         </div>
       </div>
     </div>

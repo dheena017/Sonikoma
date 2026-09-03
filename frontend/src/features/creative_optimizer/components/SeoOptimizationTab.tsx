@@ -115,10 +115,10 @@ export default function SeoOptimizationTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-purple-500/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-[#3B82F6]/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-400">
+            <span className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/30 rounded-lg text-[#3B82F6]">
               <Sparkles className="w-4 h-4" />
             </span>
             <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
@@ -133,7 +133,7 @@ export default function SeoOptimizationTab({
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
+          className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-sm active:scale-95 shrink-0"
         >
           {loading ? (
             <RefreshCw className="w-4 h-4 animate-spin" />
@@ -157,8 +157,8 @@ export default function SeoOptimizationTab({
 
       {loading && (
         <div className="bg-neutral-900/60 border border-neutral-850 rounded-2xl p-10 text-center animate-pulse space-y-3 shadow-xl">
-          <Sparkles className="h-8 w-8 text-purple-400 animate-spin mx-auto" />
-          <p className="text-xs font-mono text-purple-300">
+          <Sparkles className="h-8 w-8 text-[#3B82F6] animate-spin mx-auto" />
+          <p className="text-xs font-mono text-[#60A5FA]">
             Analyzing narrative beats & building YouTube algorithm SEO
             metadata...
           </p>
@@ -168,7 +168,7 @@ export default function SeoOptimizationTab({
       {data && !loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
           {/* 1. VIRAL TITLE CARD WITH 3 VARIANTS */}
-          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
                 <div className="flex items-center gap-2">
@@ -204,7 +204,7 @@ export default function SeoOptimizationTab({
                       onClick={() => setSelectedTitleIdx(vIdx)}
                       className={`text-[9px] font-mono px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                         selectedTitleIdx === vIdx
-                          ? "bg-purple-500/20 border-purple-500/60 text-purple-200 font-bold"
+                          ? "bg-[#3B82F6]/20 border-[#3B82F6]/60 text-purple-200 font-bold"
                           : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                       }`}
                     >
@@ -250,12 +250,12 @@ export default function SeoOptimizationTab({
           </div>
 
           {/* 2. INTERACTIVE SEARCH TAGS CARD */}
-          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
                 <div className="flex items-center gap-2">
-                  <Hash className="w-4 h-4 text-purple-400" />
-                  <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest">
+                  <Hash className="w-4 h-4 text-[#3B82F6]" />
+                  <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest">
                     High-Rank Search Tags
                   </span>
                 </div>
@@ -305,7 +305,7 @@ export default function SeoOptimizationTab({
                       onKeyDown={(e) => e.key === "Enter" && handleAddTag()}
                       placeholder="tag_name"
                       autoFocus
-                      className="bg-neutral-900 border border-purple-500/50 text-[10px] font-mono text-white px-2 py-1 rounded-lg outline-none w-24"
+                      className="bg-neutral-900 border border-[#3B82F6]/50 text-[10px] font-mono text-white px-2 py-1 rounded-lg outline-none w-24"
                     />
                     <button
                       onClick={handleAddTag}
@@ -317,7 +317,7 @@ export default function SeoOptimizationTab({
                 ) : (
                   <button
                     onClick={() => setShowTagAdd(true)}
-                    className="text-[9px] font-mono text-purple-400 hover:text-white bg-neutral-900 px-2 py-1 rounded-lg border border-purple-500/20 hover:border-purple-500/50 flex items-center gap-1 cursor-pointer transition-all"
+                    className="text-[9px] font-mono text-[#3B82F6] hover:text-white bg-neutral-900 px-2 py-1 rounded-lg border border-[#3B82F6]/20 hover:border-[#3B82F6]/50 flex items-center gap-1 cursor-pointer transition-all"
                   >
                     <Plus className="w-3 h-3" /> Add Tag
                   </button>
@@ -332,11 +332,11 @@ export default function SeoOptimizationTab({
           </div>
 
           {/* 3. CHAPTERS & TIMESTAMPS CARD */}
-          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
             <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-400" />
-                <span className="text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-widest">
+                <Clock className="w-4 h-4 text-blue-400" />
+                <span className="text-[10px] font-mono font-bold text-blue-300 uppercase tracking-widest">
                   Video Chapters & Timestamps
                 </span>
               </div>
@@ -365,16 +365,16 @@ export default function SeoOptimizationTab({
                 setData({ ...data, timestamps: e.target.value.split("\n") })
               }
               rows={4}
-              className="w-full text-[11px] font-mono text-cyan-100 bg-neutral-950 p-4 rounded-xl border border-neutral-800 leading-relaxed shadow-inner outline-none focus:border-cyan-500/50 resize-none"
+              className="w-full text-[11px] font-mono text-cyan-100 bg-neutral-950 p-4 rounded-xl border border-neutral-800 leading-relaxed shadow-inner outline-none focus:border-blue-500/50 resize-none"
             />
           </div>
 
           {/* 4. EDITABLE DESCRIPTION CARD */}
-          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
             <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-purple-400" />
-                <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest">
+                <FileText className="w-4 h-4 text-[#3B82F6]" />
+                <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest">
                   Full Video Description
                 </span>
               </div>
@@ -403,7 +403,7 @@ export default function SeoOptimizationTab({
                 setData({ ...data, youtube_description: e.target.value })
               }
               rows={6}
-              className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-4 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-purple-500/50 resize-y"
+              className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-4 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-[#3B82F6]/50 resize-y"
             />
           </div>
         </div>

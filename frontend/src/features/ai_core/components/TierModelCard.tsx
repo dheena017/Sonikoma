@@ -137,9 +137,9 @@ const PROVIDER_THEMES: Record<
   },
   stablediffusion: {
     name: "STABLE DIFFUSION",
-    bg: "rgba(168, 85, 247, 0.15)",
-    text: "#c084fc",
-    border: "rgba(168, 85, 247, 0.35)",
+    bg: "rgba(59, 130, 246, 0.15)",
+    text: "#60a5fa",
+    border: "rgba(59, 130, 246, 0.35)",
   },
   edgetts: {
     name: "EDGE TTS",

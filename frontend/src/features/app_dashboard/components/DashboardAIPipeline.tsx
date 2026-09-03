@@ -48,8 +48,8 @@ export default function DashboardAIPipeline() {
           </div>
         </div>
 
-        <div className="flex gap-3.5 p-4 rounded-2xl bg-black/40 border border-white/5 hover:border-cyan-500/30 transition-all">
-          <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 h-fit shrink-0">
+        <div className="flex gap-3.5 p-4 rounded-2xl bg-black/40 border border-white/5 hover:border-[#3B82F6]/30 transition-all">
+          <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 h-fit shrink-0">
             <Volume2 className="h-4 w-4" />
           </div>
           <div>

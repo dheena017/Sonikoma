@@ -125,14 +125,14 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                           Auto-Cropped
                         </span>
                       </div>
-                      <div className="bg-[#181818] border border-cyan-500/30 rounded-xl p-2.5 text-center space-y-1">
-                        <div className="h-16 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-xl text-cyan-400">
+                      <div className="bg-[#181818] border border-blue-500/30 rounded-xl p-2.5 text-center space-y-1">
+                        <div className="h-16 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl text-blue-400">
                           ⚔️
                         </div>
                         <span className="text-xs font-bold text-white block truncate">
                           Panel 2
                         </span>
-                        <span className="text-[10px] text-cyan-400 block font-medium">
+                        <span className="text-[10px] text-blue-400 block font-medium">
                           Auto-Cropped
                         </span>
                       </div>
@@ -209,7 +209,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                         <div className="flex items-end gap-1 h-5">
                           <span className="w-1 bg-blue-400 h-3 rounded-full animate-pulse" />
                           <span className="w-1 bg-indigo-400 h-5 rounded-full animate-pulse" />
-                          <span className="w-1 bg-cyan-400 h-2 rounded-full animate-pulse" />
+                          <span className="w-1 bg-blue-400 h-2 rounded-full animate-pulse" />
                         </div>
                       </div>
                       <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">

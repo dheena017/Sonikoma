@@ -220,12 +220,12 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   return (
     <>
-      <header className="h-16 w-full bg-[#06060c]/80 backdrop-blur-2xl border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex items-center justify-between z-30 shrink-0 select-none gap-2 sm:gap-4">
+      <header className="h-16 w-full bg-[#06060c]/80 backdrop-blur-2xl border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(59,130,246,0.08)] pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex items-center justify-between z-30 shrink-0 select-none gap-2 sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
           <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1 sm:mr-2">
             <button
               onClick={onToggleSidebar}
-              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
+              className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
               title="Toggle Sidebar Drawer"
             >
               <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -443,7 +443,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           <div className="relative">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="w-9 h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-purple-300 hover:bg-purple-500/10 transition-all cursor-pointer flex items-center justify-center relative shadow-sm"
+              className="w-9 h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-[#93C5FD] hover:bg-[#3B82F6]/10 transition-all cursor-pointer flex items-center justify-center relative shadow-sm"
               title={
                 activeProjectId && activeProjectData
                   ? `Active Project: ${
@@ -452,7 +452,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                   : "Select Active Project"
               }
             >
-              <FolderSync className="h-4 w-4 text-purple-400" />
+              <FolderSync className="h-4 w-4 text-[#3B82F6]" />
               {activeProjectId && activeProjectData && (
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
               )}
@@ -462,7 +462,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           {/* User Profile Pill at Far Right End (Matches MainHeader) */}
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
             title="View Profile & Account Settings"
             aria-label="Open User profile"
           >
@@ -471,7 +471,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                 activeUser?.username ||
                 (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
               <img
                 key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
                 src={getUserAvatarUrl(activeUser)}

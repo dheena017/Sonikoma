@@ -13,7 +13,7 @@ export const ChapterScraperEmptyState: React.FC<
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-16 space-y-4">
-        <div className="w-12 h-12 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-12 h-12 border-2 border-[#3B82F6] border-t-transparent rounded-full animate-spin" />
         <p className="text-sm font-bold text-neutral-400 animate-pulse">
           Fetching chapter list...
         </p>
@@ -45,7 +45,7 @@ export const ChapterScraperEmptyState: React.FC<
   return (
     <div className="flex flex-col items-center justify-center p-16 text-center space-y-4">
       <div className="w-14 h-14 rounded-2xl bg-purple-950/30 border border-purple-900/30 flex items-center justify-center">
-        <BookOpen className="w-7 h-7 text-purple-400 opacity-60" />
+        <BookOpen className="w-7 h-7 text-[#3B82F6] opacity-60" />
       </div>
       <div className="space-y-1">
         <p className="text-sm font-bold text-neutral-400">No Chapters Found</p>

@@ -61,7 +61,7 @@ export default function YouTubeVideoGrid() {
     <div className="bg-neutral-950/50 backdrop-blur-md p-5 border border-neutral-900 rounded-3xl space-y-4 transition-all duration-300 hover:border-neutral-800">
       <div className="flex items-center justify-between border-b border-neutral-900 pb-3 font-mono">
         <div className="flex items-center gap-2">
-          <Film className="w-4.5 h-4.5 text-purple-400" />
+          <Film className="w-4.5 h-4.5 text-[#3B82F6]" />
           <span className="text-white font-bold text-xs font-sans">
             Published Webtoon Recaps & Shorts
           </span>
@@ -76,7 +76,7 @@ export default function YouTubeVideoGrid() {
         >
           <RefreshCw
             className={`w-3.5 h-3.5 ${
-              isLoading ? "animate-spin text-purple-400" : ""
+              isLoading ? "animate-spin text-[#3B82F6]" : ""
             }`}
           />
         </button>
@@ -95,7 +95,7 @@ export default function YouTubeVideoGrid() {
           {videos.map((vid) => (
             <div
               key={vid.id}
-              className="bg-neutral-900/60 border border-neutral-850 rounded-2xl overflow-hidden group hover:border-purple-500/40 transition-all duration-200 flex flex-col justify-between"
+              className="bg-neutral-900/60 border border-neutral-850 rounded-2xl overflow-hidden group hover:border-[#3B82F6]/40 transition-all duration-200 flex flex-col justify-between"
             >
               <div className="relative aspect-video bg-black">
                 <img
@@ -109,13 +109,13 @@ export default function YouTubeVideoGrid() {
               </div>
 
               <div className="p-3.5 space-y-2.5 font-mono">
-                <h4 className="text-xs font-bold text-neutral-200 line-clamp-2 font-sans group-hover:text-purple-300 transition-colors">
+                <h4 className="text-xs font-bold text-neutral-200 line-clamp-2 font-sans group-hover:text-[#93C5FD] transition-colors">
                   {vid.title}
                 </h4>
 
                 <div className="flex items-center justify-between text-[10px] text-neutral-400 pt-1 border-t border-neutral-850">
                   <span className="flex items-center gap-1">
-                    <Eye className="w-3 h-3 text-purple-400" /> {vid.view_count}
+                    <Eye className="w-3 h-3 text-[#3B82F6]" /> {vid.view_count}
                   </span>
                   <span className="flex items-center gap-1">
                     <ThumbsUp className="w-3 h-3 text-emerald-400" />{" "}
@@ -127,7 +127,7 @@ export default function YouTubeVideoGrid() {
                         activeCommentVideoId === vid.id ? null : vid.id
                       )
                     }
-                    className="flex items-center gap-1 hover:text-purple-300 cursor-pointer font-bold text-purple-400"
+                    className="flex items-center gap-1 hover:text-[#93C5FD] cursor-pointer font-bold text-[#3B82F6]"
                   >
                     <MessageSquare className="w-3 h-3" /> {vid.comment_count}{" "}
                     Comments

@@ -112,7 +112,7 @@ export default function YouTubeTheaterPlayer({
                 </span>
                 {video.published_at && (
                   <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-purple-400" />
+                    <Calendar className="w-3.5 h-3.5 text-[#3B82F6]" />
                     {formatDate(video.published_at)}
                   </span>
                 )}
@@ -132,7 +132,7 @@ export default function YouTubeTheaterPlayer({
                   onClick={() => setShowComments(!showComments)}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 rounded-xl text-xs font-mono transition-colors cursor-pointer"
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-purple-400" />
+                  <MessageSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
                   Comments ({video.comment_count})
                 </button>
                 <a

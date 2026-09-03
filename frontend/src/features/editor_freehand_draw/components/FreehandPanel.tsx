@@ -54,7 +54,7 @@ const PRESET_COLORS = [
   "#3b82f6",
   "#eab308",
   "#22c55e",
-  "#a855f7",
+  "#3b82f6",
   "#ec4899",
 ];
 
@@ -177,8 +177,8 @@ export default function FreehandPanel({
       {/* Header & Eyedropper */}
       <div className="flex items-center justify-between pb-2 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div className="p-1 rounded-lg bg-purple-500/10">
-            <Pen className="h-3.5 w-3.5 text-purple-400" />
+          <div className="p-1 rounded-lg bg-[#3B82F6]/10">
+            <Pen className="h-3.5 w-3.5 text-[#3B82F6]" />
           </div>
           <span className="text-[10px] font-mono font-bold text-neutral-200 uppercase tracking-wider">
             Retouch & Annotation Tools
@@ -188,7 +188,7 @@ export default function FreehandPanel({
           type="button"
           onClick={handleEyedropper}
           title="Pick Color from Screen"
-          className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 hover:bg-neutral-800 text-purple-400 transition-all cursor-pointer"
+          className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/50 hover:bg-neutral-800 text-[#3B82F6] transition-all cursor-pointer"
         >
           <Pipette className="h-3.5 w-3.5" />
         </button>
@@ -266,7 +266,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("paint")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "paint"
-                  ? "border-purple-500 bg-purple-950/40 text-purple-300"
+                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -279,7 +279,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("highlighter")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "highlighter"
-                  ? "border-purple-500 bg-purple-950/40 text-purple-300"
+                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -292,7 +292,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("spray")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "spray"
-                  ? "border-purple-500 bg-purple-950/40 text-purple-300"
+                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -342,7 +342,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("line")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "line"
-                  ? "border-purple-500 bg-purple-950/40 text-purple-300"
+                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -355,7 +355,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("arrow")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "arrow"
-                  ? "border-purple-500 bg-purple-950/40 text-purple-300"
+                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -368,7 +368,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("rect")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "rect"
-                  ? "border-purple-500 bg-purple-950/40 text-purple-300"
+                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -381,7 +381,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("circle")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "circle"
-                  ? "border-purple-500 bg-purple-950/40 text-purple-300"
+                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -405,7 +405,7 @@ export default function FreehandPanel({
                 setLocalFont(e.target.value);
                 setFontFamily?.(e.target.value);
               }}
-              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 text-[10px] font-mono rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-purple-500"
+              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 text-[10px] font-mono rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#3B82F6]"
             >
               {FONT_OPTIONS.map((f) => (
                 <option key={f.value} value={f.value}>
@@ -474,7 +474,7 @@ export default function FreehandPanel({
             <span>
               {brushAction === "text" ? "Font Size" : "Stroke / Tool Size"}
             </span>
-            <span className="text-purple-400 font-bold">{brushSize}px</span>
+            <span className="text-[#3B82F6] font-bold">{brushSize}px</span>
           </div>
           <input
             type="range"
@@ -489,7 +489,7 @@ export default function FreehandPanel({
         <div className="space-y-1">
           <div className="flex justify-between items-center text-[9px] font-mono text-neutral-500 uppercase font-bold tracking-wider">
             <span>Opacity</span>
-            <span className="text-purple-400 font-bold">{localOpacity}%</span>
+            <span className="text-[#3B82F6] font-bold">{localOpacity}%</span>
           </div>
           <input
             type="range"
@@ -527,7 +527,7 @@ export default function FreehandPanel({
                   onClick={() => setFillColor(c)}
                   className={`h-5 w-5 rounded-full border transition-all cursor-pointer ${
                     fillColor.toLowerCase() === c.toLowerCase()
-                      ? "border-purple-400 scale-110 shadow-md shadow-purple-500/50"
+                      ? "border-[#60A5FA] scale-110 shadow-md shadow-purple-500/50"
                       : "border-white/10 hover:scale-105"
                   }`}
                   style={{ backgroundColor: c }}
@@ -568,20 +568,20 @@ export default function FreehandPanel({
 
       {/* AI Speech Bubble Inpainting Action Section */}
       <div className="pt-3 border-t border-white/5 space-y-2">
-        <label className="text-[9px] font-mono text-purple-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
-          <Sparkles className="h-3 w-3 text-purple-400" />
+        <label className="text-[9px] font-mono text-[#3B82F6] uppercase font-bold tracking-wider flex items-center gap-1.5">
+          <Sparkles className="h-3 w-3 text-[#3B82F6]" />
           <span>AI Inpainting & Cleaning</span>
         </label>
         <button
           type="button"
           disabled={isAiCleaning}
           onClick={handleAiBubbleClean}
-          className="w-full py-2 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 border border-purple-800/40 hover:border-purple-600 rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer disabled:opacity-50"
+          className="w-full py-2 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] border border-purple-800/40 hover:border-purple-600 rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer disabled:opacity-50"
         >
           {isAiCleaning ? (
-            <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
+            <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
           ) : (
-            <Wand2 className="h-3.5 w-3.5 text-purple-400" />
+            <Wand2 className="h-3.5 w-3.5 text-[#3B82F6]" />
           )}
           <span>
             {isAiCleaning

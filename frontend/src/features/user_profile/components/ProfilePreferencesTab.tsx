@@ -147,7 +147,7 @@ export default function ProfilePreferencesTab({
     {
       id: "cyan",
       name: "Electric Blue",
-      class: "bg-cyan-500",
+      class: "bg-blue-500",
       shadow: "shadow-cyan-500/50",
     },
   ];
@@ -212,14 +212,14 @@ export default function ProfilePreferencesTab({
         };
       case "cyan":
         return {
-          text: "text-cyan-400",
-          bg10: "bg-cyan-500/10",
-          border30: "border-cyan-500/30",
+          text: "text-blue-400",
+          bg10: "bg-blue-500/10",
+          border30: "border-blue-500/30",
           bg600: "bg-cyan-600",
-          bgHover: "hover:bg-cyan-500",
-          via: "via-cyan-500/20",
-          peerChecked: "peer-checked:bg-cyan-500",
-          focusBorder: "focus:border-cyan-500/50",
+          bgHover: "hover:bg-[#3B82F6]",
+          via: "via-blue-500/20",
+          peerChecked: "peer-checked:bg-blue-500",
+          focusBorder: "focus:border-blue-500/50",
           shadowBtn: "shadow-[0_0_20px_rgba(6,182,212,0.3)]",
           shadowBtnHover: "hover:shadow-[0_0_30px_rgba(6,182,212,0.5)]",
           shadowInset: "shadow-[inset_0_0_20px_rgba(6,182,212,0.1)]",
@@ -227,17 +227,17 @@ export default function ProfilePreferencesTab({
       case "purple":
       default:
         return {
-          text: "text-purple-400",
-          bg10: "bg-purple-500/10",
-          border30: "border-purple-500/30",
+          text: "text-[#3B82F6]",
+          bg10: "bg-[#3B82F6]/10",
+          border30: "border-[#3B82F6]/30",
           bg600: "bg-purple-600",
-          bgHover: "hover:bg-purple-500",
-          via: "via-purple-500/20",
+          bgHover: "hover:bg-[#3B82F6]",
+          via: "via-blue-500/20",
           peerChecked: "peer-checked:bg-purple-500",
-          focusBorder: "focus:border-purple-500/50",
-          shadowBtn: "shadow-[0_0_20px_rgba(168,85,247,0.3)]",
-          shadowBtnHover: "hover:shadow-[0_0_30px_rgba(168,85,247,0.5)]",
-          shadowInset: "shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]",
+          focusBorder: "focus:border-[#3B82F6]/50",
+          shadowBtn: "",
+          shadowBtnHover: "hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]",
+          shadowInset: "shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]",
         };
     }
   };
@@ -293,19 +293,19 @@ export default function ProfilePreferencesTab({
               </h4>
               <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 p-2 bg-purple-500/15 text-purple-400 border border-purple-500/30 rounded-lg">
+                  <div className="mt-0.5 p-2 bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30 rounded-lg">
                     <Moon className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-white">
                       Dark Studio Theme
                     </h4>
-                    <p className="text-[10px] text-purple-400 font-semibold mt-1">
+                    <p className="text-[10px] text-[#3B82F6] font-semibold mt-1">
                       Always active & optimized for HDR production
                     </p>
                   </div>
                 </div>
-                <div className="px-3 py-1 bg-purple-950/60 border border-purple-500/40 rounded-full text-[10px] font-mono font-bold text-purple-300 shadow-sm flex items-center gap-1.5">
+                <div className="px-3 py-1 bg-purple-950/60 border border-[#3B82F6]/40 rounded-full text-[10px] font-mono font-bold text-[#60A5FA] shadow-sm flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
                   <span>DARK MODE</span>
                 </div>
@@ -357,7 +357,7 @@ export default function ProfilePreferencesTab({
                     onClick={() => setFontScale("small")}
                     className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all ${
                       fontScale === "small"
-                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text} shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]`
+                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
                         : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -368,7 +368,7 @@ export default function ProfilePreferencesTab({
                     onClick={() => setFontScale("medium")}
                     className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-sm font-bold transition-all ${
                       fontScale === "medium"
-                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text} shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]`
+                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
                         : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -379,7 +379,7 @@ export default function ProfilePreferencesTab({
                     onClick={() => setFontScale("large")}
                     className={`flex-1 py-2.5 rounded-xl border flex items-center justify-center gap-2 text-base font-bold transition-all ${
                       fontScale === "large"
-                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text} shadow-[inset_0_0_20px_rgba(168,85,247,0.1)]`
+                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text} shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]`
                         : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -400,7 +400,7 @@ export default function ProfilePreferencesTab({
                     onClick={() => setCornerRadius("sharp")}
                     className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-sm ${
                       cornerRadius === "sharp"
-                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text}`
+                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
                         : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -411,7 +411,7 @@ export default function ProfilePreferencesTab({
                     onClick={() => setCornerRadius("rounded")}
                     className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-xl ${
                       cornerRadius === "rounded"
-                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text}`
+                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
                         : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -422,7 +422,7 @@ export default function ProfilePreferencesTab({
                     onClick={() => setCornerRadius("pill")}
                     className={`flex-1 py-3 border flex items-center justify-center gap-2 text-xs font-bold transition-all rounded-full ${
                       cornerRadius === "pill"
-                        ? `bg-purple-500/10 border-purple-500/30 ${tc.text}`
+                        ? `bg-[#3B82F6]/10 border-[#3B82F6]/30 ${tc.text}`
                         : "bg-neutral-900 border-white/5 text-neutral-400 hover:text-white"
                     }`}
                   >
@@ -437,7 +437,7 @@ export default function ProfilePreferencesTab({
                 <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
                   <div className="flex items-start gap-3">
                     <div
-                      className={`mt-0.5 p-2 bg-purple-500/10 rounded-lg ${tc.text}`}
+                      className={`mt-0.5 p-2 bg-[#3B82F6]/10 rounded-lg ${tc.text}`}
                     >
                       <ZapOff className="w-4 h-4" />
                     </div>
@@ -486,7 +486,7 @@ export default function ProfilePreferencesTab({
               <div className="flex flex-col gap-3 p-4 bg-black/20 rounded-2xl border border-white/5">
                 <div className="flex items-start gap-3">
                   <div
-                    className={`mt-0.5 shrink-0 p-2 bg-purple-500/10 rounded-lg ${tc.text}`}
+                    className={`mt-0.5 shrink-0 p-2 bg-[#3B82F6]/10 rounded-lg ${tc.text}`}
                   >
                     <Mail className="w-4 h-4" />
                   </div>
@@ -659,7 +659,7 @@ export default function ProfilePreferencesTab({
                 <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
                   <div className="flex items-start gap-3">
                     <div
-                      className={`mt-0.5 p-2 bg-purple-500/10 rounded-lg ${tc.text}`}
+                      className={`mt-0.5 p-2 bg-[#3B82F6]/10 rounded-lg ${tc.text}`}
                     >
                       <Sparkles className="w-4 h-4" />
                     </div>
@@ -811,7 +811,7 @@ export default function ProfilePreferencesTab({
               <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
                 <div className="flex items-start gap-3">
                   <div
-                    className={`mt-0.5 p-2 bg-purple-500/10 rounded-lg ${tc.text}`}
+                    className={`mt-0.5 p-2 bg-[#3B82F6]/10 rounded-lg ${tc.text}`}
                   >
                     <Minimize2 className="w-4 h-4" />
                   </div>
@@ -895,7 +895,7 @@ export default function ProfilePreferencesTab({
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-3 p-4 bg-black/20 rounded-2xl border border-white/5">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 shrink-0 p-2 bg-cyan-500/10 rounded-lg text-cyan-400">
+                    <div className="mt-0.5 shrink-0 p-2 bg-blue-500/10 rounded-lg text-blue-400">
                       <Globe className="w-4 h-4" />
                     </div>
                     <div className="min-w-0 flex-1">

@@ -58,14 +58,14 @@ const ACHIEVEMENTS = [
     title: "First Scrape",
     desc: "Parsed first vertical webtoon strip",
     unlocked: true,
-    color: "from-purple-500 to-indigo-500",
+    color: "from-[#3B82F6] to-[#2563EB]",
   },
   {
     id: "2",
     title: "Gemini Translator",
     desc: "Translated storyboard into Korean/Japanese",
     unlocked: true,
-    color: "from-blue-500 to-cyan-500",
+    color: "from-blue-500 to-blue-500",
   },
   {
     id: "3",
@@ -161,7 +161,7 @@ export default function ProfileAccountTab({
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
       {/* Main Account details Form Card */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
         <div className="space-y-1 text-left mb-6">
           <h3 className="text-lg font-bold text-white">Profile Details</h3>
@@ -192,7 +192,7 @@ export default function ProfileAccountTab({
                     fullName: e.target.value,
                   }))
                 }
-                className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+                className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
               />
             </div>
 
@@ -211,7 +211,7 @@ export default function ProfileAccountTab({
 
           <div className="space-y-1.5 text-left">
             <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
-              <Compass className="w-3.5 h-3.5 text-purple-400" />
+              <Compass className="w-3.5 h-3.5 text-[#3B82F6]" />
               Studio Creator Role
             </label>
             <input
@@ -224,7 +224,7 @@ export default function ProfileAccountTab({
                   role: e.target.value,
                 }))
               }
-              className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
+              className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all"
             />
           </div>
 
@@ -238,7 +238,7 @@ export default function ProfileAccountTab({
               onChange={(e) =>
                 setProfileUser((prev) => ({ ...prev, bio: e.target.value }))
               }
-              className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2.5 px-4 text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all resize-none"
+              className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2.5 px-4 text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all resize-none"
             />
           </div>
 
@@ -258,7 +258,7 @@ export default function ProfileAccountTab({
               <div
                 className={`w-4 h-4 rounded border transition-all flex items-center justify-center ${
                   profileUser.newsletter
-                    ? "bg-purple-600 border-purple-500"
+                    ? "bg-purple-600 border-[#3B82F6]"
                     : "bg-black/40 border-white/10 group-hover:border-white/20"
                 }`}
               >
@@ -274,7 +274,7 @@ export default function ProfileAccountTab({
             {isDirty ? (
               <button
                 type="submit"
-                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white text-xs font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-950/30 hover:shadow-purple-900/40 animate-pulse"
+                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl border border-[#3B82F6]/30 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white text-xs font-black uppercase tracking-wider cursor-pointer transition-all active:scale-95 shadow-md shadow-purple-950/30 hover:shadow-purple-900/40 animate-pulse"
               >
                 <span>✦</span>
                 <span>Save Profile Changes</span>
@@ -298,7 +298,7 @@ export default function ProfileAccountTab({
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/5 pb-4">
           <div className="space-y-1">
             <h4 className="text-xs font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-purple-400" />
+              <Award className="w-4 h-4 text-[#3B82F6]" />
               Creative Milestones & Achievements
             </h4>
             <p className="text-[10px] text-neutral-500 font-semibold">
@@ -312,7 +312,7 @@ export default function ProfileAccountTab({
               <span className="text-[8px] text-neutral-500 block uppercase">
                 Reward Points
               </span>
-              <span className="text-sm font-black text-purple-400 font-mono">
+              <span className="text-sm font-black text-[#3B82F6] font-mono">
                 {achievementPoints} pts
               </span>
             </div>
@@ -321,7 +321,7 @@ export default function ProfileAccountTab({
               <button
                 type="button"
                 onClick={() => handleClaimReward(150, "+100 Smart Credits")}
-                className="bg-purple-600 hover:bg-purple-500 text-white py-1 px-3 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                className="bg-purple-600 hover:bg-[#3B82F6] text-white py-1 px-3 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
                 title="Exchange 150 pts for 100 bonus trial credits"
               >
                 Claim Credits (150 pts)
@@ -356,7 +356,7 @@ export default function ProfileAccountTab({
             {unlockedRewards.map((reward, idx) => (
               <span
                 key={idx}
-                className="bg-purple-500/15 border border-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full"
+                className="bg-[#3B82F6]/15 border border-[#3B82F6]/20 text-[#3B82F6] px-2 py-0.5 rounded-full"
               >
                 {reward}
               </span>
@@ -384,7 +384,7 @@ export default function ProfileAccountTab({
                     {ach.title}
                   </span>
                   {ach.unlocked && (
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
                   )}
                 </div>
                 <p className="text-[9px] text-neutral-500 leading-relaxed font-semibold">
@@ -396,7 +396,7 @@ export default function ProfileAccountTab({
                 <span
                   className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
                     ach.unlocked
-                      ? "bg-purple-600/10 text-purple-400 border border-purple-500/20"
+                      ? "bg-purple-600/10 text-[#3B82F6] border border-[#3B82F6]/20"
                       : "bg-neutral-800 text-neutral-500 border border-white/5"
                   }`}
                 >

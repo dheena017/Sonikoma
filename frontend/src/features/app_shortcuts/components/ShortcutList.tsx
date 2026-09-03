@@ -46,7 +46,7 @@ export default function ShortcutList({
             </p>
             <button
               onClick={onClearFilters}
-              className="text-xs text-purple-400 hover:text-purple-300 font-bold uppercase tracking-wider"
+              className="text-xs text-[#3B82F6] hover:text-[#93C5FD] font-bold uppercase tracking-wider"
             >
               Clear all filters
             </button>

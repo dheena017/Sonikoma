@@ -49,16 +49,16 @@ export function EnhancementsPresets({
               }
               className={`relative text-left p-2.5 rounded-xl border text-[10px] font-bold cursor-pointer transition-all duration-200 overflow-hidden group ${
                 isActive
-                  ? "bg-purple-600/20 border-purple-500/60 text-white shadow-lg shadow-purple-900/30"
+                  ? "bg-purple-600/20 border-[#3B82F6]/60 text-white shadow-lg shadow-purple-900/30"
                   : "bg-black/20 border-white/5 text-neutral-500 hover:text-neutral-300 hover:bg-white/5 hover:border-white/10"
               }`}
             >
               {isActive && (
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent pointer-events-none" />
               )}
               <span className="text-base mr-1">{preset.icon}</span>
               {preset.label}
-              {isActive && <span className="ml-1 text-purple-400">✓</span>}
+              {isActive && <span className="ml-1 text-[#3B82F6]">✓</span>}
             </button>
           );
         })}
@@ -73,7 +73,7 @@ export function EnhancementsPresets({
           <div
             className={`relative w-8 h-4 rounded-full border transition-all ${
               activeStoryboardPanel?.grayscale
-                ? "bg-purple-600 border-purple-500"
+                ? "bg-purple-600 border-[#3B82F6]"
                 : "bg-neutral-800 border-neutral-700"
             }`}
           >

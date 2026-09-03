@@ -182,7 +182,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           className="text-sm font-bold text-white line-clamp-2 leading-snug flex-1 tracking-tight"
           title={`Chapter ${displayNum}`}
         >
-          <span className="text-purple-300 font-extrabold">
+          <span className="text-[#60A5FA] font-extrabold">
             {displayNum ? `Chapter ${displayNum}` : "Comic Chapter"}
           </span>
         </h3>
@@ -195,7 +195,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         className="text-sm font-bold text-white line-clamp-2 leading-snug flex-1 tracking-tight"
         title={`Chapter ${displayNum}: ${rawTitle}`}
       >
-        <span className="text-purple-300 font-extrabold mr-1.5">
+        <span className="text-[#60A5FA] font-extrabold mr-1.5">
           {displayNum ? `Ch. ${displayNum}` : "Chapter"}
         </span>
         <span className="text-neutral-200 font-medium">{rawTitle}</span>
@@ -214,8 +214,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       className={`w-full min-h-[300px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0e0e14] border ${
         isSelected
-          ? "border-purple-500 ring-2 ring-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.35)] bg-purple-955/20"
-          : "border-neutral-800/80 hover:border-purple-500/50 shadow-xl hover:shadow-2xl hover:shadow-purple-950/25"
+          ? "border-[#3B82F6] ring-2 ring-purple-500/40 shadow-[0_0_30px_rgba(59,130,246,0.35)] bg-purple-955/20"
+          : "border-neutral-800/80 hover:border-[#3B82F6]/50 shadow-xl hover:shadow-2xl hover:shadow-purple-950/25"
       }`}
     >
       {/* Top Banner / Image Area */}
@@ -256,10 +256,10 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-950 p-4">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent" />
-            <div className="w-12 h-12 rounded-2xl bg-neutral-900/80 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-950/30 mb-1.5 transition-transform group-hover:scale-110 duration-300">
-              <Sparkles className="w-6 h-6 text-purple-400/80" />
+            <div className="w-12 h-12 rounded-2xl bg-neutral-900/80 border border-[#3B82F6]/20 flex items-center justify-center shadow-lg shadow-purple-950/30 mb-1.5 transition-transform group-hover:scale-110 duration-300">
+              <Sparkles className="w-6 h-6 text-[#3B82F6]/80" />
             </div>
-            <span className="text-[11px] font-bold text-purple-300 font-mono tracking-wider">
+            <span className="text-[11px] font-bold text-[#60A5FA] font-mono tracking-wider">
               {cleanBadgeNum ? `CHAPTER ${cleanBadgeNum}` : "COMIC COVER"}
             </span>
             <span className="text-[9px] text-neutral-500 font-mono">
@@ -278,8 +278,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           } flex flex-wrap items-center gap-1.5 z-20 max-w-[70%] overflow-hidden`}
         >
           {cleanBadgeNum && (
-            <span className="bg-black/80 backdrop-blur-md text-purple-300 border border-purple-500/30 text-[10px] font-black px-2.5 py-0.5 rounded-lg uppercase tracking-wider font-mono shadow-md flex items-center gap-1">
-              <BookOpen size={10} className="text-purple-400" />
+            <span className="bg-black/80 backdrop-blur-md text-[#60A5FA] border border-[#3B82F6]/30 text-[10px] font-black px-2.5 py-0.5 rounded-lg uppercase tracking-wider font-mono shadow-md flex items-center gap-1">
+              <BookOpen size={10} className="text-[#3B82F6]" />
               CH. {cleanBadgeNum}
             </span>
           )}
@@ -342,7 +342,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
         {chapter.duration && (
           <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono z-10">
-            <Clock size={11} className="text-purple-400" />
+            <Clock size={11} className="text-[#3B82F6]" />
             {chapter.duration}
           </div>
         )}
@@ -409,7 +409,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           {/* Source Platform Badge & Release Date Row */}
           <div className="flex items-center justify-between text-xs text-neutral-400 pt-1 border-t border-neutral-850/60">
             {chapter.url && (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-widest text-purple-300 bg-purple-950/40 border border-purple-500/20 px-2 py-0.5 rounded-lg font-mono">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-widest text-[#60A5FA] bg-purple-950/40 border border-[#3B82F6]/20 px-2 py-0.5 rounded-lg font-mono">
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${getPlatformColor(
                     chapter.url
@@ -420,7 +420,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             )}
 
             <div className="flex items-center gap-1 text-[11px] font-mono text-neutral-400">
-              <Calendar className="w-3.5 h-3.5 text-purple-400/70" />
+              <Calendar className="w-3.5 h-3.5 text-[#3B82F6]/70" />
               <span>{chapter.date || "Available"}</span>
             </div>
           </div>
@@ -433,7 +433,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono truncate">
                 <ThumbsUp
                   size={12}
-                  className="text-purple-400 fill-purple-400/20 shrink-0"
+                  className="text-[#3B82F6] fill-purple-400/20 shrink-0"
                 />
                 <span>{chapter.likes}</span>
               </div>
@@ -465,7 +465,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               className="px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
               title="Read Full Chapter Strip"
             >
-              <Eye size={12} className="text-purple-400" />
+              <Eye size={12} className="text-[#3B82F6]" />
               <span>Read</span>
             </button>
             <button
@@ -473,7 +473,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                 e.stopPropagation();
                 onClick(chapter);
               }}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-purple-950/40 cursor-pointer active:scale-95 border border-purple-400/30"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-purple-950/40 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
               title="Open Chapter in Storyboard Timeline Editor"
             >
               <span>Import</span>
@@ -487,7 +487,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           <div
             ref={menuRef}
             onClick={(e) => e.stopPropagation()}
-            className="absolute right-2 bottom-14 w-56 max-w-[calc(100%-1rem)] bg-neutral-950/98 backdrop-blur-xl border border-purple-500/25 rounded-2xl shadow-2xl shadow-black/60 z-40 overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-neutral-200"
+            className="absolute right-2 bottom-14 w-56 max-w-[calc(100%-1rem)] bg-neutral-950/98 backdrop-blur-xl border border-[#3B82F6]/25 rounded-2xl shadow-2xl shadow-black/60 z-40 overflow-hidden animate-in fade-in zoom-in-95 duration-150 text-neutral-200"
           >
             <div className="p-1.5 space-y-0.5">
               <button
@@ -495,7 +495,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                   handleBookmarkClick(e);
                   setIsMenuOpen(false);
                 }}
-                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all cursor-pointer"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-[#3B82F6]/15 hover:text-[#93C5FD] flex items-center gap-2.5 transition-all cursor-pointer"
               >
                 {isBookmarked ? (
                   <>
@@ -519,7 +519,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                   if (onMarkReadToggle) onMarkReadToggle(chapter.url);
                   setIsMenuOpen(false);
                 }}
-                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all cursor-pointer"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-[#3B82F6]/15 hover:text-[#93C5FD] flex items-center gap-2.5 transition-all cursor-pointer"
               >
                 {isRead ? (
                   <>
@@ -538,7 +538,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
               <button
                 onClick={handleCopyLink}
-                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all font-medium cursor-pointer"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-[#3B82F6]/15 hover:text-[#93C5FD] flex items-center gap-2.5 transition-all font-medium cursor-pointer"
               >
                 {copied ? (
                   <>
@@ -555,7 +555,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
               <button
                 onClick={handleExportSingleJSON}
-                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-purple-500/15 hover:text-purple-300 flex items-center gap-2.5 transition-all cursor-pointer"
+                className="w-full px-3 py-2.5 text-left text-xs rounded-xl hover:bg-[#3B82F6]/15 hover:text-[#93C5FD] flex items-center gap-2.5 transition-all cursor-pointer"
               >
                 <Download size={14} className="text-neutral-400" />
                 <span>Export Metadata (JSON)</span>

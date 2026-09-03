@@ -47,12 +47,12 @@ export default function NewKeyCombinationModal({
       {/* Modal Container */}
       <div className="relative w-full max-w-lg bg-neutral-950/90 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
         {/* Glow Accent */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] blur-[1px] bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500" />
+        <div className="absolute top-0 left-0 right-0 h-[2px] blur-[1px] bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500" />
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800/80 shrink-0 bg-neutral-900/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <div className="p-2 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">
               <Keyboard className="h-5 w-5 animate-pulse" />
             </div>
             <div>
@@ -78,7 +78,7 @@ export default function NewKeyCombinationModal({
           {/* Action Scope & Label */}
           {details && (
             <div className="flex items-center justify-center gap-2 p-2.5 rounded-2xl bg-white/[0.02] border border-white/5">
-              <span className="text-[10px] font-mono font-bold text-purple-400 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 shrink-0">
+              <span className="text-[10px] font-mono font-bold text-[#3B82F6] px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 shrink-0">
                 {details.scope}
               </span>
               <span className="text-xs font-bold text-neutral-200 truncate">

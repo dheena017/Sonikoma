@@ -60,7 +60,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
           <path
             d="M9 0L18 20H0L9 0Z"
             fill="#ffffff"
-            stroke="#a855f7"
+            stroke="#3b82f6"
             strokeWidth="1.4"
           />
         </svg>
@@ -68,7 +68,7 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
 
       {/* Vertical Line */}
       <div className="relative w-full h-full pointer-events-none">
-        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/90 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-white/90 " />
       </div>
     </div>
   );

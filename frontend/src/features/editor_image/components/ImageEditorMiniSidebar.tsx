@@ -125,7 +125,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             active
-              ? "h-5 bg-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.9)] opacity-100"
+              ? "h-5 bg-[#3B82F6]  opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -143,17 +143,16 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
           aria-label={item.label}
         >
-          {/* iOS Squircle Icon Container */}
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 shadow-[0_0_20px_rgba(59,130,246,0.6)] text-white scale-105"
-                : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                active ? "text-white" : "text-neutral-400 group-hover:text-white"
+                active ? "text-white" : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>

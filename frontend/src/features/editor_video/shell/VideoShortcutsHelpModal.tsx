@@ -208,13 +208,13 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#12121e]">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
+            <div className="h-9 w-9 rounded-xl bg-purple-600/20 border border-[#3B82F6]/30 flex items-center justify-center text-[#60A5FA]">
               <Keyboard className="h-5 w-5" />
             </div>
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 Timeline & Video Shortcuts
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
                   Cheat Sheet
                 </span>
               </h2>
@@ -240,7 +240,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search shortcuts (e.g., Space, Split, Zoom, Ctrl+D)..."
-              className="w-full pl-9 pr-4 py-2 bg-neutral-900/80 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500 transition"
+              className="w-full pl-9 pr-4 py-2 bg-neutral-900/80 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#3B82F6] transition"
               autoFocus
             />
           </div>
@@ -280,7 +280,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
                 className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] transition group"
               >
                 <div>
-                  <h4 className="text-xs font-semibold text-neutral-200 group-hover:text-purple-300 transition">
+                  <h4 className="text-xs font-semibold text-neutral-200 group-hover:text-[#93C5FD] transition">
                     {item.label}
                   </h4>
                   <p className="text-[11px] text-neutral-500">
@@ -291,7 +291,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
                 <div className="flex items-center gap-1.5 shrink-0">
                   {item.keys.map((k, i) => (
                     <React.Fragment key={i}>
-                      <kbd className="min-w-[28px] h-7 px-2 flex items-center justify-center rounded-md bg-neutral-900 border border-neutral-700 text-xs font-mono font-bold text-purple-300 shadow-sm">
+                      <kbd className="min-w-[28px] h-7 px-2 flex items-center justify-center rounded-md bg-neutral-900 border border-neutral-700 text-xs font-mono font-bold text-[#60A5FA] shadow-sm">
                         {k}
                       </kbd>
                       {i < item.keys.length - 1 && (
@@ -308,12 +308,12 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
         {/* Footer */}
         <div className="px-6 py-3 border-t border-white/10 bg-[#12121e] flex items-center justify-between text-[11px] text-neutral-400">
           <div className="flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+            <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
             <span>Hover any tool button to see its shortcut</span>
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-medium transition cursor-pointer"
+            className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white font-medium transition cursor-pointer"
           >
             Got it
           </button>

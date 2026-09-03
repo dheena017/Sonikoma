@@ -43,8 +43,8 @@ export const InspectorSection: React.FC<{
         className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/5 transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <div className="h-5 w-5 rounded-lg bg-purple-900/40 border border-purple-500/30 flex items-center justify-center">
-            <Icon className="h-3 w-3 text-purple-400" />
+          <div className="h-5 w-5 rounded-lg bg-purple-900/40 border border-[#3B82F6]/30 flex items-center justify-center">
+            <Icon className="h-3 w-3 text-[#3B82F6]" />
           </div>
           <span className="text-[10px] font-mono font-bold text-neutral-200 uppercase tracking-widest">
             {section.label}
@@ -84,7 +84,7 @@ export const NumberField: React.FC<{
         step={step}
         value={val}
         onChange={(e) => setVal(Number(e.target.value))}
-        className="w-16 bg-neutral-900/90 border border-neutral-800 focus:border-purple-500/80 rounded-lg text-right text-[10px] text-purple-300 font-mono px-2 py-0.5 outline-none transition-all shadow-inner"
+        className="w-16 bg-neutral-900/90 border border-neutral-800 focus:border-[#3B82F6]/80 rounded-lg text-right text-[10px] text-[#60A5FA] font-mono px-2 py-0.5 outline-none transition-all shadow-inner"
       />
     </div>
   );
@@ -101,7 +101,7 @@ export const SliderField: React.FC<{
     <div className="space-y-1">
       <div className="flex justify-between items-center">
         <span className="text-[9px] font-mono text-neutral-400">{label}</span>
-        <span className="text-[9px] font-mono text-purple-300 font-bold">
+        <span className="text-[9px] font-mono text-[#60A5FA] font-bold">
           {val}%
         </span>
       </div>
@@ -155,7 +155,7 @@ export const SelectField: React.FC<{
       <select
         value={val}
         onChange={(e) => setVal(e.target.value)}
-        className="flex-1 bg-neutral-900/90 border border-neutral-800 rounded-lg text-[9px] font-mono text-purple-200 px-2 py-1 outline-none focus:border-purple-500 cursor-pointer"
+        className="flex-1 bg-neutral-900/90 border border-neutral-800 rounded-lg text-[9px] font-mono text-purple-200 px-2 py-1 outline-none focus:border-[#3B82F6] cursor-pointer"
       >
         {options.map((o) => (
           <option key={o}>{o}</option>
@@ -213,7 +213,7 @@ export const InspectorPanel: React.FC<{
             ]}
             value="Normal"
           />
-          <ColorField label="Tint Color" value="#a855f7" />
+          <ColorField label="Tint Color" value="#3b82f6" />
           <SliderField label="Brightness" value={100} />
           <SliderField label="Contrast" value={100} />
           <SliderField label="Saturation" value={100} />
@@ -326,14 +326,14 @@ export const InspectorPanel: React.FC<{
           ].map((layer, i) => (
             <div
               key={layer}
-              className="flex items-center gap-2 p-1.5 rounded-lg bg-neutral-900/60 border border-neutral-800/80 hover:border-purple-500/50 cursor-pointer transition-all"
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-neutral-900/60 border border-neutral-800/80 hover:border-[#3B82F6]/50 cursor-pointer transition-all"
             >
-              <Eye className="h-3 w-3 text-purple-400 hover:text-white" />
+              <Eye className="h-3 w-3 text-[#3B82F6] hover:text-white" />
               <Lock className="h-3 w-3 text-neutral-600 hover:text-white" />
               <span className="text-[10px] text-white font-mono flex-1">
                 {layer}
               </span>
-              <span className="text-[8px] text-purple-300 font-mono bg-purple-500/20 px-1 rounded">
+              <span className="text-[8px] text-[#60A5FA] font-mono bg-[#3B82F6]/20 px-1 rounded">
                 L{i + 1}
               </span>
             </div>
@@ -350,7 +350,7 @@ export const InspectorPanel: React.FC<{
       {/* Header */}
       <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-2">
-          <Sliders className="h-3.5 w-3.5 text-purple-400" />
+          <Sliders className="h-3.5 w-3.5 text-[#3B82F6]" />
           <span className="text-xs font-mono font-bold text-white uppercase tracking-widest">
             Inspector
           </span>
@@ -378,7 +378,7 @@ export const InspectorPanel: React.FC<{
             className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
           >
             {visible ? (
-              <Eye className="h-3.5 w-3.5 text-purple-400" />
+              <Eye className="h-3.5 w-3.5 text-[#3B82F6]" />
             ) : (
               <EyeOff className="h-3.5 w-3.5 text-neutral-500" />
             )}
@@ -389,7 +389,7 @@ export const InspectorPanel: React.FC<{
       {/* Empty state */}
       {!visible && (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center p-4">
-          <ZoomIn className="h-6 w-6 text-purple-400/50 animate-pulse" />
+          <ZoomIn className="h-6 w-6 text-[#3B82F6]/50 animate-pulse" />
           <p className="text-[10px] font-mono text-neutral-400">
             Select a layer on timeline
             <br />

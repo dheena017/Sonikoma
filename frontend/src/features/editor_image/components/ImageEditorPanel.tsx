@@ -40,7 +40,7 @@ const FRAME_PRESETS = [
   {
     id: "youtube",
     label: "16:9 YouTube",
-    accent: "from-cyan-500/30 to-blue-500/20",
+    accent: "from-blue-500/30 to-blue-500/20",
   },
   {
     id: "shorts",
@@ -50,7 +50,7 @@ const FRAME_PRESETS = [
   {
     id: "social",
     label: "1:1 Social",
-    accent: "from-violet-500/30 to-purple-500/20",
+    accent: "from-violet-500/30 to-blue-500/20",
   },
 ] as const;
 
@@ -151,7 +151,7 @@ export default function ImageEditorPanel({
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400">
             <Crop className="h-4 w-4" />
           </div>
           <span className="text-xs uppercase font-mono font-bold text-white tracking-wider">
@@ -174,14 +174,14 @@ export default function ImageEditorPanel({
           {/* Rotate & Flip Card */}
           <div className="bg-[#181924]/60 border border-white/10 rounded-2xl p-4 space-y-3 shadow-xl">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+              <div className="p-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
                 <RotateCw className="h-3.5 w-3.5" />
               </div>
               <span className="text-[10px] uppercase font-mono font-bold text-white tracking-widest">
                 Rotate &amp; Flip
               </span>
               {isTransforming && (
-                <span className="ml-auto text-[8px] font-mono text-cyan-400 animate-pulse">
+                <span className="ml-auto text-[8px] font-mono text-blue-400 animate-pulse">
                   Applying…
                 </span>
               )}
@@ -193,7 +193,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(-90)}
                 disabled={isTransforming}
                 title="Rotate 90° Counter-Clockwise"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 rounded-2xl text-neutral-400 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <RotateCcw className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">-90°</span>
@@ -204,7 +204,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(180)}
                 disabled={isTransforming}
                 title="Rotate 180°"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 rounded-2xl text-neutral-400 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <ChevronsUpDown className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">180°</span>
@@ -215,7 +215,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(90)}
                 disabled={isTransforming}
                 title="Rotate 90° Clockwise"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-cyan-500/10 border border-white/5 hover:border-cyan-500/30 rounded-2xl text-neutral-400 hover:text-cyan-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <RotateCw className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">+90°</span>
@@ -226,7 +226,7 @@ export default function ImageEditorPanel({
                 onClick={() => onFlip("h")}
                 disabled={isTransforming}
                 title="Flip Horizontal"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/30 rounded-2xl text-neutral-400 hover:text-purple-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <FlipHorizontal className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">Flip H</span>
@@ -237,7 +237,7 @@ export default function ImageEditorPanel({
                 onClick={() => onFlip("v")}
                 disabled={isTransforming}
                 title="Flip Vertical"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-purple-500/10 border border-white/5 hover:border-purple-500/30 rounded-2xl text-neutral-400 hover:text-purple-300 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <FlipVertical className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">Flip V</span>
@@ -248,7 +248,7 @@ export default function ImageEditorPanel({
           {/* Target Platform Framing Section */}
           <div className="flex items-center justify-center gap-2 py-1">
             <div className="h-[1px] flex-1 bg-white/10" />
-            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-purple-400 flex items-center gap-1.5">
+            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] flex items-center gap-1.5">
               <Crop className="h-3 w-3" /> Target Platform Framing
             </span>
             <div className="h-[1px] flex-1 bg-white/10" />
@@ -265,7 +265,7 @@ export default function ImageEditorPanel({
                     onClick={() => handleFramePresetChange(preset.id)}
                     className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${
                       active
-                        ? "bg-blue-950/40 border-blue-500/60 text-blue-200 shadow-[0_0_18px_rgba(59,130,246,0.3)] font-bold"
+                        ? "bg-blue-950/40 border-blue-500/60 text-blue-200  font-bold"
                         : "bg-[#10111a]/80 border-white/5 text-neutral-400 hover:border-white/15 hover:text-white"
                     }`}
                   >
@@ -311,7 +311,7 @@ export default function ImageEditorPanel({
           {/* Focal Point & Safe Zones Section */}
           <div className="flex items-center justify-center gap-2 py-1">
             <div className="h-[1px] flex-1 bg-white/10" />
-            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-purple-400 flex items-center gap-1.5">
+            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] flex items-center gap-1.5">
               <Crosshair className="h-3 w-3" /> Focal Point &amp; Safe Zones
             </span>
             <div className="h-[1px] flex-1 bg-white/10" />
@@ -319,7 +319,7 @@ export default function ImageEditorPanel({
 
           <div className="space-y-3 bg-[#181924]/60 border border-white/10 rounded-2xl p-4 shadow-xl">
             <div className="flex items-center gap-2 text-[9px] uppercase font-mono font-bold text-neutral-400">
-              <LayoutGrid className="h-3.5 w-3.5 text-purple-400" />
+              <LayoutGrid className="h-3.5 w-3.5 text-[#3B82F6]" />
               Focal Point Picker
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -332,7 +332,7 @@ export default function ImageEditorPanel({
                     onClick={() => setSelectedFocalPoint(point)}
                     className={`rounded-xl border py-2.5 text-xs font-mono font-bold transition-all cursor-pointer ${
                       active
-                        ? "bg-purple-950/60 border-purple-500/60 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+                        ? "bg-purple-950/60 border-[#3B82F6]/60 text-purple-200 "
                         : "bg-[#10111a]/80 border-white/5 text-neutral-400 hover:border-white/15 hover:text-white"
                     }`}
                   >
@@ -347,7 +347,7 @@ export default function ImageEditorPanel({
               onClick={() => setShowSafeZones(!showSafeZones)}
               className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-bold font-mono transition-all cursor-pointer ${
                 showSafeZones
-                  ? "border-cyan-500/50 bg-cyan-950/30 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  ? "border-blue-500/50 bg-cyan-950/30 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
                   : "border-white/5 bg-[#10111a]/80 text-neutral-400 hover:border-white/15 hover:text-white"
               }`}
             >
@@ -355,7 +355,7 @@ export default function ImageEditorPanel({
                 <Shield className="h-3.5 w-3.5 text-neutral-400" />
                 Show Shorts/Reels Safe Zone
               </span>
-              <span className={showSafeZones ? "text-cyan-300 font-black" : "text-neutral-500"}>
+              <span className={showSafeZones ? "text-blue-300 font-black" : "text-neutral-500"}>
                 {showSafeZones ? "ON" : "OFF"}
               </span>
             </button>
@@ -364,7 +364,7 @@ export default function ImageEditorPanel({
           {/* Line Art & Tone Polish Section */}
           <div className="flex items-center justify-center gap-2 py-1">
             <div className="h-[1px] flex-1 bg-white/10" />
-            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-purple-400 flex items-center gap-1.5">
+            <span className="text-[9px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" /> Line Art &amp; Tone Polish
             </span>
             <div className="h-[1px] flex-1 bg-white/10" />

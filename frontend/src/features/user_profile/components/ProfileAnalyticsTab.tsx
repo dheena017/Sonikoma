@@ -79,10 +79,10 @@ export default function ProfileAnalyticsTab() {
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
       {/* Overview Analytics Banner */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
         <div className="space-y-1">
-          <span className="text-[9px] font-extrabold text-purple-400 uppercase tracking-widest bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-full">
+          <span className="text-[9px] font-extrabold text-[#3B82F6] uppercase tracking-widest bg-[#3B82F6]/10 border border-[#3B82F6]/20 px-2.5 py-0.5 rounded-full">
             Performance Insights
           </span>
           <h3 className="text-xl font-black text-white">Creator Analytics</h3>
@@ -98,7 +98,7 @@ export default function ProfileAnalyticsTab() {
         <div className="flex justify-between items-center pb-3 border-b border-white/5">
           <div className="space-y-0.5">
             <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
-              <TrendingUp className="w-4.5 h-4.5 text-purple-400" /> Rendering
+              <TrendingUp className="w-4.5 h-4.5 text-[#3B82F6]" /> Rendering
               Activity
             </h4>
             <p className="text-[10px] text-neutral-500 font-semibold">
@@ -109,7 +109,7 @@ export default function ProfileAnalyticsTab() {
             <span className="text-[8px] text-neutral-500 uppercase block font-mono">
               Total Operations
             </span>
-            <span className="text-sm font-black text-purple-400 font-mono">
+            <span className="text-sm font-black text-[#3B82F6] font-mono">
               {totalActions} actions
             </span>
           </div>
@@ -140,10 +140,10 @@ export default function ProfileAnalyticsTab() {
                         cell.level === 0
                           ? "bg-neutral-900 border border-white/5"
                           : cell.level === 1
-                          ? "bg-purple-900/30 border border-purple-500/10 hover:bg-purple-800/40"
+                          ? "bg-purple-900/30 border border-[#3B82F6]/10 hover:bg-purple-800/40"
                           : cell.level === 2
-                          ? "bg-purple-600/50 border border-purple-500/20 hover:bg-purple-500/60"
-                          : "bg-purple-500 border border-purple-400/30 hover:bg-purple-400"
+                          ? "bg-purple-600/50 border border-[#3B82F6]/20 hover:bg-[#3B82F6]/60"
+                          : "bg-purple-500 border border-[#60A5FA]/30 hover:bg-purple-400"
                       }`}
                       title={`${cell.count} operation(s) on ${cell.day} (Week ${
                         wIdx + 1
@@ -159,9 +159,9 @@ export default function ProfileAnalyticsTab() {
           <div className="flex items-center justify-end gap-1.5 text-[9px] text-neutral-500 font-bold pr-2 pt-1 font-mono">
             <span>Less</span>
             <div className="w-2.5 h-2.5 bg-neutral-900 border border-white/5 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-purple-900/30 border border-purple-500/10 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-purple-600/50 border border-purple-500/20 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-purple-500 border border-purple-400/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-purple-900/30 border border-[#3B82F6]/10 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-purple-600/50 border border-[#3B82F6]/20 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-purple-500 border border-[#60A5FA]/30 rounded-sm" />
             <span>More</span>
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function ProfileAnalyticsTab() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Videos Completed */}
         <div className="bg-neutral-900/30 border border-white/5 rounded-2xl p-4 flex gap-3.5 items-center">
-          <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl">
+          <div className="p-3 bg-[#3B82F6]/10 text-[#3B82F6] rounded-xl">
             <Film className="w-5 h-5" />
           </div>
           <div>
@@ -235,7 +235,7 @@ export default function ProfileAnalyticsTab() {
         {/* Aspect Ratio Breakdown */}
         <div className="bg-[#0f0f13]/30 border border-white/5 rounded-3xl p-5 space-y-4 shadow-xl">
           <h5 className="text-[10px] font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
-            <Tv className="w-4 h-4 text-purple-400" /> Output Formats
+            <Tv className="w-4 h-4 text-[#3B82F6]" /> Output Formats
           </h5>
           <div className="space-y-3">
             <div className="space-y-1">
@@ -268,7 +268,7 @@ export default function ProfileAnalyticsTab() {
         {/* Voice Actor Preferences */}
         <div className="bg-[#0f0f13]/30 border border-white/5 rounded-3xl p-5 space-y-4 shadow-xl">
           <h5 className="text-[10px] font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
-            <Volume2 className="w-4 h-4 text-purple-400" /> Smart Voices
+            <Volume2 className="w-4 h-4 text-[#3B82F6]" /> Smart Voices
             Preference
           </h5>
           <div className="space-y-3">
@@ -314,7 +314,7 @@ export default function ProfileAnalyticsTab() {
         {/* Narration script type */}
         <div className="bg-[#0f0f13]/30 border border-white/5 rounded-3xl p-5 space-y-4 shadow-xl">
           <h5 className="text-[10px] font-black uppercase text-neutral-400 tracking-wider flex items-center gap-1.5">
-            <MessageSquare className="w-4 h-4 text-purple-400" /> Narration Mode
+            <MessageSquare className="w-4 h-4 text-[#3B82F6]" /> Narration Mode
           </h5>
           <div className="space-y-3">
             <div className="space-y-1">

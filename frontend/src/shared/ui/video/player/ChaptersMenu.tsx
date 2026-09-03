@@ -34,7 +34,7 @@ export const VideoPreviewChaptersMenu: React.FC<
             onClick={() => onSelectChapter(chapter.startTime)}
             className={`flex items-center justify-between px-3.5 py-2 text-left rounded-xl transition-all cursor-pointer text-xs ${
               isActive
-                ? "bg-purple-950/30 border border-purple-900/40 text-purple-400 font-bold"
+                ? "bg-purple-950/30 border border-purple-900/40 text-[#3B82F6] font-bold"
                 : "hover:bg-neutral-800/40 border border-transparent text-neutral-300"
             }`}
           >

@@ -63,7 +63,7 @@ export default function ScraperConnectionErrorCard({
     <div className="w-full max-w-4xl mx-auto rounded-3xl border border-rose-500/20 bg-gradient-to-b from-[#1E1215] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-10 shadow-2xl space-y-8 relative overflow-hidden text-left animate-fade-in">
       {/* Background ambient lighting */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#3B82F6]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* TOP HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.08] relative z-10">
@@ -167,13 +167,13 @@ export default function ScraperConnectionErrorCard({
                 window.dispatchEvent(new Event("popstate"));
               }
             }}
-            className="p-4 rounded-2xl border border-white/[0.08] bg-[#161616] hover:bg-[#1C1C1C] hover:border-purple-500/40 text-left transition-all group cursor-pointer"
+            className="p-4 rounded-2xl border border-white/[0.08] bg-[#161616] hover:bg-[#1C1C1C] hover:border-[#3B82F6]/40 text-left transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+              <div className="w-8 h-8 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] group-hover:scale-110 transition-transform">
                 <Upload className="w-4 h-4" />
               </div>
-              <h4 className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+              <h4 className="text-xs font-bold text-white group-hover:text-[#93C5FD] transition-colors">
                 Upload Manga Manually
               </h4>
             </div>
@@ -186,13 +186,13 @@ export default function ScraperConnectionErrorCard({
           <button
             type="button"
             onClick={handleLoadDemo}
-            className="p-4 rounded-2xl border border-white/[0.08] bg-[#161616] hover:bg-[#1C1C1C] hover:border-cyan-500/40 text-left transition-all group cursor-pointer"
+            className="p-4 rounded-2xl border border-white/[0.08] bg-[#161616] hover:bg-[#1C1C1C] hover:border-[#3B82F6]/40 text-left transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+              <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
                 <BookOpen className="w-4 h-4" />
               </div>
-              <h4 className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">
+              <h4 className="text-xs font-bold text-white group-hover:text-[#93C5FD] transition-colors">
                 Explore Demo Series
               </h4>
             </div>

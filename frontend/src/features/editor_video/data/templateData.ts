@@ -20,7 +20,7 @@ export const PRESET_TEMPLATES: TemplateProject[] = [
     category: "webtoon",
     badge: "16:9 • 0:30",
     gradient: "from-purple-900/90 via-indigo-900/70 to-slate-950",
-    accent: "text-purple-400 border-purple-500/40 bg-purple-500/20",
+    accent: "text-[#3B82F6] border-[#3B82F6]/40 bg-[#3B82F6]/20",
     desc: "Fast panel cuts with dynamic lighting, speedlines, and battle BGM.",
   },
   {
@@ -38,7 +38,7 @@ export const PRESET_TEMPLATES: TemplateProject[] = [
     category: "opening",
     badge: "Intro • 0:10",
     gradient: "from-cyan-900/90 via-blue-900/70 to-slate-950",
-    accent: "text-cyan-400 border-cyan-500/40 bg-cyan-500/20",
+    accent: "text-blue-400 border-blue-500/40 bg-blue-500/20",
     desc: "Glitch title reveal with synthwave audio transition and logo mark.",
   },
   {

@@ -78,7 +78,7 @@ export default function LoadingPage({
           </div>
 
           {hasProgress && (
-            <span className="text-[11px] font-mono font-bold text-cyan-400">
+            <span className="text-[11px] font-mono font-bold text-blue-400">
               {clampedProgress}%
             </span>
           )}

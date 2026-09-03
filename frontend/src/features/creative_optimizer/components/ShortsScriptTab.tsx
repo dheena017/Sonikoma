@@ -89,10 +89,10 @@ export default function ShortsScriptTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-purple-500/40 transition-all space-y-2 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-[#3B82F6]/40 transition-all space-y-2 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 bg-purple-500/10 border border-purple-500/30 rounded-lg text-purple-400 shrink-0">
+            <span className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/30 rounded-lg text-[#3B82F6] shrink-0">
               <Scissors className="w-4 h-4" />
             </span>
             <h4 className="text-xs font-mono font-bold text-white uppercase">
@@ -103,7 +103,7 @@ export default function ShortsScriptTab({
           <div className="flex items-center gap-2.5 flex-wrap">
             {/* Target Duration Selector */}
             <div className="flex items-center gap-1 bg-neutral-950 border border-neutral-850 p-1 rounded-xl">
-              <Clock className="w-3.5 h-3.5 text-purple-400 ml-1" />
+              <Clock className="w-3.5 h-3.5 text-[#3B82F6] ml-1" />
               {(["30s", "60s", "90s"] as const).map((dur) => (
                 <button
                   key={dur}
@@ -122,7 +122,7 @@ export default function ShortsScriptTab({
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-purple-600/30 active:scale-95 shrink-0"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-sm active:scale-95 shrink-0"
             >
               {loading ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
@@ -143,8 +143,8 @@ export default function ShortsScriptTab({
 
       {loading && (
         <div className="bg-neutral-900/60 border border-neutral-850 rounded-2xl p-8 text-center animate-pulse space-y-2 shadow-xl">
-          <Sparkles className="h-7 w-7 text-purple-400 animate-spin mx-auto" />
-          <p className="text-xs font-mono text-purple-300">
+          <Sparkles className="h-7 w-7 text-[#3B82F6] animate-spin mx-auto" />
+          <p className="text-xs font-mono text-[#60A5FA]">
             Adapting storyboard into viral {targetDuration} short-form script...
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function ShortsScriptTab({
       {(shortsData || hookData) && !loading && (
         <div className="space-y-4 animate-fade-in">
           {hookData && (
-            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
               <div className="flex justify-between items-center border-b border-neutral-850 pb-2">
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-pink-400" />
@@ -183,7 +183,7 @@ export default function ShortsScriptTab({
                   }
                   className="w-full bg-transparent text-xs font-sans text-white font-bold outline-none leading-relaxed"
                 />
-                <div className="text-[9px] font-mono text-purple-300 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800 inline-block">
+                <div className="text-[9px] font-mono text-[#60A5FA] bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800 inline-block">
                   Trigger: {hookData.psychological_trigger}
                 </div>
               </div>
@@ -192,11 +192,11 @@ export default function ShortsScriptTab({
 
           {shortsData && (
             <>
-              <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+              <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
                 <div className="flex justify-between items-center border-b border-neutral-850 pb-2">
                   <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-purple-400" />
-                    <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest">
+                    <Zap className="w-4 h-4 text-[#3B82F6]" />
+                    <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest">
                       Adapted Short Voiceover Script ({targetDuration})
                     </span>
                   </div>
@@ -222,13 +222,13 @@ export default function ShortsScriptTab({
                     })
                   }
                   rows={5}
-                  className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-3 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-purple-500/50 resize-y"
+                  className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-3 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-[#3B82F6]/50 resize-y"
                 />
               </div>
 
               {shortsData.visual_milestones && (
-                <div className="bg-neutral-900/60 border border-neutral-850 hover:border-purple-500/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
-                  <span className="text-[10px] font-mono font-bold text-purple-300 uppercase tracking-widest block border-b border-neutral-850 pb-2">
+                <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+                  <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest block border-b border-neutral-850 pb-2">
                     Visual Milestones & Frame Pacing
                   </span>
                   <ul className="space-y-2 text-xs text-neutral-300 font-sans pt-1">
@@ -237,7 +237,7 @@ export default function ShortsScriptTab({
                         key={idx}
                         className="flex items-center gap-2.5 bg-neutral-950 p-2.5 rounded-xl border border-neutral-800"
                       >
-                        <span className="text-purple-400 font-mono font-bold text-xs bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
+                        <span className="text-[#3B82F6] font-mono font-bold text-xs bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
                           #{idx + 1}
                         </span>
                         <input

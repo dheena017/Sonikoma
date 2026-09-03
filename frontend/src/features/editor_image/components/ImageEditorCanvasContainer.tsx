@@ -282,7 +282,7 @@ export default function ImageEditorCanvasContainer({
               }
             }}
             disabled={isSavingEdit}
-            className="h-7 px-3 text-[10px] font-mono font-black rounded-lg flex items-center gap-1.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-[0_0_12px_rgba(59,130,246,0.4)] hover:shadow-[0_0_18px_rgba(59,130,246,0.7)] border border-[#60A5FA]/40 transition-all cursor-pointer active:scale-95 uppercase tracking-wider disabled:opacity-50"
+            className="h-7 px-3 text-[10px] font-mono font-black rounded-lg flex items-center gap-1.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white  hover: border border-[#60A5FA]/40 transition-all cursor-pointer active:scale-95 uppercase tracking-wider disabled:opacity-50"
             title="Apply & Save Changes"
           >
             {isSavingEdit ? (
@@ -318,7 +318,7 @@ export default function ImageEditorCanvasContainer({
 
       {activeStoryboardPanel?.layers && activeTab === "separate" ? (
         <div
-          className="relative border border-white/10 hover:border-purple-500/20 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
+          className="relative border border-white/10 hover:border-[#3B82F6]/20 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
           style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
         >
           <div className="relative w-full h-full max-h-full max-w-full z-10 flex items-center justify-center p-4">

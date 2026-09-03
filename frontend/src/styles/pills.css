@@ -28,31 +28,31 @@
 /* Active state */
 .icon-pill.active,
 .icon-pill--active {
-  background-color: rgba(168, 85, 247, 0.2);
-  border-color: rgba(168, 85, 247, 0.4);
-  box-shadow: 0 0 14px rgba(168, 85, 247, 0.22);
+  background-color: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.22);
 }
 .icon-pill.active svg,
 .icon-pill--active svg {
-  color: #c084fc;
+  color: #60a5fa;
 }
 
 /* Hover via group */
 .group:hover .icon-pill:not(.active):not(.icon-pill--active) {
-  background-color: rgba(168, 85, 247, 0.1);
-  border-color: rgba(168, 85, 247, 0.2);
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
 }
 .group:hover .icon-pill:not(.active):not(.icon-pill--active) svg {
-  color: #c084fc;
+  color: #60a5fa;
 }
 
 /* ── Colour variants ─────────────────────────────────────────── */
 .icon-pill--purple {
-  background-color: rgba(168, 85, 247, 0.1);
-  border-color: rgba(168, 85, 247, 0.22);
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.22);
 }
 .icon-pill--purple svg {
-  color: #c084fc;
+  color: #60a5fa;
 }
 .icon-pill--violet {
   background-color: rgba(139, 92, 246, 0.1);
@@ -129,9 +129,9 @@
 }
 [data-mode="light"] .icon-pill.active,
 [data-mode="light"] .icon-pill--active {
-  background-color: rgba(147, 51, 234, 0.1);
-  border-color: rgba(147, 51, 234, 0.25);
-  box-shadow: 0 0 10px rgba(147, 51, 234, 0.12);
+  background-color: rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.25);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.12);
 }
 [data-mode="light"] .icon-pill.active svg,
 [data-mode="light"] .icon-pill--active svg {
@@ -140,8 +140,8 @@
 [data-mode="light"]
   .group:hover
   .icon-pill:not(.active):not(.icon-pill--active) {
-  background-color: rgba(147, 51, 234, 0.08);
-  border-color: rgba(147, 51, 234, 0.18);
+  background-color: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.18);
 }
 [data-mode="light"]
   .group:hover
@@ -150,8 +150,8 @@
   color: #7c3aed;
 }
 [data-mode="light"] .icon-pill--purple {
-  background-color: rgba(147, 51, 234, 0.08);
-  border-color: rgba(147, 51, 234, 0.2);
+  background-color: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.2);
 }
 [data-mode="light"] .icon-pill--purple svg {
   color: #7c3aed;

@@ -67,7 +67,7 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
         {(activeTab === "All" || activeTab === "LUTs") && (
           <div className="space-y-2 mb-4">
             <h4 className="text-xs font-bold text-white font-mono uppercase flex items-center gap-1.5">
-              <Sliders className="h-3.5 w-3.5 text-purple-400" />
+              <Sliders className="h-3.5 w-3.5 text-[#3B82F6]" />
               Anime Color Grading LUTs
             </h4>
             <div className="grid grid-cols-1 gap-2">
@@ -77,12 +77,12 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
                   onClick={() => handleApplyLut(lut)}
                   className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between group shadow-sm ${
                     activeLutId === lut.id
-                      ? "bg-purple-950/60 border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]"
-                      : "bg-neutral-900/80 border-neutral-800 hover:border-purple-500/60"
+                      ? "bg-purple-950/60 border-[#60A5FA] "
+                      : "bg-neutral-900/80 border-neutral-800 hover:border-[#3B82F6]/60"
                   }`}
                 >
                   <div>
-                    <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+                    <p className="text-xs font-bold text-white group-hover:text-[#93C5FD] transition-colors">
                       {lut.name}
                     </p>
                     <p className="text-[9px] text-neutral-400 font-mono mt-0.5">{lut.desc}</p>
@@ -91,7 +91,7 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
                   <span className={`px-2 py-1 rounded-lg text-[9px] font-mono font-bold shrink-0 flex items-center gap-1 ${
                     activeLutId === lut.id
                       ? "bg-purple-600 text-white"
-                      : "bg-neutral-800 text-neutral-300 group-hover:bg-purple-600 group-hover:text-white"
+                      : "bg-neutral-800 text-neutral-300 group-hover:bg-[#3B82F6] group-hover:text-white"
                   }`}>
                     {activeLutId === lut.id && <Check className="h-3 w-3" />}
                     {activeLutId === lut.id ? "Active" : "Apply LUT"}

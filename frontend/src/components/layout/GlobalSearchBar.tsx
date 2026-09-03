@@ -206,7 +206,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
             subtitle: text ? `"${text.slice(0, 70)}..."` : "Storyboard visual action beat",
             icon: MessageSquare,
             badge: `P#${idx + 1}`,
-            badgeColor: "#A855F7",
+            badgeColor: "#3B82F6",
             imageUrl: panel.image_url,
             onSelect: () => {
               useProjectStore.getState().setSelectedPanelIndex(idx);

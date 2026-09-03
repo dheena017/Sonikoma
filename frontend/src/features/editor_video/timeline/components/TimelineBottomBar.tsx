@@ -64,14 +64,14 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
           <button
             onClick={onOpenMediaPicker}
             aria-label="Add audio track"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-purple-500/15 border border-white/8 hover:border-purple-500/40 text-neutral-400 hover:text-purple-200 transition-all cursor-pointer text-[11px] font-medium shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#3B82F6]/15 border border-white/8 hover:border-[#3B82F6]/40 text-neutral-400 hover:text-purple-200 transition-all cursor-pointer text-[11px] font-medium shrink-0"
           >
             <Music className="h-3 w-3" />
             <span>Add media / audio</span>
           </button>
         </Tooltip>
 
-        <div className="flex items-center gap-1 text-[9px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20 shrink-0">
+        <div className="flex items-center gap-1 text-[9px] font-mono text-[#60A5FA] bg-[#3B82F6]/10 px-2 py-0.5 rounded border border-[#3B82F6]/20 shrink-0">
           <Sparkles className="h-2.5 w-2.5" />
           <span>Pacing: {pacingScore}</span>
         </div>
@@ -91,7 +91,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
 
       {/* Right side: Scroll buttons + Snap indicator */}
       <div className="flex items-center gap-2 shrink-0">
-        <span className={`text-[10px] font-mono ${snapEnabled ? "text-purple-400/70" : "text-neutral-600"}`}>
+        <span className={`text-[10px] font-mono ${snapEnabled ? "text-[#3B82F6]/70" : "text-neutral-600"}`}>
           Snap {snapEnabled ? "ON" : "OFF"}
         </span>
 
@@ -132,7 +132,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
             <button
               onClick={handleScrollLeft}
               aria-label="Scroll timeline left"
-              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
             >
               <ChevronLeft className="h-3.5 w-3.5 stroke-[2.5]" />
             </button>
@@ -141,7 +141,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
             <button
               onClick={handleScrollRight}
               aria-label="Scroll timeline right"
-              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-purple-600 border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
             >
               <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
             </button>

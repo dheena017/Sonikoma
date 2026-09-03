@@ -43,7 +43,7 @@ const STYLE_PRESETS: StylePreset[] = [
     id: "manhwa_action",
     label: "Manhwa Action",
     description: "Intense Korean webtoon lines, glowing aura, expressive eyes",
-    badgeColor: "from-purple-600 to-pink-600",
+    badgeColor: "from-blue-600 to-pink-600",
     icon: "⚡",
   },
   {
@@ -445,7 +445,7 @@ export default function YouTubeThumbnailModal({
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-neutral-800/70 bg-gradient-to-b from-neutral-900/70 to-transparent flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3.5">
-            <div className="p-2.5 bg-gradient-to-br from-red-600 via-rose-600 to-purple-600 rounded-2xl text-white shadow-lg shadow-red-500/20 ring-1 ring-white/20">
+            <div className="p-2.5 bg-gradient-to-br from-red-600 via-rose-600 to-blue-600 rounded-2xl text-white shadow-lg shadow-red-500/20 ring-1 ring-white/20">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -481,7 +481,7 @@ export default function YouTubeThumbnailModal({
                 onClick={() => setActiveTab("ai_creator")}
                 className={`flex-1 py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === "ai_creator"
-                    ? "bg-gradient-to-r from-red-600 to-purple-600 text-white shadow-md"
+                    ? "bg-gradient-to-r from-red-600 to-blue-600 text-white shadow-md"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
@@ -493,7 +493,7 @@ export default function YouTubeThumbnailModal({
                 onClick={() => setActiveTab("overlay_studio")}
                 className={`flex-1 py-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   activeTab === "overlay_studio"
-                    ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md"
+                    ? "bg-gradient-to-r from-blue-600 to-pink-600 text-white shadow-md"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
@@ -618,7 +618,7 @@ export default function YouTubeThumbnailModal({
                 <button
                   onClick={handleGenerateAIImage}
                   disabled={isGeneratingImage}
-                  className="w-full py-3 bg-gradient-to-r from-red-600 via-rose-600 to-purple-600 hover:from-red-500 hover:to-purple-500 disabled:opacity-50 text-white font-black text-xs rounded-xl font-mono flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 cursor-pointer"
+                  className="w-full py-3 bg-gradient-to-r from-red-600 via-rose-600 to-blue-600 hover:from-red-500 hover:to-blue-500 disabled:opacity-50 text-white font-black text-xs rounded-xl font-mono flex items-center justify-center gap-2 shadow-lg shadow-red-600/20 cursor-pointer"
                 >
                   {isGeneratingImage ? (
                     <>
@@ -906,7 +906,7 @@ export default function YouTubeThumbnailModal({
 
               <button
                 onClick={handleApplyToStudio}
-                className="px-6 py-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-purple-600 hover:from-red-500 hover:to-purple-500 text-white font-black text-xs rounded-xl font-mono flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+                className="px-6 py-2.5 bg-gradient-to-r from-red-600 via-rose-600 to-blue-600 hover:from-red-500 hover:to-blue-500 text-white font-black text-xs rounded-xl font-mono flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Apply as Video Thumbnail</span>

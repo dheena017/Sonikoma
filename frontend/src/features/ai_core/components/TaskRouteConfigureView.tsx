@@ -259,7 +259,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               <div className="pt-1 flex items-center gap-3 text-xs font-mono text-neutral-400 flex-wrap">
                 <span>Task Identifier: <code className="text-blue-300 font-bold">{taskRoute.task}</code></span>
                 <span>•</span>
-                <span>Type: <code className="text-purple-300">{taskRoute.required_type}</code></span>
+                <span>Type: <code className="text-[#60A5FA]">{taskRoute.required_type}</code></span>
               </div>
             </div>
           </div>
@@ -293,12 +293,12 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Tier 1 Primary */}
-          <div className="rounded-2xl border border-purple-500/30 bg-[#12121C] p-5 space-y-4 shadow-lg">
+          <div className="rounded-2xl border border-[#3B82F6]/30 bg-[#12121C] p-5 space-y-4 shadow-lg">
             <div className="flex items-center justify-between">
-              <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 font-mono">
+              <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30 font-mono">
                 Tier 1 Primary
               </span>
-              <span className="text-[10px] font-mono text-purple-400 font-bold">100% Traffic Default</span>
+              <span className="text-[10px] font-mono text-[#3B82F6] font-bold">100% Traffic Default</span>
             </div>
             <p className="text-xs text-neutral-400 font-sans leading-relaxed">
               Main engine utilized for all incoming generation requests.
@@ -381,7 +381,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-mono text-neutral-300">
               <span>Max Retry Attempts:</span>
-              <span className="font-bold text-purple-400">{maxRetries} Retries</span>
+              <span className="font-bold text-[#3B82F6]">{maxRetries} Retries</span>
             </div>
             <input
               type="range"

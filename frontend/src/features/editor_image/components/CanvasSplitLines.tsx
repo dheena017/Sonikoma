@@ -42,11 +42,11 @@ export default function CanvasSplitLines({
             <div
               className={`w-full border-t-2 border-dashed ${
                 isHovered
-                  ? "border-purple-400 shadow-[0_0_8px_rgba(167,139,250,0.5)]"
-                  : "border-purple-500/70"
+                  ? "border-[#60A5FA] shadow-[0_0_8px_rgba(167,139,250,0.5)]"
+                  : "border-[#3B82F6]/70"
               }`}
             />
-            <div className="absolute left-2 bg-purple-950/95 text-purple-300 font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg flex items-center gap-1.5 pointer-events-auto select-none">
+            <div className="absolute left-2 bg-purple-950/95 text-[#60A5FA] font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg flex items-center gap-1.5 pointer-events-auto select-none">
               <span>
                 Cut #{idx + 1}: {y}%
               </span>
@@ -56,7 +56,7 @@ export default function CanvasSplitLines({
                   e.stopPropagation();
                   handleRemoveSplitLine(y);
                 }}
-                className="text-purple-400 hover:text-red-400 font-bold font-sans text-[11px] cursor-pointer pl-0.5"
+                className="text-[#3B82F6] hover:text-red-400 font-bold font-sans text-[11px] cursor-pointer pl-0.5"
                 title="Remove this split line"
               >
                 &times;

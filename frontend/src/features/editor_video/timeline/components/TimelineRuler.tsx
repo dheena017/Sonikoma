@@ -162,12 +162,12 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         {/* Spacer aligned with the track labels column */}
         <div className="w-48 shrink-0 sticky left-0 z-30 border-r border-white/10 bg-[#0d0d16] flex items-center justify-between px-3 shadow-[4px_0_16px_rgba(0,0,0,0.85)]">
           <div className="flex items-center gap-1.5 min-w-0">
-            <Clock className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+            <Clock className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
             <span className="text-[10px] font-mono font-bold text-neutral-200 truncate">
               Timeline
             </span>
           </div>
-          <span className="text-[9px] font-mono text-purple-300 font-bold bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-500/30 shrink-0 ml-1">
+          <span className="text-[9px] font-mono text-[#60A5FA] font-bold bg-purple-950/60 px-1.5 py-0.5 rounded border border-[#3B82F6]/30 shrink-0 ml-1">
             {formatTimecode(totalDuration, true)}
           </span>
         </div>
@@ -253,7 +253,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
           <span className="text-[10px] font-mono font-bold text-neutral-300 tracking-wider uppercase">
             Quick Add
           </span>
-          <span className="text-[10px] font-mono text-purple-400 font-bold">+</span>
+          <span className="text-[10px] font-mono text-[#3B82F6] font-bold">+</span>
         </div>
       </div>
     );

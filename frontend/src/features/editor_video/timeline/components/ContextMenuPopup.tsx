@@ -66,14 +66,14 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
   // ── Track-Specific Header & Items Configuration ──────────────────────────────
   let trackTitle = "Clip Options";
   let trackIcon = Sparkles;
-  let trackColor = "text-purple-400";
+  let trackColor = "text-[#3B82F6]";
   let items: any[] = [];
 
   if (trackPrefix === "v1") {
     // 🎦 V1 Story Panels (Frames / Images)
     trackTitle = `Story Panel #${(contextMenu.panelIdx ?? 0) + 1}`;
     trackIcon = ImageIcon;
-    trackColor = "text-purple-400";
+    trackColor = "text-[#3B82F6]";
     items = [
       { icon: Copy, label: "Copy Frame", shortcut: "Ctrl+C", action: onCopy },
       {
@@ -152,7 +152,7 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
     // 📝 V3 Subtitles (Text narration lines)
     trackTitle = `Subtitle / Caption #${(contextMenu.panelIdx ?? 0) + 1}`;
     trackIcon = Type;
-    trackColor = "text-purple-300";
+    trackColor = "text-[#60A5FA]";
     items = [
       { icon: Copy, label: "Copy Text", shortcut: "Ctrl+C", action: onCopy },
       {
@@ -204,7 +204,7 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
     // ⚡ A2 Sound FX (SFX sound clips)
     trackTitle = `Sound FX #${(contextMenu.panelIdx ?? 0) + 1}`;
     trackIcon = Zap;
-    trackColor = "text-cyan-400";
+    trackColor = "text-blue-400";
     items = [
       { icon: RefreshCw, label: "Browse / Replace SFX", action: onCopy },
       { icon: CopyPlus, label: "Duplicate SFX Clip", shortcut: "Ctrl+D", action: onDuplicate },
@@ -224,7 +224,7 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
     // 🎙️ A3 Voiceover (Dialogue audio tracks)
     trackTitle = `Voiceover #${(contextMenu.panelIdx ?? 0) + 1}`;
     trackIcon = Mic;
-    trackColor = "text-purple-300";
+    trackColor = "text-[#60A5FA]";
     items = [
       { icon: RefreshCw, label: "Regenerate Voice Audio (TTS)", action: onCopy },
       { icon: Mic, label: "Change Character Voice Actor", action: onCopy },

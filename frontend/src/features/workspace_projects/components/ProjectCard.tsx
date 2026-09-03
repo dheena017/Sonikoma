@@ -109,7 +109,7 @@ export default function ProjectCard({
           onClick={(e) => onToggleSelect(e, project.project_id)}
         >
           {isSelected ? (
-            <CheckSquare className="w-5 h-5 text-purple-400 drop-shadow-md" />
+            <CheckSquare className="w-5 h-5 text-[#3B82F6] drop-shadow-md" />
           ) : (
             <Square className="w-5 h-5 text-white/40 opacity-0 group-hover:opacity-100 transition-opacity hover:text-white drop-shadow-md" />
           )}
@@ -189,7 +189,7 @@ export default function ProjectCard({
               }}
               aria-label="Project actions & options"
               title="Project actions & options"
-              className="w-7 h-7 rounded-full bg-black/70 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/20 hover:border-purple-400 transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
+              className="w-7 h-7 rounded-full bg-black/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#60A5FA] transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
             >
               <MoreVertical className="w-3.5 h-3.5" />
             </button>
@@ -230,7 +230,7 @@ export default function ProjectCard({
             }}
             className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover/item:bg-purple-500/20 group-hover/item:text-purple-300 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] group-hover/item:bg-[#3B82F6]/20 group-hover/item:text-[#60A5FA] transition-colors">
               <Play className="w-3.5 h-3.5 fill-purple-400/20" />
             </div>
             <span className="font-semibold">Resume</span>
@@ -266,7 +266,7 @@ export default function ProjectCard({
             }}
             className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
               <Edit2 className="w-3.5 h-3.5" />
             </div>
             <span className="font-semibold">Rename</span>
@@ -401,10 +401,10 @@ export default function ProjectCard({
           <div className="flex items-center gap-2.5 text-xs font-mono truncate">
             {/* Storyboard Count */}
             <div
-              className="flex items-center gap-1 text-purple-400"
+              className="flex items-center gap-1 text-[#3B82F6]"
               title={`${project.panels_count ?? 0} Storyboard Panels`}
             >
-              <Film className="h-3.5 w-3.5 shrink-0 text-purple-400" />
+              <Film className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
               <span className="font-bold text-neutral-200">
                 {project.panels_count ?? 0}
               </span>
@@ -431,7 +431,7 @@ export default function ProjectCard({
               e.stopPropagation();
               onOpenProject(project);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-purple-400/40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40 active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-[#60A5FA]/40 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40 active:scale-95 shrink-0"
           >
             <span>Resume</span>
             <ArrowRight className="w-3 h-3 text-white" />
@@ -443,7 +443,7 @@ export default function ProjectCard({
       {isProcessing && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-800 z-20">
           <div
-            className="h-full bg-gradient-to-r from-amber-500 via-purple-500 to-amber-500 animate-shimmer"
+            className="h-full bg-gradient-to-r from-amber-500 via-blue-500 to-amber-500 animate-shimmer"
             style={{ width: "100%", backgroundSize: "200% 100%" }}
           />
         </div>

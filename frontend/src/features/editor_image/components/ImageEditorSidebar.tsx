@@ -148,7 +148,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
         onClick={() => setIsCollapsed(true)}
       />
 
-      <aside className="fixed top-0 bottom-0 left-0 h-screen w-[280px] bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(168,85,247,0.06)] overflow-hidden select-none">
+      <aside className="fixed top-0 bottom-0 left-0 h-screen w-[280px] bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] overflow-hidden select-none">
         {/* Top Header / Close Area */}
         <div
           className={`flex items-center border-b border-neutral-800/60 transition-all duration-300 shrink-0 ${
@@ -156,8 +156,8 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           }`}
         >
           {isCollapsed ? (
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-purple-500/50 flex items-center justify-center shadow-[0_0_18px_rgba(168,85,247,0.35)]">
-              <Sparkles className="w-5 h-5 text-purple-300 animate-pulse" />
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-[#3B82F6]/50 flex items-center justify-center ">
+              <Sparkles className="w-5 h-5 text-[#60A5FA] animate-pulse" />
             </div>
           ) : (
             <>
@@ -202,7 +202,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                       <div
                         className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                           isActive
-                            ? "h-6 bg-gradient-to-b from-purple-400 to-amber-400 shadow-[0_0_14px_rgba(168,85,247,0.9)] opacity-100"
+                            ? "h-6 bg-gradient-to-b from-purple-400 to-amber-400  opacity-100"
                             : "h-0 bg-transparent opacity-0"
                         }`}
                       />
@@ -244,7 +244,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                             : "justify-between px-2.5 py-1.5"
                         } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                           isActive && !isCollapsed
-                            ? "bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-purple-500/40 text-white shadow-[0_4px_20px_rgba(168,85,247,0.2)] font-bold"
+                            ? "bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-[#3B82F6]/40 text-white shadow-[0_4px_20px_rgba(59,130,246,0.2)] font-bold"
                             : "text-neutral-300 hover:text-white hover:bg-neutral-900/60 border border-transparent"
                         }`}
                         title={isCollapsed ? item.label : undefined}
@@ -254,16 +254,16 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                           <div
                             className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 shadow-sm ${
                               isActive
-                                ? "bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-purple-500/60 shadow-[0_0_18px_rgba(168,85,247,0.35)] scale-105"
-                                : "bg-neutral-900/80 border border-neutral-800/80 group-hover:bg-purple-500/15 group-hover:border-purple-500/30"
+                                ? "bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-[#3B82F6]/60  scale-105"
+                                : "bg-neutral-900/80 border border-neutral-800/80 group-hover:bg-[#3B82F6]/15 group-hover:border-[#3B82F6]/30"
                             }`}
                           >
                             <Icon
                               strokeWidth={isActive ? 2.5 : 2}
                               className={`w-5 h-5 transition-colors duration-300 ${
                                 isActive
-                                  ? "text-purple-300"
-                                  : "text-neutral-400 group-hover:text-purple-300"
+                                  ? "text-[#60A5FA]"
+                                  : "text-neutral-400 group-hover:text-[#93C5FD]"
                               }`}
                             />
                           </div>
@@ -284,7 +284,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                                 : "relative top-0 right-0"
                             } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
                               isActive
-                                ? "bg-purple-500/20 text-purple-300 border-purple-500/30"
+                                ? "bg-[#3B82F6]/20 text-[#60A5FA] border-[#3B82F6]/30"
                                 : "bg-neutral-900 text-neutral-500 border-white/5"
                             }`}
                           >
@@ -304,7 +304,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
         <div className="p-3.5 border-t border-neutral-800/60 bg-neutral-950/90 flex justify-center w-full shrink-0">
           <button
             onClick={handleReturnToWorkspace}
-            className={`flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 text-white transition-all active:scale-95 border border-purple-400/30 cursor-pointer shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:shadow-[0_0_28px_rgba(168,85,247,0.65)] ${
+            className={`flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 text-white transition-all active:scale-95 border border-[#60A5FA]/30 cursor-pointer  hover: ${
               isCollapsed
                 ? "w-11 h-11 p-0"
                 : "w-full py-3.5 px-4 gap-2.5 text-xs font-mono font-bold tracking-wide"

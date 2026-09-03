@@ -55,7 +55,7 @@ export default function EngineStatus({ latency }: EngineStatusProps) {
             </div>
             <div className="flex items-center justify-between text-[11px] font-mono">
               <span className="text-[#E5E5E5]">Speech OCR Models</span>
-              <span className="text-[#A855F7] bg-[#A855F7]/10 px-2 py-0.5 rounded border border-[#A855F7]/30 font-bold text-[9px] uppercase">
+              <span className="text-[#3B82F6] bg-[#3B82F6]/10 px-2 py-0.5 rounded border border-[#3B82F6]/30 font-bold text-[9px] uppercase">
                 Connected
               </span>
             </div>

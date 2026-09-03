@@ -52,7 +52,7 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
   return (
     <div className="px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+        <span className="h-2 w-2 rounded-full bg-purple-500 " />
         <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">
           {title}
         </h2>
@@ -148,7 +148,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
         <button
           onClick={() => scrollTabs("left")}
           title="Scroll left"
-          className="shrink-0 h-6 w-6 rounded-full bg-neutral-900/90 border border-purple-500/40 text-purple-300 hover:text-white hover:bg-purple-600 hover:border-purple-400 hover:shadow-[0_0_10px_rgba(168,85,247,0.6)] transition-all cursor-pointer flex items-center justify-center active:scale-90 shadow-md"
+          className="shrink-0 h-6 w-6 rounded-full bg-neutral-900/90 border border-[#3B82F6]/40 text-[#60A5FA] hover:text-white hover:bg-[#3B82F6] hover:border-[#60A5FA] hover: transition-all cursor-pointer flex items-center justify-center active:scale-90 shadow-md"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
         </button>
@@ -168,8 +168,8 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
               onClick={() => onSelectTab(tab)}
               className={`relative px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 flex items-center gap-1.5 ${
                 isActive
-                  ? "bg-gradient-to-r from-purple-600/60 to-indigo-600/60 text-white border border-purple-400/80 shadow-[0_0_16px_rgba(168,85,247,0.6)]"
-                  : "bg-neutral-900/60 text-neutral-300 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-purple-500/30"
+                  ? "bg-gradient-to-r from-blue-600/60 to-indigo-600/60 text-white border border-[#60A5FA]/80 "
+                  : "bg-neutral-900/60 text-neutral-300 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-[#3B82F6]/30"
               }`}
             >
               {isActive && (
@@ -186,9 +186,9 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
         <button
           onClick={() => scrollTabs("right")}
           title="Scroll right"
-          className="shrink-0 h-6 w-6 rounded-full bg-neutral-900/90 border border-purple-500/40 text-purple-300 hover:text-white hover:bg-purple-600 hover:border-purple-400 hover:shadow-[0_0_10px_rgba(168,85,247,0.6)] transition-all cursor-pointer flex items-center justify-center active:scale-90 shadow-md"
+          className="shrink-0 h-6 w-6 rounded-full bg-neutral-900/90 border border-[#3B82F6]/40 text-[#60A5FA] hover:text-white hover:bg-[#3B82F6] hover:border-[#60A5FA] hover: transition-all cursor-pointer flex items-center justify-center active:scale-90 shadow-md"
         >
-          <ChevronRight className="h-3.5 w-3.5 drop-shadow-[0_0_4px_rgba(168,85,247,0.8)]" />
+          <ChevronRight className="h-3.5 w-3.5 drop-shadow-[0_0_4px_rgba(59,130,246,0.8)]" />
         </button>
       )}
     </div>
@@ -220,7 +220,7 @@ export const WorkspaceLayoutSearch: React.FC<SearchProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-transparent border border-neutral-800/90 focus:border-purple-500/80 focus:shadow-[0_0_16px_rgba(168,85,247,0.24)] text-[11px] text-white rounded-full pl-9 pr-3 py-2 outline-none transition-all placeholder:text-neutral-500 font-mono tracking-tight"
+          className="w-full bg-transparent border border-neutral-800/90 focus:border-[#3B82F6]/80 focus: text-[11px] text-white rounded-full pl-9 pr-3 py-2 outline-none transition-all placeholder:text-neutral-500 font-mono tracking-tight"
         />
         <Search className="h-3.5 w-3.5 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
       </div>
@@ -228,7 +228,7 @@ export const WorkspaceLayoutSearch: React.FC<SearchProps> = ({
         <button
           onClick={onFilterClick}
           title="Filter options"
-          className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-purple-500/50 transition-colors cursor-pointer shrink-0"
+          className="p-2 rounded-full bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-white hover:border-[#3B82F6]/50 transition-colors cursor-pointer shrink-0"
         >
           <Filter className="h-3.5 w-3.5" />
         </button>
@@ -257,11 +257,11 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={2}
-        className="w-full bg-neutral-900/90 border border-neutral-800 text-xs text-white rounded-xl p-2.5 outline-none focus:border-purple-500 transition-all resize-none font-mono shadow-inner"
+        className="w-full bg-neutral-900/90 border border-neutral-800 text-xs text-white rounded-xl p-2.5 outline-none focus:border-[#3B82F6] transition-all resize-none font-mono shadow-inner"
       />
       <button
         onClick={onSubmit}
-        className="w-full py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-mono font-bold border border-purple-400/40 shadow-[0_4px_14px_rgba(168,85,247,0.35)] transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
+        className="w-full py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-mono font-bold border border-[#60A5FA]/40 shadow-[0_4px_14px_rgba(59,130,246,0.35)] transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
       >
         <Sparkles className="h-3.5 w-3.5 text-purple-200" />
         <span>Generate AI Output</span>

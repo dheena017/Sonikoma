@@ -14,7 +14,7 @@ export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({
   const isFree = pack.price === "Free";
 
   return (
-    <div className="rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/60 overflow-hidden cursor-pointer transition-all group shadow-sm">
+    <div className="rounded-xl bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/60 overflow-hidden cursor-pointer transition-all group shadow-sm">
       <div className="relative h-20 overflow-hidden">
         <img
           src={pack.img}
@@ -47,7 +47,7 @@ export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({
         </div>
         <button
           onClick={onPurchase}
-          className="px-2.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shrink-0"
+          className="px-2.5 py-1.5 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shrink-0"
         >
           <ShoppingCart className="h-3 w-3" />
           {isFree ? "Get Free" : "Buy"}

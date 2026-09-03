@@ -74,7 +74,7 @@ export default function SeriesCard({
     Completed: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
     "In Progress": "bg-amber-500/20 text-amber-300 border-amber-500/30",
     Draft: "bg-neutral-500/20 text-neutral-300 border-neutral-500/30",
-    Processing: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+    Processing: "bg-[#3B82F6]/20 text-[#60A5FA] border-[#3B82F6]/30",
   };
 
   // Use the latest chapter's status or default to Draft
@@ -108,8 +108,8 @@ export default function SeriesCard({
       onClick={() => onOpenSeries(series)}
       className={`group relative flex flex-col bg-neutral-900/70 backdrop-blur-xl border ${
         isSelected
-          ? "border-purple-500 shadow-lg shadow-purple-500/25 ring-1 ring-purple-500/50"
-          : "border-white/10 hover:border-purple-500/40 hover:shadow-[0_12px_36px_rgba(168,85,247,0.18)]"
+          ? "border-[#3B82F6] shadow-lg shadow-purple-500/25 ring-1 ring-purple-500/50"
+          : "border-white/10 hover:border-[#3B82F6]/40 hover:shadow-[0_12px_36px_rgba(59,130,246,0.18)]"
       } rounded-3xl overflow-hidden transition-all duration-300 cursor-pointer shadow-xl`}
     >
       {/* ─── Thumbnail / Header Section ────────────────── */}
@@ -119,7 +119,7 @@ export default function SeriesCard({
           <div
             className={`absolute top-2.5 left-2.5 z-20 w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer shadow-md ${
               isSelected
-                ? "bg-purple-500 border-purple-500 text-white shadow-purple-500/40"
+                ? "bg-purple-500 border-[#3B82F6] text-white shadow-purple-500/40"
                 : "bg-black/40 border-white/30 text-transparent hover:border-white/60 backdrop-blur-sm"
             }`}
             onClick={(e) => {
@@ -157,12 +157,12 @@ export default function SeriesCard({
             />
             {/* Seamless bottom fade */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none z-[2]" />
-            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(168,85,247,0.15),_transparent_45%)] z-[2]" />
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.15),_transparent_45%)] z-[2]" />
           </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-950 p-4 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-2xl bg-neutral-900/80 border border-purple-500/20 flex items-center justify-center shadow-lg shadow-purple-950/30 transition-transform group-hover:scale-110 duration-300">
-              <Sparkles className="w-5 h-5 text-purple-400/80" />
+            <div className="w-10 h-10 rounded-2xl bg-neutral-900/80 border border-[#3B82F6]/20 flex items-center justify-center shadow-lg shadow-purple-950/30 transition-transform group-hover:scale-110 duration-300">
+              <Sparkles className="w-5 h-5 text-[#3B82F6]/80" />
             </div>
             <span className="text-[11px] text-neutral-300 font-bold font-mono tracking-wider text-center line-clamp-1">
               {series.title || "COMIC SERIES"}
@@ -175,7 +175,7 @@ export default function SeriesCard({
 
         {/* Hover play overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/20 backdrop-blur-[2px] z-10">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-purple-900/60 scale-75 group-hover:scale-100 transition-transform duration-300 border border-purple-400/40">
+          <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-purple-900/60 scale-75 group-hover:scale-100 transition-transform duration-300 border border-[#60A5FA]/40">
             <Play className="h-4 w-4 text-white fill-white ml-0.5" />
           </div>
         </div>
@@ -203,7 +203,7 @@ export default function SeriesCard({
               }}
               aria-label="Series actions & options"
               title="Series actions & options"
-              className="w-7 h-7 rounded-full bg-black/70 hover:bg-purple-600 text-neutral-300 hover:text-white border border-white/20 hover:border-purple-400 transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
+              className="w-7 h-7 rounded-full bg-black/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#60A5FA] transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
             >
               <MoreVertical className="w-3.5 h-3.5" />
             </button>
@@ -213,15 +213,15 @@ export default function SeriesCard({
         {/* Bottom thumbnail badges */}
         <div className="absolute bottom-2 inset-x-2 z-10 flex items-center justify-between pointer-events-none">
           <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-extrabold text-white tracking-wider shadow-lg flex items-center gap-1 font-mono">
-            <Layers className="w-2.5 h-2.5 text-purple-400" />
+            <Layers className="w-2.5 h-2.5 text-[#3B82F6]" />
             <span>
               {series.chapterCount}{" "}
               {series.chapterCount === 1 ? "Chapter" : "Chapters"}
             </span>
           </div>
 
-          <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-bold text-purple-300 tracking-wider shadow-lg flex items-center gap-1 font-mono">
-            <Clock className="w-2.5 h-2.5 text-purple-400" />
+          <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg text-[9px] font-bold text-[#60A5FA] tracking-wider shadow-lg flex items-center gap-1 font-mono">
+            <Clock className="w-2.5 h-2.5 text-[#3B82F6]" />
             <span>{timeAgo(series.latestUpdatedAt || "")}</span>
           </div>
         </div>
@@ -243,7 +243,7 @@ export default function SeriesCard({
             }}
             className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover/item:bg-purple-500/20 group-hover/item:text-purple-300 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] group-hover/item:bg-[#3B82F6]/20 group-hover/item:text-[#60A5FA] transition-colors">
               <Play className="w-3.5 h-3.5 fill-purple-400/20" />
             </div>
             <span className="font-semibold">Open Series</span>
@@ -281,7 +281,7 @@ export default function SeriesCard({
             }}
             className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
+            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
               <Edit2 className="w-3.5 h-3.5" />
             </div>
             <span className="font-semibold">Rename</span>
@@ -389,7 +389,7 @@ export default function SeriesCard({
           />
         ) : (
           <h3
-            className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-purple-300 transition-colors duration-200"
+            className="text-sm sm:text-base font-extrabold text-white leading-snug line-clamp-1 group-hover:text-[#93C5FD] transition-colors duration-200"
             title={titleText}
           >
             {titleText}
@@ -399,7 +399,7 @@ export default function SeriesCard({
         {/* Genre + Author row */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
           {series.genre && (
-            <span className="text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-md font-bold">
+            <span className="text-[10px] bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30 px-2 py-0.5 rounded-md font-bold">
               {series.genre}
             </span>
           )}
@@ -419,7 +419,7 @@ export default function SeriesCard({
               series.chapterCount === 1 ? "Chapter" : "Chapters"
             }`}
           >
-            <Layers className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+            <Layers className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
             <span className="font-bold text-white whitespace-nowrap">
               {series.chapterCount}{" "}
               {series.chapterCount === 1 ? "chapter" : "chapters"}
@@ -433,7 +433,7 @@ export default function SeriesCard({
               e.stopPropagation();
               onOpenSeries(series);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-purple-400/40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40 active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-[#60A5FA]/40 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40 active:scale-95 shrink-0"
           >
             <span>Explore</span>
             <ArrowRight className="w-3 h-3 text-white" />
@@ -445,7 +445,7 @@ export default function SeriesCard({
       {isProcessing && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-800 z-20">
           <div
-            className="h-full bg-gradient-to-r from-amber-500 via-purple-500 to-amber-500 animate-shimmer"
+            className="h-full bg-gradient-to-r from-amber-500 via-blue-500 to-amber-500 animate-shimmer"
             style={{ width: "100%", backgroundSize: "200% 100%" }}
           />
         </div>

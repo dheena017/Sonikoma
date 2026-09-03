@@ -289,13 +289,13 @@ export default function AutoCropModal({
       {/* ── Top Header Bar ─────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/8">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600/30 to-indigo-600/20 border border-purple-500/40 flex items-center justify-center shadow-[0_0_20px_rgba(168,85,247,0.25)] flex-shrink-0">
-            <Scissors className="h-6 w-6 text-purple-300" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600/30 to-indigo-600/20 border border-[#3B82F6]/40 flex items-center justify-center  flex-shrink-0">
+            <Scissors className="h-6 w-6 text-[#60A5FA]" />
           </div>
           <div>
             <h2 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
               Auto-Crop & Panel Slicer
-              <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
                 PRO CV
               </span>
             </h2>
@@ -339,13 +339,13 @@ export default function AutoCropModal({
                 onClick={() => setUseLocalCV(true)}
                 className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer relative ${
                   useLocalCV
-                    ? "bg-purple-950/40 border-purple-500/60 shadow-[0_0_16px_rgba(168,85,247,0.2)] text-white"
+                    ? "bg-purple-950/40 border-[#3B82F6]/60  text-white"
                     : "bg-neutral-900/40 border-white/5 hover:border-white/15 text-neutral-400"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-xl bg-purple-500/15 flex items-center justify-center">
-                    <Zap className="h-4 w-4 text-purple-400" />
+                  <div className="w-8 h-8 rounded-xl bg-[#3B82F6]/15 flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-[#3B82F6]" />
                   </div>
                   {useLocalCV && (
                     <span className="w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
@@ -366,7 +366,7 @@ export default function AutoCropModal({
                 onClick={() => setUseLocalCV(false)}
                 className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer relative ${
                   !useLocalCV
-                    ? "bg-purple-950/40 border-purple-500/60 shadow-[0_0_16px_rgba(168,85,247,0.2)] text-white"
+                    ? "bg-purple-950/40 border-[#3B82F6]/60  text-white"
                     : "bg-neutral-900/40 border-white/5 hover:border-white/15 text-neutral-400"
                 }`}
               >
@@ -397,7 +397,7 @@ export default function AutoCropModal({
                 <label className="text-xs font-mono font-bold text-neutral-300">
                   Vision Model
                 </label>
-                <span className="text-[10px] font-mono text-purple-400">
+                <span className="text-[10px] font-mono text-[#3B82F6]">
                   Google Gemini Catalog
                 </span>
               </div>
@@ -405,7 +405,7 @@ export default function AutoCropModal({
                 <select
                   value={cropModel}
                   onChange={(e) => setCropModel(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs font-mono text-white appearance-none cursor-pointer focus:outline-none focus:border-purple-500 transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs font-mono text-white appearance-none cursor-pointer focus:outline-none focus:border-[#3B82F6] transition-colors"
                 >
                   {visionModels.map((m) => (
                     <option key={m.id} value={m.id}>
@@ -421,7 +421,7 @@ export default function AutoCropModal({
           {/* Section 3: Core Parameters Card */}
           <div className="p-5 rounded-2xl bg-neutral-900/50 border border-neutral-800/80 space-y-5 shadow-lg">
             <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-2">
-              <Layers className="h-3.5 w-3.5 text-purple-400" />
+              <Layers className="h-3.5 w-3.5 text-[#3B82F6]" />
               Segmentation Parameters
             </h3>
 
@@ -429,7 +429,7 @@ export default function AutoCropModal({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-neutral-200">Edge Sensitivity</span>
-                <span className="font-mono font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
+                <span className="font-mono font-bold text-[#3B82F6] bg-[#3B82F6]/10 px-2 py-0.5 rounded-lg border border-[#3B82F6]/20">
                   {sensitivity}%
                 </span>
               </div>
@@ -453,7 +453,7 @@ export default function AutoCropModal({
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-neutral-200">Panel Padding</span>
-                <span className="font-mono font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
+                <span className="font-mono font-bold text-[#3B82F6] bg-[#3B82F6]/10 px-2 py-0.5 rounded-lg border border-[#3B82F6]/20">
                   {padding}px
                 </span>
               </div>
@@ -530,7 +530,7 @@ export default function AutoCropModal({
           <div className="space-y-2.5">
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2">
-                <ImageIcon className="h-3.5 w-3.5 text-purple-400" />
+                <ImageIcon className="h-3.5 w-3.5 text-[#3B82F6]" />
                 Target Test Image ({targetList.length} total)
               </span>
               <span className="text-neutral-500">
@@ -549,7 +549,7 @@ export default function AutoCropModal({
                       onClick={() => setActiveImageIdx(idx)}
                       className={`relative w-16 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all cursor-pointer ${
                         isSelected
-                          ? "border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)] scale-105"
+                          ? "border-[#3B82F6]  scale-105"
                           : "border-neutral-800 opacity-60 hover:opacity-100"
                       }`}
                     >
@@ -633,12 +633,12 @@ export default function AutoCropModal({
               >
                 {isTesting ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin text-purple-400" />
+                    <Loader2 className="h-4 w-4 animate-spin text-[#3B82F6]" />
                     <span>Analyzing Image...</span>
                   </>
                 ) : (
                   <>
-                    <Play className="h-3.5 w-3.5 text-purple-400 fill-purple-400" />
+                    <Play className="h-3.5 w-3.5 text-[#3B82F6] fill-purple-400" />
                     <span>Test Detection on Current Image</span>
                   </>
                 )}
@@ -651,7 +651,7 @@ export default function AutoCropModal({
       {/* ── Bottom Action Footer ───────────────────────────────────────── */}
       <div className="pt-6 border-t border-white/8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2.5 text-xs font-mono text-neutral-400">
-          <Info className="h-4 w-4 text-purple-400 flex-shrink-0" />
+          <Info className="h-4 w-4 text-[#3B82F6] flex-shrink-0" />
           <span>
             {targetList.length > 0
               ? `Ready to crop ${targetList.length} image${targetList.length > 1 ? "s" : ""} and push sliced panels to Storyboard Timeline.`
@@ -669,7 +669,7 @@ export default function AutoCropModal({
           <button
             onClick={onApply}
             disabled={isApplying || targetList.length === 0}
-            className="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2 active:scale-95 border border-purple-400/30 disabled:opacity-50"
+            className="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2 active:scale-95 border border-[#60A5FA]/30 disabled:opacity-50"
           >
             {isApplying ? (
               <>

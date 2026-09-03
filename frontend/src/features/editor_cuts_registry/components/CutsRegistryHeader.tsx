@@ -14,8 +14,8 @@ export function CutsRegistryHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-purple-500/50 flex items-center justify-center shadow-[0_0_18px_rgba(168,85,247,0.35)] shrink-0">
-          <LayoutGrid className="h-5 w-5 text-purple-300" />
+        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-[#3B82F6]/50 flex items-center justify-center  shrink-0">
+          <LayoutGrid className="h-5 w-5 text-[#60A5FA]" />
         </div>
         <div>
           <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">

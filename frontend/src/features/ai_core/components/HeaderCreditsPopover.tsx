@@ -73,7 +73,7 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
       <div className="bg-neutral-900/60 border border-neutral-800/80 rounded-xl p-3 mb-3 relative overflow-hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-purple-500/10 border border-purple-500/20 rounded-lg text-purple-400">
+            <div className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-lg text-[#3B82F6]">
               <Gift className="w-3.5 h-3.5" />
             </div>
             <div>
@@ -83,7 +83,7 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
               <div className="text-[10px] text-neutral-400 flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5 text-amber-400 inline" />
                 Streak:{" "}
-                <span className="text-purple-400 font-mono font-bold">
+                <span className="text-[#3B82F6] font-mono font-bold">
                   {streakDays} Day{streakDays > 1 ? "s" : ""}
                 </span>
               </div>
@@ -96,7 +96,7 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
             className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 ${
               hasClaimedToday || claimSuccess
                 ? "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700/50"
-                : "bg-purple-600 hover:bg-purple-500 text-white cursor-pointer shadow-md shadow-purple-600/30 hover:scale-105 active:scale-95"
+                : "bg-purple-600 hover:bg-[#3B82F6] text-white cursor-pointer shadow-md shadow-sm hover:scale-105 active:scale-95"
             }`}
           >
             {hasClaimedToday || claimSuccess ? (
@@ -117,7 +117,7 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
       <div className="space-y-2 text-[11px] mb-3">
         <div className="text-neutral-400 font-semibold text-[10px] uppercase tracking-wider flex items-center justify-between">
           <span>Dual Credit Systems</span>
-          <Cpu className="w-3 h-3 text-purple-400" />
+          <Cpu className="w-3 h-3 text-[#3B82F6]" />
         </div>
 
         {/* System 1: Website Credits */}
@@ -163,7 +163,7 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
         </span>
         <button
           onClick={onNavigateToBilling}
-          className="text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-0.5 hover:underline cursor-pointer"
+          className="text-[#3B82F6] hover:text-[#93C5FD] font-semibold flex items-center gap-0.5 hover:underline cursor-pointer"
         >
           Manage Plans <ArrowRight className="w-2.5 h-2.5" />
         </button>

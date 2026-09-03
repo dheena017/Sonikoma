@@ -231,7 +231,7 @@ const VoiceStudioPage = React.memo(
             <div className="space-y-2 max-w-2xl text-left">
               <h1 className="text-3xl sm:text-4xl font-black text-[#E5E5E5] tracking-tight leading-tight">
                 Voice{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                   Studio
                 </span>
               </h1>
@@ -359,7 +359,7 @@ const VoiceStudioPage = React.memo(
                   </span>
                 </div>
               )}
-              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-md">
+              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-[#60A5FA] border border-[#3B82F6]/20 shadow-md">
                 PANEL #{selectedIdx + 1}
               </div>
             </div>
@@ -375,8 +375,8 @@ const VoiceStudioPage = React.memo(
                     onClick={handlePlaySpeechAudio}
                     className={`px-2.5 py-0.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
                       isPlayingSpeech
-                        ? "bg-purple-600 text-white border-purple-400 shadow-md shadow-purple-900/50 animate-pulse"
-                        : "bg-neutral-900 text-purple-300 border-purple-500/30 hover:bg-neutral-850 hover:text-white"
+                        ? "bg-purple-600 text-white border-[#60A5FA] shadow-md shadow-purple-900/50 animate-pulse"
+                        : "bg-neutral-900 text-[#60A5FA] border-[#3B82F6]/30 hover:bg-neutral-850 hover:text-white"
                     }`}
                   >
                     {isPlayingSpeech ? (
@@ -394,7 +394,7 @@ const VoiceStudioPage = React.memo(
                 {parsedSpeech.speech ? (
                   <div className="space-y-1.5">
                     {parsedSpeech.tone && (
-                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
                         Tone: {parsedSpeech.tone}
                       </span>
                     )}
@@ -421,8 +421,8 @@ const VoiceStudioPage = React.memo(
                     onClick={handlePlayNarrativeAudio}
                     className={`px-2.5 py-0.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
                       isPlayingNarrative
-                        ? "bg-purple-600 text-white border-purple-400 shadow-md shadow-purple-900/50 animate-pulse"
-                        : "bg-neutral-900 text-purple-300 border-purple-500/30 hover:bg-neutral-850 hover:text-white"
+                        ? "bg-purple-600 text-white border-[#60A5FA] shadow-md shadow-purple-900/50 animate-pulse"
+                        : "bg-neutral-900 text-[#60A5FA] border-[#3B82F6]/30 hover:bg-neutral-850 hover:text-white"
                     }`}
                   >
                     {isPlayingNarrative ? (
@@ -473,7 +473,7 @@ const VoiceStudioPage = React.memo(
                   className={`text-xs font-black mt-0.5 ${
                     activePanel?.audio_url || activePanel?.speech_audio_url
                       ? "text-emerald-400"
-                      : "text-purple-300"
+                      : "text-[#60A5FA]"
                   }`}
                 >
                   {activePanel?.audio_url || activePanel?.speech_audio_url

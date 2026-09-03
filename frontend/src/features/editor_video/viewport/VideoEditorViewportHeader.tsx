@@ -68,7 +68,7 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
     <div className="rounded-none border-b border-white/10 bg-[#0b0c14] h-11 px-3 flex items-center justify-between gap-2 shrink-0 z-20">
       {/* Left: Viewport Name & Live Pill */}
       <div className="flex items-center gap-2">
-        <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-[0_0_8px_rgba(168,85,247,0.35)] shrink-0">
+        <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] flex items-center justify-center  shrink-0">
           <Sparkles className="h-3.5 w-3.5 text-white" />
         </div>
         <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
           onClick={() => setMonitorTab("timeline")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
             monitorTab === "timeline"
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm"
+              ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-sm"
               : "text-neutral-400 hover:text-white hover:bg-white/5"
           }`}
         >
@@ -102,13 +102,13 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
           onClick={() => setMonitorTab("video")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
             monitorTab === "video"
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-sm"
+              ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-sm"
               : "text-neutral-400 hover:text-white hover:bg-white/5"
           }`}
         >
           <Video className="h-3 w-3" />
           <span>Final Video</span>
-          <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-purple-950/60 border border-purple-800/40 text-purple-300 uppercase">
+          <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-purple-950/60 border border-purple-800/40 text-[#60A5FA] uppercase">
             MP4
           </span>
         </button>
@@ -185,7 +185,7 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
             className="h-7 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-200 hover:text-white text-[11px] font-bold flex items-center gap-1 transition cursor-pointer disabled:opacity-50"
             title="Save Project"
           >
-            <Save className="h-3 w-3 text-purple-400" />
+            <Save className="h-3 w-3 text-[#3B82F6]" />
             <span className="hidden sm:inline">{isSaving ? "Saving..." : "Save"}</span>
           </button>
         )}
@@ -195,7 +195,7 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
             type="button"
             onClick={finalExport}
             disabled={isRendering}
-            className="h-7 px-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[11px] font-bold flex items-center gap-1 transition cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.35)] active:scale-95 disabled:opacity-50"
+            className="h-7 px-3 rounded-lg bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] font-bold flex items-center gap-1 transition cursor-pointer  active:scale-95 disabled:opacity-50"
             title="Export and render final video"
           >
             <Video className="h-3 w-3" />

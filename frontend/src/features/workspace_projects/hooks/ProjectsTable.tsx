@@ -59,7 +59,7 @@ export default function ProjectsTable({
                 className="hover:text-white transition-colors cursor-pointer"
               >
                 {allSelected ? (
-                  <CheckSquare className="w-5 h-5 text-purple-400" />
+                  <CheckSquare className="w-5 h-5 text-[#3B82F6]" />
                 ) : (
                   <Square className="w-5 h-5" />
                 )}
@@ -88,7 +88,7 @@ export default function ProjectsTable({
                 onClick={() => onOpenProject(project)}
                 className={`group cursor-pointer transition-colors relative ${
                   isSelected
-                    ? "bg-purple-900/10 hover:bg-purple-900/20"
+                    ? "bg-purple-900/10 hover:bg-neutral-900/40"
                     : "hover:bg-white/[0.04]"
                 }`}
               >
@@ -97,12 +97,12 @@ export default function ProjectsTable({
                     onClick={(e) => toggleSelection(e, project.project_id)}
                     className={`transition-colors cursor-pointer ${
                       isSelected
-                        ? "text-purple-400"
+                        ? "text-[#3B82F6]"
                         : "text-neutral-600 hover:text-white"
                     }`}
                   >
                     {isSelected ? (
-                      <CheckSquare className="w-5 h-5 text-purple-400" />
+                      <CheckSquare className="w-5 h-5 text-[#3B82F6]" />
                     ) : (
                       <Square className="w-5 h-5" />
                     )}
@@ -130,17 +130,17 @@ export default function ProjectsTable({
                       )}
                     </div>
                     <div>
-                      <div className="font-bold text-white group-hover:text-purple-300 transition-colors flex items-center gap-2">
+                      <div className="font-bold text-white group-hover:text-[#93C5FD] transition-colors flex items-center gap-2">
                         {project.title}
                         {project.episode !== undefined &&
                           project.episode !== null && (
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/30 text-purple-300">
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#3B82F6]/10 border border-[#3B82F6]/30 text-[#60A5FA]">
                               EP {project.episode}
                             </span>
                           )}
                       </div>
                       <div className="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
-                        <SourceIcon className="w-3 h-3 text-purple-400" />
+                        <SourceIcon className="w-3 h-3 text-[#3B82F6]" />
                         <span>{project.author || "Webtoon Project"}</span>
                       </div>
                     </div>
@@ -154,7 +154,7 @@ export default function ProjectsTable({
                           ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                           : project.status === "failed"
                           ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                          : "bg-purple-500/10 text-purple-300 border border-purple-500/20"
+                          : "bg-[#3B82F6]/10 text-[#60A5FA] border border-[#3B82F6]/20"
                       }`}
                     >
                       {project.status || "draft"}
@@ -162,7 +162,7 @@ export default function ProjectsTable({
                     {isProcessing && (
                       <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gradient-to-r from-amber-500 to-purple-500 animate-shimmer"
+                          className="h-full bg-gradient-to-r from-amber-500 to-blue-500 animate-shimmer"
                           style={{ width: "100%", backgroundSize: "200% 100%" }}
                         />
                       </div>
@@ -210,7 +210,7 @@ export default function ProjectsTable({
                         }}
                         className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <div className="w-7 h-7 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 group-hover/item:bg-purple-500/20 group-hover/item:text-purple-300 transition-colors">
+                        <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] group-hover/item:bg-[#3B82F6]/20 group-hover/item:text-[#60A5FA] transition-colors">
                           <Play className="w-3.5 h-3.5 fill-purple-400/20" />
                         </div>
                         <span className="font-semibold">Resume</span>
@@ -240,7 +240,7 @@ export default function ProjectsTable({
                         }}
                         className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
                       >
-                        <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover/item:bg-cyan-500/20 group-hover/item:text-cyan-300 transition-colors">
+                        <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
                           <Edit2 className="w-3.5 h-3.5" />
                         </div>
                         <span className="font-semibold">Rename</span>

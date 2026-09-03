@@ -404,7 +404,7 @@ export default function YouTubeAnalyticsDashboard({
                   color="bg-sky-950/50 border-sky-900/40"
                 />
                 <StatCard
-                  icon={<Video className="w-4 h-4 text-purple-400" />}
+                  icon={<Video className="w-4 h-4 text-[#3B82F6]" />}
                   label="Videos"
                   value={
                     isConnected &&

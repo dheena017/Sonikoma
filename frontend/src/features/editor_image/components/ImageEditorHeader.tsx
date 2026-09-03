@@ -199,7 +199,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 useProjectStore.getState().setDrawerOpen(true);
               }
             }}
-            className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-neutral-300 hover:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-neutral-300 hover:text-[#93C5FD] hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
             title="Toggle Navigation Menu"
             aria-label="Toggle Navigation Menu"
           >

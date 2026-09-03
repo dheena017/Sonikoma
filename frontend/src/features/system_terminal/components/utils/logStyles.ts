@@ -54,11 +54,11 @@ export function getLogColor(log: LogEntry): string {
     if (msg.includes("get")) return "text-emerald-400 font-light";
     if (msg.includes("put")) return "text-sky-400 font-light";
     if (msg.includes("delete")) return "text-red-400 font-medium";
-    return "text-purple-400 font-light";
+    return "text-[#3B82F6] font-light";
   }
 
   if (module === "ai" || module === "engine" || module === "gemini")
-    return "text-purple-300 font-medium";
+    return "text-[#60A5FA] font-medium";
 
   if (
     module === "crop" ||
@@ -68,10 +68,10 @@ export function getLogColor(log: LogEntry): string {
     return "text-violet-400 font-medium";
 
   if (module === "ocr" || module === "vision" || module === "cv")
-    return "text-purple-300";
+    return "text-[#60A5FA]";
 
-  if (module === "downloader") return "text-cyan-400";
-  if (module === "server") return "text-cyan-300 font-medium";
+  if (module === "downloader") return "text-blue-400";
+  if (module === "server") return "text-blue-300 font-medium";
 
   if (module === "pipeline" || module === "control") return "text-blue-400";
 
@@ -126,10 +126,10 @@ export function getLogBorderColor(log: LogEntry): string {
   if (module === "vite") return "border-fuchsia-500/50";
 
   if (module === "system" || module === "gemini" || module === "ai")
-    return "border-purple-500/50";
+    return "border-[#3B82F6]/50";
 
-  if (module === "downloader") return "border-cyan-500/40";
-  if (module === "server") return "border-cyan-500/40";
+  if (module === "downloader") return "border-blue-500/40";
+  if (module === "server") return "border-blue-500/40";
 
   if (module === "pipeline" || module === "control")
     return "border-blue-500/40";

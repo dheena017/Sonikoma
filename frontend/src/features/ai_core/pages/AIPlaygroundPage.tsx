@@ -19,7 +19,7 @@ export default function AIPlaygroundPage({ navigateTo }: AIPlaygroundPageProps) 
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[300px] text-center space-y-3">
-      <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+      <div className="w-8 h-8 rounded-full border-2 border-[#3B82F6] border-t-transparent animate-spin" />
       <p className="text-xs text-neutral-400 font-mono">
         Redirecting to Smart Model Routing…
       </p>

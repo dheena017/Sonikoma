@@ -73,7 +73,7 @@ const ActiveProjectSidebarWidget: React.FC<{
     <div className="p-3 rounded-2xl bg-neutral-900/70 border border-neutral-800/80 text-xs shadow-sm my-2 backdrop-blur-md">
       <div className="flex items-center justify-between mb-2.5">
         <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5">
-          <Zap className="w-3 h-3 text-purple-400" /> Active Project
+          <Zap className="w-3 h-3 text-[#3B82F6]" /> Active Project
         </span>
         {activeProjectId ? (
           <div className="flex items-center gap-1.5">
@@ -113,7 +113,7 @@ const ActiveProjectSidebarWidget: React.FC<{
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border border-purple-500/20 flex items-center justify-center text-purple-300 font-bold text-xs">
+                <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-indigo-600/30 border border-[#3B82F6]/20 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
                   {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
                 </div>
               )}
@@ -131,7 +131,7 @@ const ActiveProjectSidebarWidget: React.FC<{
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-purple-600/20 text-neutral-300 hover:text-purple-200 border border-neutral-700/60 hover:border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
+            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-purple-200 border border-neutral-700/60 hover:border-[#3B82F6]/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
           >
             <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
@@ -139,7 +139,7 @@ const ActiveProjectSidebarWidget: React.FC<{
         </div>
       ) : (
         <div className="space-y-2.5">
-          <div className="p-2.5 rounded-xl bg-neutral-950/60 border border-neutral-800/60">
+          <div className="p-2.5 rounded-xl bg-neutral-950/60 border border-[#2F2F2F]">
             <p className="text-[11px] text-neutral-300 font-medium">
               No active project
             </p>
@@ -149,9 +149,9 @@ const ActiveProjectSidebarWidget: React.FC<{
           </div>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20 hover:shadow-purple-600/30 cursor-pointer active:scale-[0.98]"
+            className="w-full py-2 px-3 rounded-xl bg-[#1E1E1E] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm hover: cursor-pointer active:scale-[0.98]"
           >
-            <FolderOpen className="w-3.5 h-3.5" />
+            <FolderOpen className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
             <span>Select Project</span>
           </button>
         </div>
@@ -447,27 +447,27 @@ const SidebarInner = ({
                         }}
                         disabled={!item.enabled}
                         aria-label={item.label}
-                        className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold font-sans transition-all duration-150 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
+                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
                           item.active
-                            ? "text-white bg-purple-500/15 border border-purple-500/30"
-                            : "text-neutral-300 hover:text-white hover:bg-neutral-900 border border-transparent"
+                            ? "text-white bg-[#3B82F6] border border-[#60A5FA]/40 shadow-sm"
+                            : "text-neutral-400 bg-transparent hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-transparent"
                         } ${
                           (item as any).isProcessing
-                            ? "ring-1 ring-purple-500/50"
+                            ? "ring-1 ring-[#3B82F6]/50"
                             : ""
                         }`}
                       >
                         {/* Active Left Indicator Pill */}
                         {item.active && (
-                          <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-purple-400" />
+                          <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[#3B82F6] group-hover:bg-[#3B82F6] transition-colors" />
                         )}
 
                         <div className="flex items-center gap-3">
                           <Icon
                             className={`h-4 w-4 transition-colors duration-150 ${
                               item.active
-                                ? "text-purple-300"
-                                : "text-neutral-400 group-hover:text-purple-300"
+                                ? "text-white"
+                                : "text-neutral-400 group-hover:text-[#3B82F6]"
                             }`}
                           />
                           <span
@@ -484,17 +484,17 @@ const SidebarInner = ({
                           <span
                             className={`text-[10px] px-2 py-0.5 rounded-full font-sans font-bold ${
                               item.label === "Notifications" && !item.active
-                                ? "bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-sm shadow-purple-900/50"
+                                ? "bg-[#3B82F6] text-white shadow-sm shadow-blue-900/50"
                                 : item.active
-                                ? "bg-purple-900/80 text-purple-200 border border-purple-400/30"
-                                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
+                                ? "bg-[#1E1E1E] text-white border border-[#3B82F6]/40"
+                                : "bg-[#1E1E1E] text-neutral-400 border border-[#2F2F2F]"
                             }`}
                           >
                             {(item as any).badge}
                           </span>
                         )}
                         {(item as any).isProcessing && (
-                          <span className="absolute right-3 top-3.5 h-2 w-2 rounded-full bg-purple-400 animate-ping" />
+                          <span className="absolute right-3 top-3.5 h-2 w-2 rounded-full bg-[#3B82F6] animate-ping" />
                         )}
                       </button>
                     </li>
@@ -513,7 +513,7 @@ const SidebarInner = ({
             <span className="text-neutral-400 text-[11px]">
               Video Duration:
             </span>
-            <span className="font-bold text-purple-300 text-xs">
+            <span className="font-bold text-[#60A5FA] text-xs">
               {totalCalculatedDuration.toFixed(1)}s
             </span>
           </div>

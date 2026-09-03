@@ -48,7 +48,7 @@ export default function SeriesReaderModal({
       {/* Top Controls Bar */}
       <div className="h-16 px-6 border-b border-neutral-800 bg-neutral-950/80 backdrop-blur-md flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          <div className="p-2 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
@@ -67,7 +67,7 @@ export default function SeriesReaderModal({
             onClick={() => setIsPlayingAudio(!isPlayingAudio)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer border ${
               isPlayingAudio
-                ? "bg-purple-600/20 border-purple-500 text-purple-300 animate-pulse"
+                ? "bg-purple-600/20 border-[#3B82F6] text-[#60A5FA] animate-pulse"
                 : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
             }`}
           >
@@ -111,7 +111,7 @@ export default function SeriesReaderModal({
               />
             ) : (
               <div className="w-96 h-96 flex flex-col items-center justify-center gap-3 bg-neutral-900 text-neutral-500">
-                <BookOpen className="w-12 h-12 text-purple-500/40" />
+                <BookOpen className="w-12 h-12 text-[#3B82F6]/40" />
                 <span className="text-xs font-mono">
                   No Panel Preview Available
                 </span>
@@ -148,7 +148,7 @@ export default function SeriesReaderModal({
             onClick={() => setCurrentChapterIdx(idx)}
             className={`h-14 min-w-[100px] rounded-xl border overflow-hidden transition-all cursor-pointer shrink-0 relative flex items-center justify-center ${
               idx === currentChapterIdx
-                ? "border-purple-500 ring-2 ring-purple-500/50 scale-105"
+                ? "border-[#3B82F6] ring-2 ring-purple-500/50 scale-105"
                 : "border-neutral-800 opacity-60 hover:opacity-100"
             }`}
           >

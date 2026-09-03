@@ -157,7 +157,7 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
           </div>
           <div className="w-full bg-neutral-900 h-2 rounded-full overflow-hidden mb-3">
             <div
-              className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-700"
+              className="h-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-700"
               style={{ width: `${Math.min(memory.used_percent || 0, 100)}%` }}
             />
           </div>
@@ -243,7 +243,7 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
               { label: "Panels", count: counts.panels, color: "text-emerald-400" },
               { label: "Jobs", count: counts.jobs, color: "text-amber-400" },
               { label: "Scrapes", count: counts.scrape_sessions, color: "text-rose-400" },
-              { label: "Logs", count: counts.system_logs, color: "text-cyan-400" },
+              { label: "Logs", count: counts.system_logs, color: "text-blue-400" },
               { label: "Token Logs", count: counts.token_usage_logs, color: "text-violet-400" },
               { label: "Transactions", count: counts.credit_transactions, color: "text-teal-400" },
             ].map((item) => (

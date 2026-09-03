@@ -24,7 +24,7 @@ export function AutoCropParameterSlider({
   const sliderClass =
     "w-full h-1.5 bg-neutral-950 rounded-lg appearance-none cursor-pointer accent-purple-500 hover:accent-purple-400 transition-all";
   const cardClass =
-    "space-y-2 p-5 bg-neutral-900/60 border border-neutral-800/80 rounded-3xl backdrop-blur-xl shadow-md hover:border-purple-500/30 transition-all";
+    "space-y-2 p-5 bg-neutral-900/60 border border-neutral-800/80 rounded-3xl backdrop-blur-xl shadow-md hover:border-[#3B82F6]/30 transition-all";
   const labelClass = "flex justify-between items-center text-[10px] font-mono";
 
   return (

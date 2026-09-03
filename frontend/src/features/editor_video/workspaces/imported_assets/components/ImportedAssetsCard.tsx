@@ -77,8 +77,8 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
       onClick={(e) => onSelect(index, url, e)}
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
-          ? "border-purple-500 bg-purple-950/20 ring-2 ring-purple-500/60 shadow-[0_0_20px_rgba(168,85,247,0.35)]"
-          : "border-white/10 bg-[#090912] hover:border-purple-500/50 shadow-md hover:shadow-[0_8px_25px_rgba(168,85,247,0.2)]"
+          ? "border-[#3B82F6] bg-purple-950/20 ring-2 ring-purple-500/60 "
+          : "border-white/10 bg-[#090912] hover:border-[#3B82F6]/50 shadow-md hover:shadow-[0_8px_25px_rgba(59,130,246,0.2)]"
       }`}
     >
       {/* Thumbnail Image Container */}
@@ -101,13 +101,13 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
             <div
               className={`h-4 w-4 rounded flex items-center justify-center border transition-all ${
                 isSelected
-                  ? "bg-purple-600 border-purple-400 text-white"
+                  ? "bg-purple-600 border-[#60A5FA] text-white"
                   : "bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
               }`}
             >
               <Check className="h-3 w-3" />
             </div>
-            <span className="text-[9px] font-black font-mono bg-black/75 text-purple-200 px-1.5 py-0.5 rounded border border-purple-500/30 backdrop-blur-md">
+            <span className="text-[9px] font-black font-mono bg-black/75 text-purple-200 px-1.5 py-0.5 rounded border border-[#3B82F6]/30 backdrop-blur-md">
               #{index + 1}
             </span>
           </div>
@@ -140,9 +140,9 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
         {isProcessing && (
           <div className="absolute inset-0 z-20 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2 p-3 text-center animate-in fade-in duration-150">
             <div className="relative flex items-center justify-center">
-              <div className="w-9 h-9 rounded-full bg-purple-500/20 border border-purple-500/40 animate-ping absolute inset-0" />
-              <div className="w-8 h-8 rounded-full bg-purple-950/80 border border-purple-400/60 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.6)]">
-                <Loader2 className="h-4 w-4 text-purple-300 animate-spin" />
+              <div className="w-9 h-9 rounded-full bg-[#3B82F6]/20 border border-[#3B82F6]/40 animate-ping absolute inset-0" />
+              <div className="w-8 h-8 rounded-full bg-purple-950/80 border border-[#60A5FA]/60 flex items-center justify-center ">
+                <Loader2 className="h-4 w-4 text-[#60A5FA] animate-spin" />
               </div>
             </div>
 
@@ -171,7 +171,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           className={`w-full py-1 px-2 rounded-lg font-mono text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer ${
             isAdding
               ? "bg-purple-800 text-purple-200 opacity-90 cursor-wait"
-              : "bg-purple-600 hover:bg-purple-500 text-white"
+              : "bg-purple-600 hover:bg-[#3B82F6] text-white"
           }`}
         >
           {isAdding ? (

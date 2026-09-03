@@ -40,7 +40,7 @@ const ActiveProjectSidebarWidget: React.FC<{
     <div className="p-3 rounded-2xl bg-neutral-900/70 border border-neutral-800/80 text-xs shadow-sm my-2 backdrop-blur-md">
       <div className="flex items-center justify-between mb-2.5">
         <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5">
-          <Zap className="w-3 h-3 text-purple-400" /> Active Project
+          <Zap className="w-3 h-3 text-[#3B82F6]" /> Active Project
         </span>
         {activeProjectId ? (
           <div className="flex items-center gap-1.5">
@@ -80,7 +80,7 @@ const ActiveProjectSidebarWidget: React.FC<{
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-600/30 to-indigo-600/30 border border-purple-500/20 flex items-center justify-center text-purple-300 font-bold text-xs">
+                <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-indigo-600/30 border border-[#3B82F6]/20 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
                   {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
                 </div>
               )}
@@ -97,7 +97,7 @@ const ActiveProjectSidebarWidget: React.FC<{
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-purple-600/20 text-neutral-300 hover:text-purple-200 border border-neutral-700/60 hover:border-purple-500/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
+            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-purple-200 border border-neutral-700/60 hover:border-[#3B82F6]/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
           >
             <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
@@ -110,7 +110,7 @@ const ActiveProjectSidebarWidget: React.FC<{
           </p>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer active:scale-98"
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer active:scale-98"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -307,7 +307,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
                       }}
                       className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
                         active
-                          ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(168,85,247,0.12)] border border-purple-500/30 font-bold"
+                          ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(59,130,246,0.12)] border border-[#3B82F6]/30 font-bold"
                           : isLocked
                           ? "text-neutral-500 hover:text-neutral-400 border border-transparent"
                           : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
@@ -322,10 +322,10 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
                         <item.icon
                           className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                             active
-                              ? "text-purple-400"
+                              ? "text-[#3B82F6]"
                               : isLocked
                               ? "text-neutral-600"
-                              : "text-neutral-400 group-hover:scale-110 group-hover:text-purple-300"
+                              : "text-neutral-400 group-hover:scale-110 group-hover:text-[#93C5FD]"
                           }`}
                         />
                         <span className="text-xs font-semibold tracking-wide font-sans">
@@ -354,7 +354,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
             navigateTo("/dashboard");
             onClose();
           }}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:via-indigo-500 hover:to-purple-500 text-white text-xs font-black tracking-widest uppercase transition-all shadow-[0_0_20px_rgba(168,85,247,0.45)] hover:shadow-[0_0_28px_rgba(168,85,247,0.65)] active:scale-95 border border-purple-400/40 cursor-pointer font-sans"
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 text-white text-xs font-black tracking-widest uppercase transition-all  hover: active:scale-95 border border-[#60A5FA]/40 cursor-pointer font-sans"
         >
           <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
           <span>MAIN DASHBOARD</span>

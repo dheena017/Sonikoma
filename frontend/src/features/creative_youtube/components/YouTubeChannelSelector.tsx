@@ -117,7 +117,7 @@ export default function YouTubeChannelSelector({
         >
           <RefreshCw
             className={`h-3.5 w-3.5 ${
-              isLoading ? "animate-spin text-purple-400" : ""
+              isLoading ? "animate-spin text-[#3B82F6]" : ""
             }`}
           />
         </button>
@@ -125,7 +125,7 @@ export default function YouTubeChannelSelector({
 
       {isLoading ? (
         <div className="py-4 text-center text-neutral-500 text-[11px] animate-pulse flex items-center justify-center gap-2">
-          <RefreshCw className="h-4 w-4 animate-spin text-purple-400" />
+          <RefreshCw className="h-4 w-4 animate-spin text-[#3B82F6]" />
           Fetching connected YouTube channels...
         </div>
       ) : activeChannel ? (
@@ -133,7 +133,7 @@ export default function YouTubeChannelSelector({
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full flex items-center justify-between p-3 bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-850 hover:border-purple-500/50 rounded-xl transition-all duration-200 cursor-pointer text-left group"
+            className="w-full flex items-center justify-between p-3 bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-850 hover:border-[#3B82F6]/50 rounded-xl transition-all duration-200 cursor-pointer text-left group"
           >
             <div className="flex items-center gap-3 min-w-0">
               {activeChannel.thumbnail ? (
@@ -149,7 +149,7 @@ export default function YouTubeChannelSelector({
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-neutral-100 font-bold text-xs truncate group-hover:text-purple-300 transition-colors">
+                  <span className="text-neutral-100 font-bold text-xs truncate group-hover:text-[#93C5FD] transition-colors">
                     {activeChannel.title}
                   </span>
                   <span className="px-1.5 py-0.2 text-[9px] font-bold bg-red-950/40 text-red-400 border border-red-900/30 rounded">
@@ -215,7 +215,7 @@ export default function YouTubeChannelSelector({
                       </div>
                     </div>
                     {isSelected && (
-                      <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 ml-2" />
+                      <CheckCircle2 className="h-4 w-4 text-[#3B82F6] shrink-0 ml-2" />
                     )}
                   </div>
                 );

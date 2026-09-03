@@ -65,8 +65,8 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
         onDrop={handleDropFiles}
         className={`relative border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
           isDraggingOver
-            ? "border-purple-500 bg-purple-950/40 shadow-[0_0_30px_rgba(168,85,247,0.3)] scale-[1.01]"
-            : "border-purple-500/25 hover:border-purple-500/50 bg-[#12131e]/50 hover:bg-[#181926]/80 shadow-lg"
+            ? "border-[#3B82F6] bg-purple-950/40 shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.01]"
+            : "border-[#3B82F6]/25 hover:border-[#3B82F6]/50 bg-[#12131e]/50 hover:bg-[#181926]/80 shadow-lg"
         }`}
       >
         <input
@@ -76,12 +76,12 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
           onChange={handleFileChange}
           className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
         />
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600/20 to-indigo-600/20 border border-purple-500/30 flex items-center justify-center mb-3.5 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.25)]">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 border border-[#3B82F6]/30 flex items-center justify-center mb-3.5 text-[#3B82F6] ">
           <UploadCloud className="w-8 h-8" />
         </div>
         <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 font-sans">
           Drag &amp; drop your images here, or{" "}
-          <span className="text-purple-400 underline hover:text-purple-300 transition-colors">
+          <span className="text-[#3B82F6] underline hover:text-[#93C5FD] transition-colors">
             click to browse
           </span>
         </h3>
@@ -140,7 +140,7 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
           <button
             type="button"
             onClick={handleExecuteUpload}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" /> Import {selectedFiles.length} Image(s)
             into Imported Assets

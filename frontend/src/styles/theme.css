@@ -14,9 +14,6 @@
 
   /* 🎨 Accent Colors */
   --color-accent-blue: #3B82F6;
-  --color-accent-cyan: #00FFFF;
-  --color-accent-purple: #A855F7;
-  --color-accent-magenta: #FF00FF;
   --color-accent-success: #10B981;
   --color-accent-warning: #F59E0B;
   --color-accent-error: #EF4444;
@@ -36,8 +33,8 @@
 }
 
 :root {
-  --theme-primary: 59, 130, 246; /* Electric Blue #3B82F6 default */
-  --theme-secondary: 168, 85, 247; /* Vibrant Purple #A855F7 */
+  --theme-primary: 30, 30, 30; /* Dark Gray #1E1E1E base */
+  --theme-secondary: 59, 130, 246; /* Electric Blue #3B82F6 */ /* Vibrant Purple #3B82F6 */
   color-scheme: dark;
 }
 
@@ -77,7 +74,7 @@ p {
 
 /* Premium Gradient Heading Tokens */
 .text-gradient-brand {
-  background: linear-gradient(135deg, #3B82F6 0%, #A855F7 50%, #00FFFF 100%);
+  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -91,7 +88,7 @@ p {
 }
 
 .text-gradient-accent {
-  background: linear-gradient(135deg, #3B82F6 0%, #00FFFF 100%);
+  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -121,9 +118,9 @@ p {
 /* ── Primary Button (Electric Blue) ─────────────────────── */
 .btn-primary,
 button.btn-primary {
-  background-color: #3B82F6 !important;
+  background-color: #2A2A2A !important;
   color: #FFFFFF !important;
-  border: 1px solid rgba(59, 130, 246, 0.5) !important;
+  border: 1px solid #2F2F2F !important;
   border-radius: 0.75rem !important;
   font-weight: 700 !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
@@ -133,10 +130,11 @@ button.btn-primary {
 
 .btn-primary:hover,
 button.btn-primary:hover {
-  background-color: #2563EB !important;
+  background-color: #3B82F6 !important;
   border-color: #60A5FA !important;
+  color: #FFFFFF !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
   filter: none !important;
 }
 
@@ -148,7 +146,7 @@ button.btn-primary:active {
 /* ── Secondary Button (Dark Gray Surface) ───────────────── */
 .btn-secondary,
 button.btn-secondary {
-  background-color: #1E1E1E !important;
+  background-color: #2A2A2A !important;
   color: #E5E5E5 !important;
   border: 1px solid #2F2F2F !important;
   border-radius: 0.75rem !important;
@@ -160,11 +158,11 @@ button.btn-secondary {
 
 .btn-secondary:hover,
 button.btn-secondary:hover {
-  background-color: #2A2A2A !important;
+  background-color: #333333 !important;
   border-color: #3B82F6 !important;
   color: #FFFFFF !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .btn-secondary:active,
@@ -226,7 +224,7 @@ button.btn-success:hover {
   background-color: #262626 !important;
   border-color: rgba(59, 130, 246, 0.7) !important;
   transform: translateY(-2px);
-  box-shadow: 0 14px 32px -6px rgba(0, 0, 0, 0.65) !important;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Hide default browser password reveal icons */

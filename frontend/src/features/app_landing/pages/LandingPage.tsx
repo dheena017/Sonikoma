@@ -201,8 +201,8 @@ export default function LandingPage({
               <span
                 className={`text-transparent bg-clip-text bg-gradient-to-r ${
                   isLight
-                    ? "from-blue-700 via-indigo-600 to-cyan-700"
-                    : "from-blue-400 via-indigo-400 to-cyan-400"
+                    ? "from-blue-700 via-indigo-600 to-purple-700"
+                    : "from-blue-400 via-indigo-400 to-blue-400"
                 }`}
               >
                 Voiced Vertical Videos
@@ -403,11 +403,11 @@ export default function LandingPage({
               <div
                 className={`p-7 rounded-[28px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-cyan-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-950/20"
+                    ? "bg-white border-slate-200 shadow-sm hover:border-[#3B82F6] hover:shadow-lg"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-[#3B82F6]/50 hover:shadow-xl hover:shadow-cyan-950/20"
                 }`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-black mb-5">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-black mb-5">
                   3
                 </div>
                 <h3
@@ -486,7 +486,7 @@ export default function LandingPage({
                     onClick={() => setDemoTab(t.id as any)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
                       demoTab === t.id
-                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 -translate-y-0.5"
+                        ? "bg-blue-600 text-white shadow-md shadow-sm -translate-y-0.5"
                         : isLight
                         ? "bg-white text-slate-800 border border-slate-300 hover:border-blue-400 hover:text-blue-600 hover:-translate-y-0.5 shadow-2xs"
                         : "bg-[#181818] text-neutral-300 border border-[#2F2F2F] hover:border-blue-500/60 hover:text-white hover:bg-[#222] hover:-translate-y-0.5 shadow-2xs"

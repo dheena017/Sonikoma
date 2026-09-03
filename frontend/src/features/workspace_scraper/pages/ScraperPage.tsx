@@ -136,7 +136,7 @@ function formatRelativeTime(dateStr?: string): string {
 
 const GENRE_COLORS: Record<string, string> = {
   action: "bg-red-500/15 text-red-400 border-red-500/20",
-  fantasy: "bg-purple-500/15 text-purple-400 border-purple-500/20",
+  fantasy: "bg-[#3B82F6]/15 text-[#3B82F6] border-[#3B82F6]/20",
   romance: "bg-pink-500/15 text-pink-400 border-pink-500/20",
   horror: "bg-orange-500/15 text-orange-400 border-orange-500/20",
   comedy: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",

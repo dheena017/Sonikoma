@@ -48,7 +48,7 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
     <div className="fixed inset-0 z-[12000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
       <div className="w-full max-w-lg bg-[#14141c] border border-white/10 rounded-2xl p-5 shadow-2xl space-y-4 text-white font-sans">
         <div className="flex items-center justify-between border-b border-white/10 pb-3">
-          <h3 className="text-sm font-bold flex items-center gap-2 text-purple-300">
+          <h3 className="text-sm font-bold flex items-center gap-2 text-[#60A5FA]">
             <Sparkles className="h-4 w-4" />
             Add Media asset / blank clip
           </h3>
@@ -61,8 +61,8 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
         </div>
 
         {/* Upload Zone */}
-        <div className="border-2 border-dashed border-white/15 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all cursor-pointer">
-          <Upload className="h-6 w-6 text-purple-400" />
+        <div className="border-2 border-dashed border-white/15 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:border-[#3B82F6]/50 hover:bg-[#3B82F6]/5 transition-all cursor-pointer">
+          <Upload className="h-6 w-6 text-[#3B82F6]" />
           <span className="text-xs text-neutral-300 font-medium">
             Drag and drop files here, or click to upload
           </span>
@@ -84,10 +84,10 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
                   onSelectMedia(item);
                   onClose();
                 }}
-                className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-purple-600/20 hover:border-purple-400 transition-all cursor-pointer flex flex-col items-center gap-1.5 text-center group"
+                className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-[#3B82F6]/20 hover:border-[#60A5FA] transition-all cursor-pointer flex flex-col items-center gap-1.5 text-center group"
               >
                 {item.type === "image" && (
-                  <Image className="h-5 w-5 text-purple-400 group-hover:scale-110 transition-transform" />
+                  <Image className="h-5 w-5 text-[#3B82F6] group-hover:scale-110 transition-transform" />
                 )}
                 {item.type === "video" && (
                   <Video className="h-5 w-5 text-blue-400 group-hover:scale-110 transition-transform" />

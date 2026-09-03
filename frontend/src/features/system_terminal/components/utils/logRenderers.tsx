@@ -24,13 +24,13 @@ function renderTokenizedPrefix(prefix: string): ReactNode {
           );
         if (clean === "HTTP")
           return (
-            <span key={idx} className="text-purple-400">
+            <span key={idx} className="text-[#3B82F6]">
               {part}
             </span>
           );
         if (clean === "Request")
           return (
-            <span key={idx} className="text-purple-400/80">
+            <span key={idx} className="text-[#3B82F6]/80">
               {part}
             </span>
           );
@@ -62,7 +62,7 @@ function renderTokenizedUrl(url: string): ReactNode {
     return (
       <>
         <span className="text-cyan-600/80">{protocol}</span>
-        <span className="text-cyan-400/90 font-medium">{host}</span>
+        <span className="text-blue-400/90 font-medium">{host}</span>
         {modelsPath && <span className="text-neutral-500">{modelsPath}</span>}
         {model && (
           <span className="text-violet-400 font-semibold">{model}</span>
@@ -90,16 +90,16 @@ function renderTokenizedUrl(url: string): ReactNode {
     return (
       <>
         <span className="text-cyan-600/80">{protocol}</span>
-        <span className="text-cyan-400/90 font-medium">{host}</span>
+        <span className="text-blue-400/90 font-medium">{host}</span>
         <span className="text-neutral-500">{prefixPath}</span>
         <span className="text-teal-400 font-medium">{lastSegment}</span>
         {search && <span className="text-amber-500/80">{search}</span>}
-        {hash && <span className="text-purple-500/80">{hash}</span>}
+        {hash && <span className="text-[#3B82F6]/80">{hash}</span>}
       </>
     );
   } catch (e) {
     return (
-      <span className="text-cyan-400/90 font-light select-all">{url}</span>
+      <span className="text-blue-400/90 font-light select-all">{url}</span>
     );
   }
 }
@@ -189,7 +189,7 @@ export function renderParsedLog(log: string): ReactNode {
       method = methodMatch[2];
     }
 
-    let methodColor = "text-purple-400";
+    let methodColor = "text-[#3B82F6]";
     if (method.toUpperCase() === "POST")
       methodColor = "text-amber-400 font-bold";
     else if (method.toUpperCase() === "GET")
@@ -228,7 +228,7 @@ export function renderParsedLog(log: string): ReactNode {
     const [_, prefix, reqId, method, path, arrow, status, duration] =
       serverMatch;
 
-    let methodColor = "text-purple-400";
+    let methodColor = "text-[#3B82F6]";
     if (method.toUpperCase() === "POST")
       methodColor = "text-amber-400 font-bold";
     else if (method.toUpperCase() === "GET")
@@ -248,7 +248,7 @@ export function renderParsedLog(log: string): ReactNode {
         {prefix && renderTokenizedPrefix(prefix)}
         <span className="text-neutral-500 font-semibold">{reqId}</span>
         <span className={methodColor}>{method}</span>
-        <span className="text-cyan-400/90 font-light">{path}</span>
+        <span className="text-blue-400/90 font-light">{path}</span>
         <span className="text-neutral-500">{arrow}</span>
         <span className={statusColor}>{status}</span>
         {duration && (
@@ -263,7 +263,7 @@ export function renderParsedLog(log: string): ReactNode {
     const standaloneMatch = cleanLog.match(standaloneHttpRegex);
     if (standaloneMatch) {
       const [_, prefix, method, suffix] = standaloneMatch;
-      let methodColor = "text-purple-400";
+      let methodColor = "text-[#3B82F6]";
       if (method.toUpperCase() === "POST")
         methodColor = "text-amber-400 font-bold";
       else if (method.toUpperCase() === "GET")

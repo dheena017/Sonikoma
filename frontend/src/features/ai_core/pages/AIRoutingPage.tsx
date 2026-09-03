@@ -585,7 +585,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <div className="w-10 h-10 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+        <div className="w-10 h-10 rounded-full border-2 border-[#3B82F6] border-t-transparent animate-spin" />
         <p className="text-xs text-neutral-400 font-mono tracking-wide">
           Loading AI Model Catalog & Dynamic Routing Matrix…
         </p>
@@ -604,7 +604,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           <div className="flex items-center gap-2.5">
             <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
               AI Smart Model{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                 Routing
               </span>
             </h1>
@@ -722,10 +722,10 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
             <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
               Orchestrator Sync
             </span>
-            <Activity className="w-4 h-4 text-[#00FFFF]" />
+            <Activity className="w-4 h-4 text-[#3B82F6]" />
           </div>
-          <div className="text-xl font-bold text-[#00FFFF] font-mono flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#00FFFF] animate-pulse" />
+          <div className="text-xl font-bold text-[#3B82F6] font-mono flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
             SYNCHRONIZED
           </div>
           <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">

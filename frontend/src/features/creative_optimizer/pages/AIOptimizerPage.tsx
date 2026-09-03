@@ -179,7 +179,7 @@ const AIOptimizerPage = React.memo(
             <div className="space-y-2 max-w-2xl text-left">
               <h1 className="text-3xl sm:text-4xl font-black text-[#E5E5E5] tracking-tight leading-tight">
                 Video{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                   Optimizer
                 </span>
               </h1>
@@ -341,7 +341,7 @@ const AIOptimizerPage = React.memo(
                   </span>
                 </div>
               )}
-              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-md">
+              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-[#60A5FA] border border-[#3B82F6]/20 shadow-md">
                 PANEL #{selectedIdx + 1}
               </div>
             </div>
@@ -355,7 +355,7 @@ const AIOptimizerPage = React.memo(
                 {cleanDialogueDisplay(activePanel.speech_text).speech ? (
                   <div className="space-y-1">
                     {cleanDialogueDisplay(activePanel.speech_text).tone && (
-                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
                         Tone:{" "}
                         {cleanDialogueDisplay(activePanel.speech_text).tone}
                       </span>
@@ -430,14 +430,14 @@ const AIOptimizerPage = React.memo(
                     onClick={() => setActiveTab(tool.id)}
                     className={`w-full rounded-xl border px-3 py-2.5 text-left transition-all cursor-pointer ${
                       isActive
-                        ? "border-2 border-purple-500/80 bg-purple-500/15 text-white shadow-[0_0_12px_rgba(168,85,247,0.25)]"
+                        ? "border-2 border-[#3B82F6]/80 bg-[#3B82F6]/15 text-white "
                         : "border-neutral-800 bg-neutral-950 text-neutral-400 hover:border-neutral-700 hover:text-white"
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <Icon
                         className={`h-4 w-4 ${
-                          isActive ? "text-purple-300" : "text-neutral-500"
+                          isActive ? "text-[#60A5FA]" : "text-neutral-500"
                         }`}
                       />
                       <span className="text-xs font-bold">{tool.label}</span>
@@ -453,7 +453,7 @@ const AIOptimizerPage = React.memo(
             {/* Video Preview Card in Center Column */}
             <div className="pt-2 border-t border-neutral-850 space-y-2">
               <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold flex items-center gap-1.5">
-                <Video className="w-3.5 h-3.5 text-purple-400" /> FULL VIDEO
+                <Video className="w-3.5 h-3.5 text-[#3B82F6]" /> FULL VIDEO
                 PREVIEW
               </span>
               {videoUrl ? (
@@ -505,7 +505,7 @@ const AIOptimizerPage = React.memo(
                   {activeToolMeta.description}
                 </p>
               </div>
-              <div className="rounded-full border border-purple-500/30 bg-purple-500/10 px-2.5 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-purple-300">
+              <div className="rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-2.5 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-[#60A5FA]">
                 AI ASSISTED
               </div>
             </div>

@@ -109,7 +109,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
           onClick={onToggleCaptions}
           className={`px-1.5 py-1 rounded transition-colors cursor-pointer border text-[10px] font-black tracking-tight ${
             captionsVisible
-              ? "text-white bg-purple-500/20 border-purple-500/50"
+              ? "text-white bg-[#3B82F6]/20 border-[#3B82F6]/50"
               : "text-neutral-500 border-white/10 hover:text-white"
           }`}
         >
@@ -133,7 +133,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         <ToolBtn
           title={formatTooltip("Split Clip", "timeline_split", "S")}
           onClick={onSplit}
-          className="p-1.5 ml-0.5 text-purple-400 hover:bg-purple-500/20 rounded transition-colors cursor-pointer border border-purple-500/20 hover:border-purple-400"
+          className="p-1.5 ml-0.5 text-[#3B82F6] hover:bg-[#3B82F6]/20 rounded transition-colors cursor-pointer border border-[#3B82F6]/20 hover:border-[#60A5FA]"
         >
           <SplitSquareHorizontal className="h-3.5 w-3.5" />
         </ToolBtn>
@@ -164,7 +164,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
           onClick={onToggleSnap}
           className={`p-1.5 rounded transition-colors cursor-pointer border ${
             snapEnabled
-              ? "text-purple-300 bg-purple-500/15 border-purple-500/40"
+              ? "text-[#60A5FA] bg-[#3B82F6]/15 border-[#3B82F6]/40"
               : "text-neutral-600 border-white/10 hover:text-white"
           }`}
         >
@@ -185,7 +185,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         <div className="flex items-center gap-2 text-[10px] font-mono text-neutral-500">
           <span>
             Panel{" "}
-            <span className="text-purple-300 font-bold">
+            <span className="text-[#60A5FA] font-bold">
               {totalPanels > 0 ? currentPanelIndex + 1 : 0}
             </span>{" "}
             / {totalPanels}
@@ -222,7 +222,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       {/* ── Progress Bar aligned to timeline track ─────────────────────────── */}
       <div className="absolute bottom-0 left-28 right-0 h-1 bg-black/30">
         <div
-          className="h-full bg-gradient-to-r from-purple-500 via-purple-400 to-indigo-500 transition-all duration-75 ease-out"
+          className="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500 transition-all duration-75 ease-out"
           style={{ width: `${progressPercent}%` }}
         />
       </div>

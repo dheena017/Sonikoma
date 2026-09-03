@@ -16,8 +16,8 @@ export function Step({ num, title, desc }: StepProps) {
       <div
         className={`text-4xl font-black transition-colors duration-300 ${
           isLight
-            ? "text-slate-300 group-hover:text-purple-500/50"
-            : "text-neutral-700 group-hover:text-purple-500/50"
+            ? "text-slate-300 group-hover:text-[#3B82F6]/50"
+            : "text-neutral-700 group-hover:text-[#3B82F6]/50"
         }`}
       >
         {num}

@@ -372,7 +372,7 @@ export default function ProfileProjectsTab({
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 className="text-xl font-bold flex items-center gap-2">
-          <History className="w-5 h-5 text-purple-400" />
+          <History className="w-5 h-5 text-[#3B82F6]" />
           Storyboard Projects History
         </h2>
 
@@ -384,19 +384,19 @@ export default function ProfileProjectsTab({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search projects..."
-            className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 pl-9 pr-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700"
+            className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 pl-9 pr-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700"
           />
         </div>
       </div>
 
       {/* Statistics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-[#0c0c0e]/40 border border-white/5 hover:border-purple-500/20 backdrop-blur-md rounded-2xl p-4 transition-all duration-300 text-left shadow-lg">
+        <div className="bg-[#0c0c0e]/40 border border-white/5 hover:border-[#3B82F6]/20 backdrop-blur-md rounded-2xl p-4 transition-all duration-300 text-left shadow-lg">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Total Projects
             </span>
-            <History className="w-4 h-4 text-purple-400" />
+            <History className="w-4 h-4 text-[#3B82F6]" />
           </div>
           <div className="text-2xl font-black text-white mt-1.5">
             {stats.total}
@@ -459,7 +459,7 @@ export default function ProfileProjectsTab({
             onClick={() => setStatusFilter("all")}
             className={`py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer active:scale-95 border ${
               statusFilter === "all"
-                ? "bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-purple-300 border-purple-500/40 shadow-sm shadow-purple-500/10"
+                ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-[#60A5FA] border-[#3B82F6]/40 shadow-sm shadow-purple-500/10"
                 : "bg-transparent border-transparent text-neutral-500 hover:text-neutral-200 hover:bg-white/5"
             }`}
           >
@@ -469,7 +469,7 @@ export default function ProfileProjectsTab({
             onClick={() => setStatusFilter("Completed")}
             className={`py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer active:scale-95 border ${
               statusFilter === "Completed"
-                ? "bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-purple-300 border-purple-500/40 shadow-sm shadow-purple-500/10"
+                ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-[#60A5FA] border-[#3B82F6]/40 shadow-sm shadow-purple-500/10"
                 : "bg-transparent border-transparent text-neutral-500 hover:text-neutral-200 hover:bg-white/5"
             }`}
           >
@@ -479,7 +479,7 @@ export default function ProfileProjectsTab({
             onClick={() => setStatusFilter("Processing")}
             className={`py-2 px-4 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer active:scale-95 border ${
               statusFilter === "Processing"
-                ? "bg-gradient-to-r from-purple-600/20 to-indigo-600/20 text-purple-300 border-purple-500/40 shadow-sm shadow-purple-500/10"
+                ? "bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-[#60A5FA] border-[#3B82F6]/40 shadow-sm shadow-purple-500/10"
                 : "bg-transparent border-transparent text-neutral-500 hover:text-neutral-200 hover:bg-white/5"
             }`}
           >
@@ -511,7 +511,7 @@ export default function ProfileProjectsTab({
               onClick={() => setViewMode("list")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "list"
-                  ? "bg-purple-600/20 text-purple-400 border border-purple-500/30"
+                  ? "bg-purple-600/20 text-[#3B82F6] border border-[#3B82F6]/30"
                   : "text-neutral-500 hover:text-neutral-300 border border-transparent"
               }`}
               title="List View"
@@ -522,7 +522,7 @@ export default function ProfileProjectsTab({
               onClick={() => setViewMode("grid")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "grid"
-                  ? "bg-purple-600/20 text-purple-400 border border-purple-500/30"
+                  ? "bg-purple-600/20 text-[#3B82F6] border border-[#3B82F6]/30"
                   : "text-neutral-500 hover:text-neutral-300 border border-transparent"
               }`}
               title="Grid View"
@@ -543,16 +543,16 @@ export default function ProfileProjectsTab({
 
           <button
             onClick={() => importInputRef.current?.click()}
-            className="flex items-center gap-1.5 py-1.5 px-4 bg-[#0d0d12]/75 hover:bg-[#121217]/50 border border-purple-500/30 text-purple-300 hover:text-purple-200 rounded-xl text-[10px] font-extrabold transition-all duration-300 cursor-pointer shadow-md active:scale-95"
+            className="flex items-center gap-1.5 py-1.5 px-4 bg-[#0d0d12]/75 hover:bg-[#121217]/50 border border-[#3B82F6]/30 text-[#60A5FA] hover:text-purple-200 rounded-xl text-[10px] font-extrabold transition-all duration-300 cursor-pointer shadow-md active:scale-95"
             title="Import project data from JSON file"
           >
-            <Download className="w-3.5 h-3.5 text-purple-400 rotate-180" />
+            <Download className="w-3.5 h-3.5 text-[#3B82F6] rotate-180" />
             <span>Import JSON</span>
           </button>
 
           <button
             onClick={handleExportJSON}
-            className="flex items-center gap-1.5 py-1.5 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border border-purple-500/30 hover:border-purple-400/50 rounded-xl text-[10px] font-extrabold transition-all duration-300 cursor-pointer shadow-md shadow-purple-950/20 active:scale-95"
+            className="flex items-center gap-1.5 py-1.5 px-4 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white border border-[#3B82F6]/30 hover:border-[#60A5FA]/50 rounded-xl text-[10px] font-extrabold transition-all duration-300 cursor-pointer shadow-md shadow-purple-950/20 active:scale-95"
             title="Export project data as JSON file"
           >
             <Download className="w-3.5 h-3.5 text-purple-200" />
@@ -607,7 +607,7 @@ export default function ProfileProjectsTab({
           </div>
           <button
             onClick={onNavigateHome}
-            className="text-purple-400 font-bold text-xs hover:underline bg-purple-500/10 border border-purple-500/20 px-4 py-2 rounded-xl cursor-pointer"
+            className="text-[#3B82F6] font-bold text-xs hover:underline bg-[#3B82F6]/10 border border-[#3B82F6]/20 px-4 py-2 rounded-xl cursor-pointer"
           >
             Scrape New Strip
           </button>
@@ -629,8 +629,8 @@ export default function ProfileProjectsTab({
                   className="p-5 flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors select-none"
                 >
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="w-12 h-12 rounded-2xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center shrink-0">
-                      <BookOpen className="w-5 h-5 text-purple-400" />
+                    <div className="w-12 h-12 rounded-2xl bg-purple-600/10 border border-[#3B82F6]/20 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-5 h-5 text-[#3B82F6]" />
                     </div>
                     <div className="text-left">
                       <h4 className="text-base font-black text-white leading-tight">
@@ -691,21 +691,21 @@ export default function ProfileProjectsTab({
                           key={pId}
                           className={`p-3 rounded-2xl border flex items-center justify-between transition-all hover:bg-neutral-955/60 ${
                             isChecked
-                              ? "bg-purple-900/10 border-purple-500/20"
+                              ? "bg-purple-900/10 border-[#3B82F6]/20"
                               : "bg-neutral-900/30 border-white/5"
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             {/* Checkbox */}
                             <div
-                              className="text-neutral-600 hover:text-purple-400 transition-colors shrink-0 p-1 cursor-pointer"
+                              className="text-neutral-600 hover:text-[#60A5FA] transition-colors shrink-0 p-1 cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 toggleSelect(pId);
                               }}
                             >
                               {isChecked ? (
-                                <CheckSquare className="w-4 h-4 text-purple-400" />
+                                <CheckSquare className="w-4 h-4 text-[#3B82F6]" />
                               ) : (
                                 <Square className="w-4 h-4 text-neutral-700" />
                               )}
@@ -768,7 +768,7 @@ export default function ProfileProjectsTab({
                             </button>
                             <button
                               onClick={() => handleViewDetails(chapter)}
-                              className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-white/5 text-purple-400 hover:text-purple-300 rounded-xl text-[10px] font-extrabold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
+                              className="px-3.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-white/5 text-[#3B82F6] hover:text-[#93C5FD] rounded-xl text-[10px] font-extrabold transition-all cursor-pointer flex items-center gap-1 active:scale-95"
                             >
                               <Eye className="w-3.5 h-3.5" />
                               <span>View Details</span>
@@ -797,8 +797,8 @@ export default function ProfileProjectsTab({
                 {/* Series Content */}
                 <div className="p-5 space-y-4">
                   <div className="flex items-start justify-between">
-                    <div className="w-10 h-10 rounded-2xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center shrink-0">
-                      <BookOpen className="w-5 h-5 text-purple-400" />
+                    <div className="w-10 h-10 rounded-2xl bg-purple-600/10 border border-[#3B82F6]/20 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-5 h-5 text-[#3B82F6]" />
                     </div>
                     <div className="flex items-center gap-2">
                       {group.series_id && (
@@ -821,7 +821,7 @@ export default function ProfileProjectsTab({
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       )}
-                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold uppercase tracking-wider">
+                      <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 font-bold uppercase tracking-wider">
                         {group.genre}
                       </span>
                     </div>
@@ -869,21 +869,21 @@ export default function ProfileProjectsTab({
                             key={pId}
                             className={`p-2.5 rounded-xl border flex items-center justify-between text-left transition-all ${
                               isChecked
-                                ? "bg-purple-900/10 border-purple-500/20"
+                                ? "bg-purple-900/10 border-[#3B82F6]/20"
                                 : "bg-neutral-900/30 border-white/5"
                             }`}
                           >
                             <div className="flex items-center gap-2">
                               {/* Checkbox */}
                               <div
-                                className="text-neutral-600 hover:text-purple-400 transition-colors shrink-0 p-0.5 cursor-pointer"
+                                className="text-neutral-600 hover:text-[#60A5FA] transition-colors shrink-0 p-0.5 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   toggleSelect(pId);
                                 }}
                               >
                                 {isChecked ? (
-                                  <CheckSquare className="w-3.5 h-3.5 text-purple-400" />
+                                  <CheckSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
                                 ) : (
                                   <Square className="w-3.5 h-3.5 text-neutral-700" />
                                 )}
@@ -929,7 +929,7 @@ export default function ProfileProjectsTab({
                               </button>
                               <button
                                 onClick={() => handleViewDetails(chapter)}
-                                className="p-1 bg-neutral-900 hover:bg-neutral-800 border border-white/5 rounded-lg text-purple-400 hover:text-purple-300 transition-all cursor-pointer"
+                                className="p-1 bg-neutral-900 hover:bg-neutral-800 border border-white/5 rounded-lg text-[#3B82F6] hover:text-[#93C5FD] transition-all cursor-pointer"
                                 title="View details"
                               >
                                 <ChevronRight className="w-4 h-4" />

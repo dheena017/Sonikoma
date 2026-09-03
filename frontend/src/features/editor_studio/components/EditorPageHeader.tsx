@@ -198,7 +198,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       return {
         name: displayName,
         domain: host,
-        badgeColor: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+        badgeColor: "bg-[#3B82F6]/15 text-[#60A5FA] border-[#3B82F6]/30",
       };
     } catch {
       return null;
@@ -207,7 +207,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-2 sm:gap-3 border-b border-white/8 bg-[#06060c]/90 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(168,85,247,0.08)] pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-2 sm:gap-3 border-b border-white/8 bg-[#06060c]/90 backdrop-blur-2xl shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(59,130,246,0.08)] pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
         className || ""
       }`}
       style={style}
@@ -219,7 +219,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-purple-500/15 hover:border-purple-500/30 text-neutral-400 hover:text-purple-300 cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
               title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
             >
               <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -254,7 +254,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <div className="min-w-0 hidden sm:block max-w-[280px] md:max-w-[340px] lg:max-w-[420px]">
             {/* Top Workspace & Source Website Badge */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-purple-400/90 leading-none">
+              <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#3B82F6]/90 leading-none">
                 Editor Workspace
               </span>
 
@@ -283,7 +283,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
             {/* Title & Layout Icon */}
             <div className="mt-1 flex items-center gap-1.5">
-              <LayoutPanelTop className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+              <LayoutPanelTop className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
               <h2 className="truncate text-sm font-bold text-white leading-none tracking-wide">
                 {title}
               </h2>
@@ -361,8 +361,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             aria-label="Toggle Floating Player"
             className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
               isPlayerOpen
-                ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+                ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]"
+                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/20 hover:text-[#93C5FD]"
             }`}
           >
             <Monitor className="h-4 w-4" />
@@ -377,8 +377,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             aria-label={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
             className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
               isFocusMode
-                ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[inset_0_0_12px_rgba(168,85,247,0.15)]"
-                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300"
+                ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]"
+                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/20 hover:text-[#93C5FD]"
             }`}
           >
             <Focus className="h-4 w-4" />
@@ -394,9 +394,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             aria-label={isDirty ? "Save Unsaved Changes" : "Project Saved"}
             className={`flex items-center gap-1.5 px-3 h-9 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${
               isSaving
-                ? "bg-purple-600/30 border-purple-500/40 text-purple-200 cursor-wait opacity-80"
+                ? "bg-purple-600/30 border-[#3B82F6]/40 text-purple-200 cursor-wait opacity-80"
                 : isDirty
-                ? "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white border-purple-400/50 shadow-lg shadow-purple-900/40 animate-pulse"
+                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white border-[#60A5FA]/50 shadow-lg shadow-purple-900/40 animate-pulse"
                 : "bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white"
             }`}
           >
@@ -405,7 +405,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 isSaving
                   ? "animate-spin text-purple-200"
                   : isDirty
-                  ? "text-purple-300"
+                  ? "text-[#60A5FA]"
                   : "text-neutral-400"
               }`}
             />
@@ -421,7 +421,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             <button
               onClick={() => setShowNotifications((v) => !v)}
               aria-label="Notifications"
-              className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
+              className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/20 hover:text-[#93C5FD] transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
             >
               {notificationsMuted ? (
                 <BellOff className="h-4 w-4 text-rose-500" />
@@ -462,10 +462,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-purple-500/10 hover:border-purple-500/20 hover:text-purple-300 transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
+              className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/20 hover:text-[#93C5FD] transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
               aria-label="Active Project Selector"
             >
-              <FolderSync className="h-4 w-4 text-purple-400" />
+              <FolderSync className="h-4 w-4 text-[#3B82F6]" />
               {activeProjectId && activeProjectData && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
               )}
@@ -477,7 +477,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo?.("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
             aria-label="Open User profile"
           >
             <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
@@ -485,7 +485,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
               <img
                 key={user?.avatar_url || user?.full_name || "avatar"}
                 src={getUserAvatarUrl(user)}

@@ -114,7 +114,7 @@ export default function ShortcutItem({
               )}
               <Tooltip text="Record new shortcut key" placement="top">
                 <button
-                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-purple-400 transition-all cursor-pointer"
+                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-[#60A5FA] transition-all cursor-pointer"
                   aria-label="Edit Shortcut"
                 >
                   <Edit3 className="h-3.5 w-3.5" />

@@ -177,7 +177,7 @@ export function EnhancementsAudio({
                 isDialoguePlaying && !isDialoguePaused
                   ? "bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60"
                   : isDialoguePaused
-                  ? "bg-purple-950/40 border-purple-500/40 text-purple-300 hover:bg-purple-900/60"
+                  ? "bg-purple-950/40 border-[#3B82F6]/40 text-[#60A5FA] hover:bg-purple-900/60"
                   : "bg-indigo-950/40 border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 hover:text-indigo-200"
               }`}
             >
@@ -219,7 +219,7 @@ export function EnhancementsAudio({
               e.target.value
             )
           }
-          className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
+          className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-[#3B82F6]/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
           placeholder=""
         />
       </div>
@@ -238,7 +238,7 @@ export function EnhancementsAudio({
                 isNarrativePlaying && !isNarrativePaused
                   ? "bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60"
                   : isNarrativePaused
-                  ? "bg-purple-950/40 border-purple-500/40 text-purple-300 hover:bg-purple-900/60"
+                  ? "bg-purple-950/40 border-[#3B82F6]/40 text-[#60A5FA] hover:bg-purple-900/60"
                   : "bg-indigo-950/40 border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 hover:text-indigo-200"
               }`}
             >
@@ -280,7 +280,7 @@ export function EnhancementsAudio({
               e.target.value
             )
           }
-          className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
+          className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-[#3B82F6]/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
           placeholder=""
         />
       </div>
@@ -299,7 +299,7 @@ export function EnhancementsAudio({
               e.target.value
             )
           }
-          className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
+          className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] focus:border-[#3B82F6]/50 focus:outline-none transition-colors hover:border-white/15 resize-none"
           placeholder=""
         />
       </div>
@@ -316,7 +316,7 @@ export function EnhancementsAudio({
             onChange={(e) =>
               handleModifySfx(activeStoryboardPanel?.id ?? 0, e.target.value)
             }
-            className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl pl-7 pr-2.5 py-1.5 text-[10px] font-mono focus:border-purple-500/50 focus:outline-none transition-colors hover:border-white/15"
+            className="w-full bg-black/40 border border-white/8 text-neutral-300 rounded-xl pl-7 pr-2.5 py-1.5 text-[10px] font-mono focus:border-[#3B82F6]/50 focus:outline-none transition-colors hover:border-white/15"
             placeholder=""
           />
           <Volume2 className="absolute left-2.5 h-3 w-3 text-neutral-500 pointer-events-none" />

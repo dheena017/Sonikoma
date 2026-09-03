@@ -59,7 +59,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
 
   return (
     <>
-      <div className="group bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-purple-500/30 rounded-[32px] p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:border-purple-400/50">
+      <div className="group bg-gradient-to-br from-purple-900/40 to-indigo-900/40 border border-[#3B82F6]/30 rounded-[32px] p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:border-[#60A5FA]/50">
         <div className="flex flex-col md:flex-row items-center gap-6 w-full">
           <div className="relative h-28 w-48 rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-inner shrink-0 group-hover:scale-[1.02] transition-transform duration-500">
             {matchingProject.cover_image ? (
@@ -70,7 +70,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-purple-600/10">
-                <History className="h-8 w-8 text-purple-500/50" />
+                <History className="h-8 w-8 text-[#3B82F6]/50" />
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -84,8 +84,8 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
 
           <div className="flex-1 text-center md:text-left space-y-2">
             <div className="flex items-center justify-center md:justify-start gap-2.5">
-              <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
-                <History className="h-4 w-4 text-purple-400" />
+              <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-[#3B82F6]/30">
+                <History className="h-4 w-4 text-[#3B82F6]" />
               </div>
               <h3 className="text-xl font-black text-white tracking-tight">
                 Resume Workspace
@@ -93,7 +93,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
             </div>
             <p className="text-xs text-purple-200/60 font-medium max-w-sm">
               Pick up exactly where you left off with{" "}
-              <span className="text-purple-300 font-bold">"{title}"</span>. Your
+              <span className="text-[#60A5FA] font-bold">"{title}"</span>. Your
               assets and timeline are ready.
             </p>
           </div>
@@ -119,7 +119,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
               );
             }
           }}
-          className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.2)]"
+          className="w-full md:w-auto px-8 py-4 bg-white text-purple-950 font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-purple-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.2)]"
         >
           Launch Workspace{" "}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

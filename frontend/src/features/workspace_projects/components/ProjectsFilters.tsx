@@ -58,13 +58,13 @@ export default function ProjectsFilters({
     <div className="bg-[#0c0d12]/95 border border-white/10 rounded-2xl p-3.5 sm:p-4 mb-8 flex flex-col lg:flex-row gap-3.5 items-center justify-between shadow-2xl backdrop-blur-2xl">
       {/* Search Input */}
       <div className="flex-1 w-full relative">
-        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400" />
+        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3B82F6]" />
         <input
           type="text"
           placeholder="Search projects by title, series, or author..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full bg-[#12131e]/80 border border-white/10 hover:border-purple-500/50 text-white text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 font-sans transition-all placeholder:text-neutral-500 shadow-inner"
+          className="w-full bg-[#12131e]/80 border border-white/10 hover:border-[#3B82F6]/50 text-white text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-purple-500/20 font-sans transition-all placeholder:text-neutral-500 shadow-inner"
         />
       </div>
 
@@ -80,17 +80,17 @@ export default function ProjectsFilters({
             }}
             className={`flex items-center gap-2 bg-[#12131e]/80 hover:bg-[#181926] border rounded-xl px-3.5 py-2.5 text-xs font-mono transition-all cursor-pointer shadow-sm select-none ${
               isGenreOpen
-                ? "border-purple-500/60 ring-2 ring-purple-500/20 text-white"
+                ? "border-[#3B82F6]/60 ring-2 ring-purple-500/20 text-white"
                 : "border-white/10 text-neutral-300 hover:border-white/20"
             }`}
           >
-            <Filter className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+            <Filter className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
             <span className="font-semibold">
               {genreFilter === "All" ? "All Genres" : genreFilter}
             </span>
             <ChevronDown
               className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
-                isGenreOpen ? "rotate-180 text-purple-300" : ""
+                isGenreOpen ? "rotate-180 text-[#60A5FA]" : ""
               }`}
             />
           </button>
@@ -110,7 +110,7 @@ export default function ProjectsFilters({
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
                         isSelected
-                          ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-md shadow-purple-900/30"
+                          ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-purple-900/30"
                           : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
                       }`}
                     >
@@ -134,7 +134,7 @@ export default function ProjectsFilters({
             }}
             className={`flex items-center gap-2 bg-[#12131e]/80 hover:bg-[#181926] border rounded-xl px-3.5 py-2.5 text-xs font-mono transition-all cursor-pointer shadow-sm select-none ${
               isSortOpen
-                ? "border-purple-500/60 ring-2 ring-purple-500/20 text-white"
+                ? "border-[#3B82F6]/60 ring-2 ring-purple-500/20 text-white"
                 : "border-white/10 text-neutral-300 hover:border-white/20"
             }`}
           >
@@ -144,7 +144,7 @@ export default function ProjectsFilters({
             <span className="font-semibold text-white">{currentSortLabel}</span>
             <ChevronDown
               className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
-                isSortOpen ? "rotate-180 text-purple-300" : ""
+                isSortOpen ? "rotate-180 text-[#60A5FA]" : ""
               }`}
             />
           </button>
@@ -164,7 +164,7 @@ export default function ProjectsFilters({
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
                         isSelected
-                          ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold shadow-md shadow-purple-900/30"
+                          ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-purple-900/30"
                           : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
                       }`}
                     >

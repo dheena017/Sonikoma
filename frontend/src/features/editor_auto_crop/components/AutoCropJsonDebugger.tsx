@@ -17,12 +17,12 @@ export function AutoCropJsonDebugger({ payload }: Props) {
         className="w-full flex items-center justify-between px-5 py-4 bg-neutral-950/40 hover:bg-neutral-900/80 transition-colors border-b border-neutral-800/80 text-neutral-300 hover:text-white cursor-pointer select-none"
       >
         <div className="flex items-center gap-2.5 text-xs font-mono font-bold tracking-wider uppercase">
-          <FileJson className="h-4 w-4 text-purple-400" />
+          <FileJson className="h-4 w-4 text-[#3B82F6]" />
           <span>API JSON Request Payload Debugger</span>
         </div>
         <ChevronDown
           className={`h-4 w-4 transition-transform duration-200 ${
-            show ? "rotate-180 text-purple-400" : "text-neutral-500"
+            show ? "rotate-180 text-[#3B82F6]" : "text-neutral-500"
           }`}
         />
       </button>

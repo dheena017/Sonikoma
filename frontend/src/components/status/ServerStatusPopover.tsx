@@ -155,7 +155,7 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-[#0b0b0e] border border-neutral-800/80 rounded-xl p-2.5">
               <div className="flex justify-between items-center text-[10px] text-neutral-400 font-bold uppercase mb-1">
-                <span className="flex items-center gap-1"><Cpu className="w-3 h-3 text-purple-400" /> CPU Load</span>
+                <span className="flex items-center gap-1"><Cpu className="w-3 h-3 text-[#3B82F6]" /> CPU Load</span>
                 <span className="font-mono text-white">{cpu.usage_percent ?? 0}%</span>
               </div>
               <div className="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden">

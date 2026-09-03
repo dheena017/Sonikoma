@@ -29,7 +29,7 @@ export default function ProviderUsageTiersGrid({
             href={currentProvider.docsUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1"
+            className="text-xs font-mono text-[#3B82F6] hover:text-[#93C5FD] flex items-center gap-1"
           >
             <span>Full Pricing &amp; Tier Policy</span>
             <ExternalLink className="w-3 h-3" />
@@ -44,14 +44,14 @@ export default function ProviderUsageTiersGrid({
             onClick={() => onSelectTierId(t.id)}
             className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 text-left ${
               selectedTierId === t.id
-                ? "bg-[#222222] border-purple-500 ring-1 ring-purple-500/50 shadow-md"
+                ? "bg-[#222222] border-[#3B82F6] ring-1 ring-purple-500/50 shadow-md"
                 : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700"
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-white font-mono">{t.label}</span>
               {selectedTierId === t.id && (
-                <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#3B82F6]" />
               )}
             </div>
             <span className="text-xs text-neutral-400 font-mono block">

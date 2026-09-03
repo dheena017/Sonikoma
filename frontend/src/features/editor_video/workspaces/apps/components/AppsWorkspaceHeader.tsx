@@ -30,7 +30,7 @@ export const AppsWorkspaceHeader: React.FC<AppsWorkspaceHeaderProps> = ({
           Connected Apps
         </h2>
       </div>
-      <span className="text-[9px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/30">
+      <span className="text-[9px] font-mono text-[#60A5FA] bg-[#3B82F6]/10 px-2 py-0.5 rounded-full border border-[#3B82F6]/30">
         🔌 Plugins
       </span>
     </div>

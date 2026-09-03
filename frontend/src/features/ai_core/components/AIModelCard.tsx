@@ -69,7 +69,7 @@ export default function AIModelCard({
   const getUsageColor = (pct: number) => {
     if (pct >= 85) return "bg-rose-500 text-rose-400";
     if (pct >= 60) return "bg-amber-500 text-amber-400";
-    return "bg-purple-500 text-purple-400";
+    return "bg-purple-500 text-[#3B82F6]";
   };
 
   const handleCopyEndpoint = (e: React.MouseEvent) => {
@@ -83,14 +83,14 @@ export default function AIModelCard({
   return (
     <div
       onClick={() => onSelect?.(model.id)}
-      className="group relative rounded-2xl border border-neutral-850 bg-[#161616] p-5 space-y-4 hover:border-purple-500/60 hover:bg-[#1a1a1a] transition-all duration-200 text-left shadow-sm flex flex-col justify-between"
+      className="group relative rounded-2xl border border-neutral-850 bg-[#161616] p-5 space-y-4 hover:border-[#3B82F6]/60 hover:bg-[#1a1a1a] transition-all duration-200 text-left shadow-sm flex flex-col justify-between"
     >
       {/* ── CARD HEADER ───────────────────────────────────────────────────── */}
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white font-sans group-hover:text-purple-300 transition-colors">
+              <h3 className="text-sm font-bold text-white font-sans group-hover:text-[#93C5FD] transition-colors">
                 {model.name}
               </h3>
             </div>
@@ -109,7 +109,7 @@ export default function AIModelCard({
               <span>LIVE</span>
             </span>
 
-            <span className="text-[9px] font-mono font-bold bg-neutral-900 border border-neutral-800 text-purple-400 px-2 py-0.5 rounded-full">
+            <span className="text-[9px] font-mono font-bold bg-neutral-900 border border-neutral-800 text-[#3B82F6] px-2 py-0.5 rounded-full">
               {model.speed_rating}
             </span>
           </div>
@@ -141,12 +141,12 @@ export default function AIModelCard({
           <div>
             <div className="flex items-center justify-between text-[9px] text-neutral-400 font-mono font-bold uppercase mb-0.5">
               <span>Live RPM</span>
-              <span className={rpmPct >= 85 ? "text-rose-400 font-bold" : "text-purple-400 font-bold"}>
+              <span className={rpmPct >= 85 ? "text-rose-400 font-bold" : "text-[#3B82F6] font-bold"}>
                 {rpmPct}%
               </span>
             </div>
             <div className="text-xs sm:text-sm font-black text-white font-mono">
-              <span className="text-purple-300">{rpmUsed}</span>
+              <span className="text-[#60A5FA]">{rpmUsed}</span>
               <span className="text-neutral-500 text-[10px] font-normal"> / {rpmLimit}</span>
             </div>
           </div>
@@ -163,11 +163,11 @@ export default function AIModelCard({
           <div>
             <div className="flex items-center justify-between text-[9px] text-neutral-400 font-mono font-bold uppercase mb-0.5">
               <span>Live TPM</span>
-              <span className={tpmPct >= 85 ? "text-rose-400 font-bold" : "text-purple-400 font-bold"}>
+              <span className={tpmPct >= 85 ? "text-rose-400 font-bold" : "text-[#3B82F6] font-bold"}>
                 {tpmPct}%
               </span>
             </div>
-            <div className="text-xs sm:text-sm font-black text-purple-400 font-mono">
+            <div className="text-xs sm:text-sm font-black text-[#3B82F6] font-mono">
               <span>{tpmUsed >= 1000 ? `${(tpmUsed / 1000).toFixed(1)}k` : tpmUsed}</span>
               <span className="text-neutral-500 text-[10px] font-normal">
                 {" "}
@@ -213,7 +213,7 @@ export default function AIModelCard({
       {model.recommended_for && model.recommended_for.length > 0 && (
         <div className="space-y-1">
           <span className="text-[9px] font-mono uppercase text-neutral-400 flex items-center gap-1 font-bold">
-            <Sparkles className="w-2.5 h-2.5 text-purple-400" /> Recommended For
+            <Sparkles className="w-2.5 h-2.5 text-[#3B82F6]" /> Recommended For
           </span>
           <div className="flex flex-wrap gap-1">
             {model.recommended_for.slice(0, 3).map((rec, i) => (
@@ -277,7 +277,7 @@ export default function AIModelCard({
             e.stopPropagation();
             window.location.href = `/ai-core/routing`;
           }}
-          className="px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-purple-600 text-neutral-300 hover:text-white border border-neutral-800 text-[10px] font-mono flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+          className="px-2.5 py-1.5 rounded-lg bg-neutral-900 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-neutral-800 text-[10px] font-mono flex items-center gap-1 transition-all cursor-pointer shadow-sm"
         >
           <span>Route</span>
           <ArrowUpRight className="w-3 h-3" />

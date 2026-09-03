@@ -21,7 +21,7 @@ export default function HorizontalSplitterPreview({
   return (
     <div className="bg-black/30 rounded-xl p-2.5 border border-white/5 space-y-1.5">
       <div className="text-[9px] uppercase font-mono text-neutral-600 pb-1 border-b border-white/5 flex items-center gap-1">
-        <Split className="h-3 w-3 text-purple-400" />
+        <Split className="h-3 w-3 text-[#3B82F6]" />
         <span>Output Segments Preview ({resultingSegments.length})</span>
       </div>
 
@@ -33,7 +33,7 @@ export default function HorizontalSplitterPreview({
           >
             <span className="text-neutral-500 font-bold">Part {seg.index}</span>
             <div className="flex items-center gap-2">
-              <span className="text-purple-300 font-semibold">
+              <span className="text-[#60A5FA] font-semibold">
                 {seg.heightPct}%
               </span>
               {seg.heightPx !== null && (

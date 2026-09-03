@@ -20,10 +20,10 @@ const WorkspaceStatsBar: React.FC<WorkspaceStatsBarProps> = ({
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
       {[
         {
-          icon: <BarChart2 className="h-4 w-4 text-purple-400" />,
+          icon: <BarChart2 className="h-4 w-4 text-[#3B82F6]" />,
           label: "Total Projects",
           value: statsLoading ? "—" : stats.totalProjects.toString(),
-          color: "from-purple-900/20 to-indigo-900/20 border-purple-500/20",
+          color: "from-purple-900/20 to-indigo-900/20 border-[#3B82F6]/20",
         },
         {
           icon: <Layers className="h-4 w-4 text-sky-400" />,

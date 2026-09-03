@@ -54,12 +54,12 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(
           <div className="bg-neutral-900/60 border border-neutral-800/80 p-5 sm:p-6 rounded-3xl space-y-4 shadow-xl backdrop-blur-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Image className="h-4 w-4 text-purple-400" />
+                <Image className="h-4 w-4 text-[#3B82F6]" />
                 <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
                   Batch & Target Preview
                 </span>
               </div>
-              <span className="text-[9px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-purple-950/60 border border-purple-900/40 text-purple-300">
+              <span className="text-[9px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-purple-950/60 border border-purple-900/40 text-[#60A5FA]">
                 {batchCount > 0
                   ? `${batchCount} IMAGES QUEUED`
                   : "NO IMAGES QUEUED"}
@@ -96,7 +96,7 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(
 
             {/* Smart Tip Banner */}
             <div className="p-3.5 bg-neutral-950/70 border border-neutral-800/80 rounded-2xl text-[10px] font-mono text-neutral-400 leading-relaxed flex items-start gap-2.5 select-none">
-              <Sparkles className="h-4 w-4 shrink-0 text-purple-400 mt-0.5" />
+              <Sparkles className="h-4 w-4 shrink-0 text-[#3B82F6] mt-0.5" />
               <p>
                 <strong>Pro Tip:</strong> OpenCV Engine runs 100% locally with
                 zero API limits. For overlapping panels or splash art, switch to

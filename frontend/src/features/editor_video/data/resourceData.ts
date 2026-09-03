@@ -92,8 +92,8 @@ export const REAL_RESOURCES: ResourceItem[] = [
     id: "r-color-cyber",
     title: "Cyberpunk Hex Swatch Kit",
     category: "colors",
-    detail: "#a855f7 • #06b6d4 • #f43f5e • #f59e0b",
-    hex: "#a855f7",
+    detail: "#3b82f6 • #06b6d4 • #f43f5e • #f59e0b",
+    hex: "#3b82f6",
     badge: "Creator Palette",
   },
   {

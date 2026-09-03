@@ -143,11 +143,11 @@ const VideoPreviewMetadataPanel = React.memo(
             className="w-64 sm:w-72 bg-[#111116] border border-neutral-800/90 rounded-2xl shadow-2xl shadow-black/80 backdrop-blur-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150"
           >
             {/* Top gradient accent */}
-            <div className="h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
+            <div className="h-[2px] bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 opacity-80" />
 
             <div className="p-2 space-y-1.5">
               {/* SECTION 0: Track Specs & Info Card */}
-              <div className="px-2.5 pt-1 text-[9px] font-black uppercase tracking-wider text-purple-400 font-mono flex items-center justify-between">
+              <div className="px-2.5 pt-1 text-[9px] font-black uppercase tracking-wider text-[#3B82F6] font-mono flex items-center justify-between">
                 <span>Media Specs & Info</span>
                 <span className="text-[8px] text-neutral-500 font-normal">
                   Track Details
@@ -158,7 +158,7 @@ const VideoPreviewMetadataPanel = React.memo(
                 {musicTheme && (
                   <div className="flex items-center justify-between gap-2 text-[11px]">
                     <span className="text-neutral-400 font-medium flex items-center gap-1.5 shrink-0">
-                      <Music className="h-3.5 w-3.5 text-purple-400" />{" "}
+                      <Music className="h-3.5 w-3.5 text-[#3B82F6]" />{" "}
                       Soundtrack:
                     </span>
                     <span
@@ -187,10 +187,10 @@ const VideoPreviewMetadataPanel = React.memo(
 
                 <div className="flex items-center justify-between gap-2 text-[11px]">
                   <span className="text-neutral-400 font-medium flex items-center gap-1.5 shrink-0">
-                    <Clapperboard className="h-3.5 w-3.5 text-cyan-400" />{" "}
+                    <Clapperboard className="h-3.5 w-3.5 text-blue-400" />{" "}
                     Codec:
                   </span>
-                  <span className="font-mono text-cyan-300 font-bold text-[10px] uppercase">
+                  <span className="font-mono text-blue-300 font-bold text-[10px] uppercase">
                     {codec}
                   </span>
                 </div>
@@ -199,7 +199,7 @@ const VideoPreviewMetadataPanel = React.memo(
               <div className="h-px bg-neutral-800/80 my-1 mx-2" />
 
               {/* SECTION: Downloads */}
-              <div className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-purple-400/80 font-mono">
+              <div className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#3B82F6]/80 font-mono">
                 Downloads & Media
               </div>
 
@@ -213,7 +213,7 @@ const VideoPreviewMetadataPanel = React.memo(
                 className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-semibold text-neutral-200 hover:text-white hover:bg-neutral-800/80 transition-all cursor-pointer group"
               >
                 <span className="flex items-center justify-center h-6 w-6 rounded-lg bg-neutral-900 group-hover:bg-neutral-700 border border-neutral-800 transition-colors shrink-0">
-                  <Download className="h-3 w-3 text-purple-400" />
+                  <Download className="h-3 w-3 text-[#3B82F6]" />
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span>Download MP4</span>
@@ -246,7 +246,7 @@ const VideoPreviewMetadataPanel = React.memo(
               <div className="h-px bg-neutral-800/80 my-1 mx-2" />
 
               {/* SECTION: Sharing & Links */}
-              <div className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-cyan-400/80 font-mono">
+              <div className="px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-blue-400/80 font-mono">
                 Sharing & Links
               </div>
 
@@ -260,7 +260,7 @@ const VideoPreviewMetadataPanel = React.memo(
                   {copiedUrl ? (
                     <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                   ) : (
-                    <Copy className="h-3 w-3 text-cyan-400" />
+                    <Copy className="h-3 w-3 text-blue-400" />
                   )}
                 </span>
                 <div className="flex flex-col min-w-0">
@@ -362,8 +362,8 @@ const VideoPreviewMetadataPanel = React.memo(
           title="More actions & options"
           className={`h-7 w-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer shrink-0 ${
             showMore
-              ? "bg-purple-600/30 border-purple-500 text-white shadow-[0_0_10px_rgba(168,85,247,0.3)]"
-              : "bg-neutral-900/90 border-neutral-700/80 text-neutral-300 hover:text-white hover:bg-neutral-800 hover:border-purple-500/40"
+              ? "bg-purple-600/30 border-[#3B82F6] text-white "
+              : "bg-neutral-900/90 border-neutral-700/80 text-neutral-300 hover:text-white hover:bg-neutral-800 hover:border-[#3B82F6]/40"
           }`}
         >
           <MoreHorizontal className="h-3.5 w-3.5" />

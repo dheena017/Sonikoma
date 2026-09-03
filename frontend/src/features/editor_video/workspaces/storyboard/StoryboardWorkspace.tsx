@@ -268,7 +268,7 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
       <WorkspaceLayout.Content>
         {panels.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-8 text-center text-neutral-400 font-mono text-xs space-y-2.5">
-            <div className="h-11 w-11 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-purple-400">
+            <div className="h-11 w-11 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6]">
               <Film className="h-5 w-5" />
             </div>
             <p className="font-bold text-neutral-200">No Storyboard Panels</p>

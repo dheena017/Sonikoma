@@ -45,7 +45,7 @@ export default function ThumbnailStudioTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-purple-500/40 transition-all space-y-2 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-[#3B82F6]/40 transition-all space-y-2 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-pink-500/10 border border-pink-500/30 rounded-lg text-pink-400 shrink-0">
@@ -56,7 +56,7 @@ export default function ThumbnailStudioTab({
             </h4>
           </div>
 
-          <span className="text-[10px] font-mono text-purple-300 bg-purple-500/10 border border-purple-500/30 px-3 py-1 rounded-full font-bold">
+          <span className="text-[10px] font-mono text-[#60A5FA] bg-[#3B82F6]/10 border border-[#3B82F6]/30 px-3 py-1 rounded-full font-bold">
             16:9 Clickbait Generator
           </span>
         </div>

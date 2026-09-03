@@ -14,7 +14,7 @@ export default function BulkActionFooter({
 }: BulkActionFooterProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 md:left-64 p-4 z-50 animate-in slide-in-from-bottom-10 duration-300">
-      <div className="max-w-4xl mx-auto bg-gradient-to-r from-purple-900/90 to-[#0b0b0e]/95 backdrop-blur-xl border border-purple-500/50 rounded-2xl p-4 flex items-center justify-between shadow-2xl shadow-purple-900/40">
+      <div className="max-w-4xl mx-auto bg-gradient-to-r from-purple-900/90 to-[#0b0b0e]/95 backdrop-blur-xl border border-[#3B82F6]/50 rounded-2xl p-4 flex items-center justify-between shadow-2xl shadow-purple-900/40">
         <div className="flex items-center gap-4">
           <div className="bg-purple-500 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
             {selectedCount}

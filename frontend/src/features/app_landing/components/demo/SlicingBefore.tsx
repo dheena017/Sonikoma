@@ -12,10 +12,10 @@ export function SlicingBefore() {
       {/* Comic Panel 1 */}
       <div className="w-full max-w-[280px] bg-gradient-to-br from-purple-900/80 via-slate-900 to-indigo-950 border border-neutral-700/60 rounded-xl p-3.5 space-y-2 shadow-md relative overflow-hidden">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-mono font-bold text-purple-300">SCENE 01 • PROTAGONIST</span>
+          <span className="text-[10px] font-mono font-bold text-[#60A5FA]">SCENE 01 • PROTAGONIST</span>
           <span className="text-[9px] font-mono text-neutral-400">Panel 1</span>
         </div>
-        <div className="h-24 rounded-lg bg-gradient-to-r from-purple-800/40 to-indigo-800/40 border border-purple-500/20 flex flex-col items-center justify-center relative">
+        <div className="h-24 rounded-lg bg-gradient-to-r from-purple-800/40 to-indigo-800/40 border border-[#3B82F6]/20 flex flex-col items-center justify-center relative">
           <div className="text-2xl">⚡️</div>
           <span className="text-xs font-black text-white tracking-wide uppercase mt-1">Awakening</span>
           <div className="absolute top-2 right-2 bg-black/60 px-2 py-0.5 rounded text-[9px] text-neutral-300">

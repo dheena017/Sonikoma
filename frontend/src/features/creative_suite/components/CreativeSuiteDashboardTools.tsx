@@ -67,7 +67,7 @@ const CreativeSuiteDashboardTools: React.FC<
                 className={`text-[10px] font-bold font-mono tracking-wider uppercase flex items-center gap-1 transition-all ${
                   isLocked
                     ? "text-[#6B7280] group-hover:text-[#EF4444]"
-                    : "text-[#3B82F6] group-hover:text-[#00FFFF] group-hover:translate-x-1"
+                    : "text-[#3B82F6] group-hover:text-[#3B82F6] group-hover:translate-x-1"
                 }`}
               >
                 <span>{isLocked ? "Open Locker" : "Launch"}</span>

@@ -30,7 +30,7 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
               Free Tier
             </span>
             {subscriptionTier !== "pro" ? (
-              <span className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 rounded-full font-bold">
+              <span className="text-[10px] bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 px-2 rounded-full font-bold">
                 Active
               </span>
             ) : (
@@ -50,12 +50,12 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
       </div>
 
       {/* Pro Plan */}
-      <div className="bg-gradient-to-b from-[#121218]/90 to-[#070709]/90 border border-purple-500/30 rounded-3xl p-6 text-left space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
+      <div className="bg-gradient-to-b from-[#121218]/90 to-[#070709]/90 border border-[#3B82F6]/30 rounded-3xl p-6 text-left space-y-4 shadow-xl relative overflow-hidden flex flex-col justify-between">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-[#3B82F6]/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold tracking-wider uppercase text-purple-400 flex items-center gap-1">
+            <span className="text-[10px] font-bold tracking-wider uppercase text-[#3B82F6] flex items-center gap-1">
               <Zap className="w-3 h-3 fill-purple-400" /> Studio Pro
             </span>
             {subscriptionTier === "pro" ? (
@@ -74,19 +74,19 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
           </div>
           <ul className="text-[11px] text-neutral-300 space-y-2 leading-relaxed font-semibold">
             <li className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
               <span>Unlimited vertical scrapers & compiles</span>
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
               <span>1080p / 4K Ultra-HD video compilation</span>
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
               <span>Priority AI inference & ElevenLabs sync</span>
             </li>
             <li className="flex items-center gap-2">
-              <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
               <span>6,000 monthly credits included</span>
             </li>
           </ul>
@@ -96,7 +96,7 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
           <button
             type="button"
             onClick={() => onSelectPlan("pro")}
-            className="w-full py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-purple-600/30 active:scale-95 cursor-pointer mt-2"
+            className="w-full py-2 bg-purple-600 hover:bg-[#3B82F6] text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-sm active:scale-95 cursor-pointer mt-2"
           >
             Upgrade to Pro ($19/mo)
           </button>
@@ -107,7 +107,7 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
       <div className="bg-[#0f0f13]/50 border border-white/5 rounded-3xl p-6 text-left space-y-4 flex flex-col justify-between">
         <div className="space-y-1">
           <span className="text-[10px] font-bold tracking-wider uppercase text-neutral-400 flex items-center gap-1">
-            <Ticket className="w-3.5 h-3.5 text-purple-400" />
+            <Ticket className="w-3.5 h-3.5 text-[#3B82F6]" />
             Promo Coupons
           </span>
           <p className="text-[10px] text-neutral-400 font-semibold leading-relaxed">
@@ -122,11 +122,11 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
             placeholder="e.g. SONIKOMA50"
-            className="w-full bg-black/40 border border-white/10 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-600 uppercase font-mono"
+            className="w-full bg-black/40 border border-white/10 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-600 uppercase font-mono"
           />
           <button
             type="submit"
-            className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl text-xs transition-all cursor-pointer shadow-sm active:scale-95"
+            className="w-full bg-purple-600 hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-xs transition-all cursor-pointer shadow-sm active:scale-95"
           >
             Apply Coupon
           </button>

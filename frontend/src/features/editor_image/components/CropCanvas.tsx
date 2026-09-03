@@ -342,7 +342,7 @@ export default function CropCanvas({
   return (
     <div
       ref={scrollParentRef}
-      className={`relative border border-white/10 hover:border-purple-500/30 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] ${
+      className={`relative border border-white/10 hover:border-[#3B82F6]/30 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] ${
         zoom > 1 ? "overflow-auto" : "overflow-hidden"
       } flex-1 h-0 flex items-center justify-center select-none transition-all shadow-[0_10px_40px_rgba(0,0,0,0.7)]`}
     >
@@ -447,7 +447,7 @@ export default function CropCanvas({
             />
           ) : (
             <div className="flex flex-col items-center justify-center p-8 text-neutral-500 gap-2">
-              <ImageIcon className="w-8 h-8 opacity-40 text-purple-400" />
+              <ImageIcon className="w-8 h-8 opacity-40 text-[#3B82F6]" />
               <span className="text-xs font-mono">No Image Source Loaded</span>
             </div>
           )}
@@ -524,8 +524,8 @@ export default function CropCanvas({
                   }}
                   className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
                     isSelected
-                      ? "border-purple-400 bg-purple-500/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]"
-                      : "border-purple-500/40 bg-purple-500/5 hover:bg-purple-500/10 z-20"
+                      ? "border-[#60A5FA] bg-[#3B82F6]/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]"
+                      : "border-[#3B82F6]/40 bg-purple-500/5 hover:bg-[#3B82F6]/10 z-20"
                   }`}
                   style={{
                     top: `${slice.cropTop}%`,
@@ -538,8 +538,8 @@ export default function CropCanvas({
                     <span
                       className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${
                         isSelected
-                          ? "bg-purple-950 text-purple-300 border border-purple-500/30"
-                          : "bg-purple-950/90 text-purple-300"
+                          ? "bg-purple-950 text-[#60A5FA] border border-[#3B82F6]/30"
+                          : "bg-purple-950/90 text-[#60A5FA]"
                       }`}
                     >
                       Cut #{index + 1}

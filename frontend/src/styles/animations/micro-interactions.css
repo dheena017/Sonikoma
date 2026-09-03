@@ -69,7 +69,7 @@ button:disabled,
     rgb(168, 85, 247),
     transparent
   );
-  box-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.8);
   animation: scan-laser 2.5s ease-in-out infinite;
   z-index: 20;
 }

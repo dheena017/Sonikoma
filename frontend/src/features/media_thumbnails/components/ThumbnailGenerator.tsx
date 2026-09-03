@@ -127,7 +127,7 @@ export default function ThumbnailGenerator({
           </div>
 
           <p className="text-[10px] font-sans text-neutral-500 italic leading-relaxed pl-1">
-            <span className="font-mono text-[9px] uppercase font-bold text-purple-300 block">
+            <span className="font-mono text-[9px] uppercase font-bold text-[#60A5FA] block">
               CTR Justification:
             </span>
             {concept.ctr_explanation}

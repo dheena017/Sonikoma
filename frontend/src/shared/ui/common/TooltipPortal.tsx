@@ -88,9 +88,9 @@ export interface TooltipPortalProps {
 const VARIANT_STYLES: Record<TooltipVariant, string> = {
   dark: "bg-neutral-900/95 border-neutral-700/80 text-neutral-100 shadow-black/70 shadow-2xl",
   glass: "bg-neutral-900/85 backdrop-blur-xl border-white/15 text-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.6)]",
-  neon: "bg-[#0c1017]/95 border-cyan-500/50 text-cyan-50 shadow-[0_0_20px_rgba(6,182,212,0.3)] shadow-cyan-950/50",
-  cyber: "bg-[#110d1f]/95 border-purple-500/50 text-purple-100 shadow-[0_0_20px_rgba(168,85,247,0.3)] shadow-purple-950/50",
-  gradient: "bg-gradient-to-r from-neutral-900/95 via-purple-950/90 to-neutral-900/95 border-purple-500/40 text-white shadow-2xl shadow-purple-950/50",
+  neon: "bg-[#0c1017]/95 border-blue-500/50 text-cyan-50 shadow-[0_0_20px_rgba(6,182,212,0.3)] shadow-cyan-950/50",
+  cyber: "bg-[#110d1f]/95 border-[#3B82F6]/50 text-purple-100  shadow-purple-950/50",
+  gradient: "bg-gradient-to-r from-neutral-900/95 via-purple-950/90 to-neutral-900/95 border-[#3B82F6]/40 text-white shadow-2xl shadow-purple-950/50",
   primary: "bg-blue-950/95 border-blue-500/50 text-blue-50 shadow-2xl shadow-blue-950/60",
   success: "bg-emerald-950/95 border-emerald-500/50 text-emerald-50 shadow-2xl shadow-emerald-950/60",
   warning: "bg-amber-950/95 border-amber-500/50 text-amber-50 shadow-2xl shadow-amber-950/60",
@@ -101,9 +101,9 @@ const GLOW_COLORS: Record<TooltipVariant, string> = {
   dark: "shadow-[0_0_25px_rgba(0,0,0,0.8)]",
   glass: "shadow-[0_0_25px_rgba(255,255,255,0.12)]",
   neon: "shadow-[0_0_25px_rgba(6,182,212,0.4)]",
-  cyber: "shadow-[0_0_25px_rgba(168,85,247,0.4)]",
-  gradient: "shadow-[0_0_25px_rgba(168,85,247,0.35)]",
-  primary: "shadow-[0_0_25px_rgba(59,130,246,0.4)]",
+  cyber: "",
+  gradient: "",
+  primary: "",
   success: "shadow-[0_0_25px_rgba(16,185,129,0.4)]",
   warning: "shadow-[0_0_25px_rgba(245,158,11,0.4)]",
   danger: "shadow-[0_0_25px_rgba(244,63,94,0.4)]",
@@ -122,7 +122,7 @@ const BADGE_STYLES: Record<string, string> = {
   success: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
   warning: "bg-amber-500/20 text-amber-300 border-amber-500/40",
   danger: "bg-rose-500/20 text-rose-300 border-rose-500/40",
-  purple: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+  purple: "bg-[#3B82F6]/20 text-[#60A5FA] border-[#3B82F6]/40",
 };
 
 // --------------------------------------------------------------------------

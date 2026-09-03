@@ -297,7 +297,7 @@ export default function HorizontalSplitter({
           <div
             className={`relative w-9 h-5 rounded-full border transition-all ${
               showSplitPosition
-                ? "bg-[#3B82F6] border-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.6)]"
+                ? "bg-[#3B82F6] border-[#3B82F6] "
                 : "bg-neutral-900 border-white/10"
             }`}
           >
@@ -435,7 +435,7 @@ export default function HorizontalSplitter({
             <button
               type="button"
               onClick={() => handleGenerateEqualSplits(equalPartsCount)}
-              className="flex-1 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center font-mono shadow-[0_0_16px_rgba(59,130,246,0.4)] transition-all cursor-pointer active:scale-98"
+              className="flex-1 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center font-mono  transition-all cursor-pointer active:scale-98"
             >
               Generate Equal Splits
             </button>
@@ -574,7 +574,7 @@ export default function HorizontalSplitter({
                 className="flex-1 bg-neutral-900 hover:bg-neutral-800 border border-white/10 text-neutral-300 text-[9px] py-1 rounded-lg transition-colors flex items-center justify-center gap-0.5 cursor-pointer"
                 title="Shift All Lines Up"
               >
-                <ArrowUp className="h-3 w-3 text-purple-400" />
+                <ArrowUp className="h-3 w-3 text-[#3B82F6]" />
                 <span>Up</span>
               </button>
               <button
@@ -583,7 +583,7 @@ export default function HorizontalSplitter({
                 className="flex-1 bg-neutral-900 hover:bg-neutral-800 border border-white/10 text-neutral-300 text-[9px] py-1 rounded-lg transition-colors flex items-center justify-center gap-0.5 cursor-pointer"
                 title="Shift All Lines Down"
               >
-                <ArrowDown className="h-3 w-3 text-purple-400" />
+                <ArrowDown className="h-3 w-3 text-[#3B82F6]" />
                 <span>Down</span>
               </button>
             </div>
@@ -646,7 +646,7 @@ export default function HorizontalSplitter({
                       setSplitPosition(y);
                       setShowSplitPosition(true);
                     }}
-                    className="w-4 h-4 rounded bg-purple-900/30 text-purple-400 hover:bg-purple-900/50 hover:text-white flex items-center justify-center text-[8px] font-bold transition-all cursor-pointer"
+                    className="w-4 h-4 rounded bg-purple-900/30 text-[#3B82F6] hover:bg-purple-900/50 hover:text-white flex items-center justify-center text-[8px] font-bold transition-all cursor-pointer"
                     title="Focus Guideline Here"
                   >
                     {idx + 1}
@@ -663,7 +663,7 @@ export default function HorizontalSplitter({
                         if (isNaN(val)) return;
                         handleUpdateSplitLine(idx, val);
                       }}
-                      className="bg-transparent text-purple-400 font-bold font-mono text-[10px] w-12 focus:outline-none focus:bg-black/50 rounded px-1 text-center"
+                      className="bg-transparent text-[#3B82F6] font-bold font-mono text-[10px] w-12 focus:outline-none focus:bg-black/50 rounded px-1 text-center"
                     />
                     <span>%</span>
                   </div>
@@ -691,7 +691,7 @@ export default function HorizontalSplitter({
         type="button"
         onClick={handleExecuteHorizontalSplit}
         disabled={isSavingEdit}
-        className="w-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-black font-mono py-3.5 rounded-2xl cursor-pointer transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.5)] border border-purple-400/30 active:scale-95"
+        className="w-full bg-gradient-to-r from-blue-600 via-fuchsia-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-black font-mono py-3.5 rounded-2xl cursor-pointer transition-all flex items-center justify-center gap-2  border border-[#60A5FA]/30 active:scale-95"
       >
         <Split className="h-4 w-4 rotate-90 stroke-[2.5]" />
         <span>

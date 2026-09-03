@@ -132,7 +132,7 @@ export default function AmbientSoundPicker({
     <div className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 space-y-4">
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
-          <Music className="h-4.5 w-4.5 text-purple-400" />
+          <Music className="h-4.5 w-4.5 text-[#3B82F6]" />
           <h4 className="text-xs font-mono font-bold text-white uppercase">
             Background Soundtrack Matcher
           </h4>
@@ -175,17 +175,17 @@ export default function AmbientSoundPicker({
       </div>
 
       {vibe && !loading && (
-        <div className="bg-neutral-950 p-4 rounded-xl border border-purple-500/20 space-y-3 text-[10px] font-mono animate-fade-in">
+        <div className="bg-neutral-950 p-4 rounded-xl border border-[#3B82F6]/20 space-y-3 text-[10px] font-mono animate-fade-in">
           <div className="flex justify-between items-center">
             <div className="space-y-1">
-              <span className="text-purple-400 font-bold uppercase tracking-widest text-[9px]">
+              <span className="text-[#3B82F6] font-bold uppercase tracking-widest text-[9px]">
                 System Recommendation
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {vibe.music_vibe_tags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className="bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded text-purple-200"
+                    className="bg-[#3B82F6]/10 border border-[#3B82F6]/20 px-2 py-0.5 rounded text-purple-200"
                   >
                     {tag}
                   </span>
@@ -198,7 +198,7 @@ export default function AmbientSoundPicker({
                   onSelectMusicTheme(vibe.music_vibe_tags[0]);
                 }
               }}
-              className="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-purple-600 hover:bg-[#3B82F6] text-white rounded-lg font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
             >
               <Check className="w-3 h-3" /> Apply Vibe
             </button>
@@ -227,7 +227,7 @@ export default function AmbientSoundPicker({
                   className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all ${
                     playingId === track.id
                       ? "bg-purple-600 text-white"
-                      : "bg-neutral-900 text-neutral-400 group-hover:text-purple-400"
+                      : "bg-neutral-900 text-neutral-400 group-hover:text-[#60A5FA]"
                   }`}
                 >
                   {playingId === track.id ? (

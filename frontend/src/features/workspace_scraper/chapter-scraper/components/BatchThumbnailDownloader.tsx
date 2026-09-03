@@ -166,7 +166,7 @@ export const BatchThumbnailDownloader: React.FC<BatchDownloaderProps> = ({
         </div>
         <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-purple-600 to-blue-600 h-full transition-all duration-300"
+            className="bg-gradient-to-r from-blue-600 to-blue-600 h-full transition-all duration-300"
             style={{
               width: `${(progress.current / progress.total) * 100}%`,
             }}

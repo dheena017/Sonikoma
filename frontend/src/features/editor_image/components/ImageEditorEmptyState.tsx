@@ -45,13 +45,13 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
       <rect width="800" height="1200" fill="url(#bg)"/>
       
       <!-- Frame 1 -->
-      <rect x="40" y="50" width="720" height="340" rx="16" fill="url(#p1)" stroke="#a855f7" stroke-width="3" filter="url(#glow)"/>
+      <rect x="40" y="50" width="720" height="340" rx="16" fill="url(#p1)" stroke="#3b82f6" stroke-width="3" filter="url(#glow)"/>
       <text x="400" y="190" fill="#ffffff" font-family="sans-serif" font-size="32" font-weight="900" text-anchor="middle" letter-spacing="2">DEMO WEBTOON PANEL 01</text>
-      <text x="400" y="230" fill="#c084fc" font-family="monospace" font-size="16" text-anchor="middle">SONIKOMA VISION PIPELINE</text>
+      <text x="400" y="230" fill="#60a5fa" font-family="monospace" font-size="16" text-anchor="middle">SONIKOMA VISION PIPELINE</text>
 
       <!-- Speech Bubble -->
-      <ellipse cx="230" cy="130" rx="110" ry="42" fill="#ffffff" stroke="#a855f7" stroke-width="3"/>
-      <polygon points="210,168 240,168 220,198" fill="#ffffff" stroke="#a855f7" stroke-width="3"/>
+      <ellipse cx="230" cy="130" rx="110" ry="42" fill="#ffffff" stroke="#3b82f6" stroke-width="3"/>
+      <polygon points="210,168 240,168 220,198" fill="#ffffff" stroke="#3b82f6" stroke-width="3"/>
       <text x="230" y="135" fill="#0f172a" font-family="sans-serif" font-size="15" font-weight="800" text-anchor="middle">Ready for Editing!</text>
 
       <!-- Frame 2 -->
@@ -80,7 +80,7 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
   return (
     <div className="w-full flex-1 min-h-screen flex flex-col items-center justify-center bg-[#080B11] text-neutral-200 relative overflow-hidden p-6 select-none">
       <div className="relative z-10 max-w-md w-full bg-neutral-900/50 backdrop-blur-xl border border-neutral-800/80 rounded-2xl p-6 sm:p-8 shadow-xl flex flex-col items-center text-center space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+        <div className="w-12 h-12 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6]">
           <Sparkles className="w-6 h-6" />
         </div>
 
@@ -95,7 +95,7 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
 
         {/* Action Buttons */}
         <div className="w-full space-y-2 pt-2">
-          <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer">
+          <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer">
             <UploadCloud className="w-4 h-4 shrink-0" />
             <span>Upload Images</span>
             <input
@@ -112,7 +112,7 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
               onClick={handleLoadSamplePanel}
               className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-200 text-xs font-mono font-medium transition-all cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+              <Sparkles className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
               <span>Load Sample</span>
             </button>
 

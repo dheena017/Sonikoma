@@ -115,23 +115,23 @@ export default function PanelTranslationTool({
       <div className="rounded-2xl border border-neutral-800/80 bg-neutral-950/70 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h5 className="text-[11px] font-mono font-bold uppercase tracking-[0.25em] text-purple-300">
+            <h5 className="text-[11px] font-mono font-bold uppercase tracking-[0.25em] text-[#60A5FA]">
               Translation workflow
             </h5>
             <p className="mt-1 text-sm text-neutral-400">
               Localize dialogue and review compliance in one place.
             </p>
           </div>
-          <div className="rounded-full border border-purple-500/20 bg-purple-500/10 px-3 py-1 text-[10px] font-mono font-semibold uppercase tracking-[0.2em] text-purple-300">
+          <div className="rounded-full border border-[#3B82F6]/20 bg-[#3B82F6]/10 px-3 py-1 text-[10px] font-mono font-semibold uppercase tracking-[0.2em] text-[#60A5FA]">
             AI assisted
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-purple-500/10 bg-gradient-to-br from-neutral-950/95 via-neutral-900/80 to-purple-950/20 p-4 space-y-3 shadow-[0_20px_40px_rgba(0,0,0,0.28)]">
+        <div className="rounded-2xl border border-[#3B82F6]/10 bg-gradient-to-br from-neutral-950/95 via-neutral-900/80 to-purple-950/20 p-4 space-y-3 shadow-[0_20px_40px_rgba(0,0,0,0.28)]">
           <div className="flex items-center justify-between">
-            <h5 className="text-[11px] font-mono font-bold text-purple-300 uppercase tracking-wider">
+            <h5 className="text-[11px] font-mono font-bold text-[#60A5FA] uppercase tracking-wider">
               Dialogue translation
             </h5>
             <span className="rounded-full border border-neutral-800 bg-neutral-900/60 px-2 py-1 text-[9px] font-mono text-neutral-500">
@@ -171,7 +171,7 @@ export default function PanelTranslationTool({
                   onClick={handleTranslate}
                   disabled={translating || !panel.speech_text}
                   aria-label="Translate this panel"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 disabled:opacity-40 text-white transition-all cursor-pointer"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-fuchsia-600 hover:from-blue-500 hover:to-fuchsia-500 disabled:opacity-40 text-white transition-all cursor-pointer"
                 >
                   {translating ? (
                     <Sparkles className="h-4 w-4 animate-pulse" />
@@ -186,7 +186,7 @@ export default function PanelTranslationTool({
                   onClick={handleBatchTranslate}
                   disabled={batchTranslating || !panels?.length}
                   aria-label="Translate all panels"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 disabled:opacity-40 transition-all cursor-pointer"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#60A5FA] hover:bg-[#3B82F6]/20 disabled:opacity-40 transition-all cursor-pointer"
                 >
                   {batchTranslating ? (
                     <Layers3 className="h-4 w-4 animate-pulse" />
@@ -219,9 +219,9 @@ export default function PanelTranslationTool({
           )}
         </div>
 
-        <div className="rounded-2xl border border-purple-500/10 bg-gradient-to-br from-neutral-950/95 via-neutral-900/80 to-purple-950/20 p-4 space-y-3 shadow-[0_20px_40px_rgba(0,0,0,0.28)]">
+        <div className="rounded-2xl border border-[#3B82F6]/10 bg-gradient-to-br from-neutral-950/95 via-neutral-900/80 to-purple-950/20 p-4 space-y-3 shadow-[0_20px_40px_rgba(0,0,0,0.28)]">
           <div className="flex items-center justify-between">
-            <h5 className="text-[11px] font-mono font-bold text-purple-300 uppercase tracking-wider">
+            <h5 className="text-[11px] font-mono font-bold text-[#60A5FA] uppercase tracking-wider">
               Compliance scan
             </h5>
             <span className="rounded-full border border-neutral-800 bg-neutral-900/60 px-2 py-1 text-[9px] font-mono text-neutral-500">

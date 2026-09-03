@@ -195,7 +195,7 @@ export default function LayerSeparationPanel({
 
       {/* Overview Card */}
       <div className="bg-[#111115] border border-white/5 rounded-2xl p-4 space-y-2">
-        <h4 className="text-[11px] font-mono text-purple-400 uppercase font-black tracking-wider">
+        <h4 className="text-[11px] font-mono text-[#3B82F6] uppercase font-black tracking-wider">
           AI Motion Prep Suite
         </h4>
         <p className="text-[10px] text-neutral-400 font-sans leading-relaxed">
@@ -213,10 +213,10 @@ export default function LayerSeparationPanel({
           disabled={isProcessingLayers}
           className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
             isProcessingLayers
-              ? "bg-purple-900/10 text-purple-400 border-purple-800/20 cursor-not-allowed"
+              ? "bg-purple-900/10 text-[#3B82F6] border-purple-800/20 cursor-not-allowed"
               : hasLayers
-              ? "bg-purple-950/40 text-purple-300 border-purple-850 hover:bg-purple-900/30"
-              : "bg-purple-600 hover:bg-purple-500 text-white border-purple-500/20 shadow-md shadow-purple-900/20"
+              ? "bg-purple-950/40 text-[#60A5FA] border-purple-850 hover:bg-purple-900/30"
+              : "bg-purple-600 hover:bg-[#3B82F6] text-white border-[#3B82F6]/20 shadow-md shadow-purple-900/20"
           }`}
         >
           {isProcessingLayers ? (
@@ -256,7 +256,7 @@ export default function LayerSeparationPanel({
           disabled={isDebuggingYolo}
           className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
             isDebuggingYolo
-              ? "bg-purple-900/10 text-purple-400 border-purple-800/20 cursor-not-allowed"
+              ? "bg-purple-900/10 text-[#3B82F6] border-purple-800/20 cursor-not-allowed"
               : "bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border-white/10"
           }`}
         >
@@ -290,7 +290,7 @@ export default function LayerSeparationPanel({
                     href={activeStoryboardPanel?.layers?.background_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-purple-400 underline hover:text-purple-300"
+                    className="text-[#3B82F6] underline hover:text-[#93C5FD]"
                   >
                     {activeStoryboardPanel?.layers?.background_url
                       ?.split("/")
@@ -303,7 +303,7 @@ export default function LayerSeparationPanel({
                     href={activeStoryboardPanel?.layers?.character_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-purple-400 underline hover:text-purple-300"
+                    className="text-[#3B82F6] underline hover:text-[#93C5FD]"
                   >
                     {activeStoryboardPanel?.layers?.character_url
                       ?.split("/")
@@ -316,7 +316,7 @@ export default function LayerSeparationPanel({
                     href={activeStoryboardPanel?.layers?.text_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-purple-400 underline hover:text-purple-300"
+                    className="text-[#3B82F6] underline hover:text-[#93C5FD]"
                   >
                     {activeStoryboardPanel?.layers?.text_url?.split("/").pop() ||
                       "text.png"}
@@ -369,7 +369,7 @@ export default function LayerSeparationPanel({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="relative max-w-3xl w-full bg-neutral-950 border border-white/10 rounded-3xl overflow-hidden shadow-2xl p-6 flex flex-col space-y-4 max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-white/5 pb-3">
-              <h3 className="text-xs font-mono text-purple-400 uppercase font-black tracking-wider">
+              <h3 className="text-xs font-mono text-[#3B82F6] uppercase font-black tracking-wider">
                 YOLO Bubble Detections
               </h3>
               <button

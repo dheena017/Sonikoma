@@ -97,8 +97,8 @@ function SectionHeader({
   icon: Icon,
   title,
   subtitle,
-  iconColor = "#a855f7",
-  iconBg = "#a855f720",
+  iconColor = "#3b82f6",
+  iconBg = "#3b82f620",
 }: {
   icon: React.ElementType;
   title: string;
@@ -154,7 +154,7 @@ function SliderRow({
   step,
   unit,
   onChange,
-  color = "#a855f7",
+  color = "#3b82f6",
 }: {
   label: string;
   value: number;
@@ -418,15 +418,15 @@ const VideoPreviewAdvancedSettings = React.memo(
                 icon={Tv}
                 title="Output Specifications"
                 subtitle="Aspect ratio, frame rate, and codec format"
-                iconColor="#a855f7"
-                iconBg="#a855f720"
+                iconColor="#3b82f6"
+                iconBg="#3b82f620"
               />
 
               <div className="space-y-5">
                 {/* Aspect Ratio */}
                 <div className="space-y-2">
                   <label className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1.5">
-                    <Layout className="h-3.5 w-3.5 text-purple-400" />
+                    <Layout className="h-3.5 w-3.5 text-[#3B82F6]" />
                     Aspect Ratio
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -463,13 +463,13 @@ const VideoPreviewAdvancedSettings = React.memo(
                   step={6}
                   unit=" FPS"
                   onChange={setFrameRate}
-                  color="#a855f7"
+                  color="#3b82f6"
                 />
 
                 {/* Video Format */}
                 <div className="space-y-2">
                   <label className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1.5">
-                    <Disc className="h-3.5 w-3.5 text-purple-400" />
+                    <Disc className="h-3.5 w-3.5 text-[#3B82F6]" />
                     Output Codec
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -757,7 +757,7 @@ const VideoPreviewAdvancedSettings = React.memo(
 
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { id: "obsidian", name: "Obsidian", color: "#a855f7", desc: "Dark purple" },
+                  { id: "obsidian", name: "Obsidian", color: "#3b82f6", desc: "Dark purple" },
                   { id: "cyberpunk", name: "Cyberpunk", color: "#06b6d4", desc: "Neon cyan" },
                   { id: "slate", name: "Slate", color: "#94a3b8", desc: "Cool grey" },
                   { id: "indigo", name: "Indigo", color: "#6366f1", desc: "Deep indigo" },
@@ -817,7 +817,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                       <div className="flex gap-1.5 flex-shrink-0 ml-2">
                         <button
                           onClick={() => handleLoadPreset(p.name)}
-                          className="text-[10px] px-2 py-1 rounded-lg font-bold text-purple-400 hover:bg-purple-600/20 transition-colors cursor-pointer"
+                          className="text-[10px] px-2 py-1 rounded-lg font-bold text-[#3B82F6] hover:bg-[#3B82F6]/20 transition-colors cursor-pointer"
                         >
                           Load
                         </button>
@@ -842,7 +842,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                     placeholder="e.g. Action Comic Preset"
                     value={presetName}
                     onChange={(e) => setPresetName(e.target.value)}
-                    className="flex-1 bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-purple-500 outline-none placeholder-neutral-600"
+                    className="flex-1 bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-[#3B82F6] outline-none placeholder-neutral-600"
                   />
                   <button
                     type="submit"

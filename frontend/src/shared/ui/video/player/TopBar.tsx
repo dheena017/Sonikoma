@@ -43,14 +43,14 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className="h-7 w-7 rounded-lg bg-purple-600/15 border border-purple-500/30 flex items-center justify-center">
-          <Monitor className="h-3.5 w-3.5 text-purple-400" />
+        <div className="h-7 w-7 rounded-lg bg-purple-600/15 border border-[#3B82F6]/30 flex items-center justify-center">
+          <Monitor className="h-3.5 w-3.5 text-[#3B82F6]" />
         </div>
         <div>
           <span
             title={videoUrl ?? undefined}
             aria-label={videoUrl ?? undefined}
-            className="text-[10px] font-mono text-purple-400 uppercase font-black tracking-widest block"
+            className="text-[10px] font-mono text-[#3B82F6] uppercase font-black tracking-widest block"
           >
             {previewLabel}
           </span>
@@ -61,7 +61,7 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
                 : "Preview Track"}
             </span>
             {/* PANEL/SCENE COUNTER CHIP */}
-            <span className="bg-neutral-900/90 border border-neutral-800/80 rounded px-2 py-0.5 text-[9px] font-mono font-bold text-purple-300 tracking-wider">
+            <span className="bg-neutral-900/90 border border-neutral-800/80 rounded px-2 py-0.5 text-[9px] font-mono font-bold text-[#60A5FA] tracking-wider">
               {panelCounterText}
             </span>
           </div>

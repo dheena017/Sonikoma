@@ -46,7 +46,7 @@ export const AppExtensionCard: React.FC<AppExtensionCardProps> = ({
           className={`px-2.5 py-1.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shrink-0 ${
             isInstalled
               ? "bg-green-600/80 hover:bg-red-600/80 text-white"
-              : "bg-white/15 hover:bg-purple-600 text-white"
+              : "bg-white/15 hover:bg-[#3B82F6] text-white"
           }`}
         >
           {isInstalled ? (

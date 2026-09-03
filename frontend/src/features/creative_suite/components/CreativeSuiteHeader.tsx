@@ -311,10 +311,10 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className="icon-pill cursor-pointer transition-all relative hover:bg-purple-500/20 hover:text-purple-300"
+              className="icon-pill cursor-pointer transition-all relative hover:bg-[#3B82F6]/20 hover:text-[#93C5FD]"
               aria-label="Active Project Selector"
             >
-              <FolderSync className="h-4 w-4 text-purple-400" />
+              <FolderSync className="h-4 w-4 text-[#3B82F6]" />
               {activeProjectId && activeProjectData && (
                 <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
               )}
@@ -326,7 +326,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
             aria-label="Open User profile"
           >
             <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
@@ -334,7 +334,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
                 activeUser?.username ||
                 (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
               <img
                 key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
                 src={getUserAvatarUrl(activeUser)}

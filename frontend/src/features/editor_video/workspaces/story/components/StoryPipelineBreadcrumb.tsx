@@ -21,14 +21,14 @@ export const StoryPipelineBreadcrumb: React.FC<
             <div
               className={`flex items-center gap-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full transition-all whitespace-nowrap ${
                 step.active
-                  ? "bg-purple-600/30 text-purple-200 border border-purple-500/30 shadow-[0_0_8px_rgba(168,85,247,0.18)]"
+                  ? "bg-purple-600/30 text-purple-200 border border-[#3B82F6]/30 "
                   : "text-neutral-500 border border-transparent"
               }`}
             >
               <span>{step.label}</span>
             </div>
             {idx < steps.length - 1 && (
-              <ChevronRight className="h-2.5 w-2.5 text-purple-500/40 shrink-0" />
+              <ChevronRight className="h-2.5 w-2.5 text-[#3B82F6]/40 shrink-0" />
             )}
           </React.Fragment>
         ))}

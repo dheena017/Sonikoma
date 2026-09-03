@@ -37,7 +37,7 @@ export function TerminalLogsFilter({
         <select
           value={activeFilter}
           onChange={(e) => setActiveFilter(e.target.value as any)}
-          className="bg-neutral-900 border border-neutral-800 text-neutral-200 rounded-lg px-3 py-1.5 text-[10px] focus:border-purple-500 focus:outline-none cursor-pointer font-bold font-mono transition-colors shadow-sm"
+          className="bg-neutral-900 border border-neutral-800 text-neutral-200 rounded-lg px-3 py-1.5 text-[10px] focus:border-[#3B82F6] focus:outline-none cursor-pointer font-bold font-mono transition-colors shadow-sm"
         >
           <option value="all">All ({consoleLogs.length})</option>
           <option value="errors">Errors ({errorCount})</option>
@@ -54,7 +54,7 @@ export function TerminalLogsFilter({
           placeholder="Search logs..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-neutral-900 border border-neutral-900/60 text-neutral-200 rounded-lg pl-7 pr-7 py-1 text-[10px] focus:border-purple-500 focus:outline-none placeholder-neutral-500 transition-colors"
+          className="w-full bg-neutral-900 border border-neutral-900/60 text-neutral-200 rounded-lg pl-7 pr-7 py-1 text-[10px] focus:border-[#3B82F6] focus:outline-none placeholder-neutral-500 transition-colors"
         />
         <Search className="absolute left-2.5 h-3 w-3 text-neutral-600 pointer-events-none" />
         {searchQuery && (

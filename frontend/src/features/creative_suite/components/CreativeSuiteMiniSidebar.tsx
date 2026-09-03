@@ -119,7 +119,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             active
-              ? "h-5 bg-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.9)] opacity-100"
+              ? "h-5 bg-[#3B82F6]  opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -132,12 +132,12 @@ const CreativeSuiteMiniSidebarInner: React.FC<
           className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none"
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 shadow-[0_0_20px_rgba(59,130,246,0.6)] text-white scale-105"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
                 : isLocked
-                ? "bg-neutral-950 border border-neutral-900 opacity-40 cursor-not-allowed"
-                : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
+                ? "bg-[#121212] border border-[#2F2F2F] opacity-40 cursor-not-allowed"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
             }`}
           >
             <Icon
@@ -146,7 +146,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<
                   ? "text-white"
                   : isLocked
                   ? "text-neutral-700"
-                  : "text-neutral-400 group-hover:text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
@@ -208,7 +208,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Main Dashboard"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_28px_rgba(59,130,246,0.8)] active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all  hover: active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
           >
             <ExternalLink className="w-[18px] h-[18px] shrink-0" />
           </button>

@@ -826,8 +826,8 @@ export default function ProjectConfirmModal({
               {/* Layout & Narration */}
               <div className={cardCls}>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="p-1.5 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
-                    <Video className="h-3.5 w-3.5 text-cyan-400" />
+                  <div className="p-1.5 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                    <Video className="h-3.5 w-3.5 text-blue-400" />
                   </div>
                   <span className="text-xs font-bold text-white">Video Format &amp; Tone</span>
                 </div>

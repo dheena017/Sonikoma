@@ -57,7 +57,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set duration");
               handleBulkSetDuration();
             }}
-            className="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold py-1 rounded transition-colors cursor-pointer"
+            className="flex-1 bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-bold py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
           </button>
@@ -87,7 +87,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set motion");
               handleBulkSetMotion();
             }}
-            className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+            className="bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
           </button>
@@ -118,7 +118,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set preset");
               handleBulkSetPreset();
             }}
-            className="bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+            className="bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
           </button>
@@ -136,9 +136,9 @@ export default function StoryboardBulkOps({
           onClick={handleBatchMagicMotion}
           className={`w-full py-2 rounded text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer h-7 ${
             isBatchMagicProcessing
-              ? "bg-purple-900/10 text-purple-400 border-purple-800/20 cursor-not-allowed"
+              ? "bg-purple-900/10 text-[#3B82F6] border-purple-800/20 cursor-not-allowed"
               : selectedCount > 0
-              ? "bg-purple-600 hover:bg-purple-500 text-white border-purple-500/20 shadow-md shadow-purple-900/20"
+              ? "bg-purple-600 hover:bg-[#3B82F6] text-white border-[#3B82F6]/20 shadow-md shadow-purple-900/20"
               : "bg-neutral-900/40 text-neutral-500 border-neutral-800/40 cursor-not-allowed"
           }`}
         >

@@ -428,11 +428,11 @@ export const ActiveProjectSelectorDrawer: React.FC<
             return (
               <div className="p-4 border-b border-white/10 bg-gradient-to-b from-[#131427] to-[#0d0e19] space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold text-purple-400 tracking-wider flex items-center gap-1.5 font-mono">
-                    <Activity className="w-3.5 h-3.5 text-purple-400 animate-spin" />{" "}
+                  <span className="text-[10px] uppercase font-bold text-[#3B82F6] tracking-wider flex items-center gap-1.5 font-mono">
+                    <Activity className="w-3.5 h-3.5 text-[#3B82F6] animate-spin" />{" "}
                     Active Project Context
                   </span>
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 font-mono">
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 text-[#60A5FA] font-mono">
                     Loading...
                   </span>
                 </div>
@@ -449,17 +449,17 @@ export const ActiveProjectSelectorDrawer: React.FC<
 
           if (!activeProjectId || !activeProjectData) {
             return (
-              <div className="p-4 border-b border-white/10 bg-gradient-to-b from-[#131427] to-[#0d0e19] space-y-3">
+              <div className="p-4 border-b border-[#2F2F2F] bg-[#121212] space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5 font-mono">
-                    <Zap className="w-3.5 h-3.5 text-amber-400" /> No Active
-                    Project
+                    <Zap className="w-3.5 h-3.5 text-amber-400" /> NO ACTIVE
+                    PROJECT
                   </span>
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-neutral-700 bg-neutral-850 text-neutral-400 font-mono">
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full border border-[#2F2F2F] bg-[#1E1E1E] text-neutral-400 font-mono">
                     Idle
                   </span>
                 </div>
-                <div className="bg-[#14201d] border border-white/10 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-sm">
                   <div>
                     <h4 className="font-extrabold text-xs text-white">
                       No project currently active
@@ -474,9 +474,9 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         setDrawerOpen(false);
                         navigateTo("/scraper");
                       }}
-                      className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shrink-0 flex items-center gap-1.5 cursor-pointer"
+                      className="px-3.5 py-2 bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-white rounded-xl text-xs font-bold transition-all shadow-sm hover: shrink-0 flex items-center gap-1.5 cursor-pointer active:scale-95 group"
                     >
-                      <PlusCircle className="w-3.5 h-3.5" />
+                      <PlusCircle className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white transition-colors" />
                       <span>New Project</span>
                     </button>
                   )}
@@ -523,7 +523,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
             <div className="p-4 border-b border-[#2F2F2F] bg-[#181818] space-y-3.5">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] uppercase font-black text-[#3B82F6] tracking-wider flex items-center gap-2 font-mono">
-                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] shadow-[0_0_6px_#3B82F6]" />
+                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] " />
                   Active Project Context
                 </span>
                 <span
@@ -676,7 +676,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   </div>
                   <div className="w-full h-2 rounded-full bg-[#121212] overflow-hidden border border-[#2F2F2F]">
                     <div
-                      className="h-full bg-gradient-to-r from-[#3B82F6] to-[#00FFFF] transition-all duration-500 rounded-full"
+                      className="h-full bg-gradient-to-r from-[#3B82F6] to-[#3B82F6] transition-all duration-500 rounded-full"
                       style={{ width: `${activeProgressPct}%` }}
                     />
                   </div>
@@ -897,8 +897,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`px-3 py-1.5 rounded-xl transition-all text-xs font-medium whitespace-nowrap cursor-pointer ${
                   activeTab === tab.id
-                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm font-bold"
-                    : "text-[#9CA3AF] hover:text-white hover:bg-[#262626]"
+                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
+                    : "text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-[#3B82F6] hover:bg-[#2A2A2A]"
                 }`}
               >
                 {tab.label}

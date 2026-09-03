@@ -14,7 +14,7 @@ export default function CardPreview({
 }: CardPreviewProps) {
   return (
     <div className="flex items-center justify-center p-4">
-      <div className="relative w-72 h-44 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-800 p-6 flex flex-col justify-between text-left text-white shadow-xl shadow-purple-950/20 overflow-hidden font-sans select-none">
+      <div className="relative w-72 h-44 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-800 p-6 flex flex-col justify-between text-left text-white shadow-xl shadow-purple-950/20 overflow-hidden font-sans select-none">
         <div className="absolute top-[-10%] right-[-10%] w-32 h-32 rounded-full bg-indigo-500/20 blur-xl pointer-events-none" />
 
         <div className="flex items-center justify-between">

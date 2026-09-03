@@ -40,10 +40,10 @@ export default function CanvasCropSelection({
 
   const themeColorClass = isOutOfTolerance
     ? "border-orange-500"
-    : "border-purple-400";
+    : "border-[#60A5FA]";
   const badgeColorClass = isOutOfTolerance
     ? "text-orange-400 border-orange-800/40"
-    : "text-purple-400 border-purple-800/40";
+    : "text-[#3B82F6] border-purple-800/40";
   const glowColor = isOutOfTolerance
     ? "rgba(249,115,22,0.3)"
     : "rgba(139,92,246,0.25)";
@@ -104,7 +104,7 @@ export default function CanvasCropSelection({
               onResizeStart("nw", e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
-          className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+          className="absolute -top-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
         />
         <div
           onMouseDown={(e) => {
@@ -117,7 +117,7 @@ export default function CanvasCropSelection({
               onResizeStart("ne", e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
-          className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+          className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
         />
         <div
           onMouseDown={(e) => {
@@ -130,7 +130,7 @@ export default function CanvasCropSelection({
               onResizeStart("sw", e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
-          className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-purple-500 rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+          className="absolute -bottom-1.5 -left-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nesw-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
         />
         <div
           onMouseDown={(e) => {
@@ -143,7 +143,7 @@ export default function CanvasCropSelection({
               onResizeStart("se", e.touches[0].clientX, e.touches[0].clientY);
             }
           }}
-          className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-purple-500 rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+          className="absolute -bottom-1.5 -right-1.5 w-3.5 h-3.5 bg-white border-2 border-[#3B82F6] rounded-full cursor-nwse-resize pointer-events-auto z-50 hover:scale-125 active:scale-95 transition-transform shadow-[0_0_10px_rgba(139,92,246,0.5)]"
         />
 
         {/* Edge handles */}

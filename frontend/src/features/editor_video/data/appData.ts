@@ -38,7 +38,7 @@ export const MOCK_APP_EXTENSIONS: AppExtension[] = [
     icon: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=100&auto=format&fit=crop&q=80",
     installed: true,
     badge: "AI TTS",
-    color: "from-purple-900/40 to-indigo-900/40 border-purple-500/30",
+    color: "from-purple-900/40 to-indigo-900/40 border-[#3B82F6]/30",
   },
   {
     id: "app-giphy",

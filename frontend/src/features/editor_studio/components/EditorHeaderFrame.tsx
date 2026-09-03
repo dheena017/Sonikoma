@@ -15,7 +15,7 @@ export default function EditorHeaderFrame({
 }: EditorHeaderFrameProps) {
   return (
     <div
-      className={`relative flex items-center justify-between w-full min-h-12 px-3.5 shrink-0 bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 rounded-2xl backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)] select-none gap-2 z-10 ${className}`}
+      className={`relative flex items-center justify-between w-full min-h-12 px-3.5 shrink-0 bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-[#3B82F6]/30 rounded-2xl backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)] select-none gap-2 z-10 ${className}`}
     >
       <div className="flex items-center gap-2.5 shrink-0 min-w-0">
         {left}

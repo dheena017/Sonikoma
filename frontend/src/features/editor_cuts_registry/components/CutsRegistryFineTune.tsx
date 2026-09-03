@@ -87,10 +87,10 @@ export function CutsRegistryFineTune({
   handleNudge,
 }: CutsRegistryFineTuneProps) {
   return (
-    <div className="bg-black/30 border border-purple-500/15 p-3 rounded-xl space-y-3">
+    <div className="bg-black/30 border border-[#3B82F6]/15 p-3 rounded-xl space-y-3">
       <div className="flex items-center gap-1.5">
-        <Sliders className="h-3 w-3 text-purple-400" />
-        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-purple-400">
+        <Sliders className="h-3 w-3 text-[#3B82F6]" />
+        <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#3B82F6]">
           {selectedSliceId
             ? "Fine-Tune Selected Crop Tool"
             : "Fine-Tune Selection"}
@@ -154,7 +154,7 @@ export function CutsRegistryFineTune({
           <div key={label}>
             <div className="flex justify-between items-center text-[9px] font-mono text-neutral-600 mb-1">
               <span>{label}</span>
-              <span className="text-purple-400 font-bold">{value}%</span>
+              <span className="text-[#3B82F6] font-bold">{value}%</span>
             </div>
             <div className="relative h-1.5 rounded-full bg-neutral-800/80 overflow-hidden">
               <div

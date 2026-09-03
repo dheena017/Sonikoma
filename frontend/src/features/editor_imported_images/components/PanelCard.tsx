@@ -101,7 +101,7 @@ function PanelCard({
       case "Too Tall Strip":
         return "bg-rose-950/40 border-rose-800/40 text-rose-350 shadow-[0_0_8px_rgba(239,68,68,0.15)] animate-pulse";
       case "Tall Strip":
-        return "bg-purple-950/40 border-purple-800/40 text-purple-300";
+        return "bg-purple-950/40 border-purple-800/40 text-[#60A5FA]";
       case "Landscape":
         return "bg-sky-950/40 border-sky-800/40 text-sky-300";
       default:
@@ -269,10 +269,10 @@ function PanelCard({
           ? "w-full min-w-0"
           : "w-[240px] sm:w-[260px] shrink-0",
         isProcessing
-          ? "border-2 border-purple-500 bg-purple-950/20 shadow-[0_0_24px_rgba(168,85,247,0.45)] ring-1 ring-purple-500/40 scale-[1.02]"
+          ? "border-2 border-[#3B82F6] bg-purple-950/20  ring-1 ring-purple-500/40 scale-[1.02]"
           : isSelected
-          ? "border-purple-500 bg-purple-950/20 shadow-md ring-1 ring-purple-500/20 scale-[1.02]"
-          : "border-neutral-800/60 bg-neutral-950 hover:border-purple-500/50 hover:shadow-md hover:scale-[1.02]",
+          ? "border-[#3B82F6] bg-purple-950/20 shadow-md ring-1 ring-purple-500/20 scale-[1.02]"
+          : "border-neutral-800/60 bg-neutral-950 hover:border-[#3B82F6]/50 hover:shadow-md hover:scale-[1.02]",
         className || "",
       ].join(" ")}
     >

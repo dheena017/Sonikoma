@@ -51,7 +51,7 @@ export default function SeriesPublishModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800/80 bg-neutral-955/60">
           <div className="flex items-center gap-2.5">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 text-purple-300 border border-purple-500/30">
+            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-[#60A5FA] border border-[#3B82F6]/30">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -80,7 +80,7 @@ export default function SeriesPublishModal({
             }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
               activeTab === "video"
-                ? "border-purple-500 text-purple-400 bg-neutral-900"
+                ? "border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
                 : "border-transparent text-neutral-400 hover:text-white"
             }`}
           >
@@ -93,7 +93,7 @@ export default function SeriesPublishModal({
             }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
               activeTab === "archive"
-                ? "border-purple-500 text-purple-400 bg-neutral-900"
+                ? "border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
                 : "border-transparent text-neutral-400 hover:text-white"
             }`}
           >
@@ -106,7 +106,7 @@ export default function SeriesPublishModal({
             }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
               activeTab === "pdf"
-                ? "border-purple-500 text-purple-400 bg-neutral-900"
+                ? "border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
                 : "border-transparent text-neutral-400 hover:text-white"
             }`}
           >
@@ -119,7 +119,7 @@ export default function SeriesPublishModal({
             }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold font-mono transition-all border-b-2 cursor-pointer ${
               activeTab === "audio"
-                ? "border-purple-500 text-purple-400 bg-neutral-900"
+                ? "border-[#3B82F6] text-[#3B82F6] bg-neutral-900"
                 : "border-transparent text-neutral-400 hover:text-white"
             }`}
           >
@@ -133,7 +133,7 @@ export default function SeriesPublishModal({
             <div className="space-y-5">
               <div className="p-4 bg-neutral-955 rounded-2xl border border-neutral-800 space-y-4">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2 font-mono">
-                  <Film className="w-4 h-4 text-purple-400" /> Video Render
+                  <Film className="w-4 h-4 text-[#3B82F6]" /> Video Render
                   Settings
                 </h3>
 
@@ -150,7 +150,7 @@ export default function SeriesPublishModal({
                           onClick={() => setResolution(res)}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             resolution === res
-                              ? "bg-purple-600/20 border-purple-500 text-purple-300"
+                              ? "bg-purple-600/20 border-[#3B82F6] text-[#60A5FA]"
                               : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                           }`}
                         >
@@ -172,7 +172,7 @@ export default function SeriesPublishModal({
                           onClick={() => setAspectRatio(ratio)}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             aspectRatio === ratio
-                              ? "bg-purple-600/20 border-purple-500 text-purple-300"
+                              ? "bg-purple-600/20 border-[#3B82F6] text-[#60A5FA]"
                               : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                           }`}
                         >
@@ -212,7 +212,7 @@ export default function SeriesPublishModal({
                 <button
                   onClick={handleStartExport}
                   disabled={isExporting}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:brightness-110 text-white font-extrabold text-xs uppercase tracking-wider shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 hover:brightness-110 text-white font-extrabold text-xs uppercase tracking-wider shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
                 >
                   {isExporting ? (
                     <>
@@ -232,7 +232,7 @@ export default function SeriesPublishModal({
 
           {activeTab === "archive" && (
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
-              <Download className="w-10 h-10 text-purple-400 mx-auto" />
+              <Download className="w-10 h-10 text-[#3B82F6] mx-auto" />
               <div>
                 <h3 className="text-base font-bold text-white">
                   Export CBZ / ZIP Package
@@ -246,7 +246,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Packaging CBZ archive for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download CBZ Archive
               </button>
@@ -255,7 +255,7 @@ export default function SeriesPublishModal({
 
           {activeTab === "pdf" && (
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
-              <FileText className="w-10 h-10 text-purple-400 mx-auto" />
+              <FileText className="w-10 h-10 text-[#3B82F6] mx-auto" />
               <div>
                 <h3 className="text-base font-bold text-white">
                   Printable PDF Storyboard
@@ -269,7 +269,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Generating PDF storyboard for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Generate PDF Sheet
               </button>
@@ -278,7 +278,7 @@ export default function SeriesPublishModal({
 
           {activeTab === "audio" && (
             <div className="p-6 bg-neutral-955 rounded-2xl border border-neutral-800 text-center space-y-4">
-              <Music className="w-10 h-10 text-purple-400 mx-auto" />
+              <Music className="w-10 h-10 text-[#3B82F6] mx-auto" />
               <div>
                 <h3 className="text-base font-bold text-white">
                   Synthesized Audio Track
@@ -292,7 +292,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Exporting audio track for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download MP3 Track
               </button>

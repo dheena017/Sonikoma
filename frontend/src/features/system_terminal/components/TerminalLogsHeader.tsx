@@ -40,15 +40,15 @@ export function TerminalLogsHeader({
     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-neutral-800/90 pb-4 overflow-x-auto">
       {/* Header Title */}
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-3xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-transparent to-slate-950 shadow-sm shadow-purple-500/10">
-          <Terminal className="h-5 w-5 text-purple-300" />
+        <div className="flex h-11 w-11 items-center justify-center rounded-3xl border border-[#3B82F6]/20 bg-gradient-to-br from-blue-500/10 via-transparent to-slate-950 shadow-sm shadow-purple-500/10">
+          <Terminal className="h-5 w-5 text-[#60A5FA]" />
         </div>
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold text-sm text-white">Terminal Logs</h3>
             {consoleLogs.length > 0 && (
-              <span className="inline-flex items-center rounded-full border border-purple-800/60 bg-purple-950/70 px-2.5 py-0.5 text-[10px] font-semibold text-purple-300">
+              <span className="inline-flex items-center rounded-full border border-purple-800/60 bg-purple-950/70 px-2.5 py-0.5 text-[10px] font-semibold text-[#60A5FA]">
                 {consoleLogs.length} entries
               </span>
             )}
@@ -65,7 +65,7 @@ export function TerminalLogsHeader({
           onClick={() => setAutoScroll(!autoScroll)}
           className={`h-9 min-w-[72px] rounded-2xl border px-3 text-[10px] font-mono font-semibold transition duration-200 flex items-center justify-center gap-2 ${
             autoScroll
-              ? "text-purple-300 border-purple-500/40 bg-purple-950/50 hover:bg-purple-950/70"
+              ? "text-[#60A5FA] border-[#3B82F6]/40 bg-purple-950/50 hover:bg-purple-950/70"
               : "text-neutral-300 border-neutral-800/60 bg-neutral-950/80 hover:bg-neutral-900"
           }`}
           title={autoScroll ? "Auto-scroll enabled" : "Auto-scroll disabled"}

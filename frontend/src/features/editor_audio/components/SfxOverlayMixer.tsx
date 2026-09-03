@@ -71,7 +71,7 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
     <div className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 space-y-4">
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
-          <Volume2 className="h-4.5 w-4.5 text-purple-400" />
+          <Volume2 className="h-4.5 w-4.5 text-[#3B82F6]" />
           <h4 className="text-xs font-mono font-bold text-white uppercase">
             AI Sound Mixing Coordinator{" "}
             <span className="text-purple-450 font-bold lowercase text-[10px] ml-1">
@@ -108,7 +108,7 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
                 key={p.id}
                 className="flex flex-col sm:flex-row gap-3 bg-neutral-950 p-3 rounded-lg border border-neutral-850 text-[10px] font-mono justify-between items-start sm:items-center"
               >
-                <span className="text-purple-400 font-bold">Panel #{p.id}</span>
+                <span className="text-[#3B82F6] font-bold">Panel #{p.id}</span>
                 <div className="flex flex-wrap gap-4 text-neutral-450">
                   <div>
                     <span className="text-neutral-500">Ambient Vibe:</span>{" "}
@@ -118,13 +118,13 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
                   </div>
                   <div>
                     <span className="text-neutral-500">Mix ratio:</span>{" "}
-                    <span className="text-purple-400 font-bold">
+                    <span className="text-[#3B82F6] font-bold">
                       {(data.ambient_volume_ratio * 100).toFixed(0)}%
                     </span>
                   </div>
                   <div>
                     <span className="text-neutral-500">Delay:</span>{" "}
-                    <span className="text-purple-400 font-bold">
+                    <span className="text-[#3B82F6] font-bold">
                       {data.sfx_delay_ms} ms
                     </span>
                   </div>

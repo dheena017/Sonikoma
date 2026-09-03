@@ -95,7 +95,7 @@ export default function YouTubeAppNavBar({
                     className="w-6 h-6 rounded-full object-cover border border-neutral-700 group-hover:border-red-500/50 transition-colors shadow-sm"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 to-purple-600 flex items-center justify-center font-bold text-white text-[9px] font-sans uppercase shadow-sm">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center font-bold text-white text-[9px] font-sans uppercase shadow-sm">
                     {channelTitle ? channelTitle.charAt(0) : "Y"}
                   </div>
                 )}

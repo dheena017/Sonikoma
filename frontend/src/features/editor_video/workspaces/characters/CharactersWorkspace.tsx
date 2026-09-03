@@ -100,7 +100,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("Character Creator")}
-                className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer shadow-sm transition-all"
+                className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer shadow-sm transition-all"
               >
                 <Plus className="h-3 w-3" />
                 <span>+ Add Cast</span>
@@ -128,7 +128,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
         {activeTab === "Character Creator" && (
           <form onSubmit={handleAddCharacter} className="space-y-3 p-3 bg-neutral-900/80 rounded-2xl border border-purple-900/40 shadow-md font-mono text-xs">
             <h4 className="font-bold text-white uppercase text-xs flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+              <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
               Create Project Character
             </h4>
 
@@ -137,11 +137,11 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
               <img
                 src={getDicebearAvatar(newCharName || "Hero", newCharStyle)}
                 alt="Avatar Preview"
-                className="w-14 h-14 rounded-full border-2 border-purple-400 bg-neutral-800 shrink-0 shadow-md"
+                className="w-14 h-14 rounded-full border-2 border-[#60A5FA] bg-neutral-800 shrink-0 shadow-md"
               />
               <div className="min-w-0 flex-1">
                 <p className="text-white font-bold text-sm truncate">{newCharName || "Character Name"}</p>
-                <p className="text-purple-300 text-[10px]">{newCharRole} • {newCharVoice}</p>
+                <p className="text-[#60A5FA] text-[10px]">{newCharRole} • {newCharVoice}</p>
                 <span className="text-[8px] text-neutral-500 font-mono">Open DiceBear Anime Avatar</span>
               </div>
             </div>
@@ -153,7 +153,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                 placeholder="e.g. Sung Jin-Woo, Kageyama..."
                 value={newCharName}
                 onChange={(e) => setNewCharName(e.target.value)}
-                className="w-full px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:border-purple-400"
+                className="w-full px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:border-[#60A5FA]"
                 required
               />
             </div>
@@ -189,7 +189,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 mt-2"
+              className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 mt-2"
             >
               <Plus className="h-4 w-4" /> Save Character to Project
             </button>
@@ -205,7 +205,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
             {characters.map((char) => (
               <div key={char.id} className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Mic className="h-4 w-4 text-purple-400" />
+                  <Mic className="h-4 w-4 text-[#3B82F6]" />
                   <div>
                     <p className="text-xs font-bold text-white">{char.name}</p>
                     <p className="text-[10px] text-neutral-400 font-mono">{char.voiceActor}</p>
@@ -219,7 +219,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                     }
                     onTriggerFeedback(`Set active studio voice to ${char.voiceActor}`);
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600 border border-purple-500/40 text-white text-[10px] font-mono font-bold cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-[#3B82F6] border border-[#3B82F6]/40 text-white text-[10px] font-mono font-bold cursor-pointer"
                 >
                   Bind Voice
                 </button>

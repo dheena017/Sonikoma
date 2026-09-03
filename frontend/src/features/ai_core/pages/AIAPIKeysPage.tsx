@@ -349,7 +349,7 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
           <div className="space-y-2 max-w-2xl">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
               API Keys &amp;{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                 Provider Vault
               </span>
             </h1>
@@ -391,7 +391,7 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
               {/* Card Header */}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-purple-400">
+                  <div className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-[#3B82F6]">
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
@@ -410,7 +410,7 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
                     href={provider.console_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-1.5 rounded-lg bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-purple-300 transition-colors"
+                    className="p-1.5 rounded-lg bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-[#93C5FD] transition-colors"
                     title="Get API Key from provider console"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -423,7 +423,7 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
                 <div className="space-y-2.5">
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-neutral-400 flex items-center gap-1">
-                      <Key className="w-3 h-3 text-purple-400" /> {provider.name} API Key
+                      <Key className="w-3 h-3 text-[#3B82F6]" /> {provider.name} API Key
                     </label>
                     <div className="relative">
                       <input
@@ -431,7 +431,7 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
                         placeholder={`Enter ${provider.name} API Key...`}
                         value={userKey}
                         onChange={(e) => handleKeyChange(provider.id, e.target.value)}
-                        className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-3 pr-20 py-2 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-purple-500"
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-3 pr-20 py-2 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-[#3B82F6]"
                       />
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                         <button
@@ -461,7 +461,7 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
                   <div className="flex items-center justify-between text-[11px] font-mono pt-1 min-h-[26px]">
                     <div className="flex items-center gap-1.5">
                       {testState?.loading ? (
-                        <span className="flex items-center gap-1.5 text-purple-400 font-medium animate-pulse">
+                        <span className="flex items-center gap-1.5 text-[#3B82F6] font-medium animate-pulse">
                           <Loader2 className="w-3.5 h-3.5 animate-spin" /> Verifying key...
                         </span>
                       ) : testState && testState.success ? (

@@ -119,14 +119,14 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
       onClick={(e) => onSelect(index, e)}
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
-          ? "border-purple-500 bg-purple-950/25 ring-2 ring-purple-500/60 shadow-[0_0_20px_rgba(168,85,247,0.35)]"
-          : "border-white/10 bg-[#090914] hover:border-purple-500/50 shadow-md hover:shadow-[0_8px_25px_rgba(168,85,247,0.2)]"
+          ? "border-[#3B82F6] bg-purple-950/25 ring-2 ring-purple-500/60 "
+          : "border-white/10 bg-[#090914] hover:border-[#3B82F6]/50 shadow-md hover:shadow-[0_8px_25px_rgba(59,130,246,0.2)]"
       }`}
     >
       {/* Top Media Bar & Details */}
       <div className="flex p-2.5 gap-3 bg-[#0e0f1e] border-b border-white/5 items-start">
         {/* Left Thumbnail Image */}
-        <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-black/60 shrink-0 border border-white/10 group-hover:border-purple-500/40 transition-colors">
+        <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-black/60 shrink-0 border border-white/10 group-hover:border-[#3B82F6]/40 transition-colors">
           <img
             src={displayUrl}
             alt={`Panel #${index + 1}`}
@@ -137,7 +137,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
           <div
             className={`absolute top-1.5 left-1.5 h-4 w-4 rounded flex items-center justify-center border transition-all z-10 ${
               isSelected
-                ? "bg-purple-600 border-purple-400 text-white"
+                ? "bg-purple-600 border-[#60A5FA] text-white"
                 : "bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
             }`}
           >
@@ -160,7 +160,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
           )}
 
           {/* Panel # Badge */}
-          <span className="absolute bottom-1 right-1 text-[8px] font-black font-mono bg-black/85 text-purple-200 px-1 py-0.5 rounded border border-purple-500/30 backdrop-blur-md">
+          <span className="absolute bottom-1 right-1 text-[8px] font-black font-mono bg-black/85 text-purple-200 px-1 py-0.5 rounded border border-[#3B82F6]/30 backdrop-blur-md">
             #{index + 1}
           </span>
         </div>
@@ -170,12 +170,12 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
           {/* Header Row: Duration & Camera FX */}
           <div className="flex items-center justify-between gap-1">
             <span className="inline-flex items-center gap-1 text-[9px] font-mono font-bold text-neutral-300 bg-neutral-900/90 px-2 py-0.5 rounded-md border border-neutral-800">
-              <Clock className="h-2.5 w-2.5 text-purple-400" />
+              <Clock className="h-2.5 w-2.5 text-[#3B82F6]" />
               {duration}s
             </span>
 
-            <span className="inline-flex items-center gap-1 text-[9px] font-mono text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded-md border border-purple-500/30 truncate max-w-[120px]">
-              <Camera className="h-2.5 w-2.5 text-purple-400 shrink-0" />
+            <span className="inline-flex items-center gap-1 text-[9px] font-mono text-[#60A5FA] bg-purple-950/60 px-2 py-0.5 rounded-md border border-[#3B82F6]/30 truncate max-w-[120px]">
+              <Camera className="h-2.5 w-2.5 text-[#3B82F6] shrink-0" />
               <span className="truncate">{cameraMotion}</span>
             </span>
           </div>
@@ -187,14 +187,14 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                 <textarea
                   value={dialogueText}
                   onChange={(e) => setDialogueText(e.target.value)}
-                  className="w-full h-12 bg-neutral-900/90 border border-purple-500/50 rounded-lg p-1.5 text-white text-[10px] font-mono resize-none focus:outline-none"
+                  className="w-full h-12 bg-neutral-900/90 border border-[#3B82F6]/50 rounded-lg p-1.5 text-white text-[10px] font-mono resize-none focus:outline-none"
                   autoFocus
                 />
                 <div className="flex justify-end gap-1">
                   <button
                     type="button"
                     onClick={handleDialogueSave}
-                    className="px-2 py-0.5 rounded bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-bold"
+                    className="px-2 py-0.5 rounded bg-purple-600 hover:bg-[#3B82F6] text-white text-[9px] font-bold"
                   >
                     Save
                   </button>
@@ -228,7 +228,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                 onClick={handleToggleAudioPlay}
                 className={`inline-flex items-center gap-1 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
                   isPlayingAudio
-                    ? "bg-purple-600 border-purple-400 text-white shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse"
+                    ? "bg-purple-600 border-[#60A5FA] text-white  animate-pulse"
                     : "bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border-emerald-500/40"
                 }`}
                 title={isPlayingAudio ? "Pause Audio" : "Play Voice Track"}
@@ -247,7 +247,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                   e.stopPropagation();
                   onGenerateVoice?.(index);
                 }}
-                className="inline-flex items-center gap-1 text-[8px] font-mono font-semibold text-neutral-400 hover:text-purple-300 bg-neutral-900/80 hover:bg-purple-950/40 px-2 py-0.5 rounded-full border border-neutral-800 hover:border-purple-500/30 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1 text-[8px] font-mono font-semibold text-neutral-400 hover:text-[#93C5FD] bg-neutral-900/80 hover:bg-purple-950/40 px-2 py-0.5 rounded-full border border-neutral-800 hover:border-[#3B82F6]/30 transition-all cursor-pointer"
                 title="Generate AI TTS Voice for this panel"
               >
                 <VolumeX className="h-2.5 w-2.5 text-neutral-500" />
@@ -263,8 +263,8 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
             )}
 
             {bgm && (
-              <span className="inline-flex items-center gap-1 text-[8px] font-mono text-cyan-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-500/30 truncate max-w-[90px]">
-                <Music className="h-2 w-2 text-cyan-400 shrink-0" />
+              <span className="inline-flex items-center gap-1 text-[8px] font-mono text-blue-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-blue-500/30 truncate max-w-[90px]">
+                <Music className="h-2 w-2 text-blue-400 shrink-0" />
                 <span className="truncate">{bgm}</span>
               </span>
             )}

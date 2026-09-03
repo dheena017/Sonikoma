@@ -56,9 +56,9 @@ const StoryboardSidebar = ({
           title="Open Storyboard Navigator"
           className="w-full flex flex-col items-center gap-2 pt-2 cursor-pointer group"
         >
-          <PanelLeft className="w-4 h-4 text-purple-400 group-hover:text-purple-300 transition-colors" />
+          <PanelLeft className="w-4 h-4 text-[#3B82F6] group-hover:text-[#93C5FD] transition-colors" />
           <span
-            className="text-[8px] font-black font-mono uppercase text-neutral-500 group-hover:text-purple-400 transition-colors tracking-widest"
+            className="text-[8px] font-black font-mono uppercase text-neutral-500 group-hover:text-[#60A5FA] transition-colors tracking-widest"
             style={{
               writingMode: "vertical-rl",
               textOrientation: "mixed",
@@ -87,7 +87,7 @@ const StoryboardSidebar = ({
               type="button"
               onClick={() => setTimelineEpSortAscending((prev) => !prev)}
               title="Toggle Sort Order (Ascending / Descending)"
-              className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-purple-300 border border-neutral-800 rounded-lg transition-all cursor-pointer"
+              className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-[#60A5FA] border border-neutral-800 rounded-lg transition-all cursor-pointer"
             >
               {timelineEpSortAscending ? "1 → N" : "N → 1"}
             </button>
@@ -112,7 +112,7 @@ const StoryboardSidebar = ({
             value={timelineEpSearchQuery}
             onChange={(e) => setTimelineEpSearchQuery(e.target.value)}
             placeholder="Filter sequence..."
-            className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/60 font-mono transition-all"
+            className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#3B82F6]/60 font-mono transition-all"
           />
           {timelineEpSearchQuery && (
             <button
@@ -126,7 +126,7 @@ const StoryboardSidebar = ({
         </div>
 
         <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-2">
-          <div className="flex items-center justify-between text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono mb-2">
+          <div className="flex items-center justify-between text-[9px] font-black text-[#60A5FA] uppercase tracking-widest font-mono mb-2">
             <span>Sequence</span>
             <span>
               {safeEpisodeGroups.length > 0 ? safeEpisodeGroups.length : "All"}
@@ -138,12 +138,12 @@ const StoryboardSidebar = ({
             onClick={() => setSelectedTimelineEp("all")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
               selectedTimelineEp === "all"
-                ? "bg-purple-600/25 border-purple-500/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.25)]"
+                ? "bg-purple-600/25 border-[#3B82F6]/60 text-white "
                 : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
             }`}
           >
             <span className="truncate">All Scenes</span>
-            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
+            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-[#60A5FA] border border-purple-900/40 shrink-0">
               {safeEpisodeGroups.length > 0
                 ? safeEpisodeGroups.reduce((acc, g) => acc + g.count, 0)
                 : panels.length}
@@ -154,7 +154,7 @@ const StoryboardSidebar = ({
 
         {safeEpisodeGroups.length > 0 ? (
           <div className="flex flex-col gap-2 pt-2 border-t border-neutral-800 flex-1 min-h-0">
-            <div className="flex items-center justify-between text-[9px] font-black text-purple-300 uppercase tracking-widest font-mono shrink-0">
+            <div className="flex items-center justify-between text-[9px] font-black text-[#60A5FA] uppercase tracking-widest font-mono shrink-0">
               <span>Episodes</span>
               <span>({safeEpisodeGroups.length})</span>
             </div>
@@ -210,7 +210,7 @@ const StoryboardSidebar = ({
                         onMouseLeave={() => setHoveredTimelineEpIdx(null)}
                         className={`w-full flex flex-col gap-1 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left border cursor-pointer ${
                           isSelected
-                            ? "bg-purple-600/25 border-purple-400 text-purple-200 shadow-[0_0_16px_rgba(168,85,247,0.25)]"
+                            ? "bg-purple-600/25 border-[#60A5FA] text-purple-200 "
                             : "bg-neutral-900/50 border-neutral-850 text-neutral-350 hover:text-white"
                         }`}
                       >
@@ -227,7 +227,7 @@ const StoryboardSidebar = ({
                               {formatDisplayEpisodeLabel(grp.episodeLabel)}
                             </span>
                           </div>
-                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-purple-300 border border-purple-900/40 shrink-0">
+                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-[#60A5FA] border border-purple-900/40 shrink-0">
                             {grp.count}f
                           </span>
                         </div>

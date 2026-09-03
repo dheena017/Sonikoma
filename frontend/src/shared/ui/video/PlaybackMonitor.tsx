@@ -1056,7 +1056,7 @@ export default function VideoPreviewCinemaPlayer({
 
       {/* FAST-FORWARD 2X BADGE */}
       {isFastForwarding && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-purple-600/90 text-white font-mono text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl shadow-purple-950 animate-pulse border border-purple-400/30">
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-purple-600/90 text-white font-mono text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl shadow-purple-950 animate-pulse border border-[#60A5FA]/30">
           <RotateCcw className="h-3.5 w-3.5 animate-spin" />
           <span>2x Fast-Forward Active</span>
         </div>
@@ -1066,7 +1066,7 @@ export default function VideoPreviewCinemaPlayer({
       {isPiPActive && isMock && (
         <div className="fixed bottom-24 right-6 w-72 h-60 bg-neutral-900/95 border-2 border-purple-600 rounded-2xl shadow-2xl z-[80] flex flex-col overflow-hidden animate-fade-in pointer-events-auto">
           <div className="bg-neutral-950 px-3 py-1.5 flex items-center justify-between border-b border-neutral-800">
-            <span className="text-[9px] font-mono text-purple-400 font-bold uppercase tracking-wider flex items-center gap-1">
+            <span className="text-[9px] font-mono text-[#3B82F6] font-bold uppercase tracking-wider flex items-center gap-1">
               <Tv className="h-3 w-3" /> PiP Preview Mode
             </span>
             <button
@@ -1126,7 +1126,7 @@ export default function VideoPreviewCinemaPlayer({
       {/* MAIN SCREEN CANVAS */}
       <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden bg-[#09090f]">
         {/* Workspace dot grid pattern */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:16px_16px]" />
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]" />
 
         <div className="relative w-full h-full flex items-center justify-center bg-transparent overflow-hidden">
           {mode === "video" ? (
@@ -1271,7 +1271,7 @@ export default function VideoPreviewCinemaPlayer({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-center p-6 space-y-3 select-none my-auto">
-              <div className="h-12 w-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+              <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] ">
                 <Film className="h-5 w-5" />
               </div>
               <div className="space-y-1">
@@ -1296,7 +1296,7 @@ export default function VideoPreviewCinemaPlayer({
               <div className="flex flex-col gap-1.5 max-w-xl text-center">
                 {activePanelNow.narrative && (
                   <p className="bg-black/80 text-neutral-200 text-[10px] md:text-xs font-sans px-3.5 py-1.5 rounded-xl border border-white/5 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg">
-                    <span className="text-purple-400 font-mono text-[8.5px] uppercase tracking-wider block mb-0.5 font-black">
+                    <span className="text-[#3B82F6] font-mono text-[8.5px] uppercase tracking-wider block mb-0.5 font-black">
                       NARRATOR
                     </span>
                     {activePanelNow.narrative}
@@ -1304,7 +1304,7 @@ export default function VideoPreviewCinemaPlayer({
                 )}
                 {activePanelNow.speech_text && (
                   <p
-                    className={`bg-black/90 text-white font-bold font-sans px-4 py-2 rounded-xl border border-purple-500/20 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg ${subtitleSizeClass}`}
+                    className={`bg-black/90 text-white font-bold font-sans px-4 py-2 rounded-xl border border-[#3B82F6]/20 backdrop-blur-sm tracking-wide leading-relaxed shadow-lg ${subtitleSizeClass}`}
                   >
                     {activePanelNow.speech_text}
                   </p>

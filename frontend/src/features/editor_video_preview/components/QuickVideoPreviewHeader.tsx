@@ -65,7 +65,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
 
   const titleBlock = (
     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.35)] shrink-0">
+      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] flex items-center justify-center  shrink-0">
         <Sparkles className="h-4 w-4 text-white" />
       </div>
       <div className="min-w-0">
@@ -92,7 +92,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
         onClick={() => setMonitorTab("timeline")}
         className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
           monitorTab === "timeline"
-            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white "
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
         }`}
       >
@@ -110,13 +110,13 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
         onClick={() => setMonitorTab("video")}
         className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
           monitorTab === "video"
-            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white "
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
         }`}
       >
         <Video className="h-3.5 w-3.5" />
         <span>Final Video</span>
-        <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-purple-950/60 border border-purple-800/40 text-purple-300 uppercase">
+        <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-purple-950/60 border border-purple-800/40 text-[#60A5FA] uppercase">
           MP4
         </span>
       </button>
@@ -131,12 +131,12 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
           className={`h-8 px-2.5 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md ${
             showAdvancedSettings
-              ? "bg-purple-600/30 border-purple-500 text-purple-200"
+              ? "bg-purple-600/30 border-[#3B82F6] text-purple-200"
               : "bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white"
           }`}
           title="Render and Vision Settings"
         >
-          <Sliders className="h-3.5 w-3.5 text-purple-400" />
+          <Sliders className="h-3.5 w-3.5 text-[#3B82F6]" />
           <span className="hidden sm:inline">Settings</span>
           <ChevronDown className={`h-3 w-3 transition-transform ${showAdvancedSettings ? "rotate-180" : ""}`} />
         </button>
@@ -161,7 +161,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           className="h-8 px-3 rounded-xl border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50"
           title="Save Storyboard State"
         >
-          <Save className="h-3.5 w-3.5 text-purple-400" />
+          <Save className="h-3.5 w-3.5 text-[#3B82F6]" />
           <span className="hidden sm:inline">{isSaving ? "Saving..." : "Save"}</span>
         </button>
       )}
@@ -171,7 +171,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           type="button"
           onClick={finalExport}
           disabled={isRendering}
-          className="h-8 px-3.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_20px_rgba(168,85,247,0.6)] active:scale-95 disabled:opacity-50"
+          className="h-8 px-3.5 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer  hover: active:scale-95 disabled:opacity-50"
           title="Export and render final video"
         >
           <Video className="h-3.5 w-3.5" />

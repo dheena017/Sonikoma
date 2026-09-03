@@ -223,10 +223,10 @@
 [data-mode="light"] .text-purple-455 {
   color: #6d28d9 !important;
 }
-[data-mode="light"] .text-purple-400 {
+[data-mode="light"] .text-[#3B82F6] {
   color: #7c3aed !important;
 }
-[data-mode="light"] .text-purple-300 {
+[data-mode="light"] .text-[#60A5FA] {
   color: #6d28d9 !important;
 }
 [data-mode="light"] .text-indigo-400 {
@@ -235,7 +235,7 @@
 [data-mode="light"] .text-violet-400 {
   color: #7c3aed !important;
 }
-[data-mode="light"] .text-cyan-400 {
+[data-mode="light"] .text-blue-400 {
   color: #0891b2 !important;
 }
 [data-mode="light"] .text-amber-400 {
@@ -515,64 +515,64 @@
 
 /* ── Sidebar active item ──────────────────────────────────── */
 [data-mode="light"] .bg-purple-950\/20 {
-  background-color: rgba(168, 85, 247, 0.08) !important;
+  background-color: rgba(59, 130, 246, 0.08) !important;
 }
 [data-mode="light"] .bg-purple-950\/15 {
-  background-color: rgba(168, 85, 247, 0.06) !important;
+  background-color: rgba(59, 130, 246, 0.06) !important;
 }
 [data-mode="light"] .bg-purple-950\/10 {
-  background-color: rgba(168, 85, 247, 0.05) !important;
+  background-color: rgba(59, 130, 246, 0.05) !important;
 }
 [data-mode="light"] .bg-purple-950\/5 {
-  background-color: rgba(168, 85, 247, 0.03) !important;
+  background-color: rgba(59, 130, 246, 0.03) !important;
 }
 [data-mode="light"] .bg-purple-950\/25 {
-  background-color: rgba(168, 85, 247, 0.08) !important;
+  background-color: rgba(59, 130, 246, 0.08) !important;
 }
 [data-mode="light"] .bg-purple-950\/30 {
-  background-color: rgba(168, 85, 247, 0.09) !important;
+  background-color: rgba(59, 130, 246, 0.09) !important;
 }
 [data-mode="light"] .bg-purple-950\/40 {
-  background-color: rgba(168, 85, 247, 0.1) !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
 }
 [data-mode="light"] .bg-purple-950\/50 {
-  background-color: rgba(168, 85, 247, 0.12) !important;
+  background-color: rgba(59, 130, 246, 0.12) !important;
 }
 [data-mode="light"] .bg-purple-950\/60 {
-  background-color: rgba(168, 85, 247, 0.14) !important;
+  background-color: rgba(59, 130, 246, 0.14) !important;
 }
 [data-mode="light"] .bg-purple-950\/70 {
-  background-color: rgba(168, 85, 247, 0.16) !important;
+  background-color: rgba(59, 130, 246, 0.16) !important;
 }
 [data-mode="light"] .bg-purple-950\/80 {
-  background-color: rgba(168, 85, 247, 0.18) !important;
+  background-color: rgba(59, 130, 246, 0.18) !important;
 }
 [data-mode="light"] .bg-purple-950\/85 {
-  background-color: rgba(168, 85, 247, 0.2) !important;
+  background-color: rgba(59, 130, 246, 0.2) !important;
 }
 [data-mode="light"] .bg-purple-950 {
-  background-color: rgba(168, 85, 247, 0.1) !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
 }
 
 /* ── Purple borders ───────────────────────────────────────── */
 [data-mode="light"] .border-purple-900\/60 {
-  border-color: rgba(168, 85, 247, 0.25) !important;
+  border-color: rgba(59, 130, 246, 0.25) !important;
 }
 [data-mode="light"] .border-purple-900\/40 {
-  border-color: rgba(168, 85, 247, 0.18) !important;
+  border-color: rgba(59, 130, 246, 0.18) !important;
 }
 [data-mode="light"] .border-purple-900\/30 {
-  border-color: rgba(168, 85, 247, 0.15) !important;
+  border-color: rgba(59, 130, 246, 0.15) !important;
 }
 [data-mode="light"] .border-purple-950 {
-  border-color: rgba(168, 85, 247, 0.2) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
 }
 
 /* ── Dark-family purple text ──────────────────────────────── */
-[data-mode="light"] .text-purple-300 {
+[data-mode="light"] .text-[#60A5FA] {
   color: #7c3aed !important;
 }
-[data-mode="light"] .text-purple-400 {
+[data-mode="light"] .text-[#3B82F6] {
   color: #9333ea !important;
 }
 
@@ -840,9 +840,9 @@
   background-color: rgba(233, 213, 255, 0.9) !important;
 }
 [data-mode="light"] .hover\:border-purple-600:hover {
-  border-color: #c084fc !important;
+  border-color: #60a5fa !important;
 }
-[data-mode="light"] .text-purple-300 {
+[data-mode="light"] .text-[#60A5FA] {
   color: #7e22ce !important;
 }
 
@@ -1097,7 +1097,7 @@
   border-color: #d4d4d8 !important;
 }
 
-[data-mode="light"] .focus\:border-purple-500:focus {
+[data-mode="light"] .focus\:border-[#3B82F6]:focus {
   border-color: #9333ea !important;
 }
 [data-mode="light"] .focus\:border-neutral-700:focus {
@@ -1134,16 +1134,16 @@
 }
 
 [data-mode="light"] .bg-purple-800\/30 {
-  background-color: rgba(168, 85, 247, 0.1) !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
 }
 [data-mode="light"] .border-purple-800\/30 {
-  border-color: rgba(168, 85, 247, 0.2) !important;
+  border-color: rgba(59, 130, 246, 0.2) !important;
 }
-[data-mode="light"] .border-purple-500\/15 {
-  border-color: rgba(168, 85, 247, 0.18) !important;
+[data-mode="light"] .border-[#3B82F6]\/15 {
+  border-color: rgba(59, 130, 246, 0.18) !important;
 }
-[data-mode="light"] .border-purple-500\/50 {
-  border-color: rgba(168, 85, 247, 0.4) !important;
+[data-mode="light"] .border-[#3B82F6]\/50 {
+  border-color: rgba(59, 130, 246, 0.4) !important;
 }
 
 [data-mode="light"] .bg-emerald-950\/20 {

@@ -83,8 +83,8 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3 pb-3 border-b border-white/10">
-        <div className="w-10 h-10 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
-          <Database className="h-5 w-5 text-purple-400" />
+        <div className="w-10 h-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/30 text-[#3B82F6] flex items-center justify-center  shrink-0">
+          <Database className="h-5 w-5 text-[#3B82F6]" />
         </div>
         <div>
           <h4 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
@@ -106,11 +106,11 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
             Saved correction pairs:
           </span>
         </div>
-        <div className="bg-purple-500/20 border border-purple-500/40 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-[0_0_12px_rgba(168,85,247,0.25)]">
-          <span className="text-xs font-mono font-black text-purple-300">
+        <div className="bg-[#3B82F6]/20 border border-[#3B82F6]/40 px-2.5 py-1 rounded-full flex items-center gap-1.5 ">
+          <span className="text-xs font-mono font-black text-[#60A5FA]">
             {sampleCount !== null ? sampleCount : "0"}
           </span>
-          <span className="text-[9px] font-mono text-purple-400 uppercase font-bold">
+          <span className="text-[9px] font-mono text-[#3B82F6] uppercase font-bold">
             PAIRS
           </span>
         </div>
@@ -119,7 +119,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
       {/* Fine-Tuning Controller Card */}
       <div className="bg-[#181924]/60 border border-white/10 rounded-2xl p-4 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-mono text-purple-400 uppercase font-bold tracking-wider block">
+          <span className="text-[10px] font-mono text-[#3B82F6] uppercase font-bold tracking-wider block">
             Fine-Tuning Controls
           </span>
           {isTraining && (
@@ -142,7 +142,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
             </div>
             <div className="w-full bg-neutral-950 h-2 rounded-full overflow-hidden border border-neutral-800 p-0.5">
               <div
-                className="bg-gradient-to-r from-purple-600 to-indigo-500 h-full rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(168,85,247,0.5)]"
+                className="bg-gradient-to-r from-blue-600 to-indigo-500 h-full rounded-full transition-all duration-500 "
                 style={{
                   width: `${
                     (trainingEpoch / (totalTrainingEpochs || 1)) * 100
@@ -156,7 +156,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
                   ([k, v]: [string, any]) => (
                     <div key={k} className="flex justify-between">
                       <span>{k}:</span>
-                      <span className="text-purple-400 font-bold">
+                      <span className="text-[#3B82F6] font-bold">
                         {v.toFixed(4)}
                       </span>
                     </div>
@@ -180,7 +180,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
             )}
 
             {!sampleCount || sampleCount === 0 ? (
-              <div className="text-xs text-purple-300/90 bg-purple-950/30 border border-purple-900/40 p-3 rounded-2xl leading-relaxed">
+              <div className="text-xs text-[#60A5FA]/90 bg-purple-950/30 border border-purple-900/40 p-3 rounded-2xl leading-relaxed">
                 💡 <strong>Get started:</strong> Save at least 1 mask correction
                 in the <strong>Eraser</strong> tool to unlock fine-tuning.
               </div>
@@ -193,7 +193,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
                   <select
                     value={epochsToTrain}
                     onChange={(e) => setEpochsToTrain(Number(e.target.value))}
-                    className="bg-neutral-950 border border-neutral-800 text-neutral-200 rounded-2xl px-3 py-2.5 text-xs font-mono cursor-pointer focus:outline-none focus:border-purple-500/60"
+                    className="bg-neutral-950 border border-neutral-800 text-neutral-200 rounded-2xl px-3 py-2.5 text-xs font-mono cursor-pointer focus:outline-none focus:border-[#3B82F6]/60"
                   >
                     <option value={5}>5 epochs (Fast)</option>
                     <option value={10}>10 epochs</option>
@@ -218,7 +218,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
                       );
                     }
                   }}
-                  className="w-full py-3.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-black tracking-widest uppercase transition-all shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-purple-400/30 cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-black tracking-widest uppercase transition-all shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-[#60A5FA]/30 cursor-pointer active:scale-95 flex items-center justify-center gap-2"
                 >
                   <Play className="w-4 h-4 fill-purple-200 text-purple-200" />
                   <span>Start Fine-Tuning</span>

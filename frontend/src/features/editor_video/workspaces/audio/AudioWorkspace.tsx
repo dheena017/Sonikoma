@@ -92,10 +92,10 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
           <div className="rounded-2xl bg-neutral-900/80 border border-purple-900/40 p-4 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-white font-mono uppercase flex items-center gap-1.5">
-                <Mic className="h-3.5 w-3.5 text-purple-400" />
+                <Mic className="h-3.5 w-3.5 text-[#3B82F6]" />
                 Live Microphone Voiceover
               </h4>
-              <span className="text-[10px] font-mono text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-800/40">
+              <span className="text-[10px] font-mono text-[#60A5FA] bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-800/40">
                 100% Real Browser Audio
               </span>
             </div>
@@ -114,7 +114,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                   key={i}
                   className={`w-1.5 rounded-full transition-all duration-75 ${
                     isRecording
-                      ? "bg-gradient-to-t from-purple-600 via-fuchsia-400 to-emerald-400"
+                      ? "bg-gradient-to-t from-blue-600 via-fuchsia-400 to-emerald-400"
                       : "bg-neutral-800"
                   }`}
                   style={{
@@ -171,7 +171,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={handleAddRecordedVoiceToTimeline}
-                  className="w-full py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md hover:shadow-purple-600/40 transition-all"
+                  className="w-full py-2 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md hover:shadow-purple-600/40 transition-all"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Voice Recording to A3 Track
@@ -195,10 +195,10 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
             ].map((v) => (
               <div
                 key={v.id}
-                className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 hover:border-purple-500/60 flex items-center justify-between shadow-sm transition-all"
+                className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 hover:border-[#3B82F6]/60 flex items-center justify-between shadow-sm transition-all"
               >
                 <div className="flex items-center gap-2.5">
-                  <Wand2 className="h-4 w-4 text-purple-400 shrink-0" />
+                  <Wand2 className="h-4 w-4 text-[#3B82F6] shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-white">{v.name}</p>
                     <p className="text-[10px] text-neutral-400 font-mono">{v.role}</p>
@@ -217,7 +217,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                         onTriggerFeedback(`Previewing ${v.name} voice`);
                       }
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-purple-300 text-[10px] font-mono font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-[#60A5FA] text-[10px] font-mono font-bold flex items-center gap-1 transition-colors cursor-pointer"
                   >
                     <Play className="h-2.5 w-2.5" /> Preview
                   </button>
@@ -230,7 +230,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                       }
                       onTriggerFeedback(`Set active voice actor to ${v.name}`);
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-mono font-bold transition-colors cursor-pointer"
                   >
                     Select
                   </button>

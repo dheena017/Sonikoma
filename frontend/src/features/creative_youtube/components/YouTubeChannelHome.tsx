@@ -250,14 +250,14 @@ export default function YouTubeChannelHome({
                   </span>
                 )}
                 {channel?.video_count && (
-                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-500/10 border border-purple-500/25 text-purple-300 font-bold shadow-sm">
-                    <Video className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 text-[#60A5FA] font-bold shadow-sm">
+                    <Video className="w-3.5 h-3.5 text-[#3B82F6]" />
                     <strong>{channel.video_count}</strong> videos
                   </span>
                 )}
                 {channel?.view_count && (
-                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-cyan-500/10 border border-cyan-500/25 text-cyan-300 font-bold shadow-sm">
-                    <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-500/10 border border-blue-500/25 text-blue-300 font-bold shadow-sm">
+                    <Eye className="w-3.5 h-3.5 text-blue-400" />
                     <strong>{channel.view_count}</strong> views
                   </span>
                 )}
@@ -325,9 +325,9 @@ export default function YouTubeChannelHome({
 
           <button
             onClick={() => onNavigateTab("playlists")}
-            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-purple-950/40 to-neutral-900/80 hover:from-purple-900/40 hover:to-neutral-850 border border-purple-500/30 hover:border-purple-500/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
+            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-purple-950/40 to-neutral-900/80 hover:from-purple-900/40 hover:to-neutral-850 border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
           >
-            <div className="p-2.5 rounded-xl bg-purple-600 text-white shadow-md shadow-purple-600/30 shrink-0 group-hover:scale-105 transition-transform">
+            <div className="p-2.5 rounded-xl bg-purple-600 text-white shadow-md shadow-sm shrink-0 group-hover:scale-105 transition-transform">
               <FolderPlus className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -626,7 +626,7 @@ export default function YouTubeChannelHome({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="p-2 bg-purple-500/10 border border-purple-500/25 rounded-xl text-purple-400">
+                    <div className="p-2 bg-[#3B82F6]/10 border border-[#3B82F6]/25 rounded-xl text-[#3B82F6]">
                       <ListMusic className="w-4 h-4" />
                     </div>
                     <div>
@@ -642,7 +642,7 @@ export default function YouTubeChannelHome({
                   {onNavigateTab && (
                     <button
                       onClick={() => onNavigateTab("playlists")}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-mono font-bold text-purple-300 hover:text-white transition-all cursor-pointer"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-xs font-mono font-bold text-[#60A5FA] hover:text-white transition-all cursor-pointer"
                     >
                       <span>Manage Playlists ({playlists.length})</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -657,7 +657,7 @@ export default function YouTubeChannelHome({
                       onClick={() =>
                         onNavigateTab && onNavigateTab("playlists")
                       }
-                      className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-purple-500/50 hover:shadow-xl transition-all cursor-pointer flex flex-col"
+                      className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-[#3B82F6]/50 hover:shadow-xl transition-all cursor-pointer flex flex-col"
                     >
                       <div className="relative aspect-video bg-neutral-950 flex items-center justify-center overflow-hidden">
                         {pl.thumbnail ? (
@@ -670,7 +670,7 @@ export default function YouTubeChannelHome({
                           <ListMusic className="w-10 h-10 text-neutral-600" />
                         )}
                         <div className="absolute inset-y-0 right-0 w-24 bg-black/85 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1 text-white">
-                          <Layers className="w-4 h-4 text-purple-300" />
+                          <Layers className="w-4 h-4 text-[#60A5FA]" />
                           <span className="text-xs font-black font-mono">
                             {pl.item_count ?? "?"}
                           </span>
@@ -680,7 +680,7 @@ export default function YouTubeChannelHome({
                         </div>
                       </div>
                       <div className="p-3.5 space-y-1">
-                        <h4 className="text-xs font-bold text-white truncate group-hover:text-purple-300 transition-colors font-sans">
+                        <h4 className="text-xs font-bold text-white truncate group-hover:text-[#93C5FD] transition-colors font-sans">
                           {pl.title}
                         </h4>
                         <p className="text-[10px] font-mono text-neutral-500 capitalize">
@@ -703,7 +703,7 @@ export default function YouTubeChannelHome({
                 {onNavigateTab && (
                   <button
                     onClick={() => onNavigateTab("playlists")}
-                    className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-purple-600/30 transition-all cursor-pointer inline-flex items-center gap-2"
+                    className="px-5 py-2.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
                   >
                     <FolderPlus className="w-4 h-4" />
                     <span>Create Playlist</span>
@@ -805,7 +805,7 @@ export default function YouTubeChannelHome({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-neutral-900 rounded-xl border border-neutral-800 text-purple-400">
+                  <div className="p-2 bg-neutral-900 rounded-xl border border-neutral-800 text-[#3B82F6]">
                     <Video className="w-4 h-4" />
                   </div>
                   <div>
@@ -899,9 +899,9 @@ export default function YouTubeChannelHome({
                           </span>
                           <button
                             onClick={() => onViewComments(vid.id)}
-                            className="flex items-center gap-1 hover:text-purple-300 transition-colors cursor-pointer"
+                            className="flex items-center gap-1 hover:text-[#93C5FD] transition-colors cursor-pointer"
                           >
-                            <MessageSquare className="w-3 h-3 text-purple-400" />{" "}
+                            <MessageSquare className="w-3 h-3 text-[#3B82F6]" />{" "}
                             {vid.comment_count}
                           </button>
                         </div>

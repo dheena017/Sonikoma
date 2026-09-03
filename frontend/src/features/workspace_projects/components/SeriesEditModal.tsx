@@ -86,7 +86,7 @@ export default function SeriesEditModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800/80 bg-neutral-955/50">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <div className="p-2 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -120,14 +120,14 @@ export default function SeriesEditModal({
           {/* Series Title */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5 font-mono">
-              <FileText className="w-3.5 h-3.5 text-purple-400" /> Series Title
+              <FileText className="w-3.5 h-3.5 text-[#3B82F6]" /> Series Title
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Solo Leveling"
-              className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors font-sans"
+              className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
               required
             />
           </div>
@@ -136,7 +136,7 @@ export default function SeriesEditModal({
             {/* Author */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5 font-mono">
-                <User className="w-3.5 h-3.5 text-purple-400" /> Author /
+                <User className="w-3.5 h-3.5 text-[#3B82F6]" /> Author /
                 Creator
               </label>
               <input
@@ -144,21 +144,21 @@ export default function SeriesEditModal({
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="e.g. Chugong"
-                className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors font-sans"
+                className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
               />
             </div>
 
             {/* Genre */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5 font-mono">
-                <Tag className="w-3.5 h-3.5 text-purple-400" /> Genre / Tag
+                <Tag className="w-3.5 h-3.5 text-[#3B82F6]" /> Genre / Tag
               </label>
               <input
                 type="text"
                 value={genre}
                 onChange={(e) => setGenre(e.target.value)}
                 placeholder="e.g. Fantasy Action"
-                className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors font-sans"
+                className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
               />
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function SeriesEditModal({
           {/* Cover Image URL */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5 font-mono">
-              <Image className="w-3.5 h-3.5 text-purple-400" /> Cover Image URL
+              <Image className="w-3.5 h-3.5 text-[#3B82F6]" /> Cover Image URL
             </label>
             <div className="flex gap-3">
               <input
@@ -174,7 +174,7 @@ export default function SeriesEditModal({
                 value={cover}
                 onChange={(e) => setCover(e.target.value)}
                 placeholder="https://images.example.com/cover.jpg"
-                className="flex-1 bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors font-sans"
+                className="flex-1 bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
               />
               {cover && (
                 <div className="w-10 h-10 rounded-xl overflow-hidden border border-neutral-750 shrink-0 bg-neutral-955">
@@ -198,7 +198,7 @@ export default function SeriesEditModal({
               value={synopsis}
               onChange={(e) => setSynopsis(e.target.value)}
               placeholder="Enter series summary or story background..."
-              className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors font-sans resize-none scrollbar-thin"
+              className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans resize-none scrollbar-thin"
             />
           </div>
 
@@ -214,7 +214,7 @@ export default function SeriesEditModal({
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-extrabold uppercase tracking-wider shadow-lg shadow-purple-900/40 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-extrabold uppercase tracking-wider shadow-lg shadow-purple-900/40 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
             >
               {isSaving ? (
                 <>

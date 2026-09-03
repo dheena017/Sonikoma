@@ -48,7 +48,7 @@ export const REAL_TEXT_PRESETS: TextPreset[] = [
     category: "narration",
     previewText: "[NOTIFICATION: PLAYER LEVEL INCREASED +10]",
     fontFamily: "Orbitron",
-    styleClass: "font-bold text-cyan-300 bg-cyan-950/80 px-3 py-1.5 rounded-lg border border-cyan-400/60 shadow-[0_0_12px_rgba(34,211,238,0.5)] text-xs",
+    styleClass: "font-bold text-blue-300 bg-cyan-950/80 px-3 py-1.5 rounded-lg border border-blue-400/60 shadow-[0_0_12px_rgba(34,211,238,0.5)] text-xs",
     badge: "System Prompt",
   },
   {

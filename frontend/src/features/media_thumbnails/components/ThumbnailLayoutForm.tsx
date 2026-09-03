@@ -44,7 +44,7 @@ export default function ThumbnailLayoutForm({
     <div className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-5 space-y-4">
       <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
         <div className="flex items-center gap-2">
-          <Layers className="h-4.5 w-4.5 text-purple-400" />
+          <Layers className="h-4.5 w-4.5 text-[#3B82F6]" />
           <h4 className="text-xs font-mono font-bold text-white uppercase">
             Graphic Artist Layering Instructions
           </h4>
@@ -101,7 +101,7 @@ export default function ThumbnailLayoutForm({
               {layout.glowing_elements.map((glow, idx) => (
                 <span
                   key={idx}
-                  className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-purple-300"
+                  className="bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded text-[#60A5FA]"
                 >
                   {glow}
                 </span>

@@ -205,7 +205,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
       {/* ── Canvas Stage Workspace ─────────────────────────────────────── */}
       <div className="flex-1 h-full flex items-center justify-center relative overflow-hidden bg-black/40 backdrop-blur-md">
         {/* Professional Canvas Editor Dot Grid Pattern */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:18px_18px]" />
+        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:18px_18px]" />
 
         {/* Canvas Frame — Edge-to-edge flush studio canvas */}
         <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-[#0e0a20]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl rounded-none border-0 flex items-center justify-center">
@@ -239,7 +239,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-purple-950/40 via-neutral-950/30 to-indigo-950/40 flex flex-col items-center justify-center gap-2 text-neutral-400 font-mono text-xs select-none p-6 text-center">
-                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+                  <div className="w-12 h-12 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] ">
                     <Film className="w-5 h-5" />
                   </div>
                   <span className="font-bold text-neutral-300 tracking-wider">
@@ -258,7 +258,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
             <div
               onClick={() => setSelectedLayer("character")}
               className={`absolute max-w-[85%] max-h-[85%] cursor-pointer transition-all z-20 ${selectedLayer === "character"
-                  ? "ring-2 ring-purple-400 border border-purple-500/60 shadow-[0_0_25px_rgba(168,85,247,0.5)]"
+                  ? "ring-2 ring-purple-400 border border-[#3B82F6]/60 "
                   : ""
                 }`}
               style={{
@@ -280,7 +280,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                   <div className="absolute -top-2 -right-2 h-3.5 w-3.5 bg-purple-400 border-2 border-black rounded-full shadow-md" />
                   <div className="absolute -bottom-2 -left-2 h-3.5 w-3.5 bg-purple-400 border-2 border-black rounded-full shadow-md" />
                   <div className="absolute -bottom-2 -right-2 h-3.5 w-3.5 bg-purple-400 border-2 border-black rounded-full shadow-md" />
-                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-widest pointer-events-none shadow-lg border border-purple-400/40 flex items-center gap-1">
+                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-widest pointer-events-none shadow-lg border border-[#60A5FA]/40 flex items-center gap-1">
                     <Move className="h-2.5 w-2.5" /> Character Layer
                   </div>
                 </>

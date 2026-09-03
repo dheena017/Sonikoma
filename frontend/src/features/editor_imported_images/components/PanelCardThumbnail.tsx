@@ -39,7 +39,7 @@ const getScrapedImageStatus = (url: string) => {
   if (url.includes("_cleaned")) {
     return {
       text: "CLEANED",
-      bg: "bg-gradient-to-r from-fuchsia-600 to-purple-600 border-purple-400/50 text-purple-100 shadow-[0_4px_12px_rgba(168,85,247,0.25)]",
+      bg: "bg-gradient-to-r from-fuchsia-600 to-blue-600 border-[#60A5FA]/50 text-purple-100 shadow-[0_4px_12px_rgba(59,130,246,0.25)]",
     };
   }
 
@@ -90,14 +90,14 @@ export function PanelCardThumbnail({
   const resolvedDisplayIdx = displayIdx ?? idx;
 
   return (
-    <div className="relative h-44 sm:h-48 rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
+    <div className="relative h-44 sm:h-48 rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-[#3B82F6]/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent z-10 pointer-events-none" />
 
       {/* Shimmer skeleton while loading */}
       {!isLoaded && !hasError && (
         <div className="absolute inset-0 bg-gradient-to-r from-neutral-900 via-neutral-850 to-neutral-900 animate-pulse z-0 flex items-center justify-center">
-          <div className="w-6 h-6 rounded-full border-2 border-purple-500/30 border-t-purple-500 animate-spin" />
+          <div className="w-6 h-6 rounded-full border-2 border-[#3B82F6]/30 border-t-purple-500 animate-spin" />
         </div>
       )}
 
@@ -110,7 +110,7 @@ export function PanelCardThumbnail({
           <button
             type="button"
             onClick={handleRetry}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-bold font-mono uppercase bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-purple-300 border border-neutral-800 hover:border-purple-500/40 rounded-xl cursor-pointer transition-all shadow-sm active:scale-95"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-bold font-mono uppercase bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-[#93C5FD] border border-neutral-800 hover:border-[#3B82F6]/40 rounded-xl cursor-pointer transition-all shadow-sm active:scale-95"
           >
             <RefreshCw className="h-3 w-3 animate-spin-reverse-once" />
             Reload Frame
@@ -195,8 +195,8 @@ export function PanelCardThumbnail({
         className={[
           "absolute top-2 left-2 z-20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
           isSelected
-            ? "bg-gradient-to-r from-purple-650 to-indigo-650 border-purple-400/50 text-white shadow-[0_4px_12px_rgba(168,85,247,0.35)]"
-            : "bg-neutral-900 border-neutral-700 text-purple-400 shadow-inner",
+            ? "bg-gradient-to-r from-purple-650 to-indigo-650 border-[#60A5FA]/50 text-white shadow-[0_4px_12px_rgba(59,130,246,0.35)]"
+            : "bg-neutral-900 border-neutral-700 text-[#3B82F6] shadow-inner",
         ].join(" ")}
       >
         #{resolvedDisplayIdx + 1}
@@ -237,7 +237,7 @@ export function PanelCardThumbnail({
           className={[
             "relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90",
             isSelected
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-400 shadow-[0_4px_12px_rgba(168,85,247,0.4)] scale-110"
+              ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] border-[#60A5FA] shadow-[0_4px_12px_rgba(59,130,246,0.4)] scale-110"
               : "bg-neutral-900/60 border-neutral-600/70 hover:border-neutral-450 opacity-0 group-hover:opacity-100",
           ].join(" ")}
         >
@@ -262,14 +262,14 @@ export function PanelCardThumbnail({
           <button
             onClick={handleRotateClockwise}
             title="Rotate 90° Clockwise"
-            className="p-1.5 rounded-xl text-neutral-450 hover:text-purple-300 hover:bg-purple-950/60 transition-all duration-150 cursor-pointer active:scale-90"
+            className="p-1.5 rounded-xl text-neutral-450 hover:text-[#93C5FD] hover:bg-purple-950/60 transition-all duration-150 cursor-pointer active:scale-90"
           >
             <RotateCw className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={handleFlipHorizontal}
             title="Flip Horizontally"
-            className="p-1.5 rounded-xl text-neutral-450 hover:text-purple-300 hover:bg-purple-950/60 transition-all duration-150 cursor-pointer active:scale-90"
+            className="p-1.5 rounded-xl text-neutral-450 hover:text-[#93C5FD] hover:bg-purple-950/60 transition-all duration-150 cursor-pointer active:scale-90"
           >
             <FlipHorizontal className="h-3.5 w-3.5" />
           </button>

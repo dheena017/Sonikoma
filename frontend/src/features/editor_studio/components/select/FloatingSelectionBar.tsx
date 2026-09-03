@@ -670,12 +670,12 @@ export function FloatingSelectionBar({
             className="fixed left-0 right-0 z-[10001] bg-neutral-950/90 backdrop-blur-2xl border-t border-b border-neutral-800/40 px-6 py-4 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] w-full animate-in slide-in-from-bottom-2 duration-200"
           >
             {/* Glowing Top Border Accent */}
-            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-purple-500/10 via-fuchsia-500/40 to-purple-500/10 blur-[0.5px]" />
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-blue-500/10 via-fuchsia-500/40 to-blue-500/10 blur-[0.5px]" />
 
             <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2">
               <div className="w-full flex items-center justify-between gap-2 mb-1.5 select-none">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-extrabold text-purple-400 uppercase tracking-widest font-mono">
+                  <span className="text-[10px] font-extrabold text-[#3B82F6] uppercase tracking-widest font-mono">
                     Extended Actions
                   </span>
                   <span className="text-[9px] text-neutral-400 font-bold font-mono px-2 py-0.5 bg-neutral-900 border border-neutral-800/80 rounded-lg shadow-inner">
@@ -723,9 +723,9 @@ export function FloatingSelectionBar({
                   type="button"
                   onClick={handleAnalyzeAll}
                   disabled={isAnalyzingAll || busyLocal}
-                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-purple-950/20 border-purple-800/40 hover:bg-purple-600 hover:border-purple-550 text-purple-300 hover:text-white transition-all active:scale-95 disabled:opacity-40"
+                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-purple-950/20 border-purple-800/40 hover:bg-[#3B82F6] hover:border-purple-550 text-[#60A5FA] hover:text-white transition-all active:scale-95 disabled:opacity-40"
                 >
-                  <Brain className="h-4 w-4 text-purple-400 group-hover:text-white" />{" "}
+                  <Brain className="h-4 w-4 text-[#3B82F6] group-hover:text-white" />{" "}
                   AI Analyze
                 </button>
               )}
@@ -751,9 +751,9 @@ export function FloatingSelectionBar({
               <button
                 type="button"
                 onClick={exportIndividual}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-cyan-500/10 hover:border-cyan-500/30 text-neutral-455 hover:text-cyan-300 transition-all active:scale-95"
+                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/30 text-neutral-455 hover:text-[#93C5FD] transition-all active:scale-95"
               >
-                <ImageIcon className="h-4 w-4 text-cyan-400" /> Export
+                <ImageIcon className="h-4 w-4 text-blue-400" /> Export
               </button>
 
               <button
@@ -835,7 +835,7 @@ export function FloatingSelectionBar({
                         ? "Storyboard Panels Selected"
                         : "Imported Assets Selected"}
                     </p>
-                    <p className="text-[9px] text-purple-400 font-mono leading-tight whitespace-nowrap">
+                    <p className="text-[9px] text-[#3B82F6] font-mono leading-tight whitespace-nowrap">
                       {selectedCount} of {totalCount}{" "}
                       {isTimeline ? "frames" : "images"}
                     </p>
@@ -844,9 +844,9 @@ export function FloatingSelectionBar({
 
                 {/* Progress */}
                 {(isAnyBusy || busyLocal) && (
-                  <div className="flex flex-col gap-1.5 px-3.5 py-2 rounded-xl bg-purple-950/25 border border-purple-800/40 text-purple-300 text-xs font-mono shrink-0">
+                  <div className="flex flex-col gap-1.5 px-3.5 py-2 rounded-xl bg-purple-950/25 border border-purple-800/40 text-[#60A5FA] text-xs font-mono shrink-0">
                     <div className="flex items-center gap-2">
-                      <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
                       <span className="font-bold tracking-tight whitespace-nowrap">
                         {isBatchCropping && batchProgress
                           ? `Cropping ${batchProgress.current}/${batchProgress.total}`
@@ -904,7 +904,7 @@ export function FloatingSelectionBar({
                   {isAllSelected ? (
                     <Square className="h-4 w-4 text-neutral-400" />
                   ) : (
-                    <CheckSquare className="h-4 w-4 text-purple-400" />
+                    <CheckSquare className="h-4 w-4 text-[#3B82F6]" />
                   )}
                   {isAllSelected ? "Deselect All" : "Select All"}
                 </button>
@@ -924,7 +924,7 @@ export function FloatingSelectionBar({
                     <button
                       type="button"
                       onClick={handleAnalyzeSelected}
-                      className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-purple-600 text-white shadow-md hover:shadow-purple-500/20"
+                      className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-[#3B82F6] text-white shadow-md hover:shadow-purple-500/20"
                     >
                       <Sparkles className="h-4 w-4 text-white animate-pulse" />
                       Analyze Selected
@@ -949,7 +949,7 @@ export function FloatingSelectionBar({
                       disabled={isAnyBusy || busyLocal}
                       className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 rounded-l-xl border-r-0"
                     >
-                      <Scissors className="h-4 w-4 text-purple-400" />
+                      <Scissors className="h-4 w-4 text-[#3B82F6]" />
                       Auto-Crop
                     </button>
                     <button
@@ -987,7 +987,7 @@ export function FloatingSelectionBar({
                     disabled={isAnyBusy || busyLocal}
                     className="px-3.5 py-2 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 disabled:opacity-40 rounded-xl"
                   >
-                    <Sparkles className="h-4 w-4 text-purple-400" />
+                    <Sparkles className="h-4 w-4 text-[#3B82F6]" />
                     Clean Bubbles
                   </button>
                 )}
@@ -999,7 +999,7 @@ export function FloatingSelectionBar({
                   onClick={handleBatchMergeSelected}
                   className="px-3.5 py-2 text-xs rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200 font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all disabled:opacity-40"
                 >
-                  <Link2 className="h-4 w-4 text-purple-400" />
+                  <Link2 className="h-4 w-4 text-[#3B82F6]" />
                   Stitch
                 </button>
 
@@ -1009,7 +1009,7 @@ export function FloatingSelectionBar({
                     type="button"
                     onClick={handleAddToStoryboard}
                     disabled={isAnyBusy || busyLocal}
-                    className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-purple-600 text-white shadow-md hover:shadow-purple-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-[#3B82F6] text-white shadow-md hover:shadow-purple-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Plus className="h-4 w-4" />
                     Add to Storyboard
@@ -1027,7 +1027,7 @@ export function FloatingSelectionBar({
                     {isZipping ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Download className="h-4 w-4 text-purple-400" />
+                      <Download className="h-4 w-4 text-[#3B82F6]" />
                     )}
                     Zip
                   </button>
@@ -1048,7 +1048,7 @@ export function FloatingSelectionBar({
                 <button
                   type="button"
                   onClick={() => setShowMoreActions(!showMoreActions)}
-                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-purple-500/40 hover:bg-purple-950/20 text-neutral-400 hover:text-purple-300"
+                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-[#3B82F6]/40 hover:bg-purple-950/20 text-neutral-400 hover:text-[#93C5FD]"
                 >
                   {showMoreActions ? (
                     <ChevronUp className="h-4 w-4" />

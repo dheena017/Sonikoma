@@ -95,13 +95,13 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   return (
     <div
       id="dynamic_input_box"
-      className="relative z-20 rounded-[28px] border border-white/10 bg-[#0c0d12]/95 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl space-y-6 min-w-0 w-full overflow-visible animate-fade-in"
+      className="relative z-20 rounded-[28px] border border-[#2F2F2F] bg-[#121212]/95 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl space-y-6 min-w-0 w-full overflow-visible animate-fade-in"
     >
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1.5">
-          <div className="w-fit flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.2)]">
-            <Sparkles className="h-3.5 w-3.5 shrink-0 text-purple-400" />
+          <div className="w-fit flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E1E1E] border border-[#2F2F2F] text-[#60A5FA] ">
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
             <span className="text-[10px] font-black tracking-[0.2em] uppercase font-mono">
               Project Constructor
             </span>
@@ -118,20 +118,20 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
 
       {/* 2. Input Mode Selector & Tab Header */}
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-          <div className="flex p-1 rounded-2xl bg-neutral-950/80 border border-white/10 gap-1.5 shadow-inner">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2F2F2F] pb-4">
+          <div className="flex p-1 rounded-2xl bg-[#121212] border border-[#2F2F2F] gap-1.5 shadow-inner">
             <Tooltip text="Import panels via online webtoon, manga, or comic reader URL" placement="bottom">
               <button
                 type="button"
                 onClick={() => setInputMode("url")}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                   inputMode === "url"
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_16px_rgba(168,85,247,0.35)] border border-purple-400/40"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
+                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-[#2F2F2F]"
                 }`}
                 aria-label="Scrape Comic / Manhwa URL"
               >
-                <Book className="w-4 h-4" />
+                <Book className={`w-4 h-4 ${inputMode === "url" ? "text-white" : "text-[#3B82F6]"}`} />
                 <span>Scrape Comic / Manhwa URL</span>
               </button>
             </Tooltip>
@@ -142,12 +142,12 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 onClick={() => setInputMode("upload")}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                   inputMode === "upload"
-                    ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_16px_rgba(168,85,247,0.35)] border border-purple-400/40"
-                    : "text-neutral-400 hover:text-white hover:bg-white/5"
+                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
+                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-[#2F2F2F]"
                 }`}
                 aria-label="Upload Local Images"
               >
-                <UploadCloud className="w-4 h-4" />
+                <UploadCloud className={`w-4 h-4 ${inputMode === "upload" ? "text-white" : "text-[#3B82F6]"}`} />
                 <span>Upload Local Images</span>
                 {selectedFiles.length > 0 && (
                   <span className="px-2 py-0.5 text-[9px] font-black bg-white/20 text-white rounded-full font-mono">
@@ -160,12 +160,12 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
 
           {/* Platform Badge Aligned in Tab Header Row */}
           {inputMode === "url" && separatedData && separatedData.success && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-white/10 text-xs shadow-md animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#1E1E1E] border border-[#2F2F2F] text-xs shadow-md animate-fade-in">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B82F6] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3B82F6]"></span>
               </span>
-              <span className="font-bold text-purple-300 tracking-wider text-[11px] uppercase font-mono">
+              <span className="font-bold text-[#60A5FA] tracking-wider text-[11px] uppercase font-mono">
                 {separatedData.platform && separatedData.platform !== "unknown"
                   ? separatedData.platform.toUpperCase()
                   : separatedData.domain}

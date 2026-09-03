@@ -78,8 +78,8 @@ export default function DashboardStats({
       </div>
 
       {/* 4. Production Health */}
-      <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-4 hover:border-[#00FFFF]/60 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
-        <div className="w-12 h-12 rounded-xl bg-[#00FFFF]/10 text-[#00FFFF] border border-[#00FFFF]/25 flex items-center justify-center shrink-0">
+      <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-4 hover:border-[#3B82F6]/60 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
+        <div className="w-12 h-12 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
           <CheckCircle2 className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">

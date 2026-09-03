@@ -242,7 +242,7 @@ export default function YouTubeChannelHeader({
               {seoScore > 0 && (
                 <span className="text-[10px] text-neutral-400 font-mono">
                   • SEO Score:{" "}
-                  <strong className="text-purple-300">{seoScore}/100</strong>
+                  <strong className="text-[#60A5FA]">{seoScore}/100</strong>
                 </span>
               )}
             </div>
@@ -381,7 +381,7 @@ export default function YouTubeChannelHeader({
                             className="w-8 h-8 rounded-lg object-cover shrink-0 border border-neutral-700"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-600 to-purple-600 flex items-center justify-center font-bold text-white text-xs shrink-0">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-600 to-blue-600 flex items-center justify-center font-bold text-white text-xs shrink-0">
                             {ch.title ? ch.title.charAt(0) : "Y"}
                           </div>
                         )}
@@ -500,7 +500,7 @@ export default function YouTubeChannelHeader({
         </div>
 
         <div className="p-3 sm:p-4 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-purple-950/40 text-purple-400 border border-purple-900/30 shrink-0">
+          <div className="p-2 rounded-xl bg-purple-950/40 text-[#3B82F6] border border-purple-900/30 shrink-0">
             <Eye className="w-4 h-4" />
           </div>
           <div className="min-w-0">

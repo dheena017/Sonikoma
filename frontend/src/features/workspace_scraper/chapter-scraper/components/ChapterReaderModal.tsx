@@ -162,15 +162,15 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
         {/* Fullscreen Header Bar */}
         <div className="flex items-center justify-between px-4 sm:px-8 py-3 border-b border-neutral-800/80 bg-neutral-900/90 backdrop-blur-md shrink-0 z-30 shadow-xl">
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
-              <span className="text-purple-400 font-bold text-xs">CR</span>
+            <div className="h-8 w-8 rounded-xl bg-purple-600/20 border border-[#3B82F6]/30 flex items-center justify-center">
+              <span className="text-[#3B82F6] font-bold text-xs">CR</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest font-mono">
+                <span className="text-[10px] font-black text-[#3B82F6] uppercase tracking-widest font-mono">
                   Full Page Chapter Reader
                 </span>
-                <span className="text-[10px] bg-purple-900/40 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded-full font-mono">
+                <span className="text-[10px] bg-purple-900/40 text-[#60A5FA] border border-[#3B82F6]/30 px-2 py-0.5 rounded-full font-mono">
                   Live Stream
                 </span>
               </div>
@@ -183,7 +183,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => onImport(chapter)}
-              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-900/30 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="px-4 py-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-900/30 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
               <Play size={14} />
               <span className="hidden sm:inline">Open in Editor</span>
@@ -249,7 +249,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
                 >
                   -
                 </button>
-                <span className="min-w-[50px] text-center font-mono text-purple-300 text-[11px] font-bold">
+                <span className="min-w-[50px] text-center font-mono text-[#60A5FA] text-[11px] font-bold">
                   {stripWidthPx}px
                 </span>
                 <button
@@ -263,7 +263,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
             </div>
 
             {/* Reading progress badge */}
-            <div className="flex items-center gap-2 font-mono text-[10px] text-purple-300 bg-purple-950/40 border border-purple-500/20 rounded-xl px-3 py-1 font-bold">
+            <div className="flex items-center gap-2 font-mono text-[10px] text-[#60A5FA] bg-purple-950/40 border border-[#3B82F6]/20 rounded-xl px-3 py-1 font-bold">
               <span>Read: {Math.round(scrollProgress)}%</span>
             </div>
           </div>
@@ -273,7 +273,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
         {!loading && !error && images.length > 0 && (
           <div className="w-full bg-neutral-900 h-1 relative z-20 shrink-0">
             <div
-              className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 transition-all duration-75 shadow-[0_0_8px_rgba(168,85,247,0.8)]"
+              className="h-full bg-gradient-to-r from-blue-500 via-pink-500 to-indigo-500 transition-all duration-75 "
               style={{ width: `${scrollProgress}%` }}
             />
           </div>
@@ -289,7 +289,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-neutral-950 z-10">
               <div className="relative">
                 <div className="w-14 h-14 rounded-full border-4 border-purple-900/40 border-t-purple-500 animate-spin" />
-                <Loader className="w-7 h-7 text-purple-400 absolute top-3.5 left-3.5 animate-pulse" />
+                <Loader className="w-7 h-7 text-[#3B82F6] absolute top-3.5 left-3.5 animate-pulse" />
               </div>
               <div className="text-center space-y-1">
                 <p className="text-base font-bold text-white">
@@ -318,14 +318,14 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                 <button
                   onClick={() => fetchPanels(true)}
-                  className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-purple-950/40 cursor-pointer active:scale-95 border border-purple-400/30"
+                  className="px-5 py-2.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-purple-950/40 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
                 >
                   <RotateCw size={14} className={loading ? "animate-spin" : ""} />
                   Retry Scraping
                 </button>
                 <button
                   onClick={() => onImport(chapter)}
-                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-purple-300 hover:text-white border border-purple-500/20 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-[#60A5FA] hover:text-white border border-[#3B82F6]/20 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   Force Open Editor <ArrowRight size={14} />
                 </button>
@@ -396,7 +396,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
             </button>
             <button
               onClick={() => onImport(chapter)}
-              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-950/40 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-6 py-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-950/40 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Play size={14} />
               Open in Editor

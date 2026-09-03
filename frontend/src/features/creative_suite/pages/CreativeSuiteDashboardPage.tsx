@@ -96,7 +96,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       value: totalPanelsCount.toString(),
       desc: "Active storyboard frames",
       icon: Film,
-      color: "text-[#A855F7] bg-[#A855F7]/10 border-[#A855F7]/20",
+      color: "text-[#3B82F6] bg-[#3B82F6]/10 border-[#3B82F6]/20",
     },
     {
       label: "Engagement Score",
@@ -110,7 +110,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       value: "Idle",
       desc: "No active compiles",
       icon: Sparkles,
-      color: "text-[#00FFFF] bg-[#00FFFF]/10 border-[#00FFFF]/20",
+      color: "text-[#3B82F6] bg-[#3B82F6]/10 border-[#3B82F6]/20",
     },
   ];
 
@@ -185,7 +185,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
           <div className="space-y-2 max-w-2xl">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight">
               Creative{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                 Suite
               </span>
             </h1>

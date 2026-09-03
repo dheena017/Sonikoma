@@ -79,7 +79,7 @@ export const MangaVectorGraphic: React.FC<MangaVectorGraphicProps> = ({
     case "radial-zoom":
       return (
         <svg viewBox="0 0 200 120" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="100" cy="60" r="18" fill="none" stroke="#a855f7" strokeWidth="2" opacity="0.6" />
+          <circle cx="100" cy="60" r="18" fill="none" stroke="#3b82f6" strokeWidth="2" opacity="0.6" />
           {Array.from({ length: 24 }).map((_, i) => {
             const angle = (i * 360) / 24;
             const rad = (angle * Math.PI) / 180;
@@ -94,7 +94,7 @@ export const MangaVectorGraphic: React.FC<MangaVectorGraphicProps> = ({
                 y1={y1}
                 x2={x2}
                 y2={y2}
-                stroke={i % 2 === 0 ? "#ffffff" : "#c084fc"}
+                stroke={i % 2 === 0 ? "#ffffff" : "#60a5fa"}
                 strokeWidth={i % 3 === 0 ? "3" : "1.5"}
                 opacity={0.85}
               />

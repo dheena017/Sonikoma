@@ -1,7 +1,7 @@
 /* ==========================================================================
    SONIKOMA DARK MODE SYSTEM & UNIVERSAL HOVER DYNAMICS
    🌑 Base Palette: Rich Black (#0A0A0A), Charcoal (#121212), Dark Gray (#1E1E1E), Gunmetal (#2A2A2A)
-   🎨 Borders: Subtle Gray (#2F2F2F) | Accent: Electric Blue (#3B82F6), Cyan (#00FFFF)
+   🎨 Borders: Subtle Gray (#2F2F2F) | Accent: Electric Blue (#3B82F6), Electric Blue (#3B82F6)
    ✨ Typography: Primary (#E5E5E5), Secondary (#9CA3AF), Dim (#6B7280)
    ========================================================================== */
 
@@ -85,7 +85,7 @@ select:focus,
 textarea:focus {
   background-color: #262626 !important;
   border-color: #3B82F6 !important; /* Electric Blue */
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+  
   outline: none !important;
 }
 
@@ -102,6 +102,8 @@ aside nav button:hover {
   background-color: #262626 !important;
   color: #FFFFFF !important;
   border-color: #3B82F6 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
   transition: all 0.15s ease-in-out;
 }
 
@@ -129,7 +131,7 @@ tr:hover,
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3B82F6;
+  background: #3B82F6 !important;
 }
 
 /* ── Terminal / Code Output ───────────────────────────────── */

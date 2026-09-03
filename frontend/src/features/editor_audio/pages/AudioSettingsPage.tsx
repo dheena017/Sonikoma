@@ -57,7 +57,7 @@ interface AudioSettingsPageProps {
 }
 
 // Animated waveform bars for visual feedback
-function WaveformBars({ active, color = "#a855f7" }: { active: boolean; color?: string }) {
+function WaveformBars({ active, color = "#3b82f6" }: { active: boolean; color?: string }) {
   return (
     <div className="flex items-end gap-[2px] h-4">
       {[3, 5, 8, 6, 9, 5, 7, 4, 8, 5, 3].map((h, i) => (
@@ -83,7 +83,7 @@ function VolumeSlider({
   icon: Icon,
   value,
   onChange,
-  color = "#a855f7",
+  color = "#3b82f6",
   unit = "%",
   min = 0,
   max = 100,
@@ -105,7 +105,7 @@ function VolumeSlider({
   const isActive = pct > 0;
 
   return (
-    <div className="group space-y-2.5 p-3 rounded-2xl bg-neutral-900/40 border border-white/[0.04] hover:border-purple-500/20 transition-all duration-300">
+    <div className="group space-y-2.5 p-3 rounded-2xl bg-neutral-900/40 border border-white/[0.04] hover:border-[#3B82F6]/20 transition-all duration-300">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div
@@ -189,21 +189,21 @@ function VoiceCard({
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left px-3 py-2.5 rounded-xl border transition-all duration-200 relative group cursor-pointer hover:border-purple-500/40"
+      className="w-full text-left px-3 py-2.5 rounded-xl border transition-all duration-200 relative group cursor-pointer hover:border-[#3B82F6]/40"
       style={{
-        borderColor: isSelected ? "#a855f7" : "#1e1e2e",
-        backgroundColor: isSelected ? "#a855f718" : "#0d0d14",
+        borderColor: isSelected ? "#3b82f6" : "#1e1e2e",
+        backgroundColor: isSelected ? "#3b82f618" : "#0d0d14",
       }}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: isSelected ? "#a855f733" : "#1a1a2e" }}
+            style={{ backgroundColor: isSelected ? "#3b82f633" : "#1a1a2e" }}
           >
             <Mic
               className="h-3.5 w-3.5"
-              style={{ color: isSelected ? "#c084fc" : "#6b7280" }}
+              style={{ color: isSelected ? "#60a5fa" : "#6b7280" }}
             />
           </div>
           <div className="min-w-0">
@@ -218,7 +218,7 @@ function VoiceCard({
                 </span>
               )}
             </div>
-            <div className="text-[10px] text-purple-400/80 truncate mt-0.5">
+            <div className="text-[10px] text-[#3B82F6]/80 truncate mt-0.5">
               {lang} • <span className="font-mono text-neutral-500">{voice.code}</span>
             </div>
           </div>
@@ -455,7 +455,7 @@ export default function AudioSettingsPage({
             {/* Section header */}
             <div className="flex items-center gap-3 pb-4 border-b border-neutral-800">
               <div className="w-8 h-8 rounded-xl bg-purple-600/20 flex items-center justify-center">
-                <Sliders className="h-4 w-4 text-purple-400" />
+                <Sliders className="h-4 w-4 text-[#3B82F6]" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">Volume Mixer</h3>
@@ -472,7 +472,7 @@ export default function AudioSettingsPage({
                 icon={Volume2}
                 value={volume}
                 onChange={setVolume}
-                color="#a855f7"
+                color="#3b82f6"
               />
               <VolumeSlider
                 label="Narration / Voice Track"
@@ -511,7 +511,7 @@ export default function AudioSettingsPage({
                 is{" "}
                 <span
                   className="font-semibold"
-                  style={{ color: audioDucking ? "#a855f7" : "#6b7280" }}
+                  style={{ color: audioDucking ? "#3b82f6" : "#6b7280" }}
                 >
                   {audioDucking ? "enabled" : "disabled"}
                 </span>
@@ -541,7 +541,7 @@ export default function AudioSettingsPage({
             >
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <Globe className="h-4 w-4 text-purple-400" />
+                  <Globe className="h-4 w-4 text-[#3B82F6]" />
                   <span>Choose Voice Language & Dialect</span>
                 </div>
                 <div className="relative flex-1 sm:max-w-xs">
@@ -551,7 +551,7 @@ export default function AudioSettingsPage({
                     value={voiceSearch}
                     onChange={(e) => setVoiceSearch(e.target.value)}
                     placeholder="Search voice actor or dialect..."
-                    className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl pl-8.5 pr-3 py-1.5 text-white placeholder-neutral-500 focus:border-purple-500 outline-none"
+                    className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl pl-8.5 pr-3 py-1.5 text-white placeholder-neutral-500 focus:border-[#3B82F6] outline-none"
                   />
                   {voiceSearch && (
                     <button
@@ -574,9 +574,9 @@ export default function AudioSettingsPage({
                       onClick={() => setSelectedLanguage(lang)}
                       className="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer"
                       style={{
-                        backgroundColor: isSelected ? "#a855f7" : "#141420",
+                        backgroundColor: isSelected ? "#3b82f6" : "#141420",
                         color: isSelected ? "#ffffff" : "#9ca3af",
-                        border: `1px solid ${isSelected ? "#a855f7" : "#222233"}`,
+                        border: `1px solid ${isSelected ? "#3b82f6" : "#222233"}`,
                       }}
                     >
                       {lang}
@@ -593,7 +593,7 @@ export default function AudioSettingsPage({
             >
               <div className="flex items-center gap-3 pb-3 border-b border-neutral-800">
                 <div className="w-8 h-8 rounded-xl bg-purple-600/20 flex items-center justify-center">
-                  <Radio className="h-4 w-4 text-purple-400" />
+                  <Radio className="h-4 w-4 text-[#3B82F6]" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-white">AI Character Voice</h3>
@@ -604,7 +604,7 @@ export default function AudioSettingsPage({
                   </p>
                 </div>
                 {loadingVoices && (
-                  <div className="ml-auto h-4 w-4 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
+                  <div className="ml-auto h-4 w-4 rounded-full border-2 border-[#3B82F6] border-t-transparent animate-spin" />
                 )}
               </div>
 

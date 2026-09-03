@@ -21,7 +21,7 @@ export default function DashboardHeader({
         <div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
             Welcome to{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
               Sonikoma Studio
             </span>
           </h1>

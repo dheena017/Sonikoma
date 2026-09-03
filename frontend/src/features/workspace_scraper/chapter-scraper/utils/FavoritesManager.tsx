@@ -252,7 +252,7 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
           )}
           <div className="p-2 flex flex-col justify-between flex-grow">
             <div>
-              <h4 className="text-xs font-medium text-white truncate group-hover:text-purple-300">
+              <h4 className="text-xs font-medium text-white truncate group-hover:text-[#93C5FD]">
                 {series.title}
               </h4>
               <div className="flex items-center justify-between gap-1 mt-1">
@@ -267,7 +267,7 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="text-gray-500 hover:text-purple-400 transition-colors flex-shrink-0"
+                    className="text-gray-500 hover:text-[#60A5FA] transition-colors flex-shrink-0"
                     title="Open original comic page"
                   >
                     <ExternalLink size={10} />

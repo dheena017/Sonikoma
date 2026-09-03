@@ -17,11 +17,11 @@ export const SubscriptionPlanHeader: React.FC<SubscriptionPlanHeaderProps> = ({
 }) => {
   return (
     <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 sm:p-8 shadow-2xl relative">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-white/5">
         <div className="space-y-1">
-          <span className="text-[9px] font-extrabold text-purple-400 uppercase tracking-widest bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
+          <span className="text-[9px] font-extrabold text-[#3B82F6] uppercase tracking-widest bg-[#3B82F6]/10 border border-[#3B82F6]/20 px-2 py-0.5 rounded-full">
             Subscription Plan
           </span>
           <h3 className="text-xl sm:text-2xl font-black text-white">
@@ -46,7 +46,7 @@ export const SubscriptionPlanHeader: React.FC<SubscriptionPlanHeaderProps> = ({
                 onClick={() => onCurrencyChange(curr)}
                 className={`py-1 px-2.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
                   currency === curr
-                    ? "bg-purple-600/20 border border-purple-500/40 text-purple-300 shadow-xs"
+                    ? "bg-purple-600/20 border border-[#3B82F6]/40 text-[#60A5FA] shadow-xs"
                     : "text-neutral-500 hover:text-white"
                 }`}
               >
@@ -63,7 +63,7 @@ export const SubscriptionPlanHeader: React.FC<SubscriptionPlanHeaderProps> = ({
             <button
               type="button"
               onClick={onUpgradePlan}
-              className="bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-5 rounded-xl transition-all shadow-md shadow-purple-900/30 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-200"
+              className="bg-purple-600 hover:bg-[#3B82F6] text-white font-bold py-2 px-5 rounded-xl transition-all shadow-md shadow-purple-900/30 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-200"
             >
               <Plus className="w-4 h-4" />
               Upgrade to Pro

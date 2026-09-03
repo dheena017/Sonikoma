@@ -42,7 +42,7 @@ const SidebarItem: React.FC<{
         <div
           className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer ${
             isActive
-              ? "bg-purple-600 border border-purple-400/40 shadow-[0_0_20px_rgba(168,85,247,0.6)] text-white scale-105"
+              ? "bg-purple-600 border border-[#60A5FA]/40  text-white scale-105"
               : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
           }`}
         >
@@ -95,7 +95,7 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
               {groupIdx > 0 && (
                 <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-purple-400 select-none text-center w-full px-1">
+              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
                 {group.name}
               </span>
             </div>

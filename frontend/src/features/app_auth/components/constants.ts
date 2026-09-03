@@ -42,9 +42,9 @@ export const THEMES: Record<
   purple: {
     glowPrimary: "bg-purple-600/10",
     glowSecondary: "bg-indigo-600/10",
-    accentText: "text-purple-400",
-    accentBg: "bg-purple-500/10",
-    accentBorder: "border-purple-500/20",
+    accentText: "text-[#3B82F6]",
+    accentBg: "bg-[#3B82F6]/10",
+    accentBorder: "border-[#3B82F6]/20",
     button:
       "bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md",
     focus: "focus:border-blue-500/60 focus:ring-blue-600/20",
@@ -87,7 +87,7 @@ export const SHOWCASE_SLIDES = [
     description:
       "Instantly segment vertical webtoon strips into independent, perfectly cropped storyboard panels using our custom CV engine.",
     badge: "Smart Detection",
-    color: "from-blue-400 to-cyan-400",
+    color: "from-blue-400 to-blue-400",
   },
   {
     icon: Film,
@@ -103,7 +103,7 @@ export const SHOWCASE_SLIDES = [
     description:
       "Generate natural voice narration, synchronize multi-character dialogue, and mix contextual sound effects automatically.",
     badge: "Voice & SFX",
-    color: "from-indigo-400 to-cyan-400",
+    color: "from-indigo-400 to-blue-400",
   },
   {
     icon: Cpu,
@@ -121,7 +121,7 @@ export const TOUR_STEPS = [
     title: "1. Upload Webtoon Strips",
     description:
       "Paste a webtoon link or upload a long strip image. Our scraper automatically retrieves high-resolution content panels in seconds.",
-    color: "from-blue-400 to-cyan-400",
+    color: "from-blue-400 to-blue-400",
   },
   {
     icon: Sparkles,
@@ -135,7 +135,7 @@ export const TOUR_STEPS = [
     title: "3. Dramatize & Translate",
     description:
       "Use Gemini AI to transcribe bubble texts, translate storyboard dialogues into multiple languages, and generate detailed descriptions.",
-    color: "from-indigo-400 to-cyan-400",
+    color: "from-indigo-400 to-blue-400",
   },
   {
     icon: Volume2,

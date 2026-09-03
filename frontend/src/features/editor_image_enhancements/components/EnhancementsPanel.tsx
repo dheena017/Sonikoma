@@ -131,7 +131,7 @@ export default function EnhancementsPanel({
       {/* ── Header ── */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
+          <div className="p-2 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/30 text-[#3B82F6]">
             <Sparkles className="h-4 w-4" />
           </div>
           <span className="text-xs uppercase font-mono font-bold text-white tracking-wider">
@@ -179,12 +179,12 @@ export default function EnhancementsPanel({
           type="button"
           disabled={isAnalyzing}
           onClick={handleAnalyzeImage}
-          className="w-full py-2 rounded-xl border border-purple-800/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:border-purple-600 text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+          className="w-full py-2 rounded-xl border border-purple-800/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:border-purple-600 text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50"
         >
           {isAnalyzing ? (
-            <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
+            <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
           ) : (
-            <Sparkles className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
+            <Sparkles className="h-3.5 w-3.5 text-[#3B82F6] animate-pulse" />
           )}
           <span>{isAnalyzing ? "Analyzing..." : "Analyze Image"}</span>
         </button>
@@ -192,9 +192,9 @@ export default function EnhancementsPanel({
         <button
           type="button"
           onClick={handleOpenPanelAssistant}
-          className="w-full py-2 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-600/50 text-neutral-300 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
+          className="w-full py-2 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-600/50 text-neutral-300 hover:text-[#93C5FD] text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
         >
-          <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+          <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
           <span>Panel Assistant</span>
         </button>
 
@@ -202,12 +202,12 @@ export default function EnhancementsPanel({
           type="button"
           disabled={isMagicProcessing}
           onClick={handleMagicMotion}
-          className="w-full py-2 rounded-xl border border-purple-900/60 bg-purple-950/30 hover:bg-purple-900/50 text-purple-300 hover:text-purple-200 text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40"
+          className="w-full py-2 rounded-xl border border-purple-900/60 bg-purple-950/30 hover:bg-purple-900/50 text-[#60A5FA] hover:text-purple-200 text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40"
         >
           {isMagicProcessing ? (
-            <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-400" />
+            <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
           ) : (
-            <Wand2 className="h-3.5 w-3.5 text-purple-400 animate-pulse" />
+            <Wand2 className="h-3.5 w-3.5 text-[#3B82F6] animate-pulse" />
           )}
           <span>
             {isMagicProcessing ? "Applying Magic..." : "Magic Motion"}
@@ -221,7 +221,7 @@ export default function EnhancementsPanel({
           <button
             type="button"
             onClick={() => setIsTracksExpanded(!isTracksExpanded)}
-            className="w-full flex items-center justify-between text-[10px] font-mono font-bold text-purple-400 hover:text-purple-300 py-1 transition-all cursor-pointer outline-none"
+            className="w-full flex items-center justify-between text-[10px] font-mono font-bold text-[#3B82F6] hover:text-[#93C5FD] py-1 transition-all cursor-pointer outline-none"
           >
             <div className="flex items-center gap-1.5">
               <Layers className="h-3.5 w-3.5" />
@@ -271,7 +271,7 @@ export default function EnhancementsPanel({
                   }}
                   className={`p-1 rounded hover:bg-white/5 transition-colors cursor-pointer ${
                     activeStoryboardPanel?.layers?.bg_visible !== false
-                      ? "text-purple-400"
+                      ? "text-[#3B82F6]"
                       : "text-neutral-600"
                   }`}
                 >
@@ -320,7 +320,7 @@ export default function EnhancementsPanel({
                   }}
                   className={`p-1 rounded hover:bg-white/5 transition-colors cursor-pointer ${
                     activeStoryboardPanel?.layers?.char_visible !== false
-                      ? "text-purple-400"
+                      ? "text-[#3B82F6]"
                       : "text-neutral-600"
                   }`}
                 >
@@ -369,7 +369,7 @@ export default function EnhancementsPanel({
                   }}
                   className={`p-1 rounded hover:bg-white/5 transition-colors cursor-pointer ${
                     activeStoryboardPanel?.layers?.text_visible !== false
-                      ? "text-purple-400"
+                      ? "text-[#3B82F6]"
                       : "text-neutral-600"
                   }`}
                 >

@@ -122,8 +122,8 @@ export default function AutoSlicer({
     <div className="space-y-4 bg-neutral-900/60 p-5 rounded-3xl border border-neutral-800/80 shadow-2xl backdrop-blur-xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-purple-500/50 flex items-center justify-center shadow-[0_0_18px_rgba(168,85,247,0.35)] shrink-0">
-            <Sparkles className="h-5 w-5 text-purple-300" />
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-[#3B82F6]/50 flex items-center justify-center  shrink-0">
+            <Sparkles className="h-5 w-5 text-[#60A5FA]" />
           </div>
           <span className="text-[10px] uppercase font-mono font-bold text-neutral-300 tracking-wider">
             Contours-Detection Auto Cutter
@@ -174,7 +174,7 @@ export default function AutoSlicer({
           onClick={() => setStrategy("local-cv")}
           className={`flex-1 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
             strategy === "local-cv"
-              ? "bg-gradient-to-r from-purple-950/80 via-purple-900/50 to-purple-950/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.3)] border border-purple-500/40"
+              ? "bg-gradient-to-r from-purple-950/80 via-purple-900/50 to-purple-950/60 text-white  border border-[#3B82F6]/40"
               : "text-neutral-400 hover:text-white border border-transparent"
           }`}
         >
@@ -185,7 +185,7 @@ export default function AutoSlicer({
           onClick={() => setStrategy("ai")}
           className={`flex-1 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
             strategy === "ai"
-              ? "bg-gradient-to-r from-purple-950/80 via-purple-900/50 to-purple-950/60 text-white shadow-[0_0_14px_rgba(168,85,247,0.3)] border border-purple-500/40"
+              ? "bg-gradient-to-r from-purple-950/80 via-purple-900/50 to-purple-950/60 text-white  border border-[#3B82F6]/40"
               : "text-neutral-400 hover:text-white border border-transparent"
           }`}
         >
@@ -208,7 +208,7 @@ export default function AutoSlicer({
           <button
             type="button"
             onClick={handleScan}
-            className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl flex items-center justify-center gap-2 transition-all text-xs font-black uppercase tracking-widest cursor-pointer active:scale-95 shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-purple-400/30"
+            className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl flex items-center justify-center gap-2 transition-all text-xs font-black uppercase tracking-widest cursor-pointer active:scale-95 shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-[#60A5FA]/30"
           >
             <Scissors className="h-4 w-4 text-purple-200" />
             <span>{dryRun ? "Dry Run Preview" : "Slice Panel Cuts"}</span>
@@ -220,7 +220,7 @@ export default function AutoSlicer({
           title="Toggle Auto-crop Settings"
           className={`w-11 h-11 rounded-2xl border flex items-center justify-center transition-all cursor-pointer active:scale-95 shrink-0 ${
             showSettings
-              ? "bg-purple-950/60 border-purple-500/50 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.3)]"
+              ? "bg-purple-950/60 border-[#3B82F6]/50 text-[#60A5FA] "
               : "bg-neutral-950/80 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-900"
           }`}
         >

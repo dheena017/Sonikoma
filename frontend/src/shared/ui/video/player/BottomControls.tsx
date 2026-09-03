@@ -154,8 +154,8 @@ export const VideoPreviewBottomControls: React.FC<
                   )
                 ) : (
                   <div className="flex flex-col items-center justify-center w-full h-full">
-                    <div className="h-5 w-5 rounded bg-purple-500/10 flex items-center justify-center">
-                      <Sliders className="h-3 w-3 text-purple-400" />
+                    <div className="h-5 w-5 rounded bg-[#3B82F6]/10 flex items-center justify-center">
+                      <Sliders className="h-3 w-3 text-[#3B82F6]" />
                     </div>
                   </div>
                 )}
@@ -163,7 +163,7 @@ export const VideoPreviewBottomControls: React.FC<
 
               <div className="px-1 py-0.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black font-mono text-purple-400 tabular-nums">
+                  <span className="text-[10px] font-black font-mono text-[#3B82F6] tabular-nums">
                     {formatTime(hoverProgress.time)}
                   </span>
                   <span className="text-[9px] font-bold px-1.5 py-0.5 bg-neutral-950/60 rounded border border-neutral-800 text-neutral-400 uppercase">
@@ -212,7 +212,7 @@ export const VideoPreviewBottomControls: React.FC<
           })}
 
           <div
-            className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full z-10"
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full z-10"
             style={{
               width: `${
                 totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0
@@ -227,7 +227,7 @@ export const VideoPreviewBottomControls: React.FC<
                 totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0
               }% - 7px)`,
               boxShadow:
-                "0 0 0 2px rgba(168,85,247,0.4), 0 0 16px rgba(168,85,247,0.8)",
+                "0 0 0 2px rgba(59,130,246,0.4), 0 0 16px rgba(59,130,246,0.8)",
             }}
           />
         </div>
@@ -247,7 +247,7 @@ export const VideoPreviewBottomControls: React.FC<
 
           <button
             onClick={togglePlay}
-            className="h-10 w-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-[0_0_16px_rgba(168,85,247,0.35)]"
+            className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 "
           >
             {isPlaying ? (
               <Pause className="h-4 w-4 fill-white" />
@@ -312,7 +312,7 @@ export const VideoPreviewBottomControls: React.FC<
               }}
               className="flex items-center gap-1 px-3 py-1.5 bg-neutral-900/80 hover:bg-neutral-800 rounded-xl border border-white/10 text-[11px] font-mono text-neutral-300 transition-all cursor-pointer"
             >
-              <span className="font-bold text-purple-400 capitalize">
+              <span className="font-bold text-[#3B82F6] capitalize">
                 {activeChapter.title}
               </span>
               <ChevronRight className="h-3 w-3 shrink-0" />
@@ -335,7 +335,7 @@ export const VideoPreviewBottomControls: React.FC<
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               isLooping
-                ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
+                ? "bg-purple-600/25 border-[#3B82F6]/50 text-[#60A5FA]"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Loop Playback (L)"
@@ -354,7 +354,7 @@ export const VideoPreviewBottomControls: React.FC<
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               showSubtitles
-                ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
+                ? "bg-purple-600/25 border-[#3B82F6]/50 text-[#60A5FA]"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Toggle Subtitles"
@@ -377,7 +377,7 @@ export const VideoPreviewBottomControls: React.FC<
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               showSettings
-                ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
+                ? "bg-purple-600/25 border-[#3B82F6]/50 text-[#60A5FA]"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Playback Settings"
@@ -390,7 +390,7 @@ export const VideoPreviewBottomControls: React.FC<
               onClick={() => setIsTheaterMode(!isTheaterMode)}
               className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
                 isTheaterMode
-                  ? "bg-purple-600/25 border-purple-500/50 text-purple-300"
+                  ? "bg-purple-600/25 border-[#3B82F6]/50 text-[#60A5FA]"
                   : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
               }`}
               title="Toggle Theater Mode (T)"

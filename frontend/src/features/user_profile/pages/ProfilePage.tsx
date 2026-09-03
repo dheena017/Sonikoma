@@ -137,13 +137,13 @@ export default function ProfilePage(props: ProfilePageProps) {
 
         {/* Compact Glassmorphic Hero Banner */}
         <div className="relative w-full rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-4 sm:p-5 shadow-md overflow-hidden">
-          <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]" />
+          <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             {/* User Profile Block */}
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-0.5 bg-gradient-to-tr from-purple-600 via-indigo-500 to-pink-500 shadow-md overflow-hidden shrink-0">
+                <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-0.5 bg-gradient-to-tr from-blue-600 via-indigo-500 to-pink-500 shadow-md overflow-hidden shrink-0">
                   <img
                     src={state.profileUser.avatarUrl}
                     alt={state.profileUser.fullName}
@@ -159,7 +159,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                     <button
                       onClick={() => state.setActiveTab("account")}
                       aria-label="Edit Avatar"
-                      className="!absolute !top-auto bottom-1 right-1 !z-10 p-1.5 rounded-lg bg-neutral-950/95 border border-white/30 text-purple-300 hover:text-white transition-all shadow-md cursor-pointer"
+                      className="!absolute !top-auto bottom-1 right-1 !z-10 p-1.5 rounded-lg bg-neutral-950/95 border border-white/30 text-[#60A5FA] hover:text-white transition-all shadow-md cursor-pointer"
                     >
                       <Camera className="w-4 h-4" />
                     </button>

@@ -115,7 +115,7 @@ const PanelAssistantPage = React.memo(
             <div className="space-y-2 max-w-2xl text-left">
               <h1 className="text-3xl sm:text-4xl font-black text-[#E5E5E5] tracking-tight leading-tight">
                 Translation{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                   Studio
                 </span>
               </h1>
@@ -166,7 +166,7 @@ const PanelAssistantPage = React.memo(
               <div className="relative flex items-center gap-4 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/50 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
             title="Scroll left"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -184,8 +184,8 @@ const PanelAssistantPage = React.memo(
                   onClick={() => setSelectedIdx(idx)}
                   className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/60 flex items-center justify-center ${
                     isSel
-                      ? "border-2 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)] scale-105 bg-purple-500/10"
-                      : "border-neutral-850 opacity-60 hover:opacity-100 hover:border-purple-500/50"
+                      ? "border-2 border-[#3B82F6]  scale-105 bg-[#3B82F6]/10"
+                      : "border-neutral-850 opacity-60 hover:opacity-100 hover:border-[#3B82F6]/50"
                   }`}
                 >
                   {p?.image_url ? (
@@ -209,7 +209,7 @@ const PanelAssistantPage = React.memo(
 
           <button
             onClick={() => scrollFilmstrip("right")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-purple-500/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
+            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/50 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
             title="Scroll right"
           >
             <ChevronRight className="w-4 h-4" />
@@ -238,7 +238,7 @@ const PanelAssistantPage = React.memo(
                   </span>
                 </div>
               )}
-              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-purple-300 border border-purple-500/20 shadow-md">
+              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-[#60A5FA] border border-[#3B82F6]/20 shadow-md">
                 PANEL #{selectedIdx + 1}
               </div>
             </div>
@@ -251,7 +251,7 @@ const PanelAssistantPage = React.memo(
                 {cleanDialogueDisplay(activePanel?.speech_text).speech ? (
                   <div className="space-y-1.5">
                     {cleanDialogueDisplay(activePanel?.speech_text).tone && (
-                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
                         Tone:{" "}
                         {cleanDialogueDisplay(activePanel?.speech_text).tone}
                       </span>
@@ -290,7 +290,7 @@ const PanelAssistantPage = React.memo(
                   ACTIVE WORKFLOW
                 </p>
                 <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
-                  <BookOpenText className="w-4 h-4 text-purple-400" />{" "}
+                  <BookOpenText className="w-4 h-4 text-[#3B82F6]" />{" "}
                   Translation & Localization Studio
                 </h4>
                 <p className="mt-0.5 text-xs text-neutral-400 font-mono">
@@ -298,7 +298,7 @@ const PanelAssistantPage = React.memo(
                   1-click batch processing.
                 </p>
               </div>
-              <div className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-purple-300">
+              <div className="rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-[#60A5FA]">
                 PANEL #{selectedIdx + 1}
               </div>
             </div>

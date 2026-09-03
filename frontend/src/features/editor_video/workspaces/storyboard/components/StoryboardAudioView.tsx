@@ -169,7 +169,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                         AI TTS Synced
                       </span>
                     ) : text ? (
-                      <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
                         Script Ready
                       </span>
                     ) : (
@@ -191,7 +191,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                   onClick={(e) => handlePlayAudio(index, panel, e)}
                   className={`px-2.5 py-1 rounded-xl text-[9px] font-mono font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer ${
                     isPlaying
-                      ? "bg-purple-600 text-white animate-pulse shadow-[0_0_12px_rgba(168,85,247,0.6)]"
+                      ? "bg-purple-600 text-white animate-pulse "
                       : "bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300"
                   }`}
                 >
@@ -209,7 +209,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                     e.stopPropagation();
                     onTriggerVoiceGen(index);
                   }}
-                  className="px-2.5 py-1 rounded-xl bg-purple-600/20 hover:bg-purple-600 border border-purple-500/40 text-purple-200 hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl bg-purple-600/20 hover:bg-[#3B82F6] border border-[#3B82F6]/40 text-purple-200 hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer"
                 >
                   <Sparkles className="h-2.5 w-2.5" />
                   <span>Gen Voice</span>

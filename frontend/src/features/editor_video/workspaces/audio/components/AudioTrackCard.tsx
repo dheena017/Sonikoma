@@ -16,12 +16,12 @@ export const AudioTrackCard: React.FC<AudioTrackCardProps> = ({
   onAddTrack,
 }) => {
   return (
-    <div className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-purple-500/60 flex items-center gap-2.5 group cursor-pointer shadow-sm">
+    <div className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/60 flex items-center gap-2.5 group cursor-pointer shadow-sm">
       <button
         onClick={onTogglePlay}
         className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 transition-all border cursor-pointer ${
           isPlaying
-            ? "bg-purple-600 border-purple-400 text-white"
+            ? "bg-purple-600 border-[#60A5FA] text-white"
             : "bg-neutral-800 border-neutral-700 text-neutral-400 group-hover:text-white"
         }`}
       >
@@ -36,7 +36,7 @@ export const AudioTrackCard: React.FC<AudioTrackCardProps> = ({
         <div className="flex items-center gap-2 text-[9px] font-mono text-neutral-400">
           <span>{track.duration}</span>
           {track.mood && (
-            <span className="text-purple-400">• {track.mood}</span>
+            <span className="text-[#3B82F6]">• {track.mood}</span>
           )}
           {track.badge && (
             <span className="text-amber-400">• {track.badge}</span>
@@ -45,7 +45,7 @@ export const AudioTrackCard: React.FC<AudioTrackCardProps> = ({
       </div>
       <button
         onClick={onAddTrack}
-        className="px-2 py-1 rounded-lg bg-neutral-800 hover:bg-purple-600 text-white text-[9px] font-mono font-bold transition-colors cursor-pointer"
+        className="px-2 py-1 rounded-lg bg-neutral-800 hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold transition-colors cursor-pointer"
       >
         + Add
       </button>

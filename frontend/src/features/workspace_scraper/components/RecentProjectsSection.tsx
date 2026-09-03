@@ -79,14 +79,14 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
     <div className="w-full space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-purple-500/30">
-            <History className="h-4 w-4 text-purple-400" />
+          <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-[#3B82F6]/30">
+            <History className="h-4 w-4 text-[#3B82F6]" />
           </div>
           <h3 className="text-xl font-black text-white tracking-tight">
             Recent Projects
           </h3>
           {!loadingProjects && (
-            <span className="px-2 py-0.5 bg-purple-500/10 border border-purple-500/20 rounded-full text-[10px] font-black text-purple-400">
+            <span className="px-2 py-0.5 bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-full text-[10px] font-black text-[#3B82F6]">
               {filteredProjects.length}
             </span>
           )}
@@ -102,13 +102,13 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
                 setSearchQuery(e.target.value);
                 setShowAll(false);
               }}
-              className="pl-8 pr-3 py-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-purple-500/40 w-44 transition-colors"
+              className="pl-8 pr-3 py-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-[#3B82F6]/40 w-44 transition-colors"
             />
           </div>
           <button
             onClick={() => fetchProjects()}
             title="Refresh projects"
-            className="p-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-purple-500/30 hover:bg-purple-500/10 transition-all cursor-pointer text-neutral-500 hover:text-purple-400"
+            className="p-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 transition-all cursor-pointer text-neutral-500 hover:text-[#60A5FA]"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${loadingProjects ? "animate-spin" : ""}`}
@@ -116,7 +116,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
           </button>
           <button
             onClick={() => navigateTo?.("/projects")}
-            className="text-xs font-bold text-purple-400 hover:text-purple-300 hover:underline flex items-center gap-1 cursor-pointer whitespace-nowrap"
+            className="text-xs font-bold text-[#3B82F6] hover:text-[#93C5FD] hover:underline flex items-center gap-1 cursor-pointer whitespace-nowrap"
           >
             View All <ArrowRight className="h-3 w-3" />
           </button>
@@ -137,7 +137,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
               </p>
               <button
                 onClick={() => setSearchQuery("")}
-                className="text-xs text-purple-400 hover:text-purple-300 font-bold cursor-pointer"
+                className="text-xs text-[#3B82F6] hover:text-[#93C5FD] font-bold cursor-pointer"
               >
                 Clear search
               </button>
@@ -159,7 +159,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
                     .substring(2, 10)}`;
                   navigateTo?.(`/scraper/editor?id=${tempId}`);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5" /> New Project
               </button>
@@ -207,7 +207,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
             <div className="flex justify-center pt-2">
               <button
                 onClick={() => setShowAll((v) => !v)}
-                className="flex items-center gap-2 px-5 py-2.5 border border-neutral-800 bg-neutral-900/60 hover:border-purple-500/30 hover:bg-purple-500/5 rounded-xl text-xs font-bold text-neutral-400 hover:text-purple-300 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 border border-neutral-800 bg-neutral-900/60 hover:border-[#3B82F6]/30 hover:bg-[#3B82F6]/5 rounded-xl text-xs font-bold text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer"
               >
                 {showAll ? (
                   <>

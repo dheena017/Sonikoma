@@ -42,7 +42,7 @@ export function CinematicRenderDemo({
         <div className="flex items-center gap-2">
           <button
             onClick={onGetStarted}
-            className="px-3.5 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-purple-500 transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-[#3B82F6] transition-colors cursor-pointer"
           >
             Export Video
           </button>
@@ -66,8 +66,8 @@ export function CinematicRenderDemo({
                 className={`p-2 rounded-lg border text-xs cursor-pointer transition-all ${
                   i === 0
                     ? isLight
-                      ? "bg-purple-50 border-purple-500 text-purple-700 font-bold"
-                      : "bg-purple-600/25 border-purple-500 text-white font-bold"
+                      ? "bg-purple-50 border-[#3B82F6] text-purple-700 font-bold"
+                      : "bg-purple-600/25 border-[#3B82F6] text-white font-bold"
                     : isLight
                     ? "bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300 hover:text-slate-950 font-medium"
                     : "bg-neutral-900 border-neutral-800 text-neutral-200 hover:border-neutral-700 font-medium"
@@ -127,7 +127,7 @@ export function CinematicRenderDemo({
             <select
               value={aspect}
               onChange={(e) => setAspect(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-purple-500 outline-none cursor-pointer transition-all ${
+              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-[#3B82F6] outline-none cursor-pointer transition-all ${
                 isLight
                   ? "bg-white border-slate-300 text-slate-900"
                   : "bg-neutral-900 border-neutral-700 text-white"
@@ -150,7 +150,7 @@ export function CinematicRenderDemo({
             <select
               value={audioStyle}
               onChange={(e) => setAudioStyle(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-purple-500 outline-none cursor-pointer transition-all ${
+              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-[#3B82F6] outline-none cursor-pointer transition-all ${
                 isLight
                   ? "bg-white border-slate-300 text-slate-900"
                   : "bg-neutral-900 border-neutral-700 text-white"
@@ -173,7 +173,7 @@ export function CinematicRenderDemo({
             <select
               value={musicTheme}
               onChange={(e) => setMusicTheme(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-purple-500 outline-none cursor-pointer transition-all ${
+              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-[#3B82F6] outline-none cursor-pointer transition-all ${
                 isLight
                   ? "bg-white border-slate-300 text-slate-900"
                   : "bg-neutral-900 border-neutral-700 text-white"
@@ -196,7 +196,7 @@ export function CinematicRenderDemo({
         }`}
       >
         <div className="flex items-center gap-2.5">
-          <Volume2 className="w-4 h-4 text-purple-400 shrink-0" />
+          <Volume2 className="w-4 h-4 text-[#3B82F6] shrink-0" />
           <span className="text-xs font-semibold font-mono">
             Audio Track: {audioStyle}
           </span>
@@ -207,7 +207,7 @@ export function CinematicRenderDemo({
           {Array.from({ length: 18 }).map((_, i) => (
             <div
               key={i}
-              className="flex-1 bg-gradient-to-t from-purple-600 to-purple-400 rounded-xs"
+              className="flex-1 bg-gradient-to-t from-blue-600 to-blue-400 rounded-xs"
               style={{
                 height: `${30 + ((i * 17) % 70)}%`,
                 opacity: 0.75,

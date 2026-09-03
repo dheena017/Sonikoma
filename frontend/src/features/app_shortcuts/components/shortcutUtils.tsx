@@ -127,7 +127,7 @@ export const highlightText = (text: string, highlight: string) => {
         part.toLowerCase() === highlight.toLowerCase() ? (
           <mark
             key={i}
-            className="bg-purple-500/40 text-purple-200 rounded px-0.5 border-b border-purple-400/50"
+            className="bg-purple-500/40 text-purple-200 rounded px-0.5 border-b border-[#60A5FA]/50"
           >
             {part}
           </mark>
@@ -147,7 +147,7 @@ export const renderKeyCombo = (combo: string) => {
     <div className="flex items-center gap-1.5 justify-end">
       {keys.map((key, idx) => (
         <React.Fragment key={idx}>
-          <kbd className="min-w-[24px] px-2 py-1 text-[10px] font-bold font-mono bg-neutral-900 border-b-2 border-neutral-800 text-purple-300 rounded shadow-[0_2px_0_0_rgba(0,0,0,0.5)] flex items-center justify-center group-hover:text-purple-200 group-hover:border-purple-700/50 transition-all active:translate-y-[1px] active:shadow-none">
+          <kbd className="min-w-[24px] px-2 py-1 text-[10px] font-bold font-mono bg-neutral-900 border-b-2 border-neutral-800 text-[#60A5FA] rounded shadow-[0_2px_0_0_rgba(0,0,0,0.5)] flex items-center justify-center group-hover:text-purple-200 group-hover:border-purple-700/50 transition-all active:translate-y-[1px] active:shadow-none">
             {key}
           </kbd>
           {idx < keys.length - 1 && (

@@ -83,7 +83,7 @@ export default function StoryboardHeader({
   if (selectedCount > 0) {
     const selectionLeftBlock = (
       <div className="flex items-center gap-2.5 flex-wrap">
-        <div className="flex items-center gap-2 bg-purple-950/80 border border-purple-500/40 rounded-xl px-3 py-1.5 shadow-[0_0_15px_rgba(168,85,247,0.25)]">
+        <div className="flex items-center gap-2 bg-purple-950/80 border border-[#3B82F6]/40 rounded-xl px-3 py-1.5 ">
           <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[10px] font-mono font-black">
             {selectedCount}
           </div>
@@ -95,7 +95,7 @@ export default function StoryboardHeader({
               type="button"
               onClick={clearSelection}
               title="Clear Selection"
-              className="ml-1 p-0.5 rounded-md hover:bg-purple-900/60 text-purple-300 hover:text-white transition-colors cursor-pointer"
+              className="ml-1 p-0.5 rounded-md hover:bg-purple-900/60 text-[#60A5FA] hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -109,17 +109,17 @@ export default function StoryboardHeader({
           className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
         >
           {isAllSelected ? (
-            <Square className="w-3.5 h-3.5 text-purple-400" />
+            <Square className="w-3.5 h-3.5 text-[#3B82F6]" />
           ) : (
-            <CheckSquare className="w-3.5 h-3.5 text-purple-400" />
+            <CheckSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
           )}
           <span>{isAllSelected ? "Deselect All" : "Select All"}</span>
         </button>
 
         {/* Busy / Progress Indicator */}
         {isBusy && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-950/60 border border-purple-500/40 rounded-xl text-purple-300 text-xs font-mono">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-purple-400" />
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-950/60 border border-[#3B82F6]/40 rounded-xl text-[#60A5FA] text-xs font-mono">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" />
             <span>
               {isBatchCropping
                 ? `Cropping ${batchProgress?.current || 0}/${
@@ -145,9 +145,9 @@ export default function StoryboardHeader({
             onClick={handleAnalyzeSelected}
             disabled={isBusy}
             title="Analyze selected scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Analyze Selected</span>
           </button>
         )}
@@ -159,9 +159,9 @@ export default function StoryboardHeader({
             onClick={handleAutoCropSelected}
             disabled={isBusy}
             title="Auto-crop selected scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Scissors className="w-3.5 h-3.5 text-purple-400" />
+            <Scissors className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Auto Crop</span>
           </button>
         )}
@@ -173,9 +173,9 @@ export default function StoryboardHeader({
             onClick={handleCleanBubblesSelected}
             disabled={isBusy}
             title="Clean text speech bubbles"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Clean Bubbles</span>
           </button>
         )}
@@ -187,9 +187,9 @@ export default function StoryboardHeader({
             onClick={handleBatchMergeSelected}
             disabled={isBusy}
             title="Stitch selected scenes vertically"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-purple-500/40 bg-purple-950/40 hover:bg-purple-900/60 text-purple-300 hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Link2 className="w-3.5 h-3.5 text-purple-400" />
+            <Link2 className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Merge ({selectedCount})</span>
           </button>
         )}
@@ -234,7 +234,7 @@ export default function StoryboardHeader({
   // Standard Mode Left Title Block
   const titleBlock = (
     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.35)] shrink-0">
+      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] flex items-center justify-center  shrink-0">
         <Film className="h-4 w-4 text-white" />
       </div>
       <div className="min-w-0">
@@ -242,7 +242,7 @@ export default function StoryboardHeader({
           <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate">
             Storyboard
           </h3>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-[10px] font-bold text-purple-300 font-mono">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-bold text-[#60A5FA] font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
             {panelsLength} {panelsLength === 1 ? "Scene" : "Scenes"}
           </span>
@@ -262,7 +262,7 @@ export default function StoryboardHeader({
         title="Horizontal Scroll View"
         className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
           viewLayout === "scroll"
-            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white "
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
         }`}
       >
@@ -275,7 +275,7 @@ export default function StoryboardHeader({
         title="Grid View"
         className={`px-3 py-1 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
           viewLayout === "grid"
-            ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white "
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
         }`}
       >
@@ -292,7 +292,7 @@ export default function StoryboardHeader({
           type="button"
           onClick={handleAnalyzeAllPanels}
           disabled={isAnalyzingAll}
-          className="text-[11px] font-mono font-bold border border-purple-500/40 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(168,85,247,0.25)] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+          className="text-[11px] font-mono font-bold border border-[#3B82F6]/40 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all  hover: active:scale-95 cursor-pointer disabled:cursor-not-allowed"
         >
           <Sparkles
             className={`w-3.5 h-3.5 ${
@@ -327,7 +327,7 @@ export default function StoryboardHeader({
           onClick={() => setShowBulkOps(!showBulkOps)}
           className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
             showBulkOps
-              ? "border-purple-500/50 bg-purple-500/15 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.2)]"
+              ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] "
               : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
           }`}
         >
@@ -336,7 +336,7 @@ export default function StoryboardHeader({
       )}
 
       {/* Timeline Sequencer Badge */}
-      <span className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-purple-500/25 text-purple-300 text-[10px] font-bold uppercase tracking-wider font-mono shadow-inner">
+      <span className="hidden sm:inline-flex px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-[#3B82F6]/25 text-[#60A5FA] text-[10px] font-bold uppercase tracking-wider font-mono shadow-inner">
         Timeline Sequencer
       </span>
     </div>

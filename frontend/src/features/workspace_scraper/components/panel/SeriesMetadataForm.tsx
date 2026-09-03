@@ -97,7 +97,7 @@ export const SeriesMetadataForm: React.FC<SeriesMetadataFormProps> = ({
   return (
     <div className="space-y-4">
       <h3 className="text-xs font-bold text-neutral-300 uppercase tracking-widest flex items-center gap-2">
-        <Layout className="w-3.5 h-3.5 text-purple-500" /> Series Identity
+        <Layout className="w-3.5 h-3.5 text-[#3B82F6]" /> Series Identity
       </h3>
       <div className="space-y-3">
         <div className="space-y-1 relative" ref={titleContainerRef}>
@@ -114,7 +114,7 @@ export const SeriesMetadataForm: React.FC<SeriesMetadataFormProps> = ({
               setShowTitleSuggestions(false);
             }}
             placeholder="e.g. Boundless Necromancer"
-            className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
+            className="w-full bg-neutral-950 border border-neutral-800 focus:border-[#3B82F6] rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
           />
           {showTitleSuggestions && titleSuggestions.length > 0 && (
             <div className="absolute left-0 right-0 top-full mt-1 bg-neutral-950 border border-neutral-850 rounded-xl shadow-2xl z-30 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150 max-h-48 overflow-y-auto divide-y divide-neutral-900/50">
@@ -171,7 +171,7 @@ export const SeriesMetadataForm: React.FC<SeriesMetadataFormProps> = ({
               value={chapterNumber}
               onChange={(e) => setChapterNumber?.(e.target.value)}
               placeholder="72"
-              className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all font-mono"
+              className="w-full bg-neutral-950 border border-neutral-800 focus:border-[#3B82F6] rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all font-mono"
             />
           </div>
           <div className="space-y-1 relative" ref={genreContainerRef}>
@@ -188,7 +188,7 @@ export const SeriesMetadataForm: React.FC<SeriesMetadataFormProps> = ({
                 setShowGenreSuggestions(false);
               }}
               placeholder="Fantasy"
-              className="w-full bg-neutral-950 border border-neutral-800 focus:border-purple-500 rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
+              className="w-full bg-neutral-950 border border-neutral-800 focus:border-[#3B82F6] rounded-xl px-4 py-2.5 text-sm text-neutral-200 outline-none transition-all"
             />
             {showGenreSuggestions && genreSuggestions.length > 0 && (
               <div className="absolute left-0 right-0 top-full mt-1 bg-neutral-950 border border-neutral-850 rounded-xl shadow-2xl z-30 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150 max-h-48 overflow-y-auto divide-y divide-neutral-900/50">

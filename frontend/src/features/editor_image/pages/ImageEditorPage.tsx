@@ -527,16 +527,16 @@ const ImageEditorPage = React.memo(
               aria-label={
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }
-              className="absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 sm:w-7 h-24 rounded-r-2xl bg-[#141524] hover:bg-[#1f2138] border-y border-r border-purple-500/40 hover:border-purple-400 text-purple-300 hover:text-white flex flex-col items-center justify-center gap-1 shadow-[6px_0_20px_rgba(168,85,247,0.35)] transition-all cursor-pointer group active:scale-95 select-none pointer-events-auto"
+              className="absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 sm:w-7 h-24 rounded-r-2xl bg-[#141524] hover:bg-[#1f2138] border-y border-r border-[#3B82F6]/40 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white flex flex-col items-center justify-center gap-1 shadow-[6px_0_20px_rgba(59,130,246,0.35)] transition-all cursor-pointer group active:scale-95 select-none pointer-events-auto"
               title={
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }
             >
               <div className="w-1 h-3 rounded-full bg-purple-500/40 group-hover:bg-purple-400/80 transition-colors" />
               {isToolsPanelOpen ? (
-                <ChevronLeft className="w-4 h-4 text-purple-400 group-hover:text-white transition-transform group-hover:-translate-x-0.5" />
+                <ChevronLeft className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-transform group-hover:-translate-x-0.5" />
               ) : (
-                <ChevronRight className="w-4 h-4 text-purple-400 group-hover:text-white transition-transform group-hover:translate-x-0.5" />
+                <ChevronRight className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-transform group-hover:translate-x-0.5" />
               )}
               <div className="w-1 h-3 rounded-full bg-purple-500/40 group-hover:bg-purple-400/80 transition-colors" />
             </button>
@@ -547,7 +547,7 @@ const ImageEditorPage = React.memo(
             <div
               className="absolute inset-0 opacity-20 pointer-events-none"
               style={{
-                backgroundImage: "radial-gradient(#a855f7 1px, transparent 0)",
+                backgroundImage: "radial-gradient(#3b82f6 1px, transparent 0)",
                 backgroundSize: "20px 20px",
               }}
             />

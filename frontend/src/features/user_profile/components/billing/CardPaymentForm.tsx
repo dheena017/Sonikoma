@@ -44,7 +44,7 @@ export default function CardPaymentForm({
             value={cardHolder}
             onChange={(e) => setCardHolder(e.target.value)}
             placeholder="e.g. John Doe"
-            className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none"
+            className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-[#3B82F6]/50 text-white focus:outline-none"
           />
         </div>
 
@@ -58,7 +58,7 @@ export default function CardPaymentForm({
             value={cardNo}
             onChange={(e) => onCardNoChange(e.target.value)}
             placeholder="4111 2222 3333 4444"
-            className="w-full bg-black/40 border border-white/5 rounded-xl py-2.5 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
+            className="w-full bg-black/40 border border-white/5 rounded-xl py-2.5 px-3 focus:border-[#3B82F6]/50 text-white focus:outline-none font-mono"
           />
         </div>
 
@@ -73,7 +73,7 @@ export default function CardPaymentForm({
               value={cardExpiry}
               onChange={(e) => onCardExpiryChange(e.target.value)}
               placeholder="MM/YY"
-              className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
+              className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-[#3B82F6]/50 text-white focus:outline-none font-mono"
             />
           </div>
           <div className="space-y-1.5">
@@ -86,7 +86,7 @@ export default function CardPaymentForm({
               value={cardCvv}
               onChange={(e) => onCardCvvChange(e.target.value)}
               placeholder="•••"
-              className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-purple-500/50 text-white focus:outline-none font-mono"
+              className="w-full bg-black/40 border border-white/5 rounded-xl py-2 px-3 focus:border-[#3B82F6]/50 text-white focus:outline-none font-mono"
             />
           </div>
         </div>
@@ -98,7 +98,7 @@ export default function CardPaymentForm({
         disabled={!isComplete}
         className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all ${
           isComplete
-            ? "bg-purple-600 hover:bg-purple-500 text-white cursor-pointer"
+            ? "bg-purple-600 hover:bg-[#3B82F6] text-white cursor-pointer"
             : "bg-neutral-700 text-neutral-500 cursor-not-allowed opacity-60"
         }`}
       >

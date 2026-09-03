@@ -33,15 +33,15 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
   return (
     <div className="space-y-3 pt-1 pb-4">
       {/* Banner / Instructions */}
-      <div className="p-2.5 rounded-xl bg-purple-950/30 border border-purple-500/20 flex items-center justify-between gap-2">
+      <div className="p-2.5 rounded-xl bg-purple-950/30 border border-[#3B82F6]/20 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[10px] font-mono text-purple-200">
-          <MessageSquare className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+          <MessageSquare className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
           <span>Script & Dialogue Director — Edit lines & narration across all panels</span>
         </div>
         <button
           type="button"
           onClick={() => onTriggerFeedback?.("AI Generated dialogue for all empty panels")}
-          className="px-2 py-0.5 rounded-md bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm transition"
+          className="px-2 py-0.5 rounded-md bg-purple-600 hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm transition"
         >
           <Wand2 className="h-2.5 w-2.5" />
           <span>Auto-Script</span>
@@ -61,8 +61,8 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
             onClick={(e) => onSelect(index, e)}
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
-                ? "border-purple-500 bg-purple-950/25 ring-2 ring-purple-500/50 shadow-md"
-                : "border-white/10 bg-[#0c0d1b] hover:border-purple-500/40"
+                ? "border-[#3B82F6] bg-purple-950/25 ring-2 ring-purple-500/50 shadow-md"
+                : "border-white/10 bg-[#0c0d1b] hover:border-[#3B82F6]/40"
             }`}
           >
             {/* Top row: Panel thumbnail + Speaker selector */}
@@ -76,11 +76,11 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-[10px] font-bold font-mono text-purple-300">
+                  <span className="text-[10px] font-bold font-mono text-[#60A5FA]">
                     Panel #{index + 1}
                   </span>
                   <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/50 border border-white/10 text-[9px] font-mono text-neutral-300">
-                    <User className="h-2.5 w-2.5 text-purple-400" />
+                    <User className="h-2.5 w-2.5 text-[#3B82F6]" />
                     <span>{speaker}</span>
                   </div>
                 </div>
@@ -98,7 +98,7 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
                   className="px-2 py-0.5 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-[8px] font-mono flex items-center gap-1"
                   title="AI Polish Line"
                 >
-                  <Sparkles className="h-2 w-2 text-purple-400" />
+                  <Sparkles className="h-2 w-2 text-[#3B82F6]" />
                   <span>AI Polish</span>
                 </button>
               </div>
@@ -110,7 +110,7 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
               placeholder="Enter character dialogue, narration line, or subtitles..."
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => onUpdateDialogue(index, e.target.value)}
-              className="w-full h-16 p-2 rounded-xl bg-black/50 border border-white/10 text-white placeholder-neutral-500 text-[10px] font-mono resize-none focus:outline-none focus:border-purple-500/60 transition-colors leading-relaxed"
+              className="w-full h-16 p-2 rounded-xl bg-black/50 border border-white/10 text-white placeholder-neutral-500 text-[10px] font-mono resize-none focus:outline-none focus:border-[#3B82F6]/60 transition-colors leading-relaxed"
             />
           </div>
         );

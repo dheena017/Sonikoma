@@ -74,7 +74,7 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
           <div className="space-y-2 max-w-2xl">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
               AI Command{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                 Center
               </span>
             </h1>
@@ -127,8 +127,8 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-4 hover:border-[#A855F7]/50 transition-all group">
-              <div className="p-3.5 rounded-2xl bg-[#A855F7]/10 text-[#A855F7] border border-[#A855F7]/20 shrink-0 group-hover:scale-105 transition-transform">
+            <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-4 hover:border-[#3B82F6]/50 transition-all group">
+              <div className="p-3.5 rounded-2xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0 group-hover:scale-105 transition-transform">
                 <TrendingUp className="w-6 h-6" />
               </div>
               <div>
@@ -203,20 +203,20 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
 
           <div
             onClick={() => handleNav("/ai-core/rate-limits")}
-            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#A855F7]/50 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
+            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/50 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
           >
             <div>
-              <div className="p-3 w-fit rounded-xl bg-[#A855F7]/10 text-[#A855F7] border border-[#A855F7]/20 mb-4 group-hover:scale-105 transition-transform">
+              <div className="p-3 w-fit rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 mb-4 group-hover:scale-105 transition-transform">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="text-base font-bold text-[#E5E5E5] group-hover:text-[#A855F7] transition-colors">
+              <h3 className="text-base font-bold text-[#E5E5E5] group-hover:text-[#3B82F6] transition-colors">
                 Rate Limits & Quotas
               </h3>
               <p className="text-xs text-[#9CA3AF] mt-2 leading-relaxed">
                 Live monitoring of RPM (requests per minute) and TPM (tokens per minute) limits across active providers.
               </p>
             </div>
-            <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-[#A855F7] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
+            <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-[#3B82F6] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
               <span>Check Limits</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </div>
@@ -236,7 +236,7 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
             </div>
             <button
               onClick={() => handleNav("/ai-core/api-keys")}
-              className="text-xs font-mono font-bold text-[#3B82F6] hover:text-[#00FFFF] transition-colors"
+              className="text-xs font-mono font-bold text-[#3B82F6] hover:text-[#3B82F6] transition-colors"
             >
               Manage All Keys →
             </button>

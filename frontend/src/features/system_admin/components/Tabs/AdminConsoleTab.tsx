@@ -108,7 +108,7 @@ export function AdminConsoleTab() {
       case "TRACE":
         return "text-neutral-500";
       default:
-        return "text-[#00FFFF]";
+        return "text-[#3B82F6]";
     }
   };
 

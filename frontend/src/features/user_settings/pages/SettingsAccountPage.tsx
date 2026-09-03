@@ -160,7 +160,7 @@ export default function SettingsAccountPage({
           <div className="space-y-2 max-w-2xl">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
               Account{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                 Settings
               </span>
             </h1>
@@ -183,11 +183,11 @@ export default function SettingsAccountPage({
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-[#0b0b0f] border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5">
-              <User className="w-32 h-32 text-purple-500" />
+              <User className="w-32 h-32 text-[#3B82F6]" />
             </div>
 
             <div className="flex items-center gap-3 border-b border-neutral-800 pb-4">
-              <UserCheck className="w-5 h-5 text-purple-400" />
+              <UserCheck className="w-5 h-5 text-[#3B82F6]" />
               <h2 className="text-sm font-bold text-white uppercase tracking-wider">
                 Personal Details
               </h2>
@@ -204,7 +204,7 @@ export default function SettingsAccountPage({
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-semibold"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-semibold"
                   />
                 </div>
 
@@ -232,7 +232,7 @@ export default function SettingsAccountPage({
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-purple-500/50 transition-all font-semibold"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 transition-all font-semibold"
                   >
                     <option value="creator">Creator</option>
                     <option value="writer">Writer / Author</option>
@@ -251,7 +251,7 @@ export default function SettingsAccountPage({
                     value={avatarUrl}
                     onChange={(e) => setAvatarUrl(e.target.value)}
                     placeholder="https://example.com/avatar.jpg"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-mono text-xs"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-mono text-xs"
                   />
                 </div>
               </div>
@@ -265,7 +265,7 @@ export default function SettingsAccountPage({
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Tell us about yourself or your webtoon series..."
                   rows={4}
-                  className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-semibold"
+                  className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-semibold"
                 />
               </div>
 
@@ -278,7 +278,7 @@ export default function SettingsAccountPage({
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-purple-500/50 transition-all font-semibold"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 transition-all font-semibold"
                   >
                     <option value="en">English (US)</option>
                     <option value="ko">Korean (한국어)</option>
@@ -309,7 +309,7 @@ export default function SettingsAccountPage({
                 <button
                   type="submit"
                   disabled={profileLoading}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
                 >
                   {profileLoading ? (
                     <>
@@ -496,7 +496,7 @@ export default function SettingsAccountPage({
                       </td>
                       <td className="py-4 px-4 text-xs">
                         {isCurrent ? (
-                          <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                          <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30">
                             This Device
                           </span>
                         ) : (

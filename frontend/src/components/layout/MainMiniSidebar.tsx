@@ -231,7 +231,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             item.active
-              ? "h-5 bg-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.9)] opacity-100"
+              ? "h-5 bg-[#3B82F6]  opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -243,19 +243,18 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           aria-label={item.label}
           className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
         >
-          {/* iOS Squircle Icon Container */}
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               item.active
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 shadow-[0_0_20px_rgba(59,130,246,0.6)] text-white scale-105"
-                : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
             }`}
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
                 item.active
                   ? "text-white"
-                  : "text-neutral-400 group-hover:text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
@@ -272,11 +271,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
   const [creativeHover, setCreativeHover] = useState(false);
   const [creativeRect, setCreativeRect] = useState<DOMRect | null>(null);
-  const [menuHover, setMenuHover] = useState(false);
-  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 overflow-hidden select-none">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] hidden lg:flex flex-col items-center py-3 z-40 overflow-hidden select-none">
       {/* Navigation Groups */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -293,9 +290,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
               }}
             >
               {groupIdx > 0 && (
-                <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
+                <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
+              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#9CA3AF] select-none text-center w-full px-1">
                 {group.group}
               </span>
             </div>
@@ -308,7 +305,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       </div>
 
       {/* Bottom Action Button */}
-      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-white/10 shrink-0">
+      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-[#2F2F2F] shrink-0">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/creative-suite")}
@@ -318,9 +315,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             }}
             onMouseLeave={() => setCreativeHover(false)}
             aria-label="Creative Suite"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:shadow-[0_0_28px_rgba(59,130,246,0.8)] active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#1E1E1E] hover:bg-[#3B82F6] text-white transition-all shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover: active:scale-90 border border-[#2F2F2F] hover:border-[#60A5FA] cursor-pointer flex items-center justify-center"
           >
-            <Sparkles className="w-5 h-5 shrink-0" />
+            <Sparkles className="w-5 h-5 shrink-0 text-[#3B82F6] group-hover:text-white transition-colors" />
           </button>
           <TooltipPortal
             text="Creative Suite"

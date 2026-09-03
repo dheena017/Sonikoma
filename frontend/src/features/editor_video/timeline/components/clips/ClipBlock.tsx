@@ -74,7 +74,7 @@ const ClipBlock: React.FC<ClipBlockProps> = ({
         selected
           ? "border-white/60 shadow-lg z-10"
           : "hover:border-white/30"
-      } ${isResizing ? "border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.5)]" : ""}`}
+      } ${isResizing ? "border-[#60A5FA] " : ""}`}
     >
       <div className="flex items-center gap-1.5 min-w-0 truncate">
         <SyncStatusBadge status={status} />

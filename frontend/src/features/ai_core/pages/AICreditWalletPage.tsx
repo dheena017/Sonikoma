@@ -58,7 +58,7 @@ export default function AICreditWalletPage({ addNotification }: AICreditWalletPa
           <div className="space-y-2 max-w-2xl">
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
               AI Credits &amp;{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
                 Subscriptions
               </span>
             </h1>

@@ -157,7 +157,7 @@ export default function ProfileSecurityTab({
     if (securityScore >= 80)
       return {
         grade: "B",
-        color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+        color: "text-[#3B82F6] bg-[#3B82F6]/10 border-[#3B82F6]/20",
       };
     return {
       grade: "C",
@@ -198,11 +198,11 @@ export default function ProfileSecurityTab({
     <div className="space-y-6 animate-in fade-in duration-300 text-left">
       {/* Security Audit Score Dashboard */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-6 relative flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/25 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/25 to-transparent" />
 
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-600/15 border border-purple-500/20 flex items-center justify-center">
-            <ShieldCheck className="w-6 h-6 text-purple-400" />
+          <div className="w-12 h-12 rounded-2xl bg-purple-600/15 border border-[#3B82F6]/20 flex items-center justify-center">
+            <ShieldCheck className="w-6 h-6 text-[#3B82F6]" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-white">
@@ -245,11 +245,11 @@ export default function ProfileSecurityTab({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Change password section */}
         <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative">
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
           <div className="space-y-1 mb-6">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Lock className="w-5 h-5 text-purple-400" />
+              <Lock className="w-5 h-5 text-[#3B82F6]" />
               Update Account Password
             </h3>
             <p className="text-xs text-neutral-400 font-semibold">
@@ -285,7 +285,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
                 />
               </div>
 
@@ -297,7 +297,7 @@ export default function ProfileSecurityTab({
                   <button
                     type="button"
                     onClick={handleGeneratePassword}
-                    className="text-[9px] font-bold text-purple-400 hover:text-purple-300 transition-colors uppercase cursor-pointer"
+                    className="text-[9px] font-bold text-[#3B82F6] hover:text-[#93C5FD] transition-colors uppercase cursor-pointer"
                   >
                     Generate Secure
                   </button>
@@ -312,7 +312,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
                 />
 
                 {/* Password strength checklist and bar */}
@@ -427,7 +427,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
                 />
               </div>
             </div>
@@ -445,11 +445,11 @@ export default function ProfileSecurityTab({
 
         {/* Two-Factor Authentication (2FA) setup card */}
         <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative flex flex-col justify-between">
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
           <div className="space-y-1.5 mb-4">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Key className="w-5 h-5 text-purple-400" />
+              <Key className="w-5 h-5 text-[#3B82F6]" />
               Two-Factor Authentication (2FA)
             </h3>
             <p className="text-xs text-neutral-400 font-semibold">
@@ -489,7 +489,7 @@ export default function ProfileSecurityTab({
               {!show2faSetup ? (
                 <button
                   onClick={() => setShow2faSetup(true)}
-                  className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
+                  className="w-full bg-purple-600 hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
                 >
                   Configure 2FA Protection
                 </button>
@@ -525,7 +525,7 @@ export default function ProfileSecurityTab({
                         setOtpCode(e.target.value.replace(/\D/g, ""))
                       }
                       placeholder="Enter 6-digit code"
-                      className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs text-white focus:outline-none font-mono text-center tracking-[0.2em]"
+                      className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs text-white focus:outline-none font-mono text-center tracking-[0.2em]"
                     />
                     {otpError && (
                       <p className="text-[9px] text-rose-400 font-bold ml-1">
@@ -544,7 +544,7 @@ export default function ProfileSecurityTab({
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                      className="flex-1 bg-purple-600 hover:bg-[#3B82F6] text-white py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
                     >
                       Verify & Activate
                     </button>
@@ -558,11 +558,11 @@ export default function ProfileSecurityTab({
 
       {/* Session management section */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative space-y-5">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
         <div className="space-y-1">
           <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <Globe className="w-5 h-5 text-purple-400" />
+            <Globe className="w-5 h-5 text-[#3B82F6]" />
             Active Login Sessions
           </h3>
           <p className="text-xs text-neutral-400 font-semibold">
@@ -577,8 +577,8 @@ export default function ProfileSecurityTab({
               className="bg-black/30 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center">
-                  <Globe className="w-5 h-5 text-purple-400" />
+                <div className="w-10 h-10 rounded-xl bg-purple-600/10 border border-[#3B82F6]/20 flex items-center justify-center">
+                  <Globe className="w-5 h-5 text-[#3B82F6]" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white flex items-center gap-2">
@@ -610,12 +610,12 @@ export default function ProfileSecurityTab({
 
       {/* Security Audit Log Section */}
       <div className="bg-[#0f0f13]/40 border border-white/5 rounded-3xl p-8 shadow-2xl relative space-y-5">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-purple-400" />
+              <ShieldCheck className="w-5 h-5 text-[#3B82F6]" />
               Security Audit Log
             </h3>
             <p className="text-xs text-neutral-400 font-semibold">
@@ -632,7 +632,7 @@ export default function ProfileSecurityTab({
                 setCurrentPage(1);
               }}
               placeholder="Search event or IP..."
-              className="w-full bg-black/40 border border-white/5 focus:border-purple-500/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700"
+              className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700"
             />
           </div>
         </div>
