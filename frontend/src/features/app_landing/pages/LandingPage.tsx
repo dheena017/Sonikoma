@@ -140,7 +140,7 @@ export default function LandingPage({
             </div>
           </div>
 
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-1.5">
             {[
               { label: "How It Works", target: "how-it-works" },
               { label: "Live Demo", target: "demo-showcase" },
@@ -154,10 +154,10 @@ export default function LandingPage({
                     .getElementById(link.target)
                     ?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className={`text-sm font-semibold transition-colors cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer select-none focus:outline-none ${
                   isLight
-                    ? "text-slate-700 hover:text-blue-600"
-                    : "text-neutral-300 hover:text-white"
+                    ? "text-slate-600 hover:text-blue-600 hover:bg-slate-100"
+                    : "text-neutral-300 hover:text-white hover:bg-white/5"
                 }`}
               >
                 {link.label}
@@ -168,17 +168,17 @@ export default function LandingPage({
           <div className="flex items-center gap-3">
             <button
               onClick={onLogin}
-              className={`hidden sm:inline-flex px-4 py-2 text-sm font-semibold transition-colors cursor-pointer rounded-xl ${
+              className={`hidden sm:inline-flex px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer rounded-xl select-none focus:outline-none ${
                 isLight
-                  ? "text-slate-800 hover:text-slate-950 hover:bg-slate-100"
-                  : "text-neutral-200 hover:text-white hover:bg-[#181818]"
+                  ? "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
+                  : "text-neutral-300 hover:text-white hover:bg-white/5"
               }`}
             >
               Sign In
             </button>
             <button
               onClick={onGetStarted}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none"
             >
               Get Started Free
             </button>
