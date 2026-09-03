@@ -266,17 +266,66 @@ const Timeline: React.FC<TimelineProps> = ({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== "Space") return;
       const target = event.target as HTMLElement | null;
-      if (target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName))
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
         return;
-      event.preventDefault();
-      togglePlayback();
+      }
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        togglePlayback();
+        return;
+      }
+
+      if (event.key === "Home") {
+        event.preventDefault();
+        setTimelineTime(0);
+        setCurrentPanelIndex?.(0);
+        return;
+      }
+
+      if (event.key === "End") {
+        event.preventDefault();
+        setTimelineTime(totalDuration);
+        const lastIdx = Math.max(0, panelTimings.length - 1);
+        setCurrentPanelIndex?.(lastIdx);
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        const step = event.shiftKey ? 2.0 : 0.5;
+        setTimelineTime((prev) => {
+          const next = Math.max(0, prev - step);
+          const nextIdx = getPanelIndexAtTime(next);
+          setCurrentPanelIndex?.(nextIdx);
+          return next;
+        });
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        const step = event.shiftKey ? 2.0 : 0.5;
+        setTimelineTime((prev) => {
+          const next = Math.min(totalDuration, prev + step);
+          const nextIdx = getPanelIndexAtTime(next);
+          setCurrentPanelIndex?.(nextIdx);
+          return next;
+        });
+        return;
+      }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [totalDuration, getPanelIndexAtTime, setCurrentPanelIndex, panelTimings.length]);
 
   const seekToPosition = (clientX: number) => {
     if (!rulerRef.current && !s.trackAreaRef.current) return;
@@ -439,7 +488,7 @@ const Timeline: React.FC<TimelineProps> = ({
         isPlaying={isPlaying}
         playbackTime={timelineTime}
         totalDuration={totalDuration}
-        onToggleSnap={() => s.setSnapEnabled((v) => !v)}
+        onToggleSnap={s.toggleSnap}
         onToggleCaptions={() => s.setCaptionsVisible((v) => !v)}
         onToggleKeyframes={s.keyframesState.toggleKeyframeRows}
         onSplit={s.handleSplit}
@@ -611,9 +660,9 @@ const Timeline: React.FC<TimelineProps> = ({
         onOpenMediaPicker={s.openMediaPicker}
         scrollRef={timelineScrollRef}
         zoomLevel={s.zoomLevel}
-        onZoomIn={() => s.setZoomLevel((z) => Math.min(80, z + 5))}
-        onZoomOut={() => s.setZoomLevel((z) => Math.max(15, z - 5))}
-        onZoomReset={() => s.setZoomLevel(30)}
+        onZoomIn={s.handleZoomIn}
+        onZoomOut={s.handleZoomOut}
+        onZoomReset={s.handleZoomReset}
       />
 
       {/* ── Keyframe Inspector Slide-over ───────────────────────────────────── */}

@@ -6,6 +6,7 @@ import {
   Settings,
   Play,
   Layers,
+  Film,
   Image as ImageIcon,
 } from "lucide-react";
 import { Category } from "@/features/app_shortcuts/components/shortcutTypes";
@@ -27,6 +28,7 @@ const iconMap: Record<Category, React.ReactNode> = {
   trigger: <Settings className="h-4 w-4" />,
   playback: <Play className="h-4 w-4" />,
   editor: <Layers className="h-4 w-4" />,
+  timeline: <Film className="h-4 w-4" />,
   deck: <ImageIcon className="h-4 w-4" />,
 };
 
@@ -36,6 +38,7 @@ const labelMap: Record<Category, string> = {
   trigger: "Trigger",
   playback: "Playback",
   editor: "Editor",
+  timeline: "Timeline",
   deck: "Gallery",
 };
 

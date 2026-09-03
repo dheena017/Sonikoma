@@ -38,12 +38,16 @@ export interface TimelineState {
   setSnapEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   setCaptionsVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSoloTrack: React.Dispatch<React.SetStateAction<string | null>>;
+  handleZoomIn: () => void;
+  handleZoomOut: () => void;
+  handleZoomReset: () => void;
 
   getClipDuration: (key: string) => number;
   updateClipDuration: (key: string, duration: number) => void;
   updateClipOffset: (key: string, offsetPx: number) => void;
 
   // Track controls
+  toggleSnap: () => void;
   toggleMute: (id: string) => void;
   toggleLock: (id: string) => void;
   toggleHide: (id: string) => void;
@@ -128,7 +132,25 @@ export function useTimelineState(
   const hasSelection = !!selectedClip;
   const hasDuration = hasSelection && getClipDuration(selectedClip!) > 0;
 
+  // ── Zoom controls ───────────────────────────────────────────────────────────
+  const handleZoomIn = useCallback(
+    () => setZoomLevel((z) => Math.min(120, z + 5)),
+    []
+  );
+  const handleZoomOut = useCallback(
+    () => setZoomLevel((z) => Math.max(10, z - 5)),
+    []
+  );
+  const handleZoomReset = useCallback(
+    () => setZoomLevel(30),
+    []
+  );
+
   // ── Track controls ──────────────────────────────────────────────────────────
+  const toggleSnap = useCallback(
+    () => setSnapEnabled((p) => !p),
+    []
+  );
   const toggleMute = useCallback(
     (id: string) => setMutedTracks((p) => ({ ...p, [id]: !p[id] })),
     []
@@ -318,17 +340,70 @@ export function useTimelineState(
   // ── Global keyboard shortcuts ───────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      // Global zoom shortcuts
+      if (e.key === "=" || e.key === "+") {
+        e.preventDefault();
+        handleZoomIn();
+        return;
+      }
+      if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        handleZoomOut();
+        return;
+      }
+      if (e.key === "0" && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        handleZoomReset();
+        return;
+      }
+      if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey) {
+        toggleSnap();
+        return;
+      }
+
+      // Clip actions
       if (!selectedClip) return;
-      if (e.key === "s" || e.key === "S") handleSplit();
-      if (e.key === "Delete" || e.key === "Backspace") handleRemoveDuration();
-      if ((e.ctrlKey || e.metaKey) && e.key === "c") setClipboard(selectedClip);
-      if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+      if ((e.key === "s" || e.key === "S") && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        handleSplit();
+      }
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        handleRemoveDuration();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C")) {
+        e.preventDefault();
+        handleCopy();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V")) {
+        e.preventDefault();
+        handlePaste();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D")) {
         e.preventDefault();
         handleDuplicate();
       }
       if (e.key === "k" || e.key === "K") {
-        // Add keyframe at 1.0s on selected clip
         keyframesState.addKeyframe(selectedClip, 1.0, "scale", 1.0);
+      }
+      if (e.key === "m" || e.key === "M") {
+        const track = selectedClip.split("-")[0].toUpperCase();
+        if (track) toggleMute(track);
+      }
+      if (e.key === "l" || e.key === "L") {
+        const track = selectedClip.split("-")[0].toUpperCase();
+        if (track) toggleLock(track);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -337,7 +412,15 @@ export function useTimelineState(
     selectedClip,
     handleSplit,
     handleRemoveDuration,
+    handleCopy,
+    handlePaste,
     handleDuplicate,
+    handleZoomIn,
+    handleZoomOut,
+    handleZoomReset,
+    toggleSnap,
+    toggleMute,
+    toggleLock,
     keyframesState,
   ]);
 
@@ -362,9 +445,13 @@ export function useTimelineState(
     setSnapEnabled,
     setCaptionsVisible,
     setSoloTrack,
+    handleZoomIn,
+    handleZoomOut,
+    handleZoomReset,
     getClipDuration,
     updateClipDuration,
     updateClipOffset,
+    toggleSnap,
     toggleMute,
     toggleLock,
     toggleHide,

@@ -111,18 +111,18 @@ const interval = setInterval(() => {
   }
 }, 1200);
 
-const tscBin = path.resolve(
+const tscJs = path.resolve(
   __dirname,
-  "../node_modules/.bin/tsc" + (process.platform === "win32" ? ".cmd" : "")
+  "../node_modules/typescript/bin/tsc"
 );
 
 const child = spawn(
-  tscBin,
-  ["--noEmit", "--project", "tsconfig.json", "--pretty"],
+  process.execPath,
+  [tscJs, "--noEmit", "--project", "tsconfig.json", "--pretty"],
   {
     cwd: path.resolve(__dirname, ".."),
     stdio: ["inherit", "pipe", "pipe"],
-    shell: true,
+    shell: false,
   }
 );
 

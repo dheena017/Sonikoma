@@ -5,7 +5,7 @@ import {
   ShortcutCategoryTabs,
 } from "@/features/app_shortcuts/components/ShortcutFilters";
 import ShortcutList from "@/features/app_shortcuts/components/ShortcutList";
-import ShortcutRecordingModal from "@/features/app_shortcuts/components/ShortcutRecordingModal";
+import NewKeyCombinationModal from "@/shared/ui/modal/NewKeyCombinationModal";
 import { getActionDetails } from "@/features/app_shortcuts/components/shortcutUtils";
 import { ShortcutsPageProps } from "@/features/app_shortcuts/components/shortcutTypes";
 import { useShortcutsPage } from "@/features/app_shortcuts/hooks/useShortcutsPage";
@@ -134,7 +134,7 @@ const ShortcutsPageContent = React.memo(
         </div>
 
         {recordingActionId && (
-          <ShortcutRecordingModal
+          <NewKeyCombinationModal
             recordingActionId={recordingActionId}
             details={getActionDetails(recordingActionId)}
             conflictMsg={conflictMsg}

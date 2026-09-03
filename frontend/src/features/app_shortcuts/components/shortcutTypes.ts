@@ -6,6 +6,7 @@ export type Category =
   | "trigger"
   | "playback"
   | "editor"
+  | "timeline"
   | "deck";
 
 export interface ShortcutsPageProps {

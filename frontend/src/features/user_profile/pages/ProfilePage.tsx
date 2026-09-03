@@ -159,7 +159,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                     <button
                       onClick={() => state.setActiveTab("account")}
                       aria-label="Edit Avatar"
-                      className="absolute bottom-1 right-1 p-2 rounded-lg bg-neutral-950/90 border border-white/20 text-purple-300 hover:text-white transition-all shadow-md cursor-pointer"
+                      className="!absolute !top-auto bottom-1 right-1 !z-10 p-1.5 rounded-lg bg-neutral-950/95 border border-white/30 text-purple-300 hover:text-white transition-all shadow-md cursor-pointer"
                     >
                       <Camera className="w-4 h-4" />
                     </button>

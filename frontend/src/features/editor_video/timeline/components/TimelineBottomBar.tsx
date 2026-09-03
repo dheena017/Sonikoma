@@ -107,7 +107,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
           {zoomLevel !== undefined && (
             <button
               onClick={onZoomReset}
-              title="Reset Zoom (30px/s)"
+              title="Reset Zoom (0)"
               className="px-1.5 py-0.5 rounded text-[9px] font-mono text-neutral-400 hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
             >
               {Math.round((zoomLevel / 30) * 100)}%

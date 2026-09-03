@@ -87,13 +87,13 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       <div className="flex items-center gap-0.5">
         {/* Undo / Redo */}
         <ToolBtn
-          title="Undo"
+          title="Undo (Ctrl+Z)"
           className="p-1.5 text-neutral-500 hover:text-white rounded hover:bg-white/5 transition-colors cursor-pointer"
         >
           <Undo className="h-3.5 w-3.5" />
         </ToolBtn>
         <ToolBtn
-          title="Redo"
+          title="Redo (Ctrl+Y)"
           className="p-1.5 text-neutral-500 hover:text-white rounded hover:bg-white/5 transition-colors cursor-pointer"
         >
           <Redo className="h-3.5 w-3.5" />
@@ -103,7 +103,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Captions toggle */}
         <button
-          title="Captions (CC)"
+          title="Toggle Captions (CC)"
           onClick={onToggleCaptions}
           className={`px-1.5 py-1 rounded transition-colors cursor-pointer border text-[10px] font-black tracking-tight ${
             captionsVisible
@@ -116,7 +116,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Keyframe Sub-rows toggle */}
         <button
-          title="Toggle Keyframe Sub-rows (K)"
+          title="Toggle Keyframes (K)"
           onClick={onToggleKeyframes}
           className={`p-1.5 rounded transition-colors cursor-pointer border ${
             keyframesVisible
@@ -129,7 +129,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Split */}
         <ToolBtn
-          title="Split (S)"
+          title="Split Clip (S)"
           onClick={onSplit}
           className="p-1.5 ml-0.5 text-purple-400 hover:bg-purple-500/20 rounded transition-colors cursor-pointer border border-purple-500/20 hover:border-purple-400"
         >
@@ -138,7 +138,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Delete */}
         <ToolBtn
-          title="Delete"
+          title="Delete Selected Clip (Del)"
           onClick={onDelete}
           className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors cursor-pointer"
         >
@@ -147,7 +147,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Duplicate */}
         <ToolBtn
-          title="Duplicate"
+          title="Duplicate Selected Clip (Ctrl+D)"
           onClick={onDuplicate}
           className="p-1.5 text-neutral-500 hover:text-white hover:bg-white/5 rounded transition-colors cursor-pointer"
         >
@@ -158,7 +158,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Snap */}
         <button
-          title="Snap"
+          title="Toggle Magnetic Snapping (N)"
           onClick={onToggleSnap}
           className={`p-1.5 rounded transition-colors cursor-pointer border ${
             snapEnabled
@@ -171,7 +171,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Fit view */}
         <ToolBtn
-          title="Fit View"
+          title="Fit Timeline View (Shift+Z)"
           className="p-1.5 text-neutral-500 hover:text-white hover:bg-white/5 rounded transition-colors cursor-pointer"
         >
           <LayoutGrid className="h-3.5 w-3.5" />
@@ -191,12 +191,12 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
           <ChevronRight className="h-3 w-3" />
           {snapEnabled && (
             <span className="text-amber-400/80 font-bold text-[9px] tracking-wide">
-              SNAP
+              SNAP (N)
             </span>
           )}
 
           <button
-            title={isPlaying ? "Pause" : "Play"}
+            title={isPlaying ? "Pause Playback (Space)" : "Start Playback (Space)"}
             onClick={onPlay}
             className={`ml-0.5 p-1 rounded transition-colors cursor-pointer ${
               isPlaying

@@ -36,6 +36,18 @@ export const DEFAULT_SHORTCUTS: Record<string, string> = {
   volume_up: "Alt+ArrowUp",
   volume_down: "Alt+ArrowDown",
   volume_mute: "Alt+M",
+  timeline_split: "S",
+  timeline_delete: "Delete",
+  timeline_copy: "Ctrl+C",
+  timeline_paste: "Ctrl+V",
+  timeline_duplicate: "Ctrl+D",
+  timeline_keyframe: "K",
+  timeline_snap: "N",
+  timeline_zoom_in: "=",
+  timeline_zoom_out: "-",
+  timeline_zoom_reset: "0",
+  timeline_mute: "M",
+  timeline_lock: "L",
 };
 
 /** Normalize and check if a keyboard event matches a shortcut string like "Alt+D" or "Ctrl+Z" */
@@ -99,7 +111,7 @@ export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
         props.navigateTo?.("/dashboard");
       } else if (matchesShortcut(e, shortcuts.nav_settings)) {
         e.preventDefault();
-        props.navigateTo?.("/settings");
+        props.navigateTo?.("/settings/account");
       } else if (matchesShortcut(e, shortcuts.nav_editor)) {
         e.preventDefault();
         props.navigateTo?.("/editor");
@@ -109,9 +121,15 @@ export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
       } else if (matchesShortcut(e, shortcuts.nav_bubble)) {
         e.preventDefault();
         props.setShowBubbleModal?.(true);
+      } else if (matchesShortcut(e, shortcuts.nav_logs)) {
+        e.preventDefault();
+        props.addNotification?.("Logs are available in the current workspace panels.", "info");
+      } else if (matchesShortcut(e, shortcuts.nav_status)) {
+        e.preventDefault();
+        props.addNotification?.("Server status is shown in the header.", "info");
       } else if (matchesShortcut(e, shortcuts.nav_shortcuts)) {
         e.preventDefault();
-        setIsShortcutsHelpOpen((prev) => !prev);
+        props.navigateTo?.("/shortcuts");
       } else if (matchesShortcut(e, shortcuts.nav_profile)) {
         e.preventDefault();
         props.navigateTo?.("/profile");

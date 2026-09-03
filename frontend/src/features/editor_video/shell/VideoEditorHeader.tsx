@@ -14,8 +14,10 @@ import {
   Menu,
   Film,
   FolderSync,
+  Keyboard,
 } from "lucide-react";
 import VideoCustomizeLayoutModal from "./VideoCustomizeLayoutModal";
+import VideoShortcutsHelpModal from "./VideoShortcutsHelpModal";
 import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import {
   getUserAvatarUrl,
@@ -112,9 +114,31 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   }, [user]);
 
   const [showCustomizeLayout, setShowCustomizeLayout] = useState(false);
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.key === "?" || (e.shiftKey && e.key === "/")) {
+        e.preventDefault();
+        setShowShortcutsModal((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const [credits, setCredits] = useState<number | null>(
     userCredits !== undefined && userCredits !== null
       ? userCredits
@@ -260,6 +284,15 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           )}
 
           <div className="hidden lg:flex items-center gap-1 p-1 bg-[#121218] border border-neutral-800/90 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setShowShortcutsModal(true)}
+              className="p-1.5 rounded-lg transition-all cursor-pointer flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800/60"
+              title="Keyboard Shortcuts (?)"
+            >
+              <Keyboard className="w-4 h-4" />
+            </button>
+
             <button
               type="button"
               onClick={() => setShowCustomizeLayout(true)}
@@ -465,6 +498,11 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
       <VideoCustomizeLayoutModal
         isOpen={showCustomizeLayout}
         onClose={() => setShowCustomizeLayout(false)}
+      />
+
+      <VideoShortcutsHelpModal
+        isOpen={showShortcutsModal}
+        onClose={() => setShowShortcutsModal(false)}
       />
 
       <ProjectConfirmModal

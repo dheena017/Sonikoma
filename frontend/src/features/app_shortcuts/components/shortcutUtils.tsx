@@ -5,6 +5,16 @@ import {
   Navigation,
   Settings,
   Image as ImageIcon,
+  Film,
+  Scissors,
+  SplitSquareHorizontal,
+  Copy,
+  Plus,
+  Volume2,
+  Lock,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
 } from "lucide-react";
 import {
   Category,
@@ -14,61 +24,96 @@ import {
 export const categoryOptions: Category[] = [
   "all",
   "nav",
-  "trigger",
-  "playback",
+  "timeline",
   "editor",
+  "playback",
+  "trigger",
   "deck",
 ];
 
 export const categoryLabels: Record<Category, string> = {
   all: "All",
   nav: "Navigation",
-  trigger: "Trigger",
-  playback: "Playback",
+  timeline: "Timeline & Video",
   editor: "Editor",
+  playback: "Playback",
+  trigger: "Trigger",
   deck: "Gallery",
 };
 
 export const getActionDetails = (id: string): ShortcutActionDetails => {
   let label = id
-    .replace("nav_", "Navigate: ")
-    .replace("trigger_", "Action: ")
-    .replace("playback_", "Preview: ")
-    .replace("editor_tab_", "Editor Tab: ")
-    .replace("editor_", "Editor: ")
-    .replace("deck_", "Gallery: ")
-    .replace("volume_", "Volume: ")
-    .replace(/_/g, " ");
+    .replace(/^nav_/, "")
+    .replace(/^trigger_/, "")
+    .replace(/^playback_/, "")
+    .replace(/^editor_tab_/, "")
+    .replace(/^editor_/, "")
+    .replace(/^timeline_/, "")
+    .replace(/^deck_/, "")
+    .replace(/^volume_/, "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
   let scope = "Global";
   let icon = <Navigation className="h-3.5 w-3.5" />;
   let category: Category = "nav";
 
-  if (id.startsWith("editor_")) {
-    scope = "Editor Only";
-    icon = <Layers className="h-3.5 w-3.5" />;
+  // Navigation
+  if (id === "nav_dashboard") { label = "Go to Dashboard"; scope = "Navigation"; category = "nav"; icon = <Navigation className="h-3.5 w-3.5" />; }
+  else if (id === "nav_settings") { label = "Go to Settings"; scope = "Navigation"; category = "nav"; icon = <Settings className="h-3.5 w-3.5" />; }
+  else if (id === "nav_editor") { label = "Go to Video Editor"; scope = "Navigation"; category = "nav"; icon = <Film className="h-3.5 w-3.5" />; }
+  else if (id === "nav_autocrop") { label = "Go to AutoCrop Studio"; scope = "Navigation"; category = "nav"; icon = <Scissors className="h-3.5 w-3.5" />; }
+  else if (id === "nav_bubble") { label = "Go to Bubble Cleaner"; scope = "Navigation"; category = "nav"; icon = <Layers className="h-3.5 w-3.5" />; }
+  else if (id === "nav_logs") { label = "Go to System Logs"; scope = "Navigation"; category = "nav"; icon = <Settings className="h-3.5 w-3.5" />; }
+  else if (id === "nav_status") { label = "Go to Server Status"; scope = "Navigation"; category = "nav"; icon = <Settings className="h-3.5 w-3.5" />; }
+  else if (id === "nav_shortcuts") { label = "Go to Shortcuts Settings"; scope = "Navigation"; category = "nav"; icon = <Settings className="h-3.5 w-3.5" />; }
+  else if (id === "nav_profile") { label = "Go to User Profile"; scope = "Navigation"; category = "nav"; icon = <Settings className="h-3.5 w-3.5" />; }
+
+  // Triggers / Actions
+  else if (id === "trigger_compile") { label = "Compile Video Project"; scope = "Action"; category = "trigger"; icon = <Settings className="h-3.5 w-3.5" />; }
+  else if (id === "trigger_scrape") { label = "New Scrape Task"; scope = "Action"; category = "trigger"; icon = <Settings className="h-3.5 w-3.5" />; }
+
+  // Playback & Audio
+  else if (id === "playback_toggle") { label = "Play / Pause Playback"; scope = "Playback"; category = "playback"; icon = <Play className="h-3.5 w-3.5" />; }
+  else if (id === "playback_reset") { label = "Reset Playback to Start"; scope = "Playback"; category = "playback"; icon = <Play className="h-3.5 w-3.5" />; }
+  else if (id === "volume_up") { label = "Increase Volume"; scope = "Audio"; category = "playback"; icon = <Volume2 className="h-3.5 w-3.5" />; }
+  else if (id === "volume_down") { label = "Decrease Volume"; scope = "Audio"; category = "playback"; icon = <Volume2 className="h-3.5 w-3.5" />; }
+  else if (id === "volume_mute") { label = "Mute / Unmute Master Audio"; scope = "Audio"; category = "playback"; icon = <Volume2 className="h-3.5 w-3.5" />; }
+  else if (id === "playback_speed_1") { label = "Playback Speed: 1.0x"; scope = "Playback"; category = "playback"; icon = <Play className="h-3.5 w-3.5" />; }
+  else if (id === "playback_speed_1_5") { label = "Playback Speed: 1.5x"; scope = "Playback"; category = "playback"; icon = <Play className="h-3.5 w-3.5" />; }
+  else if (id === "playback_speed_2") { label = "Playback Speed: 2.0x"; scope = "Playback"; category = "playback"; icon = <Play className="h-3.5 w-3.5" />; }
+
+  // Timeline & Video
+  else if (id === "timeline_split") { label = "Split Clip at Playhead"; scope = "Timeline"; category = "timeline"; icon = <SplitSquareHorizontal className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_delete") { label = "Delete Selected Clip"; scope = "Timeline"; category = "timeline"; icon = <Scissors className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_copy") { label = "Copy Selected Clip"; scope = "Timeline"; category = "timeline"; icon = <Copy className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_paste") { label = "Paste Clip"; scope = "Timeline"; category = "timeline"; icon = <Plus className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_duplicate") { label = "Duplicate Selected Clip"; scope = "Timeline"; category = "timeline"; icon = <Copy className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_keyframe") { label = "Add Animation Keyframe"; scope = "Timeline"; category = "timeline"; icon = <Plus className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_zoom_in") { label = "Zoom In Scale"; scope = "Timeline"; category = "timeline"; icon = <ZoomIn className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_zoom_out") { label = "Zoom Out Scale"; scope = "Timeline"; category = "timeline"; icon = <ZoomOut className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_zoom_reset") { label = "Reset Zoom to 100%"; scope = "Timeline"; category = "timeline"; icon = <Maximize2 className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_mute") { label = "Toggle Active Track Mute"; scope = "Timeline"; category = "timeline"; icon = <Volume2 className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_lock") { label = "Toggle Active Track Lock"; scope = "Timeline"; category = "timeline"; icon = <Lock className="h-3.5 w-3.5" />; }
+  else if (id === "timeline_snap") { label = "Toggle Magnetic Snapping"; scope = "Timeline"; category = "timeline"; icon = <Layers className="h-3.5 w-3.5" />; }
+
+  // Editor (Canvas / Image)
+  else if (id.startsWith("editor_")) {
+    scope = "Editor";
     category = "editor";
-  } else if (id.startsWith("playback_") || id.startsWith("volume_")) {
-    scope = "Workspace Only";
-    icon = <Play className="h-3.5 w-3.5" />;
-    category = "playback";
-  } else if (id.startsWith("deck_")) {
-    scope = "Gallery Only";
-    icon = <ImageIcon className="h-3.5 w-3.5" />;
-    category = "deck";
-  } else if (id.startsWith("trigger_")) {
-    scope = "Global";
-    icon = <Settings className="h-3.5 w-3.5" />;
-    category = "trigger";
+    icon = <Layers className="h-3.5 w-3.5" />;
+    if (id === "editor_brush_inc") label = "Increase Brush Size";
+    else if (id === "editor_brush_dec") label = "Decrease Brush Size";
+    else if (id === "editor_zoom_in") label = "Zoom In Canvas";
+    else if (id === "editor_zoom_out") label = "Zoom Out Canvas";
   }
 
-  if (id === "playback_speed_1") label = "Playback Speed: 1x";
-  if (id === "playback_speed_1_5") label = "Playback Speed: 1.5x";
-  if (id === "playback_speed_2") label = "Playback Speed: 2x";
-  if (id === "editor_brush_inc") label = "Editor: Increase Brush Size";
-  if (id === "editor_brush_dec") label = "Editor: Decrease Brush Size";
-  if (id === "editor_zoom_in") label = "Editor: Zoom In";
-  if (id === "editor_zoom_out") label = "Editor: Zoom Out";
+  // Gallery
+  else if (id.startsWith("deck_")) {
+    scope = "Gallery";
+    category = "deck";
+    icon = <ImageIcon className="h-3.5 w-3.5" />;
+  }
 
   return { label, scope, icon, category };
 };
