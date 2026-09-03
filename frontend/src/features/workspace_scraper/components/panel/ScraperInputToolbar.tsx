@@ -366,7 +366,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                 }`}
                 aria-label="Import Chapter Scraper"
               >
-                <Zap className="h-4 w-4 text-[#3B82F6]" />
+                <Zap className="h-4 w-4 text-white" />
                 <span>Import Chapter Scraper</span>
               </button>
             </Tooltip>

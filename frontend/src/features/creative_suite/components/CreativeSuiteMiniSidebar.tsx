@@ -3,18 +3,10 @@ import {
   Menu,
   LayoutGrid,
   Film,
-  Scissors,
-  Users,
   Globe,
-  Music,
-  MessageSquare,
   Mic,
-  BarChart3,
   Youtube,
   ExternalLink,
-  Sparkles,
-  Settings,
-  Zap,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
@@ -166,7 +158,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 shadow-xl select-none overflow-hidden">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-neutral-950/85 backdrop-blur-2xl border-r border-white/10 hidden lg:flex flex-col items-center py-3 z-40 shadow-[8px_0_32px_rgba(0,0,0,0.6)] select-none overflow-hidden">
       {/* Navigation Groups */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -185,7 +177,7 @@ const CreativeSuiteMiniSidebarInner: React.FC<
               {groupIdx > 0 && (
                 <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
+              <span className="text-[8.5px] font-sans font-bold uppercase tracking-[0.16em] text-neutral-400 select-none text-center w-full px-1">
                 {group.name}
               </span>
             </div>

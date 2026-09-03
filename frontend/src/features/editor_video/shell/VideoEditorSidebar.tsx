@@ -246,15 +246,6 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
             </button>
           </div>
 
-          {/* Active Project Widget */}
-          <div className="px-4 pt-3 shrink-0">
-            <ActiveProjectSidebarWidget
-              setDrawerOpen={(open) =>
-                useProjectStore.getState().setDrawerOpen(open)
-              }
-            />
-          </div>
-
           {/* Navigation Items List */}
           <div className="flex-1 overflow-y-auto py-4 px-4 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {navSections.map((sec, secIdx) => (
@@ -319,14 +310,19 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
             ))}
           </div>
 
-          {/* Sidebar Footer: Return Button */}
-          <div className="p-4 border-t border-white/10 shrink-0">
+          {/* Sidebar Footer: Active Project Widget + Return Button */}
+          <div className="p-4 border-t border-white/10 shrink-0 space-y-3">
+            <ActiveProjectSidebarWidget
+              setDrawerOpen={(open) =>
+                useProjectStore.getState().setDrawerOpen(open)
+              }
+            />
             <button
               onClick={() => {
                 onClose();
                 onBackToApp?.();
               }}
-              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 text-white text-xs font-black tracking-widest uppercase transition-all  hover: active:scale-95 border border-[#60A5FA]/40 cursor-pointer font-sans"
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-neutral-300 hover:text-white text-xs font-black tracking-widest uppercase transition-all active:scale-95 border border-[#2F2F2F] hover:border-[#60A5FA]/40 cursor-pointer font-sans shadow-sm"
             >
               <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
               <span>CREATIVE SUITE</span>

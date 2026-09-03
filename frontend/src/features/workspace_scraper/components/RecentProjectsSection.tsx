@@ -159,7 +159,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
                     .substring(2, 10)}`;
                   navigateTo?.(`/scraper/editor?id=${tempId}`);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm active:scale-95"
               >
                 <Plus className="h-3.5 w-3.5" /> New Project
               </button>

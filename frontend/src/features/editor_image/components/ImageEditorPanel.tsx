@@ -172,16 +172,16 @@ export default function ImageEditorPanel({
       {activeTool === "edit" && (
         <>
           {/* Rotate & Flip Card */}
-          <div className="bg-[#181924]/60 border border-white/10 rounded-2xl p-4 space-y-3 shadow-xl">
+          <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-4 space-y-3 shadow-md">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+              <div className="p-1.5 rounded-xl bg-[#121212] border border-[#2F2F2F] text-[#3B82F6]">
                 <RotateCw className="h-3.5 w-3.5" />
               </div>
               <span className="text-[10px] uppercase font-mono font-bold text-white tracking-widest">
                 Rotate &amp; Flip
               </span>
               {isTransforming && (
-                <span className="ml-auto text-[8px] font-mono text-blue-400 animate-pulse">
+                <span className="ml-auto text-[8px] font-mono text-[#3B82F6] animate-pulse">
                   Applying…
                 </span>
               )}
@@ -193,7 +193,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(-90)}
                 disabled={isTransforming}
                 title="Rotate 90° Counter-Clockwise"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <RotateCcw className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">-90°</span>
@@ -204,7 +204,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(180)}
                 disabled={isTransforming}
                 title="Rotate 180°"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <ChevronsUpDown className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">180°</span>
@@ -215,7 +215,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(90)}
                 disabled={isTransforming}
                 title="Rotate 90° Clockwise"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <RotateCw className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">+90°</span>
@@ -226,7 +226,7 @@ export default function ImageEditorPanel({
                 onClick={() => onFlip("h")}
                 disabled={isTransforming}
                 title="Flip Horizontal"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <FlipHorizontal className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">Flip H</span>
@@ -237,7 +237,7 @@ export default function ImageEditorPanel({
                 onClick={() => onFlip("v")}
                 disabled={isTransforming}
                 title="Flip Vertical"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#10111a]/80 hover:bg-[#3B82F6]/10 border border-white/5 hover:border-[#3B82F6]/30 rounded-2xl text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <FlipVertical className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">Flip V</span>
@@ -254,7 +254,7 @@ export default function ImageEditorPanel({
             <div className="h-[1px] flex-1 bg-white/10" />
           </div>
 
-          <div className="space-y-3 bg-[#181924]/60 border border-white/10 rounded-2xl p-4 shadow-xl">
+          <div className="space-y-3 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-4 shadow-md">
             <div className="grid grid-cols-1 gap-2">
               {FRAME_PRESETS.map((preset) => {
                 const active = selectedFramePreset === preset.id;
@@ -265,8 +265,8 @@ export default function ImageEditorPanel({
                     onClick={() => handleFramePresetChange(preset.id)}
                     className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${
                       active
-                        ? "bg-blue-950/40 border-blue-500/60 text-blue-200  font-bold"
-                        : "bg-[#10111a]/80 border-white/5 text-neutral-400 hover:border-white/15 hover:text-white"
+                        ? "bg-[#3B82F6] border-[#60A5FA]/40 text-white font-bold"
+                        : "bg-[#2A2A2A] border-[#2F2F2F] text-neutral-400 hover:border-[#3B82F6] hover:text-white"
                     }`}
                   >
                     <div className="text-xs font-bold uppercase tracking-[0.18em] font-mono">

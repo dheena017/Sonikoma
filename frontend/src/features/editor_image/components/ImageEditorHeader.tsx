@@ -187,10 +187,10 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#0c0d12]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_32px_rgba(0,0,0,0.6)] flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex-shrink-0 z-50 selection:bg-[#2A2A2A] relative gap-2 sm:gap-4">
+    <header className={`sticky top-0 left-0 right-0 h-16 w-full bg-[#141414] border-b border-[#2F2F2F] shadow-md flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex-shrink-0 gap-2 sm:gap-4 ${isSidebarOpen ? "z-0 pointer-events-none" : "z-50"}`}>
       {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/10 h-full mr-1 sm:mr-2">
+        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full mr-1 sm:mr-2">
           <button
             onClick={() => {
               if (onToggleSidebar) {

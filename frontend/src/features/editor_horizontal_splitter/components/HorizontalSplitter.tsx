@@ -405,7 +405,7 @@ export default function HorizontalSplitter({
       />
 
       {/* Generator Tools */}
-      <div className="space-y-3.5 bg-[#181924]/60 border border-white/10 p-4 rounded-2xl shadow-xl">
+      <div className="space-y-3.5 bg-[#1E1E1E] border border-[#2F2F2F] p-4 rounded-2xl shadow-md">
         <div className="text-[10px] uppercase font-mono font-bold text-white flex items-center gap-2">
           <Grid className="h-3.5 w-3.5 text-[#3B82F6]" />
           <span>Generator Tools</span>
@@ -430,12 +430,12 @@ export default function HorizontalSplitter({
                   Math.max(2, Math.min(15, parseInt(e.target.value) || 2))
                 )
               }
-              className="w-14 text-center text-xs font-bold font-mono bg-[#10111a]/80 border border-white/10 rounded-xl py-2 text-white focus:outline-none focus:border-[#3B82F6]"
+              className="w-14 text-center text-xs font-bold font-mono bg-[#121212] border border-[#2F2F2F] rounded-xl py-2 text-white focus:outline-none focus:border-[#3B82F6]"
             />
             <button
               type="button"
               onClick={() => handleGenerateEqualSplits(equalPartsCount)}
-              className="flex-1 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center font-mono  transition-all cursor-pointer active:scale-98"
+              className="flex-1 bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA]/40 text-white text-xs font-bold py-2 rounded-xl flex items-center justify-center font-mono transition-all cursor-pointer active:scale-98 shadow-sm"
             >
               Generate Equal Splits
             </button>
@@ -450,21 +450,21 @@ export default function HorizontalSplitter({
           <button
             type="button"
             onClick={() => handleGenerateEqualSplits(2)}
-            className="px-2.5 py-1.5 bg-[#10111a]/80 border border-white/10 hover:border-[#3B82F6]/60 text-neutral-300 hover:text-white rounded-xl text-[9.5px] font-mono transition-all cursor-pointer"
+            className="px-2.5 py-1.5 bg-[#2A2A2A] border border-[#2F2F2F] hover:border-[#3B82F6] text-neutral-300 hover:text-white rounded-xl text-[9.5px] font-mono transition-all cursor-pointer shadow-sm"
           >
             2 Parts (50%)
           </button>
           <button
             type="button"
             onClick={() => handleGenerateEqualSplits(3)}
-            className="px-2.5 py-1.5 bg-[#10111a]/80 border border-white/10 hover:border-[#3B82F6]/60 text-neutral-300 hover:text-white rounded-xl text-[9.5px] font-mono transition-all cursor-pointer"
+            className="px-2.5 py-1.5 bg-[#2A2A2A] border border-[#2F2F2F] hover:border-[#3B82F6] text-neutral-300 hover:text-white rounded-xl text-[9.5px] font-mono transition-all cursor-pointer shadow-sm"
           >
             3 Parts
           </button>
           <button
             type="button"
             onClick={() => handleGenerateEqualSplits(4)}
-            className="px-2.5 py-1.5 bg-[#10111a]/80 border border-white/10 hover:border-[#3B82F6]/60 text-neutral-300 hover:text-white rounded-xl text-[9.5px] font-mono transition-all cursor-pointer"
+            className="px-2.5 py-1.5 bg-[#2A2A2A] border border-[#2F2F2F] hover:border-[#3B82F6] text-neutral-300 hover:text-white rounded-xl text-[9.5px] font-mono transition-all cursor-pointer shadow-sm"
           >
             4 Parts
           </button>
@@ -472,7 +472,7 @@ export default function HorizontalSplitter({
 
         {/* Pixel height slicing */}
         {naturalHeight && (
-          <div className="space-y-2 pt-2 border-t border-white/10">
+          <div className="space-y-2 pt-2 border-t border-[#2F2F2F]">
             <div className="flex justify-between items-center text-[9.5px] font-mono text-neutral-400">
               <span>Slice every X pixels</span>
               <span className="text-[#3B82F6] font-bold">
@@ -494,12 +494,12 @@ export default function HorizontalSplitter({
                     )
                   )
                 }
-                className="flex-1 text-xs font-bold font-mono bg-[#10111a]/80 border border-white/10 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-[#3B82F6]"
+                className="flex-1 text-xs font-bold font-mono bg-[#121212] border border-[#2F2F2F] rounded-xl py-2 px-3 text-white focus:outline-none focus:border-[#3B82F6]"
               />
               <button
                 type="button"
                 onClick={handleApplyPixelSlice}
-                className="bg-[#10111a]/80 hover:bg-[#181924] border border-white/10 text-neutral-200 hover:text-white text-xs font-bold py-2 px-4 rounded-xl font-mono transition-all cursor-pointer"
+                className="bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-neutral-200 hover:text-white text-xs font-bold py-2 px-4 rounded-xl font-mono transition-all cursor-pointer shadow-sm"
               >
                 Apply Pixel Slice
               </button>
@@ -508,7 +508,7 @@ export default function HorizontalSplitter({
         )}
 
         {/* Repeating Intervals divider */}
-        <div className="space-y-2 pt-2 border-t border-white/10">
+        <div className="space-y-2 pt-2 border-t border-[#2F2F2F]">
           <div className="flex justify-between items-center text-[9.5px] font-mono text-neutral-400">
             <span>Repeating Interval Cuts</span>
             <span className="text-[#3B82F6] font-bold">
@@ -519,7 +519,7 @@ export default function HorizontalSplitter({
             <select
               value={intervalPercent}
               onChange={(e) => setIntervalPercent(parseFloat(e.target.value))}
-              className="flex-1 text-xs font-bold font-mono bg-[#10111a]/80 border border-white/10 rounded-xl py-2 px-3 text-white focus:outline-none focus:border-[#3B82F6] cursor-pointer"
+              className="flex-1 text-xs font-bold font-mono bg-[#121212] border border-[#2F2F2F] rounded-xl py-2 px-3 text-white focus:outline-none focus:border-[#3B82F6] cursor-pointer"
             >
               <option value="10">Every 10% (9 cuts)</option>
               <option value="15">Every 15% (6 cuts)</option>
@@ -532,7 +532,7 @@ export default function HorizontalSplitter({
             <button
               type="button"
               onClick={() => handleGenerateIntervalSplits(intervalPercent)}
-              className="bg-[#10111a]/80 hover:bg-[#181924] border border-white/10 text-neutral-200 hover:text-white text-xs font-bold py-2 px-4 rounded-xl font-mono transition-all cursor-pointer"
+              className="bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-neutral-200 hover:text-white text-xs font-bold py-2 px-4 rounded-xl font-mono transition-all cursor-pointer shadow-sm"
             >
               Apply
             </button>
@@ -691,7 +691,7 @@ export default function HorizontalSplitter({
         type="button"
         onClick={handleExecuteHorizontalSplit}
         disabled={isSavingEdit}
-        className="w-full bg-gradient-to-r from-blue-600 via-fuchsia-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-black font-mono py-3.5 rounded-2xl cursor-pointer transition-all flex items-center justify-center gap-2  border border-[#60A5FA]/30 active:scale-95"
+        className="w-full bg-[#2A2A2A] hover:bg-[#3B82F6] disabled:opacity-35 disabled:cursor-not-allowed text-white text-xs font-black font-mono py-3.5 rounded-2xl cursor-pointer transition-all flex items-center justify-center gap-2 border border-[#2F2F2F] hover:border-[#60A5FA]/40 active:scale-95 shadow-sm"
       >
         <Split className="h-4 w-4 rotate-90 stroke-[2.5]" />
         <span>

@@ -17,7 +17,9 @@ import {
   useImageEditorStore,
   ImageTool,
 } from "@/features/editor_image/hooks/useImageEditorState";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { SonikomaLogo } from "@/shared/ui/branding";
+import { ActiveProjectSidebarWidget } from "@/components/layout/MainSidebar";
 
 export interface ImageEditorSidebarProps {
   isCollapsed: boolean;
@@ -142,13 +144,13 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
 
   return (
     <>
-      {/* Drawer Backdrop Overlay when open (Hides Header & Prevents Scrolling) */}
+      {/* Drawer Backdrop Overlay when open (Hides Header & Prevents Interaction) */}
       <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-md z-[110] transition-opacity animate-[fadeIn_0.2s_ease-out]"
+        className="fixed inset-0 bg-black/80 backdrop-blur-md z-[200] transition-opacity animate-[fadeIn_0.2s_ease-out]"
         onClick={() => setIsCollapsed(true)}
       />
 
-      <aside className="fixed top-0 bottom-0 left-0 h-screen w-[280px] bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] overflow-hidden select-none">
+      <aside className="fixed top-0 bottom-0 left-0 h-screen w-72 shrink-0 bg-neutral-950/80 backdrop-blur-2xl border-r border-white/10 flex flex-col transition-all duration-300 ease-out z-[210] shadow-[10px_0_40px_rgba(0,0,0,0.8)] overflow-hidden select-none">
         {/* Top Header / Close Area */}
         <div
           className={`flex items-center border-b border-neutral-800/60 transition-all duration-300 shrink-0 ${
@@ -156,20 +158,20 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           }`}
         >
           {isCollapsed ? (
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#2A2A2A] to-[#2A2A2A] border border-[#3B82F6]/50 flex items-center justify-center ">
-              <Sparkles className="w-5 h-5 text-[#60A5FA] animate-pulse" />
+            <div className="w-11 h-11 rounded-2xl bg-[#3B82F6] border border-[#60A5FA]/40 flex items-center justify-center shadow-md">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
           ) : (
             <>
               <SonikomaLogo
-                size="sm"
-                badge="Image"
+                size="md"
+                badge="Suite"
                 showSubtitle={true}
-                subtitleText="Image Studio"
+                subtitleText="Comic to Video Studio"
               />
               <button
                 onClick={() => setIsCollapsed(true)}
-                className="w-8 h-8 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 border border-neutral-800 transition-colors cursor-pointer"
                 title="Close sidebar"
               >
                 <X className="w-4 h-4" />
@@ -183,10 +185,10 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           {menuGroups.map((group, groupIdx) => (
             <div key={group.title} className="space-y-2">
               {!isCollapsed && groupIdx > 0 && (
-                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-neutral-800/80 to-transparent my-2" />
+                <div className="w-full h-px bg-neutral-800/60 my-2.5" />
               )}
               {!isCollapsed && (
-                <h3 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans mb-1">
+                <h3 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.16em] font-sans mb-1 flex items-center gap-2">
                   {group.title}
                 </h3>
               )}
@@ -198,11 +200,11 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
 
                   return (
                     <div key={item.id} className="relative flex justify-center">
-                      {/* Premium Floating Active Ribbon Pill */}
+                      {/* Floating Active Ribbon Indicator */}
                       <div
-                        className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+                        className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
                           isActive
-                            ? "h-6 bg-gradient-to-b from-[#2A2A2A] to-amber-400  opacity-100"
+                            ? "h-6 bg-[#3B82F6] opacity-100"
                             : "h-0 bg-transparent opacity-0"
                         }`}
                       />
@@ -241,35 +243,31 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                         className={`w-full flex items-center ${
                           isCollapsed
                             ? "justify-center py-1"
-                            : "justify-between px-2.5 py-1.5"
-                        } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
+                            : "justify-between px-3.5 py-2.5"
+                        } rounded-xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
                           isActive && !isCollapsed
-                            ? "bg-gradient-to-r from-[#2A2A2A] via-[#2A2A2A] to-[#2A2A2A] border border-[#3B82F6]/40 text-white shadow-[0_4px_20px_rgba(59,130,246,0.2)] font-bold"
-                            : "text-neutral-300 hover:text-white hover:bg-neutral-900/60 border border-transparent"
+                            ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white font-bold shadow-md"
+                            : "text-neutral-300 hover:text-white hover:bg-[#1E1E1E] border border-transparent hover:border-[#3B82F6]"
                         }`}
                         title={isCollapsed ? item.label : undefined}
                       >
+                        {/* Left edge active indicator pill */}
+                        {isActive && (
+                          <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-white" />
+                        )}
+
                         <div className="flex items-center gap-3">
-                          {/* iOS-Style Squircle Icon Pill (Identical to ImageEditorMiniSidebar) */}
-                          <div
-                            className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 shadow-sm ${
+                          <Icon
+                            strokeWidth={isActive ? 2.5 : 2}
+                            className={`w-4 h-4 transition-colors duration-200 ${
                               isActive
-                                ? "bg-gradient-to-br from-[#2A2A2A] to-[#2A2A2A] border border-[#3B82F6]/60  scale-105"
-                                : "bg-neutral-900/80 border border-neutral-800/80 group-hover:bg-[#3B82F6]/15 group-hover:border-[#3B82F6]/30"
+                                ? "text-white"
+                                : "text-neutral-400 group-hover:text-[#3B82F6]"
                             }`}
-                          >
-                            <Icon
-                              strokeWidth={isActive ? 2.5 : 2}
-                              className={`w-5 h-5 transition-colors duration-300 ${
-                                isActive
-                                  ? "text-[#60A5FA]"
-                                  : "text-neutral-400 group-hover:text-[#93C5FD]"
-                              }`}
-                            />
-                          </div>
+                          />
 
                           {!isCollapsed && (
-                            <span className="text-sm font-bold tracking-wide">
+                            <span className="text-xs font-semibold tracking-wide">
                               {item.label}
                             </span>
                           )}
@@ -284,8 +282,8 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                                 : "relative top-0 right-0"
                             } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
                               isActive
-                                ? "bg-[#3B82F6]/20 text-[#60A5FA] border-[#3B82F6]/30"
-                                : "bg-neutral-900 text-neutral-500 border-white/5"
+                                ? "bg-[#3B82F6] text-white border-[#60A5FA]/40"
+                                : "bg-[#121212] text-neutral-400 border-[#2F2F2F]"
                             }`}
                           >
                             {item.badge}
@@ -300,11 +298,16 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           ))}
         </div>
 
-        {/* Bottom Action Footer - Return to Storyboard */}
-        <div className="p-3.5 border-t border-neutral-800/60 bg-neutral-950/90 flex justify-center w-full shrink-0">
+        {/* Bottom Action Footer - Active Project and Return to Storyboard */}
+        <div className="p-4 border-t border-neutral-800/60 bg-transparent flex flex-col gap-3 w-full shrink-0">
+          <ActiveProjectSidebarWidget
+            setDrawerOpen={(open) => {
+              useProjectStore.getState().setDrawerOpen(open);
+            }}
+          />
           <button
             onClick={handleReturnToWorkspace}
-            className={`flex items-center justify-center rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 text-white transition-all active:scale-95 border border-[#60A5FA]/30 cursor-pointer  hover: ${
+            className={`flex items-center justify-center rounded-xl bg-neutral-900/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white transition-all active:scale-95 border border-neutral-800/80 hover:border-[#60A5FA]/40 cursor-pointer shadow-sm ${
               isCollapsed
                 ? "w-11 h-11 p-0"
                 : "w-full py-3.5 px-4 gap-2.5 text-xs font-mono font-bold tracking-wide"
@@ -313,7 +316,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           >
             <ArrowLeft className="w-4 h-4 shrink-0 text-white stroke-[2.5]" />
             {!isCollapsed && (
-              <span className="text-xs font-mono font-bold tracking-wide">
+              <span className="text-xs font-mono font-bold tracking-wide text-white">
                 Return to Storyboard
               </span>
             )}

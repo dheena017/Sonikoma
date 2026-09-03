@@ -95,7 +95,7 @@ function ImageEditorToolsPanel(
   } = props;
 
   return (
-    <div className="w-full h-full flex flex-col min-h-0 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl overflow-hidden text-left">
+    <div className="w-full h-full flex flex-col min-h-0 bg-[#141414] border-r border-[#2F2F2F] shadow-2xl overflow-hidden text-left">
       {/* Main Active Tool Panel Area */}
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {activeTab === "merge" && (

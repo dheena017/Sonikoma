@@ -54,7 +54,7 @@ interface SidebarProps {
   user?: any;
 }
 
-const ActiveProjectSidebarWidget: React.FC<{
+export const ActiveProjectSidebarWidget: React.FC<{
   setDrawerOpen: (open: boolean) => void;
 }> = ({ setDrawerOpen }) => {
   const { activeProjectId, activeProjectData } = useProjectStore();
@@ -413,16 +413,6 @@ const SidebarInner = ({
           </button>
         </div>
 
-        {/* ACTIVE PROJECT WIDGET (DRAWER TRIGGER) */}
-        <ActiveProjectSidebarWidget
-          setDrawerOpen={(open) => {
-            const event = new CustomEvent("toggle-project-drawer", {
-              detail: { open },
-            });
-            window.dispatchEvent(event);
-          }}
-        />
-
         {/* NAVIGATION MENUS WITH HIDDEN SCROLLBAR */}
         <div className="space-y-5 overflow-y-auto flex-grow min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
           {menuItems.map((group, groupIdx) => (
@@ -506,8 +496,18 @@ const SidebarInner = ({
         </div>
       </div>
 
-      {/* BOTTOM STATUS FOOTER */}
-      <div className="pt-3 border-t border-neutral-800/60 space-y-2">
+      {/* BOTTOM STATUS FOOTER WITH ACTIVE PROJECT WIDGET AT BOTTOM */}
+      <div className="pt-3 border-t border-neutral-800/60 space-y-2 shrink-0">
+        {/* ACTIVE PROJECT WIDGET MOVED TO BOTTOM */}
+        <ActiveProjectSidebarWidget
+          setDrawerOpen={(open) => {
+            const event = new CustomEvent("toggle-project-drawer", {
+              detail: { open },
+            });
+            window.dispatchEvent(event);
+          }}
+        />
+
         {panels.length > 0 && (
           <div className="px-3 py-2 rounded-xl bg-neutral-900/60 border border-neutral-800/80 text-neutral-400 text-xs font-sans flex items-center justify-between backdrop-blur-md">
             <span className="text-neutral-400 text-[11px]">

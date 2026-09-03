@@ -230,15 +230,6 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
         </button>
       </div>
 
-      {/* Active Project Widget */}
-      <div className="px-4 pt-3 shrink-0">
-        <ActiveProjectSidebarWidget
-          setDrawerOpen={(open) =>
-            useProjectStore.getState().setDrawerOpen(open)
-          }
-        />
-      </div>
-
       {/* Navigation Groups */}
       <div className="flex-1 overflow-y-auto py-4 px-4 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {groups.map((group, groupIdx) => (
@@ -298,8 +289,13 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
         ))}
       </div>
 
-      {/* Footer Return Button */}
-      <div className="p-4 border-t border-white/10 shrink-0">
+      {/* Footer: Active Project Widget + Return Button */}
+      <div className="p-4 border-t border-white/10 shrink-0 space-y-3">
+        <ActiveProjectSidebarWidget
+          setDrawerOpen={(open) =>
+            useProjectStore.getState().setDrawerOpen(open)
+          }
+        />
         <button
           onClick={() => {
             navigateTo("/creative-suite");

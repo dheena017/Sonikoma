@@ -1,19 +1,12 @@
 import React, { useEffect } from "react";
 import {
-  Sparkles,
   LayoutGrid,
   Film,
-  Scissors,
-  Users,
   Globe,
-  Music,
-  MessageSquare,
   Mic,
-  BarChart3,
   Youtube,
   ArrowLeft,
   X,
-  Settings,
   Zap,
   FolderOpen,
   FolderSync,
@@ -136,7 +129,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
   onClose,
   panels = [],
 }) => {
-  const { themeMode } = useThemeMode();
+  useThemeMode();
 
   // Lock body scroll when sidebar drawer is open
   useEffect(() => {
@@ -152,7 +145,19 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
 
   const groups = [
     {
-      name: "Visual Studio",
+      name: "Hub",
+      items: [
+        {
+          id: "dashboard",
+          label: "Creative Hub",
+          icon: LayoutGrid,
+          path: "/creative-suite",
+          requiresPanels: false,
+        },
+      ],
+    },
+    {
+      name: "Visuals",
       items: [
         {
           id: "optimizer",
@@ -171,7 +176,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
       ],
     },
     {
-      name: "Audio Production",
+      name: "Audio",
       items: [
         {
           id: "voice",
@@ -194,39 +199,6 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         },
       ],
     },
-    {
-      name: "AI & API Engine Hub",
-      items: [
-        {
-          id: "ai_core",
-          label: "AI Command Center",
-          icon: Sparkles,
-          path: "/ai-core",
-          requiresPanels: false,
-        },
-        {
-          id: "api_keys",
-          label: "API Keys & Models",
-          icon: Settings,
-          path: "/ai-core/api-keys",
-          requiresPanels: false,
-        },
-        {
-          id: "ai_analytics",
-          label: "AI Token Analytics",
-          icon: BarChart3,
-          path: "/ai-core/analytics",
-          requiresPanels: false,
-        },
-        {
-          id: "ai_billing",
-          label: "Billing & Credits",
-          icon: Zap,
-          path: "/ai-core/billing",
-          requiresPanels: false,
-        },
-      ],
-    },
   ];
 
   const isActive = (path: string) => {
@@ -245,43 +217,34 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
   };
 
   const sidebarContent = (
-    <div className="flex h-full flex-col bg-[#0d0d12]/95 backdrop-blur-3xl border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.6)]">
+    <div className="flex h-full flex-col bg-neutral-950/85 backdrop-blur-2xl text-white select-none">
       {/* Sidebar Header */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-white/10 shrink-0">
+      <div className="flex items-center justify-between px-5 pb-4 pt-5 border-b border-neutral-800/60 shrink-0">
         <SonikomaLogo
-          size="sm"
-          badge="Creative"
+          size="md"
+          badge="Suite"
           showSubtitle={true}
-          subtitleText="AI Creative Workspace"
+          subtitleText="Comic to Video Studio"
         />
         <button
           onClick={onClose}
-          className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+          className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 border border-neutral-800 transition-colors cursor-pointer"
           title="Close sidebar drawer"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Active Project Widget */}
-      <div className="px-4 pt-3 shrink-0">
-        <ActiveProjectSidebarWidget
-          setDrawerOpen={(open) =>
-            useProjectStore.getState().setDrawerOpen(open)
-          }
-        />
-      </div>
-
       {/* Navigation Groups */}
-      <div className="flex-1 overflow-y-auto py-4 px-4 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto py-4 px-3 space-y-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
         {groups.map((group, groupIdx) => (
           <div key={group.name} className="space-y-2">
             {groupIdx > 0 && (
               <div className="w-full flex flex-col pt-1 pb-1">
-                <div className="w-8 h-[1px] bg-white/10 rounded-full ml-3" />
+                <div className="w-full h-px bg-neutral-800/60 my-2.5" />
               </div>
             )}
-            <h4 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-sans">
+            <h4 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.16em] font-sans mb-1 flex items-center gap-2">
               {group.name}
             </h4>
             <ul className="space-y-1">
@@ -295,7 +258,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
                     <div
                       className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                         active
-                          ? "h-5 bg-[#2A2A2A] shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                          ? "h-5 bg-[#3B82F6] opacity-100"
                           : "h-0 bg-transparent opacity-0"
                       }`}
                     />
@@ -305,9 +268,9 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
                         navigateTo(item.path);
                         onClose();
                       }}
-                      className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
+                      className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
                         active
-                          ? "bg-[#2A2A2A] text-white shadow-[inset_0_0_16px_rgba(59,130,246,0.12)] border border-[#3B82F6]/30 font-bold"
+                          ? "bg-[#3B82F6] text-white shadow-sm border border-[#60A5FA]/40 font-bold"
                           : isLocked
                           ? "text-neutral-500 hover:text-neutral-400 border border-transparent"
                           : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
@@ -322,13 +285,13 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
                         <item.icon
                           className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                             active
-                              ? "text-[#3B82F6]"
+                              ? "text-white"
                               : isLocked
                               ? "text-neutral-600"
                               : "text-neutral-400 group-hover:scale-110 group-hover:text-[#93C5FD]"
                           }`}
                         />
-                        <span className="text-xs font-semibold tracking-wide font-sans">
+                        <span className={active ? "font-bold text-white" : "font-medium text-neutral-300 group-hover:text-white"}>
                           {item.label}
                         </span>
                       </div>
@@ -347,14 +310,19 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         ))}
       </div>
 
-      {/* Sidebar Footer: Return to App */}
-      <div className="p-4 border-t border-white/10 shrink-0">
+      {/* Sidebar Footer: Active Project Widget + Return to App */}
+      <div className="p-4 border-t border-white/10 shrink-0 space-y-3">
+        <ActiveProjectSidebarWidget
+          setDrawerOpen={(open) =>
+            useProjectStore.getState().setDrawerOpen(open)
+          }
+        />
         <button
           onClick={() => {
             navigateTo("/dashboard");
             onClose();
           }}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:via-indigo-500 hover:to-blue-500 text-white text-xs font-black tracking-widest uppercase transition-all  hover: active:scale-95 border border-[#60A5FA]/40 cursor-pointer font-sans"
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-neutral-900/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all active:scale-95 border border-neutral-800/80 hover:border-[#60A5FA]/40 cursor-pointer font-sans shadow-sm"
         >
           <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
           <span>MAIN DASHBOARD</span>

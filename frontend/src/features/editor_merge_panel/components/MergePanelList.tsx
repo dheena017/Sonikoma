@@ -35,11 +35,11 @@ export default function MergePanelList({
               <div
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border flex-shrink-0 ${
                   isCurrent
-                    ? "bg-teal-950/30 border-teal-800/40"
-                    : "bg-black/20 border-white/5"
+                    ? "bg-[#1E1E1E] border-[#3B82F6]/60 shadow-sm"
+                    : "bg-[#121212] border-[#2F2F2F]"
                 }`}
               >
-                <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 bg-neutral-900 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#2F2F2F] flex-shrink-0 bg-[#0A0A0A] flex items-center justify-center">
                   <img
                     src={imgUrl}
                     alt={`Frame ${imgIdx + 1}`}
@@ -63,13 +63,13 @@ export default function MergePanelList({
                 <div className="flex-1 min-w-0">
                   <span
                     className={`text-[10px] font-bold font-mono ${
-                      isCurrent ? "text-teal-300" : "text-neutral-400"
+                      isCurrent ? "text-white" : "text-neutral-400"
                     }`}
                   >
                     Frame #{imgIdx + 1}
                   </span>
                   {isCurrent && (
-                    <span className="ml-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-teal-950 text-teal-400 border border-teal-800/50">
+                    <span className="ml-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-[#121212] text-[#3B82F6] border border-[#3B82F6]/40">
                       CURRENT
                     </span>
                   )}
@@ -77,7 +77,7 @@ export default function MergePanelList({
               </div>
               {!isLast && layout === "vertical" && (
                 <div className="flex justify-center">
-                  <ArrowDown className="h-3 w-3 text-teal-700/60" />
+                  <ArrowDown className="h-3 w-3 text-neutral-600" />
                 </div>
               )}
             </React.Fragment>

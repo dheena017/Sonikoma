@@ -174,7 +174,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
   };
 
   return (
-    <div className="w-20 h-full flex flex-col items-center py-3 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 select-none shrink-0 z-30 overflow-hidden">
+    <div className="w-20 h-full flex flex-col items-center py-3 bg-[#121212] border-r border-[#2F2F2F] select-none shrink-0 z-30 overflow-hidden">
       {/* Tool Icons List */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -191,7 +191,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
               }}
             >
               {groupIdx > 0 && (
-                <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
+                <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
               )}
               <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
                 {group.name}
@@ -206,7 +206,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
       </div>
 
       {/* Bottom Return to Storyboard Button */}
-      <div className="pt-3 w-full flex justify-center border-t border-white/10 shrink-0 pb-1">
+      <div className="pt-3 w-full flex justify-center border-t border-[#2F2F2F] shrink-0 pb-1">
         <button
           onClick={handleReturn}
           onMouseEnter={(e) => {
@@ -215,7 +215,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           }}
           onMouseLeave={() => setReturnHover(false)}
           aria-label="Return to Storyboard"
-          className="w-11 h-11 rounded-2xl bg-gradient-to-b from-[#8B5CF6] to-[#6366F1] hover:from-[#7C3AED] hover:to-[#4F46E5] text-white shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:shadow-[0_0_28px_rgba(139,92,246,0.8)] border border-[#A78BFA]/40 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95"
+          className="w-11 h-11 rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] text-neutral-400 hover:text-[#3B82F6] border border-[#2F2F2F] hover:border-[#3B82F6] flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 shadow-sm"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>

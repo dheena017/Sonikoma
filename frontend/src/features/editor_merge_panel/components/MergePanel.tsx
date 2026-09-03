@@ -173,8 +173,8 @@ export default function MergePanel({
                     onClick={() => setMergeCount(n)}
                     className={`px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 ${
                       mergeCount === n
-                        ? "bg-teal-600/25 border-teal-500/50 text-teal-300 shadow-[0_0_8px_rgba(45,212,191,0.15)]"
-                        : "bg-black/20 border-white/6 text-neutral-500 hover:text-neutral-200 hover:border-white/15"
+                        ? "bg-[#3B82F6] border-[#60A5FA]/40 text-white font-bold"
+                        : "bg-[#2A2A2A] border-[#2F2F2F] text-neutral-400 hover:text-white hover:border-[#3B82F6]"
                     }`}
                   >
                     +{n}
@@ -185,7 +185,7 @@ export default function MergePanel({
                 <button
                   type="button"
                   onClick={() => setMergeCount(maxMergeable)}
-                  className="px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 bg-[#2A2A2A] border-[#3B82F6]/40 text-[#60A5FA] hover:bg-[#3B82F6]/40 hover:border-[#60A5FA]"
+                  className="px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 bg-[#2A2A2A] border-[#2F2F2F] hover:border-[#3B82F6] hover:bg-[#3B82F6] text-white"
                 >
                   Merge All Remaining
                 </button>
@@ -202,12 +202,12 @@ export default function MergePanel({
           />
 
           {/* ── Result summary ── */}
-          <div className="flex items-center gap-2.5 bg-teal-950/20 border border-teal-800/30 rounded-xl px-3 py-2.5">
-            <Layers className="h-3.5 w-3.5 text-teal-500 flex-shrink-0" />
-            <p className="text-[10px] text-teal-300/80 font-sans leading-snug">
+          <div className="flex items-center gap-2.5 bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-2.5">
+            <Layers className="h-3.5 w-3.5 text-[#3B82F6] flex-shrink-0" />
+            <p className="text-[10px] text-neutral-300 font-sans leading-snug">
               <strong>{previewIndices.length} images</strong> →{" "}
               <strong>1 merged panel</strong> (frames{" "}
-              <span className="font-mono">
+              <span className="font-mono text-[#3B82F6]">
                 #{previewIndices[0] + 1}–#
                 {previewIndices[previewIndices.length - 1] + 1}
               </span>{" "}
@@ -233,21 +233,16 @@ export default function MergePanel({
               });
             }}
             disabled={isMerging || !canMerge}
-            className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-600 hover:to-emerald-600 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-lg shadow-teal-900/30"
-            style={{
-              boxShadow: isMerging
-                ? undefined
-                : "0 0 20px rgba(20,184,166,0.2)",
-            }}
+            className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA]/40 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
           >
             {isMerging ? (
               <>
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw className="h-4 w-4 animate-spin text-white" />
                 <span>Merging Frames…</span>
               </>
             ) : (
               <>
-                <Link2 className="h-4 w-4" />
+                <Link2 className="h-4 w-4 text-white" />
                 <span>
                   Merge Frame #{editingImageIdx + 1} +{" "}
                   {direction === "next" ? "Next" : "Prev"} {mergeCount}
