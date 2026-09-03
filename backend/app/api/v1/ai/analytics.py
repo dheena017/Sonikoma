@@ -564,15 +564,30 @@ async def test_provider_key(payload: dict, current_user: Optional[dict] = Depend
 # 3. REAL TOKEN ANALYTICS & USAGE SUMMARY
 # ─────────────────────────────────────────────────────────────────────────────
 
+@router.get("/usage/summary", summary="Get real aggregated AI token consumption, latency, and tool metrics")
 @router.get("/analytics/summary", summary="Get real aggregated AI token consumption, latency, and tool metrics")
-async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_optional_current_user)):
+async def get_ai_analytics_summary(
+    timeframe: Optional[str] = Query("24h"),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
     """
     Returns REAL database-backed telemetry of AI operations across all modules in Sonikoma.
     """
     conn = get_db_connection()
     try:
+        # Timeframe filter clause
+        tf = (timeframe or "24h").lower()
+        if tf == "24h":
+            time_filter = "WHERE created_at >= datetime('now', '-24 hours')"
+        elif tf == "7d":
+            time_filter = "WHERE created_at >= datetime('now', '-7 days')"
+        elif tf == "30d":
+            time_filter = "WHERE created_at >= datetime('now', '-30 days')"
+        else:
+            time_filter = ""
+
         # Total counts and tokens
-        totals_row = conn.execute("""
+        totals_row = conn.execute(f"""
             SELECT 
                 COUNT(*) as total_requests,
                 COALESCE(SUM(total_tokens), 0) as total_tokens,
@@ -581,6 +596,7 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
                 COALESCE(AVG(latency_ms), 0.0) as avg_latency_ms,
                 COALESCE(SUM(cost_estimate_usd), 0.0) as total_cost_usd
             FROM ai_token_usage_ledger
+            {time_filter}
         """).fetchone()
 
         total_requests = totals_row["total_requests"] if totals_row else 0
@@ -591,12 +607,14 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
         total_cost_usd = round(totals_row["total_cost_usd"], 4) if totals_row else 0.0
 
         # Feature breakdown
-        feature_rows = conn.execute("""
+        feature_rows = conn.execute(f"""
             SELECT 
                 feature,
                 COUNT(*) as calls,
-                COALESCE(SUM(total_tokens), 0) as tokens
+                COALESCE(SUM(total_tokens), 0) as tokens,
+                COALESCE(SUM(cost_estimate_usd), 0.0) as cost_usd
             FROM ai_token_usage_ledger
+            {time_filter}
             GROUP BY feature
             ORDER BY tokens DESC
         """).fetchall()
@@ -626,7 +644,7 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
             })
 
         # Model usage breakdown
-        model_rows = conn.execute("""
+        model_rows = conn.execute(f"""
             SELECT 
                 model,
                 provider,
@@ -634,6 +652,7 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
                 COALESCE(AVG(latency_ms), 0.0) as avg_latency_ms,
                 COALESCE(SUM(total_tokens), 0) as tokens
             FROM ai_token_usage_ledger
+            {time_filter}
             GROUP BY model, provider
             ORDER BY calls DESC
         """).fetchall()
@@ -651,35 +670,39 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
                 "tokens": mr["tokens"],
             })
 
-        # Daily timeline
-        daily_rows = conn.execute("""
+        # Dynamic Timeseries Bucketing
+        if tf == "24h":
+            time_group = "strftime('%H:00', created_at)"
+        else:
+            time_group = "strftime('%m/%d', created_at)"
+
+        timeseries_rows = conn.execute(f"""
             SELECT 
-                DATE(created_at) as date_str,
-                COALESCE(SUM(total_tokens), 0) as tokens,
-                COUNT(*) as calls,
-                COALESCE(SUM(cost_estimate_usd), 0.0) as cost_usd
+                {time_group} as time_slot,
+                COALESCE(SUM(prompt_tokens), 0) as in_tokens,
+                COALESCE(SUM(completion_tokens), 0) as out_tokens,
+                COALESCE(SUM(total_tokens), 0) as total_toks,
+                COALESCE(SUM(cost_estimate_usd), 0.0) as cost_slot,
+                COUNT(*) as reqs
             FROM ai_token_usage_ledger
-            GROUP BY DATE(created_at)
-            ORDER BY date_str ASC
-            LIMIT 7
+            {time_filter}
+            GROUP BY time_slot
+            ORDER BY created_at ASC
+            LIMIT 24
         """).fetchall()
 
-        timeline = []
-        for dr in daily_rows:
-            timeline.append({
-                "date": dr["date_str"],
-                "tokens": dr["tokens"],
-                "calls": dr["calls"],
-                "cost_usd": round(dr["cost_usd"], 4),
-            })
+        timestamps = [r["time_slot"] for r in timeseries_rows]
+        input_tokens = [r["in_tokens"] for r in timeseries_rows]
+        output_tokens = [r["out_tokens"] for r in timeseries_rows]
 
         # Success rate calculation
-        sr_row = conn.execute("""
+        sr_row = conn.execute(f"""
             SELECT 
                 COUNT(*) as total_calls,
                 SUM(CASE WHEN status = 'SUCCESS' THEN 1 ELSE 0 END) as successful_calls,
                 SUM(CASE WHEN status != 'SUCCESS' THEN 1 ELSE 0 END) as failed_calls
             FROM ai_token_usage_ledger
+            {time_filter}
         """).fetchone()
         
         failed_calls = sr_row["failed_calls"] if sr_row else 0
@@ -690,7 +713,7 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
             success_rate = 100.0
 
         # Provider breakdown aggregation
-        provider_rows = conn.execute("""
+        provider_rows = conn.execute(f"""
             SELECT 
                 provider,
                 COUNT(*) as calls,
@@ -698,6 +721,7 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
                 COALESCE(SUM(cost_estimate_usd), 0.0) as cost_usd,
                 COALESCE(AVG(latency_ms), 0.0) as avg_lat
             FROM ai_token_usage_ledger
+            {time_filter}
             GROUP BY provider
         """).fetchall()
         
@@ -719,10 +743,11 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
         real_credits = get_available_credits(user_id)
 
         # Recent logs preview
-        recent_log_rows = conn.execute("""
+        recent_log_rows = conn.execute(f"""
             SELECT id, user_id, provider, model, feature, prompt_tokens, completion_tokens,
                    total_tokens, latency_ms, cost_estimate_usd, status, created_at
             FROM ai_token_usage_ledger
+            {time_filter}
             ORDER BY created_at DESC
             LIMIT 10
         """).fetchall()
@@ -766,7 +791,14 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
             "provider_breakdown": provider_breakdown,
             "model_usage": model_usage,
             "top_models_by_volume": model_usage[:5],
-            "timeline": timeline,
+            "timeseries": {
+                "timestamps": timestamps,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+            },
+            "timestamps": timestamps,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
             "health_and_limits_summary": health_summary,
             "recent_logs_preview": recent_logs,
         }
@@ -774,6 +806,110 @@ async def get_ai_analytics_summary(current_user: Optional[dict] = Depends(get_op
     except Exception as err:
         logger.error("Error computing AI analytics summary: %s", err)
         raise HTTPException(status_code=500, detail=str(err))
+    finally:
+        conn.close()
+
+
+@router.get("/usage/metrics", summary="Get bucketed timeseries metrics for analytics graphs")
+@router.get("/analytics/metrics", summary="Get bucketed timeseries metrics for analytics graphs")
+async def get_usage_metrics(
+    time_range: Optional[str] = Query("24h"),
+    model: Optional[str] = Query(None),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    """Returns database-computed timeseries points for the visual analytics chart."""
+    conn = get_db_connection()
+    try:
+        tr = (time_range or "24h").lower()
+        if tr == "24h":
+            time_filter = "WHERE created_at >= datetime('now', '-24 hours')"
+            group_clause = "strftime('%H:00', created_at)"
+        elif tr == "7d":
+            time_filter = "WHERE created_at >= datetime('now', '-7 days')"
+            group_clause = "strftime('%m/%d', created_at)"
+        elif tr == "30d":
+            time_filter = "WHERE created_at >= datetime('now', '-30 days')"
+            group_clause = "strftime('%m/%d', created_at)"
+        else:
+            time_filter = ""
+            group_clause = "strftime('%Y-%m-%d', created_at)"
+
+        model_clause = ""
+        if model and model != "All Models":
+            prefix = "AND" if time_filter else "WHERE"
+            model_clause = f" {prefix} LOWER(model) = LOWER('{model}')"
+
+        rows = conn.execute(f"""
+            SELECT 
+                {group_clause} as time_label,
+                COALESCE(SUM(prompt_tokens), 0) as input_tokens,
+                COALESCE(SUM(completion_tokens), 0) as output_tokens,
+                COALESCE(SUM(total_tokens), 0) as total_tokens,
+                COALESCE(SUM(cost_estimate_usd), 0.0) as cost_usd
+            FROM ai_token_usage_ledger
+            {time_filter}{model_clause}
+            GROUP BY time_label
+            ORDER BY created_at ASC
+            LIMIT 30
+        """).fetchall()
+
+        timestamps = [r["time_label"] for r in rows]
+        in_tokens = [r["input_tokens"] for r in rows]
+        out_tokens = [r["output_tokens"] for r in rows]
+
+        return {
+            "success": True,
+            "timestamps": timestamps,
+            "input_tokens": in_tokens,
+            "output_tokens": out_tokens,
+            "total_points": len(rows),
+        }
+    finally:
+        conn.close()
+
+
+@router.get("/usage/export", summary="Export real usage logs as CSV or JSON")
+@router.get("/analytics/export", summary="Export real usage logs as CSV or JSON")
+async def export_usage_data(
+    format: str = Query("json"),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    """Exports raw database ledger rows as CSV or JSON attachment."""
+    from fastapi.responses import Response
+    import io
+    import csv
+    
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("""
+            SELECT id, user_id, provider, model, feature, prompt_tokens, completion_tokens,
+                   total_tokens, latency_ms, cost_estimate_usd, status, created_at
+            FROM ai_token_usage_ledger
+            ORDER BY created_at DESC
+        """).fetchall()
+        
+        data = [dict(r) for r in rows]
+        
+        if format.lower() == "csv":
+            output = io.StringIO()
+            if data:
+                writer = csv.DictWriter(output, fieldnames=list(data[0].keys()))
+                writer.writeheader()
+                writer.writerows(data)
+            else:
+                output.write("id,user_id,provider,model,feature,prompt_tokens,completion_tokens,total_tokens,latency_ms,cost_estimate_usd,status,created_at\n")
+            
+            return Response(
+                content=output.getvalue(),
+                media_type="text/csv",
+                headers={"Content-Disposition": 'attachment; filename="sonikoma_ai_usage.csv"'}
+            )
+        else:
+            return Response(
+                content=json.dumps(data, indent=2),
+                media_type="application/json",
+                headers={"Content-Disposition": 'attachment; filename="sonikoma_ai_usage.json"'}
+            )
     finally:
         conn.close()
 

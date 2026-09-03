@@ -21,7 +21,6 @@ import {
 import TierModelCard, {
   DynamicModelOption,
 } from "../components/TierModelCard";
-import TaskRouteConfigureView from "../components/TaskRouteConfigureView";
 
 interface AIRoutingPageProps {
   addNotification?: (msg: string, type?: string) => void;
@@ -238,39 +237,6 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
 
-  // Dedicated Task Route Configuration View State
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("task") || null;
-    } catch {
-      return null;
-    }
-  });
-
-  useEffect(() => {
-    const handleUrlChange = () => {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        setSelectedTaskId(params.get("task") || null);
-      } catch {}
-    };
-    window.addEventListener("popstate", handleUrlChange);
-    return () => window.removeEventListener("popstate", handleUrlChange);
-  }, []);
-
-  const handleSelectTask = (taskId: string | null) => {
-    setSelectedTaskId(taskId);
-    try {
-      const url = new URL(window.location.href);
-      if (taskId) {
-        url.searchParams.set("task", taskId);
-      } else {
-        url.searchParams.delete("task");
-      }
-      window.history.pushState({}, "", url.toString());
-    } catch {}
-  };
 
   const handleResetSingleTask = (task: string) => {
     const def = CAPABILITY_DEFINITIONS.find((d) => d.task === task);
@@ -627,26 +593,6 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     );
   }
 
-  const activeTaskRoute = routes.find((r) => r.task === selectedTaskId);
-
-  // If a specific task is requested (e.g. /ai-core?tab=routing&task=character_persona), show dedicated configure page
-  if (activeTaskRoute) {
-    return (
-      <TaskRouteConfigureView
-        taskRoute={activeTaskRoute}
-        allRoutes={routes}
-        availableModels={availableModels}
-        onBack={() => handleSelectTask(null)}
-        onSelectTask={(taskId) => handleSelectTask(taskId)}
-        onModelChange={handleModelChange}
-        onSave={handleSave}
-        onResetTask={handleResetSingleTask}
-        isSaving={isSaving}
-        saved={saved}
-        addNotification={addNotification}
-      />
-    );
-  }
 
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto animate-in fade-in duration-200 text-left">
@@ -927,16 +873,6 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                   >
                     <Play className="w-3 h-3 fill-current" />
                     <span>Test</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleSelectTask(route.task)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all cursor-pointer shadow-sm active:scale-95"
-                    title="Open dedicated task configuration page"
-                  >
-                    <Sliders className="w-3 h-3" />
-                    <span>Configure</span>
                   </button>
                 </div>
               </div>

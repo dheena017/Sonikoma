@@ -14,8 +14,39 @@ interface AIRateLimitsPageProps {
   addNotification?: (msg: string, type?: string) => void;
 }
 
+const ALL_PROVIDER_SPEC: ProviderFullSpec = {
+  id: "all",
+  name: "All Providers",
+  group: "foundation",
+  icon: Layers,
+  badge: "Global Quota Matrix",
+  color: "from-blue-600 via-purple-600 to-pink-500",
+  borderHover: "hover:border-purple-500",
+  docsUrl: "#",
+  resetInfo: "Real-time Multi-Provider Rate Limit Sync",
+  priorityFeature: {
+    title: "Global Priority Execution",
+    description: "Multi-tier cascade bypass factor",
+    toggleLabel: "0.3x Factor",
+    activeText: "0.3x Priority Throttle",
+    standardText: "1.0x Full Limits",
+  },
+  batchFeature: {
+    title: "Unified Batch Pipeline",
+    discount: "50% Token Savings",
+    highlight: "Multi-Provider Async",
+    subtext: "Automated distributed batch processing",
+  },
+  tiers: [
+    { id: "free", label: "Free / Sandbox", qualification: "Default developer sandbox", spend10Min: "$0", billingCap: "Standard Free RPM" },
+    { id: "tier1", label: "Tier 1 (Standard)", qualification: "Linked payment account", spend10Min: "$50", billingCap: "Standard Paid RPM" },
+    { id: "tier2", label: "Tier 2 (Pro Growth)", qualification: "Production verified account", spend10Min: "$500", billingCap: "High Concurrency" },
+    { id: "tier3", label: "Tier 3 (Enterprise)", qualification: "Enterprise throughput", spend10Min: "$5,000", billingCap: "Custom Quotas" },
+  ],
+};
+
 export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPageProps) {
-  const [selectedProviderId, setSelectedProviderId] = useState<string>("gemini");
+  const [selectedProviderId, setSelectedProviderId] = useState<string>("all");
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>("all");
   const [selectedTierId, setSelectedTierId] = useState<string>("tier1");
   const [isPriorityInference, setIsPriorityInference] = useState<boolean>(false);
@@ -46,7 +77,9 @@ export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPagePr
   }, []);
 
   const currentProviderSpec: ProviderFullSpec =
-    PROVIDER_FULL_SPECS.find((p) => p.id === selectedProviderId) || PROVIDER_FULL_SPECS[0];
+    selectedProviderId === "all"
+      ? ALL_PROVIDER_SPEC
+      : PROVIDER_FULL_SPECS.find((p) => p.id === selectedProviderId) || PROVIDER_FULL_SPECS[0];
 
   // Auto-adjust active tier if the new provider has different tier IDs
   useEffect(() => {
@@ -79,19 +112,50 @@ export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPagePr
     }
   };
 
+  const isMatchProvider = (m: AIModelCardData, providerId: string) => {
+    if (providerId === "all") return true;
+    const p = (m.provider || "").toLowerCase();
+    const id = (m.id || "").toLowerCase();
+    const target = providerId.toLowerCase();
+
+    if (target === "gemini" || target === "google") {
+      return p === "gemini" || p === "google" || id.includes("gemini") || id.includes("imagen");
+    }
+    if (target === "openai") {
+      return p === "openai" || id.includes("gpt") || id.includes("o1") || id.includes("o3") || id.includes("dall");
+    }
+    if (target === "anthropic") {
+      return p === "anthropic" || id.includes("claude");
+    }
+    if (target === "groq") {
+      return p === "groq" || id.includes("groq");
+    }
+    if (target === "deepseek") {
+      return p === "deepseek" || id.includes("deepseek");
+    }
+    if (target === "elevenlabs") {
+      return p === "elevenlabs" || id.includes("eleven");
+    }
+    if (target === "deepl") {
+      return p === "deepl";
+    }
+    return p === target;
+  };
+
+  const allSpecsList = [ALL_PROVIDER_SPEC, ...PROVIDER_FULL_SPECS];
+
   const visibleProviders =
     selectedGroupFilter === "all"
-      ? PROVIDER_FULL_SPECS
+      ? allSpecsList
       : PROVIDER_FULL_SPECS.filter((p) => p.group === selectedGroupFilter);
 
-  const providerModels = models.filter(
-    (m) => m.provider.toLowerCase() === selectedProviderId.toLowerCase()
-  );
+  const providerModels = models.filter((m) => isMatchProvider(m, selectedProviderId));
 
   const filteredModels = providerModels.filter((m) =>
     searchQuery
       ? m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.id.toLowerCase().includes(searchQuery.toLowerCase())
+        m.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (m.provider && m.provider.toLowerCase().includes(searchQuery.toLowerCase()))
       : true
   );
 
@@ -130,12 +194,15 @@ export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPagePr
           </div>
         </div>
 
-        {/* 11 Provider Selection Cards Grid */}
+        {/* Provider Selection Cards Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 pt-1">
           {visibleProviders.map((tab) => {
             const Icon = tab.icon;
             const isSelected = selectedProviderId === tab.id;
-            const modelCount = models.filter((m) => m.provider.toLowerCase() === tab.id.toLowerCase()).length;
+            const modelCount =
+              tab.id === "all"
+                ? models.length
+                : models.filter((m) => isMatchProvider(m, tab.id)).length;
 
             return (
               <button

@@ -507,10 +507,10 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                           </button>
 
                           <a
-                            href={`/ai-core?tab=routing&task=${task.id}`}
+                            href="/ai-core/models"
                             className="px-3.5 py-1.5 rounded-xl bg-[#1E1E24] hover:bg-[#282832] border border-white/[0.1] hover:border-white/[0.2] text-xs font-bold text-neutral-200 hover:text-white transition-all cursor-pointer active:scale-95"
                           >
-                            Configure
+                            Routing Studio
                           </a>
                         </div>
                       </div>

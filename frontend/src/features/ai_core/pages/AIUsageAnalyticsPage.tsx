@@ -86,16 +86,19 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
     prompt_tokens: summaryData?.total_prompt_tokens || 0,
     completion_tokens: summaryData?.total_completion_tokens || 0,
     total_cost_usd: summaryData?.estimated_cost_usd || 0.0,
-    available_credits: summaryData?.available_credits || 1000,
-    avg_latency_ms: summaryData?.avg_latency_ms || 240,
+    available_credits: summaryData?.available_credits || 0,
+    avg_latency_ms: summaryData?.avg_latency_ms || 0,
     success_rate_percent: summaryData?.success_rate_percent || 100,
   };
 
-  const timestamps = timeseriesData?.timestamps || ["12:00", "14:00", "16:00", "18:00", "20:00", "22:00"];
-  const inputTokens = timeseriesData?.input_tokens || [120, 340, 890, 450, 1100, 750];
-  const outputTokens = timeseriesData?.output_tokens || [40, 90, 220, 110, 310, 190];
+  const timestamps = timeseriesData?.timestamps || summaryData?.timestamps || [];
+  const inputTokens = timeseriesData?.input_tokens || summaryData?.input_tokens || [];
+  const outputTokens = timeseriesData?.output_tokens || summaryData?.output_tokens || [];
 
-  const maxVal = Math.max(...inputTokens, ...outputTokens, 100);
+  const maxVal = Math.max(...inputTokens, ...outputTokens, 1);
+
+  const providerBreakdown = summaryData?.provider_breakdown || [];
+  const featuresBreakdown = summaryData?.features_breakdown || [];
 
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-in fade-in duration-200 text-left text-[#E5E5E5]">
@@ -184,7 +187,7 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
             <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Available Credits</span>
             <p className="text-2xl font-black text-purple-400 font-mono flex items-center gap-1">
               <Coins className="w-5 h-5" />
-              {kpis.available_credits?.toLocaleString() || 1000}
+              {kpis.available_credits?.toLocaleString() || 0}
             </p>
             <span className="text-[10px] text-emerald-400 font-mono">Wallet Active</span>
           </div>
@@ -217,32 +220,38 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
         </div>
 
         {/* Dynamic Bar / Timeseries Graph */}
-        <div className="h-48 flex items-end gap-3 pt-6 pb-2 border-b border-neutral-800">
-          {timestamps.map((ts: string, idx: number) => {
-            const inTok = inputTokens[idx] || 0;
-            const outTok = outputTokens[idx] || 0;
-            const inH = Math.max(8, Math.round((inTok / maxVal) * 100));
-            const outH = Math.max(8, Math.round((outTok / maxVal) * 100));
+        {timestamps.length > 0 ? (
+          <div className="h-48 flex items-end gap-3 pt-6 pb-2 border-b border-neutral-800">
+            {timestamps.map((ts: string, idx: number) => {
+              const inTok = inputTokens[idx] || 0;
+              const outTok = outputTokens[idx] || 0;
+              const inH = Math.max(8, Math.round((inTok / maxVal) * 100));
+              const outH = Math.max(8, Math.round((outTok / maxVal) * 100));
 
-            return (
-              <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                <div className="w-full max-w-[28px] flex items-end gap-1 h-full justify-center">
-                  <div
-                    className="w-1/2 bg-purple-600 rounded-t group-hover:bg-purple-400 transition-all duration-300"
-                    style={{ height: `${inH}%` }}
-                    title={`Input: ${inTok} tokens`}
-                  />
-                  <div
-                    className="w-1/2 bg-indigo-600 rounded-t group-hover:bg-indigo-400 transition-all duration-300"
-                    style={{ height: `${outH}%` }}
-                    title={`Output: ${outTok} tokens`}
-                  />
+              return (
+                <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
+                  <div className="w-full max-w-[28px] flex items-end gap-1 h-full justify-center">
+                    <div
+                      className="w-1/2 bg-purple-600 rounded-t group-hover:bg-purple-400 transition-all duration-300"
+                      style={{ height: `${inH}%` }}
+                      title={`Input: ${inTok} tokens`}
+                    />
+                    <div
+                      className="w-1/2 bg-indigo-600 rounded-t group-hover:bg-indigo-400 transition-all duration-300"
+                      style={{ height: `${outH}%` }}
+                      title={`Output: ${outTok} tokens`}
+                    />
+                  </div>
+                  <span className="text-[9px] font-mono text-neutral-400">{ts}</span>
                 </div>
-                <span className="text-[9px] font-mono text-neutral-400">{ts}</span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="h-32 flex flex-col items-center justify-center text-neutral-500 text-xs font-mono border-b border-neutral-800">
+            No token activity recorded in this timeframe
+          </div>
+        )}
       </div>
 
       {/* ── BREAKDOWNS (PROVIDER & FEATURE) ───────────────────────────────── */}
@@ -253,21 +262,24 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
             Provider Breakdown
           </h3>
           <div className="space-y-2">
-            {(summaryData?.provider_breakdown || [
-              { provider: "gemini", provider_name: "Google Gemini", requests: 14, total_tokens: 18400, cost_usd: 0.0028 },
-              { provider: "groq", provider_name: "Groq LPU", requests: 6, total_tokens: 4200, cost_usd: 0.0004 },
-            ]).map((p: any) => (
-              <div key={p.provider} className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/80 border border-neutral-800">
-                <div className="flex items-center gap-2.5">
-                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                  <span className="text-xs font-bold text-white">{p.provider_name}</span>
+            {providerBreakdown.length > 0 ? (
+              providerBreakdown.map((p: any) => (
+                <div key={p.provider} className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/80 border border-neutral-800">
+                  <div className="flex items-center gap-2.5">
+                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                    <span className="text-xs font-bold text-white">{p.provider_name || p.provider}</span>
+                  </div>
+                  <div className="text-right text-xs font-mono">
+                    <span className="text-white font-bold block">{p.total_tokens?.toLocaleString()} tok</span>
+                    <span className="text-[10px] text-neutral-400">${Number(p.cost_usd || 0).toFixed(4)}</span>
+                  </div>
                 </div>
-                <div className="text-right text-xs font-mono">
-                  <span className="text-white font-bold block">{p.total_tokens?.toLocaleString()} tok</span>
-                  <span className="text-[10px] text-neutral-400">${Number(p.cost_usd || 0).toFixed(4)}</span>
-                </div>
+              ))
+            ) : (
+              <div className="p-6 text-center text-xs text-neutral-500 font-mono">
+                No provider activity recorded for this timeframe
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -277,22 +289,24 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
             Feature Breakdown
           </h3>
           <div className="space-y-2">
-            {(summaryData?.features_breakdown || [
-              { feature: "Storyboard Narrative", calls: 8, tokens: 12000, percentage: 65 },
-              { feature: "Scraper Blueprint", calls: 4, tokens: 4500, percentage: 25 },
-              { feature: "Prompt Enhancement", calls: 2, tokens: 1900, percentage: 10 },
-            ]).map((f: any) => (
-              <div key={f.feature} className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/80 border border-neutral-800">
-                <div>
-                  <span className="text-xs font-bold text-white block">{f.feature}</span>
-                  <span className="text-[10px] text-neutral-400 font-mono">{f.calls} calls</span>
+            {featuresBreakdown.length > 0 ? (
+              featuresBreakdown.map((f: any) => (
+                <div key={f.feature} className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/80 border border-neutral-800">
+                  <div>
+                    <span className="text-xs font-bold text-white block">{f.feature}</span>
+                    <span className="text-[10px] text-neutral-400 font-mono">{f.calls} calls</span>
+                  </div>
+                  <div className="text-right text-xs font-mono">
+                    <span className="text-purple-400 font-bold block">{f.tokens?.toLocaleString()} tok</span>
+                    <span className="text-[10px] text-neutral-400">{f.percentage}% share</span>
+                  </div>
                 </div>
-                <div className="text-right text-xs font-mono">
-                  <span className="text-purple-400 font-bold block">{f.tokens?.toLocaleString()} tok</span>
-                  <span className="text-[10px] text-neutral-400">{f.percentage}% share</span>
-                </div>
+              ))
+            ) : (
+              <div className="p-6 text-center text-xs text-neutral-500 font-mono">
+                No feature calls recorded for this timeframe
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
