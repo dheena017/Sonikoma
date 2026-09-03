@@ -9,12 +9,12 @@
   height: 100%;
   overflow: hidden;
   opacity: 1;
-  background: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.12) 0%, rgba(37, 99, 235, 0.04) 40%, transparent 70%), #0a0b0e;
+  background: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.05) 40%, transparent 70%), #0a0b0e;
   transition: opacity 0.4s ease, background 0.4s ease;
 }
 
 .anime-hero-scene-light {
-  background: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.03) 40%, transparent 70%), #f8fafc;
+  background: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.04) 40%, transparent 70%), #f8fafc;
 }
 
 /* Background Character Artwork */
@@ -26,14 +26,24 @@
   height: 100%;
   object-fit: cover;
   object-position: center 10%;
-  opacity: 0.35;
-  filter: saturate(1.05) contrast(1.02);
+  opacity: 0.42;
+  filter: saturate(1.1) contrast(1.05);
   pointer-events: none;
+  animation: hero-subtle-drift 24s ease-in-out infinite alternate;
 }
 
 .anime-hero-scene-light .anime-hero-art {
-  opacity: 0.22;
-  filter: saturate(1.02) contrast(0.98) brightness(1.04);
+  opacity: 0.28;
+  filter: saturate(1.05) contrast(1.0) brightness(1.05);
+}
+
+@keyframes hero-subtle-drift {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    transform: scale(1.03) translateY(-8px);
+  }
 }
 
 /* Layer Structure */
@@ -45,43 +55,69 @@
   pointer-events: none;
 }
 
-/* Soft Ambient Glows */
+/* Soft Ambient Aurora Glows with Live Floating Animation */
 .anime-hero-aurora {
-  opacity: 0.4;
+  opacity: 0.5;
   mix-blend-mode: screen;
 }
 
 .anime-aurora-beam {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(100px);
-  opacity: 0.35;
+  filter: blur(90px);
+  opacity: 0.4;
 }
 
 .anime-aurora-beam.beam-1 {
-  top: -15vh;
-  left: 15vw;
-  width: 45vw;
-  height: 40vh;
+  top: -10vh;
+  left: 10vw;
+  width: 50vw;
+  height: 45vh;
   background: radial-gradient(
     circle,
-    rgba(59, 130, 246, 0.25) 0%,
-    rgba(99, 102, 241, 0.1) 60%,
-    transparent 80%
+    rgba(59, 130, 246, 0.3) 0%,
+    rgba(99, 102, 241, 0.15) 50%,
+    transparent 75%
   );
+  animation: aurora-float-1 16s ease-in-out infinite alternate;
 }
 
 .anime-aurora-beam.beam-2 {
   bottom: -5vh;
-  right: 15vw;
-  width: 45vw;
-  height: 40vh;
+  right: 10vw;
+  width: 50vw;
+  height: 45vh;
   background: radial-gradient(
     circle,
-    rgba(6, 182, 212, 0.18) 0%,
-    rgba(59, 130, 246, 0.08) 60%,
-    transparent 80%
+    rgba(6, 182, 212, 0.22) 0%,
+    rgba(59, 130, 246, 0.1) 50%,
+    transparent 75%
   );
+  animation: aurora-float-2 20s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-float-1 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(4vw, 3vh) scale(1.08);
+  }
+  100% {
+    transform: translate(-3vw, -2vh) scale(0.95);
+  }
+}
+
+@keyframes aurora-float-2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-5vw, -4vh) scale(1.1);
+  }
+  100% {
+    transform: translate(4vw, 2vh) scale(0.92);
+  }
 }
 
 /* Vignette & Readability */
@@ -89,8 +125,8 @@
   background: radial-gradient(
     circle at 50% 40%,
     transparent 20%,
-    rgba(10, 11, 14, 0.5) 70%,
-    rgba(10, 11, 14, 0.9) 100%
+    rgba(10, 11, 14, 0.45) 70%,
+    rgba(10, 11, 14, 0.85) 100%
   );
 }
 
@@ -98,16 +134,16 @@
   background: radial-gradient(
     circle at 50% 40%,
     transparent 20%,
-    rgba(248, 250, 252, 0.4) 70%,
-    rgba(248, 250, 252, 0.8) 100%
+    rgba(248, 250, 252, 0.35) 70%,
+    rgba(248, 250, 252, 0.75) 100%
   );
 }
 
 .anime-hero-readability {
   background: linear-gradient(
     180deg,
-    rgba(10, 11, 14, 0.3) 0%,
-    rgba(10, 11, 14, 0.7) 50%,
+    rgba(10, 11, 14, 0.25) 0%,
+    rgba(10, 11, 14, 0.6) 50%,
     #0a0b0e 100%
   );
 }
@@ -115,8 +151,8 @@
 .anime-hero-scene-light .anime-hero-readability {
   background: linear-gradient(
     180deg,
-    rgba(248, 250, 252, 0.2) 0%,
-    rgba(248, 250, 252, 0.5) 50%,
+    rgba(248, 250, 252, 0.15) 0%,
+    rgba(248, 250, 252, 0.45) 50%,
     #f8fafc 100%
   );
 }

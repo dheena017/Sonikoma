@@ -9,8 +9,6 @@ import {
   Eye,
   EyeOff,
   Check,
-  Key,
-  Compass,
   Sparkles,
 } from "lucide-react";
 import AuthPageShell from "@/features/app_auth/components/AuthPageShell";
@@ -21,13 +19,6 @@ interface RegisterFormProps {
   onNavigateToLogin: () => void;
   onNavigateHome?: () => void;
 }
-
-const CREATOR_ROLES = [
-  { id: "artist", label: "Artist", desc: "I draw comics" },
-  { id: "creator", label: "Video Creator", desc: "I make recaps" },
-  { id: "producer", label: "Producer", desc: "Studio workflow" },
-  { id: "fan", label: "Enthusiast", desc: "I love webtoons" },
-];
 
 export default function RegisterForm({
   onRegister,
@@ -47,16 +38,11 @@ export default function RegisterForm({
     setShowPassword,
     acceptTerms,
     setAcceptTerms,
-    creatorRole,
-    setCreatorRole,
     activeTheme,
     passwordNotification,
     hasMinLength,
-    hasUppercase,
-    hasNumber,
     isEmailValid,
     isFormValid,
-    handleGeneratePassword,
     handleSubmit,
     handleSocialRegister,
   } = useRegisterForm({
@@ -75,10 +61,10 @@ export default function RegisterForm({
             {onNavigateHome && (
               <button
                 onClick={onNavigateHome}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
               >
                 <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                <span>Back</span>
+                <span>Back to Home</span>
               </button>
             )}
 
@@ -102,35 +88,23 @@ export default function RegisterForm({
       }
       rightBody={
         <>
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 p-2 shadow-sm flex items-center justify-center">
-                <img
-                  src="/logo-dark.png"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                  }}
-                  alt="Sonikoma"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
-                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                <span>Join Sonikoma Studio</span>
-              </div>
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
+              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              <span>Get Started Free</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
               Create Account
             </h2>
             <p className="text-neutral-400 text-sm font-medium leading-relaxed">
-              Start parsing webtoons and compiling animations today.
+              Start creating animated, voiced comic videos in seconds.
             </p>
           </div>
 
           <div className="w-full">
             <button
               onClick={() => handleSocialRegister("Google")}
-              className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all duration-200 cursor-pointer shadow-md active:scale-[0.99] group"
+              className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all duration-200 cursor-pointer shadow-md hover:shadow-blue-500/20 active:scale-[0.99] group"
             >
               <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                 <path
@@ -157,8 +131,8 @@ export default function RegisterForm({
 
           <div className="relative flex py-1 items-center">
             <div className="flex-grow border-t border-[#2F2F2F]" />
-            <span className="flex-shrink mx-4 text-neutral-400 text-[10px] font-bold uppercase tracking-widest bg-[#141414] px-3 py-1 rounded-full border border-[#2F2F2F]">
-              Or Sign Up With Email
+            <span className="flex-shrink mx-4 text-neutral-400 text-xs font-semibold uppercase tracking-wider bg-[#141414] px-3 py-1 rounded-full border border-[#2F2F2F]">
+              Or with email
             </span>
             <div className="flex-grow border-t border-[#2F2F2F]" />
           </div>
@@ -177,8 +151,9 @@ export default function RegisterForm({
                 </div>
               )}
 
+              {/* Full Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold tracking-wider uppercase text-neutral-300 ml-0.5">
+                <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 ml-0.5">
                   Full Name
                 </label>
                 <div className="relative">
@@ -188,15 +163,16 @@ export default function RegisterForm({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
-                    placeholder="John Doe"
+                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    placeholder="Your Name"
                   />
                 </div>
               </div>
 
+              {/* Email */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between ml-0.5">
-                  <label className="text-xs font-bold tracking-wider uppercase text-neutral-300">
+                  <label className="text-xs font-bold uppercase tracking-wider text-neutral-300">
                     Email Address
                   </label>
                   {email && (
@@ -205,7 +181,7 @@ export default function RegisterForm({
                         isEmailValid ? "text-emerald-400" : "text-amber-400"
                       }`}
                     >
-                      {isEmailValid ? "Valid Format" : "Invalid Email"}
+                      {isEmailValid ? "Valid format" : "Check email"}
                     </span>
                   )}
                 </div>
@@ -216,96 +192,38 @@ export default function RegisterForm({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     placeholder="name@example.com"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold tracking-wider uppercase text-neutral-300 ml-0.5 flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5 text-blue-400" />
-                  Select Creator Profile
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {CREATOR_ROLES.map((role) => {
-                    const isSelected = role.id === creatorRole;
-                    return (
-                      <button
-                        key={role.id}
-                        type="button"
-                        onClick={() => setCreatorRole(role.id)}
-                        className={`text-left p-2.5 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-blue-500/10 border-blue-500/50 text-white shadow-sm"
-                            : "bg-[#181818] border-[#2F2F2F] hover:border-neutral-600 text-neutral-400 hover:text-neutral-300"
-                        }`}
-                      >
-                        <div className="text-xs font-bold">{role.label}</div>
-                        <div className="text-[10px] text-neutral-400 mt-0.5">
-                          {role.desc}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
+              {/* Password */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between ml-0.5">
-                  <label className="text-xs font-bold tracking-wider uppercase text-neutral-300">
-                    Password
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleGeneratePassword}
-                    className="text-xs text-blue-400 hover:text-blue-300 font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                  >
-                    <Key className="w-3 h-3" />
-                    Auto-Generate
-                  </button>
-                </div>
+                <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 ml-0.5">
+                  Password
+                </label>
                 <div className="relative">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 pl-3.5 flex items-center z-10">
-                    <Lock className="w-4 h-4 text-neutral-400" />
-                  </div>
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                   <input
                     type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
-                    placeholder="Create a strong password"
+                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    placeholder="Create password (8+ characters)"
                   />
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer flex items-center justify-center"
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Password Requirement Checks */}
-                <div className="flex items-center gap-3 pt-1 text-[11px] font-medium text-neutral-400">
-                  <span className={`flex items-center gap-1 ${hasMinLength ? "text-emerald-400" : ""}`}>
-                    <Check className="w-3 h-3" /> 8+ chars
-                  </span>
-                  <span className={`flex items-center gap-1 ${hasUppercase ? "text-emerald-400" : ""}`}>
-                    <Check className="w-3 h-3" /> 1 uppercase
-                  </span>
-                  <span className={`flex items-center gap-1 ${hasNumber ? "text-emerald-400" : ""}`}>
-                    <Check className="w-3 h-3" /> 1 number
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -341,7 +259,7 @@ export default function RegisterForm({
               <button
                 type="submit"
                 disabled={isLoading || !isFormValid}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
               >
                 {isLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />

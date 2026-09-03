@@ -9,7 +9,6 @@ import {
   EyeOff,
   Check,
   Sparkles,
-  Info,
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { useLoginForm } from "@/features/app_auth/hooks";
@@ -39,13 +38,10 @@ export default function LoginPage({
     rememberMe,
     setRememberMe,
     activeTheme,
-    isCapsLockOn,
     isEmailValid,
-    isPasswordValid,
     handleSubmit,
     handleSocialLogin,
     checkCapsLock,
-    t,
   } = useLoginForm({
     onLogin,
     onNavigateToRegister,
@@ -55,21 +51,21 @@ export default function LoginPage({
 
   return (
     <div className="min-h-screen flex bg-[#0A0A0A] text-[#E5E5E5] font-sans overflow-hidden relative">
-      {/* LEFT PANEL: Auth Product Showcase */}
+      {/* LEFT PANEL: Product Preview */}
       <AuthShowcase activeTheme={activeTheme} iconType="login" />
 
-      {/* RIGHT PANEL: Login Form Interface */}
+      {/* RIGHT PANEL: Clean Login Form */}
       <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left">
-        {/* Top Controls Toolbar — pinned, never scrolls */}
+        {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-6 flex-shrink-0">
           <div className="flex items-center gap-2 lg:gap-3">
             {onNavigateHome && (
               <button
                 onClick={onNavigateHome}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
               >
                 <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-                <span>Back</span>
+                <span>Back to Home</span>
               </button>
             )}
 
@@ -94,38 +90,26 @@ export default function LoginPage({
         {/* Scrollable form body */}
         <div className="custom-scrollbar flex-1 overflow-y-auto px-8 lg:px-16 pb-8 lg:pb-16 flex flex-col justify-center">
           <div className="my-auto w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 py-4 text-left">
-            {/* Welcome Text & Studio Badge */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 p-2 shadow-sm flex items-center justify-center">
-                  <img
-                    src="/logo-dark.png"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                    }}
-                    alt="Sonikoma"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Comic to Video AI Engine</span>
-                </div>
+            {/* Header */}
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
+                <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                <span>Sonikoma Studio</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">Sonikoma Studio</span>
+                Sign In
               </h2>
               <p className="text-neutral-400 text-sm font-medium leading-relaxed">
-                Log in to access your dashboard, projects, and production tools.
+                Log in to access your dashboard and comic video projects.
               </p>
             </div>
 
-            {/* Google Sign-In Button */}
-            <div className="w-full space-y-2">
+            {/* Google Sign-In */}
+            <div>
               <button
                 type="button"
                 onClick={() => handleSocialLogin("Google")}
-                className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all duration-200 cursor-pointer shadow-md active:scale-[0.99] group"
+                className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition-all duration-200 cursor-pointer shadow-md hover:shadow-blue-500/20 active:scale-[0.99] group"
               >
                 <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
                   <path
@@ -145,37 +129,34 @@ export default function LoginPage({
                     d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
                   />
                 </svg>
-                <span>Continue with Google Account</span>
+                <span>Continue with Google</span>
                 <ArrowRight className="w-4 h-4 text-blue-200 group-hover:translate-x-1 transition-transform" />
               </button>
-              <p className="text-xs text-center text-neutral-400">
-                🔒 Standard Sonikoma authentication requires your Google Account
-              </p>
             </div>
 
-            {/* Separator Line */}
+            {/* Separator */}
             <div className="relative flex py-1 items-center">
               <div className="flex-grow border-t border-[#2F2F2F]" />
-              <span className="flex-shrink mx-4 text-neutral-400 text-[10px] font-bold uppercase tracking-widest bg-[#141414] px-3 py-1 rounded-full border border-[#2F2F2F]">
-                {t.or}
+              <span className="flex-shrink mx-4 text-neutral-400 text-xs font-semibold uppercase tracking-wider bg-[#141414] px-3 py-1 rounded-full border border-[#2F2F2F]">
+                Or with email
               </span>
               <div className="flex-grow border-t border-[#2F2F2F]" />
             </div>
 
-            {/* Login Card */}
+            {/* Form Card */}
             <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl space-y-5">
-              <form className="space-y-5" onSubmit={handleSubmit}>
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 {error && (
                   <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
                     {error}
                   </div>
                 )}
 
-                {/* Email address input */}
+                {/* Email Input */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between ml-0.5">
-                    <label className="text-xs font-bold tracking-wider uppercase text-neutral-300">
-                      {t.email}
+                    <label className="text-xs font-bold uppercase tracking-wider text-neutral-300">
+                      Email Address
                     </label>
                     {email && (
                       <span
@@ -183,7 +164,7 @@ export default function LoginPage({
                           isEmailValid ? "text-emerald-400" : "text-amber-400"
                         }`}
                       >
-                        {isEmailValid ? "Valid Format" : "Invalid Email"}
+                        {isEmailValid ? "Valid format" : "Check email format"}
                       </span>
                     )}
                   </div>
@@ -194,30 +175,28 @@ export default function LoginPage({
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
-                      placeholder={t.emailPlaceholder}
+                      className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      placeholder="name@example.com"
                     />
                   </div>
                 </div>
 
-                {/* Password input */}
+                {/* Password Input */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between ml-0.5">
-                    <label className="text-xs font-bold tracking-wider uppercase text-neutral-300">
-                      {t.password}
+                    <label className="text-xs font-bold uppercase tracking-wider text-neutral-300">
+                      Password
                     </label>
                     <button
                       type="button"
                       onClick={onNavigateToForgotPassword}
-                      className="text-xs text-blue-400 hover:text-blue-300 transition-colors font-bold cursor-pointer"
+                      className="text-xs text-blue-400 hover:text-blue-300 font-bold transition-colors cursor-pointer"
                     >
-                      {t.forgot}
+                      Forgot password?
                     </button>
                   </div>
                   <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 pl-3.5 flex items-center z-10">
-                      <Lock className="w-4 h-4 text-neutral-400" />
-                    </div>
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                     <input
                       type={showPassword ? "text" : "password"}
                       required
@@ -225,36 +204,25 @@ export default function LoginPage({
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyDown={checkCapsLock}
                       onKeyUp={checkCapsLock}
-                      className="w-full bg-[#181818] border border-[#2F2F2F] focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
-                      placeholder={t.passwordPlaceholder}
+                      className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      placeholder="Enter your password"
                     />
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors focus:outline-none cursor-pointer flex items-center justify-center"
-                        aria-label={
-                          showPassword ? "Hide password" : "Show password"
-                        }
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
                   </div>
-                  {isCapsLockOn && (
-                    <div className="text-xs font-bold text-amber-400 ml-1 mt-1 flex items-center gap-1.5">
-                      <Info className="w-3.5 h-3.5" />
-                      <span>{t.capsLock}</span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Remember Me Toggle */}
-                <div className="flex items-center ml-0.5">
+                <div className="flex items-center ml-0.5 pt-1">
                   <label className="flex items-center gap-2.5 cursor-pointer group select-none">
                     <div className="relative flex items-center justify-center">
                       <input
@@ -276,7 +244,7 @@ export default function LoginPage({
                       </div>
                     </div>
                     <span className="text-xs text-neutral-300 group-hover:text-white transition-colors font-medium">
-                      {t.remember}
+                      Remember me on this device
                     </span>
                   </label>
                 </div>
@@ -285,13 +253,13 @@ export default function LoginPage({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
                 >
                   {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <>
-                      <span>{t.signIn}</span>
+                      <span>Sign In</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
@@ -301,12 +269,12 @@ export default function LoginPage({
 
             {/* Create Account Link */}
             <p className="text-center text-sm text-neutral-400 font-medium">
-              {t.createAcc}{" "}
+              Don't have an account?{" "}
               <button
                 onClick={onNavigateToRegister}
                 className="text-blue-400 hover:text-blue-300 font-bold underline underline-offset-4 decoration-blue-500/50 hover:decoration-blue-400 transition-colors cursor-pointer ml-1"
               >
-                {t.createBtn}
+                Create free account
               </button>
             </p>
           </div>

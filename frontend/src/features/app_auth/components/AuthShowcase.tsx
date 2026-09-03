@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import {
   ThemeKey,
-  SHOWCASE_SLIDES,
 } from "@/features/app_auth/components/constants";
 
 interface AuthShowcaseProps {
@@ -16,13 +15,40 @@ interface AuthShowcaseProps {
   iconType: "login" | "register" | "forgot";
 }
 
+const SIMPLE_SLIDES = [
+  {
+    icon: Sparkles,
+    badge: "Step 1",
+    title: "Auto-Crop Comic Panels",
+    description: "Automatically slice long webtoon strips into independent, perfectly cropped storyboard panels in seconds.",
+  },
+  {
+    icon: Film,
+    badge: "Step 2",
+    title: "Smooth Camera Motion",
+    description: "Bring static panels to life with automatic camera zooms, pan effects, and smooth vertical scrolling.",
+  },
+  {
+    icon: Volume2,
+    badge: "Step 3",
+    title: "Character Voice Narration",
+    description: "Generate realistic character dialogue voiceovers and sync background music and sound effects automatically.",
+  },
+  {
+    icon: Cpu,
+    badge: "Step 4",
+    title: "Export Ready Videos",
+    description: "Download high-definition vertical MP4 videos ready to post on TikTok, YouTube Shorts, and Instagram Reels.",
+  },
+];
+
 export default function AuthShowcase({}: AuthShowcaseProps) {
   const [currentSlide, setCurrentSlide] = React.useState(0);
 
   // Auto-play product carousel
   React.useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % SHOWCASE_SLIDES.length);
+      setCurrentSlide((prev) => (prev + 1) % SIMPLE_SLIDES.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
@@ -56,14 +82,14 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
         <div className="flex items-center gap-2 bg-[#181818] border border-[#2F2F2F] rounded-full px-3 py-1.5 shadow-sm">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-[10px] font-bold tracking-wider text-neutral-300 uppercase">
-            Live Studio
+            AI Video Studio
           </span>
         </div>
       </div>
 
       {/* Carousel Slide Area */}
       <div className="relative z-10 my-auto w-full max-w-xl min-h-[460px] flex flex-col justify-center">
-        {SHOWCASE_SLIDES.map((slide, idx) => {
+        {SIMPLE_SLIDES.map((slide, idx) => {
           const isActive = idx === currentSlide;
 
           return (
@@ -78,11 +104,11 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
               {/* Slide Title & Description */}
               <div className="space-y-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                  <span className="text-[11px] font-bold tracking-wider uppercase text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
                     {slide.badge}
                   </span>
                   <span className="text-[11px] font-mono text-neutral-500 font-bold">
-                    0{idx + 1} / 0{SHOWCASE_SLIDES.length}
+                    0{idx + 1} / 0{SIMPLE_SLIDES.length}
                   </span>
                 </div>
 
@@ -94,52 +120,52 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                 </p>
               </div>
 
-              {/* SLIDE VISUAL DEMO CARD (STUDIO THEME) */}
+              {/* Visual Demo Card */}
               <div className="my-5 w-full rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 shadow-xl relative overflow-hidden">
                 {idx === 0 && (
-                  /* Slide 0: AI Panel Segmentation */
+                  /* Slide 0: AI Panel Slicing */
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs font-mono text-neutral-300 border-b border-[#2F2F2F] pb-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-300 border-b border-[#2F2F2F] pb-2">
                       <span className="flex items-center gap-1.5 text-blue-400 font-bold">
                         <Sparkles className="w-4 h-4 text-blue-400" />
-                        AI Strip Segmentation
+                        Automatic Comic Slicing
                       </span>
                       <span className="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
-                        99.8% Precision
+                        Ready
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2.5">
-                      <div className="bg-[#181818] border border-blue-500/30 rounded-xl p-2.5 text-center space-y-1 shadow-sm">
+                      <div className="bg-[#181818] border border-blue-500/30 rounded-xl p-2.5 text-center space-y-1">
                         <div className="h-16 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl text-blue-400">
                           ⚡️
                         </div>
-                        <span className="text-[11px] font-bold text-white block truncate">
-                          Awakening
+                        <span className="text-xs font-bold text-white block truncate">
+                          Panel 1
                         </span>
-                        <span className="text-[9px] font-mono text-blue-400 block font-bold">
-                          Panel 1 • Sliced
+                        <span className="text-[10px] text-blue-400 block font-medium">
+                          Auto-Cropped
                         </span>
                       </div>
-                      <div className="bg-[#181818] border border-cyan-500/30 rounded-xl p-2.5 text-center space-y-1 shadow-sm">
+                      <div className="bg-[#181818] border border-cyan-500/30 rounded-xl p-2.5 text-center space-y-1">
                         <div className="h-16 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-xl text-cyan-400">
                           ⚔️
                         </div>
-                        <span className="text-[11px] font-bold text-white block truncate">
-                          Shadow Clash
+                        <span className="text-xs font-bold text-white block truncate">
+                          Panel 2
                         </span>
-                        <span className="text-[9px] font-mono text-cyan-400 block font-bold">
-                          Panel 2 • Sliced
+                        <span className="text-[10px] text-cyan-400 block font-medium">
+                          Auto-Cropped
                         </span>
                       </div>
-                      <div className="bg-[#181818] border border-indigo-500/30 rounded-xl p-2.5 text-center space-y-1 shadow-sm">
+                      <div className="bg-[#181818] border border-indigo-500/30 rounded-xl p-2.5 text-center space-y-1">
                         <div className="h-16 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl text-indigo-400">
                           💥
                         </div>
-                        <span className="text-[11px] font-bold text-white block truncate">
-                          Burst Attack
+                        <span className="text-xs font-bold text-white block truncate">
+                          Panel 3
                         </span>
-                        <span className="text-[9px] font-mono text-indigo-400 block font-bold">
-                          Panel 3 • Sliced
+                        <span className="text-[10px] text-indigo-400 block font-medium">
+                          Auto-Cropped
                         </span>
                       </div>
                     </div>
@@ -147,15 +173,15 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                 )}
 
                 {idx === 1 && (
-                  /* Slide 1: Cinematic Camera Dynamics */
+                  /* Slide 1: Camera Motions */
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs font-mono text-neutral-300 border-b border-[#2F2F2F] pb-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-300 border-b border-[#2F2F2F] pb-2">
                       <span className="flex items-center gap-1.5 text-blue-400 font-bold">
                         <Film className="w-4 h-4 text-blue-400" />
-                        Cinematic Pan & Dynamic Zoom
+                        Dynamic Camera Motion
                       </span>
                       <span className="text-[10px] text-blue-400 font-bold px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
-                        60 FPS Motion
+                        60 FPS Video
                       </span>
                     </div>
                     <div className="h-24 rounded-xl bg-[#181818] border border-[#2F2F2F] p-3.5 flex items-center justify-between">
@@ -165,40 +191,40 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                         </div>
                         <div>
                           <p className="text-xs font-bold text-white">
-                            Ken-Burns Action Tracking
+                            Smooth Camera Pan & Zoom
                           </p>
-                          <p className="text-[10px] font-mono text-neutral-400">
-                            Smooth 3D Parallax • Auto Shake
+                          <p className="text-[10px] text-neutral-400">
+                            Automatic motion animation
                           </p>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-lg bg-[#0E0E0E] text-blue-400 font-mono text-[10px] font-bold border border-[#2F2F2F]">
-                        4K Ultra HD
+                      <span className="px-2.5 py-1 rounded-lg bg-[#0E0E0E] text-blue-400 text-[10px] font-bold border border-[#2F2F2F]">
+                        1080p / 4K
                       </span>
                     </div>
                   </div>
                 )}
 
                 {idx === 2 && (
-                  /* Slide 2: Multi-Character Voice Narration */
+                  /* Slide 2: Voice Narration */
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs font-mono text-neutral-300 border-b border-[#2F2F2F] pb-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-300 border-b border-[#2F2F2F] pb-2">
                       <span className="flex items-center gap-1.5 text-blue-400 font-bold">
                         <Volume2 className="w-4 h-4 text-blue-400" />
-                        Multi-Character Neural Voice Dubbing
+                        Character Voices & Audio
                       </span>
                       <span className="text-[10px] text-blue-400 font-bold px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
-                        Studio Audio 48kHz
+                        Natural TTS
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
                       <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">
                         <div>
                           <p className="text-xs font-bold text-white">
-                            Jin-Woo (Protagonist)
+                            Main Character Voice
                           </p>
                           <p className="text-[10px] text-neutral-400">
-                            Dramatic Voice • English
+                            Dramatic • English
                           </p>
                         </div>
                         <div className="flex items-end gap-1 h-5">
@@ -210,14 +236,14 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                       <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">
                         <div>
                           <p className="text-xs font-bold text-white">
-                            Epic Battle SFX
+                            Background Soundtracks
                           </p>
                           <p className="text-[10px] text-neutral-400">
-                            Orchestral Background
+                            Action & Mystery
                           </p>
                         </div>
-                        <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                          Auto Ducking
+                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                          Auto-Synced
                         </span>
                       </div>
                     </div>
@@ -225,21 +251,21 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                 )}
 
                 {idx === 3 && (
-                  /* Slide 3: Instant Video Render */
+                  /* Slide 3: Video Export */
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs font-mono text-neutral-300 border-b border-[#2F2F2F] pb-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-neutral-300 border-b border-[#2F2F2F] pb-2">
                       <span className="flex items-center gap-1.5 text-blue-400 font-bold">
                         <Cpu className="w-4 h-4 text-blue-400" />
-                        GPU Video Rendering Engine
+                        Ready to Post
                       </span>
                       <span className="text-[10px] text-blue-400 font-bold px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
-                        MP4 / 9:16 Shorts
+                        Vertical MP4
                       </span>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs font-mono">
+                      <div className="flex items-center justify-between text-xs">
                         <span className="text-neutral-300 font-bold">
-                          Rendering TikTok Video...
+                          Video Generation
                         </span>
                         <span className="text-blue-400 font-bold">
                           100% Ready
@@ -256,13 +282,13 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
               {/* Feature Chips */}
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <span className="text-xs font-semibold text-neutral-300 bg-[#181818] border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
-                  ⚡ Fast AI Generation
+                  ⚡ Fast Generation
                 </span>
                 <span className="text-xs font-semibold text-neutral-300 bg-[#181818] border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
-                  🎬 1080p & 4K Output
+                  🎬 1080p & 4K Video
                 </span>
                 <span className="text-xs font-semibold text-neutral-300 bg-[#181818] border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
-                  🎯 Auto Translation & Dubbing
+                  🎯 Auto Translation
                 </span>
               </div>
             </div>
@@ -274,7 +300,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
       <div className="relative z-10 flex items-center justify-between border-t border-[#2F2F2F] pt-5 mt-4">
         <div className="flex items-center gap-3">
           <div className="flex gap-2">
-            {SHOWCASE_SLIDES.map((_, idx) => (
+            {SIMPLE_SLIDES.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
@@ -292,10 +318,10 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
               type="button"
               onClick={() =>
                 setCurrentSlide((prev) =>
-                  prev === 0 ? SHOWCASE_SLIDES.length - 1 : prev - 1
+                  prev === 0 ? SIMPLE_SLIDES.length - 1 : prev - 1
                 )
               }
-              className="p-1 rounded-lg bg-[#181818] hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-mono font-bold px-2.5 border border-[#2F2F2F]"
+              className="p-1 rounded-lg bg-[#181818] hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-bold px-2.5 border border-[#2F2F2F]"
               title="Previous slide"
             >
               &larr;
@@ -303,9 +329,9 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
             <button
               type="button"
               onClick={() =>
-                setCurrentSlide((prev) => (prev + 1) % SHOWCASE_SLIDES.length)
+                setCurrentSlide((prev) => (prev + 1) % SIMPLE_SLIDES.length)
               }
-              className="p-1 rounded-lg bg-[#181818] hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-mono font-bold px-2.5 border border-[#2F2F2F]"
+              className="p-1 rounded-lg bg-[#181818] hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-bold px-2.5 border border-[#2F2F2F]"
               title="Next slide"
             >
               &rarr;
@@ -313,7 +339,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
           </div>
         </div>
 
-        <p className="text-xs text-neutral-500 font-medium font-mono">
+        <p className="text-xs text-neutral-500 font-medium">
           © {new Date().getFullYear()} Sonikoma Studio
         </p>
       </div>
