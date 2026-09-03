@@ -2,6 +2,7 @@ import { useRef } from "react";
 import type { ChangeEvent, MouseEvent } from "react";
 import { getActionDetails } from "@/features/app_shortcuts/components/shortcutUtils";
 import { ShortcutsPageProps } from "@/features/app_shortcuts/components/shortcutTypes";
+import { notifyShortcutsChanged } from "@/shared/hooks/useAppShortcuts";
 
 interface UseShortcutPersistenceParams
   extends Omit<ShortcutsPageProps, "onNavigateHome"> {}
@@ -27,6 +28,7 @@ export function useShortcutPersistence({
       "ai_comic_shortcuts",
       JSON.stringify(defaultShortcuts)
     );
+    notifyShortcutsChanged(defaultShortcuts);
 
     addNotification?.("Restored default key configurations", "info");
     audioFeedback?.playError();
@@ -38,6 +40,7 @@ export function useShortcutPersistence({
     setShortcuts((prev) => {
       const next = { ...prev, [id]: defaultValue };
       localStorage.setItem("ai_comic_shortcuts", JSON.stringify(next));
+      notifyShortcutsChanged(next);
       return next;
     });
 
@@ -52,6 +55,7 @@ export function useShortcutPersistence({
     setShortcuts((prev) => {
       const next = { ...prev, [id]: "" };
       localStorage.setItem("ai_comic_shortcuts", JSON.stringify(next));
+      notifyShortcutsChanged(next);
       return next;
     });
 

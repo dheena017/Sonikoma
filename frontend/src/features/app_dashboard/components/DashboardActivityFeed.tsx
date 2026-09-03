@@ -58,7 +58,7 @@ export default function DashboardActivityFeed({
   }, [activities, activeFilter]);
 
   return (
-    <div className="rounded-[28px] border border-[#263934] bg-gradient-to-b from-[#17221f] via-[#111a18] to-[#0b1210] p-6 sm:p-7 shadow-2xl transition-all duration-300">
+    <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-7 shadow-2xl transition-all duration-300">
       {/* Header & Filter Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">

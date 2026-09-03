@@ -285,8 +285,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
     activeProjectObj?.first_panel_image ||
     activePanels[0]?.image_url ||
     null;
-  const ActiveSourceIcon = getSourceIcon(activeProjectObj?.url);
-  const activeSourceName = getSourceName(activeProjectObj?.url);
+  const ActiveSourceIcon = getSourceIcon(activeProjectObj?.url || "");
+  const activeSourceName = getSourceName(activeProjectObj?.url || "");
 
   if (!isDrawerOpen) return null;
 
@@ -956,8 +956,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 p.panels_count ?? p.panel_count ?? p.panels?.length ?? 0;
               const importedCount = p.imported_assets_count ?? 0;
               const status = (p.status || "ready").toLowerCase();
-              const ItemSourceIcon = getSourceIcon(p.url);
-              const itemSourceName = getSourceName(p.url);
+              const ItemSourceIcon = getSourceIcon(p.url || "");
+              const itemSourceName = getSourceName(p.url || "");
               const itemTimeAgo = timeAgo(p.created_at || p.updated_at);
 
               const statusColor =

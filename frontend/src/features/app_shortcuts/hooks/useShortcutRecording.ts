@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getActionDetails } from "@/features/app_shortcuts/components/shortcutUtils";
+import { notifyShortcutsChanged } from "@/shared/hooks/useAppShortcuts";
 
 interface UseShortcutRecordingParams {
   shortcuts: Record<string, string>;
@@ -73,6 +74,7 @@ export function useShortcutRecording({
       setShortcuts((prev) => {
         const next = { ...prev, [recordingActionId!]: combination };
         localStorage.setItem("ai_comic_shortcuts", JSON.stringify(next));
+        notifyShortcutsChanged(next);
         return next;
       });
 

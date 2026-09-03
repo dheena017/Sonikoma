@@ -9,6 +9,7 @@ import {
 } from "./types";
 import { useKeyframes, KeyframesState } from "./useKeyframes";
 import { editorEventBus } from "../events/editorEventBus";
+import { useAppShortcuts } from "@/shared/hooks/useAppShortcuts";
 
 export interface TimelineState {
   // Core State
@@ -337,6 +338,8 @@ export function useTimelineState(
     setAiSuggestions((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
+  const { shortcuts, matchesShortcut } = useAppShortcuts();
+
   // ── Global keyboard shortcuts ───────────────────────────────────────────────
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -352,64 +355,110 @@ export function useTimelineState(
       }
 
       // Global zoom shortcuts
-      if (e.key === "=" || e.key === "+") {
+      if (
+        matchesShortcut(e, shortcuts.timeline_zoom_in) ||
+        (!shortcuts.timeline_zoom_in && (e.key === "=" || e.key === "+"))
+      ) {
         e.preventDefault();
         handleZoomIn();
         return;
       }
-      if (e.key === "-" || e.key === "_") {
+      if (
+        matchesShortcut(e, shortcuts.timeline_zoom_out) ||
+        (!shortcuts.timeline_zoom_out && (e.key === "-" || e.key === "_"))
+      ) {
         e.preventDefault();
         handleZoomOut();
         return;
       }
-      if (e.key === "0" && !e.ctrlKey && !e.metaKey) {
+      if (
+        matchesShortcut(e, shortcuts.timeline_zoom_reset) ||
+        (!shortcuts.timeline_zoom_reset && e.key === "0" && !e.ctrlKey && !e.metaKey)
+      ) {
         e.preventDefault();
         handleZoomReset();
         return;
       }
-      if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey) {
+      if (
+        matchesShortcut(e, shortcuts.timeline_snap) ||
+        (!shortcuts.timeline_snap && (e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey)
+      ) {
         toggleSnap();
         return;
       }
 
       // Clip actions
       if (!selectedClip) return;
-      if ((e.key === "s" || e.key === "S") && !e.ctrlKey && !e.metaKey) {
+      if (
+        matchesShortcut(e, shortcuts.timeline_split) ||
+        (!shortcuts.timeline_split && (e.key === "s" || e.key === "S") && !e.ctrlKey && !e.metaKey)
+      ) {
         e.preventDefault();
         handleSplit();
+        return;
       }
-      if (e.key === "Delete" || e.key === "Backspace") {
+      if (
+        matchesShortcut(e, shortcuts.timeline_delete) ||
+        (!shortcuts.timeline_delete && (e.key === "Delete" || e.key === "Backspace"))
+      ) {
         e.preventDefault();
         handleRemoveDuration();
+        return;
       }
-      if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C")) {
+      if (
+        matchesShortcut(e, shortcuts.timeline_copy) ||
+        (!shortcuts.timeline_copy && (e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C"))
+      ) {
         e.preventDefault();
         handleCopy();
+        return;
       }
-      if ((e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V")) {
+      if (
+        matchesShortcut(e, shortcuts.timeline_paste) ||
+        (!shortcuts.timeline_paste && (e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V"))
+      ) {
         e.preventDefault();
         handlePaste();
+        return;
       }
-      if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D")) {
+      if (
+        matchesShortcut(e, shortcuts.timeline_duplicate) ||
+        (!shortcuts.timeline_duplicate && (e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D"))
+      ) {
         e.preventDefault();
         handleDuplicate();
+        return;
       }
-      if (e.key === "k" || e.key === "K") {
+      if (
+        matchesShortcut(e, shortcuts.timeline_keyframe) ||
+        (!shortcuts.timeline_keyframe && (e.key === "k" || e.key === "K") && !e.ctrlKey && !e.metaKey)
+      ) {
         keyframesState.addKeyframe(selectedClip, 1.0, "scale", 1.0);
+        return;
       }
-      if (e.key === "m" || e.key === "M") {
+      if (
+        matchesShortcut(e, shortcuts.timeline_mute) ||
+        (!shortcuts.timeline_mute && (e.key === "m" || e.key === "M") && !e.ctrlKey && !e.metaKey)
+      ) {
         const track = selectedClip.split("-")[0].toUpperCase();
         if (track) toggleMute(track);
+        return;
       }
-      if (e.key === "l" || e.key === "L") {
+      if (
+        matchesShortcut(e, shortcuts.timeline_lock) ||
+        (!shortcuts.timeline_lock && (e.key === "l" || e.key === "L") && !e.ctrlKey && !e.metaKey)
+      ) {
         const track = selectedClip.split("-")[0].toUpperCase();
         if (track) toggleLock(track);
+        return;
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [
     selectedClip,
+    shortcuts,
+    matchesShortcut,
     handleSplit,
     handleRemoveDuration,
     handleCopy,

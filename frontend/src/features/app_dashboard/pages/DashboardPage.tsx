@@ -35,7 +35,7 @@ export default function DashboardPage() {
   return (
     <div className="w-full flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-4 sm:py-6 max-w-7xl mx-auto">
       {/* ── MAIN COVER WRAPPER CARD ── */}
-      <div className="rounded-[28px] border border-[#263934] bg-gradient-to-b from-[#17221f] via-[#111a18] to-[#0b1210] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
         <div className="relative z-10">
           <DashboardHeader
             themeMode={themeMode}

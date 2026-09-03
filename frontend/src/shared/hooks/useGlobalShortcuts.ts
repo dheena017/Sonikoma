@@ -20,22 +20,29 @@ export interface UseGlobalShortcutsProps {
 }
 
 export const DEFAULT_SHORTCUTS: Record<string, string> = {
+  // Navigation (All verified routes)
   nav_dashboard: "Alt+D",
+  nav_projects: "Alt+J",
   nav_settings: "Alt+S",
   nav_editor: "Alt+E",
   nav_autocrop: "Alt+C",
-  nav_bubble: "Alt+B",
-  nav_logs: "Alt+L",
-  nav_status: "Alt+G",
+  nav_aicore: "Alt+A",
   nav_shortcuts: "Alt+K",
   nav_profile: "Alt+U",
+  nav_notifications: "Alt+I",
+
+  // Action Triggers
   trigger_compile: "Alt+P",
   trigger_scrape: "Alt+N",
+
+  // Playback & Audio
   playback_toggle: "Space",
   playback_reset: "Alt+R",
   volume_up: "Alt+ArrowUp",
   volume_down: "Alt+ArrowDown",
   volume_mute: "Alt+M",
+
+  // Timeline & Video Editor
   timeline_split: "S",
   timeline_delete: "Delete",
   timeline_copy: "Ctrl+C",
@@ -70,6 +77,9 @@ export function matchesShortcut(e: KeyboardEvent, shortcutStr?: string): boolean
   if (key === "arrowleft") return e.key === "ArrowLeft";
   if (key === "arrowright") return e.key === "ArrowRight";
   if (key === "escape") return e.key === "Escape";
+  if (key === "delete" || key === "del") return e.key === "Delete" || e.key === "Backspace";
+  if (key === "=" || key === "+") return e.key === "=" || e.key === "+";
+  if (key === "-" || key === "_") return e.key === "-" || e.key === "_";
 
   return e.key.toLowerCase() === key;
 }
@@ -105,10 +115,13 @@ export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
         return;
       }
 
-      // ── Dispatch table ───────────────────────────────────────────────────
+      // ── Dispatch table (Strictly verified valid routes) ───────────────────
       if (matchesShortcut(e, shortcuts.nav_dashboard)) {
         e.preventDefault();
         props.navigateTo?.("/dashboard");
+      } else if (matchesShortcut(e, shortcuts.nav_projects)) {
+        e.preventDefault();
+        props.navigateTo?.("/projects");
       } else if (matchesShortcut(e, shortcuts.nav_settings)) {
         e.preventDefault();
         props.navigateTo?.("/settings/account");
@@ -117,22 +130,19 @@ export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
         props.navigateTo?.("/editor");
       } else if (matchesShortcut(e, shortcuts.nav_autocrop)) {
         e.preventDefault();
-        props.setShowAutoCropModal?.(true);
-      } else if (matchesShortcut(e, shortcuts.nav_bubble)) {
+        props.navigateTo?.("/auto-crop");
+      } else if (matchesShortcut(e, shortcuts.nav_aicore)) {
         e.preventDefault();
-        props.setShowBubbleModal?.(true);
-      } else if (matchesShortcut(e, shortcuts.nav_logs)) {
-        e.preventDefault();
-        props.addNotification?.("Logs are available in the current workspace panels.", "info");
-      } else if (matchesShortcut(e, shortcuts.nav_status)) {
-        e.preventDefault();
-        props.addNotification?.("Server status is shown in the header.", "info");
+        props.navigateTo?.("/ai-core");
       } else if (matchesShortcut(e, shortcuts.nav_shortcuts)) {
         e.preventDefault();
         props.navigateTo?.("/shortcuts");
       } else if (matchesShortcut(e, shortcuts.nav_profile)) {
         e.preventDefault();
         props.navigateTo?.("/profile");
+      } else if (matchesShortcut(e, shortcuts.nav_notifications)) {
+        e.preventDefault();
+        props.navigateTo?.("/notifications");
       } else if (matchesShortcut(e, shortcuts.playback_toggle)) {
         e.preventDefault();
         props.toggleStoryboardPlayback?.();

@@ -21,7 +21,7 @@ export default function DashboardHeader({
         <div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight font-sans">
             Welcome to{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2dd4bf] via-[#14b8a6] to-[#67e8f9]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF]">
               Sonikoma Studio
             </span>
           </h1>
@@ -33,13 +33,13 @@ export default function DashboardHeader({
 
         {/* Simple Clean Search Bar */}
         <div className="relative max-w-md pt-0.5 group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280] group-hover:text-[#2dd4bf] transition-colors" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280] group-hover:text-[#3B82F6] transition-colors" />
           <input
             type="text"
             placeholder="Search projects, chapters, or series..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-[#14201d] border border-white/[0.08] hover:border-[#14b8a6]/50 focus:border-[#14b8a6] focus:ring-1 focus:ring-[#14b8a6]/30 rounded-xl py-2 pl-10 pr-9 text-xs sm:text-sm text-[#E5E5E5] outline-none font-sans transition-all placeholder:text-[#6B7280]"
+            className="w-full bg-[#18181E] border border-white/[0.08] hover:border-[#3B82F6]/50 focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 rounded-xl py-2 pl-10 pr-9 text-xs sm:text-sm text-[#E5E5E5] outline-none font-sans transition-all placeholder:text-[#6B7280]"
           />
           {searchQuery && (
             <Tooltip text="Clear search" placement="top">
@@ -63,7 +63,7 @@ export default function DashboardHeader({
             type="button"
             onClick={onNewSeries}
             aria-label="Start new chapter"
-            className="flex items-center gap-2 bg-[#0f9f91] hover:bg-[#0d9488] text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider shadow-md border border-[#2dd4bf]/30 transition-all cursor-pointer active:scale-95"
+            className="flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider shadow-md border border-[#3B82F6]/30 transition-all cursor-pointer active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span>New Chapter</span>
