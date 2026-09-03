@@ -3,7 +3,7 @@ import React from "react";
 export function TranslationBefore() {
   return (
     <div className="w-full h-full flex items-center justify-center p-6 bg-[#0d0e15] relative overflow-hidden">
-      <div className="w-72 h-72 rounded-2xl bg-gradient-to-br from-rose-950 via-slate-900 to-purple-950 border border-neutral-700/80 p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl">
+      <div className="w-72 h-72 rounded-2xl bg-gradient-to-br from-rose-950 via-slate-900 to-[#2A2A2A] border border-neutral-700/80 p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(244,63,94,0.25),transparent_60%)]" />
 
         <div className="relative z-10">

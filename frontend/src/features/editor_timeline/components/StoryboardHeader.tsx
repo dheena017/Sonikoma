@@ -83,8 +83,8 @@ export default function StoryboardHeader({
   if (selectedCount > 0) {
     const selectionLeftBlock = (
       <div className="flex items-center gap-2.5 flex-wrap">
-        <div className="flex items-center gap-2 bg-purple-950/80 border border-[#3B82F6]/40 rounded-xl px-3 py-1.5 ">
-          <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[10px] font-mono font-black">
+        <div className="flex items-center gap-2 bg-[#2A2A2A] border border-[#3B82F6]/40 rounded-xl px-3 py-1.5 ">
+          <div className="h-5 w-5 rounded bg-[#2A2A2A] flex items-center justify-center text-white text-[10px] font-mono font-black">
             {selectedCount}
           </div>
           <span className="text-xs font-mono font-bold text-white whitespace-nowrap">
@@ -95,7 +95,7 @@ export default function StoryboardHeader({
               type="button"
               onClick={clearSelection}
               title="Clear Selection"
-              className="ml-1 p-0.5 rounded-md hover:bg-purple-900/60 text-[#60A5FA] hover:text-white transition-colors cursor-pointer"
+              className="ml-1 p-0.5 rounded-md hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -118,7 +118,7 @@ export default function StoryboardHeader({
 
         {/* Busy / Progress Indicator */}
         {isBusy && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-950/60 border border-[#3B82F6]/40 rounded-xl text-[#60A5FA] text-xs font-mono">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#2A2A2A] border border-[#3B82F6]/40 rounded-xl text-[#60A5FA] text-xs font-mono">
             <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" />
             <span>
               {isBatchCropping
@@ -145,7 +145,7 @@ export default function StoryboardHeader({
             onClick={handleAnalyzeSelected}
             disabled={isBusy}
             title="Analyze selected scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Analyze Selected</span>
@@ -159,7 +159,7 @@ export default function StoryboardHeader({
             onClick={handleAutoCropSelected}
             disabled={isBusy}
             title="Auto-crop selected scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
             <Scissors className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Auto Crop</span>
@@ -173,7 +173,7 @@ export default function StoryboardHeader({
             onClick={handleCleanBubblesSelected}
             disabled={isBusy}
             title="Clean text speech bubbles"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Clean Bubbles</span>
@@ -187,7 +187,7 @@ export default function StoryboardHeader({
             onClick={handleBatchMergeSelected}
             disabled={isBusy}
             title="Stitch selected scenes vertically"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
             <Link2 className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Merge ({selectedCount})</span>
@@ -243,7 +243,7 @@ export default function StoryboardHeader({
             Storyboard
           </h3>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-bold text-[#60A5FA] font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2A2A2A] animate-pulse" />
             {panelsLength} {panelsLength === 1 ? "Scene" : "Scenes"}
           </span>
         </div>
@@ -298,7 +298,7 @@ export default function StoryboardHeader({
             className={`w-3.5 h-3.5 ${
               isAnalyzingAll
                 ? "animate-spin text-amber-300"
-                : "text-purple-200"
+                : "text-[#3B82F6]"
             }`}
           />
           <span>

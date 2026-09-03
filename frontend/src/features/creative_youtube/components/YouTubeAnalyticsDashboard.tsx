@@ -165,7 +165,7 @@ const StatCard = ({
           : color.includes("sky")
           ? "bg-sky-500"
           : color.includes("purple")
-          ? "bg-purple-500"
+          ? "bg-[#2A2A2A]"
           : color.includes("emerald")
           ? "bg-emerald-500"
           : "bg-amber-500"
@@ -422,7 +422,7 @@ export default function YouTubeAnalyticsDashboard({
                       ? "0 public · 0 unlisted"
                       : "Not connected"
                   }
-                  color="bg-purple-950/50 border-purple-900/40"
+                  color="bg-[#2A2A2A] border-[#2F2F2F]"
                 />
                 <StatCard
                   icon={<TrendingUp className="w-4 h-4 text-emerald-400" />}
@@ -685,7 +685,7 @@ export default function YouTubeAnalyticsDashboard({
                           className="w-10 h-10 rounded-full border border-neutral-700 shrink-0 object-cover"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-purple-800 flex items-center justify-center font-bold text-white text-xs font-sans uppercase shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-[#2A2A2A] flex items-center justify-center font-bold text-white text-xs font-sans uppercase shrink-0">
                           {isConnected && channel?.title
                             ? channel.title.charAt(0)
                             : "Y"}

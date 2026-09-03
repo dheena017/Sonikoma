@@ -156,7 +156,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           }`}
         >
           {isCollapsed ? (
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/50 to-purple-950/60 border border-[#3B82F6]/50 flex items-center justify-center ">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#2A2A2A] to-[#2A2A2A] border border-[#3B82F6]/50 flex items-center justify-center ">
               <Sparkles className="w-5 h-5 text-[#60A5FA] animate-pulse" />
             </div>
           ) : (
@@ -202,7 +202,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                       <div
                         className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                           isActive
-                            ? "h-6 bg-gradient-to-b from-purple-400 to-amber-400  opacity-100"
+                            ? "h-6 bg-gradient-to-b from-[#2A2A2A] to-amber-400  opacity-100"
                             : "h-0 bg-transparent opacity-0"
                         }`}
                       />
@@ -244,7 +244,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                             : "justify-between px-2.5 py-1.5"
                         } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                           isActive && !isCollapsed
-                            ? "bg-gradient-to-r from-purple-950/60 via-purple-900/30 to-purple-950/40 border border-[#3B82F6]/40 text-white shadow-[0_4px_20px_rgba(59,130,246,0.2)] font-bold"
+                            ? "bg-gradient-to-r from-[#2A2A2A] via-[#2A2A2A] to-[#2A2A2A] border border-[#3B82F6]/40 text-white shadow-[0_4px_20px_rgba(59,130,246,0.2)] font-bold"
                             : "text-neutral-300 hover:text-white hover:bg-neutral-900/60 border border-transparent"
                         }`}
                         title={isCollapsed ? item.label : undefined}
@@ -254,7 +254,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                           <div
                             className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 shadow-sm ${
                               isActive
-                                ? "bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-[#3B82F6]/60  scale-105"
+                                ? "bg-gradient-to-br from-[#2A2A2A] to-[#2A2A2A] border border-[#3B82F6]/60  scale-105"
                                 : "bg-neutral-900/80 border border-neutral-800/80 group-hover:bg-[#3B82F6]/15 group-hover:border-[#3B82F6]/30"
                             }`}
                           >

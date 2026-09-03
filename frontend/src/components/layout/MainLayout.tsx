@@ -359,7 +359,7 @@ export default function MainLayout(props: MainLayoutProps) {
     <div
       id="app_root"
       className={`h-screen max-h-screen overflow-hidden max-w-full bg-[#07080c] bg-gradient-to-b from-[#07080c] via-[#090a10] to-[#06070a] text-neutral-100 flex flex-col selection:text-white relative ${
-        isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-purple-600"
+        isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-[#2A2A2A]"
       }`}
     >
 

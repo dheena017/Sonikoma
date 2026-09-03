@@ -30,7 +30,7 @@ export const REAL_TEXT_PRESETS: TextPreset[] = [
     category: "titles",
     previewText: "CHAPTER 1: THE SHADOW AWAKENING",
     fontFamily: "Cinzel",
-    styleClass: "font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-purple-200 via-fuchsia-400 to-indigo-400 drop-shadow-lg uppercase text-sm",
+    styleClass: "font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#2A2A2A] via-fuchsia-400 to-indigo-400 drop-shadow-lg uppercase text-sm",
     badge: "Cinematic Title",
   },
   {

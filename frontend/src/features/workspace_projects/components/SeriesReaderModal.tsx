@@ -67,7 +67,7 @@ export default function SeriesReaderModal({
             onClick={() => setIsPlayingAudio(!isPlayingAudio)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer border ${
               isPlayingAudio
-                ? "bg-purple-600/20 border-[#3B82F6] text-[#60A5FA] animate-pulse"
+                ? "bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA] animate-pulse"
                 : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
             }`}
           >
@@ -148,7 +148,7 @@ export default function SeriesReaderModal({
             onClick={() => setCurrentChapterIdx(idx)}
             className={`h-14 min-w-[100px] rounded-xl border overflow-hidden transition-all cursor-pointer shrink-0 relative flex items-center justify-center ${
               idx === currentChapterIdx
-                ? "border-[#3B82F6] ring-2 ring-purple-500/50 scale-105"
+                ? "border-[#3B82F6] ring-2 ring-[#3B82F6]/50 scale-105"
                 : "border-neutral-800 opacity-60 hover:opacity-100"
             }`}
           >

@@ -151,7 +151,7 @@ export default function YouTubeShortsPlayer({
               onClick={() => setShowComments(!showComments)}
               className={`p-3 border rounded-full text-white shadow-lg transition-all cursor-pointer hover:scale-110 ${
                 showComments
-                  ? "bg-purple-600 border-[#3B82F6] text-white"
+                  ? "bg-[#2A2A2A] border-[#3B82F6] text-white"
                   : "bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800"
               }`}
               title="View Comments"

@@ -46,7 +46,7 @@ export const SubscriptionPlanHeader: React.FC<SubscriptionPlanHeaderProps> = ({
                 onClick={() => onCurrencyChange(curr)}
                 className={`py-1 px-2.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
                   currency === curr
-                    ? "bg-purple-600/20 border border-[#3B82F6]/40 text-[#60A5FA] shadow-xs"
+                    ? "bg-[#2A2A2A] border border-[#3B82F6]/40 text-[#60A5FA] shadow-xs"
                     : "text-neutral-500 hover:text-white"
                 }`}
               >
@@ -63,7 +63,7 @@ export const SubscriptionPlanHeader: React.FC<SubscriptionPlanHeaderProps> = ({
             <button
               type="button"
               onClick={onUpgradePlan}
-              className="bg-purple-600 hover:bg-[#3B82F6] text-white font-bold py-2 px-5 rounded-xl transition-all shadow-md shadow-purple-900/30 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-200"
+              className="bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold py-2 px-5 rounded-xl transition-all shadow-md shadow-black/50 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-200"
             >
               <Plus className="w-4 h-4" />
               Upgrade to Pro

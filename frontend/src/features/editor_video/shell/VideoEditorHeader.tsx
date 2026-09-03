@@ -466,7 +466,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             title="View Profile & Account Settings"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
               {activeUser?.full_name ||
                 activeUser?.username ||
                 (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}

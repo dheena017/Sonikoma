@@ -50,9 +50,9 @@ export const WorkspaceLayoutHeader: React.FC<HeaderProps> = ({
   const [isStarred, setIsStarred] = useState(false);
 
   return (
-    <div className="px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-sm">
+    <div className="px-3.5 py-2.5 border-b border-[#2F2F2F] bg-neutral-950/70 backdrop-blur-md flex items-center justify-between shrink-0 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="h-2 w-2 rounded-full bg-purple-500 " />
+        <span className="h-2 w-2 rounded-full bg-[#2A2A2A] " />
         <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">
           {title}
         </h2>
@@ -142,7 +142,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
   };
 
   return (
-    <div className="shrink-0 bg-[#0a0814]/95 backdrop-blur-md border-b border-purple-900/30 flex items-center px-2 py-1.5 min-w-0 gap-1 overflow-hidden">
+    <div className="shrink-0 bg-[#0a0814]/95 backdrop-blur-md border-b border-[#2F2F2F] flex items-center px-2 py-1.5 min-w-0 gap-1 overflow-hidden">
       {/* Scroll Left Button */}
       {showLeft && (
         <button
@@ -173,7 +173,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
               }`}
             >
               {isActive && (
-                <span className="h-1.5 w-1.5 rounded-full bg-purple-300 shadow-[0_0_6px_rgba(216,180,254,1)] animate-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-[#2A2A2A] shadow-[0_0_6px_rgba(216,180,254,1)] animate-pulse" />
               )}
               <span>{tab}</span>
             </button>
@@ -212,7 +212,7 @@ export const WorkspaceLayoutSearch: React.FC<SearchProps> = ({
 }) => {
   return (
     <div
-      className={`px-3 py-2 bg-[#110d22]/95 border-b border-purple-900/20 flex items-center gap-2 shrink-0 ${className}`}
+      className={`px-3 py-2 bg-[#110d22]/95 border-b border-[#2F2F2F] flex items-center gap-2 shrink-0 ${className}`}
     >
       <div className="flex-1 relative">
         <input
@@ -251,7 +251,7 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
   placeholder = "Describe prompt...",
 }) => {
   return (
-    <div className="p-3 bg-gradient-to-br from-purple-950/30 via-indigo-950/20 to-black/40 border-b border-purple-900/40 flex flex-col gap-2 shrink-0">
+    <div className="p-3 bg-gradient-to-br from-[#2A2A2A] via-indigo-950/20 to-black/40 border-b border-[#2F2F2F] flex flex-col gap-2 shrink-0">
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -261,9 +261,9 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
       />
       <button
         onClick={onSubmit}
-        className="w-full py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-mono font-bold border border-[#60A5FA]/40 shadow-[0_4px_14px_rgba(59,130,246,0.35)] transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
+        className="w-full py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-[#2A2A2A] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-mono font-bold border border-[#60A5FA]/40 shadow-[0_4px_14px_rgba(59,130,246,0.35)] transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
       >
-        <Sparkles className="h-3.5 w-3.5 text-purple-200" />
+        <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
         <span>Generate AI Output</span>
       </button>
     </div>
@@ -286,7 +286,7 @@ export const WorkspaceLayoutFooter: React.FC<{ text?: string }> = ({
   text = "Powered by Sonikoma Comic Studio Engine",
 }) => {
   return (
-    <div className="p-2 border-t border-purple-900/20 bg-neutral-950/80 text-center text-[9px] text-neutral-500 shrink-0 font-mono tracking-wide">
+    <div className="p-2 border-t border-[#2F2F2F] bg-neutral-950/80 text-center text-[9px] text-neutral-500 shrink-0 font-mono tracking-wide">
       <span>{text}</span>
     </div>
   );

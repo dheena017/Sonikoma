@@ -64,7 +64,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
           <button
             onClick={onOpenMediaPicker}
             aria-label="Add audio track"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#3B82F6]/15 border border-white/8 hover:border-[#3B82F6]/40 text-neutral-400 hover:text-purple-200 transition-all cursor-pointer text-[11px] font-medium shrink-0"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#3B82F6]/15 border border-white/8 hover:border-[#3B82F6]/40 text-neutral-400 hover:text-[#3B82F6] transition-all cursor-pointer text-[11px] font-medium shrink-0"
           >
             <Music className="h-3 w-3" />
             <span>Add media / audio</span>
@@ -132,7 +132,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
             <button
               onClick={handleScrollLeft}
               aria-label="Scroll timeline left"
-              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
             >
               <ChevronLeft className="h-3.5 w-3.5 stroke-[2.5]" />
             </button>
@@ -141,7 +141,7 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
             <button
               onClick={handleScrollRight}
               aria-label="Scroll timeline right"
-              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-purple-300 text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
+              className="h-6 w-6 flex items-center justify-center rounded-md bg-white/5 hover:bg-[#3B82F6] border border-white/10 hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all cursor-pointer active:scale-90 shadow-sm"
             >
               <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
             </button>

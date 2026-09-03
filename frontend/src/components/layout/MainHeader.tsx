@@ -481,7 +481,7 @@ const HeaderInner = ({
 
         {/* 🧼 Speech Bubble Cleaning Processing Pill */}
         {isCleaningBubbles && (
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-950/80 border border-[#3B82F6]/50 text-[10px] font-bold font-sans text-[#60A5FA]  animate-pulse select-none">
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/50 text-[10px] font-bold font-sans text-[#60A5FA]  animate-pulse select-none">
             <Loader2 className="h-3.5 w-3.5 animate-spin text-[#3B82F6] shrink-0" />
             <span>
               {cleanProgress

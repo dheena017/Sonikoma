@@ -40,7 +40,7 @@ export const THEMES: Record<
     badgeBg: "bg-blue-500/10 border-blue-500/20 text-blue-400",
   },
   purple: {
-    glowPrimary: "bg-purple-600/10",
+    glowPrimary: "bg-[#2A2A2A]",
     glowSecondary: "bg-indigo-600/10",
     accentText: "text-[#3B82F6]",
     accentBg: "bg-[#3B82F6]/10",

@@ -54,7 +54,7 @@ export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps>
   onPlayStoryboard,
 }) => {
   return (
-    <div className="shrink-0 border-b border-purple-900/20 bg-[#0c0d18]/95 backdrop-blur-2xl">
+    <div className="shrink-0 border-b border-[#2F2F2F] bg-[#0c0d18]/95 backdrop-blur-2xl">
       {/* Title & Master Actions Row */}
       <div className="px-3.5 py-2.5 flex items-center justify-between gap-2 border-b border-white/5">
         <div className="flex items-center gap-2 min-w-0">
@@ -100,9 +100,9 @@ export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps>
             onClick={onToggleSelectAll}
             className={`px-2 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
               isAllSelected
-                ? "bg-purple-600 border-[#3B82F6] text-white "
+                ? "bg-[#2A2A2A] border-[#3B82F6] text-white "
                 : selectedCount > 0
-                ? "bg-purple-900/40 border-[#3B82F6]/40 text-[#60A5FA]"
+                ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-[#60A5FA]"
                 : "bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-300"
             }`}
           >
@@ -131,7 +131,7 @@ export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps>
             onClick={() => onSelectTab(tab.id as StoryboardFilterTab)}
             className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold whitespace-nowrap transition-all border cursor-pointer ${
               activeTab === tab.id
-                ? "bg-purple-600/30 border-[#3B82F6]/60 text-white "
+                ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white "
                 : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
             }`}
           >
@@ -165,8 +165,8 @@ export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps>
 
       {/* Floating Bulk Action Bar (When panels are selected) */}
       {selectedCount > 0 && (
-        <div className="px-3 py-2 bg-purple-950/50 border-t border-[#3B82F6]/30 flex flex-wrap items-center justify-between gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
-          <span className="text-[10px] font-black font-mono text-purple-200">
+        <div className="px-3 py-2 bg-[#2A2A2A] border-t border-[#3B82F6]/30 flex flex-wrap items-center justify-between gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+          <span className="text-[10px] font-black font-mono text-[#3B82F6]">
             {selectedCount} Selected
           </span>
 
@@ -175,7 +175,7 @@ export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps>
               <button
                 type="button"
                 onClick={onAutoVoiceover}
-                className="px-2 py-0.5 rounded-md bg-purple-600 hover:bg-[#3B82F6] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer"
+                className="px-2 py-0.5 rounded-md bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer"
                 title="Generate AI Voiceover for selected panels"
               >
                 <Volume2 className="h-2.5 w-2.5" />

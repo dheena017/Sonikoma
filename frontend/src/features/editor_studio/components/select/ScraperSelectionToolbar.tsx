@@ -261,7 +261,7 @@ export function ScraperSelectionToolbar({
         ref={buttonRef}
         type="button"
         onClick={toggleDropdown}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/30 rounded-xl text-[10px] font-bold text-neutral-300 hover:text-white transition-all shadow-md hover:shadow-purple-500/5 font-mono select-none cursor-pointer duration-200"
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/30 rounded-xl text-[10px] font-bold text-neutral-300 hover:text-white transition-all shadow-md hover:shadow-black/50 font-mono select-none cursor-pointer duration-200"
       >
         <ListFilter className="h-3 w-3 text-[#3B82F6]" />
         <span>Select Filter</span>
@@ -327,7 +327,7 @@ export function ScraperSelectionToolbar({
               className="w-full text-left px-2.5 py-1.5 rounded-lg text-[11px] text-[#3B82F6] hover:text-[#93C5FD] hover:bg-neutral-900 transition-colors font-sans cursor-pointer font-medium flex items-center justify-between"
             >
               <span>Select Panels Not In Storyboard</span>
-              <span className="text-[9px] bg-purple-955 text-[#3B82F6] px-1.5 py-0.5 rounded border border-purple-800/40">
+              <span className="text-[9px] bg-[#2A2A2A] text-[#3B82F6] px-1.5 py-0.5 rounded border border-[#2F2F2F]">
                 + Not Added
               </span>
             </button>
@@ -413,7 +413,7 @@ export function ScraperSelectionToolbar({
                   selectEveryNth(everyN);
                   setIsOpen(false);
                 }}
-                className="ml-auto px-2 py-0.5 rounded bg-purple-650 hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-[#3B82F6]/20 active:scale-95"
+                className="ml-auto px-2 py-0.5 rounded bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-[#3B82F6]/20 active:scale-95"
               >
                 Apply
               </button>
@@ -507,7 +507,7 @@ export function ScraperSelectionToolbar({
                   handleSelectRange(rangeFrom, rangeTo);
                   setIsOpen(false);
                 }}
-                className="ml-auto px-2.5 py-0.5 rounded bg-purple-650 hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-[#3B82F6]/20 active:scale-95"
+                className="ml-auto px-2.5 py-0.5 rounded bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-[#3B82F6]/20 active:scale-95"
               >
                 Select
               </button>

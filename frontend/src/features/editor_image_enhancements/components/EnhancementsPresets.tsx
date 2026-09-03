@@ -49,7 +49,7 @@ export function EnhancementsPresets({
               }
               className={`relative text-left p-2.5 rounded-xl border text-[10px] font-bold cursor-pointer transition-all duration-200 overflow-hidden group ${
                 isActive
-                  ? "bg-purple-600/20 border-[#3B82F6]/60 text-white shadow-lg shadow-purple-900/30"
+                  ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white shadow-lg shadow-black/50"
                   : "bg-black/20 border-white/5 text-neutral-500 hover:text-neutral-300 hover:bg-white/5 hover:border-white/10"
               }`}
             >
@@ -73,7 +73,7 @@ export function EnhancementsPresets({
           <div
             className={`relative w-8 h-4 rounded-full border transition-all ${
               activeStoryboardPanel?.grayscale
-                ? "bg-purple-600 border-[#3B82F6]"
+                ? "bg-[#2A2A2A] border-[#3B82F6]"
                 : "bg-neutral-800 border-neutral-700"
             }`}
           >

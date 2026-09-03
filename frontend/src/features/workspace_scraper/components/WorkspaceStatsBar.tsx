@@ -23,7 +23,7 @@ const WorkspaceStatsBar: React.FC<WorkspaceStatsBarProps> = ({
           icon: <BarChart2 className="h-4 w-4 text-[#3B82F6]" />,
           label: "Total Projects",
           value: statsLoading ? "—" : stats.totalProjects.toString(),
-          color: "from-purple-900/20 to-indigo-900/20 border-[#3B82F6]/20",
+          color: "from-[#2A2A2A] to-indigo-900/20 border-[#3B82F6]/20",
         },
         {
           icon: <Layers className="h-4 w-4 text-sky-400" />,

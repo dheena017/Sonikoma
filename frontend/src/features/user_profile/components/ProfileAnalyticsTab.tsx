@@ -140,10 +140,10 @@ export default function ProfileAnalyticsTab() {
                         cell.level === 0
                           ? "bg-neutral-900 border border-white/5"
                           : cell.level === 1
-                          ? "bg-purple-900/30 border border-[#3B82F6]/10 hover:bg-purple-800/40"
+                          ? "bg-[#2A2A2A] border border-[#3B82F6]/10 hover:bg-[#2A2A2A]"
                           : cell.level === 2
-                          ? "bg-purple-600/50 border border-[#3B82F6]/20 hover:bg-[#3B82F6]/60"
-                          : "bg-purple-500 border border-[#60A5FA]/30 hover:bg-purple-400"
+                          ? "bg-[#2A2A2A] border border-[#3B82F6]/20 hover:bg-[#3B82F6]/60"
+                          : "bg-[#2A2A2A] border border-[#60A5FA]/30 hover:bg-[#2A2A2A]"
                       }`}
                       title={`${cell.count} operation(s) on ${cell.day} (Week ${
                         wIdx + 1
@@ -159,9 +159,9 @@ export default function ProfileAnalyticsTab() {
           <div className="flex items-center justify-end gap-1.5 text-[9px] text-neutral-500 font-bold pr-2 pt-1 font-mono">
             <span>Less</span>
             <div className="w-2.5 h-2.5 bg-neutral-900 border border-white/5 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-purple-900/30 border border-[#3B82F6]/10 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-purple-600/50 border border-[#3B82F6]/20 rounded-sm" />
-            <div className="w-2.5 h-2.5 bg-purple-500 border border-[#60A5FA]/30 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-[#2A2A2A] border border-[#3B82F6]/10 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-[#2A2A2A] border border-[#3B82F6]/20 rounded-sm" />
+            <div className="w-2.5 h-2.5 bg-[#2A2A2A] border border-[#60A5FA]/30 rounded-sm" />
             <span>More</span>
           </div>
         </div>
@@ -245,7 +245,7 @@ export default function ProfileAnalyticsTab() {
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-purple-500 rounded-full"
+                  className="h-full bg-[#2A2A2A] rounded-full"
                   style={{ width: `${verticalPct}%` }}
                 />
               </div>
@@ -279,7 +279,7 @@ export default function ProfileAnalyticsTab() {
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-purple-500 rounded-full"
+                  className="h-full bg-[#2A2A2A] rounded-full"
                   style={{ width: `${matthewPct}%` }}
                 />
               </div>
@@ -303,7 +303,7 @@ export default function ProfileAnalyticsTab() {
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-purple-900/60 rounded-full"
+                  className="h-full bg-[#2A2A2A] rounded-full"
                   style={{ width: `${marcusPct}%` }}
                 />
               </div>
@@ -324,7 +324,7 @@ export default function ProfileAnalyticsTab() {
               </div>
               <div className="h-1.5 bg-neutral-900 border border-white/5 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-purple-500 rounded-full"
+                  className="h-full bg-[#2A2A2A] rounded-full"
                   style={{ width: `${badgesPct}%` }}
                 />
               </div>

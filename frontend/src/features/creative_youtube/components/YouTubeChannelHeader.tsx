@@ -228,7 +228,7 @@ export default function YouTubeChannelHeader({
               className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl border border-white/10 shadow-xl object-cover shrink-0"
             />
           ) : (
-            <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-red-600 via-rose-700 to-purple-800 border border-white/10 flex items-center justify-center text-white font-bold text-lg font-sans uppercase shrink-0 shadow-lg">
+            <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-red-600 via-rose-700 to-[#2A2A2A] border border-white/10 flex items-center justify-center text-white font-bold text-lg font-sans uppercase shrink-0 shadow-lg">
               {activeTitle ? activeTitle.charAt(0) : "Y"}
             </div>
           )}
@@ -500,7 +500,7 @@ export default function YouTubeChannelHeader({
         </div>
 
         <div className="p-3 sm:p-4 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-purple-950/40 text-[#3B82F6] border border-purple-900/30 shrink-0">
+          <div className="p-2 rounded-xl bg-[#2A2A2A] text-[#3B82F6] border border-[#2F2F2F] shrink-0">
             <Eye className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -514,7 +514,7 @@ export default function YouTubeChannelHeader({
         </div>
 
         <div className="p-3 sm:p-4 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-950/40 text-indigo-400 border border-indigo-900/30 shrink-0">
+          <div className="p-2 rounded-xl bg-[#2A2A2A] text-indigo-400 border border-indigo-900/30 shrink-0">
             <Video className="w-4 h-4" />
           </div>
           <div className="min-w-0">

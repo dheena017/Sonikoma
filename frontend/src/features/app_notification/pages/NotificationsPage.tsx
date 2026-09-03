@@ -357,7 +357,7 @@ const NotificationsPage = React.memo(
                                     <a
                                       href={note.link}
                                       onClick={(e) => e.stopPropagation()}
-                                      className="p-2.5 rounded-xl bg-purple-600 border border-[#3B82F6] text-white shadow-lg shadow-purple-900/20 hover:bg-[#3B82F6] transition-all"
+                                      className="p-2.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6] text-white shadow-lg shadow-black/50 hover:bg-[#3B82F6] transition-all"
                                       title="Navigate to target"
                                     >
                                       <ExternalLink className="h-4 w-4" />

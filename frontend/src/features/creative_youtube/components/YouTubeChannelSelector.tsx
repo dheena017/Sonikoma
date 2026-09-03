@@ -189,7 +189,7 @@ export default function YouTubeChannelSelector({
                     }}
                     className={`flex items-center justify-between p-3 cursor-pointer transition-colors ${
                       isSelected
-                        ? "bg-purple-950/20 text-purple-200"
+                        ? "bg-[#2A2A2A] text-[#3B82F6]"
                         : "hover:bg-neutral-900 text-neutral-300"
                     }`}
                   >

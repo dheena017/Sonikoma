@@ -39,7 +39,7 @@ export function PanelCardControls({
             );
             addPanelsToStoryboard([imgUrl]);
           }}
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-700 to-violet-600 hover:from-blue-600 hover:to-violet-500 active:from-purple-800 active:to-violet-700 text-white text-[10px] h-10 rounded-2xl font-mono font-semibold tracking-[0.12em] transition-all duration-150 shadow-[0_10px_30px_-18px_rgba(59,130,246,0.45)] cursor-pointer border border-[#3B82F6]/20"
+          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#2A2A2A] to-violet-600 hover:from-blue-600 hover:to-violet-500 active:from-[#2A2A2A] active:to-violet-700 text-white text-[10px] h-10 rounded-2xl font-mono font-semibold tracking-[0.12em] transition-all duration-150 shadow-[0_10px_30px_-18px_rgba(59,130,246,0.45)] cursor-pointer border border-[#3B82F6]/20"
         >
           <PlusCircle className="h-4 w-4 shrink-0" />
           <span>Add to Timeline</span>
@@ -75,8 +75,8 @@ export function PanelCardControls({
             isLast
               ? "bg-white/[0.02] border-white/[0.05] text-neutral-600 cursor-not-allowed select-none opacity-40"
               : isMerging
-              ? "bg-indigo-950/30 border-indigo-900/30 text-indigo-400 opacity-70 cursor-wait cursor-pointer"
-              : "bg-indigo-950/40 hover:bg-indigo-900/60 border-indigo-800/40 hover:border-indigo-600/50 text-indigo-400 hover:text-indigo-300 hover:shadow-[0_10px_20px_-14px_rgba(99,102,241,0.35)] cursor-pointer",
+              ? "bg-[#2A2A2A] border-indigo-900/30 text-indigo-400 opacity-70 cursor-wait cursor-pointer"
+              : "bg-[#2A2A2A] hover:bg-[#333333] border-indigo-800/40 hover:border-indigo-600/50 text-indigo-400 hover:text-neutral-300 hover:shadow-[0_10px_20px_-14px_rgba(99,102,241,0.35)] cursor-pointer",
           ].join(" ")}
         >
           {isMerging ? (

@@ -211,8 +211,8 @@ export const StoryboardChapterGroup = ({
           >
             <div className="flex items-center justify-between border-b border-neutral-850/80 pb-2.5">
               <div className="flex items-center gap-2">
-                <div className="px-3 py-1 rounded-xl bg-purple-950/90 border border-purple-800/60 text-purple-200 font-mono text-xs font-bold flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
+                <div className="px-3 py-1 rounded-xl bg-[#2A2A2A] border border-[#2F2F2F] text-[#3B82F6] font-mono text-xs font-bold flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#2A2A2A] animate-pulse" />
                   {formatDisplayEpisodeLabel(grp.episodeLabel)}
                 </div>
                 <span className="text-[10px] font-mono font-bold bg-neutral-900 text-neutral-400 px-2.5 py-1 rounded-lg border border-neutral-800">

@@ -447,7 +447,7 @@ export default function YouTubeChannelModal({
 
       <div className="relative w-full max-w-2xl bg-[#09090b] border border-neutral-800/80 rounded-3xl shadow-[0_25px_60px_-15px_rgba(239,68,68,0.15)] overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] ring-1 ring-white/5">
         {/* Top Ambient Glow Ribbon */}
-        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-600 via-purple-600 to-pink-600 opacity-90" />
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-600 via-[#2A2A2A] to-pink-600 opacity-90" />
 
         {/* Header */}
         <div className="px-6 pt-5 pb-4 border-b border-neutral-800/60 bg-gradient-to-b from-neutral-900/60 to-transparent shrink-0">
@@ -544,7 +544,7 @@ export default function YouTubeChannelModal({
                 <button
                   onClick={() => handleAuthorizeYouTube(true)}
                   disabled={isConnecting}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600/20 via-purple-600/20 to-pink-600/20 hover:from-red-600/30 hover:to-pink-600/30 border border-red-500/30 rounded-xl text-xs font-mono font-bold text-neutral-200 hover:text-white transition-all shadow-sm cursor-pointer disabled:opacity-60"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600/20 via-[#2A2A2A] to-pink-600/20 hover:from-red-600/30 hover:to-pink-600/30 border border-red-500/30 rounded-xl text-xs font-mono font-bold text-neutral-200 hover:text-white transition-all shadow-sm cursor-pointer disabled:opacity-60"
                   title="Authorize and link another YouTube channel"
                 >
                   <Plus className="w-3.5 h-3.5 text-red-400" />
@@ -657,7 +657,7 @@ export default function YouTubeChannelModal({
           ) : needsReauth ? (
             /* ── Needs Authorization State ── */
             <div className="flex flex-col items-center py-8 px-4 gap-5 text-center">
-              <div className="p-4 bg-purple-950/40 border border-purple-800/50 rounded-3xl text-[#3B82F6] shadow-xl shadow-purple-950/30">
+              <div className="p-4 bg-[#2A2A2A] border border-[#2F2F2F] rounded-3xl text-[#3B82F6] shadow-xl shadow-black/50">
                 <ShieldCheck className="w-10 h-10" />
               </div>
               <div className="space-y-1.5 max-w-md">
@@ -676,7 +676,7 @@ export default function YouTubeChannelModal({
               <button
                 onClick={handleAuthorizeYouTube}
                 disabled={isConnecting}
-                className="w-full max-w-xs py-3.5 px-6 bg-gradient-to-r from-red-600 via-purple-600 to-pink-600 hover:from-red-500 hover:to-pink-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black text-xs rounded-2xl shadow-xl shadow-red-950/30 border border-red-500/30 transition-all font-mono flex items-center justify-center gap-2.5 cursor-pointer"
+                className="w-full max-w-xs py-3.5 px-6 bg-gradient-to-r from-red-600 via-[#2A2A2A] to-pink-600 hover:from-red-500 hover:to-pink-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black text-xs rounded-2xl shadow-xl shadow-red-950/30 border border-red-500/30 transition-all font-mono flex items-center justify-center gap-2.5 cursor-pointer"
               >
                 {isConnecting ? (
                   <>
@@ -717,7 +717,7 @@ export default function YouTubeChannelModal({
                 <button
                   onClick={handleAuthorizeYouTube}
                   disabled={isConnecting}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-purple-950/50 border border-purple-800/60 rounded-xl text-xs text-[#60A5FA] hover:text-white font-mono transition-all cursor-pointer disabled:opacity-60"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#2A2A2A] border border-[#2F2F2F] rounded-xl text-xs text-[#60A5FA] hover:text-white font-mono transition-all cursor-pointer disabled:opacity-60"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   {isConnecting ? "Opening…" : "Re-authorize in Google"}
@@ -897,7 +897,7 @@ export default function YouTubeChannelModal({
                       onClick={() => setSelectedId(ch.id)}
                       className={`group relative w-full p-4 rounded-2xl border transition-all cursor-pointer text-left overflow-hidden ${
                         isSelected
-                          ? "bg-gradient-to-r from-red-950/40 via-neutral-900/80 to-purple-950/30 border-red-600/80 shadow-[0_4px_25px_rgba(239,68,68,0.18)] ring-1 ring-red-500/40"
+                          ? "bg-gradient-to-r from-red-950/40 via-neutral-900/80 to-[#2A2A2A] border-red-600/80 shadow-[0_4px_25px_rgba(239,68,68,0.18)] ring-1 ring-red-500/40"
                           : "bg-neutral-900/60 border-neutral-800/80 hover:bg-neutral-900 hover:border-neutral-700 hover:shadow-md"
                       }`}
                     >
@@ -1134,7 +1134,7 @@ export default function YouTubeChannelModal({
             <button
               onClick={handleConnect}
               disabled={!selectedId || isSaving || channels.length === 0}
-              className="relative group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-red-600 via-purple-600 to-pink-600 hover:from-red-500 hover:via-blue-500 hover:to-pink-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs rounded-xl transition-all shadow-[0_4px_20px_rgba(239,68,68,0.3)] border border-red-500/40 cursor-pointer font-mono overflow-hidden"
+              className="relative group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-red-600 via-[#2A2A2A] to-pink-600 hover:from-red-500 hover:via-blue-500 hover:to-pink-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-black text-xs rounded-xl transition-all shadow-[0_4px_20px_rgba(239,68,68,0.3)] border border-red-500/40 cursor-pointer font-mono overflow-hidden"
             >
               {/* Shimmer Effect */}
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />

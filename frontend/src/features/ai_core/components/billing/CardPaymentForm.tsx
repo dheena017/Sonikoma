@@ -102,7 +102,7 @@ export const CardPaymentForm: React.FC<CardPaymentFormProps> = ({
         disabled={!isComplete}
         className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
           isComplete
-            ? "bg-purple-600 hover:bg-[#3B82F6] text-white cursor-pointer shadow-md shadow-purple-900/20 active:scale-95"
+            ? "bg-[#2A2A2A] hover:bg-[#3B82F6] text-white cursor-pointer shadow-md shadow-black/50 active:scale-95"
             : "bg-neutral-800 text-neutral-500 cursor-not-allowed opacity-60"
         }`}
       >

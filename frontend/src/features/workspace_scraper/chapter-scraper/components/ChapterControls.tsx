@@ -127,7 +127,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
           placeholder="Search chapters by title or chapter number..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-600 transition-all focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+          className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-600 transition-all focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
         />
       </div>
 
@@ -152,7 +152,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
           onClick={onToggleMultiSelectMode}
           className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${
             isMultiSelectMode
-              ? "border-[#3B82F6]/50 bg-purple-600 text-white shadow-lg shadow-sm"
+              ? "border-[#3B82F6]/50 bg-[#2A2A2A] text-white shadow-lg shadow-sm"
               : "border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-[#3B82F6]/40 hover:text-white"
           }`}
           title="Enable Multi-Select Mode"
@@ -165,14 +165,14 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
           onClick={() => setShowAdvanced(!showAdvanced)}
           className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${
             showAdvanced || hasAdvancedFilters
-              ? "border-[#3B82F6]/50 bg-purple-950/50 text-[#60A5FA]"
+              ? "border-[#3B82F6]/50 bg-[#2A2A2A] text-[#60A5FA]"
               : "border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-[#3B82F6]/40 hover:text-white"
           }`}
         >
           <Filter size={16} />
           Advanced Filters
           {hasAdvancedFilters && (
-            <span className="rounded-full bg-[#3B82F6]/20 px-1.5 py-0.5 text-[10px] text-purple-200">
+            <span className="rounded-full bg-[#3B82F6]/20 px-1.5 py-0.5 text-[10px] text-[#3B82F6]">
               Active
             </span>
           )}

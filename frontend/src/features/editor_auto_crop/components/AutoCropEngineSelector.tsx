@@ -342,7 +342,7 @@ export const AutoCropEngineSelector = React.memo(
             onClick={() => setUseLocalCV(false)}
             className={`group flex flex-col gap-2.5 p-4 sm:p-5 rounded-2xl border text-left transition-all duration-300 cursor-pointer select-none relative overflow-hidden ${
               !useLocalCV
-                ? "bg-indigo-950/20 border-indigo-500/80 shadow-[0_0_24px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30"
+                ? "bg-[#2A2A2A] border-[#2F2F2F] shadow-[0_0_24px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30"
                 : "bg-neutral-900/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900"
             }`}
           >
@@ -361,7 +361,7 @@ export const AutoCropEngineSelector = React.memo(
                 <span
                   className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase ${
                     !useLocalCV
-                      ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                      ? "bg-indigo-500/20 text-neutral-300 border border-[#2F2F2F]"
                       : "bg-neutral-800 text-neutral-400"
                   }`}
                 >
@@ -371,7 +371,7 @@ export const AutoCropEngineSelector = React.memo(
               <span
                 className={`h-4 w-4 rounded-full border flex items-center justify-center transition-all ${
                   !useLocalCV
-                    ? "border-indigo-400 bg-indigo-950 text-indigo-400"
+                    ? "border-indigo-400 bg-[#2A2A2A] text-indigo-400"
                     : "border-neutral-700 bg-neutral-900"
                 }`}
               >
@@ -780,7 +780,7 @@ export const AutoCropEngineSelector = React.memo(
                       {[
                         { id: "cyan", bg: "bg-blue-500" },
                         { id: "emerald", bg: "bg-emerald-500" },
-                        { id: "violet", bg: "bg-purple-500" },
+                        { id: "violet", bg: "bg-[#2A2A2A]" },
                         { id: "gold", bg: "bg-amber-450" },
                         { id: "rose", bg: "bg-rose-500" },
                       ].map((theme) => (
@@ -864,7 +864,7 @@ export const AutoCropEngineSelector = React.memo(
                       }}
                       className={`flex flex-col gap-1.5 p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer select-none active:scale-[0.98] ${
                         isSelected
-                          ? "bg-indigo-950/20 border-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.1)]"
+                          ? "bg-[#2A2A2A] border-[#2F2F2F] shadow-[0_0_12px_rgba(99,102,241,0.1)]"
                           : "bg-neutral-900/30 border-neutral-900 hover:border-neutral-800"
                       }`}
                     >
@@ -875,7 +875,7 @@ export const AutoCropEngineSelector = React.memo(
                         <span
                           className={`text-[8px] font-mono px-1.5 py-0.5 rounded border leading-none font-bold uppercase select-none ${
                             isSelected
-                              ? "bg-indigo-950 border-indigo-700/50 text-indigo-400"
+                              ? "bg-[#2A2A2A] border-indigo-700/50 text-indigo-400"
                               : "bg-neutral-950 border-neutral-850 text-neutral-550"
                           }`}
                         >
@@ -935,7 +935,7 @@ export const AutoCropEngineSelector = React.memo(
                     className={`flex-grow flex items-center justify-center gap-1.5 h-full px-3.5 rounded-xl border text-[9.5px] font-bold font-mono transition-all duration-200 active:scale-95 cursor-pointer ${
                       testingConnection
                         ? "bg-neutral-900 border-neutral-850 text-neutral-500 cursor-not-allowed"
-                        : "bg-indigo-950/20 border-indigo-900/60 text-indigo-400 hover:bg-indigo-900/10 hover:border-indigo-800"
+                        : "bg-[#2A2A2A] border-indigo-900/60 text-indigo-400 hover:bg-[#333333] hover:border-indigo-800"
                     }`}
                   >
                     {testingConnection ? (
@@ -966,7 +966,7 @@ export const AutoCropEngineSelector = React.memo(
             </div>
 
             {/* AI Extended Tuning Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-indigo-950/10 border border-indigo-900/30 rounded-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 bg-[#2A2A2A] border border-indigo-900/30 rounded-2xl">
               {/* Reading Flow Directive */}
               <div className="space-y-1.5">
                 <label className="text-[8px] font-bold text-neutral-500 uppercase font-mono block">
@@ -984,7 +984,7 @@ export const AutoCropEngineSelector = React.memo(
                       onClick={() => setReadingOrder(order.id as any)}
                       className={`flex-1 py-1 text-center rounded transition-all cursor-pointer truncate ${
                         readingOrder === order.id
-                          ? "bg-indigo-950 border border-indigo-700/50 text-indigo-300 font-bold"
+                          ? "bg-[#2A2A2A] border border-indigo-700/50 text-neutral-300 font-bold"
                           : "text-neutral-500 hover:text-neutral-400"
                       }`}
                     >
@@ -1014,7 +1014,7 @@ export const AutoCropEngineSelector = React.memo(
                       onClick={() => setMaxPanelCap(cap)}
                       className={`flex-1 py-1 text-center rounded transition-all cursor-pointer ${
                         maxPanelCap === cap
-                          ? "bg-indigo-950 border border-indigo-700/50 text-indigo-300 font-bold"
+                          ? "bg-[#2A2A2A] border border-indigo-700/50 text-neutral-300 font-bold"
                           : "text-neutral-500 hover:text-neutral-400"
                       }`}
                     >
@@ -1046,7 +1046,7 @@ export const AutoCropEngineSelector = React.memo(
                       onClick={() => setAiTemperature(t.val)}
                       className={`flex-1 py-1 text-center rounded transition-all cursor-pointer truncate ${
                         aiTemperature === t.val
-                          ? "bg-indigo-950 border border-indigo-700/50 text-indigo-300 font-bold"
+                          ? "bg-[#2A2A2A] border border-indigo-700/50 text-neutral-300 font-bold"
                           : "text-neutral-500 hover:text-neutral-400"
                       }`}
                     >
@@ -1091,7 +1091,7 @@ export const AutoCropEngineSelector = React.memo(
                 <label className="text-[9px] font-bold text-neutral-500 uppercase font-mono block tracking-wider">
                   Custom Prompt Guidance instructions
                 </label>
-                <span className="text-[8px] font-mono text-indigo-400/80 bg-indigo-950/50 px-2 py-0.5 rounded border border-indigo-900/30 uppercase select-none">
+                <span className="text-[8px] font-mono text-indigo-400/80 bg-[#2A2A2A] px-2 py-0.5 rounded border border-indigo-900/30 uppercase select-none">
                   Directives Prompt
                 </span>
               </div>
@@ -1168,7 +1168,7 @@ export const AutoCropEngineSelector = React.memo(
                       <span className="text-neutral-500 font-bold block">
                         GEMINI MODEL TARGET
                       </span>
-                      <span className="text-indigo-300 font-bold">
+                      <span className="text-neutral-300 font-bold">
                         {cropModel}
                       </span>
                     </div>
@@ -1240,7 +1240,7 @@ export const AutoCropEngineSelector = React.memo(
             )}
 
             {/* Info note */}
-            <div className="p-3.5 bg-indigo-950/10 border border-indigo-900/30 text-[9.5px] font-mono text-indigo-400 rounded-2xl leading-relaxed flex items-start gap-2 select-none">
+            <div className="p-3.5 bg-[#2A2A2A] border border-indigo-900/30 text-[9.5px] font-mono text-indigo-400 rounded-2xl leading-relaxed flex items-start gap-2 select-none">
               <Compass className="h-4 w-4 shrink-0 text-indigo-400/80 mt-0.5" />
               <p>
                 <strong>Gemini AI Engine Active.</strong> If detection fails (no

@@ -5,7 +5,7 @@ export function BubblesAfter() {
   return (
     <div className="w-full h-full flex items-center justify-center p-6 bg-[#0d0e15] relative overflow-hidden">
       {/* Comic Illustration Scene - Clean Inpainted */}
-      <div className="w-72 h-72 rounded-2xl bg-gradient-to-br from-purple-900 via-slate-900 to-indigo-950 border-2 border-emerald-400 p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-emerald-500/10">
+      <div className="w-72 h-72 rounded-2xl bg-gradient-to-br from-[#2A2A2A] via-slate-900 to-indigo-950 border-2 border-emerald-400 p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-emerald-500/10">
         {/* Full Unobstructed Artwork */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(59,130,246,0.45),transparent_60%)]" />
         <div className="absolute top-8 right-6 w-32 h-32 bg-gradient-to-br from-indigo-600/30 to-blue-600/20 rounded-full blur-xl border border-[#3B82F6]/20 flex items-center justify-center">

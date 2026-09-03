@@ -43,7 +43,7 @@ export const ChapterWorkspaceTabs: React.FC<ChapterWorkspaceTabsProps> = ({
           }}
           className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
             isChaptersTabActive
-              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+              ? "bg-[#2A2A2A] text-white shadow-lg shadow-black/50"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           } w-full justify-center`}
         >
@@ -68,7 +68,7 @@ export const ChapterWorkspaceTabs: React.FC<ChapterWorkspaceTabsProps> = ({
           }}
           className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "bookmarks"
-              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+              ? "bg-[#2A2A2A] text-white shadow-lg shadow-black/50"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           } w-full justify-center`}
         >
@@ -92,7 +92,7 @@ export const ChapterWorkspaceTabs: React.FC<ChapterWorkspaceTabsProps> = ({
           }}
           className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "recent"
-              ? "bg-purple-600 text-white shadow-lg shadow-purple-900/30"
+              ? "bg-[#2A2A2A] text-white shadow-lg shadow-black/50"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
           } w-full justify-center`}
         >

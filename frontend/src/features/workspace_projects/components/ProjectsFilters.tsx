@@ -64,7 +64,7 @@ export default function ProjectsFilters({
           placeholder="Search projects by title, series, or author..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full bg-[#12131e]/80 border border-white/10 hover:border-[#3B82F6]/50 text-white text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-purple-500/20 font-sans transition-all placeholder:text-neutral-500 shadow-inner"
+          className="w-full bg-[#12131e]/80 border border-white/10 hover:border-[#3B82F6]/50 text-white text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/50 font-sans transition-all placeholder:text-neutral-500 shadow-inner"
         />
       </div>
 
@@ -80,7 +80,7 @@ export default function ProjectsFilters({
             }}
             className={`flex items-center gap-2 bg-[#12131e]/80 hover:bg-[#181926] border rounded-xl px-3.5 py-2.5 text-xs font-mono transition-all cursor-pointer shadow-sm select-none ${
               isGenreOpen
-                ? "border-[#3B82F6]/60 ring-2 ring-purple-500/20 text-white"
+                ? "border-[#3B82F6]/60 ring-2 ring-[#3B82F6]/50 text-white"
                 : "border-white/10 text-neutral-300 hover:border-white/20"
             }`}
           >
@@ -110,7 +110,7 @@ export default function ProjectsFilters({
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
                         isSelected
-                          ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-purple-900/30"
+                          ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-black/50"
                           : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
                       }`}
                     >
@@ -134,7 +134,7 @@ export default function ProjectsFilters({
             }}
             className={`flex items-center gap-2 bg-[#12131e]/80 hover:bg-[#181926] border rounded-xl px-3.5 py-2.5 text-xs font-mono transition-all cursor-pointer shadow-sm select-none ${
               isSortOpen
-                ? "border-[#3B82F6]/60 ring-2 ring-purple-500/20 text-white"
+                ? "border-[#3B82F6]/60 ring-2 ring-[#3B82F6]/50 text-white"
                 : "border-white/10 text-neutral-300 hover:border-white/20"
             }`}
           >
@@ -164,7 +164,7 @@ export default function ProjectsFilters({
                       }}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
                         isSelected
-                          ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-purple-900/30"
+                          ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-black/50"
                           : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
                       }`}
                     >
@@ -186,7 +186,7 @@ export default function ProjectsFilters({
             title="Grid View"
             className={`p-1.5 rounded-lg transition-all cursor-pointer active:scale-95 ${
               viewMode === "grid"
-                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
                 : "text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
@@ -198,7 +198,7 @@ export default function ProjectsFilters({
             title="List View"
             className={`p-1.5 rounded-lg transition-all cursor-pointer active:scale-95 ${
               viewMode === "list"
-                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
                 : "text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >

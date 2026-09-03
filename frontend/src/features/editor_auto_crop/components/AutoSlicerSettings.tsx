@@ -48,7 +48,7 @@ export default function AutoSlicerSettings({
             <select
               value={backgroundMode}
               onChange={(e) => setBackgroundMode(e.target.value)}
-              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-indigo-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
+              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-[#2F2F2F] focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
             >
               <option value="auto">Auto-Detect</option>
               <option value="white">Force White</option>
@@ -66,7 +66,7 @@ export default function AutoSlicerSettings({
             <select
               value={aspectRatio}
               onChange={(e) => setAspectRatio(e.target.value)}
-              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-indigo-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
+              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-[#2F2F2F] focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
             >
               <option value="free">Free Ratio</option>
               <option value="1:1">1:1 Square</option>
@@ -93,7 +93,7 @@ export default function AutoSlicerSettings({
                   `[AutoSlicerSettings] Model changed to: ${e.target.value}`
                 );
               }}
-              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-indigo-500/50 focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
+              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-300 rounded-xl px-2.5 py-1.5 text-[10px] font-mono focus:border-[#2F2F2F] focus:outline-none cursor-pointer appearance-none transition-colors hover:border-neutral-700"
             >
               {aiModels.map((m) => (
                 <option key={m.id} value={m.id}>

@@ -339,7 +339,7 @@ export default function AutoCropModal({
                 onClick={() => setUseLocalCV(true)}
                 className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer relative ${
                   useLocalCV
-                    ? "bg-purple-950/40 border-[#3B82F6]/60  text-white"
+                    ? "bg-[#2A2A2A] border-[#3B82F6]/60  text-white"
                     : "bg-neutral-900/40 border-white/5 hover:border-white/15 text-neutral-400"
                 }`}
               >
@@ -348,7 +348,7 @@ export default function AutoCropModal({
                     <Zap className="h-4 w-4 text-[#3B82F6]" />
                   </div>
                   {useLocalCV && (
-                    <span className="w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
+                    <span className="w-4 h-4 rounded-full bg-[#2A2A2A] flex items-center justify-center">
                       <Check className="h-2.5 w-2.5 text-white" />
                     </span>
                   )}
@@ -366,7 +366,7 @@ export default function AutoCropModal({
                 onClick={() => setUseLocalCV(false)}
                 className={`p-3.5 rounded-2xl border transition-all text-left flex flex-col justify-between gap-2.5 cursor-pointer relative ${
                   !useLocalCV
-                    ? "bg-purple-950/40 border-[#3B82F6]/60  text-white"
+                    ? "bg-[#2A2A2A] border-[#3B82F6]/60  text-white"
                     : "bg-neutral-900/40 border-white/5 hover:border-white/15 text-neutral-400"
                 }`}
               >
@@ -487,7 +487,7 @@ export default function AutoCropModal({
                       onClick={() => setAspectRatioLock(ratio.id)}
                       className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                         isActive
-                          ? "bg-purple-600 text-white shadow-sm"
+                          ? "bg-[#2A2A2A] text-white shadow-sm"
                           : "text-neutral-400 hover:text-white"
                       }`}
                     >
@@ -511,7 +511,7 @@ export default function AutoCropModal({
               <button
                 onClick={() => setAutoSplitTallStrips(!autoSplitTallStrips)}
                 className={`relative inline-flex h-5 w-10 rounded-full transition-colors duration-200 focus:outline-none cursor-pointer ${
-                  autoSplitTallStrips ? "bg-purple-600" : "bg-neutral-800"
+                  autoSplitTallStrips ? "bg-[#2A2A2A]" : "bg-neutral-800"
                 }`}
               >
                 <span
@@ -669,7 +669,7 @@ export default function AutoCropModal({
           <button
             onClick={onApply}
             disabled={isApplying || targetList.length === 0}
-            className="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/30 flex items-center justify-center gap-2 active:scale-95 border border-[#60A5FA]/30 disabled:opacity-50"
+            className="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-[#2A2A2A] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-black/50 flex items-center justify-center gap-2 active:scale-95 border border-[#60A5FA]/30 disabled:opacity-50"
           >
             {isApplying ? (
               <>
@@ -678,7 +678,7 @@ export default function AutoCropModal({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4 text-purple-200" />
+                <Sparkles className="h-4 w-4 text-[#3B82F6]" />
                 <span>
                   Auto-Crop All ({targetList.length} Images)
                 </span>

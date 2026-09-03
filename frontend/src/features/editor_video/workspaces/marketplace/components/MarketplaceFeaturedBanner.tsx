@@ -11,7 +11,7 @@ export const MarketplaceFeaturedBanner: React.FC<
 > = ({ title, subtitle, tag = "🔥 FEATURED THIS WEEK" }) => {
   return (
     <div className="rounded-2xl overflow-hidden relative h-24 border border-[#3B82F6]/30">
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-950" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#2A2A2A] via-indigo-900 to-slate-950" />
       <div className="relative z-10 p-4 flex flex-col justify-between h-full">
         <span className="text-[9px] font-mono font-bold text-[#60A5FA]">
           {tag}

@@ -37,7 +37,7 @@ export default function QuickStartGuide({
   };
 
   return (
-    <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-[#3B82F6]/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+    <div className="bg-gradient-to-br from-[#2A2A2A] to-indigo-900/20 border border-[#3B82F6]/20 rounded-3xl p-6 shadow-xl relative overflow-hidden">
       <div className="absolute top-0 right-0 p-4 opacity-10">
         <Sparkles className="h-20 w-20 text-[#3B82F6]" />
       </div>

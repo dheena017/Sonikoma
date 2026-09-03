@@ -9,7 +9,7 @@ interface ThemeSwitcherProps {
 }
 
 const paletteStyles: Record<ThemeKey, string> = {
-  purple: "bg-purple-500",
+  purple: "bg-[#2A2A2A]",
   blue: "bg-blue-500",
   emerald: "bg-emerald-500",
   amber: "bg-amber-500",

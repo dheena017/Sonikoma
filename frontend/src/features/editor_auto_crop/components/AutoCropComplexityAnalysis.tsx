@@ -96,7 +96,7 @@ export function AutoCropComplexityAnalysis({
         <div className="flex items-center gap-3">
           <button
             onClick={autoTuneCV}
-            className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 transition-colors uppercase font-bold text-[8px]"
+            className="flex items-center gap-1 text-indigo-400 hover:text-neutral-300 transition-colors uppercase font-bold text-[8px]"
           >
             <Wand2 className="h-2.5 w-2.5" /> Auto-Tune CV
           </button>

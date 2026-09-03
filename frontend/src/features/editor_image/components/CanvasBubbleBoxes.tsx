@@ -41,7 +41,7 @@ export default function CanvasBubbleBoxes({
             className={`absolute border-2 pointer-events-auto cursor-pointer transition-all ${
               isSelected
                 ? "border-amber-400 bg-amber-400/20 z-40 shadow-[0_0_10px_rgba(251,191,36,0.5)]"
-                : "border-[#60A5FA]/40 bg-purple-500/5 hover:border-purple-300 hover:bg-[#3B82F6]/20"
+                : "border-[#60A5FA]/40 bg-[#2A2A2A] hover:border-[#2F2F2F] hover:bg-[#3B82F6]/20"
             }`}
             style={{
               top: `${top}%`,

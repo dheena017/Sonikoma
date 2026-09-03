@@ -18,7 +18,7 @@ const ClipResizeHandle: React.FC<ClipResizeHandleProps> = ({
       e.preventDefault();
       onResizeStart(e);
     }}
-    className={`absolute top-0 bottom-0 w-1.5 z-20 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 transition-opacity hover:bg-purple-400/80 flex items-center justify-center ${
+    className={`absolute top-0 bottom-0 w-1.5 z-20 cursor-ew-resize opacity-0 group-hover/clip:opacity-100 transition-opacity hover:bg-[#2A2A2A] flex items-center justify-center ${
       side === "right" ? "right-0 rounded-r" : "left-0 rounded-l"
     }`}
   >

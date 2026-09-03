@@ -38,18 +38,18 @@ export default function ShortcutItem({
         }
       }}
       className={`grid grid-cols-12 items-center px-6 py-4 transition-all cursor-pointer group relative ${
-        isRecording ? "bg-purple-950/20 z-10" : "hover:bg-white/[0.02]"
+        isRecording ? "bg-[#2A2A2A] z-10" : "hover:bg-white/[0.02]"
       }`}
     >
       {isRecording && (
-        <div className="absolute inset-y-0 left-0 w-1 bg-purple-500" />
+        <div className="absolute inset-y-0 left-0 w-1 bg-[#2A2A2A]" />
       )}
 
       <div className="col-span-6 sm:col-span-7 flex items-center gap-4">
         <div
           className={`p-2 rounded-lg ${
             isRecording
-              ? "bg-purple-500 text-white"
+              ? "bg-[#2A2A2A] text-white"
               : "bg-neutral-900 text-neutral-500 group-hover:text-neutral-300 group-hover:bg-neutral-800"
           } transition-all`}
         >
@@ -82,7 +82,7 @@ export default function ShortcutItem({
       <div className="col-span-6 sm:col-span-3 flex items-center gap-4 justify-end">
         {isRecording ? (
           <div className="flex flex-col items-end">
-            <span className="text-[10px] font-bold font-mono px-3 py-1.5 rounded-lg bg-purple-500 text-white animate-pulse shadow-lg shadow-purple-500/20">
+            <span className="text-[10px] font-bold font-mono px-3 py-1.5 rounded-lg bg-[#2A2A2A] text-white animate-pulse shadow-lg shadow-black/50">
               RECORDING...
             </span>
           </div>

@@ -221,7 +221,7 @@ const EditorSidebar = ({
                     {/* Premium Floating Active Pill */}
                     <div
                       className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
-                          ? "h-5 bg-gradient-to-b from-purple-400 to-amber-400  opacity-100"
+                          ? "h-5 bg-gradient-to-b from-[#2A2A2A] to-amber-400  opacity-100"
                           : "h-0 bg-transparent opacity-0"
                         }`}
                     />
@@ -342,7 +342,7 @@ const EditorSidebar = ({
                           className={`absolute ${isCollapsed
                               ? "top-1 right-1"
                               : "top-1/2 -translate-y-1/2 right-3"
-                            } h-2 w-2 rounded-full bg-purple-500 animate-ping`}
+                            } h-2 w-2 rounded-full bg-[#2A2A2A] animate-ping`}
                         />
                       )}
                     </button>
@@ -358,7 +358,7 @@ const EditorSidebar = ({
       <div className="p-4 border-t border-white/5 bg-gradient-to-t from-black/30 to-transparent flex justify-center w-full">
         <button
           onClick={handleReturnToWorkspace}
-          className={`flex items-center justify-center rounded-2xl bg-gradient-to-b from-blue-500 to-purple-700 hover:from-purple-400 hover:to-blue-600 text-white transition-all active:scale-95 border border-[#60A5FA]/30 cursor-pointer shadow-[0_4px_14px_rgba(59,130,246,0.4)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.6)] ${isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
+          className={`flex items-center justify-center rounded-2xl bg-gradient-to-b from-blue-500 to-[#2A2A2A] hover:from-[#2A2A2A] hover:to-blue-600 text-white transition-all active:scale-95 border border-[#60A5FA]/30 cursor-pointer shadow-[0_4px_14px_rgba(59,130,246,0.4)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.6)] ${isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
             }`}
           title="Return to Workspace"
         >

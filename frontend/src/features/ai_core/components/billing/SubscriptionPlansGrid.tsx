@@ -96,7 +96,7 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
           <button
             type="button"
             onClick={() => onSelectPlan("pro")}
-            className="w-full py-2 bg-purple-600 hover:bg-[#3B82F6] text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-sm active:scale-95 cursor-pointer mt-2"
+            className="w-full py-2 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-sm active:scale-95 cursor-pointer mt-2"
           >
             Upgrade to Pro ($19/mo)
           </button>
@@ -122,11 +122,11 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
             placeholder="e.g. SONIKOMA50"
-            className="w-full bg-black/40 border border-white/10 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-600 uppercase font-mono"
+            className="w-full bg-black/40 border border-white/10 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all placeholder:text-neutral-600 uppercase font-mono"
           />
           <button
             type="submit"
-            className="w-full bg-purple-600 hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-xs transition-all cursor-pointer shadow-sm active:scale-95"
+            className="w-full bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-xs transition-all cursor-pointer shadow-sm active:scale-95"
           >
             Apply Coupon
           </button>

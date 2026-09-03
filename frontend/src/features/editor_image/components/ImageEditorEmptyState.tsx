@@ -95,7 +95,7 @@ export const ImageEditorEmptyState: React.FC<ImageEditorEmptyStateProps> = ({
 
         {/* Action Buttons */}
         <div className="w-full space-y-2 pt-2">
-          <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer">
+          <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-mono font-bold text-xs shadow-md transition-all cursor-pointer">
             <UploadCloud className="w-4 h-4 shrink-0" />
             <span>Upload Images</span>
             <input

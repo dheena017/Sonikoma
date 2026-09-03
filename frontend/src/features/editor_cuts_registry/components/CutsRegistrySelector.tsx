@@ -20,7 +20,7 @@ export function CutsRegistrySelector({
         type="button"
         onClick={handlePushToSlices}
         disabled={!hasSelection}
-        className="w-full bg-purple-600/80 hover:bg-[#3B82F6] disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-purple-900/30"
+        className="w-full bg-[#2A2A2A] hover:bg-[#3B82F6] disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-black/50"
         style={{
           boxShadow: !hasSelection
             ? undefined
@@ -36,7 +36,7 @@ export function CutsRegistrySelector({
         <div
           className={`relative w-8 h-4 rounded-full border flex-shrink-0 transition-all ${
             autoPushOnDraw
-              ? "bg-purple-600 border-[#3B82F6]"
+              ? "bg-[#2A2A2A] border-[#3B82F6]"
               : "bg-neutral-800 border-neutral-700"
           }`}
         >

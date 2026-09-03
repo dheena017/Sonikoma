@@ -225,7 +225,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                       `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
                     );
                   }}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-950/50 cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-black/50 cursor-pointer"
                   aria-label="Resume Editing"
                 >
                   <Play className="w-4 h-4 fill-white" />{" "}

@@ -160,7 +160,7 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
               </div>
               <div className="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden">
                 <div
-                  className="bg-purple-500 h-full transition-all duration-500"
+                  className="bg-[#2A2A2A] h-full transition-all duration-500"
                   style={{ width: `${Math.min(cpu.usage_percent || 0, 100)}%` }}
                 />
               </div>
@@ -250,7 +250,7 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
         <a
           href="/admin/health"
           onClick={() => { if (onClose) onClose(); }}
-          className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 font-semibold transition text-[11px]"
+          className="flex items-center gap-1 text-indigo-400 hover:text-neutral-300 font-semibold transition text-[11px]"
         >
           Full Diagnostics <ExternalLink className="w-3 h-3" />
         </a>

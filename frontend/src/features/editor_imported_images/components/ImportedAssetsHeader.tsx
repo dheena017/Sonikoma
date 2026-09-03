@@ -123,8 +123,8 @@ export default function ImportedAssetsHeader({
   if (selectedScrapedLength > 0) {
     const selectionLeft = (
       <div className="flex items-center gap-2.5 flex-wrap">
-        <div className="flex items-center gap-2 bg-purple-950/80 border border-[#3B82F6]/40 rounded-xl px-3 py-1.5 ">
-          <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[10px] font-mono font-black">
+        <div className="flex items-center gap-2 bg-[#2A2A2A] border border-[#3B82F6]/40 rounded-xl px-3 py-1.5 ">
+          <div className="h-5 w-5 rounded bg-[#2A2A2A] flex items-center justify-center text-white text-[10px] font-mono font-black">
             {selectedScrapedLength}
           </div>
           <span className="text-xs font-mono font-bold text-white whitespace-nowrap">
@@ -134,7 +134,7 @@ export default function ImportedAssetsHeader({
             type="button"
             onClick={handleClearAll}
             title="Clear Selection"
-            className="ml-1 p-0.5 rounded-md hover:bg-purple-900/60 text-[#60A5FA] hover:text-white transition-colors cursor-pointer"
+            className="ml-1 p-0.5 rounded-md hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -180,7 +180,7 @@ export default function ImportedAssetsHeader({
 
         {/* Busy / Progress Indicator */}
         {isBusy && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-[#3B82F6]/40 text-[#60A5FA] text-[11px] font-mono animate-pulse">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/40 text-[#60A5FA] text-[11px] font-mono animate-pulse">
             <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" />
             <span>
               {isBatchCropping && batchProgress
@@ -289,7 +289,7 @@ export default function ImportedAssetsHeader({
       <EditorHeaderFrame
         left={selectionLeft}
         right={selectionRight}
-        className="border-b-0 rounded-2xl bg-gradient-to-r from-purple-950/80 via-neutral-950/95 to-neutral-950/95 border border-[#3B82F6]/35 p-3 shadow-lg"
+        className="border-b-0 rounded-2xl bg-gradient-to-r from-[#2A2A2A] via-neutral-950/95 to-neutral-950/95 border border-[#3B82F6]/35 p-3 shadow-lg"
       />
     );
   }
@@ -308,7 +308,7 @@ export default function ImportedAssetsHeader({
             Imported Assets
           </h3>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-bold text-[#60A5FA] font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2A2A2A] animate-pulse" />
             {filteredCount !== undefined
               ? `${filteredCount} / ${scrapedImagesLength}`
               : scrapedImagesLength}{" "}
@@ -358,7 +358,7 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={handleSelectAllToggle}
-          className="text-[11px] font-mono font-bold border border-[#3B82F6]/35 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] hover:text-purple-100 rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all  active:scale-95 cursor-pointer"
+          className="text-[11px] font-mono font-bold border border-[#3B82F6]/35 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all  active:scale-95 cursor-pointer"
         >
           <CheckSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
           <span>Select All</span>
@@ -377,8 +377,8 @@ export default function ImportedAssetsHeader({
           }
           className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
             isEpisodeCollapsed
-              ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-[#93C5FD] hover:border-purple-700"
-              : "bg-purple-600/20 border-purple-600/50 text-[#60A5FA] hover:bg-[#3B82F6]/30"
+              ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-[#93C5FD] hover:border-[#2F2F2F]"
+              : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA] hover:bg-[#3B82F6]/30"
           }`}
         >
           {isEpisodeCollapsed ? (
@@ -401,7 +401,7 @@ export default function ImportedAssetsHeader({
           onClick={handleSaveAssets}
           className="relative overflow-hidden h-8 px-3.5 rounded-xl font-black text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-[#3B82F6]/30 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
         >
-          <Save className="w-3.5 h-3.5 text-purple-200" />
+          <Save className="w-3.5 h-3.5 text-[#3B82F6]" />
           <span>Save</span>
         </button>
       )}

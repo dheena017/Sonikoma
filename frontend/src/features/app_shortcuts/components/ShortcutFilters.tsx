@@ -54,7 +54,7 @@ export function ShortcutSearch({
         placeholder="Search shortcuts (e.g. 'Zoom', 'Dashboard', 'Alt+S')..."
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="w-full bg-neutral-900/50 border border-neutral-800 hover:border-neutral-700 focus:border-[#3B82F6]/50 focus:ring-4 focus:ring-purple-500/5 rounded-2xl pl-12 pr-4 py-3 text-sm text-neutral-200 outline-none transition-all placeholder:text-neutral-600 shadow-inner"
+        className="w-full bg-neutral-900/50 border border-neutral-800 hover:border-neutral-700 focus:border-[#3B82F6]/50 focus:ring-4 focus:ring-[#3B82F6]/50 rounded-2xl pl-12 pr-4 py-3 text-sm text-neutral-200 outline-none transition-all placeholder:text-neutral-600 shadow-inner"
       />
     </div>
   );

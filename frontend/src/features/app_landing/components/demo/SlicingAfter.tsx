@@ -10,7 +10,7 @@ export function SlicingAfter() {
       </div>
 
       {/* Sliced Panel 1 */}
-      <div className="w-full max-w-[280px] bg-gradient-to-br from-purple-900/90 via-slate-900 to-indigo-950 border-2 border-emerald-400 rounded-xl p-3.5 space-y-2 shadow-lg shadow-emerald-500/10 relative overflow-hidden transition-transform hover:scale-[1.02]">
+      <div className="w-full max-w-[280px] bg-gradient-to-br from-[#2A2A2A] via-slate-900 to-indigo-950 border-2 border-emerald-400 rounded-xl p-3.5 space-y-2 shadow-lg shadow-emerald-500/10 relative overflow-hidden transition-transform hover:scale-[1.02]">
         <div className="flex items-center justify-between">
           <span className="px-2 py-0.5 rounded bg-emerald-500 text-slate-950 font-mono text-[9px] font-extrabold flex items-center gap-1">
             <Scissors className="w-2.5 h-2.5" />
@@ -18,7 +18,7 @@ export function SlicingAfter() {
           </span>
           <span className="text-[9px] font-mono text-emerald-400 font-bold">READY</span>
         </div>
-        <div className="h-24 rounded-lg bg-gradient-to-r from-purple-800/50 to-indigo-800/50 border border-emerald-400/40 flex flex-col items-center justify-center relative">
+        <div className="h-24 rounded-lg bg-gradient-to-r from-[#2A2A2A] to-indigo-800/50 border border-emerald-400/40 flex flex-col items-center justify-center relative">
           <div className="text-2xl">⚡️</div>
           <span className="text-xs font-black text-white tracking-wide uppercase mt-1">Awakening</span>
           <div className="absolute top-2 right-2 bg-black/70 px-2 py-0.5 rounded text-[9px] text-neutral-200">
@@ -28,9 +28,9 @@ export function SlicingAfter() {
       </div>
 
       {/* Sliced Panel 2 */}
-      <div className="w-full max-w-[280px] bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 border-2 border-[#60A5FA] rounded-xl p-3.5 space-y-2 shadow-lg shadow-purple-500/10 relative overflow-hidden transition-transform hover:scale-[1.02]">
+      <div className="w-full max-w-[280px] bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 border-2 border-[#60A5FA] rounded-xl p-3.5 space-y-2 shadow-lg shadow-black/50 relative overflow-hidden transition-transform hover:scale-[1.02]">
         <div className="flex items-center justify-between">
-          <span className="px-2 py-0.5 rounded bg-purple-500 text-white font-mono text-[9px] font-extrabold flex items-center gap-1">
+          <span className="px-2 py-0.5 rounded bg-[#2A2A2A] text-white font-mono text-[9px] font-extrabold flex items-center gap-1">
             <Scissors className="w-2.5 h-2.5" />
             PANEL 02 • 1080x1920 (99.4%)
           </span>

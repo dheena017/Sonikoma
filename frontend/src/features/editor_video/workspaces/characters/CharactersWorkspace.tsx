@@ -100,7 +100,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("Character Creator")}
-                className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer shadow-sm transition-all"
+                className="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer shadow-sm transition-all"
               >
                 <Plus className="h-3 w-3" />
                 <span>+ Add Cast</span>
@@ -126,7 +126,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
         {/* Character Creator with Live DiceBear Avatar Preview */}
         {activeTab === "Character Creator" && (
-          <form onSubmit={handleAddCharacter} className="space-y-3 p-3 bg-neutral-900/80 rounded-2xl border border-purple-900/40 shadow-md font-mono text-xs">
+          <form onSubmit={handleAddCharacter} className="space-y-3 p-3 bg-neutral-900/80 rounded-2xl border border-[#2F2F2F] shadow-md font-mono text-xs">
             <h4 className="font-bold text-white uppercase text-xs flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
               Create Project Character
@@ -189,7 +189,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 mt-2"
+              className="w-full py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 mt-2"
             >
               <Plus className="h-4 w-4" /> Save Character to Project
             </button>
@@ -219,7 +219,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                     }
                     onTriggerFeedback(`Set active studio voice to ${char.voiceActor}`);
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-[#3B82F6] border border-[#3B82F6]/40 text-white text-[10px] font-mono font-bold cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#3B82F6]/40 text-white text-[10px] font-mono font-bold cursor-pointer"
                 >
                   Bind Voice
                 </button>

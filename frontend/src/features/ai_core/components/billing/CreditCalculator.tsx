@@ -28,7 +28,7 @@ export const CreditCalculator: React.FC<CreditCalculatorProps> = ({
             Slide to estimate pricing for custom rendering volume packages
           </p>
         </div>
-        <div className="bg-purple-600/10 border border-[#3B82F6]/20 px-4 py-2 rounded-2xl text-[#3B82F6] text-sm font-black font-mono flex items-center gap-1.5 self-start sm:self-auto">
+        <div className="bg-[#2A2A2A] border border-[#3B82F6]/20 px-4 py-2 rounded-2xl text-[#3B82F6] text-sm font-black font-mono flex items-center gap-1.5 self-start sm:self-auto">
           <Zap className="w-4 h-4 text-[#3B82F6] fill-purple-400" />
           Price: {formatCustomPrice(customCredits)}
         </div>
@@ -56,7 +56,7 @@ export const CreditCalculator: React.FC<CreditCalculatorProps> = ({
       <button
         type="button"
         onClick={onPurchase}
-        className="w-full bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-purple-900/10"
+        className="w-full bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-black/50"
       >
         Purchase Custom Package ({formatCustomPrice(customCredits)})
       </button>

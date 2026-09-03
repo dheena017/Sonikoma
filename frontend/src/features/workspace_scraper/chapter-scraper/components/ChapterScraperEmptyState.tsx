@@ -44,7 +44,7 @@ export const ChapterScraperEmptyState: React.FC<
 
   return (
     <div className="flex flex-col items-center justify-center p-16 text-center space-y-4">
-      <div className="w-14 h-14 rounded-2xl bg-purple-950/30 border border-purple-900/30 flex items-center justify-center">
+      <div className="w-14 h-14 rounded-2xl bg-[#2A2A2A] border border-[#2F2F2F] flex items-center justify-center">
         <BookOpen className="w-7 h-7 text-[#3B82F6] opacity-60" />
       </div>
       <div className="space-y-1">

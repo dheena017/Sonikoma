@@ -76,7 +76,7 @@ const StoryboardSidebar = ({
     <aside className="w-full lg:w-64 bg-[#0d0d12] border border-neutral-800 rounded-2xl p-3 shrink-0 shadow-[0_16px_40px_rgba(0,0,0,0.38)] flex flex-col self-start transition-all duration-300">
       <div className="flex items-center justify-between border-b border-neutral-800 pb-2.5 mb-3">
         <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse" />
+          <span className="h-2 w-2 rounded-full bg-[#2A2A2A] animate-pulse" />
           <h4 className="text-[10px] font-black text-white uppercase tracking-[0.2em] font-mono">
             Storyboard
           </h4>
@@ -138,12 +138,12 @@ const StoryboardSidebar = ({
             onClick={() => setSelectedTimelineEp("all")}
             className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
               selectedTimelineEp === "all"
-                ? "bg-purple-600/25 border-[#3B82F6]/60 text-white "
+                ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white "
                 : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
             }`}
           >
             <span className="truncate">All Scenes</span>
-            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-[#60A5FA] border border-purple-900/40 shrink-0">
+            <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-[#60A5FA] border border-[#2F2F2F] shrink-0">
               {safeEpisodeGroups.length > 0
                 ? safeEpisodeGroups.reduce((acc, g) => acc + g.count, 0)
                 : panels.length}
@@ -210,7 +210,7 @@ const StoryboardSidebar = ({
                         onMouseLeave={() => setHoveredTimelineEpIdx(null)}
                         className={`w-full flex flex-col gap-1 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left border cursor-pointer ${
                           isSelected
-                            ? "bg-purple-600/25 border-[#60A5FA] text-purple-200 "
+                            ? "bg-[#2A2A2A] border-[#60A5FA] text-[#3B82F6] "
                             : "bg-neutral-900/50 border-neutral-850 text-neutral-350 hover:text-white"
                         }`}
                       >
@@ -219,7 +219,7 @@ const StoryboardSidebar = ({
                             <span
                               className={`h-2 w-2 rounded-full shrink-0 ${
                                 isSelected
-                                  ? "bg-purple-400 animate-pulse"
+                                  ? "bg-[#2A2A2A] animate-pulse"
                                   : "bg-emerald-500/80"
                               }`}
                             />
@@ -227,7 +227,7 @@ const StoryboardSidebar = ({
                               {formatDisplayEpisodeLabel(grp.episodeLabel)}
                             </span>
                           </div>
-                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-[#60A5FA] border border-purple-900/40 shrink-0">
+                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-955 text-[#60A5FA] border border-[#2F2F2F] shrink-0">
                             {grp.count}f
                           </span>
                         </div>

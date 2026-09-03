@@ -124,8 +124,8 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
           </span>
           {isTraining && (
             <span className="flex h-2.5 w-2.5 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2A2A2A] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#2A2A2A]"></span>
             </span>
           )}
         </div>
@@ -180,7 +180,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
             )}
 
             {!sampleCount || sampleCount === 0 ? (
-              <div className="text-xs text-[#60A5FA]/90 bg-purple-950/30 border border-purple-900/40 p-3 rounded-2xl leading-relaxed">
+              <div className="text-xs text-[#60A5FA]/90 bg-[#2A2A2A] border border-[#2F2F2F] p-3 rounded-2xl leading-relaxed">
                 💡 <strong>Get started:</strong> Save at least 1 mask correction
                 in the <strong>Eraser</strong> tool to unlock fine-tuning.
               </div>
@@ -218,9 +218,9 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
                       );
                     }
                   }}
-                  className="w-full py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-black tracking-widest uppercase transition-all shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-[#60A5FA]/30 cursor-pointer active:scale-95 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-[#2A2A2A] hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-black tracking-widest uppercase transition-all shadow-[0_4px_14px_rgba(139,92,246,0.3)] hover:shadow-[0_6px_20px_rgba(139,92,246,0.5)] border border-[#60A5FA]/30 cursor-pointer active:scale-95 flex items-center justify-center gap-2"
                 >
-                  <Play className="w-4 h-4 fill-purple-200 text-purple-200" />
+                  <Play className="w-4 h-4 fill-purple-200 text-[#3B82F6]" />
                   <span>Start Fine-Tuning</span>
                 </button>
               </div>

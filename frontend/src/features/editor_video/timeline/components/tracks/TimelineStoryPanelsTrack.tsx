@@ -216,7 +216,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
           <button
             type="button"
             onClick={onAddPanel}
-            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-[#93C5FD] italic px-2 hover:bg-purple-950/20 rounded-md transition-colors cursor-pointer group"
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-[#93C5FD] italic px-2 hover:bg-[#2A2A2A] rounded-md transition-colors cursor-pointer group"
           >
             <Plus className="h-2.5 w-2.5 text-[#3B82F6]/70 group-hover:text-[#93C5FD] transition-colors" />
             <span>Add story panels / comic frames</span>
@@ -301,7 +301,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
                   className={`group absolute rounded-md border select-none overflow-hidden z-10 ${
                     isMoving
-                      ? "cursor-grabbing shadow-[0_4px_20px_rgba(59,130,246,0.5)] z-40 border-purple-300"
+                      ? "cursor-grabbing shadow-[0_4px_20px_rgba(59,130,246,0.5)] z-40 border-[#2F2F2F]"
                       : isResizing
                       ? "cursor-col-resize  z-30"
                       : isSelected
@@ -326,7 +326,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                       className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-95 transition-opacity pointer-events-none"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-purple-950/30 flex items-center justify-center pointer-events-none">
+                    <div className="absolute inset-0 bg-[#2A2A2A] flex items-center justify-center pointer-events-none">
                       <span className="text-[9px] font-mono text-[#3B82F6]/60 font-bold">
                         #{idx + 1}
                       </span>
@@ -356,7 +356,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   <div className="absolute top-1 right-1.5 flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
                     {/* Live Drag Delta Display */}
                     {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
-                      <span className="text-[7.5px] font-mono font-bold text-purple-100 bg-purple-900/90 px-1.5 py-0.5 rounded border border-purple-300  animate-pulse">
+                      <span className="text-[7.5px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1.5 py-0.5 rounded border border-[#2F2F2F]  animate-pulse">
                         {movingInfo.deltaPx > 0
                           ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
                           : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
@@ -364,7 +364,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     )}
 
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
-                      <span className="text-[7px] font-mono font-bold text-purple-200 bg-purple-950/90 px-1 py-0.2 rounded-sm border border-[#60A5FA]/50 animate-pulse">
+                      <span className="text-[7px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1 py-0.2 rounded-sm border border-[#60A5FA]/50 animate-pulse">
                         {resizingInfo.deltaSecs > 0
                           ? `+${resizingInfo.deltaSecs.toFixed(1)}s`
                           : `${resizingInfo.deltaSecs.toFixed(1)}s`}
@@ -373,7 +373,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     <span
                       className={`text-[7px] font-mono px-1 rounded-sm transition-colors ${
                         isResizing
-                          ? "bg-purple-600 text-white font-bold shadow"
+                          ? "bg-[#2A2A2A] text-white font-bold shadow"
                           : "bg-black/80 text-neutral-300"
                       }`}
                     >
@@ -388,7 +388,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                         e.stopPropagation();
                         onContextMenu(e, key, idx);
                       }}
-                      className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#0c0c16]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-purple-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                      className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#0c0c16]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                       title="Frame Options"
                     >
                       <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
@@ -419,7 +419,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         <button
           type="button"
           onClick={onAddPanel}
-          className="w-full h-11 rounded-md border border-[#3B82F6]/30 hover:border-[#60A5FA]/80 bg-purple-950/40 hover:bg-purple-900/60 text-purple-200 hover:text-white flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover: select-none group/add"
+          className="w-full h-11 rounded-md border border-[#3B82F6]/30 hover:border-[#60A5FA]/80 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover: select-none group/add"
           title="Add Frame"
         >
           <ImagePlus className="h-3.5 w-3.5 text-[#3B82F6] group-hover/add:scale-110 transition-transform" />

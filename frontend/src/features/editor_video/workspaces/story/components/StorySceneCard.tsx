@@ -20,10 +20,10 @@ export const StorySceneCard: React.FC<StorySceneCardProps> = ({
     >
       <div className="flex items-center justify-between border-b border-neutral-800/80 pb-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
-          <span className="text-[10px] font-mono font-semibold text-purple-200 bg-purple-500/12 px-2 py-0.5 rounded-full border border-[#3B82F6]/20 shrink-0">
+          <span className="text-[10px] font-mono font-semibold text-[#3B82F6] bg-[#2A2A2A] px-2 py-0.5 rounded-full border border-[#3B82F6]/20 shrink-0">
             Scene #{scene.sceneNumber}
           </span>
-          <span className="text-xs font-semibold text-white group-hover:text-purple-100 transition-colors truncate">
+          <span className="text-xs font-semibold text-white group-hover:text-[#3B82F6] transition-colors truncate">
             {scene.title}
           </span>
         </div>

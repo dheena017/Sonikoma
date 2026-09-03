@@ -44,7 +44,7 @@ export default function ProviderUsageTiersGrid({
             onClick={() => onSelectTierId(t.id)}
             className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 text-left ${
               selectedTierId === t.id
-                ? "bg-[#222222] border-[#3B82F6] ring-1 ring-purple-500/50 shadow-md"
+                ? "bg-[#222222] border-[#3B82F6] ring-1 ring-[#3B82F6]/50 shadow-md"
                 : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700"
             }`}
           >

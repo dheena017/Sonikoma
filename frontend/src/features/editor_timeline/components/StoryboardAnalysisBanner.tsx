@@ -13,16 +13,16 @@ const StoryboardAnalysisBanner = ({
   if (!isAnalyzingAll) return null;
 
   return (
-    <div className="bg-indigo-950/70 border border-indigo-500/40 rounded-xl px-4 py-3 flex items-center justify-between gap-3 animate-in fade-in duration-200 shadow-lg shadow-indigo-950/40 my-2">
+    <div className="bg-[#2A2A2A] border border-[#2F2F2F] rounded-xl px-4 py-3 flex items-center justify-between gap-3 animate-in fade-in duration-200 shadow-lg shadow-indigo-950/40 my-2">
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center shrink-0">
           <div className="w-6 h-6 rounded-full border-2 border-indigo-400/30 border-t-indigo-400 animate-spin" />
-          <Sparkles className="w-3 h-3 text-indigo-300 absolute animate-pulse" />
+          <Sparkles className="w-3 h-3 text-neutral-300 absolute animate-pulse" />
         </div>
         <div>
           <h4 className="text-xs font-bold text-white tracking-wide flex items-center gap-2">
             Generating Narrative Sequence
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-medium">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-neutral-300 border border-[#2F2F2F] font-medium">
               AI Active
             </span>
           </h4>

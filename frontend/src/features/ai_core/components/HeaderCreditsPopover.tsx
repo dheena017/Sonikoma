@@ -96,7 +96,7 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
             className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 ${
               hasClaimedToday || claimSuccess
                 ? "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-700/50"
-                : "bg-purple-600 hover:bg-[#3B82F6] text-white cursor-pointer shadow-md shadow-sm hover:scale-105 active:scale-95"
+                : "bg-[#2A2A2A] hover:bg-[#3B82F6] text-white cursor-pointer shadow-md shadow-sm hover:scale-105 active:scale-95"
             }`}
           >
             {hasClaimedToday || claimSuccess ? (

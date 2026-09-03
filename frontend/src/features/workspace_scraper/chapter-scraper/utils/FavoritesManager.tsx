@@ -241,7 +241,7 @@ export const FavoritesList: React.FC<FavoritesListProps> = ({
         <div
           key={series.title_no}
           onClick={() => onSelectSeries(series)}
-          className="bg-gray-800 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg hover:shadow-purple-600/50 transition-shadow group flex flex-col"
+          className="bg-gray-800 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg hover:shadow-black/50 transition-shadow group flex flex-col"
         >
           {series.cover_image && (
             <img

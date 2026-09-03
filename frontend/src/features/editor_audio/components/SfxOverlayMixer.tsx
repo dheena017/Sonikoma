@@ -74,7 +74,7 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
           <Volume2 className="h-4.5 w-4.5 text-[#3B82F6]" />
           <h4 className="text-xs font-mono font-bold text-white uppercase">
             AI Sound Mixing Coordinator{" "}
-            <span className="text-purple-450 font-bold lowercase text-[10px] ml-1">
+            <span className="text-[#3B82F6] font-bold lowercase text-[10px] ml-1">
               (Cost: 5 Credits)
             </span>
           </h4>
@@ -93,7 +93,7 @@ export default function SfxOverlayMixer({ panels }: SfxOverlayMixerProps) {
       </div>
 
       {loading && (
-        <div className="text-center py-6 animate-pulse text-[10px] font-mono text-purple-450">
+        <div className="text-center py-6 animate-pulse text-[10px] font-mono text-[#3B82F6]">
           Calculating environment delay offsets & overlay coefficients...
         </div>
       )}

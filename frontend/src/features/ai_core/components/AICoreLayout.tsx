@@ -37,7 +37,7 @@ export default function AICoreLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#07080c] text-white font-sans antialiased selection:bg-purple-500 selection:text-white">
+    <div className="min-h-screen bg-[#07080c] text-white font-sans antialiased selection:bg-[#2A2A2A] selection:text-white">
       {/* 1. FIXED HEADER (TOP 16 HEIGHT) */}
       <AICoreHeader
         currentPath={currentPath}

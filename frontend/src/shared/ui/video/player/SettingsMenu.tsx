@@ -64,7 +64,7 @@ export const VideoPreviewSettingsMenu: React.FC<
             onClick={() => setIsLooping(!isLooping)}
             className={`py-1 rounded text-[9px] font-bold border transition-all cursor-pointer ${
               isLooping
-                ? "bg-purple-950/40 border-purple-800/40 text-[#3B82F6]"
+                ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#3B82F6]"
                 : "bg-neutral-950 border-neutral-800 text-neutral-500"
             }`}
           >
@@ -81,7 +81,7 @@ export const VideoPreviewSettingsMenu: React.FC<
             onClick={() => setCinematicBars(!cinematicBars)}
             className={`py-1 rounded text-[9px] font-bold border transition-all cursor-pointer ${
               cinematicBars
-                ? "bg-purple-950/40 border-purple-800/40 text-[#3B82F6]"
+                ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#3B82F6]"
                 : "bg-neutral-950 border-neutral-800 text-neutral-500"
             }`}
           >

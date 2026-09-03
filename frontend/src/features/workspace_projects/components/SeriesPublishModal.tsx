@@ -150,7 +150,7 @@ export default function SeriesPublishModal({
                           onClick={() => setResolution(res)}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             resolution === res
-                              ? "bg-purple-600/20 border-[#3B82F6] text-[#60A5FA]"
+                              ? "bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
                               : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                           }`}
                         >
@@ -172,7 +172,7 @@ export default function SeriesPublishModal({
                           onClick={() => setAspectRatio(ratio)}
                           className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                             aspectRatio === ratio
-                              ? "bg-purple-600/20 border-[#3B82F6] text-[#60A5FA]"
+                              ? "bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
                               : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                           }`}
                         >
@@ -212,11 +212,11 @@ export default function SeriesPublishModal({
                 <button
                   onClick={handleStartExport}
                   disabled={isExporting}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 hover:brightness-110 text-white font-extrabold text-xs uppercase tracking-wider shadow-xl shadow-purple-900/40 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
+                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-pink-600 hover:brightness-110 text-white font-extrabold text-xs uppercase tracking-wider shadow-xl shadow-black/50 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
                 >
                   {isExporting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin text-purple-200" />
+                      <Loader2 className="w-4 h-4 animate-spin text-[#3B82F6]" />
                       Rendering Continuous Series Reel...
                     </>
                   ) : (
@@ -246,7 +246,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Packaging CBZ archive for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download CBZ Archive
               </button>
@@ -269,7 +269,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Generating PDF storyboard for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Generate PDF Sheet
               </button>
@@ -292,7 +292,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Exporting audio track for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-purple-900/40 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download MP3 Track
               </button>

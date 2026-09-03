@@ -19,7 +19,7 @@ export default function UploadHistory({ history }: UploadHistoryProps) {
   return (
     <div className="bg-neutral-950/40 backdrop-blur-md border border-neutral-900 rounded-3xl p-6 space-y-4 mt-5 animate-fade-in transition-all duration-305 hover:border-neutral-800">
       <h3 className="text-xs font-bold text-neutral-300 tracking-wider uppercase font-mono flex items-center gap-2 border-b border-neutral-900 pb-3">
-        <History className="h-4.5 w-4.5 text-purple-405" />
+        <History className="h-4.5 w-4.5 text-[#3B82F6]" />
         Upload & Export History
       </h3>
 
@@ -66,7 +66,7 @@ export default function UploadHistory({ history }: UploadHistoryProps) {
                 href={pub.youtube_url}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2.5 bg-neutral-900/40 hover:bg-purple-950/20 border border-neutral-850 text-neutral-400 hover:text-purple-305 rounded-xl transition-all duration-200 shrink-0 cursor-pointer shadow-sm active:scale-95"
+                className="p-2.5 bg-neutral-900/40 hover:bg-[#2A2A2A] border border-neutral-850 text-neutral-400 hover:text-[#3B82F6] rounded-xl transition-all duration-200 shrink-0 cursor-pointer shadow-sm active:scale-95"
                 title="View on YouTube"
               >
                 <ExternalLink className="h-3.5 w-3.5" />

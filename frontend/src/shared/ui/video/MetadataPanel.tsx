@@ -162,7 +162,7 @@ const VideoPreviewMetadataPanel = React.memo(
                       Soundtrack:
                     </span>
                     <span
-                      className="font-mono text-purple-200 font-semibold truncate max-w-[140px]"
+                      className="font-mono text-[#3B82F6] font-semibold truncate max-w-[140px]"
                       title={musicTheme}
                     >
                       {musicTheme}
@@ -362,7 +362,7 @@ const VideoPreviewMetadataPanel = React.memo(
           title="More actions & options"
           className={`h-7 w-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer shrink-0 ${
             showMore
-              ? "bg-purple-600/30 border-[#3B82F6] text-white "
+              ? "bg-[#2A2A2A] border-[#3B82F6] text-white "
               : "bg-neutral-900/90 border-neutral-700/80 text-neutral-300 hover:text-white hover:bg-neutral-800 hover:border-[#3B82F6]/40"
           }`}
         >

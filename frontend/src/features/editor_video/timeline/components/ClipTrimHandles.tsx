@@ -18,9 +18,9 @@ interface ClipTrimHandlesProps {
 const colorMap = {
   purple: {
     baseBorder: "border-[#60A5FA]/30",
-    hoverBg: "bg-purple-600",
-    activeGlow: "shadow-[0_0_14px_rgba(192,132,252,1)] bg-purple-500",
-    iconColor: "text-purple-200",
+    hoverBg: "bg-[#2A2A2A]",
+    activeGlow: "shadow-[0_0_14px_rgba(192,132,252,1)] bg-[#2A2A2A]",
+    iconColor: "text-[#3B82F6]",
   },
   indigo: {
     baseBorder: "border-indigo-400/30",

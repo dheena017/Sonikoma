@@ -206,7 +206,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
           <button
             type="button"
             onClick={onAddSubtitle}
-            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-[#93C5FD] italic px-2 hover:bg-purple-950/20 rounded-md transition-colors cursor-pointer group"
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-[#93C5FD] italic px-2 hover:bg-[#2A2A2A] rounded-md transition-colors cursor-pointer group"
           >
             <Plus className="h-2.5 w-2.5 text-[#3B82F6]/70 group-hover:text-[#93C5FD] transition-colors" />
             <span>Add subtitles / text captions</span>
@@ -276,13 +276,13 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                   )
                 }
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute flex items-center justify-between gap-1 select-none rounded-md border text-[9px] font-mono font-bold px-2.5 bg-purple-950/90 border-[#3B82F6]/40 text-purple-200 z-10 ${
+                className={`group absolute flex items-center justify-between gap-1 select-none rounded-md border text-[9px] font-mono font-bold px-2.5 bg-[#2A2A2A] border-[#3B82F6]/40 text-[#3B82F6] z-10 ${
                   isMoving
                     ? "cursor-grabbing shadow-[0_4px_20px_rgba(59,130,246,0.4)] z-40"
                     : isResizing
-                    ? "cursor-col-resize border-purple-300  z-30"
+                    ? "cursor-col-resize border-[#2F2F2F]  z-30"
                     : selectedClip === key
-                    ? "cursor-grab border-purple-300  z-20"
+                    ? "cursor-grab border-[#2F2F2F]  z-20"
                     : "cursor-grab hover:border-[#60A5FA]/60 z-10"
                 }`}
                 style={{
@@ -304,7 +304,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                 <div className="flex items-center gap-0.5 z-20 pointer-events-auto shrink-0" style={{ cursor: "inherit" }}>
                   {/* Live Drag Delta Display */}
                   {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
-                    <span className="text-[7px] font-mono font-bold text-purple-100 bg-purple-900/90 px-1 py-0.2 rounded border border-purple-300  animate-pulse">
+                    <span className="text-[7px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1 py-0.2 rounded border border-[#2F2F2F]  animate-pulse">
                       {movingInfo.deltaPx > 0
                         ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
                         : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
@@ -312,13 +312,13 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                   )}
 
                   {isResizing && resizingInfo.deltaSecs !== 0 && (
-                    <span className="text-[7px] font-mono font-bold text-purple-200 bg-purple-950 px-1 py-0.2 rounded-sm border border-[#60A5FA]/50 animate-pulse">
+                    <span className="text-[7px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1 py-0.2 rounded-sm border border-[#60A5FA]/50 animate-pulse">
                       {resizingInfo.deltaSecs > 0
                         ? `+${resizingInfo.deltaSecs.toFixed(1)}s`
                         : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                     </span>
                   )}
-                  <span className="text-[7.5px] font-mono font-bold text-purple-100 bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
+                  <span className="text-[7.5px] font-mono font-bold text-[#3B82F6] bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
                     {activeDur.toFixed(1)}s
                   </span>
 
@@ -330,7 +330,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                       e.stopPropagation();
                       onContextMenu(e, key, idx);
                     }}
-                    className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#0c0c16]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-purple-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                    className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#0c0c16]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                     title="Subtitle Options"
                   >
                     <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
@@ -360,7 +360,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
         <button
           type="button"
           onClick={onAddSubtitle}
-          className="w-full h-7 rounded-md border border-[#3B82F6]/30 hover:border-[#60A5FA]/80 bg-purple-950/40 hover:bg-purple-900/60 text-purple-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover: select-none group/add"
+          className="w-full h-7 rounded-md border border-[#3B82F6]/30 hover:border-[#60A5FA]/80 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover: select-none group/add"
           title="Add Subtitles"
         >
           <Type className="h-3 w-3 text-[#3B82F6] group-hover/add:scale-110 transition-transform" />

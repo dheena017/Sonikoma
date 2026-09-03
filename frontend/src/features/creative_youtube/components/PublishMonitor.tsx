@@ -404,7 +404,7 @@ export default function PublishMonitor({
                   onClick={() => onThumbnailSelect?.(url)}
                   className={`relative min-w-[120px] aspect-video bg-neutral-950 rounded-xl border overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.03] active:scale-95 ${
                     thumbnailPreviewUrl === url
-                      ? "border-[#3B82F6] ring-1 ring-purple-500/30"
+                      ? "border-[#3B82F6] ring-1 ring-[#3B82F6]/50"
                       : "border-neutral-900 hover:border-neutral-700"
                   }`}
                 >
@@ -436,7 +436,7 @@ export default function PublishMonitor({
               </span>
               <button
                 onClick={handleGenerateSlogans}
-                className="text-[9px] text-purple-405 hover:text-[#93C5FD] flex items-center gap-0.5 cursor-pointer bg-purple-950/20 px-2 py-0.5 rounded border border-purple-900/30 transition-all hover:bg-purple-900/10"
+                className="text-[9px] text-[#3B82F6] hover:text-[#93C5FD] flex items-center gap-0.5 cursor-pointer bg-[#2A2A2A] px-2 py-0.5 rounded border border-[#2F2F2F] transition-all hover:bg-[#2A2A2A]"
               >
                 <Sparkles className="h-3 w-3" />
                 Suggestions
@@ -454,7 +454,7 @@ export default function PublishMonitor({
                     onClick={() => setClickbaitText(s)}
                     className={`px-2 py-0.5 rounded text-[9.5px] font-bold border cursor-pointer transition-all duration-200 ${
                       clickbaitText === s
-                        ? "bg-purple-950/40 border-[#3B82F6] text-[#60A5FA]"
+                        ? "bg-[#2A2A2A] border-[#3B82F6] text-[#60A5FA]"
                         : "bg-neutral-900 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-800"
                     }`}
                   >
@@ -491,7 +491,7 @@ export default function PublishMonitor({
                 }}
                 className={`flex-1 py-1 rounded-lg border text-center transition-colors duration-250 cursor-pointer ${
                   showStyleControls
-                    ? "bg-purple-950/40 border-purple-800 text-[#60A5FA]"
+                    ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
                     : "bg-neutral-900/40 border-neutral-855"
                 }`}
               >
@@ -504,7 +504,7 @@ export default function PublishMonitor({
                 }}
                 className={`flex-1 py-1 rounded-lg border text-center transition-colors duration-250 cursor-pointer ${
                   showFilterControls
-                    ? "bg-purple-950/40 border-purple-800 text-[#60A5FA]"
+                    ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
                     : "bg-neutral-900/40 border-neutral-855"
                 }`}
               >
@@ -625,7 +625,7 @@ export default function PublishMonitor({
                           onClick={() => setTextColor(c)}
                           className={`h-3.5 w-3.5 rounded-full border cursor-pointer transition-transform hover:scale-110 ${
                             textColor === c
-                              ? "border-white ring-1 ring-purple-500"
+                              ? "border-white ring-1 ring-[#3B82F6]/50"
                               : "border-neutral-900"
                           }`}
                           style={{ backgroundColor: c }}
@@ -640,7 +640,7 @@ export default function PublishMonitor({
                       onClick={() => setUseBackgroundBox(!useBackgroundBox)}
                       className={`px-2 py-0.5 rounded text-[8.5px] font-bold border cursor-pointer transition-colors ${
                         useBackgroundBox
-                          ? "bg-purple-950/40 border-purple-850 text-[#60A5FA]"
+                          ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
                           : "bg-neutral-900 border-neutral-850"
                       }`}
                     >
@@ -659,7 +659,7 @@ export default function PublishMonitor({
                             onClick={() => setBackgroundBoxColor(c)}
                             className={`h-3 w-3 rounded border cursor-pointer ${
                               backgroundBoxColor === c
-                                ? "border-white ring-1 ring-purple-500"
+                                ? "border-white ring-1 ring-[#3B82F6]/50"
                                 : "border-neutral-900"
                             }`}
                             style={{
@@ -732,7 +732,7 @@ export default function PublishMonitor({
                             onClick={() => setFrameColor(c)}
                             className={`h-3.5 w-3.5 rounded border cursor-pointer ${
                               frameColor === c
-                                ? "border-white ring-1 ring-purple-500"
+                                ? "border-white ring-1 ring-[#3B82F6]/50"
                                 : "border-neutral-900"
                             } ${
                               c === "none"
@@ -779,7 +779,7 @@ export default function PublishMonitor({
                       onClick={() => setShowArrow(!showArrow)}
                       className={`px-2 py-0.5 rounded-md text-[8.5px] font-bold border cursor-pointer transition-colors ${
                         showArrow
-                          ? "bg-purple-950/40 border-purple-850 text-purple-305"
+                          ? "bg-[#2A2A2A] border-[#2F2F2F] text-[#3B82F6]"
                           : "bg-neutral-900 border-neutral-850"
                       }`}
                     >
@@ -888,7 +888,7 @@ export default function PublishMonitor({
             <button
               onClick={() => setIsScheduled(!isScheduled)}
               className={`w-10 h-5 flex items-center rounded-full p-0.5 cursor-pointer transition-all duration-300 shrink-0 ${
-                isScheduled ? "bg-purple-650" : "bg-neutral-800"
+                isScheduled ? "bg-[#2A2A2A]" : "bg-neutral-800"
               }`}
             >
               <div
@@ -909,7 +909,7 @@ export default function PublishMonitor({
                   type="date"
                   value={scheduleDate}
                   onChange={(e) => setScheduleDate(e.target.value)}
-                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-purple-500/10 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
+                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/50 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
                 />
               </div>
 
@@ -921,7 +921,7 @@ export default function PublishMonitor({
                   type="time"
                   value={scheduleTime}
                   onChange={(e) => setScheduleTime(e.target.value)}
-                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-purple-500/10 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
+                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/50 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
                 />
               </div>
             </div>
@@ -962,7 +962,7 @@ export default function PublishMonitor({
               className={`font-bold px-2 py-0.5 rounded-md text-[9.5px] ${
                 isShort
                   ? "bg-red-955 text-red-400 border border-red-900/30"
-                  : "bg-purple-950/20 text-[#3B82F6] border border-purple-900/30"
+                  : "bg-[#2A2A2A] text-[#3B82F6] border border-[#2F2F2F]"
               }`}
             >
               {isShort ? "SHORTS" : "REGULAR VIDEO"}
@@ -1005,7 +1005,7 @@ export default function PublishMonitor({
           <div className="text-neutral-500 border-b border-neutral-900/60 pb-1 flex justify-between">
             <span>Publish Process Monitor</span>
             {isPublishing && (
-              <span className="animate-pulse text-purple-405 font-bold">
+              <span className="animate-pulse text-[#3B82F6] font-bold">
                 ACTIVE
               </span>
             )}

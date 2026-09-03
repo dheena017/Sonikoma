@@ -141,7 +141,7 @@ const GENRE_COLORS: Record<string, string> = {
   horror: "bg-orange-500/15 text-orange-400 border-orange-500/20",
   comedy: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
   drama: "bg-blue-500/15 text-blue-400 border-blue-500/20",
-  shonen: "bg-indigo-500/15 text-indigo-400 border-indigo-500/20",
+  shonen: "bg-indigo-500/15 text-indigo-400 border-[#2F2F2F]",
   superhero: "bg-amber-500/15 text-amber-400 border-amber-500/20",
 };
 

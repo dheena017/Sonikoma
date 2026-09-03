@@ -127,7 +127,7 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
                   onClick={() => setTimeframe(tf)}
                   className={`px-3 py-1 rounded-lg text-xs font-medium uppercase transition-all cursor-pointer ${
                     timeframe === tf
-                      ? "bg-purple-600 text-white font-bold shadow-sm"
+                      ? "bg-[#2A2A2A] text-white font-bold shadow-sm"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -211,7 +211,7 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
           </div>
           <div className="flex items-center gap-4 text-xs font-mono">
             <span className="flex items-center gap-1.5 text-[#3B82F6]">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500" /> Input Tokens
+              <span className="w-2.5 h-2.5 rounded-full bg-[#2A2A2A]" /> Input Tokens
             </span>
             <span className="flex items-center gap-1.5 text-indigo-400">
               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Output Tokens
@@ -232,7 +232,7 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
                 <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
                   <div className="w-full max-w-[28px] flex items-end gap-1 h-full justify-center">
                     <div
-                      className="w-1/2 bg-purple-600 rounded-t group-hover:bg-purple-400 transition-all duration-300"
+                      className="w-1/2 bg-[#2A2A2A] rounded-t group-hover:bg-[#2A2A2A] transition-all duration-300"
                       style={{ height: `${inH}%` }}
                       title={`Input: ${inTok} tokens`}
                     />

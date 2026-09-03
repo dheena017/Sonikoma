@@ -921,7 +921,7 @@ const ChapterScraperDeck = React.memo(
                             {/* Expanded header */}
                             <div className="relative flex items-center justify-between gap-2 border-b border-neutral-850/80 pb-3 pt-1.5">
                               <div className="min-w-0 flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-purple-400 animate-pulse  shrink-0" />
+                                <span className="h-2 w-2 rounded-full bg-[#2A2A2A] animate-pulse  shrink-0" />
                                 <div className="min-w-0">
                                   <h4 className="text-xs font-black text-white uppercase tracking-wider font-mono truncate">
                                     Episodes
@@ -995,14 +995,14 @@ const ChapterScraperDeck = React.memo(
                                     onClick={() => setSelectedEpisodeIdx("all")}
                                     className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
                                       selectedEpisodeIdx === "all"
-                                        ? "bg-purple-600/25 border-[#3B82F6]/60 text-white "
+                                        ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white "
                                         : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white hover:bg-neutral-850"
                                     }`}
                                   >
                                     <span className="truncate">
                                       All Episodes
                                     </span>
-                                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-[#60A5FA] border border-purple-900/40 shrink-0">
+                                    <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-[#60A5FA] border border-[#2F2F2F] shrink-0">
                                       {totalScrapedFrames}f
                                     </span>
                                   </button>
@@ -1060,7 +1060,7 @@ const ChapterScraperDeck = React.memo(
                                       }
                                       className={`w-full flex flex-col gap-1 px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition-all text-left cursor-pointer border ${
                                         isSelected
-                                          ? "bg-purple-600/25 border-[#60A5FA] text-purple-200 "
+                                          ? "bg-[#2A2A2A] border-[#60A5FA] text-[#3B82F6] "
                                           : "bg-neutral-900/40 border-neutral-850 text-neutral-350 hover:text-white hover:bg-neutral-850/80"
                                       }`}
                                     >
@@ -1069,7 +1069,7 @@ const ChapterScraperDeck = React.memo(
                                           <span
                                             className={`h-2 w-2 rounded-full shrink-0 ${
                                               isSelected
-                                                ? "bg-purple-400 animate-pulse"
+                                                ? "bg-[#2A2A2A] animate-pulse"
                                                 : "bg-emerald-500/80"
                                             }`}
                                           />
@@ -1079,7 +1079,7 @@ const ChapterScraperDeck = React.memo(
                                             )}
                                           </span>
                                         </div>
-                                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-[#60A5FA] border border-purple-900/40 shrink-0">
+                                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-neutral-950 text-[#60A5FA] border border-[#2F2F2F] shrink-0">
                                           {grp.count}f
                                         </span>
                                       </div>
@@ -1095,7 +1095,7 @@ const ChapterScraperDeck = React.memo(
 
                                     {/* AI Summary & Hero Frame Tooltip on Hover */}
                                     {hoveredEpisodeIdx === originalIdx && (
-                                      <div className="absolute left-full top-0 ml-3 z-50 w-56 p-3 bg-neutral-955/95 border border-purple-900/60 rounded-xl shadow-2xl backdrop-blur-md hidden lg:block animate-in fade-in duration-150 pointer-events-none">
+                                      <div className="absolute left-full top-0 ml-3 z-50 w-56 p-3 bg-neutral-955/95 border border-[#2F2F2F] rounded-xl shadow-2xl backdrop-blur-md hidden lg:block animate-in fade-in duration-150 pointer-events-none">
                                         <div className="space-y-1.5">
                                           <div className="flex items-center justify-between border-b border-neutral-800 pb-1">
                                             <span className="text-[10px] font-black text-[#60A5FA] uppercase tracking-wider">
@@ -1103,7 +1103,7 @@ const ChapterScraperDeck = React.memo(
                                                 grp.episodeLabel
                                               )}
                                             </span>
-                                            <span className="text-[8px] bg-purple-950 text-[#3B82F6] px-1.5 py-0.5 rounded border border-purple-800">
+                                            <span className="text-[8px] bg-[#2A2A2A] text-[#3B82F6] px-1.5 py-0.5 rounded border border-[#2F2F2F]">
                                               AI Tooltip
                                             </span>
                                           </div>

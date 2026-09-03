@@ -375,7 +375,7 @@ const VoiceStudioPage = React.memo(
                     onClick={handlePlaySpeechAudio}
                     className={`px-2.5 py-0.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
                       isPlayingSpeech
-                        ? "bg-purple-600 text-white border-[#60A5FA] shadow-md shadow-purple-900/50 animate-pulse"
+                        ? "bg-[#2A2A2A] text-white border-[#60A5FA] shadow-md shadow-black/50 animate-pulse"
                         : "bg-neutral-900 text-[#60A5FA] border-[#3B82F6]/30 hover:bg-neutral-850 hover:text-white"
                     }`}
                   >
@@ -421,7 +421,7 @@ const VoiceStudioPage = React.memo(
                     onClick={handlePlayNarrativeAudio}
                     className={`px-2.5 py-0.5 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
                       isPlayingNarrative
-                        ? "bg-purple-600 text-white border-[#60A5FA] shadow-md shadow-purple-900/50 animate-pulse"
+                        ? "bg-[#2A2A2A] text-white border-[#60A5FA] shadow-md shadow-black/50 animate-pulse"
                         : "bg-neutral-900 text-[#60A5FA] border-[#3B82F6]/30 hover:bg-neutral-850 hover:text-white"
                     }`}
                   >

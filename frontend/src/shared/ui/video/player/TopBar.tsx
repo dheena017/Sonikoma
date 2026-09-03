@@ -43,7 +43,7 @@ export const VideoPreviewTopBar: React.FC<VideoPreviewTopBarProps> = ({
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className="h-7 w-7 rounded-lg bg-purple-600/15 border border-[#3B82F6]/30 flex items-center justify-center">
+        <div className="h-7 w-7 rounded-lg bg-[#2A2A2A] border border-[#3B82F6]/30 flex items-center justify-center">
           <Monitor className="h-3.5 w-3.5 text-[#3B82F6]" />
         </div>
         <div>

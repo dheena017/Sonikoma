@@ -33,15 +33,15 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
   return (
     <div className="space-y-3 pt-1 pb-4">
       {/* Banner / Instructions */}
-      <div className="p-2.5 rounded-xl bg-purple-950/30 border border-[#3B82F6]/20 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-[10px] font-mono text-purple-200">
+      <div className="p-2.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/20 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-[10px] font-mono text-[#3B82F6]">
           <MessageSquare className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
           <span>Script & Dialogue Director — Edit lines & narration across all panels</span>
         </div>
         <button
           type="button"
           onClick={() => onTriggerFeedback?.("AI Generated dialogue for all empty panels")}
-          className="px-2 py-0.5 rounded-md bg-purple-600 hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm transition"
+          className="px-2 py-0.5 rounded-md bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm transition"
         >
           <Wand2 className="h-2.5 w-2.5" />
           <span>Auto-Script</span>
@@ -61,7 +61,7 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
             onClick={(e) => onSelect(index, e)}
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
-                ? "border-[#3B82F6] bg-purple-950/25 ring-2 ring-purple-500/50 shadow-md"
+                ? "border-[#3B82F6] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 shadow-md"
                 : "border-white/10 bg-[#0c0d1b] hover:border-[#3B82F6]/40"
             }`}
           >
@@ -70,7 +70,7 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
               <div className="flex items-center gap-2 min-w-0">
                 <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-white/10">
                   <img src={displayUrl} alt="" className="w-full h-full object-cover" />
-                  <span className="absolute bottom-0 right-0 text-[7px] font-black font-mono bg-black/80 text-purple-200 px-0.5 rounded">
+                  <span className="absolute bottom-0 right-0 text-[7px] font-black font-mono bg-black/80 text-[#3B82F6] px-0.5 rounded">
                     #{index + 1}
                   </span>
                 </div>

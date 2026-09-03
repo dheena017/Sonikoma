@@ -25,7 +25,7 @@ export const RecentWorkspaceHeader: React.FC<RecentWorkspaceHeaderProps> = ({
       {/* Title row */}
       <div className="px-4 py-3 border-b border-[#3B82F6]/15 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-10 w-10 rounded-3xl bg-purple-500/12 border border-[#3B82F6]/25 flex items-center justify-center ">
+          <div className="h-10 w-10 rounded-3xl bg-[#2A2A2A] border border-[#3B82F6]/25 flex items-center justify-center ">
             <History className="h-4.5 w-4.5 text-[#60A5FA]" />
           </div>
           <div className="min-w-0 space-y-0.5">
@@ -37,8 +37,8 @@ export const RecentWorkspaceHeader: React.FC<RecentWorkspaceHeaderProps> = ({
             </p>
           </div>
         </div>
-        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-purple-100 bg-[#3B82F6]/10 px-3 py-1 rounded-full border border-[#3B82F6]/25 shadow-sm">
-          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-purple-300/15 text-[#60A5FA]">
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#3B82F6] bg-[#3B82F6]/10 px-3 py-1 rounded-full border border-[#3B82F6]/25 shadow-sm">
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#2A2A2A] text-[#60A5FA]">
             🕒
           </span>
           Log

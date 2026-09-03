@@ -155,7 +155,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     if (name.includes("toonily")) return "bg-fuchsia-500 shadow-fuchsia-500/35";
     if (name.includes("bato")) return "bg-sky-500 shadow-sky-500/35";
     if (name.includes("manga")) return "bg-indigo-500 shadow-indigo-500/35";
-    return "bg-purple-500 shadow-purple-500/35";
+    return "bg-[#2A2A2A] shadow-black/50";
   };
 
   // Format Display Title with "Chapter [Num]" or custom subtitle
@@ -214,8 +214,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       className={`w-full min-h-[300px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0e0e14] border ${
         isSelected
-          ? "border-[#3B82F6] ring-2 ring-purple-500/40 shadow-[0_0_30px_rgba(59,130,246,0.35)] bg-purple-955/20"
-          : "border-neutral-800/80 hover:border-[#3B82F6]/50 shadow-xl hover:shadow-2xl hover:shadow-purple-950/25"
+          ? "border-[#3B82F6] ring-2 ring-[#3B82F6]/50 shadow-[0_0_30px_rgba(59,130,246,0.35)] bg-[#2A2A2A]"
+          : "border-neutral-800/80 hover:border-[#3B82F6]/50 shadow-xl hover:shadow-2xl hover:shadow-black/50"
       }`}
     >
       {/* Top Banner / Image Area */}
@@ -229,7 +229,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               type="checkbox"
               checked={isSelected}
               onChange={() => onToggleSelect?.(chapter.url)}
-              className="w-5 h-5 rounded-md border-neutral-700 text-purple-600 focus:ring-purple-500 focus:ring-offset-neutral-900 bg-neutral-955 cursor-pointer accent-purple-600 transition-transform duration-200 hover:scale-105 shadow-md"
+              className="w-5 h-5 rounded-md border-neutral-700 text-[#3B82F6] focus:ring-[#3B82F6]/50 focus:ring-offset-neutral-900 bg-neutral-955 cursor-pointer accent-purple-600 transition-transform duration-200 hover:scale-105 shadow-md"
             />
           </div>
         )}
@@ -254,9 +254,9 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             }}
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-950 p-4">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent" />
-            <div className="w-12 h-12 rounded-2xl bg-neutral-900/80 border border-[#3B82F6]/20 flex items-center justify-center shadow-lg shadow-purple-950/30 mb-1.5 transition-transform group-hover:scale-110 duration-300">
+          <div className="w-full h-full flex flex-col items-center justify-center relative overflow-hidden bg-gradient-to-br from-[#2A2A2A] via-neutral-900 to-neutral-950 p-4">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#2A2A2A] via-transparent to-transparent" />
+            <div className="w-12 h-12 rounded-2xl bg-neutral-900/80 border border-[#3B82F6]/20 flex items-center justify-center shadow-lg shadow-black/50 mb-1.5 transition-transform group-hover:scale-110 duration-300">
               <Sparkles className="w-6 h-6 text-[#3B82F6]/80" />
             </div>
             <span className="text-[11px] font-bold text-[#60A5FA] font-mono tracking-wider">
@@ -409,7 +409,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           {/* Source Platform Badge & Release Date Row */}
           <div className="flex items-center justify-between text-xs text-neutral-400 pt-1 border-t border-neutral-850/60">
             {chapter.url && (
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-widest text-[#60A5FA] bg-purple-950/40 border border-[#3B82F6]/20 px-2 py-0.5 rounded-lg font-mono">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-widest text-[#60A5FA] bg-[#2A2A2A] border border-[#3B82F6]/20 px-2 py-0.5 rounded-lg font-mono">
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${getPlatformColor(
                     chapter.url
@@ -473,7 +473,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                 e.stopPropagation();
                 onClick(chapter);
               }}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-purple-950/40 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+              className="px-3.5 py-1.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-black/50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
               title="Open Chapter in Storyboard Timeline Editor"
             >
               <span>Import</span>

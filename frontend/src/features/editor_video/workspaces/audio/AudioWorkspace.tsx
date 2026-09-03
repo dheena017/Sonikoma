@@ -89,13 +89,13 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
       <WorkspaceLayout.Content>
         {/* Real Live Voiceover Microphone Recorder Panel */}
         {activeTab === "Recorder" && (
-          <div className="rounded-2xl bg-neutral-900/80 border border-purple-900/40 p-4 space-y-4 shadow-xl">
+          <div className="rounded-2xl bg-neutral-900/80 border border-[#2F2F2F] p-4 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold text-white font-mono uppercase flex items-center gap-1.5">
                 <Mic className="h-3.5 w-3.5 text-[#3B82F6]" />
                 Live Microphone Voiceover
               </h4>
-              <span className="text-[10px] font-mono text-[#60A5FA] bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-800/40">
+              <span className="text-[10px] font-mono text-[#60A5FA] bg-[#2A2A2A] px-2 py-0.5 rounded-full border border-[#2F2F2F]">
                 100% Real Browser Audio
               </span>
             </div>
@@ -171,7 +171,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={handleAddRecordedVoiceToTimeline}
-                  className="w-full py-2 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md hover:shadow-purple-600/40 transition-all"
+                  className="w-full py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md hover:shadow-black/50 transition-all"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Voice Recording to A3 Track
@@ -230,7 +230,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                       }
                       onTriggerFeedback(`Set active voice actor to ${v.name}`);
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[10px] font-mono font-bold transition-colors cursor-pointer"
                   >
                     Select
                   </button>

@@ -201,7 +201,7 @@ export default function LandingPage({
               <span
                 className={`text-transparent bg-clip-text bg-gradient-to-r ${
                   isLight
-                    ? "from-blue-700 via-indigo-600 to-purple-700"
+                    ? "from-blue-700 via-indigo-600 to-[#2A2A2A]"
                     : "from-blue-400 via-indigo-400 to-blue-400"
                 }`}
               >
@@ -377,10 +377,10 @@ export default function LandingPage({
                 className={`p-7 rounded-[28px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer ${
                   isLight
                     ? "bg-white border-slate-200 shadow-sm hover:border-indigo-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-950/20"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-[#2F2F2F] hover:shadow-xl hover:shadow-indigo-950/20"
                 }`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl font-black mb-5">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-[#2F2F2F] text-indigo-400 flex items-center justify-center text-xl font-black mb-5">
                   2
                 </div>
                 <h3

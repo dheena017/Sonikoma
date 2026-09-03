@@ -185,7 +185,7 @@ export default function AmbientSoundPicker({
                 {vibe.music_vibe_tags.map((tag, idx) => (
                   <span
                     key={idx}
-                    className="bg-[#3B82F6]/10 border border-[#3B82F6]/20 px-2 py-0.5 rounded text-purple-200"
+                    className="bg-[#3B82F6]/10 border border-[#3B82F6]/20 px-2 py-0.5 rounded text-[#3B82F6]"
                   >
                     {tag}
                   </span>
@@ -198,7 +198,7 @@ export default function AmbientSoundPicker({
                   onSelectMusicTheme(vibe.music_vibe_tags[0]);
                 }
               }}
-              className="px-3 py-1.5 bg-purple-600 hover:bg-[#3B82F6] text-white rounded-lg font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white rounded-lg font-bold transition-all shadow-md active:scale-95 cursor-pointer flex items-center gap-1.5"
             >
               <Check className="w-3 h-3" /> Apply Vibe
             </button>
@@ -226,7 +226,7 @@ export default function AmbientSoundPicker({
                   onClick={() => playPreview(track)}
                   className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all ${
                     playingId === track.id
-                      ? "bg-purple-600 text-white"
+                      ? "bg-[#2A2A2A] text-white"
                       : "bg-neutral-900 text-neutral-400 group-hover:text-[#60A5FA]"
                   }`}
                 >

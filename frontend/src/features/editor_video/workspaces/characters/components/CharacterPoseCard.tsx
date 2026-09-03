@@ -24,11 +24,11 @@ export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({
       className="p-3 rounded-2xl bg-[#090814] border border-white/5 hover:border-[#3B82F6]/40 flex items-center justify-between cursor-pointer transition-all duration-200 group shadow-sm hover:shadow-[0_4px_20px_rgba(59,130,246,0.15)]"
     >
       <div className="flex items-center gap-2.5 min-w-0">
-        <div className="w-8 h-8 rounded-xl bg-purple-950/60 border border-purple-800/40 flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition-transform">
+        <div className="w-8 h-8 rounded-xl bg-[#2A2A2A] border border-[#2F2F2F] flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition-transform">
           {pose.icon || "🧍"}
         </div>
         <div className="min-w-0">
-          <h5 className="text-xs font-bold text-white group-hover:text-purple-200 transition-colors truncate">
+          <h5 className="text-xs font-bold text-white group-hover:text-[#3B82F6] transition-colors truncate">
             {pose.title}
           </h5>
           {pose.angle && (
@@ -40,7 +40,7 @@ export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({
       </div>
 
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="text-[8.5px] font-bold font-mono text-[#60A5FA] bg-purple-950/80 px-2 py-0.5 rounded-md border border-purple-800/40 uppercase">
+        <span className="text-[8.5px] font-bold font-mono text-[#60A5FA] bg-[#2A2A2A] px-2 py-0.5 rounded-md border border-[#2F2F2F] uppercase">
           {pose.tag}
         </span>
         <button
@@ -48,7 +48,7 @@ export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({
           className={`h-7 px-2.5 rounded-lg text-[10px] font-bold font-mono flex items-center gap-1 transition-all ${
             applied
               ? "bg-emerald-600 text-white"
-              : "bg-purple-600/30 hover:bg-[#3B82F6] text-purple-200 hover:text-white border border-[#3B82F6]/30"
+              : "bg-[#2A2A2A] hover:bg-[#3B82F6] text-[#3B82F6] hover:text-white border border-[#3B82F6]/30"
           }`}
         >
           {applied ? (

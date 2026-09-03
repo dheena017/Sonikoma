@@ -24,7 +24,7 @@ export const ResourceItemCard: React.FC<ResourceItemCardProps> = ({
             style={{ backgroundColor: resource.hex }}
           />
         ) : (
-          <div className="h-8 w-8 rounded-lg bg-purple-900/40 border border-[#3B82F6]/30 flex items-center justify-center shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-[#2A2A2A] border border-[#3B82F6]/30 flex items-center justify-center shrink-0">
             <Package className="h-4 w-4 text-[#3B82F6]" />
           </div>
         )}
@@ -53,7 +53,7 @@ export const ResourceItemCard: React.FC<ResourceItemCardProps> = ({
       ) : (
         <button
           onClick={() => onApply(resource.title)}
-          className="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold shrink-0 transition-colors cursor-pointer"
+          className="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold shrink-0 transition-colors cursor-pointer"
         >
           Apply
         </button>

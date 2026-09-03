@@ -37,13 +37,13 @@ export const InspectorSection: React.FC<{
   const [open, setOpen] = useState(section.defaultOpen ?? false);
   const { Icon } = section;
   return (
-    <div className="border-b border-purple-900/20">
+    <div className="border-b border-[#2F2F2F]">
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-white/5 transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-2">
-          <div className="h-5 w-5 rounded-lg bg-purple-900/40 border border-[#3B82F6]/30 flex items-center justify-center">
+          <div className="h-5 w-5 rounded-lg bg-[#2A2A2A] border border-[#3B82F6]/30 flex items-center justify-center">
             <Icon className="h-3 w-3 text-[#3B82F6]" />
           </div>
           <span className="text-[10px] font-mono font-bold text-neutral-200 uppercase tracking-widest">
@@ -155,7 +155,7 @@ export const SelectField: React.FC<{
       <select
         value={val}
         onChange={(e) => setVal(e.target.value)}
-        className="flex-1 bg-neutral-900/90 border border-neutral-800 rounded-lg text-[9px] font-mono text-purple-200 px-2 py-1 outline-none focus:border-[#3B82F6] cursor-pointer"
+        className="flex-1 bg-neutral-900/90 border border-neutral-800 rounded-lg text-[9px] font-mono text-[#3B82F6] px-2 py-1 outline-none focus:border-[#3B82F6] cursor-pointer"
       >
         {options.map((o) => (
           <option key={o}>{o}</option>
@@ -348,7 +348,7 @@ export const InspectorPanel: React.FC<{
   return (
     <div className="h-full flex flex-col overflow-hidden bg-[#0c0d16]/75 text-white select-none backdrop-blur-3xl border-l border-white/10">
       {/* Header */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-purple-900/20 bg-neutral-950/70 backdrop-blur-md shrink-0">
+      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#2F2F2F] bg-neutral-950/70 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-2">
           <Sliders className="h-3.5 w-3.5 text-[#3B82F6]" />
           <span className="text-xs font-mono font-bold text-white uppercase tracking-widest">

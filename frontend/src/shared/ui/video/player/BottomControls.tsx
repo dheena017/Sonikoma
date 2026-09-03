@@ -268,7 +268,7 @@ export const VideoPreviewBottomControls: React.FC<
           <div className="flex items-center gap-2 group/volume">
             <button
               onClick={() => setIsMuted(!isMuted)}
-              className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+              className="h-8 w-8 rounded-xl hover:bg-neutral-800/80 border border-transparent hover:border-white/10 text-neutral-300 hover:text-white flex items-center justify-center transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/50"
             >
               {isMuted ? (
                 <VolumeX className="h-4 w-4" />
@@ -335,7 +335,7 @@ export const VideoPreviewBottomControls: React.FC<
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               isLooping
-                ? "bg-purple-600/25 border-[#3B82F6]/50 text-[#60A5FA]"
+                ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Loop Playback (L)"
@@ -354,7 +354,7 @@ export const VideoPreviewBottomControls: React.FC<
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               showSubtitles
-                ? "bg-purple-600/25 border-[#3B82F6]/50 text-[#60A5FA]"
+                ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Toggle Subtitles"
@@ -377,7 +377,7 @@ export const VideoPreviewBottomControls: React.FC<
             }}
             className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
               showSettings
-                ? "bg-purple-600/25 border-[#3B82F6]/50 text-[#60A5FA]"
+                ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
                 : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
             }`}
             title="Playback Settings"
@@ -390,7 +390,7 @@ export const VideoPreviewBottomControls: React.FC<
               onClick={() => setIsTheaterMode(!isTheaterMode)}
               className={`h-8 w-8 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
                 isTheaterMode
-                  ? "bg-purple-600/25 border-[#3B82F6]/50 text-[#60A5FA]"
+                  ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
                   : "hover:bg-neutral-800/80 text-neutral-400 hover:text-white border-transparent"
               }`}
               title="Toggle Theater Mode (T)"

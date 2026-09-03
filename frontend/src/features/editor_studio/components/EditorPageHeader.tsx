@@ -394,16 +394,16 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             aria-label={isDirty ? "Save Unsaved Changes" : "Project Saved"}
             className={`flex items-center gap-1.5 px-3 h-9 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${
               isSaving
-                ? "bg-purple-600/30 border-[#3B82F6]/40 text-purple-200 cursor-wait opacity-80"
+                ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-[#3B82F6] cursor-wait opacity-80"
                 : isDirty
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white border-[#60A5FA]/50 shadow-lg shadow-purple-900/40 animate-pulse"
+                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white border-[#60A5FA]/50 shadow-lg shadow-black/50 animate-pulse"
                 : "bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white"
             }`}
           >
             <Save
               className={`h-3.5 w-3.5 ${
                 isSaving
-                  ? "animate-spin text-purple-200"
+                  ? "animate-spin text-[#3B82F6]"
                   : isDirty
                   ? "text-[#60A5FA]"
                   : "text-neutral-400"
@@ -480,7 +480,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
               {user?.full_name ||
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}

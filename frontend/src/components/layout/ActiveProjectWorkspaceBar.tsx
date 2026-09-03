@@ -116,7 +116,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
             </button>
             <button
               onClick={() => setDrawerOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600/20 hover:bg-[#3B82F6] text-[#60A5FA] hover:text-white border border-[#3B82F6]/30 transition-all text-xs font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-[#60A5FA] hover:text-white border border-[#3B82F6]/30 transition-all text-xs font-medium"
             >
               <FolderSync className="w-3.5 h-3.5" />
               <span>Select Another</span>
@@ -143,7 +143,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
             <Loader2 className="w-4 h-4 animate-spin" />
           </div>
           <div className="flex-1">
-            <div className="h-3 w-32 bg-purple-900/50 rounded animate-pulse" />
+            <div className="h-3 w-32 bg-[#2A2A2A] rounded animate-pulse" />
             <div className="h-2 w-20 bg-neutral-800 rounded animate-pulse mt-1" />
           </div>
           <div className="flex items-center gap-1.5">
@@ -177,7 +177,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-medium shadow-md shadow-purple-500/20 transition-all text-xs"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-medium shadow-md shadow-black/50 transition-all text-xs"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -222,7 +222,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
       case "draft":
         return (
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#3B82F6]/10 text-[#60A5FA] border border-[#3B82F6]/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#2A2A2A] animate-pulse" />
             <span>Draft</span>
           </span>
         );
@@ -274,7 +274,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-purple-900/60 to-indigo-900/60 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
+              <div className="w-full h-full bg-gradient-to-br from-[#2A2A2A] to-indigo-900/60 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
                 {title.charAt(0).toUpperCase()}
               </div>
             )}

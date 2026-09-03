@@ -79,7 +79,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
     <div className="w-full space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 rounded-xl bg-purple-600/20 flex items-center justify-center border border-[#3B82F6]/30">
+          <div className="h-8 w-8 rounded-xl bg-[#2A2A2A] flex items-center justify-center border border-[#3B82F6]/30">
             <History className="h-4 w-4 text-[#3B82F6]" />
           </div>
           <h3 className="text-xl font-black text-white tracking-tight">
@@ -159,7 +159,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
                     .substring(2, 10)}`;
                   navigateTo?.(`/scraper/editor?id=${tempId}`);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
               >
                 <Plus className="h-3.5 w-3.5" /> New Project
               </button>

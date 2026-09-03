@@ -238,7 +238,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                   className="w-full h-full object-contain object-center pointer-events-none"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-950/40 via-neutral-950/30 to-indigo-950/40 flex flex-col items-center justify-center gap-2 text-neutral-400 font-mono text-xs select-none p-6 text-center">
+                <div className="w-full h-full bg-gradient-to-br from-[#2A2A2A] via-neutral-950/30 to-indigo-950/40 flex flex-col items-center justify-center gap-2 text-neutral-400 font-mono text-xs select-none p-6 text-center">
                   <div className="w-12 h-12 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] ">
                     <Film className="w-5 h-5" />
                   </div>
@@ -258,7 +258,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
             <div
               onClick={() => setSelectedLayer("character")}
               className={`absolute max-w-[85%] max-h-[85%] cursor-pointer transition-all z-20 ${selectedLayer === "character"
-                  ? "ring-2 ring-purple-400 border border-[#3B82F6]/60 "
+                  ? "ring-2 ring-[#3B82F6]/50 border border-[#3B82F6]/60 "
                   : ""
                 }`}
               style={{
@@ -276,11 +276,11 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
 
               {selectedLayer === "character" && (
                 <>
-                  <div className="absolute -top-2 -left-2 h-3.5 w-3.5 bg-purple-400 border-2 border-black rounded-full shadow-md" />
-                  <div className="absolute -top-2 -right-2 h-3.5 w-3.5 bg-purple-400 border-2 border-black rounded-full shadow-md" />
-                  <div className="absolute -bottom-2 -left-2 h-3.5 w-3.5 bg-purple-400 border-2 border-black rounded-full shadow-md" />
-                  <div className="absolute -bottom-2 -right-2 h-3.5 w-3.5 bg-purple-400 border-2 border-black rounded-full shadow-md" />
-                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-widest pointer-events-none shadow-lg border border-[#60A5FA]/40 flex items-center gap-1">
+                  <div className="absolute -top-2 -left-2 h-3.5 w-3.5 bg-[#2A2A2A] border-2 border-black rounded-full shadow-md" />
+                  <div className="absolute -top-2 -right-2 h-3.5 w-3.5 bg-[#2A2A2A] border-2 border-black rounded-full shadow-md" />
+                  <div className="absolute -bottom-2 -left-2 h-3.5 w-3.5 bg-[#2A2A2A] border-2 border-black rounded-full shadow-md" />
+                  <div className="absolute -bottom-2 -right-2 h-3.5 w-3.5 bg-[#2A2A2A] border-2 border-black rounded-full shadow-md" />
+                  <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#2A2A2A] text-white px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-widest pointer-events-none shadow-lg border border-[#60A5FA]/40 flex items-center gap-1">
                     <Move className="h-2.5 w-2.5" /> Character Layer
                   </div>
                 </>

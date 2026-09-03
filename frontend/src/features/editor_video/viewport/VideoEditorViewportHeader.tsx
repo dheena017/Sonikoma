@@ -108,7 +108,7 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
         >
           <Video className="h-3 w-3" />
           <span>Final Video</span>
-          <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-purple-950/60 border border-purple-800/40 text-[#60A5FA] uppercase">
+          <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-[#2A2A2A] border border-[#2F2F2F] text-[#60A5FA] uppercase">
             MP4
           </span>
         </button>
@@ -131,7 +131,7 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
                 onClick={() => setAspectRatio(ratio.id)}
                 className={`px-2 py-0.5 rounded transition cursor-pointer font-bold ${
                   aspectRatio === ratio.id
-                    ? "bg-purple-600 text-white shadow-sm"
+                    ? "bg-[#2A2A2A] text-white shadow-sm"
                     : "hover:text-white hover:bg-white/5"
                 }`}
                 title={`Aspect Ratio: ${ratio.label}`}

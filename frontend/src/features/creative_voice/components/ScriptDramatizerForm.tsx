@@ -352,7 +352,7 @@ export default function ScriptDramatizerForm({
                             onClick={() => handlePreviewLineTTS(resLine, idx)}
                             className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
                               playingIdx === idx
-                                ? "bg-purple-600 text-white animate-pulse"
+                                ? "bg-[#2A2A2A] text-white animate-pulse"
                                 : "bg-neutral-950 text-[#60A5FA] border border-[#3B82F6]/30 hover:text-white"
                             }`}
                             aria-label={playingIdx === idx ? "Stop playback" : "Listen"}

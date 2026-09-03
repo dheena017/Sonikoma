@@ -33,8 +33,8 @@ export default function DashboardAIPipeline() {
           </div>
         </div>
 
-        <div className="flex gap-3.5 p-4 rounded-2xl bg-black/40 border border-white/5 hover:border-indigo-500/30 transition-all">
-          <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 h-fit shrink-0">
+        <div className="flex gap-3.5 p-4 rounded-2xl bg-black/40 border border-white/5 hover:border-[#2F2F2F] transition-all">
+          <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-[#2F2F2F] h-fit shrink-0">
             <Sliders className="h-4 w-4" />
           </div>
           <div>

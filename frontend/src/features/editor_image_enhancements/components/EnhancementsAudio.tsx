@@ -173,12 +173,12 @@ export function EnhancementsAudio({
             <button
               type="button"
               onClick={handleToggleDialogueAudio}
-              className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer border shadow-sm ${
+              className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer border shadow-sm ${
                 isDialoguePlaying && !isDialoguePaused
                   ? "bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60"
                   : isDialoguePaused
-                  ? "bg-purple-950/40 border-[#3B82F6]/40 text-[#60A5FA] hover:bg-purple-900/60"
-                  : "bg-indigo-950/40 border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 hover:text-indigo-200"
+                  ? "bg-[#2A2A2A] border-[#3B82F6] text-white hover:bg-[#333333]"
+                  : "bg-[#2A2A2A] border-[#2F2F2F] text-neutral-300 hover:border-[#3B82F6] hover:bg-[#333333] hover:text-white"
               }`}
             >
               {isDialoguePlaying && !isDialoguePaused ? (
@@ -234,12 +234,12 @@ export function EnhancementsAudio({
             <button
               type="button"
               onClick={handleToggleNarrativeAudio}
-              className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer border shadow-sm ${
+              className={`px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer border shadow-sm ${
                 isNarrativePlaying && !isNarrativePaused
                   ? "bg-amber-950/40 border-amber-500/40 text-amber-300 hover:bg-amber-900/60"
                   : isNarrativePaused
-                  ? "bg-purple-950/40 border-[#3B82F6]/40 text-[#60A5FA] hover:bg-purple-900/60"
-                  : "bg-indigo-950/40 border-indigo-500/30 text-indigo-300 hover:bg-indigo-900/60 hover:text-indigo-200"
+                  ? "bg-[#2A2A2A] border-[#3B82F6] text-white hover:bg-[#333333]"
+                  : "bg-[#2A2A2A] border-[#2F2F2F] text-neutral-300 hover:border-[#3B82F6] hover:bg-[#333333] hover:text-white"
               }`}
             >
               {isNarrativePlaying && !isNarrativePaused ? (
@@ -340,8 +340,8 @@ export function EnhancementsAudio({
               onClick={handleToggleShake}
               className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 outline-none cursor-pointer ${
                 activeStoryboardPanel?.audio_reactive_shake
-                  ? "bg-purple-600"
-                  : "bg-neutral-800"
+                  ? "bg-[#3B82F6]"
+                  : "bg-[#1E1E1E] border border-[#2F2F2F]"
               }`}
             >
               <div

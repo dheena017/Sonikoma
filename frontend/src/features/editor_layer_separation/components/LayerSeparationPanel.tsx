@@ -184,7 +184,7 @@ export default function LayerSeparationPanel({
       {/* ── Header ── */}
       <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <div className="p-2 rounded-xl bg-indigo-500/10 border border-[#2F2F2F] text-indigo-400">
             <Layers className="h-4 w-4" />
           </div>
           <span className="text-xs uppercase font-mono font-bold text-white tracking-wider">
@@ -213,10 +213,10 @@ export default function LayerSeparationPanel({
           disabled={isProcessingLayers}
           className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
             isProcessingLayers
-              ? "bg-purple-900/10 text-[#3B82F6] border-purple-800/20 cursor-not-allowed"
+              ? "bg-[#2A2A2A] text-[#3B82F6] border-[#2F2F2F] cursor-not-allowed"
               : hasLayers
-              ? "bg-purple-950/40 text-[#60A5FA] border-purple-850 hover:bg-purple-900/30"
-              : "bg-purple-600 hover:bg-[#3B82F6] text-white border-[#3B82F6]/20 shadow-md shadow-purple-900/20"
+              ? "bg-[#2A2A2A] text-[#60A5FA] border-[#2F2F2F] hover:bg-[#2A2A2A]"
+              : "bg-[#2A2A2A] hover:bg-[#3B82F6] text-white border-[#3B82F6]/20 shadow-md shadow-black/50"
           }`}
         >
           {isProcessingLayers ? (
@@ -256,7 +256,7 @@ export default function LayerSeparationPanel({
           disabled={isDebuggingYolo}
           className={`w-full py-2.5 rounded-xl text-[10px] font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
             isDebuggingYolo
-              ? "bg-purple-900/10 text-[#3B82F6] border-purple-800/20 cursor-not-allowed"
+              ? "bg-[#2A2A2A] text-[#3B82F6] border-[#2F2F2F] cursor-not-allowed"
               : "bg-neutral-900 hover:bg-neutral-800 text-neutral-300 border-white/10"
           }`}
         >

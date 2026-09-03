@@ -230,11 +230,11 @@ const DialogueClipSlider: React.FC<DialogueClipSliderProps> = ({
             left: `${leftPct}%`,
             width: `${widthPct}%`,
           }}
-          className="absolute top-0 bottom-0 bg-purple-600 hover:bg-[#3B82F6]/90 border-l border-r border-[#60A5FA] rounded flex items-center justify-between group cursor-grab active:cursor-grabbing"
+          className="absolute top-0 bottom-0 bg-[#2A2A2A] hover:bg-[#3B82F6]/90 border-l border-r border-[#60A5FA] rounded flex items-center justify-between group cursor-grab active:cursor-grabbing"
           onMouseDown={(e) => handleMouseDown(e, "center")}
         >
           <div
-            className="w-1.5 h-full bg-purple-400/70 hover:bg-white cursor-ew-resize flex-shrink-0"
+            className="w-1.5 h-full bg-[#2A2A2A] hover:bg-white cursor-ew-resize flex-shrink-0"
             onMouseDown={(e) => handleMouseDown(e, "left")}
           />
 
@@ -243,7 +243,7 @@ const DialogueClipSlider: React.FC<DialogueClipSliderProps> = ({
           </span>
 
           <div
-            className="w-1.5 h-full bg-purple-400/70 hover:bg-white cursor-ew-resize flex-shrink-0"
+            className="w-1.5 h-full bg-[#2A2A2A] hover:bg-white cursor-ew-resize flex-shrink-0"
             onMouseDown={(e) => handleMouseDown(e, "right")}
           />
         </div>
@@ -861,13 +861,13 @@ const StoryboardCard = ({
           : "w-[240px] sm:w-[260px] shrink-0"
       } group relative rounded-2xl overflow-hidden border p-3 space-y-2.5 transition-all duration-200 ease-out select-none outline-none backdrop-blur-md shadow-md [content-visibility:auto] [contain-intrinsic-size:260px_350px] will-change-transform ${
         panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll
-          ? "border-2 border-[#3B82F6] bg-purple-950/30  ring-1 ring-purple-400/40 scale-[1.02]"
+          ? "border-2 border-[#3B82F6] bg-[#2A2A2A]  ring-1 ring-[#3B82F6]/50 scale-[1.02]"
           : isCurrent && isSelected
-          ? "bg-purple-950/40 border-[#60A5FA] ring-2 ring-purple-500  scale-[1.02]"
+          ? "bg-[#2A2A2A] border-[#60A5FA] ring-2 ring-[#3B82F6]/50  scale-[1.02]"
           : isCurrent
           ? "bg-[#0c0d16]/90 border-[#3B82F6] shadow-md scale-[1.01]"
           : isSelected
-          ? "border-[#3B82F6] bg-purple-950/30 shadow-md ring-1 ring-purple-500/20 scale-[1.02]"
+          ? "border-[#3B82F6] bg-[#2A2A2A] shadow-md ring-1 ring-[#3B82F6]/50 scale-[1.02]"
           : "border-neutral-800/60 bg-neutral-950 hover:border-[#3B82F6]/50 hover:shadow-md hover:scale-[1.02]"
       }`}
     >
@@ -921,7 +921,7 @@ const StoryboardCard = ({
 
         {/* Selection indicator overlay when selected */}
         {isSelected && (
-          <div className="absolute inset-0 bg-purple-600/10 border-2 border-[#3B82F6]/60 rounded-xl pointer-events-none z-[5]" />
+          <div className="absolute inset-0 bg-[#2A2A2A] border-2 border-[#3B82F6]/60 rounded-xl pointer-events-none z-[5]" />
         )}
 
         {/* Hover hint label overlay */}
@@ -937,7 +937,7 @@ const StoryboardCard = ({
             className={[
               "backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
               isSelected
-                ? "bg-gradient-to-r from-purple-650 to-indigo-650 border-[#60A5FA]/50 text-white shadow-[0_4px_12px_rgba(59,130,246,0.35)]"
+                ? "bg-gradient-to-r from-[#2A2A2A] to-indigo-650 border-[#60A5FA]/50 text-white shadow-[0_4px_12px_rgba(59,130,246,0.35)]"
                 : "bg-neutral-900 border-neutral-700 text-[#3B82F6] shadow-inner",
             ].join(" ")}
           >
@@ -977,7 +977,7 @@ const StoryboardCard = ({
         {/* Selection checkbox circle with animated pulse ring at Top-Right */}
         <div className="absolute top-2 right-2 z-20">
           {isSelected && (
-            <div className="absolute inset-0 rounded-full bg-purple-500/35 animate-ping" />
+            <div className="absolute inset-0 rounded-full bg-[#2A2A2A] animate-ping" />
           )}
           <button
             type="button"
@@ -1097,7 +1097,7 @@ const StoryboardCard = ({
                   className={`px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
                     isDialoguePlaying && !isDialoguePaused
                       ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
-                      : "bg-purple-950/40 border-purple-700/50 text-[#60A5FA] hover:bg-purple-900/60 hover:text-white"
+                      : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA] hover:bg-[#2A2A2A] hover:text-white"
                   }`}
                   title="Play Dialogue Preview"
                 >
@@ -1131,9 +1131,9 @@ const StoryboardCard = ({
               value={panel.speech_text}
               onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
               placeholder="Enter dialogue or subtitle text..."
-              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
-                  ? "opacity-60 cursor-not-allowed border-purple-900/40 text-[#60A5FA]"
+                  ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
                   : "hover:border-neutral-700"
               }`}
             />
@@ -1156,7 +1156,7 @@ const StoryboardCard = ({
                   className={`px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
                     isNarrativePlaying && !isNarrativePaused
                       ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
-                      : "bg-purple-950/40 border-purple-700/50 text-[#60A5FA] hover:bg-purple-900/60 hover:text-white"
+                      : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA] hover:bg-[#2A2A2A] hover:text-white"
                   }`}
                   title="Play Narration Preview"
                 >
@@ -1192,9 +1192,9 @@ const StoryboardCard = ({
                 handleModifyNarrative?.(panel.id, e.target.value)
               }
               placeholder="Enter narrative voiceover or scene description..."
-              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
-                  ? "opacity-60 cursor-not-allowed border-purple-900/40 text-[#60A5FA]"
+                  ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
                   : "hover:border-neutral-700"
               }`}
             />
@@ -1214,9 +1214,9 @@ const StoryboardCard = ({
               value={panel.sfx || ""}
               onChange={(e) => handleModifySFX(panel.id, e.target.value)}
               placeholder="e.g. door slam, footsteps..."
-              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-purple-500/30 font-sans transition-all shadow-inner ${
+              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
-                  ? "opacity-60 cursor-not-allowed text-[#60A5FA] border-purple-900/40"
+                  ? "opacity-60 cursor-not-allowed text-[#60A5FA] border-[#2F2F2F]"
                   : "hover:border-neutral-700"
               }`}
             />
@@ -1238,9 +1238,9 @@ const StoryboardCard = ({
                 handleModifyVisualDescription(panel.id, e.target.value)
               }
               placeholder="Describe visual scene for lighting..."
-              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
-                  ? "opacity-60 cursor-not-allowed text-[#60A5FA] border-purple-900/40"
+                  ? "opacity-60 cursor-not-allowed text-[#60A5FA] border-[#2F2F2F]"
                   : "hover:border-neutral-700"
               }`}
             />
@@ -1352,7 +1352,7 @@ const StoryboardCard = ({
               type="button"
               disabled={isMagicProcessing}
               onClick={handleMagicMotion}
-              className="py-1.5 px-1 rounded-lg border border-[#3B82F6]/50 bg-gradient-to-r from-purple-950/60 to-indigo-950/60 hover:from-purple-900/60 hover:to-indigo-900/60 text-purple-200 hover:text-white text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm disabled:opacity-40 active:scale-95"
+              className="py-1.5 px-1 rounded-lg border border-[#3B82F6]/50 bg-gradient-to-r from-[#2A2A2A] to-indigo-950/60 hover:from-[#2A2A2A] hover:to-indigo-900/60 text-[#3B82F6] hover:text-white text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm disabled:opacity-40 active:scale-95"
               title="Apply Magic Motion"
             >
               {isMagicProcessing ? (

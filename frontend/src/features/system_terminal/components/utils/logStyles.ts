@@ -79,7 +79,7 @@ export function getLogColor(log: LogEntry): string {
     return "text-amber-300";
 
   if (module === "image editor") return "text-orange-400";
-  if (module === "stitcher" || module === "stitch") return "text-indigo-300";
+  if (module === "stitcher" || module === "stitch") return "text-neutral-300";
 
   if (module === "bubbles" || module === "speech bubbles")
     return "text-pink-400";

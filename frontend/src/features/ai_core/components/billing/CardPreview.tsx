@@ -14,12 +14,12 @@ export const CardPreview: React.FC<CardPreviewProps> = ({
 }) => {
   return (
     <div className="flex items-center justify-center p-4">
-      <div className="relative w-full max-w-[320px] h-48 rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-800 to-neutral-900 p-6 flex flex-col justify-between text-left text-white shadow-2xl shadow-purple-950/40 overflow-hidden font-sans select-none border border-white/10">
-        <div className="absolute top-[-10%] right-[-10%] w-32 h-32 rounded-full bg-purple-400/20 blur-xl pointer-events-none" />
+      <div className="relative w-full max-w-[320px] h-48 rounded-2xl bg-gradient-to-br from-[#2A2A2A] via-indigo-800 to-neutral-900 p-6 flex flex-col justify-between text-left text-white shadow-2xl shadow-black/50 overflow-hidden font-sans select-none border border-white/10">
+        <div className="absolute top-[-10%] right-[-10%] w-32 h-32 rounded-full bg-[#2A2A2A] blur-xl pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[-10%] w-32 h-32 rounded-full bg-indigo-500/20 blur-xl pointer-events-none" />
 
         <div className="flex items-center justify-between relative z-10">
-          <span className="text-[10px] font-black uppercase tracking-widest text-purple-200">
+          <span className="text-[10px] font-black uppercase tracking-widest text-[#3B82F6]">
             Sonikoma AI Studio
           </span>
           <CreditCard className="w-5 h-5 text-white/80" />

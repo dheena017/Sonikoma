@@ -326,12 +326,12 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
             }}
             className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
               isDraggingLeft
-                ? "bg-purple-500/80 "
+                ? "bg-[#2A2A2A] "
                 : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
             }`}
             title="Drag to resize Left Panel (Double click to reset)"
           >
-            <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-purple-300 transition-colors" />
+            <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-[#2A2A2A] transition-colors" />
           </div>
         )}
 
@@ -388,12 +388,12 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
                 }}
                 className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
                   isDraggingRight
-                    ? "bg-purple-500/80 "
+                    ? "bg-[#2A2A2A] "
                     : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
                 }`}
                 title="Drag to resize Inspector Panel (Double click to reset)"
               >
-                <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-purple-300 transition-colors" />
+                <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-[#2A2A2A] transition-colors" />
               </div>
             )}
 
@@ -418,12 +418,12 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               }}
               className={`h-2 w-full relative cursor-row-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-t border-b border-white/[0.06] ${
                 isDraggingTimeline
-                  ? "bg-purple-500/80 "
+                  ? "bg-[#2A2A2A] "
                   : "bg-[#0c0c14] hover:bg-[#3B82F6]/30"
               }`}
               title="Drag to resize Timeline (Double click to reset)"
             >
-              <div className="h-[2px] w-12 rounded-full bg-white/20 group-hover:bg-purple-300 transition-colors" />
+              <div className="h-[2px] w-12 rounded-full bg-white/20 group-hover:bg-[#2A2A2A] transition-colors" />
             </div>
           )}
 

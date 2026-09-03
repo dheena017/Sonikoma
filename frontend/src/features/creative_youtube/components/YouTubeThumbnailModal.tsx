@@ -440,7 +440,7 @@ export default function YouTubeThumbnailModal({
       {/* Main Modal Shell */}
       <div className="relative w-full max-w-5xl bg-[#09090b] border border-neutral-800 rounded-3xl shadow-[0_25px_60px_-15px_rgba(239,68,68,0.2)] overflow-hidden z-10 flex flex-col max-h-[92vh] ring-1 ring-white/5 animate-in zoom-in-95 duration-200">
         {/* Glow Ribbon */}
-        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-600 via-purple-600 to-pink-600 opacity-90" />
+        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-600 via-[#2A2A2A] to-pink-600 opacity-90" />
 
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-neutral-800/70 bg-gradient-to-b from-neutral-900/70 to-transparent flex items-center justify-between shrink-0">

@@ -9,11 +9,11 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-16 md:py-24 relative overflow-hidden bg-transparent">
       {/* Background decorative glowing orbs */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#2A2A2A] rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Main glassmorphic card */}
-      <div className="relative w-full max-w-xl bg-neutral-950/40 backdrop-blur-xl border border-neutral-800/80 rounded-2xl p-8 md:p-12 text-center shadow-2xl shadow-purple-950/10 overflow-hidden">
+      <div className="relative w-full max-w-xl bg-neutral-950/40 backdrop-blur-xl border border-neutral-800/80 rounded-2xl p-8 md:p-12 text-center shadow-2xl shadow-black/50 overflow-hidden">
         {/* Subtle grid pattern background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
 
@@ -27,7 +27,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
         </div>
 
         {/* 404 Header Text with Gradient */}
-        <h1 className="relative z-10 font-sans font-extrabold text-8xl md:text-9xl tracking-tighter bg-gradient-to-r from-purple-400 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent select-none filter drop- leading-none mb-4">
+        <h1 className="relative z-10 font-sans font-extrabold text-8xl md:text-9xl tracking-tighter bg-gradient-to-r from-[#2A2A2A] via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent select-none filter drop- leading-none mb-4">
           404
         </h1>
 
@@ -45,7 +45,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
         <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
             onClick={onNavigateHome}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-medium hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-purple-900/30 hover:shadow-purple-900/50 hover:scale-[1.02] cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-medium hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-black/50 hover:shadow-black/50 hover:scale-[1.02] cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Return to Dashboard

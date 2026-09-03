@@ -628,7 +628,7 @@ export default function ProjectConfirmModal({
 
               <div className={cardCls}>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="p-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+                  <div className="p-1.5 bg-indigo-500/10 border border-[#2F2F2F] rounded-xl">
                     <ImageIcon className="h-3.5 w-3.5 text-indigo-400" />
                   </div>
                   <span className="text-xs font-bold text-white">Cover Art &amp; Visibility</span>

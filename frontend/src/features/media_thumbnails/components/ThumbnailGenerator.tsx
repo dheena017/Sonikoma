@@ -62,7 +62,7 @@ export default function ThumbnailGenerator({
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="px-3.5 py-1.5 bg-purple-650 hover:bg-purple-550 text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 cursor-pointer"
+          className="px-3.5 py-1.5 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-white rounded-xl text-xs font-mono font-bold transition-all disabled:opacity-40 cursor-pointer"
         >
           {loading ? "Designing..." : "✦ Draft Concept"}
         </button>

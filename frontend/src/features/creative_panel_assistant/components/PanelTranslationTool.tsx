@@ -129,7 +129,7 @@ export default function PanelTranslationTool({
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-[#3B82F6]/10 bg-gradient-to-br from-neutral-950/95 via-neutral-900/80 to-purple-950/20 p-4 space-y-3 shadow-[0_20px_40px_rgba(0,0,0,0.28)]">
+        <div className="rounded-2xl border border-[#3B82F6]/10 bg-gradient-to-br from-neutral-950/95 via-neutral-900/80 to-[#2A2A2A] p-4 space-y-3 shadow-[0_20px_40px_rgba(0,0,0,0.28)]">
           <div className="flex items-center justify-between">
             <h5 className="text-[11px] font-mono font-bold text-[#60A5FA] uppercase tracking-wider">
               Dialogue translation
@@ -219,7 +219,7 @@ export default function PanelTranslationTool({
           )}
         </div>
 
-        <div className="rounded-2xl border border-[#3B82F6]/10 bg-gradient-to-br from-neutral-950/95 via-neutral-900/80 to-purple-950/20 p-4 space-y-3 shadow-[0_20px_40px_rgba(0,0,0,0.28)]">
+        <div className="rounded-2xl border border-[#3B82F6]/10 bg-gradient-to-br from-neutral-950/95 via-neutral-900/80 to-[#2A2A2A] p-4 space-y-3 shadow-[0_20px_40px_rgba(0,0,0,0.28)]">
           <div className="flex items-center justify-between">
             <h5 className="text-[11px] font-mono font-bold text-[#60A5FA] uppercase tracking-wider">
               Compliance scan

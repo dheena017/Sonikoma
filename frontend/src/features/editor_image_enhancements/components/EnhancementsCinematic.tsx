@@ -20,7 +20,7 @@ export function EnhancementsCinematic({
   return (
     <div className="space-y-3 pt-2">
       <div className="flex items-center gap-2">
-        <div className="p-1 rounded-lg bg-indigo-500/10 border border-indigo-500/15">
+        <div className="p-1 rounded-lg bg-indigo-500/10 border border-[#2F2F2F]">
           <Film className="h-3 w-3 text-indigo-400" />
         </div>
         <span className="text-[10px] uppercase font-mono font-bold text-neutral-400 tracking-widest">

@@ -110,7 +110,7 @@ export default function ShortsScriptTab({
                   onClick={() => setTargetDuration(dur)}
                   className={`text-[9px] font-mono px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
                     targetDuration === dur
-                      ? "bg-purple-600 text-white font-bold"
+                      ? "bg-[#2A2A2A] text-white font-bold"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -122,7 +122,7 @@ export default function ShortsScriptTab({
             <button
               onClick={handleGenerate}
               disabled={loading}
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-sm active:scale-95 shrink-0"
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-black/50 hover:shadow-sm active:scale-95 shrink-0"
             >
               {loading ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />

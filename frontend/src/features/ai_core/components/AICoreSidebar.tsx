@@ -95,7 +95,7 @@ const ActiveProjectSidebarWidget: React.FC<{
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-purple-200 border border-neutral-700/60 hover:border-[#3B82F6]/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
+            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-[#3B82F6] border border-neutral-700/60 hover:border-[#3B82F6]/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
           >
             <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
@@ -108,7 +108,7 @@ const ActiveProjectSidebarWidget: React.FC<{
           </p>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-purple-500/20 cursor-pointer active:scale-98"
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-black/50 cursor-pointer active:scale-98"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -261,7 +261,7 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
                     <div
                       className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                         active
-                          ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                          ? "h-5 bg-[#2A2A2A] shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
                           : "h-0 bg-transparent opacity-0"
                       }`}
                     />
@@ -273,7 +273,7 @@ const AICoreSidebar: React.FC<AICoreSidebarProps> = ({
                       }}
                       className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
                         active
-                          ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(59,130,246,0.12)] border border-[#3B82F6]/30 font-bold"
+                          ? "bg-[#2A2A2A] text-white shadow-[inset_0_0_16px_rgba(59,130,246,0.12)] border border-[#3B82F6]/30 font-bold"
                           : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
                       }`}
                     >

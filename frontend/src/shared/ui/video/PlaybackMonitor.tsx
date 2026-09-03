@@ -1039,7 +1039,7 @@ export default function VideoPreviewCinemaPlayer({
         }`}
     >
       {/* BACKGROUND OVERLAY */}
-      <div className="absolute inset-0 bg-radial-gradient from-purple-950/20 via-black to-black opacity-95 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-radial-gradient from-[#2A2A2A] via-black to-black opacity-95 pointer-events-none z-0" />
 
       {/* CINEMATIC LETTERBOX BARS */}
       <div
@@ -1056,7 +1056,7 @@ export default function VideoPreviewCinemaPlayer({
 
       {/* FAST-FORWARD 2X BADGE */}
       {isFastForwarding && (
-        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-purple-600/90 text-white font-mono text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl shadow-purple-950 animate-pulse border border-[#60A5FA]/30">
+        <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-[#2A2A2A] text-white font-mono text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl shadow-black/50 animate-pulse border border-[#60A5FA]/30">
           <RotateCcw className="h-3.5 w-3.5 animate-spin" />
           <span>2x Fast-Forward Active</span>
         </div>
@@ -1064,7 +1064,7 @@ export default function VideoPreviewCinemaPlayer({
 
       {/* PIP PREVIEW WINDOW */}
       {isPiPActive && isMock && (
-        <div className="fixed bottom-24 right-6 w-72 h-60 bg-neutral-900/95 border-2 border-purple-600 rounded-2xl shadow-2xl z-[80] flex flex-col overflow-hidden animate-fade-in pointer-events-auto">
+        <div className="fixed bottom-24 right-6 w-72 h-60 bg-neutral-900/95 border-2 border-[#2F2F2F] rounded-2xl shadow-2xl z-[80] flex flex-col overflow-hidden animate-fade-in pointer-events-auto">
           <div className="bg-neutral-950 px-3 py-1.5 flex items-center justify-between border-b border-neutral-800">
             <span className="text-[9px] font-mono text-[#3B82F6] font-bold uppercase tracking-wider flex items-center gap-1">
               <Tv className="h-3 w-3" /> PiP Preview Mode

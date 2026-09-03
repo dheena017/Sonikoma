@@ -723,7 +723,7 @@ export function FloatingSelectionBar({
                   type="button"
                   onClick={handleAnalyzeAll}
                   disabled={isAnalyzingAll || busyLocal}
-                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-purple-950/20 border-purple-800/40 hover:bg-[#3B82F6] hover:border-purple-550 text-[#60A5FA] hover:text-white transition-all active:scale-95 disabled:opacity-40"
+                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-[#2A2A2A] border-[#2F2F2F] hover:bg-[#3B82F6] hover:border-[#2F2F2F] text-[#60A5FA] hover:text-white transition-all active:scale-95 disabled:opacity-40"
                 >
                   <Brain className="h-4 w-4 text-[#3B82F6] group-hover:text-white" />{" "}
                   AI Analyze
@@ -734,7 +734,7 @@ export function FloatingSelectionBar({
                 <button
                   type="button"
                   onClick={() => sortSelected("asc")}
-                  className="px-3 py-2 text-xs font-bold flex items-center gap-1 hover:bg-indigo-500/10 text-neutral-455 hover:text-indigo-300 transition-all cursor-pointer"
+                  className="px-3 py-2 text-xs font-bold flex items-center gap-1 hover:bg-indigo-500/10 text-neutral-455 hover:text-neutral-300 transition-all cursor-pointer"
                 >
                   <ArrowUpDown className="h-4 w-4 text-indigo-400" /> Sort ↑
                 </button>
@@ -742,7 +742,7 @@ export function FloatingSelectionBar({
                 <button
                   type="button"
                   onClick={() => sortSelected("desc")}
-                  className="px-3 py-2 text-xs font-bold flex items-center gap-1 hover:bg-indigo-500/10 text-neutral-455 hover:text-indigo-300 transition-all cursor-pointer"
+                  className="px-3 py-2 text-xs font-bold flex items-center gap-1 hover:bg-indigo-500/10 text-neutral-455 hover:text-neutral-300 transition-all cursor-pointer"
                 >
                   Sort ↓
                 </button>
@@ -825,8 +825,8 @@ export function FloatingSelectionBar({
               }
             >
               <div className="flex items-center gap-3 shrink-0">
-                <div className="flex items-center gap-2 bg-purple-950/60 border border-purple-700/50 rounded-xl px-3.5 py-2 shrink-0">
-                  <div className="h-5 w-5 rounded bg-purple-500 flex items-center justify-center text-white text-[9px] font-bold font-mono">
+                <div className="flex items-center gap-2 bg-[#2A2A2A] border border-[#2F2F2F] rounded-xl px-3.5 py-2 shrink-0">
+                  <div className="h-5 w-5 rounded bg-[#2A2A2A] flex items-center justify-center text-white text-[9px] font-bold font-mono">
                     {selectedCount}
                   </div>
                   <div>
@@ -844,7 +844,7 @@ export function FloatingSelectionBar({
 
                 {/* Progress */}
                 {(isAnyBusy || busyLocal) && (
-                  <div className="flex flex-col gap-1.5 px-3.5 py-2 rounded-xl bg-purple-950/25 border border-purple-800/40 text-[#60A5FA] text-xs font-mono shrink-0">
+                  <div className="flex flex-col gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A2A2A] border border-[#2F2F2F] text-[#60A5FA] text-xs font-mono shrink-0">
                     <div className="flex items-center gap-2">
                       <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
                       <span className="font-bold tracking-tight whitespace-nowrap">
@@ -924,7 +924,7 @@ export function FloatingSelectionBar({
                     <button
                       type="button"
                       onClick={handleAnalyzeSelected}
-                      className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-[#3B82F6] text-white shadow-md hover:shadow-purple-500/20"
+                      className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer transition-all bg-[#2A2A2A] border-[#2F2F2F] hover:bg-[#3B82F6] text-white shadow-md hover:shadow-black/50"
                     >
                       <Sparkles className="h-4 w-4 text-white animate-pulse" />
                       Analyze Selected
@@ -1009,7 +1009,7 @@ export function FloatingSelectionBar({
                     type="button"
                     onClick={handleAddToStoryboard}
                     disabled={isAnyBusy || busyLocal}
-                    className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-purple-650 border-purple-550 hover:bg-[#3B82F6] text-white shadow-md hover:shadow-purple-500/20 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-all bg-[#2A2A2A] border-[#2F2F2F] hover:bg-[#3B82F6] text-white shadow-md hover:shadow-black/50 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Plus className="h-4 w-4" />
                     Add to Storyboard
@@ -1048,7 +1048,7 @@ export function FloatingSelectionBar({
                 <button
                   type="button"
                   onClick={() => setShowMoreActions(!showMoreActions)}
-                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-[#3B82F6]/40 hover:bg-purple-950/20 text-neutral-400 hover:text-[#93C5FD]"
+                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-[#3B82F6]/40 hover:bg-[#2A2A2A] text-neutral-400 hover:text-[#93C5FD]"
                 >
                   {showMoreActions ? (
                     <ChevronUp className="h-4 w-4" />

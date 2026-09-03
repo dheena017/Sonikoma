@@ -70,7 +70,7 @@ export default function AdPlacementTab({
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-sm active:scale-95 shrink-0"
+          className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-black/50 hover:shadow-sm active:scale-95 shrink-0"
         >
           {loading ? (
             <RefreshCw className="w-4 h-4 animate-spin" />

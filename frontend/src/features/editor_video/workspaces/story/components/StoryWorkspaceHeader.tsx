@@ -23,7 +23,7 @@ export const StoryWorkspaceHeader: React.FC<StoryWorkspaceHeaderProps> = ({
   <div className="shrink-0">
     <div className="px-4 py-3 border-b border-[#3B82F6]/15 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0">
-        <div className="h-10 w-10 rounded-3xl bg-purple-500/12 border border-[#3B82F6]/25 flex items-center justify-center ">
+        <div className="h-10 w-10 rounded-3xl bg-[#2A2A2A] border border-[#3B82F6]/25 flex items-center justify-center ">
           <BookOpen className="h-4.5 w-4.5 text-[#60A5FA]" />
         </div>
         <div className="min-w-0 space-y-0.5">

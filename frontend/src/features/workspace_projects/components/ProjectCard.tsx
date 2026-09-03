@@ -431,7 +431,7 @@ export default function ProjectCard({
               e.stopPropagation();
               onOpenProject(project);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-[#60A5FA]/40 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-purple-950/40 active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-[#60A5FA]/40 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-black/50 active:scale-95 shrink-0"
           >
             <span>Resume</span>
             <ArrowRight className="w-3 h-3 text-white" />

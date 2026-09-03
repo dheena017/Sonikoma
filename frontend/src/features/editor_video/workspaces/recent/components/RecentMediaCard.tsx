@@ -11,15 +11,15 @@ export const RecentMediaCard: React.FC<{
     className="p-3 rounded-[1.75rem] bg-[#07060f] border border-white/5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:border-[#3B82F6]/25 hover:shadow-[0_18px_48px_rgba(59,130,246,0.22)] transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer"
   >
     <div className="flex items-center gap-3 min-w-0 flex-1">
-      <div className="h-11 w-11 rounded-3xl bg-purple-500/12 border border-[#3B82F6]/20 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+      <div className="h-11 w-11 rounded-3xl bg-[#2A2A2A] border border-[#3B82F6]/20 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
         <Image className="h-5.5 w-5.5 text-[#60A5FA]" />
       </div>
       <div className="min-w-0 flex-1 space-y-1">
-        <h4 className="text-xs font-semibold text-white group-hover:text-purple-100 leading-tight font-sans truncate">
+        <h4 className="text-xs font-semibold text-white group-hover:text-[#3B82F6] leading-tight font-sans truncate">
           {item.title}
         </h4>
         <div className="flex flex-wrap items-center gap-2 text-[10px] text-neutral-400 font-mono">
-          <span className="text-[9px] uppercase tracking-[0.18em] bg-[#3B82F6]/15 text-purple-200 px-2 py-0.5 rounded-full border border-[#3B82F6]/20 font-semibold shrink-0">
+          <span className="text-[9px] uppercase tracking-[0.18em] bg-[#3B82F6]/15 text-[#3B82F6] px-2 py-0.5 rounded-full border border-[#3B82F6]/20 font-semibold shrink-0">
             Used {item.usesCount}x
           </span>
           <span className="flex items-center gap-1 shrink-0">

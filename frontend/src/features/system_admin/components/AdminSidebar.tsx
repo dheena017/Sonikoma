@@ -204,7 +204,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                     {/* Active Side Accent Indicator */}
                     <div
                       className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${active
-                        ? "h-5 bg-purple-400 shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                        ? "h-5 bg-[#2A2A2A] shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
                         : "h-0 bg-transparent opacity-0"
                         }`}
                     />
@@ -215,7 +215,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                         onClose();
                       }}
                       className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${active
-                        ? "bg-purple-600/15 text-white shadow-[inset_0_0_16px_rgba(59,130,246,0.12)] border border-[#3B82F6]/30 font-bold"
+                        ? "bg-[#2A2A2A] text-white shadow-[inset_0_0_16px_rgba(59,130,246,0.12)] border border-[#3B82F6]/30 font-bold"
                         : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
                         }`}
                     >

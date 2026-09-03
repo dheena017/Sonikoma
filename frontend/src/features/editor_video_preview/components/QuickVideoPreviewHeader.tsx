@@ -99,7 +99,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
         <Layers className="h-3.5 w-3.5" />
         <span>Storyboard Preview</span>
         {panelsCount > 0 && (
-          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-purple-200">
+          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-[#3B82F6]">
             {panelsCount}p
           </span>
         )}
@@ -116,7 +116,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
       >
         <Video className="h-3.5 w-3.5" />
         <span>Final Video</span>
-        <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-purple-950/60 border border-purple-800/40 text-[#60A5FA] uppercase">
+        <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-[#2A2A2A] border border-[#2F2F2F] text-[#60A5FA] uppercase">
           MP4
         </span>
       </button>
@@ -131,7 +131,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
           className={`h-8 px-2.5 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md ${
             showAdvancedSettings
-              ? "bg-purple-600/30 border-[#3B82F6] text-purple-200"
+              ? "bg-[#2A2A2A] border-[#3B82F6] text-[#3B82F6]"
               : "bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white"
           }`}
           title="Render and Vision Settings"

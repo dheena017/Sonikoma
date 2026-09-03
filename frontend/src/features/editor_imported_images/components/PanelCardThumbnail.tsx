@@ -39,7 +39,7 @@ const getScrapedImageStatus = (url: string) => {
   if (url.includes("_cleaned")) {
     return {
       text: "CLEANED",
-      bg: "bg-gradient-to-r from-fuchsia-600 to-blue-600 border-[#60A5FA]/50 text-purple-100 shadow-[0_4px_12px_rgba(59,130,246,0.25)]",
+      bg: "bg-gradient-to-r from-fuchsia-600 to-blue-600 border-[#60A5FA]/50 text-[#3B82F6] shadow-[0_4px_12px_rgba(59,130,246,0.25)]",
     };
   }
 
@@ -195,7 +195,7 @@ export function PanelCardThumbnail({
         className={[
           "absolute top-2 left-2 z-20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
           isSelected
-            ? "bg-gradient-to-r from-purple-650 to-indigo-650 border-[#60A5FA]/50 text-white shadow-[0_4px_12px_rgba(59,130,246,0.35)]"
+            ? "bg-gradient-to-r from-[#2A2A2A] to-indigo-650 border-[#60A5FA]/50 text-white shadow-[0_4px_12px_rgba(59,130,246,0.35)]"
             : "bg-neutral-900 border-neutral-700 text-[#3B82F6] shadow-inner",
         ].join(" ")}
       >
@@ -230,7 +230,7 @@ export function PanelCardThumbnail({
       {/* Selection checkbox circle with animated pulse ring */}
       <div className="absolute top-2 right-2 z-20">
         {isSelected && (
-          <div className="absolute inset-0 rounded-full bg-purple-500/35 animate-ping" />
+          <div className="absolute inset-0 rounded-full bg-[#2A2A2A] animate-ping" />
         )}
         <div
           onClick={onCheckboxClick}
@@ -262,14 +262,14 @@ export function PanelCardThumbnail({
           <button
             onClick={handleRotateClockwise}
             title="Rotate 90° Clockwise"
-            className="p-1.5 rounded-xl text-neutral-450 hover:text-[#93C5FD] hover:bg-purple-950/60 transition-all duration-150 cursor-pointer active:scale-90"
+            className="p-1.5 rounded-xl text-neutral-450 hover:text-[#93C5FD] hover:bg-[#2A2A2A] transition-all duration-150 cursor-pointer active:scale-90"
           >
             <RotateCw className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={handleFlipHorizontal}
             title="Flip Horizontally"
-            className="p-1.5 rounded-xl text-neutral-450 hover:text-[#93C5FD] hover:bg-purple-950/60 transition-all duration-150 cursor-pointer active:scale-90"
+            className="p-1.5 rounded-xl text-neutral-450 hover:text-[#93C5FD] hover:bg-[#2A2A2A] transition-all duration-150 cursor-pointer active:scale-90"
           >
             <FlipHorizontal className="h-3.5 w-3.5" />
           </button>

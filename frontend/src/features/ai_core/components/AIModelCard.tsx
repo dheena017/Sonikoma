@@ -69,7 +69,7 @@ export default function AIModelCard({
   const getUsageColor = (pct: number) => {
     if (pct >= 85) return "bg-rose-500 text-rose-400";
     if (pct >= 60) return "bg-amber-500 text-amber-400";
-    return "bg-purple-500 text-[#3B82F6]";
+    return "bg-[#2A2A2A] text-[#3B82F6]";
   };
 
   const handleCopyEndpoint = (e: React.MouseEvent) => {

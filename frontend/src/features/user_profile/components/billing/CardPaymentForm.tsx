@@ -98,7 +98,7 @@ export default function CardPaymentForm({
         disabled={!isComplete}
         className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all ${
           isComplete
-            ? "bg-purple-600 hover:bg-[#3B82F6] text-white cursor-pointer"
+            ? "bg-[#2A2A2A] hover:bg-[#3B82F6] text-white cursor-pointer"
             : "bg-neutral-700 text-neutral-500 cursor-not-allowed opacity-60"
         }`}
       >

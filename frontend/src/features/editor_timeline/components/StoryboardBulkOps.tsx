@@ -35,7 +35,7 @@ export default function StoryboardBulkOps({
   handleBatchMagicMotion = () => {},
 }: StoryboardBulkOpsProps) {
   return (
-    <div className="bg-neutral-950/70 p-3 sm:p-4 rounded-xl border border-purple-900/30 grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 animate-fadeIn">
+    <div className="bg-neutral-950/70 p-3 sm:p-4 rounded-xl border border-[#2F2F2F] grid grid-cols-1 md:grid-cols-5 gap-3 sm:gap-4 animate-fadeIn">
       {/* Duration */}
       <div className="space-y-2">
         <label className="text-[10px] font-bold text-neutral-400 uppercase font-mono tracking-wider block">
@@ -57,7 +57,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set duration");
               handleBulkSetDuration();
             }}
-            className="flex-1 bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-bold py-1 rounded transition-colors cursor-pointer"
+            className="flex-1 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[10px] font-bold py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
           </button>
@@ -87,7 +87,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set motion");
               handleBulkSetMotion();
             }}
-            className="bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+            className="bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
           </button>
@@ -118,7 +118,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set preset");
               handleBulkSetPreset();
             }}
-            className="bg-purple-600 hover:bg-[#3B82F6] text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+            className="bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
           >
             Apply All
           </button>
@@ -136,9 +136,9 @@ export default function StoryboardBulkOps({
           onClick={handleBatchMagicMotion}
           className={`w-full py-2 rounded text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer h-7 ${
             isBatchMagicProcessing
-              ? "bg-purple-900/10 text-[#3B82F6] border-purple-800/20 cursor-not-allowed"
+              ? "bg-[#2A2A2A] text-[#3B82F6] border-[#2F2F2F] cursor-not-allowed"
               : selectedCount > 0
-              ? "bg-purple-600 hover:bg-[#3B82F6] text-white border-[#3B82F6]/20 shadow-md shadow-purple-900/20"
+              ? "bg-[#2A2A2A] hover:bg-[#3B82F6] text-white border-[#3B82F6]/20 shadow-md shadow-black/50"
               : "bg-neutral-900/40 text-neutral-500 border-neutral-800/40 cursor-not-allowed"
           }`}
         >

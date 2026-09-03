@@ -59,7 +59,7 @@ export const AutoCropGeneralTab = React.memo(function AutoCropGeneralTab(
                   Batch & Target Preview
                 </span>
               </div>
-              <span className="text-[9px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-purple-950/60 border border-purple-900/40 text-[#60A5FA]">
+              <span className="text-[9px] font-mono px-2.5 py-0.5 rounded-full font-bold bg-[#2A2A2A] border border-[#2F2F2F] text-[#60A5FA]">
                 {batchCount > 0
                   ? `${batchCount} IMAGES QUEUED`
                   : "NO IMAGES QUEUED"}

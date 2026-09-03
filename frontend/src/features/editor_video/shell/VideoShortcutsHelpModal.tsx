@@ -208,7 +208,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#12121e]">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-purple-600/20 border border-[#3B82F6]/30 flex items-center justify-center text-[#60A5FA]">
+            <div className="h-9 w-9 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/30 flex items-center justify-center text-[#60A5FA]">
               <Keyboard className="h-5 w-5" />
             </div>
             <div>
@@ -255,7 +255,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
                   onClick={() => setActiveCat(cat.id)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer shrink-0 ${
                     isSelected
-                      ? "bg-purple-600 text-white shadow-sm"
+                      ? "bg-[#2A2A2A] text-white shadow-sm"
                       : "bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10 border border-white/5"
                   }`}
                 >
@@ -313,7 +313,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white font-medium transition cursor-pointer"
+            className="px-4 py-1.5 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-medium transition cursor-pointer"
           >
             Got it
           </button>

@@ -23,7 +23,7 @@ export const AiWorkspaceHeader: React.FC<AiWorkspaceHeaderProps> = ({
   onSearchChange,
 }) => (
   <div className="shrink-0">
-    <div className="px-3.5 py-2.5 border-b border-purple-900/30 bg-neutral-950/80 backdrop-blur-md flex items-center justify-between">
+    <div className="px-3.5 py-2.5 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-md flex items-center justify-between">
       <div className="flex items-center gap-2.5">
         <div className="h-6 w-6 rounded-lg bg-[#3B82F6]/20 border border-[#3B82F6]/40 flex items-center justify-center ">
           <Wand2 className="h-3.5 w-3.5 text-[#3B82F6]" />

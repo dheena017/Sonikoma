@@ -204,7 +204,7 @@ export default function SettingsAccountPage({
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-semibold"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/50 transition-all font-semibold"
                   />
                 </div>
 
@@ -251,7 +251,7 @@ export default function SettingsAccountPage({
                     value={avatarUrl}
                     onChange={(e) => setAvatarUrl(e.target.value)}
                     placeholder="https://example.com/avatar.jpg"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-mono text-xs"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/50 transition-all font-mono text-xs"
                   />
                 </div>
               </div>
@@ -265,7 +265,7 @@ export default function SettingsAccountPage({
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Tell us about yourself or your webtoon series..."
                   rows={4}
-                  className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-purple-500/20 transition-all font-semibold"
+                  className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/50 transition-all font-semibold"
                 />
               </div>
 
@@ -294,7 +294,7 @@ export default function SettingsAccountPage({
                     id="newsletter"
                     checked={newsletter}
                     onChange={(e) => setNewsletter(e.target.checked)}
-                    className="w-4 h-4 rounded bg-[#050508] border-neutral-850 text-purple-600 focus:ring-purple-500"
+                    className="w-4 h-4 rounded bg-[#050508] border-neutral-850 text-[#3B82F6] focus:ring-[#3B82F6]/50"
                   />
                   <label
                     htmlFor="newsletter"
@@ -309,7 +309,7 @@ export default function SettingsAccountPage({
                 <button
                   type="submit"
                   disabled={profileLoading}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
                 >
                   {profileLoading ? (
                     <>
@@ -352,7 +352,7 @@ export default function SettingsAccountPage({
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
                     placeholder="••••••••"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 pr-10 text-sm text-neutral-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 pr-10 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
                   />
                   <button
                     type="button"
@@ -379,7 +379,7 @@ export default function SettingsAccountPage({
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
                     placeholder="Min. 8 characters"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 pr-10 text-sm text-neutral-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 pr-10 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
                   />
                   <button
                     type="button"
@@ -405,7 +405,7 @@ export default function SettingsAccountPage({
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
+                  className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
                 />
               </div>
 

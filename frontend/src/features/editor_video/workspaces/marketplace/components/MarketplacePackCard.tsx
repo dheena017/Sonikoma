@@ -29,7 +29,7 @@ export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({
           className={`absolute top-2 right-2 text-[8px] font-mono font-bold px-1.5 py-0.5 rounded ${
             isFree
               ? "bg-green-500/80 text-white"
-              : "bg-purple-600/80 text-white"
+              : "bg-[#2A2A2A] text-white"
           }`}
         >
           {pack.price}
@@ -47,7 +47,7 @@ export const MarketplacePackCard: React.FC<MarketplacePackCardProps> = ({
         </div>
         <button
           onClick={onPurchase}
-          className="px-2.5 py-1.5 rounded-lg bg-purple-600 hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shrink-0"
+          className="px-2.5 py-1.5 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold flex items-center gap-1 cursor-pointer transition-all shrink-0"
         >
           <ShoppingCart className="h-3 w-3" />
           {isFree ? "Get Free" : "Buy"}

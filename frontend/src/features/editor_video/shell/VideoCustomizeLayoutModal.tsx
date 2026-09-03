@@ -205,7 +205,7 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
                   onClick={() => setTimelinePosition(pos)}
                   className={`flex items-center justify-between px-4 py-2 rounded-xl border text-xs font-medium capitalize transition-all ${
                     localConfig.timelinePosition === pos
-                      ? "bg-purple-600/20 border-[#3B82F6]/60 text-white "
+                      ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white "
                       : "bg-neutral-800/40 border-neutral-700/60 text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -230,7 +230,7 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
                   onClick={() => setInspectorPosition(pos)}
                   className={`flex items-center justify-between px-4 py-2 rounded-xl border text-xs font-medium capitalize transition-all ${
                     localConfig.inspectorPosition === pos
-                      ? "bg-purple-600/20 border-[#3B82F6]/60 text-white "
+                      ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white "
                       : "bg-neutral-800/40 border-neutral-700/60 text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -247,7 +247,7 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
         <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-neutral-700/70 bg-[#18181c]">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white font-semibold text-xs transition-all shadow-md active:scale-95"
+            className="px-5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-semibold text-xs transition-all shadow-md active:scale-95"
           >
             Done
           </button>

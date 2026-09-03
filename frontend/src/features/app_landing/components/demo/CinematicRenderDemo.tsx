@@ -42,7 +42,7 @@ export function CinematicRenderDemo({
         <div className="flex items-center gap-2">
           <button
             onClick={onGetStarted}
-            className="px-3.5 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-lg hover:bg-[#3B82F6] transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-[#2A2A2A] text-white text-xs font-bold rounded-lg hover:bg-[#3B82F6] transition-colors cursor-pointer"
           >
             Export Video
           </button>
@@ -66,8 +66,8 @@ export function CinematicRenderDemo({
                 className={`p-2 rounded-lg border text-xs cursor-pointer transition-all ${
                   i === 0
                     ? isLight
-                      ? "bg-purple-50 border-[#3B82F6] text-purple-700 font-bold"
-                      : "bg-purple-600/25 border-[#3B82F6] text-white font-bold"
+                      ? "bg-[#2A2A2A] border-[#3B82F6] text-[#3B82F6] font-bold"
+                      : "bg-[#2A2A2A] border-[#3B82F6] text-white font-bold"
                     : isLight
                     ? "bg-slate-50 border-slate-200 text-slate-800 hover:border-slate-300 hover:text-slate-950 font-medium"
                     : "bg-neutral-900 border-neutral-800 text-neutral-200 hover:border-neutral-700 font-medium"
@@ -89,7 +89,7 @@ export function CinematicRenderDemo({
             Viewport Preview
           </div>
           <div className="relative w-full aspect-video bg-gradient-to-br from-neutral-900 to-black rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
-            <div className="w-28 h-44 bg-gradient-to-br from-purple-700 to-indigo-900 rounded-lg border border-white/20 shadow-xl relative overflow-hidden flex flex-col items-center justify-center text-center p-2">
+            <div className="w-28 h-44 bg-gradient-to-br from-[#2A2A2A] to-indigo-900 rounded-lg border border-white/20 shadow-xl relative overflow-hidden flex flex-col items-center justify-center text-center p-2">
               <span className="text-white text-xs font-bold">Panel 1 Motion</span>
               <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 text-emerald-400 text-[9px] font-mono font-bold">
                 {aspect}

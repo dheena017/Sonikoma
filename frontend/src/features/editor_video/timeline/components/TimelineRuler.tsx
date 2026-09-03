@@ -167,7 +167,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
               Timeline
             </span>
           </div>
-          <span className="text-[9px] font-mono text-[#60A5FA] font-bold bg-purple-950/60 px-1.5 py-0.5 rounded border border-[#3B82F6]/30 shrink-0 ml-1">
+          <span className="text-[9px] font-mono text-[#60A5FA] font-bold bg-[#2A2A2A] px-1.5 py-0.5 rounded border border-[#3B82F6]/30 shrink-0 ml-1">
             {formatTimecode(totalDuration, true)}
           </span>
         </div>
@@ -181,10 +181,10 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
           {/* Hover Time Scrubber Line & Tooltip */}
           {hoverPct !== null && hoverTime !== null && (
             <div
-              className="pointer-events-none absolute inset-y-0 w-px bg-purple-400/50 z-20"
+              className="pointer-events-none absolute inset-y-0 w-px bg-[#2A2A2A] z-20"
               style={{ left: `${(hoverTime * 30)}px` }}
             >
-              <div className="absolute top-0.5 -translate-x-1/2 px-1.5 py-0.2 rounded bg-purple-600 text-white text-[8px] font-mono font-bold shadow-lg whitespace-nowrap">
+              <div className="absolute top-0.5 -translate-x-1/2 px-1.5 py-0.2 rounded bg-[#2A2A2A] text-white text-[8px] font-mono font-bold shadow-lg whitespace-nowrap">
                 {formatTimecode(hoverTime, true)}
               </div>
             </div>
@@ -208,11 +208,11 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
                   }}
                 >
                   {tick.label && (
-                    <span className="text-[8px] font-mono text-neutral-400 mb-0.5 whitespace-nowrap select-none group-hover/ruler:text-purple-200 transition-colors font-semibold">
+                    <span className="text-[8px] font-mono text-neutral-400 mb-0.5 whitespace-nowrap select-none group-hover/ruler:text-[#3B82F6] transition-colors font-semibold">
                       {tick.label}
                     </span>
                   )}
-                  <div className="w-[1px] h-3 bg-white/40 group-hover/ruler:bg-purple-400/80 transition-colors" />
+                  <div className="w-[1px] h-3 bg-white/40 group-hover/ruler:bg-[#2A2A2A] transition-colors" />
                 </div>
               );
             }

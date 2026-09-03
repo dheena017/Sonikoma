@@ -487,7 +487,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         }
                       }
                     }}
-                    className="p-2 px-3 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold active:scale-95 shadow-md"
+                    className="p-2 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold active:scale-95 shadow-md"
                   >
                     <Save className="h-4 w-4" />
                     Save Settings
@@ -723,7 +723,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         .getState()
                         .setPlayerSettings({ isPlayerOpen: true });
                     }}
-                    className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/80 to-purple-950/30 hover:from-neutral-850 hover:to-purple-900/40 border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 text-[#60A5FA] hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
+                    className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/80 to-[#2A2A2A] hover:from-neutral-850 hover:to-[#2A2A2A] border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 text-[#60A5FA] hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
                   >
                     <div className="flex items-center gap-3.5">
                       <div className="h-8 w-8 rounded-xl bg-[#3B82F6]/20 border border-[#3B82F6]/40 flex items-center justify-center text-[#60A5FA] group-hover:scale-105 transition-transform ">
@@ -739,7 +739,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/80 border border-[#3B82F6]/40 text-xs font-mono text-[#60A5FA] group-hover:bg-purple-900/80 group-hover:text-purple-100 transition-colors shadow-sm">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/40 text-xs font-mono text-[#60A5FA] group-hover:bg-[#2A2A2A] group-hover:text-[#3B82F6] transition-colors shadow-sm">
                       <Eye className="h-3.5 w-3.5" />
                       <span>Expand Preview</span>
                     </div>

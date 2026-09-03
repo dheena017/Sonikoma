@@ -43,7 +43,7 @@ export default function CanvasCropSelection({
     : "border-[#60A5FA]";
   const badgeColorClass = isOutOfTolerance
     ? "text-orange-400 border-orange-800/40"
-    : "text-[#3B82F6] border-purple-800/40";
+    : "text-[#3B82F6] border-[#2F2F2F]";
   const glowColor = isOutOfTolerance
     ? "rgba(249,115,22,0.3)"
     : "rgba(139,92,246,0.25)";
@@ -82,7 +82,7 @@ export default function CanvasCropSelection({
 
       {/* SELECTION BOUNDARY GUIDES - Set transition-none */}
       <div
-        className={`absolute border-[2.5px] border-dashed pointer-events-none group transition-none bg-purple-500/[0.12] ${themeColorClass}`}
+        className={`absolute border-[2.5px] border-dashed pointer-events-none group transition-none bg-[#2A2A2A]/[0.12] ${themeColorClass}`}
         style={{
           top: `${editCropTop}%`,
           bottom: `${editCropBottom}%`,
@@ -160,7 +160,7 @@ export default function CanvasCropSelection({
           }}
           className="absolute -top-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
         >
-          <div className="mx-auto w-12 h-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <div className="mx-auto w-12 h-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
         <div
           onMouseDown={(e) => {
@@ -175,7 +175,7 @@ export default function CanvasCropSelection({
           }}
           className="absolute -bottom-1.5 left-2 right-2 h-3 cursor-ns-resize pointer-events-auto group/edge z-40"
         >
-          <div className="mx-auto w-12 h-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <div className="mx-auto w-12 h-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity mt-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
         <div
           onMouseDown={(e) => {
@@ -190,7 +190,7 @@ export default function CanvasCropSelection({
           }}
           className="absolute top-2 bottom-2 -left-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
         >
-          <div className="my-auto h-12 w-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <div className="my-auto h-12 w-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
         <div
           onMouseDown={(e) => {
@@ -205,7 +205,7 @@ export default function CanvasCropSelection({
           }}
           className="absolute top-2 bottom-2 -right-1.5 w-3 cursor-ew-resize pointer-events-auto group/edge flex items-center z-40"
         >
-          <div className="my-auto h-12 w-1 bg-purple-500/50 rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
+          <div className="my-auto h-12 w-1 bg-[#2A2A2A] rounded-full opacity-0 group-hover/edge:opacity-100 transition-opacity ml-1 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
         </div>
 
         {/* Move helper */}

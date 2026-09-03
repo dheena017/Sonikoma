@@ -28,7 +28,7 @@ export function TestimonialCard({
     <div
       className={`p-8 rounded-[32px] border transition-all duration-300 flex flex-col justify-between space-y-6 ${
         isLight
-          ? "bg-white border-slate-200 shadow-lg shadow-slate-200/40 hover:border-purple-300 hover:shadow-purple-200/50"
+          ? "bg-white border-slate-200 shadow-lg shadow-slate-200/40 hover:border-[#2F2F2F] hover:shadow-black/50"
           : "bg-neutral-900/40 border-white/10 hover:border-[#3B82F6]/40 hover:bg-neutral-900/80 shadow-xl shadow-black/20"
       }`}
     >
@@ -76,7 +76,7 @@ export function TestimonialCard({
             (e.currentTarget as HTMLImageElement).src =
               "https://lh3.googleusercontent.com/a/default-user";
           }}
-          className="w-12 h-12 rounded-2xl object-cover bg-purple-600/10 border border-[#3B82F6]/20 shrink-0"
+          className="w-12 h-12 rounded-2xl object-cover bg-[#2A2A2A] border border-[#3B82F6]/20 shrink-0"
         />
         <div className="space-y-0.5 overflow-hidden">
           <h4
@@ -89,7 +89,7 @@ export function TestimonialCard({
           <div className="flex items-center gap-2">
             <p
               className={`text-xs transition-colors ${
-                isLight ? "text-purple-600 font-semibold" : "text-[#3B82F6]"
+                isLight ? "text-[#3B82F6] font-semibold" : "text-[#3B82F6]"
               }`}
             >
               {handle}

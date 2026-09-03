@@ -77,7 +77,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
       onClick={(e) => onSelect(index, url, e)}
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
-          ? "border-[#3B82F6] bg-purple-950/20 ring-2 ring-purple-500/60 "
+          ? "border-[#3B82F6] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 "
           : "border-white/10 bg-[#090912] hover:border-[#3B82F6]/50 shadow-md hover:shadow-[0_8px_25px_rgba(59,130,246,0.2)]"
       }`}
     >
@@ -101,13 +101,13 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
             <div
               className={`h-4 w-4 rounded flex items-center justify-center border transition-all ${
                 isSelected
-                  ? "bg-purple-600 border-[#60A5FA] text-white"
+                  ? "bg-[#2A2A2A] border-[#60A5FA] text-white"
                   : "bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
               }`}
             >
               <Check className="h-3 w-3" />
             </div>
-            <span className="text-[9px] font-black font-mono bg-black/75 text-purple-200 px-1.5 py-0.5 rounded border border-[#3B82F6]/30 backdrop-blur-md">
+            <span className="text-[9px] font-black font-mono bg-black/75 text-[#3B82F6] px-1.5 py-0.5 rounded border border-[#3B82F6]/30 backdrop-blur-md">
               #{index + 1}
             </span>
           </div>
@@ -141,12 +141,12 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           <div className="absolute inset-0 z-20 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2 p-3 text-center animate-in fade-in duration-150">
             <div className="relative flex items-center justify-center">
               <div className="w-9 h-9 rounded-full bg-[#3B82F6]/20 border border-[#3B82F6]/40 animate-ping absolute inset-0" />
-              <div className="w-8 h-8 rounded-full bg-purple-950/80 border border-[#60A5FA]/60 flex items-center justify-center ">
+              <div className="w-8 h-8 rounded-full bg-[#2A2A2A] border border-[#60A5FA]/60 flex items-center justify-center ">
                 <Loader2 className="h-4 w-4 text-[#60A5FA] animate-spin" />
               </div>
             </div>
 
-            <span className="text-[9px] font-bold font-mono text-purple-200 tracking-wider uppercase">
+            <span className="text-[9px] font-bold font-mono text-[#3B82F6] tracking-wider uppercase">
               {isCropping
                 ? "Auto Cropping..."
                 : isCleaning
@@ -170,12 +170,12 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           disabled={isProcessing}
           className={`w-full py-1 px-2 rounded-lg font-mono text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer ${
             isAdding
-              ? "bg-purple-800 text-purple-200 opacity-90 cursor-wait"
-              : "bg-purple-600 hover:bg-[#3B82F6] text-white"
+              ? "bg-[#2A2A2A] text-[#3B82F6] opacity-90 cursor-wait"
+              : "bg-[#2A2A2A] hover:bg-[#3B82F6] text-white"
           }`}
         >
           {isAdding ? (
-            <Loader2 className="h-2.5 w-2.5 animate-spin text-purple-200" />
+            <Loader2 className="h-2.5 w-2.5 animate-spin text-[#3B82F6]" />
           ) : (
             <Plus className="h-2.5 w-2.5" />
           )}
@@ -194,12 +194,12 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
             index >= totalImagesCount - 1
               ? "bg-white/[0.02] border-white/[0.05] text-neutral-600 cursor-not-allowed select-none opacity-40"
               : isMerging
-              ? "bg-indigo-950 border-indigo-400 text-indigo-200 cursor-wait"
-              : "bg-indigo-950/80 hover:bg-indigo-900 border-indigo-500/30 text-indigo-300 hover:text-white cursor-pointer"
+              ? "bg-[#2A2A2A] border-indigo-400 text-indigo-200 cursor-wait"
+              : "bg-[#2A2A2A] hover:bg-[#333333] border-[#2F2F2F] text-neutral-300 hover:text-white cursor-pointer"
           }`}
         >
           {isMerging ? (
-            <Loader2 className="h-2.5 w-2.5 animate-spin text-indigo-300" />
+            <Loader2 className="h-2.5 w-2.5 animate-spin text-neutral-300" />
           ) : (
             <Link2 className="h-2.5 w-2.5" />
           )}

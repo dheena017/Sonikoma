@@ -89,7 +89,7 @@ export function CutsRegistryList({
                   handleCropSingleSlice(slice, e);
                 }}
                 disabled={isCroppingSlice === slice.id || isSavingEdit}
-                className="text-[#3B82F6] hover:text-[#93C5FD] disabled:opacity-50 disabled:cursor-wait p-1 rounded-lg hover:bg-purple-900/30 transition-all cursor-pointer"
+                className="text-[#3B82F6] hover:text-[#93C5FD] disabled:opacity-50 disabled:cursor-wait p-1 rounded-lg hover:bg-[#2A2A2A] transition-all cursor-pointer"
                 title="Execute this crop immediately"
               >
                 {isCroppingSlice === slice.id ? (

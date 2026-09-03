@@ -21,7 +21,7 @@ const KeyframeDiamond: React.FC<KeyframeDiamondProps> = ({
 }) => {
   const leftPct = clipDuration > 0 ? (keyframe.time / clipDuration) * 100 : 0;
   const colorClass =
-    KEYFRAME_COLORS[keyframe.property] || "bg-purple-400 border-purple-300";
+    KEYFRAME_COLORS[keyframe.property] || "bg-[#2A2A2A] border-[#2F2F2F]";
 
   return (
     <div

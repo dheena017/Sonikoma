@@ -21,7 +21,7 @@ export const AudioTrackCard: React.FC<AudioTrackCardProps> = ({
         onClick={onTogglePlay}
         className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 transition-all border cursor-pointer ${
           isPlaying
-            ? "bg-purple-600 border-[#60A5FA] text-white"
+            ? "bg-[#2A2A2A] border-[#60A5FA] text-white"
             : "bg-neutral-800 border-neutral-700 text-neutral-400 group-hover:text-white"
         }`}
       >

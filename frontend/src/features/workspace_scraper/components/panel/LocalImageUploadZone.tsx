@@ -65,7 +65,7 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
         onDrop={handleDropFiles}
         className={`relative border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
           isDraggingOver
-            ? "border-[#3B82F6] bg-purple-950/40 shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.01]"
+            ? "border-[#3B82F6] bg-[#2A2A2A] shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.01]"
             : "border-[#3B82F6]/25 hover:border-[#3B82F6]/50 bg-[#12131e]/50 hover:bg-[#181926]/80 shadow-lg"
         }`}
       >

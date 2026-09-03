@@ -107,7 +107,7 @@ export default function ProfileSecurityTab({
     if (score === 3)
       return { label: "Strong", percentage: 75, color: "bg-indigo-500" };
     if (score === 2)
-      return { label: "Moderate", percentage: 50, color: "bg-purple-500" };
+      return { label: "Moderate", percentage: 50, color: "bg-[#2A2A2A]" };
     return { label: "Weak", percentage: 25, color: "bg-rose-500" };
   }, [passwordState.new]);
 
@@ -201,7 +201,7 @@ export default function ProfileSecurityTab({
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-500/25 to-transparent" />
 
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-purple-600/15 border border-[#3B82F6]/20 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-[#2A2A2A] border border-[#3B82F6]/20 flex items-center justify-center">
             <ShieldCheck className="w-6 h-6 text-[#3B82F6]" />
           </div>
           <div>
@@ -285,7 +285,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all font-mono"
                 />
               </div>
 
@@ -312,7 +312,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all font-mono"
                 />
 
                 {/* Password strength checklist and bar */}
@@ -427,7 +427,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all font-mono"
                 />
               </div>
             </div>
@@ -489,7 +489,7 @@ export default function ProfileSecurityTab({
               {!show2faSetup ? (
                 <button
                   onClick={() => setShow2faSetup(true)}
-                  className="w-full bg-purple-600 hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
+                  className="w-full bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
                 >
                   Configure 2FA Protection
                 </button>
@@ -544,7 +544,7 @@ export default function ProfileSecurityTab({
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-purple-600 hover:bg-[#3B82F6] text-white py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                      className="flex-1 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
                     >
                       Verify & Activate
                     </button>
@@ -577,7 +577,7 @@ export default function ProfileSecurityTab({
               className="bg-black/30 border border-white/5 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-600/10 border border-[#3B82F6]/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/20 flex items-center justify-center">
                   <Globe className="w-5 h-5 text-[#3B82F6]" />
                 </div>
                 <div>
@@ -632,7 +632,7 @@ export default function ProfileSecurityTab({
                 setCurrentPage(1);
               }}
               placeholder="Search event or IP..."
-              className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700"
+              className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all placeholder:text-neutral-700"
             />
           </div>
         </div>

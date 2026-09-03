@@ -361,7 +361,7 @@ export default function SeriesDetailsPage({
           </button>
           <button
             onClick={() => navigateTo("/projects")}
-            className="px-6 py-2.5 bg-purple-600 hover:bg-[#3B82F6] text-white rounded-xl font-bold transition-all cursor-pointer"
+            className="px-6 py-2.5 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white rounded-xl font-bold transition-all cursor-pointer"
           >
             Back to Projects
           </button>
@@ -380,7 +380,7 @@ export default function SeriesDetailsPage({
           <button
             type="button"
             onClick={() => navigateTo("/projects")}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-purple-950/40 border border-white/10 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer shadow-sm group"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-[#2A2A2A] border border-white/10 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer shadow-sm group"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
             <span>Projects</span>
@@ -441,7 +441,7 @@ export default function SeriesDetailsPage({
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-purple-950/40 via-neutral-900 to-neutral-955">
+              <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#2A2A2A] via-neutral-900 to-neutral-955">
                 <FolderOpen className="w-12 h-12 text-[#3B82F6]/50" />
                 <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
                   No Cover
@@ -507,7 +507,7 @@ export default function SeriesDetailsPage({
             <div className="flex flex-wrap gap-3 pt-3 border-t border-white/10">
               <button
                 onClick={handleNewChapter}
-                className="flex items-center gap-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-purple-900/40 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95"
               >
                 <Plus className="h-4 w-4" />
                 <span>New Chapter</span>
@@ -587,7 +587,7 @@ export default function SeriesDetailsPage({
         </div>
 
         <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+          <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-[#2F2F2F] shrink-0">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div className="flex-1 min-w-0">
@@ -651,7 +651,7 @@ export default function SeriesDetailsPage({
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1 rounded-lg uppercase tracking-wider font-bold transition-all cursor-pointer ${
                   statusFilter === status
-                    ? "bg-purple-600 text-white"
+                    ? "bg-[#2A2A2A] text-white"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
@@ -667,7 +667,7 @@ export default function SeriesDetailsPage({
               onClick={() => setIsSortOpen((prev) => !prev)}
               className={`flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 border rounded-xl px-3 py-2 text-xs font-mono transition-all cursor-pointer select-none ${
                 isSortOpen
-                  ? "border-[#3B82F6]/60 ring-2 ring-purple-500/20 text-white"
+                  ? "border-[#3B82F6]/60 ring-2 ring-[#3B82F6]/50 text-white"
                   : "border-neutral-800 text-neutral-300 hover:border-neutral-700"
               }`}
             >
@@ -710,7 +710,7 @@ export default function SeriesDetailsPage({
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
                           isSelected
-                            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-purple-900/30"
+                            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-black/50"
                             : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
                         }`}
                       >
@@ -766,7 +766,7 @@ export default function SeriesDetailsPage({
                       type="checkbox"
                       checked={selectedProjectIds.includes(chapter.project_id)}
                       onChange={() => toggleSelectChapter(chapter.project_id)}
-                      className="w-5 h-5 rounded border-neutral-700 text-purple-600 focus:ring-purple-500 bg-neutral-955 cursor-pointer"
+                      className="w-5 h-5 rounded border-neutral-700 text-[#3B82F6] focus:ring-[#3B82F6]/50 bg-neutral-955 cursor-pointer"
                     />
                   </div>
                 )}
@@ -822,7 +822,7 @@ export default function SeriesDetailsPage({
                         e.stopPropagation();
                         toggleSelectChapter(chapter.project_id);
                       }}
-                      className="w-5 h-5 rounded border-neutral-700 text-purple-600 focus:ring-purple-500 bg-neutral-955 cursor-pointer shrink-0"
+                      className="w-5 h-5 rounded border-neutral-700 text-[#3B82F6] focus:ring-[#3B82F6]/50 bg-neutral-955 cursor-pointer shrink-0"
                     />
                   )}
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-neutral-955 border border-neutral-800 shrink-0">
@@ -865,7 +865,7 @@ export default function SeriesDetailsPage({
                       e.stopPropagation();
                       actions.handleOpenProject(chapter);
                     }}
-                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-[#3B82F6] text-white text-xs font-bold transition-all"
+                    className="px-4 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold transition-all"
                   >
                     Open Studio
                   </button>

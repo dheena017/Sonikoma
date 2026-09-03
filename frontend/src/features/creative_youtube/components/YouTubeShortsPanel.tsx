@@ -128,7 +128,7 @@ export default function YouTubeShortsPanel({
   return (
     <div className="space-y-6 animate-fade-in">
       {/* ── 1. HEADER BANNER & SHORTS TELEMETRY ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-gradient-to-r from-red-950/40 via-purple-950/30 to-neutral-950 p-6 rounded-3xl border border-red-900/30 shadow-2xl">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-gradient-to-r from-red-950/40 via-[#2A2A2A] to-neutral-950 p-6 rounded-3xl border border-red-900/30 shadow-2xl">
         <div className="flex items-center gap-4">
           <div className="p-3.5 bg-gradient-to-br from-red-600 to-rose-700 rounded-2xl shadow-xl shadow-red-600/30 shrink-0">
             <Zap className="w-6 h-6 text-white fill-white" />

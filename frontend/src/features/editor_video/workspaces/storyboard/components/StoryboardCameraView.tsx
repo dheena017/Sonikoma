@@ -41,7 +41,7 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
   return (
     <div className="space-y-3 pt-1 pb-4">
       {/* Banner */}
-      <div className="p-2.5 rounded-xl bg-indigo-950/30 border border-indigo-500/20 flex items-center justify-between gap-2">
+      <div className="p-2.5 rounded-xl bg-[#2A2A2A] border border-[#2F2F2F] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[10px] font-mono text-indigo-200">
           <Camera className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
           <span>Cinematic Camera Director — Assign 3D pans, zooms & timing</span>
@@ -61,8 +61,8 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
             onClick={(e) => onSelect(index, e)}
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
-                ? "border-indigo-500 bg-indigo-950/25 ring-2 ring-indigo-500/50 shadow-md"
-                : "border-white/10 bg-[#0c0d1b] hover:border-indigo-500/40"
+                ? "border-[#2F2F2F] bg-[#2A2A2A] ring-2 ring-indigo-500/50 shadow-md"
+                : "border-white/10 bg-[#0c0d1b] hover:border-[#2F2F2F]"
             }`}
           >
             {/* Top row: Thumbnail + Duration Slider */}
@@ -76,7 +76,7 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
                 </div>
 
                 <div>
-                  <span className="text-[10px] font-bold font-mono text-indigo-300">
+                  <span className="text-[10px] font-bold font-mono text-neutral-300">
                     Panel #{index + 1}
                   </span>
                   <p className="text-[8px] font-mono text-neutral-400">

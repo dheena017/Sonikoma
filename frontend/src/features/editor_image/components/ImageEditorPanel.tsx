@@ -332,7 +332,7 @@ export default function ImageEditorPanel({
                     onClick={() => setSelectedFocalPoint(point)}
                     className={`rounded-xl border py-2.5 text-xs font-mono font-bold transition-all cursor-pointer ${
                       active
-                        ? "bg-purple-950/60 border-[#3B82F6]/60 text-purple-200 "
+                        ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-[#3B82F6] "
                         : "bg-[#10111a]/80 border-white/5 text-neutral-400 hover:border-white/15 hover:text-white"
                     }`}
                   >

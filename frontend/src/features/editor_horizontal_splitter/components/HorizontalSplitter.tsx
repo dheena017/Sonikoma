@@ -646,7 +646,7 @@ export default function HorizontalSplitter({
                       setSplitPosition(y);
                       setShowSplitPosition(true);
                     }}
-                    className="w-4 h-4 rounded bg-purple-900/30 text-[#3B82F6] hover:bg-purple-900/50 hover:text-white flex items-center justify-center text-[8px] font-bold transition-all cursor-pointer"
+                    className="w-4 h-4 rounded bg-[#2A2A2A] text-[#3B82F6] hover:bg-[#2A2A2A] hover:text-white flex items-center justify-center text-[8px] font-bold transition-all cursor-pointer"
                     title="Focus Guideline Here"
                   >
                     {idx + 1}

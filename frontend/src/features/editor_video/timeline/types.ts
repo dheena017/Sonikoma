@@ -68,7 +68,7 @@ export const KEYFRAME_COLORS: Record<KeyframeProperty, string> = {
   opacity: "bg-amber-400  border-amber-300",
   x: "bg-blue-400   border-blue-300",
   y: "bg-green-400  border-green-300",
-  scale: "bg-purple-400 border-purple-300",
+  scale: "bg-[#2A2A2A] border-[#2F2F2F]",
   rotation: "bg-pink-400   border-pink-300",
   blur: "bg-blue-400   border-cyan-300",
   volume: "bg-emerald-400 border-emerald-300",

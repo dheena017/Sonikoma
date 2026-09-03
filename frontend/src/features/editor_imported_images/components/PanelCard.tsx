@@ -101,7 +101,7 @@ function PanelCard({
       case "Too Tall Strip":
         return "bg-rose-950/40 border-rose-800/40 text-rose-350 shadow-[0_0_8px_rgba(239,68,68,0.15)] animate-pulse";
       case "Tall Strip":
-        return "bg-purple-950/40 border-purple-800/40 text-[#60A5FA]";
+        return "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]";
       case "Landscape":
         return "bg-sky-950/40 border-sky-800/40 text-sky-300";
       default:
@@ -264,14 +264,14 @@ function PanelCard({
       aria-label={`Panel ${idx + 1}${isSelected ? ", selected" : ""}`}
       aria-pressed={isSelected}
       className={[
-        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-purple-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90 [content-visibility:auto] [contain-intrinsic-size:260px_320px]",
+        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90 [content-visibility:auto] [contain-intrinsic-size:260px_320px]",
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[240px] sm:w-[260px] shrink-0",
         isProcessing
-          ? "border-2 border-[#3B82F6] bg-purple-950/20  ring-1 ring-purple-500/40 scale-[1.02]"
+          ? "border-2 border-[#3B82F6] bg-[#2A2A2A]  ring-1 ring-[#3B82F6]/50 scale-[1.02]"
           : isSelected
-          ? "border-[#3B82F6] bg-purple-950/20 shadow-md ring-1 ring-purple-500/20 scale-[1.02]"
+          ? "border-[#3B82F6] bg-[#2A2A2A] shadow-md ring-1 ring-[#3B82F6]/50 scale-[1.02]"
           : "border-neutral-800/60 bg-neutral-950 hover:border-[#3B82F6]/50 hover:shadow-md hover:scale-[1.02]",
         className || "",
       ].join(" ")}

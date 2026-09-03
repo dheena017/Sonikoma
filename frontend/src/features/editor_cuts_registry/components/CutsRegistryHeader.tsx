@@ -14,7 +14,7 @@ export function CutsRegistryHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-900/60 to-purple-950/80 border border-[#3B82F6]/50 flex items-center justify-center  shrink-0">
+        <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#2A2A2A] to-[#2A2A2A] border border-[#3B82F6]/50 flex items-center justify-center  shrink-0">
           <LayoutGrid className="h-5 w-5 text-[#60A5FA]" />
         </div>
         <div>

@@ -136,8 +136,8 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                           Auto-Cropped
                         </span>
                       </div>
-                      <div className="bg-[#181818] border border-indigo-500/30 rounded-xl p-2.5 text-center space-y-1">
-                        <div className="h-16 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl text-indigo-400">
+                      <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-2.5 text-center space-y-1">
+                        <div className="h-16 rounded-lg bg-indigo-500/10 border border-[#2F2F2F] flex items-center justify-center text-xl text-indigo-400">
                           💥
                         </div>
                         <span className="text-xs font-bold text-white block truncate">

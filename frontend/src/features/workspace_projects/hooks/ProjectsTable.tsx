@@ -88,7 +88,7 @@ export default function ProjectsTable({
                 onClick={() => onOpenProject(project)}
                 className={`group cursor-pointer transition-colors relative ${
                   isSelected
-                    ? "bg-purple-900/10 hover:bg-neutral-900/40"
+                    ? "bg-[#2A2A2A] hover:bg-neutral-900/40"
                     : "hover:bg-white/[0.04]"
                 }`}
               >

@@ -117,8 +117,8 @@ export default function ProfilePreferencesTab({
     {
       id: "purple",
       name: "Nebula Purple",
-      class: "bg-purple-500",
-      shadow: "shadow-purple-500/50",
+      class: "bg-[#2A2A2A]",
+      shadow: "shadow-black/50",
     },
     {
       id: "indigo",
@@ -158,12 +158,12 @@ export default function ProfilePreferencesTab({
         return {
           text: "text-indigo-400",
           bg10: "bg-indigo-500/10",
-          border30: "border-indigo-500/30",
+          border30: "border-[#2F2F2F]",
           bg600: "bg-indigo-600",
           bgHover: "hover:bg-indigo-500",
           via: "via-indigo-500/20",
           peerChecked: "peer-checked:bg-indigo-500",
-          focusBorder: "focus:border-indigo-500/50",
+          focusBorder: "focus:border-[#2F2F2F]",
           shadowBtn: "shadow-[0_0_20px_rgba(99,102,241,0.3)]",
           shadowBtnHover: "hover:shadow-[0_0_30px_rgba(99,102,241,0.5)]",
           shadowInset: "shadow-[inset_0_0_20px_rgba(99,102,241,0.1)]",
@@ -230,10 +230,10 @@ export default function ProfilePreferencesTab({
           text: "text-[#3B82F6]",
           bg10: "bg-[#3B82F6]/10",
           border30: "border-[#3B82F6]/30",
-          bg600: "bg-purple-600",
+          bg600: "bg-[#2A2A2A]",
           bgHover: "hover:bg-[#3B82F6]",
           via: "via-blue-500/20",
-          peerChecked: "peer-checked:bg-purple-500",
+          peerChecked: "peer-checked:bg-[#2A2A2A]",
           focusBorder: "focus:border-[#3B82F6]/50",
           shadowBtn: "",
           shadowBtnHover: "hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]",
@@ -305,8 +305,8 @@ export default function ProfilePreferencesTab({
                     </p>
                   </div>
                 </div>
-                <div className="px-3 py-1 bg-purple-950/60 border border-[#3B82F6]/40 rounded-full text-[10px] font-mono font-bold text-[#60A5FA] shadow-sm flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+                <div className="px-3 py-1 bg-[#2A2A2A] border border-[#3B82F6]/40 rounded-full text-[10px] font-mono font-bold text-[#60A5FA] shadow-sm flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2A2A2A] animate-pulse" />
                   <span>DARK MODE</span>
                 </div>
               </div>

@@ -216,7 +216,7 @@ export default function YouTubeChannelHome({
               </div>
             ) : (
               <div className="relative shrink-0">
-                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-red-600 via-rose-700 to-purple-800 border-4 border-neutral-950 ring-2 ring-white/10 flex items-center justify-center shrink-0 shadow-2xl">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-red-600 via-rose-700 to-[#2A2A2A] border-4 border-neutral-950 ring-2 ring-white/10 flex items-center justify-center shrink-0 shadow-2xl">
                   <span className="text-3xl sm:text-4xl font-black text-white font-sans uppercase">
                     {channel?.title ? channel.title.charAt(0) : "Y"}
                   </span>
@@ -325,9 +325,9 @@ export default function YouTubeChannelHome({
 
           <button
             onClick={() => onNavigateTab("playlists")}
-            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-purple-950/40 to-neutral-900/80 hover:from-purple-900/40 hover:to-neutral-850 border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
+            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-[#2A2A2A] to-neutral-900/80 hover:from-[#2A2A2A] hover:to-neutral-850 border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
           >
-            <div className="p-2.5 rounded-xl bg-purple-600 text-white shadow-md shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+            <div className="p-2.5 rounded-xl bg-[#2A2A2A] text-white shadow-md shadow-sm shrink-0 group-hover:scale-105 transition-transform">
               <FolderPlus className="w-4 h-4" />
             </div>
             <div className="min-w-0">

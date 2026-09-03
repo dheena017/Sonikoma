@@ -187,7 +187,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#0c0d12]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_32px_rgba(0,0,0,0.6)] flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex-shrink-0 z-50 selection:bg-purple-650 relative gap-2 sm:gap-4">
+    <header className="sticky top-0 left-0 right-0 h-16 w-full bg-[#0c0d12]/95 backdrop-blur-2xl border-b border-white/10 shadow-[0_4px_32px_rgba(0,0,0,0.6)] flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex-shrink-0 z-50 selection:bg-[#2A2A2A] relative gap-2 sm:gap-4">
       {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
         <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/10 h-full mr-1 sm:mr-2">
@@ -199,7 +199,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 useProjectStore.getState().setDrawerOpen(true);
               }
             }}
-            className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-neutral-300 hover:text-[#93C5FD] hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/30 cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] flex items-center justify-center text-neutral-300 hover:text-white cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
             title="Toggle Navigation Menu"
             aria-label="Toggle Navigation Menu"
           >
@@ -268,8 +268,8 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
-                showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+              className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-xs font-medium text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
+                showCreditsPopover ? "border-amber-500 bg-[#2A2A2A]" : ""
               }`}
             >
               <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
@@ -300,8 +300,8 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               setShowNotifications(!showNotifications);
               setShowCreditsPopover(false);
             }}
-            className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
-              showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
+            className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-neutral-300 hover:text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative ${
+              showNotifications ? "border-[#3B82F6] bg-[#2A2A2A]" : ""
             }`}
             title="Notifications"
           >

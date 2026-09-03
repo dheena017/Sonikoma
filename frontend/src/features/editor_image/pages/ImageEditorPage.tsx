@@ -532,13 +532,13 @@ const ImageEditorPage = React.memo(
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }
             >
-              <div className="w-1 h-3 rounded-full bg-purple-500/40 group-hover:bg-purple-400/80 transition-colors" />
+              <div className="w-1 h-3 rounded-full bg-[#2A2A2A] group-hover:bg-[#2A2A2A] transition-colors" />
               {isToolsPanelOpen ? (
                 <ChevronLeft className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-transform group-hover:-translate-x-0.5" />
               ) : (
                 <ChevronRight className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-transform group-hover:translate-x-0.5" />
               )}
-              <div className="w-1 h-3 rounded-full bg-purple-500/40 group-hover:bg-purple-400/80 transition-colors" />
+              <div className="w-1 h-3 rounded-full bg-[#2A2A2A] group-hover:bg-[#2A2A2A] transition-colors" />
             </button>
           </aside>
 

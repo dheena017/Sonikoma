@@ -46,7 +46,7 @@ export default function CanvasSplitLines({
                   : "border-[#3B82F6]/70"
               }`}
             />
-            <div className="absolute left-2 bg-purple-950/95 text-[#60A5FA] font-mono text-[9px] px-2 py-0.5 rounded-lg border border-purple-800/60 font-bold backdrop-blur shadow-lg flex items-center gap-1.5 pointer-events-auto select-none">
+            <div className="absolute left-2 bg-[#2A2A2A] text-[#60A5FA] font-mono text-[9px] px-2 py-0.5 rounded-lg border border-[#2F2F2F] font-bold backdrop-blur shadow-lg flex items-center gap-1.5 pointer-events-auto select-none">
               <span>
                 Cut #{idx + 1}: {y}%
               </span>

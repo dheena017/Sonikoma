@@ -133,7 +133,7 @@ export default function SeoOptimizationTab({
         <button
           onClick={handleGenerate}
           disabled={loading}
-          className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-950/50 hover:shadow-sm active:scale-95 shrink-0"
+          className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-pink-600 hover:from-blue-500 hover:to-pink-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-black/50 hover:shadow-sm active:scale-95 shrink-0"
         >
           {loading ? (
             <RefreshCw className="w-4 h-4 animate-spin" />
@@ -204,7 +204,7 @@ export default function SeoOptimizationTab({
                       onClick={() => setSelectedTitleIdx(vIdx)}
                       className={`text-[9px] font-mono px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
                         selectedTitleIdx === vIdx
-                          ? "bg-[#3B82F6]/20 border-[#3B82F6]/60 text-purple-200 font-bold"
+                          ? "bg-[#3B82F6]/20 border-[#3B82F6]/60 text-[#3B82F6] font-bold"
                           : "bg-neutral-950 border-neutral-850 text-neutral-400 hover:text-white"
                       }`}
                     >
@@ -283,7 +283,7 @@ export default function SeoOptimizationTab({
                 {data.tags.map((tag, idx) => (
                   <div
                     key={idx}
-                    className="group text-[10px] font-mono bg-neutral-900 hover:bg-purple-950/60 text-purple-200 px-2.5 py-1 rounded-lg border border-neutral-800 flex items-center gap-1.5 transition-all"
+                    className="group text-[10px] font-mono bg-neutral-900 hover:bg-[#2A2A2A] text-[#3B82F6] px-2.5 py-1 rounded-lg border border-neutral-800 flex items-center gap-1.5 transition-all"
                   >
                     <span>#{tag}</span>
                     <button
@@ -309,7 +309,7 @@ export default function SeoOptimizationTab({
                     />
                     <button
                       onClick={handleAddTag}
-                      className="p-1 bg-purple-600 text-white rounded-lg cursor-pointer"
+                      className="p-1 bg-[#2A2A2A] text-white rounded-lg cursor-pointer"
                     >
                       <Check className="w-3 h-3" />
                     </button>

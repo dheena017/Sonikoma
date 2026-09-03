@@ -185,7 +185,7 @@ export default function MergePanel({
                 <button
                   type="button"
                   onClick={() => setMergeCount(maxMergeable)}
-                  className="px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 bg-purple-600/20 border-[#3B82F6]/40 text-[#60A5FA] hover:bg-[#3B82F6]/40 hover:border-[#60A5FA]"
+                  className="px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 bg-[#2A2A2A] border-[#3B82F6]/40 text-[#60A5FA] hover:bg-[#3B82F6]/40 hover:border-[#60A5FA]"
                 >
                   Merge All Remaining
                 </button>

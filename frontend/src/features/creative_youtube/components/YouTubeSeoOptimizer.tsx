@@ -65,7 +65,7 @@ export default function YouTubeSeoOptimizer({
           Gemini AI SEO & Tag Optimizer
         </span>
         {result && (
-          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950/60 text-[#60A5FA] border border-purple-800/40">
+          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#2A2A2A] text-[#60A5FA] border border-[#2F2F2F]">
             SEO Score: {result.seo_score}/100
           </span>
         )}
@@ -148,7 +148,7 @@ export default function YouTubeSeoOptimizer({
                 "success"
               );
             }}
-            className="w-full py-2 bg-purple-950/40 hover:bg-purple-950/80 border border-purple-800/40 text-[#60A5FA] rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+            className="w-full py-2 bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#60A5FA] rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
           >
             <CheckCircle className="w-3.5 h-3.5 text-[#3B82F6]" />
             Apply SEO Metadata to Upload

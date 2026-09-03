@@ -525,7 +525,7 @@ export default function CropCanvas({
                   className={`absolute border-2 pointer-events-auto cursor-grab active:cursor-grabbing transition-colors flex flex-col justify-between ${
                     isSelected
                       ? "border-[#60A5FA] bg-[#3B82F6]/10 z-30 shadow-[0_0_15px_rgba(139,92,246,0.2)]"
-                      : "border-[#3B82F6]/40 bg-purple-500/5 hover:bg-[#3B82F6]/10 z-20"
+                      : "border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#3B82F6]/10 z-20"
                   }`}
                   style={{
                     top: `${slice.cropTop}%`,
@@ -538,8 +538,8 @@ export default function CropCanvas({
                     <span
                       className={`inline-block font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-lg ${
                         isSelected
-                          ? "bg-purple-950 text-[#60A5FA] border border-[#3B82F6]/30"
-                          : "bg-purple-950/90 text-[#60A5FA]"
+                          ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
+                          : "bg-[#2A2A2A] text-[#60A5FA]"
                       }`}
                     >
                       Cut #{index + 1}

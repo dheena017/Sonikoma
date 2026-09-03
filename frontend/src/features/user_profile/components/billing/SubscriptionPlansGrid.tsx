@@ -89,11 +89,11 @@ export default function SubscriptionPlansGrid({
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
             placeholder="e.g. COMIC50"
-            className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-purple-600/20 transition-all placeholder:text-neutral-700 uppercase"
+            className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all placeholder:text-neutral-700 uppercase"
           />
           <button
             type="submit"
-            className="w-full bg-purple-600 hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
+            className="w-full bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
           >
             Apply Coupon
           </button>

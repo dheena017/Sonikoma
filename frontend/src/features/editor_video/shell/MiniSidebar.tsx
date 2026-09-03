@@ -27,7 +27,7 @@ const SidebarItem: React.FC<{
       <div
         className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
           isActive
-            ? "h-5 bg-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.9)] opacity-100"
+            ? "h-5 bg-[#2A2A2A] shadow-[0_0_10px_rgba(192,132,252,0.9)] opacity-100"
             : "h-0 bg-transparent opacity-0"
         }`}
       />
@@ -42,7 +42,7 @@ const SidebarItem: React.FC<{
         <div
           className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer ${
             isActive
-              ? "bg-purple-600 border border-[#60A5FA]/40  text-white scale-105"
+              ? "bg-[#2A2A2A] border border-[#60A5FA]/40  text-white scale-105"
               : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
           }`}
         >

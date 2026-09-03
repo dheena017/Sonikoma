@@ -127,7 +127,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           className={`h-8 px-3 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
             filterStatus !== "all"
-              ? "bg-purple-950/60 border-[#3B82F6]/50 text-[#60A5FA] "
+              ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA] "
               : "bg-neutral-950/80 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
           }`}
         >
@@ -155,7 +155,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
                 filterStatus === "all"
-                  ? "bg-purple-600/25 text-[#60A5FA] border border-[#3B82F6]/30"
+                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -176,7 +176,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
                 filterStatus === "in_storyboard"
-                  ? "bg-purple-600/25 text-[#60A5FA] border border-[#3B82F6]/30"
+                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -245,7 +245,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
                 filterStatus === "portrait"
-                  ? "bg-purple-600/25 text-[#60A5FA] border border-[#3B82F6]/30"
+                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -281,7 +281,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
                 filterStatus === "tall_strip"
-                  ? "bg-purple-600/25 text-[#60A5FA] border border-[#3B82F6]/30"
+                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >

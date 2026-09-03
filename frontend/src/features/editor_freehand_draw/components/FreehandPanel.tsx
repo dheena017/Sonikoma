@@ -205,7 +205,7 @@ export default function FreehandPanel({
             onClick={() => setBrushAction("paint")}
             className={`py-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono font-bold transition-all cursor-pointer ${
               ["paint", "highlighter", "spray"].includes(brushAction)
-                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
                 : "text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
@@ -218,7 +218,7 @@ export default function FreehandPanel({
             onClick={() => setBrushAction("rect")}
             className={`py-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono font-bold transition-all cursor-pointer ${
               ["line", "arrow", "rect", "circle"].includes(brushAction)
-                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
                 : "text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
@@ -231,7 +231,7 @@ export default function FreehandPanel({
             onClick={() => setBrushAction("text")}
             className={`py-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono font-bold transition-all cursor-pointer ${
               brushAction === "text"
-                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
                 : "text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
@@ -244,7 +244,7 @@ export default function FreehandPanel({
             onClick={() => setBrushAction("blur")}
             className={`py-1.5 rounded-lg flex items-center justify-center gap-1 text-[10px] font-mono font-bold transition-all cursor-pointer ${
               brushAction === "blur"
-                ? "bg-purple-600 text-white shadow-md shadow-purple-900/40"
+                ? "bg-[#2A2A2A] text-white shadow-md shadow-black/50"
                 : "text-neutral-400 hover:text-white hover:bg-white/5"
             }`}
           >
@@ -266,7 +266,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("paint")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "paint"
-                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
+                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -279,7 +279,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("highlighter")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "highlighter"
-                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
+                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -292,7 +292,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("spray")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "spray"
-                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
+                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -331,7 +331,7 @@ export default function FreehandPanel({
                   setLocalFilled(e.target.checked);
                   setIsFilled?.(e.target.checked);
                 }}
-                className="rounded border-neutral-800 bg-neutral-900 text-purple-600 focus:ring-0 cursor-pointer"
+                className="rounded border-neutral-800 bg-neutral-900 text-[#3B82F6] focus:ring-0 cursor-pointer"
               />
               <span>Solid Fill</span>
             </label>
@@ -342,7 +342,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("line")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "line"
-                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
+                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -355,7 +355,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("arrow")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "arrow"
-                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
+                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -368,7 +368,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("rect")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "rect"
-                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
+                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -381,7 +381,7 @@ export default function FreehandPanel({
               onClick={() => setBrushAction("circle")}
               className={`py-1.5 rounded-xl border text-[9px] font-mono font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 brushAction === "circle"
-                  ? "border-[#3B82F6] bg-purple-950/40 text-[#60A5FA]"
+                  ? "border-[#3B82F6] bg-[#2A2A2A] text-[#60A5FA]"
                   : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-neutral-850"
               }`}
             >
@@ -428,7 +428,7 @@ export default function FreehandPanel({
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
                   localAlign === "left"
-                    ? "bg-purple-600 text-white"
+                    ? "bg-[#2A2A2A] text-white"
                     : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
@@ -442,7 +442,7 @@ export default function FreehandPanel({
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
                   localAlign === "center"
-                    ? "bg-purple-600 text-white"
+                    ? "bg-[#2A2A2A] text-white"
                     : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
@@ -456,7 +456,7 @@ export default function FreehandPanel({
                 }}
                 className={`flex-1 py-1 rounded flex items-center justify-center transition-colors cursor-pointer ${
                   localAlign === "right"
-                    ? "bg-purple-600 text-white"
+                    ? "bg-[#2A2A2A] text-white"
                     : "text-neutral-500 hover:text-neutral-300"
                 }`}
               >
@@ -527,7 +527,7 @@ export default function FreehandPanel({
                   onClick={() => setFillColor(c)}
                   className={`h-5 w-5 rounded-full border transition-all cursor-pointer ${
                     fillColor.toLowerCase() === c.toLowerCase()
-                      ? "border-[#60A5FA] scale-110 shadow-md shadow-purple-500/50"
+                      ? "border-[#60A5FA] scale-110 shadow-md shadow-black/50"
                       : "border-white/10 hover:scale-105"
                   }`}
                   style={{ backgroundColor: c }}
@@ -576,7 +576,7 @@ export default function FreehandPanel({
           type="button"
           disabled={isAiCleaning}
           onClick={handleAiBubbleClean}
-          className="w-full py-2 bg-purple-950/40 hover:bg-purple-900/60 text-[#60A5FA] border border-purple-800/40 hover:border-purple-600 rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer disabled:opacity-50"
+          className="w-full py-2 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] border border-[#2F2F2F] hover:border-[#2F2F2F] rounded-xl flex items-center justify-center gap-2 text-[10px] font-mono font-bold transition-all cursor-pointer disabled:opacity-50"
         >
           {isAiCleaning ? (
             <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />

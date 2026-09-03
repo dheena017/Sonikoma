@@ -28,10 +28,10 @@ export const CharactersWorkspaceHeader: React.FC<
 }) => {
   return (
     <div className="shrink-0">
-      <div className="px-4 py-3 border-b border-purple-900/20 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
+      <div className="px-4 py-3 border-b border-[#2F2F2F] bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-10 w-10 rounded-3xl bg-indigo-500/12 border border-indigo-500/25 flex items-center justify-center shadow-[0_0_18px_rgba(99,102,241,0.18)]">
-            <Users className="h-4.5 w-4.5 text-indigo-300" />
+          <div className="h-10 w-10 rounded-3xl bg-indigo-500/12 border border-[#2F2F2F] flex items-center justify-center shadow-[0_0_18px_rgba(99,102,241,0.18)]">
+            <Users className="h-4.5 w-4.5 text-neutral-300" />
           </div>
           <div className="min-w-0 space-y-0.5">
             <h2 className="text-[11px] font-black text-white uppercase tracking-[0.28em] font-mono truncate">
