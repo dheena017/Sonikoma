@@ -176,7 +176,7 @@ export default function ProfileAccountTab({
           </div>
         )}
 
-        <form onSubmit={handleProfileSave} className="space-y-5">
+        <form noValidate onSubmit={handleProfileSave} className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5 text-left">
               <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1">

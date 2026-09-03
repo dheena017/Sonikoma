@@ -143,7 +143,7 @@ export default function RegisterForm({
           </div>
 
           <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl space-y-4">
-            <form className="space-y-4" onSubmit={handleSubmit}>
+            <form noValidate className="space-y-4" onSubmit={handleSubmit}>
               {error && (
                 <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
                   {error}
@@ -161,8 +161,10 @@ export default function RegisterForm({
                 <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 ml-0.5">
                   Full Name
                 </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <div className="relative flex items-center">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 z-10 flex items-center">
+                    <User className="w-4 h-4" />
+                  </div>
                   <input
                     type="text"
                     required
@@ -190,8 +192,10 @@ export default function RegisterForm({
                     </span>
                   )}
                 </div>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <div className="relative flex items-center">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 z-10 flex items-center">
+                    <Mail className="w-4 h-4" />
+                  </div>
                   <input
                     type="email"
                     required
@@ -208,8 +212,10 @@ export default function RegisterForm({
                 <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 ml-0.5">
                   Password
                 </label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <div className="relative flex items-center">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 z-10 flex items-center">
+                    <Lock className="w-4 h-4" />
+                  </div>
                   <input
                     type={showPassword ? "text" : "password"}
                     required
@@ -218,19 +224,22 @@ export default function RegisterForm({
                     className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                     placeholder="Create password (8+ characters)"
                   />
-                  <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </Tooltip>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
+                    <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
 

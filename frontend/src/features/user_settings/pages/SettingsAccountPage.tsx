@@ -193,7 +193,7 @@ export default function SettingsAccountPage({
               </h2>
             </div>
 
-            <form onSubmit={handleSaveProfile} className="space-y-6">
+            <form noValidate onSubmit={handleSaveProfile} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
@@ -340,7 +340,7 @@ export default function SettingsAccountPage({
               </h2>
             </div>
 
-            <form onSubmit={handleChangePassword} className="space-y-6">
+            <form noValidate onSubmit={handleChangePassword} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
                   Current Password

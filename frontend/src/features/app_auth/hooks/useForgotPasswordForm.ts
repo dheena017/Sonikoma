@@ -68,54 +68,26 @@ export default function useForgotPasswordForm(props: ForgotPasswordFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (resetMethod === "email") {
-      if (!isEmailValid || !isVerified || isLoading) return;
-      setIsLoading(true);
-      setError(null);
-      try {
-        await props.onForgotPassword(email);
-        setIsSent(true);
-        setResendTimer(60);
-      } catch (err: any) {
-        setError(err.message || "Failed to send reset link. Please try again.");
-        setSliderVal(0);
-        setIsVerified(false);
-      } finally {
-        setIsLoading(false);
-      }
-    } else if (resetMethod === "phone") {
-      if (!isPhoneValid || !isVerified || isLoading) return;
-      setIsLoading(true);
-      setError(null);
-      setTimeout(() => {
-        setIsCodeSent(true);
-        setResendTimer(60);
-        setIsLoading(false);
-      }, 1500);
-    } else {
-      if (!isQuestionValid || !isVerified || isLoading) return;
-      setIsLoading(true);
-      setError(null);
-      setTimeout(() => {
-        const cleanTitle = securityAnswers.comicTitle
-          .toLowerCase()
-          .replace(/\s/g, "");
-        const cleanCity = securityAnswers.studioCity
-          .toLowerCase()
-          .replace(/\s/g, "");
-
-        if (cleanTitle === "webtoon" && cleanCity === "newyork") {
-          setIsResetReady(true);
-          setError(null);
-        } else {
-          setError(
-            "Incorrect answer combination. Try hints: 'webtoon' and 'newyork'."
-          );
-          setSliderVal(0);
-          setIsVerified(false);
-        }
-        setIsLoading(false);
-      }, 1500);
+    if (isLoading) return;
+    if (!email.trim()) {
+      setError("Please enter your email address.");
+      return;
+    }
+    if (!isEmailValid) {
+      setError("Please enter a valid email address (e.g. name@example.com).");
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+    try {
+      await props.onForgotPassword(email);
+      setIsCodeSent(true);
+      setIsSent(true);
+      setResendTimer(60);
+    } catch (err: any) {
+      setError(err.message || "Failed to send reset code. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { useLoginForm } from "@/features/app_auth/hooks";
-import LandingAnimeScene from "@/features/app_landing/components/LandingAnimeScene";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface LoginPageProps {
@@ -53,14 +52,11 @@ export default function LoginPage({
 
   return (
     <div className="min-h-screen flex bg-[#0A0A0A] text-[#E5E5E5] font-sans overflow-hidden relative">
-      {/* Unified Full-Screen Background Anime Scene */}
-      <LandingAnimeScene variant="auth" themeMode="dark" />
-
-      {/* LEFT PANEL: Product Preview */}
+      {/* LEFT PANEL: Anime Showcase */}
       <AuthShowcase activeTheme={activeTheme} iconType="login" />
 
-      {/* RIGHT PANEL: Form Interface with Translucent Frosted Glass */}
-      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12]/40 backdrop-blur-sm relative border-l border-[#2F2F2F]/40 text-left z-10">
+      {/* RIGHT PANEL: Clean Solid Studio Form */}
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left z-10">
         {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-6 flex-shrink-0">
           <div className="flex items-center gap-2 lg:gap-3">
@@ -68,7 +64,7 @@ export default function LoginPage({
               <Tooltip text="Return to Landing Page" placement="bottom">
                 <button
                   onClick={onNavigateHome}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818]/90 hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                   <span>Back to Home</span>
@@ -101,12 +97,12 @@ export default function LoginPage({
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
                 <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                <span>Sonikoma Studio</span>
+                <span>Sonikoma</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
                 Sign In
               </h2>
-              <p className="text-neutral-300 text-sm font-medium leading-relaxed">
+              <p className="text-neutral-400 text-sm font-medium leading-relaxed">
                 Log in to access your dashboard and comic video projects.
               </p>
             </div>
@@ -145,16 +141,16 @@ export default function LoginPage({
 
             {/* Separator */}
             <div className="relative flex py-1 items-center">
-              <div className="flex-grow border-t border-[#2F2F2F]/60" />
-              <span className="flex-shrink mx-4 text-neutral-300 text-xs font-semibold uppercase tracking-wider bg-[#141414]/90 px-3 py-1 rounded-full border border-[#2F2F2F]">
+              <div className="flex-grow border-t border-[#2F2F2F]" />
+              <span className="flex-shrink mx-4 text-neutral-400 text-xs font-semibold uppercase tracking-wider bg-[#141414] px-3 py-1 rounded-full border border-[#2F2F2F]">
                 Or with email
               </span>
-              <div className="flex-grow border-t border-[#2F2F2F]/60" />
+              <div className="flex-grow border-t border-[#2F2F2F]" />
             </div>
 
             {/* Form Card */}
-            <div className="rounded-[28px] border border-[#2F2F2F]/80 bg-[#181818]/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl space-y-5">
-              <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl space-y-5">
+              <form noValidate className="space-y-4" onSubmit={handleSubmit}>
                 {error && (
                   <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
                     {error}
@@ -177,14 +173,16 @@ export default function LoginPage({
                       </span>
                     )}
                   </div>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <div className="relative flex items-center">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 z-10 flex items-center">
+                      <Mail className="w-4 h-4" />
+                    </div>
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#141414]/90 border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                       placeholder="name@example.com"
                     />
                   </div>
@@ -206,8 +204,10 @@ export default function LoginPage({
                       </button>
                     </Tooltip>
                   </div>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <div className="relative flex items-center">
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 z-10 flex items-center">
+                      <Lock className="w-4 h-4" />
+                    </div>
                     <input
                       type={showPassword ? "text" : "password"}
                       required
@@ -215,22 +215,25 @@ export default function LoginPage({
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyDown={checkCapsLock}
                       onKeyUp={checkCapsLock}
-                      className="w-full bg-[#141414]/90 border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                       placeholder="Enter your password"
                     />
-                    <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                      >
-                        {showPassword ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    </Tooltip>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
+                      <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </Tooltip>
+                    </div>
                   </div>
                 </div>
 

@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { useForgotPasswordForm } from "@/features/app_auth/hooks";
-import LandingAnimeScene from "@/features/app_landing/components/LandingAnimeScene";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ForgotPasswordPageProps {
@@ -53,21 +52,18 @@ export default function ForgotPasswordPage({
 
   return (
     <div className="min-h-screen flex bg-[#0A0A0A] text-[#E5E5E5] font-sans overflow-hidden relative">
-      {/* Unified Full-Screen Background Anime Scene */}
-      <LandingAnimeScene variant="auth" themeMode="dark" />
-
-      {/* LEFT PANEL: Product Preview */}
+      {/* LEFT PANEL: Product Preview with Anime Scene */}
       <AuthShowcase activeTheme={activeTheme} iconType="forgot" />
 
-      {/* RIGHT PANEL: Reset Form Interface with Translucent Frosted Glass */}
-      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12]/40 backdrop-blur-sm relative border-l border-[#2F2F2F]/40 text-left z-10">
+      {/* RIGHT PANEL: Clean Solid Studio Form */}
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left z-10">
         {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-6 flex-shrink-0">
           <div className="flex items-center gap-2 lg:gap-3">
             <Tooltip text="Return to Sign In" placement="bottom">
               <button
                 onClick={onNavigateToLogin}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818]/90 hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
               >
                 <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                 <span>Back to Login</span>
@@ -88,13 +84,13 @@ export default function ForgotPasswordPage({
               <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
                 Reset Password
               </h2>
-              <p className="text-neutral-300 text-sm font-medium leading-relaxed">
+              <p className="text-neutral-400 text-sm font-medium leading-relaxed">
                 Enter your email address and we'll send you a recovery code.
               </p>
             </div>
 
             {/* Form Card */}
-            <div className="rounded-[28px] border border-[#2F2F2F]/80 bg-[#181818]/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl space-y-5">
+            <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl space-y-5">
               {isCompleted ? (
                 <div className="text-center space-y-4 py-4">
                   <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto">
@@ -114,7 +110,7 @@ export default function ForgotPasswordPage({
                   </Tooltip>
                 </div>
               ) : isCodeSent ? (
-                <form className="space-y-4" onSubmit={handleNewPasswordSubmit}>
+                <form noValidate className="space-y-4" onSubmit={handleNewPasswordSubmit}>
                   {error && (
                     <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
                       {error}
@@ -130,7 +126,7 @@ export default function ForgotPasswordPage({
                       required
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono tracking-widest text-center"
+                      className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono tracking-widest text-center"
                       placeholder="6-digit code"
                     />
                   </div>
@@ -139,25 +135,30 @@ export default function ForgotPasswordPage({
                     <label className="text-xs font-bold uppercase tracking-wider text-neutral-300">
                       New Password
                     </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 z-10 flex items-center">
+                        <Lock className="w-4 h-4" />
+                      </div>
                       <input
                         type={showPassword ? "text" : "password"}
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                         placeholder="Enter new password"
                       />
-                      <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </Tooltip>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
+                        <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </Tooltip>
+                      </div>
                     </div>
                   </div>
 
@@ -165,14 +166,16 @@ export default function ForgotPasswordPage({
                     <label className="text-xs font-bold uppercase tracking-wider text-neutral-300">
                       Confirm Password
                     </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 z-10 flex items-center">
+                        <Lock className="w-4 h-4" />
+                      </div>
                       <input
                         type={showPassword ? "text" : "password"}
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                         placeholder="Confirm new password"
                       />
                     </div>
@@ -189,7 +192,7 @@ export default function ForgotPasswordPage({
                   </Tooltip>
                 </form>
               ) : (
-                <form className="space-y-4" onSubmit={handleSubmit}>
+                <form noValidate className="space-y-4" onSubmit={handleSubmit}>
                   {error && (
                     <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
                       {error}
@@ -211,14 +214,16 @@ export default function ForgotPasswordPage({
                         </span>
                       )}
                     </div>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                    <div className="relative flex items-center">
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 z-10 flex items-center">
+                        <Mail className="w-4 h-4" />
+                      </div>
                       <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#141414]/90 border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                         placeholder="name@example.com"
                       />
                     </div>

@@ -269,7 +269,7 @@ export default function ProfileSecurityTab({
             </div>
           )}
 
-          <form onSubmit={handlePasswordSave} className="space-y-4">
+          <form noValidate onSubmit={handlePasswordSave} className="space-y-4">
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1">
