@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { useForgotPasswordForm } from "@/features/app_auth/hooks";
+import LandingAnimeScene from "@/features/app_landing/components/LandingAnimeScene";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface ForgotPasswordPageProps {
   onForgotPassword: (email: string) => Promise<void>;
@@ -51,21 +53,26 @@ export default function ForgotPasswordPage({
 
   return (
     <div className="min-h-screen flex bg-[#0A0A0A] text-[#E5E5E5] font-sans overflow-hidden relative">
+      {/* Unified Full-Screen Background Anime Scene */}
+      <LandingAnimeScene variant="auth" themeMode="dark" />
+
       {/* LEFT PANEL: Product Preview */}
       <AuthShowcase activeTheme={activeTheme} iconType="forgot" />
 
-      {/* RIGHT PANEL: Reset Form Interface */}
-      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left">
+      {/* RIGHT PANEL: Reset Form Interface with Translucent Frosted Glass */}
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12]/40 backdrop-blur-sm relative border-l border-[#2F2F2F]/40 text-left z-10">
         {/* Top Controls Toolbar */}
         <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-6 flex-shrink-0">
           <div className="flex items-center gap-2 lg:gap-3">
-            <button
-              onClick={onNavigateToLogin}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-              <span>Back to Login</span>
-            </button>
+            <Tooltip text="Return to Sign In" placement="bottom">
+              <button
+                onClick={onNavigateToLogin}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818]/90 hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Back to Login</span>
+              </button>
+            </Tooltip>
           </div>
         </div>
 
@@ -81,13 +88,13 @@ export default function ForgotPasswordPage({
               <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
                 Reset Password
               </h2>
-              <p className="text-neutral-400 text-sm font-medium leading-relaxed">
+              <p className="text-neutral-300 text-sm font-medium leading-relaxed">
                 Enter your email address and we'll send you a recovery code.
               </p>
             </div>
 
             {/* Form Card */}
-            <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl space-y-5">
+            <div className="rounded-[28px] border border-[#2F2F2F]/80 bg-[#181818]/90 backdrop-blur-xl p-6 sm:p-8 shadow-2xl space-y-5">
               {isCompleted ? (
                 <div className="text-center space-y-4 py-4">
                   <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto">
@@ -97,12 +104,14 @@ export default function ForgotPasswordPage({
                   <p className="text-xs text-neutral-400 leading-relaxed">
                     Your password has been reset successfully. You can now log in with your new password.
                   </p>
-                  <button
-                    onClick={onNavigateToLogin}
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 transition-all cursor-pointer text-sm"
-                  >
-                    Go to Login
-                  </button>
+                  <Tooltip text="Go to Sign In" placement="bottom">
+                    <button
+                      onClick={onNavigateToLogin}
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 transition-all cursor-pointer text-sm"
+                    >
+                      Go to Login
+                    </button>
+                  </Tooltip>
                 </div>
               ) : isCodeSent ? (
                 <form className="space-y-4" onSubmit={handleNewPasswordSubmit}>
@@ -121,7 +130,7 @@ export default function ForgotPasswordPage({
                       required
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono tracking-widest text-center"
+                      className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono tracking-widest text-center"
                       placeholder="6-digit code"
                     />
                   </div>
@@ -137,16 +146,18 @@ export default function ForgotPasswordPage({
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                         placeholder="Enter new password"
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
+                      <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </Tooltip>
                     </div>
                   </div>
 
@@ -161,19 +172,21 @@ export default function ForgotPasswordPage({
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                         placeholder="Confirm new password"
                       />
                     </div>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
-                  >
-                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Update Password</span>}
-                  </button>
+                  <Tooltip text="Save new password and sign in" placement="bottom">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                    >
+                      {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Update Password</span>}
+                    </button>
+                  </Tooltip>
                 </form>
               ) : (
                 <form className="space-y-4" onSubmit={handleSubmit}>
@@ -205,26 +218,28 @@ export default function ForgotPasswordPage({
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#141414]/90 border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                         placeholder="name@example.com"
                       />
                     </div>
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={isLoading || !isEmailValid}
-                    className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <>
-                        <span>Send Recovery Code</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
+                  <Tooltip text="Send password recovery code to your email" placement="bottom">
+                    <button
+                      type="submit"
+                      disabled={isLoading || !isEmailValid}
+                      className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <span>Send Recovery Code</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </Tooltip>
                 </form>
               )}
             </div>
@@ -232,12 +247,14 @@ export default function ForgotPasswordPage({
             {/* Back to Login Link */}
             <p className="text-center text-sm text-neutral-400 font-medium">
               Remember your password?{" "}
-              <button
-                onClick={onNavigateToLogin}
-                className="text-blue-400 hover:text-blue-300 font-bold underline underline-offset-4 decoration-blue-500/50 hover:decoration-blue-400 transition-colors cursor-pointer ml-1"
-              >
-                Sign In
-              </button>
+              <Tooltip text="Return to Sign In" placement="bottom">
+                <button
+                  onClick={onNavigateToLogin}
+                  className="text-blue-400 hover:text-blue-300 font-bold underline underline-offset-4 decoration-blue-500/50 hover:decoration-blue-400 transition-colors cursor-pointer ml-1"
+                >
+                  Sign In
+                </button>
+              </Tooltip>
             </p>
           </div>
 

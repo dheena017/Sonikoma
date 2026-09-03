@@ -24,6 +24,7 @@ import {
   TranslationAfter,
   LandingAnimeScene,
 } from "@/features/app_landing/components";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -142,46 +143,52 @@ export default function LandingPage({
 
           <div className="hidden md:flex items-center gap-1.5">
             {[
-              { label: "How It Works", target: "how-it-works" },
-              { label: "Live Demo", target: "demo-showcase" },
-              { label: "Pricing", target: "pricing" },
-              { label: "FAQ", target: "faq" },
+              { label: "How It Works", target: "how-it-works", tip: "Learn how Sonikoma works in 3 steps" },
+              { label: "Live Demo", target: "demo-showcase", tip: "Interactive transformation preview" },
+              { label: "Pricing", target: "pricing", tip: "View pricing plans & credits" },
+              { label: "FAQ", target: "faq", tip: "Frequently asked questions" },
             ].map((link) => (
-              <button
-                key={link.target}
-                onClick={() => {
-                  document
-                    .getElementById(link.target)
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer select-none focus:outline-none ${
-                  isLight
-                    ? "text-slate-600 hover:text-blue-600 hover:bg-slate-100"
-                    : "text-neutral-300 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                {link.label}
-              </button>
+              <Tooltip key={link.target} text={link.tip} placement="bottom">
+                <button
+                  onClick={() => {
+                    document
+                      .getElementById(link.target)
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer select-none focus:outline-none ${
+                    isLight
+                      ? "text-slate-600 hover:text-blue-600 hover:bg-slate-100"
+                      : "text-neutral-300 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  {link.label}
+                </button>
+              </Tooltip>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={onLogin}
-              className={`hidden sm:inline-flex px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer rounded-xl select-none focus:outline-none ${
-                isLight
-                  ? "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
-                  : "text-neutral-300 hover:text-white hover:bg-white/5"
-              }`}
-            >
-              Sign In
-            </button>
-            <button
-              onClick={onGetStarted}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none"
-            >
-              Get Started Free
-            </button>
+            <Tooltip text="Log in to your Sonikoma account" placement="bottom">
+              <button
+                onClick={onLogin}
+                className={`hidden sm:inline-flex px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer rounded-xl select-none focus:outline-none ${
+                  isLight
+                    ? "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
+                    : "text-neutral-300 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                Sign In
+              </button>
+            </Tooltip>
+
+            <Tooltip text="Start creating comic videos for free" placement="bottom">
+              <button
+                onClick={onGetStarted}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none"
+              >
+                Get Started Free
+              </button>
+            </Tooltip>
           </div>
         </div>
       </nav>
@@ -268,13 +275,15 @@ export default function LandingPage({
                       }`}
                     />
                   </div>
-                  <button
-                    onClick={onGetStarted}
-                    className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition-all duration-200 active:scale-95 cursor-pointer shrink-0 shadow-md hover:shadow-blue-500/20"
-                  >
-                    <Play className="w-3.5 h-3.5 fill-white" />
-                    Create Video
-                  </button>
+                  <Tooltip text="Process this chapter and create a video" placement="top">
+                    <button
+                      onClick={onGetStarted}
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition-all duration-200 active:scale-95 cursor-pointer shrink-0 shadow-md hover:shadow-blue-500/20"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-white" />
+                      Create Video
+                    </button>
+                  </Tooltip>
                 </div>
 
                 {/* SAMPLES */}
@@ -287,17 +296,18 @@ export default function LandingPage({
                     Try sample comic:
                   </span>
                   {SAMPLE_URLS.map((sample) => (
-                    <button
-                      key={sample.name}
-                      onClick={() => setLandingUrl(sample.url)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border cursor-pointer ${
-                        isLight
-                          ? "bg-slate-100 border-slate-300 text-slate-800 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-800 hover:-translate-y-0.5 shadow-2xs"
-                          : "bg-[#181818] border-[#2F2F2F] text-neutral-300 hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-300 hover:-translate-y-0.5 shadow-2xs"
-                      }`}
-                    >
-                      {sample.name}
-                    </button>
+                    <Tooltip key={sample.name} text={`Load ${sample.name} chapter URL`} placement="bottom">
+                      <button
+                        onClick={() => setLandingUrl(sample.url)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border cursor-pointer ${
+                          isLight
+                            ? "bg-slate-100 border-slate-300 text-slate-800 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-800 hover:-translate-y-0.5 shadow-2xs"
+                            : "bg-[#181818] border-[#2F2F2F] text-neutral-300 hover:border-blue-500 hover:bg-blue-500/10 hover:text-blue-300 hover:-translate-y-0.5 shadow-2xs"
+                        }`}
+                      >
+                        {sample.name}
+                      </button>
+                    </Tooltip>
                   ))}
                 </div>
               </div>
@@ -480,32 +490,36 @@ export default function LandingPage({
                   id: "slicing",
                   label: "1. Panel Slicing",
                   icon: <Scissors className="w-4 h-4" />,
+                  tip: "Automatic comic panel bounding box detection",
                 },
                 {
                   id: "bubbles",
                   label: "2. Speech Bubble Removal",
                   icon: <Sparkles className="w-4 h-4" />,
+                  tip: "Clean speech text bubbles with AI inpainting",
                 },
                 {
                   id: "translation",
                   label: "3. Auto Translation",
                   icon: <Languages className="w-4 h-4" />,
+                  tip: "Detect foreign dialogues & translate into English",
                 },
               ].map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => setDemoTab(t.id as any)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
-                    demoTab === t.id
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 -translate-y-0.5"
-                      : isLight
-                      ? "bg-white text-slate-800 border border-slate-300 hover:border-blue-400 hover:text-blue-600 hover:-translate-y-0.5 shadow-2xs"
-                      : "bg-[#181818] text-neutral-300 border border-[#2F2F2F] hover:border-blue-500/60 hover:text-white hover:bg-[#222] hover:-translate-y-0.5 shadow-2xs"
-                  }`}
-                >
-                  {t.icon}
-                  {t.label}
-                </button>
+                <Tooltip key={t.id} text={t.tip} placement="top">
+                  <button
+                    onClick={() => setDemoTab(t.id as any)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
+                      demoTab === t.id
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 -translate-y-0.5"
+                        : isLight
+                        ? "bg-white text-slate-800 border border-slate-300 hover:border-blue-400 hover:text-blue-600 hover:-translate-y-0.5 shadow-2xs"
+                        : "bg-[#181818] text-neutral-300 border border-[#2F2F2F] hover:border-blue-500/60 hover:text-white hover:bg-[#222] hover:-translate-y-0.5 shadow-2xs"
+                    }`}
+                  >
+                    {t.icon}
+                    {t.label}
+                  </button>
+                </Tooltip>
               ))}
             </div>
 
@@ -603,22 +617,24 @@ export default function LandingPage({
                 >
                   Monthly
                 </span>
-                <button
-                  onClick={() =>
-                    setBillingCycle(
-                      billingCycle === "monthly" ? "yearly" : "monthly"
-                    )
-                  }
-                  className="w-12 h-7 rounded-full bg-blue-600/20 p-1 border border-blue-500/30 hover:border-blue-500/60 relative transition-all cursor-pointer"
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-blue-600 transition-transform ${
-                      billingCycle === "yearly"
-                        ? "translate-x-5"
-                        : "translate-x-0"
-                    }`}
-                  />
-                </button>
+                <Tooltip text="Switch between monthly and yearly billing (Save 20%)" placement="top">
+                  <button
+                    onClick={() =>
+                      setBillingCycle(
+                        billingCycle === "monthly" ? "yearly" : "monthly"
+                      )
+                    }
+                    className="w-12 h-7 rounded-full bg-blue-600/20 p-1 border border-blue-500/30 hover:border-blue-500/60 relative transition-all cursor-pointer"
+                  >
+                    <div
+                      className={`w-5 h-5 rounded-full bg-blue-600 transition-transform ${
+                        billingCycle === "yearly"
+                          ? "translate-x-5"
+                          : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </Tooltip>
                 <div className="flex items-center gap-1.5">
                   <span
                     className={`text-sm font-bold ${
@@ -806,13 +822,15 @@ export default function LandingPage({
               Turn static webtoon panels into voiced, animated vertical videos in just a few clicks.
             </p>
 
-            <button
-              onClick={onGetStarted}
-              className="mx-auto px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 cursor-pointer text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20"
-            >
-              Start Creating Free
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <Tooltip text="Create your free account and export videos" placement="top">
+              <button
+                onClick={onGetStarted}
+                className="mx-auto px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 cursor-pointer text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20"
+              >
+                Start Creating Free
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </Tooltip>
           </div>
         </section>
 

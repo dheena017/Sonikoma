@@ -9,6 +9,8 @@ import {
 import {
   ThemeKey,
 } from "@/features/app_auth/components/constants";
+import LandingAnimeScene from "@/features/app_landing/components/LandingAnimeScene";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface AuthShowcaseProps {
   activeTheme: ThemeKey;
@@ -54,7 +56,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
   }, []);
 
   return (
-    <div className="hidden lg:flex w-1/2 h-screen flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-[#0A0A0A] text-left select-none border-r border-[#2F2F2F]">
+    <div className="hidden lg:flex w-1/2 h-screen flex-col justify-between p-12 xl:p-16 relative overflow-hidden bg-black/10 backdrop-blur-xs text-left select-none border-r border-[#2F2F2F]/40 z-10">
       {/* Background Animated Anime Hero Scene */}
       <LandingAnimeScene variant="auth" themeMode="dark" />
 
@@ -82,12 +84,14 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
         </div>
 
         {/* Live indicator badge */}
-        <div className="flex items-center gap-2 bg-[#181818] border border-[#2F2F2F] rounded-full px-3 py-1.5 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[10px] font-bold tracking-wider text-neutral-300 uppercase">
-            AI Video Studio
-          </span>
-        </div>
+        <Tooltip text="AI Comic-to-Video Engine is Online" placement="bottom">
+          <div className="flex items-center gap-2 bg-[#181818]/90 backdrop-blur-md border border-[#2F2F2F] rounded-full px-3 py-1.5 shadow-sm cursor-pointer">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-bold tracking-wider text-neutral-300 uppercase">
+              AI Video Studio
+            </span>
+          </div>
+        </Tooltip>
       </div>
 
       {/* Carousel Slide Area */}
@@ -110,7 +114,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                   <span className="text-[11px] font-bold tracking-wider uppercase text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
                     {slide.badge}
                   </span>
-                  <span className="text-[11px] font-mono text-neutral-500 font-bold">
+                  <span className="text-[11px] font-mono text-neutral-400 font-bold">
                     0{idx + 1} / 0{SIMPLE_SLIDES.length}
                   </span>
                 </div>
@@ -118,13 +122,13 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                 <h1 className="text-3xl xl:text-4xl font-black text-white tracking-tight leading-tight">
                   {slide.title}
                 </h1>
-                <p className="text-neutral-400 text-sm leading-relaxed font-normal max-w-lg">
+                <p className="text-neutral-300 text-sm leading-relaxed font-normal max-w-lg">
                   {slide.description}
                 </p>
               </div>
 
               {/* Visual Demo Card */}
-              <div className="my-5 w-full rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 shadow-xl relative overflow-hidden">
+              <div className="my-5 w-full rounded-2xl border border-[#2F2F2F]/80 bg-[#141414]/90 backdrop-blur-xl p-4 shadow-xl relative overflow-hidden">
                 {idx === 0 && (
                   /* Slide 0: AI Panel Slicing */
                   <div className="space-y-3">
@@ -138,7 +142,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2.5">
-                      <div className="bg-[#181818] border border-blue-500/30 rounded-xl p-2.5 text-center space-y-1">
+                      <div className="bg-[#181818]/90 border border-blue-500/30 rounded-xl p-2.5 text-center space-y-1">
                         <div className="h-16 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl text-blue-400">
                           ⚡️
                         </div>
@@ -149,7 +153,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                           Auto-Cropped
                         </span>
                       </div>
-                      <div className="bg-[#181818] border border-cyan-500/30 rounded-xl p-2.5 text-center space-y-1">
+                      <div className="bg-[#181818]/90 border border-cyan-500/30 rounded-xl p-2.5 text-center space-y-1">
                         <div className="h-16 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-xl text-cyan-400">
                           ⚔️
                         </div>
@@ -160,7 +164,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                           Auto-Cropped
                         </span>
                       </div>
-                      <div className="bg-[#181818] border border-indigo-500/30 rounded-xl p-2.5 text-center space-y-1">
+                      <div className="bg-[#181818]/90 border border-indigo-500/30 rounded-xl p-2.5 text-center space-y-1">
                         <div className="h-16 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-xl text-indigo-400">
                           💥
                         </div>
@@ -187,7 +191,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                         60 FPS Video
                       </span>
                     </div>
-                    <div className="h-24 rounded-xl bg-[#181818] border border-[#2F2F2F] p-3.5 flex items-center justify-between">
+                    <div className="h-24 rounded-xl bg-[#181818]/90 border border-[#2F2F2F] p-3.5 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md">
                           <Play className="w-4 h-4 fill-white ml-0.5" />
@@ -221,7 +225,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
-                      <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">
+                      <div className="bg-[#181818]/90 border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">
                         <div>
                           <p className="text-xs font-bold text-white">
                             Main Character Voice
@@ -236,7 +240,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                           <span className="w-1 bg-cyan-400 h-2 rounded-full animate-pulse" />
                         </div>
                       </div>
-                      <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">
+                      <div className="bg-[#181818]/90 border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">
                         <div>
                           <p className="text-xs font-bold text-white">
                             Background Soundtracks
@@ -284,13 +288,13 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
 
               {/* Feature Chips */}
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-xs font-semibold text-neutral-300 bg-[#181818] border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
+                <span className="text-xs font-semibold text-neutral-300 bg-[#181818]/90 border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
                   ⚡ Fast Generation
                 </span>
-                <span className="text-xs font-semibold text-neutral-300 bg-[#181818] border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
+                <span className="text-xs font-semibold text-neutral-300 bg-[#181818]/90 border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
                   🎬 1080p & 4K Video
                 </span>
-                <span className="text-xs font-semibold text-neutral-300 bg-[#181818] border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
+                <span className="text-xs font-semibold text-neutral-300 bg-[#181818]/90 border border-[#2F2F2F] px-3 py-1.5 rounded-lg">
                   🎯 Auto Translation
                 </span>
               </div>
@@ -299,46 +303,51 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
         })}
       </div>
 
-      {/* Footer Navigation Dots & Slide Switcher */}
-      <div className="relative z-10 flex items-center justify-between border-t border-[#2F2F2F] pt-5 mt-4">
+      {/* Footer Navigation */}
+      <div className="relative z-10 flex items-center justify-between border-t border-[#2F2F2F]/60 pt-5 mt-4">
         <div className="flex items-center gap-3">
           <div className="flex gap-2">
             {SIMPLE_SLIDES.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                  idx === currentSlide
-                    ? "w-8 bg-blue-500"
-                    : "w-2 bg-neutral-700 hover:bg-neutral-500"
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
+              <Tooltip key={idx} text={`View Step ${idx + 1}`} placement="top">
+                <button
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                    idx === currentSlide
+                      ? "w-8 bg-blue-500"
+                      : "w-2 bg-neutral-700 hover:bg-neutral-500"
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              </Tooltip>
             ))}
           </div>
           <div className="flex items-center gap-1 ml-2">
-            <button
-              type="button"
-              onClick={() =>
-                setCurrentSlide((prev) =>
-                  prev === 0 ? SIMPLE_SLIDES.length - 1 : prev - 1
-                )
-              }
-              className="p-1 rounded-lg bg-[#181818] hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-bold px-2.5 border border-[#2F2F2F]"
-              title="Previous slide"
-            >
-              &larr;
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                setCurrentSlide((prev) => (prev + 1) % SIMPLE_SLIDES.length)
-              }
-              className="p-1 rounded-lg bg-[#181818] hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-bold px-2.5 border border-[#2F2F2F]"
-              title="Next slide"
-            >
-              &rarr;
-            </button>
+            <Tooltip text="Previous feature" placement="top">
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentSlide((prev) =>
+                    prev === 0 ? SIMPLE_SLIDES.length - 1 : prev - 1
+                  )
+                }
+                className="p-1 rounded-lg bg-[#181818]/90 hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-bold px-2.5 border border-[#2F2F2F]"
+                title="Previous slide"
+              >
+                &larr;
+              </button>
+            </Tooltip>
+            <Tooltip text="Next feature" placement="top">
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentSlide((prev) => (prev + 1) % SIMPLE_SLIDES.length)
+                }
+                className="p-1 rounded-lg bg-[#181818]/90 hover:bg-[#222] text-neutral-400 hover:text-white transition-colors cursor-pointer text-xs font-bold px-2.5 border border-[#2F2F2F]"
+                title="Next slide"
+              >
+                &rarr;
+              </button>
+            </Tooltip>
           </div>
         </div>
 
