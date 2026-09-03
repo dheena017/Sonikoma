@@ -161,7 +161,7 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
       {/* Main content sits directly below the fixed header without reserving extra blank space. */}
       <div
         id="main-scroll-container"
-        className={`flex flex-1 flex-col min-w-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] custom-purple-scrollbar overflow-y-auto overflow-x-hidden ${
+        className={`flex flex-1 flex-col min-w-0 transition-[padding] duration-300 ease-out custom-purple-scrollbar overflow-y-auto overflow-x-hidden [contain:layout_style] ${
           isFocusMode
             ? "h-screen pl-0 pr-0"
             : "h-screen pt-16 pl-0 pr-0 md:pl-20 md:pr-0"

@@ -85,7 +85,7 @@ export function PanelCardThumbnail({
   const resolvedDisplayIdx = displayIdx ?? idx;
 
   return (
-    <div className="relative h-56 sm:h-64 rounded-[1.5rem] overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
+    <div className="relative h-44 sm:h-48 rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-purple-500/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent z-10 pointer-events-none" />
 
@@ -109,10 +109,11 @@ export function PanelCardThumbnail({
           key={`${imgUrl}-${retryKey}`}
           src={resolvedImgSrc}
           alt={`Panel #${resolvedDisplayIdx + 1}`}
-          className={`w-full h-full object-contain transition-all duration-500 ease-out ${
+          loading="lazy"
+          className={`w-full h-full object-contain transition-all duration-300 ease-out ${
             isProcessing
               ? "opacity-20 scale-95 blur-[3px]"
-              : "group-hover:scale-108 group-hover:rotate-[0.5deg]"
+              : "group-hover:scale-105"
           }`}
           decoding="async"
           draggable={false}

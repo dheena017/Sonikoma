@@ -877,16 +877,16 @@ const StoryboardCard = ({
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[240px] sm:w-[260px] shrink-0"
-      } group relative rounded-2xl overflow-hidden border p-3 space-y-2.5 transition-all duration-300 ease-out select-none outline-none backdrop-blur-xl shadow-[0_20px_50px_-30px_rgba(0,0,0,0.65)] ${
+      } group relative rounded-2xl overflow-hidden border p-3 space-y-2.5 transition-all duration-200 ease-out select-none outline-none backdrop-blur-md shadow-md [content-visibility:auto] [contain-intrinsic-size:260px_350px] ${
         panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll
           ? "border-2 border-purple-500 bg-purple-950/30 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.02]"
           : isCurrent && isSelected
           ? "bg-purple-950/40 border-purple-400 ring-2 ring-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.5)] scale-[1.02]"
           : isCurrent
-          ? "bg-[#0c0d16]/90 border-purple-500 shadow-lg scale-[1.01]"
+          ? "bg-[#0c0d16]/90 border-purple-500 shadow-md scale-[1.01]"
           : isSelected
-          ? "border-purple-500 bg-purple-950/30 shadow-[0_12px_40px_-12px_rgba(168,85,247,0.35)] ring-1 ring-purple-500/20 scale-[1.02]"
-          : "border-neutral-800/60 bg-neutral-950 hover:border-purple-500/50 hover:shadow-[0_18px_40px_-20px_rgba(168,85,247,0.18)] hover:scale-[1.03] hover:-translate-y-1.5"
+          ? "border-purple-500 bg-purple-950/30 shadow-md ring-1 ring-purple-500/20 scale-[1.02]"
+          : "border-neutral-800/60 bg-neutral-950 hover:border-purple-500/50 hover:shadow-md hover:scale-[1.02]"
       }`}
     >
       {/* Image Thumbnail */}
@@ -897,6 +897,8 @@ const StoryboardCard = ({
         <img
           src={panel.image_url}
           alt={`Panel #${idx + 1}`}
+          loading="lazy"
+          decoding="async"
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
           className="w-full h-full object-contain object-center group-hover/thumb:scale-[1.05] transition-transform duration-300 rounded-xl"

@@ -283,15 +283,15 @@ function PanelCard({
       aria-label={`Panel ${idx + 1}${isSelected ? ", selected" : ""}`}
       aria-pressed={isSelected}
       className={[
-        "group relative rounded-[1.5rem] overflow-hidden border p-4 space-y-4 transition-all duration-300 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-purple-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.65)]",
+        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-purple-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90 [content-visibility:auto] [contain-intrinsic-size:260px_320px]",
         viewLayout === "grid"
           ? "w-full min-w-0"
-          : "w-[260px] sm:w-[280px] shrink-0",
+          : "w-[240px] sm:w-[260px] shrink-0",
         isProcessing
           ? "border-2 border-purple-500 bg-purple-950/20 shadow-[0_0_24px_rgba(168,85,247,0.45)] ring-1 ring-purple-500/40 scale-[1.02]"
           : isSelected
-          ? "border-purple-500 bg-purple-950/20 shadow-[0_12px_40px_-12px_rgba(168,85,247,0.35)] ring-1 ring-purple-500/20 scale-[1.02]"
-          : "border-neutral-800/60 bg-neutral-950 hover:border-purple-500/50 hover:shadow-[0_18px_40px_-20px_rgba(168,85,247,0.18)] hover:scale-[1.03] hover:-translate-y-1.5",
+          ? "border-purple-500 bg-purple-950/20 shadow-md ring-1 ring-purple-500/20 scale-[1.02]"
+          : "border-neutral-800/60 bg-neutral-950 hover:border-purple-500/50 hover:shadow-md hover:scale-[1.02]",
         className || "",
       ].join(" ")}
     >

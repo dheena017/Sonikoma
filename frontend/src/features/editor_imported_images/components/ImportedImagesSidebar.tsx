@@ -84,6 +84,7 @@ export const HorizontalScrollContainer: React.FC<{
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const animFrameRef = useRef<number | null>(null);
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -96,38 +97,54 @@ export const HorizontalScrollContainer: React.FC<{
     const el = scrollRef.current;
     if (!el) return;
     checkScroll();
-    el.addEventListener("scroll", checkScroll, { passive: true });
+
+    const onScroll = () => {
+      if (animFrameRef.current !== null) return;
+      animFrameRef.current = requestAnimationFrame(() => {
+        checkScroll();
+        animFrameRef.current = null;
+      });
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", checkScroll);
 
     const handleNativeWheel = (e: WheelEvent) => {
-      if (e.deltaY !== 0 && Math.abs(e.deltaY) >= Math.abs(e.deltaX)) {
+      const delta =
+        Math.abs(e.deltaX) >= Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (delta !== 0) {
         const maxScroll = el.scrollWidth - el.clientWidth;
         if (maxScroll <= 0) return;
 
-        const isScrollingRight = e.deltaY > 0;
-        const isScrollingLeft = e.deltaY < 0;
+        const isScrollingRight = delta > 0;
+        const isScrollingLeft = delta < 0;
 
-        const canScrollRight = el.scrollLeft < maxScroll - 1;
-        const canScrollLeft = el.scrollLeft > 1;
+        const canRight = el.scrollLeft < maxScroll - 1;
+        const canLeft = el.scrollLeft > 1;
 
-        if (
-          (isScrollingRight && canScrollRight) ||
-          (isScrollingLeft && canScrollLeft)
-        ) {
-          e.preventDefault(); // Stop whole page from vertical scrolling!
-          el.scrollLeft += e.deltaY * 1.2;
+        if ((isScrollingRight && canRight) || (isScrollingLeft && canLeft)) {
+          e.preventDefault();
+          // Fast responsive scroll
+          el.scrollLeft += delta * 1.5;
         }
       }
     };
 
     el.addEventListener("wheel", handleNativeWheel, { passive: false });
 
+    const observer = new ResizeObserver(() => checkScroll());
+    observer.observe(el);
+
     return () => {
-      el.removeEventListener("scroll", checkScroll);
+      el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", checkScroll);
       el.removeEventListener("wheel", handleNativeWheel);
+      observer.disconnect();
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+      }
     };
-  }, [checkScroll, children]);
+  }, [checkScroll]);
 
   const scroll = (direction: "left" | "right") => {
     const el = scrollRef.current;
@@ -154,10 +171,10 @@ export const HorizontalScrollContainer: React.FC<{
         </button>
       )}
 
-      {/* Scroll Track — custom purple scrollbar with smooth horizontal scrolling */}
+      {/* Scroll Track — ultra-smooth, hardware accelerated horizontal scrolling */}
       <div
         ref={scrollRef}
-        className={`flex-1 min-w-0 flex gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar scroll-smooth select-none ${className}`}
+        className={`flex-1 min-w-0 flex gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain [transform:translateZ(0)] ${className}`}
       >
         {children}
       </div>
