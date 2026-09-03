@@ -53,7 +53,7 @@ export default function NotificationDropdown({
           )}
           <h3 className="font-bold text-sm text-[#E5E5E5]">Notifications</h3>
           {unreadCount > 0 && (
-            <span className="bg-[#3B82F6] text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+            <span className="bg-[#FF2D55] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
               {unreadCount}
             </span>
           )}

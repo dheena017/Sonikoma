@@ -29,6 +29,7 @@ import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { GeneratedPanel } from "@/types";
 import { Notification } from "@/features/app_notification";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { SonikomaLogo } from "@/shared/ui/branding";
 import { useMemo } from "react";
 import React from "react";
 
@@ -396,36 +397,13 @@ const SidebarInner = ({
       {/* BRANDING LOGO */}
       <div className="space-y-6 flex flex-col flex-grow min-h-0">
         <div className="flex items-center justify-between pb-4 border-b border-neutral-800/60">
-          <div
-            className="flex items-center gap-3.5 cursor-pointer group"
+          <SonikomaLogo
+            size="md"
+            badge="Suite"
+            showSubtitle={true}
+            subtitleText="Comic to Video Studio"
             onClick={handleNavigateToDashboardOverview}
-          >
-            <div className="relative shrink-0 rounded-full border border-[#2F2F2F] group-hover:border-[#3B82F6] transition-colors p-0.5 bg-[#1E1E1E]">
-              <img
-                src={
-                  themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"
-                }
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                }}
-                className="h-10 w-10 rounded-full shrink-0 object-cover bg-black"
-                alt="Sonikoma Logo"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base tracking-tight text-[#E5E5E5] font-sans group-hover:text-[#3B82F6] transition-colors">
-                  Sonikoma
-                </span>
-                <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30 rounded-md font-mono">
-                  Suite
-                </span>
-              </div>
-              <p className="text-[10px] text-[#9CA3AF] font-sans tracking-wide">
-                Comic to Video Studio
-              </p>
-            </div>
-          </div>
+          />
 
           <button
             onClick={onClose}

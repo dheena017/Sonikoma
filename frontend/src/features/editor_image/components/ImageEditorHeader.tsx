@@ -23,6 +23,7 @@ import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
 import { AIModelSelector } from "@/features/ai_core";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 interface ImageEditorHeaderProps {
   editingImageIdx: number | null;
@@ -206,30 +207,11 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
           </button>
         </div>
 
-        <div
-          className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
+        <SonikomaLogo
+          size="sm"
+          badge="Image Editor"
           onClick={handleLogoClick}
-        >
-          <img
-            key={themeMode}
-            src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-            }}
-            className="h-9 w-9 sm:h-10 sm:w-10 rounded-full shadow-md shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105"
-            style={{
-              background: themeMode === "light" ? "#ffffff" : "#000000",
-            }}
-            alt="Sonikoma Logo"
-          />
-          <span className="font-black text-base sm:text-lg tracking-wider text-[#E5E5E5] group-hover/brand:text-[#3B82F6] transition-all duration-300 font-sans hidden sm:inline-block">
-            Sonikoma
-          </span>
-        </div>
-
-        <span className="hidden sm:inline-block px-2.5 py-1 text-[10px] font-black tracking-wider text-[#3B82F6] bg-[#121212] rounded-full border border-[#3B82F6]/30 shadow-xs uppercase font-mono">
-          IMAGE EDITOR
-        </span>
+        />
 
         {scrapedImages && scrapedImages.length > 0 && (
           <div className="flex items-center space-x-1 bg-neutral-900/90 rounded-xl px-1.5 py-1 border border-white/8 shadow-xs">
@@ -286,10 +268,12 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className="flex h-9 items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
+              className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+              }`}
             >
-              <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
-              <span>{credits.toLocaleString()}</span>
+              <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
+              <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
             </button>
 
             {showCreditsPopover && (
@@ -316,18 +300,18 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               setShowNotifications(!showNotifications);
               setShowCreditsPopover(false);
             }}
-            className={`h-9 w-9 flex items-center justify-center text-neutral-400 hover:text-white rounded-xl bg-neutral-900 border border-neutral-800 hover:border-white/20 transition-all relative cursor-pointer active:scale-95 ${
-              showNotifications ? "bg-neutral-800 text-white border-white/20" : ""
+            className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+              showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
             }`}
             title="Notifications"
           >
             {notificationsMuted ? (
-              <BellOff className="h-4 w-4 text-rose-500" />
+              <BellOff className="h-4 w-4 text-rose-400" />
             ) : (
               <Bell className="h-4 w-4" />
             )}
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
+              <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF2D55] text-[10px] font-black text-white ring-2 ring-[#18191e] shadow-xs">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}

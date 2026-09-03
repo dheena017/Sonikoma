@@ -28,6 +28,7 @@ import { getUserCreditsPayload, claimDailyCredits } from "@/api/endpoints/auth";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
+import { SonikomaLogo } from "@/shared/ui/branding";
 import { useBackendHealth } from "@/shared/hooks";
 
 interface VideoEditorHeaderProps {
@@ -207,22 +208,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           </div>
 
-          <div
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
+          <SonikomaLogo
+            size="sm"
             onClick={() => navigateTo && navigateTo("/dashboard")}
-          >
-            <img
-              src="/logo-dark.png"
-              alt="Sonikoma Logo"
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded-full shadow-lg shadow-purple-900/40 shrink-0 object-cover transition-all duration-300 animate-[fadeIn_0.3s_ease-out] group-hover/brand:scale-105 group-hover/brand:rotate-[6deg]"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-            />
-            <span className="font-black text-base sm:text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-white group-hover/brand:brightness-110 transition-all duration-300 font-sans hidden sm:inline-block">
-              Sonikoma
-            </span>
-          </div>
+          />
         </div>
 
 
@@ -245,10 +234,12 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                   setShowNotifications(false);
                 }}
                 title="Your credit balance & daily rewards — click to view"
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
+                className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+                }`}
               >
-                <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
-                <span>{credits.toLocaleString()}</span>
+                <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
               </button>
 
               {showCreditsPopover && (
@@ -383,15 +374,17 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                 setShowCreditsPopover(false);
               }}
               title="Notifications"
-              className="relative w-9 h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-white hover:bg-neutral-700/80 transition-all cursor-pointer flex items-center justify-center shadow-sm"
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+                showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
+              }`}
             >
               {notificationsMuted ? (
-                <BellOff className="h-4 w-4 text-rose-500" />
+                <BellOff className="h-4 w-4 text-rose-400" />
               ) : (
                 <Bell className="h-4 w-4" />
               )}
               {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center h-4 min-w-[18px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-extrabold border-2 border-[#09090e] shadow-sm">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF2D55] text-[10px] font-black text-white ring-2 ring-[#18191e] shadow-xs">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}

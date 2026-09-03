@@ -77,25 +77,23 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
         type="button"
         onClick={handleToggle}
         title={`Server Status: ${status.toUpperCase()} (Click to view full diagnostics)`}
-        className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-500 text-[10px] sm:text-xs font-medium font-sans select-none transition-all shadow-sm shrink-0 cursor-pointer active:scale-95 ${
-          isOpen ? "ring-2 ring-indigo-500/40 border-indigo-500/50" : ""
+        className={`h-8.5 flex items-center gap-2 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+          isOpen ? "bg-[#282a32]" : ""
         }`}
       >
-        <span
-          className={`relative flex h-3 sm:h-3.5 w-3 sm:w-3.5 items-center justify-center rounded-full ${colors.ringBg} border ${colors.ringBorder} shrink-0`}
-        >
+        <span className="relative flex h-2 w-2 items-center justify-center shrink-0">
           <span
-            className={`absolute inline-flex h-1.5 sm:h-2 w-1.5 sm:w-2 rounded-full opacity-75 animate-ping ${colors.pulseBg}`}
+            className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${colors.pulseBg}`}
           />
           <span
-            className={`relative inline-flex rounded-full h-1.5 sm:h-2 w-1.5 sm:w-2 ${colors.dotBg} ${colors.shadow}`}
+            className={`relative inline-flex rounded-full h-2 w-2 ${colors.dotBg}`}
           />
         </span>
         {showLabel && (
-          <span className="hidden sm:inline text-neutral-300 font-medium">Server:</span>
+          <span className="hidden sm:inline text-white font-medium">Server:</span>
         )}
         <span
-          className={`font-black uppercase tracking-wider font-mono text-[9px] sm:text-[11px] ${colors.textColor}`}
+          className={`font-bold uppercase tracking-wider font-mono text-[11px] ${colors.textColor}`}
         >
           {status}
         </span>

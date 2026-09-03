@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
+import { SonikomaLogo } from "@/shared/ui/branding";
 import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/utils";
 import { timeAgo } from "@/utils/dateUtils";
 
@@ -302,21 +303,13 @@ export const ActiveProjectSelectorDrawer: React.FC<
         {/* ─── Website Logo & Header ─── */}
         <div className="p-4 border-b border-[#2F2F2F] flex items-center justify-between bg-[#181818]">
           <div className="flex items-center gap-3.5">
-            <div className="relative">
-              <img
-                src={
-                  themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"
-                }
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                }}
-                className="relative h-10 w-10 rounded-full border border-[#2F2F2F] object-cover bg-black shrink-0 shadow-md"
-                alt="Sonikoma Logo"
-              />
-            </div>
+            <SonikomaLogo
+              size="sm"
+              iconOnly={true}
+            />
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-black text-base text-[#E5E5E5] font-sans tracking-tight">
+                <h3 className="font-bold text-base text-[#E5E5E5] font-sans tracking-tight">
                   Select Active Project
                 </h3>
               </div>

@@ -27,6 +27,7 @@ import { useBackendHealth } from "@/shared/hooks";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { AIModelSelector } from "@/features/ai_core";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface AdminHeaderPageProps {
   currentPath: string;
@@ -241,24 +242,11 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           </button>
         </div>
 
-        <div
-          className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
+        <SonikomaLogo
+          size="sm"
+          badge="Admin"
           onClick={() => navigateTo("/admin")}
-        >
-          <div className="relative shrink-0 rounded-full border border-[#2F2F2F] group-hover/brand:border-[#3B82F6] p-0.5 bg-[#1E1E1E] transition-colors">
-            <img
-              src="/logo-dark.png"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              className="h-9 w-9 sm:h-10 sm:w-10 rounded-full shrink-0 object-cover transition-transform duration-300 group-hover/brand:scale-105"
-              alt="Sonikoma Logo"
-            />
-          </div>
-          <span className="font-black text-base sm:text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF] transition-all duration-300 font-sans hidden sm:inline-block">
-            Sonikoma
-          </span>
-        </div>
+        />
       </div>
 
       {/* Middle side: Search Command Palette */}
@@ -345,10 +333,12 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
                   setShowNotifications(false);
                 }}
                 aria-label="Your credit balance & daily rewards"
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
+                className={`h-10 flex items-center gap-2 px-3.5 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs sm:text-[13px] font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+                }`}
               >
-                <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
-                <span>{credits.toLocaleString()}</span>
+                <Zap className="h-4 w-4 fill-amber-400 text-amber-400 shrink-0" />
+                <span className="font-bold text-amber-300 font-mono text-xs sm:text-[12.5px]">{credits.toLocaleString()}</span>
               </button>
             </Tooltip>
 
@@ -377,18 +367,18 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
                 setShowNotifications(!showNotifications);
                 setShowCreditsPopover(false);
               }}
-              className={`icon-pill cursor-pointer relative transition-all ${
-                showNotifications ? "icon-pill--active" : ""
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+                showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
               }`}
               aria-label="Notifications"
             >
               {notificationsMuted ? (
-                <BellOff className="h-4 w-4 text-rose-455" />
+                <BellOff className="h-4 w-4 text-rose-400" />
               ) : (
                 <Bell className="h-4 w-4" />
               )}
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF2D55] text-[10px] font-black text-white ring-2 ring-[#18191e] shadow-xs">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}

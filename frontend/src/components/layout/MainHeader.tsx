@@ -36,6 +36,7 @@ import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { AIModelSelector } from "@/features/ai_core";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { SonikomaLogo } from "@/shared/ui/branding";
 import GlobalSearchBar from "./GlobalSearchBar";
 
 interface HeaderProps {
@@ -453,36 +454,18 @@ const HeaderInner = ({
           <Tooltip text="Toggle Navigation Menu" placement="bottom" shortcut="Ctrl+B">
             <button
               onClick={onToggleSidebar}
-              className="icon-pill cursor-pointer hover:icon-pill--purple transition-all"
+              className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
               aria-label="Toggle Navigation Menu"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </button>
           </Tooltip>
         </div>
 
-        <div
-          className="flex items-center gap-2 sm:gap-3 cursor-pointer select-none transition-all duration-300 group/brand"
+        <SonikomaLogo
+          size="sm"
           onClick={() => navigateTo("/dashboard")}
-          onMouseEnter={() => (window as any).prefetchRoute?.("/dashboard")}
-        >
-          <div className="relative shrink-0 rounded-full border border-[#2F2F2F] group-hover/brand:border-[#3B82F6] p-0.5 bg-[#1E1E1E] transition-colors">
-            <img
-              src="/logo-dark.png"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              className="h-9 w-9 rounded-full shrink-0 object-cover relative z-10 transition-transform duration-300 group-hover/brand:scale-105"
-              style={{
-                background: "#000000",
-              }}
-              alt="Sonikoma Logo"
-            />
-          </div>
-          <span className="font-black text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#00FFFF] transition-all duration-300 font-sans hidden sm:inline-block">
-            Sonikoma
-          </span>
-        </div>
+        />
       </div>
 
       {/* Center Side: Global Search Bar */}
@@ -520,7 +503,7 @@ const HeaderInner = ({
           </div>
         )}
 
-        {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
+        {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>
             <Tooltip text="Credits & Daily Rewards" placement="bottom">
@@ -531,10 +514,12 @@ const HeaderInner = ({
                   setShowStats(false);
                 }}
                 aria-label="Your credit balance & daily rewards"
-                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
+                className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+                }`}
               >
-                <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
-                <span>{credits.toLocaleString()}</span>
+                <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
               </button>
             </Tooltip>
 
@@ -563,18 +548,18 @@ const HeaderInner = ({
                 setShowNotifications(!showNotifications);
                 setShowStats(false);
               }}
-              className={`icon-pill cursor-pointer relative transition-all ${
-                showNotifications ? "icon-pill--active" : ""
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+                showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
               }`}
               aria-label="Notifications"
             >
               {notificationsMuted ? (
-                <BellOff className="h-4 w-4 text-rose-455" />
+                <BellOff className="h-4 w-4 text-rose-400" />
               ) : (
                 <Bell className="h-4 w-4" />
               )}
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-neutral-950">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF2D55] text-[10px] font-black text-white ring-2 ring-[#18191e] shadow-xs">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -618,65 +603,49 @@ const HeaderInner = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className={`icon-pill cursor-pointer transition-all relative ${
-                projectState === "missing"
-                  ? "text-rose-300 bg-rose-500/15 border-rose-500/50 hover:bg-rose-500/25"
-                  : projectState === "loading"
-                  ? "text-purple-300 bg-purple-500/15 border-purple-500/40 animate-pulse"
-                  : projectState === "active"
-                  ? "text-purple-300 bg-purple-500/15 border-purple-500/40 hover:bg-purple-500/25"
-                  : "hover:bg-purple-500/20 hover:text-purple-300"
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+                projectState === "active"
+                  ? "text-blue-400 border-blue-500/40 bg-blue-500/10"
+                  : projectState === "missing"
+                  ? "text-rose-400 border-rose-500/40 bg-rose-500/10"
+                  : ""
               }`}
               aria-label="Active Project Selector"
             >
               {projectState === "missing" ? (
                 <AlertCircle className="h-4 w-4 text-rose-400" />
               ) : projectState === "loading" ? (
-                <Loader2 className="h-4 w-4 text-purple-400 animate-spin" />
+                <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
               ) : (
-                <FolderSync className="h-4 w-4 text-purple-400" />
+                <FolderSync className="h-4 w-4" />
               )}
 
               {projectState === "active" && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
-              )}
-              {projectState === "missing" && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-black animate-pulse" />
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#0D0E12] animate-pulse" />
               )}
             </button>
           </Tooltip>
         </div>
 
-        {/* User Profile Pill at Far Right End (Image 2 Style) */}
+        {/* User Profile Pill at Far Right End */}
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-purple-500/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
+            className="h-8.5 flex items-center gap-2 pl-3 pr-1.5 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] transition-all cursor-pointer select-none group shrink-0 shadow-2xs active:scale-95"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-purple-200 truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="text-xs font-semibold text-white truncate max-w-[120px] hidden sm:inline">
               {user?.full_name ||
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-purple-400 transition-all duration-300">
+            <div className="relative w-6 h-6 rounded-lg overflow-hidden border border-[#33353e] bg-black shrink-0 flex items-center justify-center">
               <img
                 key={user?.avatar_url || user?.full_name || "avatar"}
                 src={getUserAvatarUrl(user)}
                 referrerPolicy="no-referrer"
-                onLoad={(e) => {
-                  e.currentTarget.classList.remove("opacity-0");
-                  e.currentTarget.classList.add("opacity-100");
-                }}
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement;
-                  target.onerror = null;
-                  target.src = DEFAULT_USER_AVATAR_DATA_URI;
-                  target.classList.remove("opacity-0");
-                  target.classList.add("opacity-100");
-                }}
+                className="w-full h-full object-cover"
                 alt="User Avatar"
-                className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
               />
             </div>
           </button>

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 const ActiveProjectSidebarWidget: React.FC<{
   setDrawerOpen: (open: boolean) => void;
@@ -247,31 +248,12 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
     <div className="flex h-full flex-col bg-[#0d0d12]/95 backdrop-blur-3xl border-r border-white/10 shadow-[8px_0_32px_rgba(0,0,0,0.6)]">
       {/* Sidebar Header */}
       <div className="h-16 flex items-center justify-between px-5 border-b border-white/10 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="relative shrink-0 rounded-full border border-purple-500/30 p-0.5 bg-[#18191e] shadow-[0_0_12px_rgba(168,85,247,0.3)]">
-            <img
-              src={themeMode === "light" ? "/logo-light.png" : "/logo-dark.png"}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              className="h-9 w-9 rounded-full shrink-0 object-cover bg-black"
-              alt="Sonikoma Logo"
-            />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-sm tracking-tight text-white font-sans">
-                Creative Suite
-              </span>
-              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-md font-mono">
-                SUITE
-              </span>
-            </div>
-            <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
-              AI Creative Workspace
-            </p>
-          </div>
-        </div>
+        <SonikomaLogo
+          size="sm"
+          badge="Creative"
+          showSubtitle={true}
+          subtitleText="AI Creative Workspace"
+        />
         <button
           onClick={onClose}
           className="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"

@@ -61,9 +61,9 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
       {/* Background Animated Anime Hero Scene (Shown ONLY in Left Showcase) */}
       <LandingAnimeScene variant="auth" themeMode="dark" />
 
-      {/* Top Header Branding */}
-      <div className="relative z-10 flex items-center justify-between w-full">
-        <SonikomaLogo size="md" />
+      {/* Top Header Branding Card */}
+      <div className="relative z-10 flex items-center justify-between p-3.5 px-5 rounded-2xl bg-[#141414]/90 backdrop-blur-xl border border-[#2F2F2F] shadow-xl w-full">
+        <SonikomaLogo size="sm" />
       </div>
 
       {/* Carousel Slide Area with High-Contrast Background Card */}

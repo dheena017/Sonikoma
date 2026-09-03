@@ -30,6 +30,7 @@ import {
   Sliders,
 } from "lucide-react";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { SonikomaLogo } from "@/shared/ui/branding";
 import { getProxyImageUrl, isApiUrl, isProxyUrl } from "@/api/endpoints/image";
 
 interface ProjectConfirmModalProps {
@@ -492,27 +493,15 @@ export default function ProjectConfirmModal({
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center gap-3.5">
-            <div className="relative group/logo flex items-center justify-center shrink-0">
-              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#3B82F6]/40 via-[#60A5FA]/30 to-[#3B82F6]/40 opacity-75 blur-md" />
-              <img
-                src="/logo-dark.png"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                }}
-                alt="Sonikoma Logo"
-                className="relative h-10 w-10 rounded-2xl bg-[#0a0a14] shadow-xl shadow-[#1e3a5f]/60 object-cover border border-[#3B82F6]/30 shrink-0"
-              />
-            </div>
+            <SonikomaLogo
+              size="sm"
+              badge="Studio"
+            />
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-black text-white tracking-tight">
-                  Project Confirmation
-                </h2>
-                <span className="px-2 py-0.5 text-[9px] font-mono font-extrabold uppercase bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30 rounded-full">
-                  STUDIO
-                </span>
-              </div>
-              <p className="text-[10px] text-neutral-500 font-mono mt-0.5">
+              <h2 className="text-base font-bold text-white tracking-tight">
+                Project Confirmation
+              </h2>
+              <p className="text-[10px] text-neutral-400 font-mono mt-0.5">
                 Review information before starting the AI pipeline
               </p>
             </div>

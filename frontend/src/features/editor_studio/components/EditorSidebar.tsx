@@ -13,6 +13,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 interface EditorSidebarProps {
   isCollapsed: boolean;
@@ -168,32 +169,12 @@ const EditorSidebar = ({
           }`}
       >
         {!isCollapsed && (
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
-              <img
-                src="/logo-dark.png"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-                }}
-                className="relative h-10 w-10 rounded-full border border-purple-500/30 shrink-0 object-cover bg-black"
-                alt="Sonikoma Logo"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm tracking-tight text-white font-sans">
-                  Storyboard
-                </span>
-                <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
-                  STUDIO
-                </span>
-              </div>
-              <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
-                Webtoon Scraper & Storyboard
-              </p>
-            </div>
-          </div>
+          <SonikomaLogo
+            size="sm"
+            badge="Studio"
+            showSubtitle={true}
+            subtitleText="Storyboard & Scraper"
+          />
         )}
 
         {/* Mobile/Desktop Close Button */}

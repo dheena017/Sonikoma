@@ -253,48 +253,28 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
 
   return (
     <div className={`relative inline-flex items-center select-none ${className}`}>
-      {/* ── Studio Multi-Engine Switcher Trigger Button (Spacious & Prominent) ── */}
+      {/* ── Studio Multi-Engine Switcher Trigger Button ── */}
       <button
         type="button"
         onClick={() => {
           setIsOpen(true);
           fetchRoutingConfig();
         }}
-        className={`flex items-center gap-3 px-3.5 py-1.5 rounded-2xl bg-[#13141C] hover:bg-[#191B26] border border-white/[0.1] hover:border-purple-500/50 text-neutral-200 transition-all duration-200 shadow-md hover:shadow-purple-500/10 shrink-0 cursor-pointer active:scale-98 group select-none h-10 sm:h-11 ${
-          isOpen ? "ring-2 ring-purple-500/40 border-purple-500/60 bg-[#191B26]" : ""
+        className={`h-8.5 flex items-center gap-2 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+          isOpen ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
         }`}
         title="AI Smart Routing: Open Multi-Model Cascades Matrix"
       >
-        {/* Glowing Gradient Icon Box */}
-        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-purple-500/25 via-indigo-500/20 to-blue-500/25 border border-purple-500/30 flex items-center justify-center text-purple-300 group-hover:text-white group-hover:scale-105 transition-all shadow-inner shrink-0">
-          <Workflow className="w-4 h-4" />
-        </div>
-
-        {/* Center Labels */}
-        <div className="flex flex-col text-left justify-center min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs sm:text-[13px] font-bold text-white tracking-tight leading-tight whitespace-nowrap font-sans group-hover:text-purple-200 transition-colors">
-              AI Smart Routing
-            </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10B981] shrink-0" />
-          </div>
-          <span className="text-[9.5px] sm:text-[10px] font-mono text-neutral-400 group-hover:text-neutral-300 leading-tight mt-0.5 truncate hidden min-[480px]:inline">
-            11 Cascades Synchronized
-          </span>
-        </div>
-
-        {/* Right Badge & Chevron */}
-        <div className="flex items-center gap-2 shrink-0 ml-1">
-          <span className="px-2 py-0.5 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-300 font-mono text-[9.5px] font-bold uppercase tracking-wider hidden sm:inline">
-            11 Tasks
-          </span>
-
-          <ChevronDown
-            className={`w-4 h-4 text-neutral-400 group-hover:text-white transition-transform duration-200 shrink-0 ${
-              isOpen ? "rotate-180 text-purple-300" : ""
-            }`}
-          />
-        </div>
+        <Workflow className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+        <span className="font-semibold text-white tracking-tight">AI Routing</span>
+        <span className="px-1.5 py-0.5 rounded-md bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono text-[10px] font-bold hidden sm:inline">
+          11 Tasks
+        </span>
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-white transition-transform duration-200 shrink-0 ${
+            isOpen ? "rotate-180 text-blue-400" : ""
+          }`}
+        />
       </button>
 
       {/* ── RIGHT-SIDE SLIDE-OVER DRAWER PANEL (MATCHING IMAGE 2 STYLING) ─────────────────── */}

@@ -17,6 +17,7 @@ import {
   useImageEditorStore,
   ImageTool,
 } from "@/features/editor_image/hooks/useImageEditorState";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface ImageEditorSidebarProps {
   isCollapsed: boolean;
@@ -160,37 +161,15 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-3.5">
-                <div className="relative">
-                  <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-amber-500 opacity-40 blur-sm group-hover:opacity-75 transition-opacity" />
-                  <img
-                    src="/logo-dark.png"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src =
-                        "/logo-dark.png";
-                    }}
-                    className="relative h-11 w-11 rounded-full border border-purple-500/30 shrink-0 object-cover bg-black"
-                    alt="Sonikoma Logo"
-                  />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-base tracking-tight text-white font-sans">
-                      Image Studio
-                    </span>
-                    <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md font-mono">
-                      IMAGE
-                    </span>
-                  </div>
-                  <p className="text-[10px] text-neutral-400 font-sans tracking-wide">
-                    Image Processing Suite
-                  </p>
-                </div>
-              </div>
-
+              <SonikomaLogo
+                size="sm"
+                badge="Image"
+                showSubtitle={true}
+                subtitleText="Image Studio"
+              />
               <button
                 onClick={() => setIsCollapsed(true)}
-                className="w-8 h-8 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-purple-300 hover:bg-purple-500/10 hover:border-purple-500/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+                className="w-8 h-8 rounded-xl bg-neutral-900/80 border border-neutral-800 text-neutral-400 hover:text-white cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
                 title="Close sidebar"
               >
                 <X className="w-4 h-4" />

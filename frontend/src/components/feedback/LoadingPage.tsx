@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "@/styles/animations/loading.css";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 export type ThemeMode = "dark" | "light";
 
@@ -32,11 +33,9 @@ export default function LoadingPage({
     }
   }, [themeMode]);
 
-  const hasProgress = progress !== undefined && progress >= 0;
-  const clampedProgress = hasProgress
-    ? Math.min(100, Math.max(0, progress))
-    : 0;
-
+  const clampedProgress =
+    typeof progress === "number" ? Math.min(100, Math.max(0, progress)) : null;
+  const hasProgress = clampedProgress !== null;
   const isLight = activeMode === "light";
 
   return (
@@ -51,23 +50,13 @@ export default function LoadingPage({
     >
       {/* Luxury Glass Studio Card */}
       <div className="loading-studio-card">
-        {/* Central Logo with Ambient Glow & Floating Specular Shine */}
-        <div className="loading-logo-container">
-          <div className="loading-logo-glow" />
-          <div className="loading-logo-box">
-            <img
-              src={isLight ? "/logo-light.png" : "/logo-dark.png"}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              alt="Sonikoma Logo"
-              className="loading-logo-img"
-            />
-          </div>
+        {/* Central Logo */}
+        <div className="pb-3 flex justify-center">
+          <SonikomaLogo
+            size="lg"
+            themeMode={activeMode}
+          />
         </div>
-
-        {/* Title */}
-        <div className="loading-title">Sonikoma</div>
 
         {/* Status Pill */}
         <div className="loading-status-pill">
