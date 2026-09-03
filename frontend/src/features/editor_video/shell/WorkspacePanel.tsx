@@ -6,29 +6,48 @@ import { editorEventBus, useEditorEvent } from "../events/editorEventBus";
 
 interface WorkspacePanelProps {
   defaultWorkspace?: WorkspaceId;
+  activeWorkspace?: WorkspaceId;
+  onSelectWorkspace?: (id: WorkspaceId) => void;
   onBackToApp?: () => void;
+  navigateTo?: (path: string) => void;
   showContent?: boolean;
   appLogic?: any;
 }
 
 export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
   defaultWorkspace = "imported_assets",
+  activeWorkspace: controlledActiveWorkspace,
+  onSelectWorkspace: controlledOnSelectWorkspace,
   onBackToApp,
+  navigateTo,
   showContent = true,
   appLogic,
 }) => {
-  const [activeWorkspace, setActiveWorkspace] =
+  const [internalActiveWorkspace, setInternalActiveWorkspace] =
     useState<WorkspaceId>(defaultWorkspace);
+
+  const activeWorkspace = controlledActiveWorkspace ?? internalActiveWorkspace;
+
+  const handleSelectWorkspace = useCallback(
+    (id: WorkspaceId) => {
+      if (controlledOnSelectWorkspace) {
+        controlledOnSelectWorkspace(id);
+      } else {
+        setInternalActiveWorkspace(id);
+      }
+    },
+    [controlledOnSelectWorkspace]
+  );
 
   // ── Listen for OPEN_WORKSPACE events from Timeline track buttons ──────────
   const handleOpenWorkspace = useCallback(
     ({ workspaceId }: { workspaceId: string }) => {
       const id = workspaceId as WorkspaceId;
       if (WORKSPACE_REGISTRY[id]) {
-        setActiveWorkspace(id);
+        handleSelectWorkspace(id);
       }
     },
-    []
+    [handleSelectWorkspace]
   );
   useEditorEvent("OPEN_WORKSPACE", handleOpenWorkspace);
 
@@ -43,13 +62,14 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
       <div className="hidden lg:block h-full shrink-0">
         <MiniSidebar
           activeWorkspace={activeWorkspace}
-          onSelectWorkspace={setActiveWorkspace}
+          onSelectWorkspace={handleSelectWorkspace}
           onBackToApp={onBackToApp}
+          navigateTo={navigateTo}
         />
       </div>
 
       {showContent && (
-        <div className="flex-1 w-full min-w-0 flex flex-col h-full bg-[#0c0d16]/75 backdrop-blur-2xl border-r border-white/10 shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]">
+        <div className="flex-1 w-full min-w-0 flex flex-col h-full bg-[#121212] backdrop-blur-2xl border-r border-[#2F2F2F] shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]">
           <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
             <ActiveWorkspaceComponent
               appLogic={appLogic}

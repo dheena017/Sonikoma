@@ -119,7 +119,7 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
     // 🎥 V2 Camera FX (Pan, Zoom, Motion clips)
     trackTitle = `Camera Motion FX #${(contextMenu.panelIdx ?? 0) + 1}`;
     trackIcon = Camera;
-    trackColor = "text-indigo-400";
+    trackColor = "text-[#60A5FA]";
     items = [
       {
         icon: Sparkles,
@@ -307,7 +307,7 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
 
       <div
         ref={contextMenuRef}
-        className="fixed z-[9999] bg-[#0f0f1c]/98 backdrop-blur-2xl rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-white/10 py-1.5 overflow-hidden text-neutral-200 select-none animate-in fade-in zoom-in-95 duration-100 max-h-[calc(100vh-24px)] flex flex-col"
+        className="fixed z-[9999] bg-[#18181B]/98 backdrop-blur-2xl rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.9)] border border-white/10 py-1.5 overflow-hidden text-neutral-200 select-none animate-in fade-in zoom-in-95 duration-100 max-h-[calc(100vh-24px)] flex flex-col"
         style={{ left: `${x}px`, top: `${y}px`, width: `${MENU_W}px` }}
       >
         {/* Track Category Header */}

@@ -14,7 +14,7 @@ export const StoryPipelineBreadcrumb: React.FC<
   StoryPipelineBreadcrumbProps
 > = ({ steps }) => {
   return (
-    <div className="px-3 py-2 bg-[#08050e]/90 border-b border-[#2F2F2F] shrink-0">
+    <div className="px-3 py-2 bg-[#1E1E1E]/90 border-b border-[#2F2F2F] shrink-0">
       <div className="flex items-center justify-between gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {steps.map((step, idx) => (
           <React.Fragment key={step.label}>

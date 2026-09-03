@@ -9,7 +9,7 @@ export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({
   onTriggerFeedback,
 }) => {
   return (
-    <div className="px-3 py-2 bg-[#08050e]/95 border-b border-[#2F2F2F] flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="px-3 py-2 bg-[#1E1E1E]/95 border-b border-[#2F2F2F] flex items-center justify-between gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <span className="text-[9px] font-mono font-bold text-[#60A5FA] flex items-center gap-1 shrink-0">
         <Wand2 className="h-3 w-3 text-[#60A5FA]" /> AI Character Tools:
       </span>

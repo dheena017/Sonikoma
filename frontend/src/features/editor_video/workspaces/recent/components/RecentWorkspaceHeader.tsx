@@ -23,7 +23,7 @@ export const RecentWorkspaceHeader: React.FC<RecentWorkspaceHeaderProps> = ({
   return (
     <div className="shrink-0">
       {/* Title row */}
-      <div className="px-4 py-3 border-b border-[#3B82F6]/15 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
+      <div className="px-4 py-3 border-b border-[#3B82F6]/15 bg-[#121212]/95 backdrop-blur-xl flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="h-10 w-10 rounded-3xl bg-[#2A2A2A] border border-[#3B82F6]/25 flex items-center justify-center ">
             <History className="h-4.5 w-4.5 text-[#60A5FA]" />

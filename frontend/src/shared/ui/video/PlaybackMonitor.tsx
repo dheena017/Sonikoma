@@ -5,7 +5,6 @@ import {
   Sliders,
   RotateCcw,
   Tv,
-  Film,
   Sparkles,
   Wand2,
   Layers,
@@ -1239,7 +1238,7 @@ export default function VideoPreviewCinemaPlayer({
               ) : (
                 <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10 p-2 sm:p-4">
                   <img
-                    src={activePanelImg}
+                    src={activePanelImg || undefined}
                     onError={(e) => {
                       const img = e.currentTarget;
                       if (img.dataset.retried) return;
@@ -1269,23 +1268,7 @@ export default function VideoPreviewCinemaPlayer({
                 </div>
               )}
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-center p-6 space-y-3 select-none my-auto">
-              <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] ">
-                <Film className="h-5 w-5" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-xs sm:text-sm font-bold text-white font-mono uppercase tracking-wider">
-                  Cinema Monitor Standby
-                </h3>
-                <p className="text-[11px] sm:text-xs text-neutral-400 font-mono max-w-xs leading-relaxed">
-                  {panels.length > 0
-                    ? `Select any panel below to start playback · ${panels.length} cuts ready`
-                    : "No storyboard panels yet · Add or crop panels below to preview"}
-                </p>
-              </div>
-            </div>
-          )}
+          ) : null}
         </div>
 
         {/* Subtitles Overlay */}
@@ -1325,40 +1308,42 @@ export default function VideoPreviewCinemaPlayer({
         />
       )}
 
-      {/* SUB-COMPONENT: Floating Chapters Menu */}
-      <VideoPreviewChaptersMenu
-        show={showChaptersMenu && controlsVisible}
-        chapters={chapters}
-        activeChapter={activeChapter}
-        onSelectChapter={(startTime) => {
-          setCurrentTime(startTime);
-          if (videoRef.current) videoRef.current.currentTime = startTime;
-          setShowChaptersMenu(false);
-        }}
-        formatTime={formatTime}
-      />
+      {mode === "video" && (
+        <>
+          {/* SUB-COMPONENT: Floating Chapters Menu */}
+          <VideoPreviewChaptersMenu
+            show={showChaptersMenu && controlsVisible}
+            chapters={chapters}
+            activeChapter={activeChapter}
+            onSelectChapter={(startTime) => {
+              setCurrentTime(startTime);
+              if (videoRef.current) videoRef.current.currentTime = startTime;
+              setShowChaptersMenu(false);
+            }}
+            formatTime={formatTime}
+          />
 
-      {/* SUB-COMPONENT: Settings Menu */}
-      <VideoPreviewSettingsMenu
-        show={showSettings && controlsVisible}
-        onClose={() => setShowSettings(false)}
-        isLooping={isLooping}
-        setIsLooping={setIsLooping}
-        cinematicBars={cinematicBars}
-        setCinematicBars={setCinematicBars}
-        playbackSpeed={playbackSpeed}
-        setPlaybackSpeed={setPlaybackSpeed}
-        subtitleSize={subtitleSize}
-        setSubtitleSize={setSubtitleSize}
-        videoQuality={videoQuality}
-        setVideoQuality={setVideoQuality}
-        subtitlesStyle={subtitlesStyle}
-        setSubtitlesStyle={setSubtitlesStyle}
-        baseSpeedRef={baseSpeedRef}
-      />
+          {/* SUB-COMPONENT: Settings Menu */}
+          <VideoPreviewSettingsMenu
+            show={showSettings && controlsVisible}
+            onClose={() => setShowSettings(false)}
+            isLooping={isLooping}
+            setIsLooping={setIsLooping}
+            cinematicBars={cinematicBars}
+            setCinematicBars={setCinematicBars}
+            playbackSpeed={playbackSpeed}
+            setPlaybackSpeed={setPlaybackSpeed}
+            subtitleSize={subtitleSize}
+            setSubtitleSize={setSubtitleSize}
+            videoQuality={videoQuality}
+            setVideoQuality={setVideoQuality}
+            subtitlesStyle={subtitlesStyle}
+            setSubtitlesStyle={setSubtitlesStyle}
+            baseSpeedRef={baseSpeedRef}
+          />
 
-      {/* SUB-COMPONENT: Bottom Controls Bar */}
-      <VideoPreviewBottomControls
+          {/* SUB-COMPONENT: Bottom Controls Bar */}
+          <VideoPreviewBottomControls
         visible={controlsVisible}
         progressBarRef={progressBarRef}
         handleProgressBarInteraction={handleProgressBarInteraction}
@@ -1394,8 +1379,10 @@ export default function VideoPreviewCinemaPlayer({
         setIsTheaterMode={setIsTheaterMode}
         toggleFullscreen={toggleFullscreen}
         isFullscreen={isFullscreen}
-        addNotification={addNotification}
-      />
+            addNotification={addNotification}
+          />
+        </>
+      )}
     </div>
   );
 }

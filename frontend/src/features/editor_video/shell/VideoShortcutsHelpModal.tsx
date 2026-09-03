@@ -202,11 +202,11 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150">
       <div
-        className="w-full max-w-2xl bg-[#0e0e16] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-2xl bg-[#18181B] border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#12121e]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#121212]">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/30 flex items-center justify-center text-[#60A5FA]">
               <Keyboard className="h-5 w-5" />
@@ -232,7 +232,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
         </div>
 
         {/* Search & Category Filter */}
-        <div className="p-4 border-b border-white/5 space-y-3 bg-[#0a0a10]">
+        <div className="p-4 border-b border-white/5 space-y-3 bg-[#121212]">
           <div className="relative">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-neutral-500" />
             <input
@@ -306,7 +306,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-white/10 bg-[#12121e] flex items-center justify-between text-[11px] text-neutral-400">
+        <div className="px-6 py-3 border-t border-white/10 bg-[#121212] flex items-center justify-between text-[11px] text-neutral-400">
           <div className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
             <span>Hover any tool button to see its shortcut</span>

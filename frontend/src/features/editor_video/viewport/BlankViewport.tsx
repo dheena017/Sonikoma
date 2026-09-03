@@ -208,7 +208,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
         <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:18px_18px]" />
 
         {/* Canvas Frame — Edge-to-edge flush studio canvas */}
-        <div className="relative w-full h-full overflow-hidden bg-gradient-to-br from-[#0e0a20]/80 via-[#070510]/80 to-[#040308]/80 backdrop-blur-xl rounded-none border-0 flex items-center justify-center">
+        <div className="relative w-full h-full overflow-hidden bg-[#0A0A0A] backdrop-blur-xl rounded-none border-0 flex items-center justify-center">
           {/* Layer 1: Background Plate */}
           {layerVisibility.background && (
             <div
@@ -221,7 +221,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
               }
               onWheel={handleBackgroundWheel}
               className={`absolute inset-0 w-full h-full cursor-grab transition-all ${selectedLayer === "background"
-                  ? "ring-2 ring-inset ring-indigo-500 z-10"
+                  ? "ring-2 ring-inset ring-[#3B82F6]/50 z-10"
                   : "z-0"
                 } ${isDraggingBackground ? "cursor-grabbing" : ""}`}
               style={{
@@ -238,7 +238,7 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
                   className="w-full h-full object-contain object-center pointer-events-none"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[#2A2A2A] via-neutral-950/30 to-indigo-950/40 flex flex-col items-center justify-center gap-2 text-neutral-400 font-mono text-xs select-none p-6 text-center">
+                <div className="w-full h-full bg-gradient-to-br from-[#2A2A2A] via-neutral-950/30 to-blue-600/40 flex flex-col items-center justify-center gap-2 text-neutral-400 font-mono text-xs select-none p-6 text-center">
                   <div className="w-12 h-12 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] ">
                     <Film className="w-5 h-5" />
                   </div>

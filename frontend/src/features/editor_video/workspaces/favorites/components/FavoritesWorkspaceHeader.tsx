@@ -19,7 +19,7 @@ export const FavoritesWorkspaceHeader: React.FC<
   return (
     <div className="shrink-0">
       {/* Title row */}
-      <div className="px-4 py-3 border-b border-amber-500/15 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
+      <div className="px-4 py-3 border-b border-amber-500/15 bg-[#121212]/95 backdrop-blur-xl flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="h-10 w-10 rounded-3xl bg-amber-500/12 border border-amber-500/25 flex items-center justify-center shadow-[0_0_18px_rgba(245,158,11,0.22)]">
             <Star className="h-4.5 w-4.5 text-amber-300 fill-amber-300" />

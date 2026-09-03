@@ -21,7 +21,7 @@ export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({
   return (
     <div
       onClick={handleApply}
-      className="p-3 rounded-2xl bg-[#090814] border border-white/5 hover:border-[#3B82F6]/40 flex items-center justify-between cursor-pointer transition-all duration-200 group shadow-sm hover:shadow-[0_4px_20px_rgba(59,130,246,0.15)]"
+      className="p-3 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/40 flex items-center justify-between cursor-pointer transition-all duration-200 group shadow-sm hover:shadow-[0_4px_20px_rgba(59,130,246,0.15)]"
     >
       <div className="flex items-center gap-2.5 min-w-0">
         <div className="w-8 h-8 rounded-xl bg-[#2A2A2A] border border-[#2F2F2F] flex items-center justify-center text-sm shrink-0 group-hover:scale-105 transition-transform">

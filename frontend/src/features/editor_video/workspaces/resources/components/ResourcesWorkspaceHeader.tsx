@@ -19,8 +19,8 @@ export const ResourcesWorkspaceHeader: React.FC<
   <div className="shrink-0">
     <div className="px-3.5 py-2.5 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-md flex items-center justify-between">
       <div className="flex items-center gap-2.5">
-        <div className="h-6 w-6 rounded-lg bg-indigo-500/20 border border-[#2F2F2F] flex items-center justify-center shadow-[0_0_10px_rgba(99,102,241,0.3)]">
-          <Package className="h-3.5 w-3.5 text-indigo-400" />
+        <div className="h-6 w-6 rounded-lg bg-[#3B82F6]/20 border border-[#2F2F2F] flex items-center justify-center shadow-sm">
+          <Package className="h-3.5 w-3.5 text-[#60A5FA]" />
         </div>
         <h2 className="text-xs font-black text-white uppercase tracking-wider font-mono">
           Brand & Resources

@@ -32,11 +32,11 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
   onToggleHide,
   onToggleMute,
 }) => (
-  <div data-track-header="true" className="w-48 shrink-0 h-full sticky left-0 z-30 flex items-center justify-between px-3 border-r border-white/10 group bg-[#0d0d16] shadow-[4px_0_16px_rgba(0,0,0,0.85)] select-none">
+  <div data-track-header="true" className="w-48 shrink-0 h-full sticky left-0 z-30 flex items-center justify-between px-3 border-r border-white/10 group bg-[#15161c] select-none">
     {/* Track ID & Name (Always prominent & readable, never truncated) */}
     <div className="flex items-center gap-2 min-w-0 pr-1 overflow-hidden">
       <span
-        className={`text-[9px] font-mono font-black ${color} shrink-0 px-1 py-0.5 rounded bg-white/[0.05] border border-white/10`}
+        className={`text-[9px] font-mono font-black ${color} shrink-0 px-1 py-0.5 rounded bg-black/20 border border-white/10`}
       >
         {id}
       </span>
@@ -46,12 +46,12 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
     </div>
 
     {/* Compact Action Icons Toolbar */}
-    <div className="flex items-center gap-1 shrink-0 bg-black/60 px-1.5 py-0.5 rounded border border-white/10 opacity-80 group-hover:opacity-100 transition-opacity">
+    <div className="flex items-center gap-0.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
       <button
         type="button"
         onClick={onToggleLock}
         title={locked ? "Unlock track" : "Lock track"}
-        className={`p-0.5 rounded transition-colors cursor-pointer ${
+        className={`h-5 w-5 flex items-center justify-center rounded transition-colors cursor-pointer ${
           locked
             ? "text-amber-400 bg-amber-950/60"
             : "text-neutral-400 hover:text-white"
@@ -64,7 +64,7 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
         type="button"
         onClick={onToggleHide}
         title={hidden ? "Show track" : "Hide track"}
-        className={`p-0.5 rounded transition-colors cursor-pointer ${
+        className={`h-5 w-5 flex items-center justify-center rounded transition-colors cursor-pointer ${
           hidden
             ? "text-red-400 bg-red-950/60"
             : "text-neutral-400 hover:text-white"
@@ -82,7 +82,7 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
           type="button"
           onClick={onToggleMute}
           title={muted ? "Unmute" : "Mute"}
-          className={`p-0.5 rounded transition-colors cursor-pointer ${
+          className={`h-5 w-5 flex items-center justify-center rounded transition-colors cursor-pointer ${
             muted
               ? "text-rose-400 bg-rose-950/60"
               : "text-neutral-400 hover:text-white"

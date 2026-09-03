@@ -120,11 +120,11 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
           ? "border-[#3B82F6] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 "
-          : "border-white/10 bg-[#090914] hover:border-[#3B82F6]/50 shadow-md hover:shadow-[0_8px_25px_rgba(59,130,246,0.2)]"
+          : "border-white/10 bg-[#18181B] hover:border-[#3B82F6]/50 shadow-md hover:shadow-md"
       }`}
     >
       {/* Top Media Bar & Details */}
-      <div className="flex p-2.5 gap-3 bg-[#0e0f1e] border-b border-white/5 items-start">
+      <div className="flex p-2.5 gap-3 bg-[#18181B] border-b border-white/5 items-start">
         {/* Left Thumbnail Image */}
         <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-black/60 shrink-0 border border-white/10 group-hover:border-[#3B82F6]/40 transition-colors">
           <img
@@ -263,7 +263,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
             )}
 
             {bgm && (
-              <span className="inline-flex items-center gap-1 text-[8px] font-mono text-blue-300 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-blue-500/30 truncate max-w-[90px]">
+              <span className="inline-flex items-center gap-1 text-[8px] font-mono text-blue-300 bg-neutral-900/60 px-1.5 py-0.5 rounded border border-blue-500/30 truncate max-w-[90px]">
                 <Music className="h-2 w-2 text-blue-400 shrink-0" />
                 <span className="truncate">{bgm}</span>
               </span>
@@ -273,7 +273,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
       </div>
 
       {/* Card Action Footer */}
-      <div className="px-2.5 py-1.5 bg-[#090912] flex items-center justify-between gap-1">
+      <div className="px-2.5 py-1.5 bg-[#121212] flex items-center justify-between gap-1">
         <button
           type="button"
           onClick={(e) => {

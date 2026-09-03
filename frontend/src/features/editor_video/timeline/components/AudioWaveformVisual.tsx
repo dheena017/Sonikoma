@@ -83,7 +83,7 @@ async function extractRealPeaks(url: string, numBuckets = 300): Promise<number[]
 export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
   audioUrl,
   seed = 1,
-  color = "#d8b4fe",
+  color = "#93C5FD",
   opacity = 0.95,
   className = "",
 }) => {

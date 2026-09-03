@@ -121,7 +121,7 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
           type="checkbox"
           checked={!!localConfig[field]}
           onChange={() => {}}
-          className="w-4 h-4 rounded border-neutral-600 cursor-pointer accent-purple-600"
+          className="w-4 h-4 rounded border-neutral-600 cursor-pointer accent-[#3B82F6]"
         />
         <span className="font-medium text-neutral-200 group-hover:text-white text-sm">
           {label}
@@ -146,10 +146,10 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-[#1e1e24] border border-neutral-700/80 rounded-2xl shadow-2xl overflow-hidden text-neutral-200 text-sm"
+        className="w-full max-w-lg bg-[#1E1E1E] border border-neutral-700/80 rounded-2xl shadow-2xl overflow-hidden text-neutral-200 text-sm"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-700/70 bg-[#18181c]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-700/70 bg-[#18181B]">
           <div className="flex items-center gap-2.5">
             <LayoutGrid className="h-4 w-4 text-[#3B82F6]" />
             <h3 className="font-semibold text-base text-white tracking-wide">
@@ -244,7 +244,7 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-neutral-700/70 bg-[#18181c]">
+        <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-neutral-700/70 bg-[#18181B]">
           <button
             onClick={onClose}
             className="px-5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-semibold text-xs transition-all shadow-md active:scale-95"

@@ -114,7 +114,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                   key={i}
                   className={`w-1.5 rounded-full transition-all duration-75 ${
                     isRecording
-                      ? "bg-gradient-to-t from-blue-600 via-fuchsia-400 to-emerald-400"
+                      ? "bg-gradient-to-t from-blue-600 via-blue-600 to-emerald-400"
                       : "bg-neutral-800"
                   }`}
                   style={{

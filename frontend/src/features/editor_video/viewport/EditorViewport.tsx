@@ -77,7 +77,7 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#0b0c14] overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-[#0A0A0A] overflow-hidden">
       <VideoEditorViewportHeader
         monitorTab={monitorTab}
         setMonitorTab={setMonitorTab}
@@ -101,7 +101,15 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
         setAspectRatio={onAspectRatioChange}
       />
 
-      <div className="flex-1 w-full relative overflow-hidden bg-black flex items-center justify-center p-2">
+      <div
+        className="flex-1 w-full relative overflow-hidden bg-black flex items-center justify-center p-2"
+        onWheel={(event) => {
+          event.preventDefault();
+          setZoomLevel((current) =>
+            Math.min(2, Math.max(0.5, current + (event.deltaY < 0 ? 0.1 : -0.1)))
+          );
+        }}
+      >
         <div
           className="w-full h-full flex items-center justify-center transition-transform duration-150"
           style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center center" }}

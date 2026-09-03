@@ -58,7 +58,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
   isAddingSelected = false,
 }) => {
   return (
-    <div className="shrink-0 border-b border-[#2F2F2F] bg-[#0c0d18]/95 backdrop-blur-2xl">
+    <div className="shrink-0 border-b border-[#2F2F2F] bg-[#1E1E1E]/95 backdrop-blur-2xl">
       {/* Title & Master Actions Row */}
       <div className="px-3.5 py-2.5 flex items-center justify-between gap-2 border-b border-white/5">
         <div className="flex items-center gap-2 min-w-0">
@@ -179,7 +179,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
                 type="button"
                 onClick={onAutoCropSelected}
                 disabled={isBatchCropping}
-                className="px-2 py-0.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
+                className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
                 title="Auto-crop selected frames"
               >
                 {isBatchCropping ? (
@@ -196,7 +196,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
                 type="button"
                 onClick={onCleanBubblesSelected}
                 disabled={isCleaningBubbles}
-                className="px-2 py-0.5 rounded-md bg-cyan-600 hover:bg-[#3B82F6] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
+                className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#3B82F6] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
                 title="Clean speech bubbles in selected frames"
               >
                 {isCleaningBubbles ? (

@@ -25,7 +25,7 @@ export const WorkspaceLayoutRoot: React.FC<WorkspaceLayoutProps> = ({
 }) => {
   return (
     <div
-      className={`h-full w-full flex flex-col bg-gradient-to-b from-[#0e0c1a] via-[#0a0814] to-[#06050c] text-white select-none overflow-hidden backdrop-blur-2xl ${className}`}
+      className={`h-full w-full flex flex-col bg-[#0A0A0A] text-white select-none overflow-hidden backdrop-blur-2xl ${className}`}
     >
       {children}
     </div>
@@ -142,7 +142,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
   };
 
   return (
-    <div className="shrink-0 bg-[#0a0814]/95 backdrop-blur-md border-b border-[#2F2F2F] flex items-center px-2 py-1.5 min-w-0 gap-1 overflow-hidden">
+    <div className="shrink-0 bg-[#121212]/95 backdrop-blur-md border-b border-[#2F2F2F] flex items-center px-2 py-1.5 min-w-0 gap-1 overflow-hidden">
       {/* Scroll Left Button */}
       {showLeft && (
         <button
@@ -168,7 +168,7 @@ export const WorkspaceLayoutTabs: React.FC<TabsProps> = ({
               onClick={() => onSelectTab(tab)}
               className={`relative px-3.5 py-1.5 rounded-full text-[10px] font-mono font-bold whitespace-nowrap cursor-pointer transition-all duration-200 active:scale-95 shrink-0 flex items-center gap-1.5 ${
                 isActive
-                  ? "bg-gradient-to-r from-blue-600/60 to-indigo-600/60 text-white border border-[#60A5FA]/80 "
+                  ? "bg-gradient-to-r from-blue-600/60 to-blue-600/60 text-white border border-[#60A5FA]/80 "
                   : "bg-neutral-900/60 text-neutral-300 border border-neutral-800/80 hover:text-white hover:bg-white/10 hover:border-[#3B82F6]/30"
               }`}
             >
@@ -212,7 +212,7 @@ export const WorkspaceLayoutSearch: React.FC<SearchProps> = ({
 }) => {
   return (
     <div
-      className={`px-3 py-2 bg-[#110d22]/95 border-b border-[#2F2F2F] flex items-center gap-2 shrink-0 ${className}`}
+      className={`px-3 py-2 bg-[#1E1E1E]/95 border-b border-[#2F2F2F] flex items-center gap-2 shrink-0 ${className}`}
     >
       <div className="flex-1 relative">
         <input
@@ -251,7 +251,7 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
   placeholder = "Describe prompt...",
 }) => {
   return (
-    <div className="p-3 bg-gradient-to-br from-[#2A2A2A] via-indigo-950/20 to-black/40 border-b border-[#2F2F2F] flex flex-col gap-2 shrink-0">
+    <div className="p-3 bg-gradient-to-br from-[#2A2A2A] to-black/40 border-b border-[#2F2F2F] flex flex-col gap-2 shrink-0">
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -261,7 +261,7 @@ export const WorkspaceLayoutPromptBox: React.FC<PromptBoxProps> = ({
       />
       <button
         onClick={onSubmit}
-        className="w-full py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-[#2A2A2A] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-mono font-bold border border-[#60A5FA]/40 shadow-[0_4px_14px_rgba(59,130,246,0.35)] transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
+        className="w-full py-2 rounded-xl bg-gradient-to-r from-blue-600 to-[#2A2A2A] hover:from-blue-500 hover:to-blue-600 text-white text-xs font-mono font-bold border border-[#60A5FA]/40 shadow-[0_4px_14px_rgba(59,130,246,0.35)] transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98"
       >
         <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
         <span>Generate AI Output</span>

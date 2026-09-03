@@ -14,7 +14,7 @@ export const CharacterRosterCard: React.FC<CharacterRosterCardProps> = ({
   return (
     <div
       onClick={onSelect}
-      className="p-3 rounded-[1.75rem] bg-[#07060f] border border-white/5 hover:border-[#3B82F6]/30 cursor-pointer transition-all flex items-center justify-between gap-3 group shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_48px_rgba(59,130,246,0.22)]"
+      className="p-3 rounded-[1.75rem] bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/30 cursor-pointer transition-all flex items-center justify-between gap-3 group shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_48px_rgba(59,130,246,0.22)]"
     >
       <div className="flex items-center gap-3">
         <img

@@ -185,7 +185,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
 
   return (
     <div
-      className="border-b border-white/[0.04] flex items-center transition-all duration-300"
+      className="border-b border-white/10 bg-[#18181B] flex items-center transition-all duration-300"
       style={{ height: `${Math.max(46, outerHeightPx)}px` }}
     >
       <TrackLabel
@@ -330,7 +330,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                       e.stopPropagation();
                       onContextMenu(e, key, idx);
                     }}
-                    className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#0c0c16]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                    className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                     title="Subtitle Options"
                   >
                     <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
@@ -356,7 +356,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
       </div>
 
       {/* Right Side Pinned Action Column matching Left Track Header */}
-      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#0d0d16] border-l border-white/10 shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
+      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#1E1E1E] border-l border-[#2F2F2F] shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
         <button
           type="button"
           onClick={onAddSubtitle}

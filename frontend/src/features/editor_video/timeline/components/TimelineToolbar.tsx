@@ -69,9 +69,6 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   onPlay,
 }) => {
   const { formatTooltip } = useAppShortcuts();
-  const progressPercent =
-    totalDuration > 0 ? (playbackTime / totalDuration) * 100 : 0;
-
   const formatTime = (seconds: number): string => {
     if (seconds < 0) seconds = 0;
     const hours = Math.floor(seconds / 3600);
@@ -84,7 +81,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   };
 
   return (
-    <div className="h-10 px-3 border-b border-white/[0.05] flex items-center justify-between bg-[#0d0d12] shrink-0 relative">
+    <div className="h-10 px-3 border-b border-[#2F2F2F] flex items-center justify-between bg-[#1E1E1E] shrink-0 relative">
       {/* ── Left: action buttons ────────────────────────────────────────────── */}
       <div className="flex items-center gap-0.5">
         {/* Undo / Redo */}
@@ -217,14 +214,6 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
             )}
           </button>
         </div>
-      </div>
-
-      {/* ── Progress Bar aligned to timeline track ─────────────────────────── */}
-      <div className="absolute bottom-0 left-28 right-0 h-1 bg-black/30">
-        <div
-          className="h-full bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500 transition-all duration-75 ease-out"
-          style={{ width: `${progressPercent}%` }}
-        />
       </div>
 
       {/* ── Playback Time Display ─────────────────────────────────────────── */}

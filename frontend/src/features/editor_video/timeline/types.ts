@@ -70,6 +70,6 @@ export const KEYFRAME_COLORS: Record<KeyframeProperty, string> = {
   y: "bg-green-400  border-green-300",
   scale: "bg-[#2A2A2A] border-[#2F2F2F]",
   rotation: "bg-pink-400   border-pink-300",
-  blur: "bg-blue-400   border-cyan-300",
+  blur: "bg-blue-400   border-[#60A5FA]",
   volume: "bg-emerald-400 border-emerald-300",
 };

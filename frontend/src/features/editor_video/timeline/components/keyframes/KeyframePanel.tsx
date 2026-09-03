@@ -43,7 +43,7 @@ const KeyframePanel: React.FC<KeyframePanelProps> = ({
   if (!keyframe) return null;
 
   return (
-    <div className="absolute right-2 top-2 z-40 w-64 bg-[#14141c] border border-white/10 rounded-xl p-3 shadow-2xl backdrop-blur-xl text-xs select-none">
+    <div className="absolute right-2 top-2 z-40 w-64 bg-[#18181B] border border-white/10 rounded-xl p-3 shadow-2xl backdrop-blur-xl text-xs select-none">
       <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-2.5">
         <div className="flex items-center gap-1.5 text-amber-400 font-bold">
           <Diamond className="h-3.5 w-3.5 fill-amber-400" />

@@ -78,7 +78,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
           ? "border-[#3B82F6] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 "
-          : "border-white/10 bg-[#090912] hover:border-[#3B82F6]/50 shadow-md hover:shadow-[0_8px_25px_rgba(59,130,246,0.2)]"
+          : "border-white/10 bg-[#121212] hover:border-[#3B82F6]/50 shadow-md hover:shadow-md"
       }`}
     >
       {/* Thumbnail Image Container */}
@@ -162,7 +162,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
       </div>
 
       {/* Card Controls & Actions Footer */}
-      <div className="p-2 bg-[#0c0d18] border-t border-white/5 space-y-1.5">
+      <div className="p-2 bg-[#121212] border-t border-white/5 space-y-1.5">
         {/* Primary Action Button: Add to Timeline */}
         <button
           type="button"
@@ -194,7 +194,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
             index >= totalImagesCount - 1
               ? "bg-white/[0.02] border-white/[0.05] text-neutral-600 cursor-not-allowed select-none opacity-40"
               : isMerging
-              ? "bg-[#2A2A2A] border-indigo-400 text-indigo-200 cursor-wait"
+              ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-neutral-200 cursor-wait"
               : "bg-[#2A2A2A] hover:bg-[#333333] border-[#2F2F2F] text-neutral-300 hover:text-white cursor-pointer"
           }`}
         >

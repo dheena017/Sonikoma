@@ -32,7 +32,7 @@ interface HoverProgress {
 
 export interface VideoPreviewBottomControlsProps {
   visible: boolean;
-  progressBarRef: React.RefObject<HTMLDivElement>;
+  progressBarRef: React.RefObject<HTMLDivElement | null>;
   handleProgressBarInteraction: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleProgressBarMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
   handleProgressBarMouseLeave: () => void;

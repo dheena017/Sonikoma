@@ -62,7 +62,7 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
                 ? "border-[#3B82F6] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 shadow-md"
-                : "border-white/10 bg-[#0c0d1b] hover:border-[#3B82F6]/40"
+                : "border-white/10 bg-[#121212] hover:border-[#3B82F6]/40"
             }`}
           >
             {/* Top row: Panel thumbnail + Speaker selector */}

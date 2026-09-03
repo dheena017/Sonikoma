@@ -198,13 +198,13 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
 
   return (
     <div
-      className="border-b border-white/[0.04] flex items-center transition-all duration-300"
+      className="border-b border-white/10 bg-[#18181B] flex items-center transition-all duration-300"
       style={{ height: `${Math.max(46, outerHeightPx)}px` }}
     >
       <TrackLabel
         id="V2"
         label="Camera FX"
-        color="text-indigo-400"
+        color="text-[#60A5FA]"
         type="video"
         locked={locked}
         hidden={hidden}
@@ -221,7 +221,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
             onClick={onAddFx}
             className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-neutral-300 italic px-2 hover:bg-[#2A2A2A] rounded-md transition-colors cursor-pointer group"
           >
-            <Plus className="h-2.5 w-2.5 text-indigo-400/70 group-hover:text-neutral-300 transition-colors" />
+            <Plus className="h-2.5 w-2.5 text-[#60A5FA]/70 group-hover:text-neutral-300 transition-colors" />
             <span>Add camera motion / zoom FX</span>
           </button>
         ) : (
@@ -281,14 +281,14 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 key={key}
                 onMouseDown={(e) => handleMoveStart(e, key, idx, baseLeftPx + offsetPx)}
                 onContextMenu={(e) => onContextMenu(e, key, idx)}
-                className={`group absolute flex items-center justify-between gap-1 select-none truncate rounded-md border text-[9px] font-mono font-bold px-2.5 bg-[#2A2A2A] border-[#2F2F2F] text-indigo-200 z-10 ${
+                className={`group absolute flex items-center justify-between gap-1 select-none truncate rounded-md border text-[9px] font-mono font-bold px-2.5 bg-[#2A2A2A] border-[#2F2F2F] text-neutral-200 z-10 ${
                   isMoving
                     ? "cursor-grabbing shadow-[0_4px_20px_rgba(129,140,248,0.4)] z-40 scale-[1.01]"
                     : isResizing
-                    ? "cursor-col-resize border-indigo-300 shadow-[0_0_14px_rgba(129,140,248,0.5)] z-30"
+                    ? "cursor-col-resize border-[#3B82F6] shadow-sm z-30"
                     : selectedClip === key
-                    ? "cursor-grab border-indigo-300 z-10"
-                    : "cursor-grab hover:border-indigo-400/60"
+                    ? "cursor-grab border-[#3B82F6] z-10"
+                    : "cursor-grab hover:border-[#3B82F6]/40"
                 }`}
                 style={{
                   left: `${finalLeftPx}px`,
@@ -300,16 +300,16 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 }}
                 title={`Panel #${idx + 1} Effect: ${fx}`}
               >
-                <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] truncate pointer-events-none bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-indigo-400/60 transition-colors">
+                <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] truncate pointer-events-none bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-[#3B82F6]/40 transition-colors">
                   <GripVertical className="h-3 w-3 text-neutral-300 group-hover:text-white shrink-0 transition-colors" />
-                  <Camera className="h-2.5 w-2.5 text-indigo-400 shrink-0" />
+                  <Camera className="h-2.5 w-2.5 text-[#60A5FA] shrink-0" />
                   <span className="text-[8.5px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">{fx}</span>
                 </div>
 
                 <div className="flex items-center gap-0.5 z-20 pointer-events-auto shrink-0" style={{ cursor: "inherit" }}>
                   {/* Live Drag Delta Display */}
                   {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
-                    <span className="text-[7px] font-mono font-bold text-indigo-100 bg-indigo-900/90 px-1 py-0.2 rounded border border-indigo-300 shadow-[0_0_8px_rgba(129,140,248,0.7)] animate-pulse">
+                    <span className="text-[7px] font-mono font-bold text-white bg-neutral-900/90 px-1 py-0.2 rounded border border-[#3B82F6] shadow-[0_0_8px_rgba(129,140,248,0.7)] animate-pulse">
                       {movingInfo.deltaPx > 0
                         ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
                         : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
@@ -317,12 +317,12 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                   )}
 
                   {isResizing && resizingInfo.deltaSecs !== 0 && (
-                    <span className="text-[7px] font-mono font-bold text-indigo-200 bg-[#2A2A2A] px-1 py-0.2 rounded-sm border border-indigo-400/50 animate-pulse">
+                    <span className="text-[7px] font-mono font-bold text-neutral-200 bg-[#2A2A2A] px-1 py-0.2 rounded-sm border border-[#3B82F6]/40 animate-pulse">
                       {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                     </span>
                   )}
                   {displayWidthPx >= 45 && (
-                  <span className="text-[7.5px] font-mono font-bold text-indigo-100 bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
+                  <span className="text-[7.5px] font-mono font-bold text-white bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
                     {activeDur.toFixed(1)}s
                   </span>
                   )}
@@ -335,7 +335,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                       e.stopPropagation();
                       onContextMenu(e, key, idx);
                     }}
-                    className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#0c0c16]/85 hover:bg-indigo-600 text-neutral-300 hover:text-white border border-white/20 hover:border-indigo-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(129,140,248,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                    className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#3B82F6] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(129,140,248,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                     title="Camera FX Options"
                   >
                     <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
@@ -361,14 +361,14 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
       </div>
 
       {/* Right Side Pinned Action Column matching Left Track Header */}
-      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#0d0d16] border-l border-white/10 shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
+      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#1E1E1E] border-l border-[#2F2F2F] shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
         <button
           type="button"
           onClick={onAddFx}
-          className="w-full h-7 rounded-md border border-[#2F2F2F] hover:border-indigo-400/80 bg-[#2A2A2A] hover:bg-[#333333] text-indigo-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover:shadow-[0_0_14px_rgba(129,140,248,0.35)] select-none group/add"
+          className="w-full h-7 rounded-md border border-[#2F2F2F] hover:border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#333333] text-neutral-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover:shadow-[0_0_14px_rgba(129,140,248,0.35)] select-none group/add"
           title="Add Camera FX"
         >
-          <Camera className="h-3 w-3 text-indigo-400 group-hover/add:scale-110 transition-transform" />
+          <Camera className="h-3 w-3 text-[#60A5FA] group-hover/add:scale-110 transition-transform" />
           <span>Add FX</span>
         </button>
       </div>

@@ -477,7 +477,7 @@ const Timeline: React.FC<TimelineProps> = ({
   const rulerRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    <div className="w-full h-full bg-[#0c0d16]/80 backdrop-blur-2xl border-t border-white/10 flex flex-col shrink-0 select-none z-20 font-sans relative shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
+    <div className="w-full h-full bg-[#121212] backdrop-blur-2xl border-t border-[#2F2F2F] flex flex-col shrink-0 select-none z-20 font-sans relative shadow-[0_-8px_32px_rgba(0,0,0,0.5)]">
       {/* ── Toolbar ─────────────────────────────────────────────────────────── */}
       <TimelineToolbar
         currentPanelIndex={currentPanelIndex}
@@ -514,7 +514,7 @@ const Timeline: React.FC<TimelineProps> = ({
           className="timeline-scroll-area flex-1 overflow-auto min-h-0 relative"
           style={{
             scrollbarWidth: "thin",
-            scrollbarColor: "#7c3aed #0d0d14",
+            scrollbarColor: "#3B82F6 #18181B",
           }}
         >
           {/* Inner wrapper with flush right edge, generous end-buffer and synchronized tracks */}
@@ -525,7 +525,7 @@ const Timeline: React.FC<TimelineProps> = ({
             }}
           >
             {/* Sticky Synchronized Top Ruler */}
-            <div className="sticky top-0 z-30 bg-[#0a0a10]">
+            <div className="sticky top-0 z-40 bg-[#121212]">
               <TimelineRuler
                 totalDuration={totalDuration}
                 onScrubStart={handlePlayheadScrubStart}
@@ -543,20 +543,8 @@ const Timeline: React.FC<TimelineProps> = ({
               onScrubStart={handlePlayheadScrubStart}
             />
 
-            {/* V3 — Subtitles / Overlay */}
-            {!s.hiddenTracks["V3"] && s.captionsVisible && (
-              <TimelineSubtitlesTrack
-                panels={displayPanels}
-                panelTimings={panelTimings}
-                totalPanels={totalPanels}
-                selectedClip={s.selectedClip}
-                {...trackControls("V3")}
-                {...clipCbs}
-                onAddSubtitle={s.openSubtitlesPicker}
-              />
-            )}
-
-            {/* V1 — Story Panels (Main Video) */}
+            {/* ── Video Tracks ──────────────────────────────────────────────── */}
+            {/* V1 — Story Panels (Main Video Track) */}
             {!s.hiddenTracks["V1"] && (
               <TimelineStoryPanelsTrack
                 panels={displayPanels}
@@ -579,7 +567,34 @@ const Timeline: React.FC<TimelineProps> = ({
               />
             )}
 
-            {/* A3 — Voiceover */}
+            {/* V2 — Camera FX (Motion / Zoom Track) */}
+            {!s.hiddenTracks["V2"] && (
+              <TimelineCameraFxTrack
+                panels={displayPanels}
+                panelTimings={panelTimings}
+                totalPanels={totalPanels}
+                selectedClip={s.selectedClip}
+                {...trackControls("V2")}
+                {...clipCbs}
+                onAddFx={s.openFxPicker}
+              />
+            )}
+
+            {/* V3 — Subtitles / Overlay Track */}
+            {!s.hiddenTracks["V3"] && s.captionsVisible && (
+              <TimelineSubtitlesTrack
+                panels={displayPanels}
+                panelTimings={panelTimings}
+                totalPanels={totalPanels}
+                selectedClip={s.selectedClip}
+                {...trackControls("V3")}
+                {...clipCbs}
+                onAddSubtitle={s.openSubtitlesPicker}
+              />
+            )}
+
+            {/* ── Audio Tracks ──────────────────────────────────────────────── */}
+            {/* A1 — Voiceover & Narration Track */}
             {!s.hiddenTracks["A3"] && (
               <TimelineVoiceoverTrack
                 panels={displayPanels}
@@ -593,7 +608,20 @@ const Timeline: React.FC<TimelineProps> = ({
               />
             )}
 
-            {/* A1 — Music (BGM) */}
+            {/* A2 — Sound FX / Ambient Track */}
+            {!s.hiddenTracks["A2"] && (
+              <TimelineSoundFxTrack
+                panels={displayPanels}
+                panelTimings={panelTimings}
+                totalPanels={totalPanels}
+                selectedClip={s.selectedClip}
+                {...trackControls("A2")}
+                {...clipCbs}
+                onAddSfx={s.openSfxPicker}
+              />
+            )}
+
+            {/* A3 — Background Music (BGM) Track */}
             {!s.hiddenTracks["A1"] && (
               <TimelineMusicTrack
                 musicTheme={
@@ -615,32 +643,6 @@ const Timeline: React.FC<TimelineProps> = ({
                 {...trackControls("A1")}
                 {...clipCbs}
                 onAddMusic={s.openMusicPicker}
-              />
-            )}
-
-            {/* V2 — Camera FX */}
-            {!s.hiddenTracks["V2"] && (
-              <TimelineCameraFxTrack
-                panels={displayPanels}
-                panelTimings={panelTimings}
-                totalPanels={totalPanels}
-                selectedClip={s.selectedClip}
-                {...trackControls("V2")}
-                {...clipCbs}
-                onAddFx={s.openFxPicker}
-              />
-            )}
-
-            {/* A2 — Sound FX */}
-            {!s.hiddenTracks["A2"] && (
-              <TimelineSoundFxTrack
-                panels={displayPanels}
-                panelTimings={panelTimings}
-                totalPanels={totalPanels}
-                selectedClip={s.selectedClip}
-                {...trackControls("A2")}
-                {...clipCbs}
-                onAddSfx={s.openSfxPicker}
               />
             )}
 

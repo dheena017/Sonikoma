@@ -67,6 +67,8 @@ interface VideoEditorHeaderProps {
   fetchWithInterceptor?: any;
   user?: any;
   addNotification?: (message: string, type?: string) => void;
+  layoutMode?: "standard" | "full_timeline" | "preview_only";
+  onLayoutModeChange?: (mode: "standard" | "full_timeline" | "preview_only") => void;
 }
 
 const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
@@ -99,6 +101,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   fetchWithInterceptor,
   user,
   addNotification,
+  layoutMode = "standard",
+  onLayoutModeChange,
 }) => {
   // Resolve live user from prop or LocalStorage session cache
   const activeUser = React.useMemo(() => {
@@ -238,7 +242,35 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           />
         </div>
 
-
+        {/* ── Studio Layout Mode Segmented Switcher ─────────────────────── */}
+        <div className="hidden md:flex items-center p-1 bg-[#121212] border border-[#2F2F2F] rounded-2xl shadow-inner shrink-0">
+          <button
+            type="button"
+            onClick={() => onLayoutModeChange?.("standard")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              layoutMode === "standard"
+                ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+            }`}
+            title="Standard Studio Split Mode"
+          >
+            <Film className="w-3.5 h-3.5" />
+            <span>Studio</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onLayoutModeChange?.("full_timeline")}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              layoutMode === "full_timeline"
+                ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm"
+                : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+            }`}
+            title="Full Page Multi-Track Timeline Mode"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            <span>Full Timeline</span>
+          </button>
+        </div>
 
         {/* Server Status Indicator */}
         <div className="flex items-center justify-center">
@@ -258,8 +290,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                   setShowNotifications(false);
                 }}
                 title="Your credit balance & daily rewards — click to view"
-                className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
-                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+                className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#2A2A2A]" : ""
                 }`}
               >
                 <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
@@ -283,7 +315,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </div>
           )}
 
-          <div className="hidden lg:flex items-center gap-1 p-1 bg-[#121218] border border-neutral-800/90 rounded-xl">
+          <div className="hidden lg:flex items-center gap-1 p-1 bg-[#121212] border border-neutral-800/90 rounded-xl">
             <button
               type="button"
               onClick={() => setShowShortcutsModal(true)}
@@ -407,8 +439,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                 setShowCreditsPopover(false);
               }}
               title="Notifications"
-              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
-                showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
+              className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+                showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#2A2A2A]" : ""
               }`}
             >
               {notificationsMuted ? (
@@ -417,7 +449,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                 <Bell className="h-4 w-4" />
               )}
               {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF2D55] text-[10px] font-black text-white ring-2 ring-[#18191e] shadow-xs">
+                <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF2D55] text-[10px] font-black text-white ring-2 ring-[#18181B] shadow-xs">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -462,16 +494,16 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           {/* User Profile Pill at Far Right End (Matches MainHeader) */}
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18181B] border border-[#2A2A2A] hover:border-[#3B82F6]/50 hover:bg-[#2A2A2A] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95"
             title="View Profile & Account Settings"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#1E1E1E] border border-white/5">
               {activeUser?.full_name ||
                 activeUser?.username ||
                 (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#3B82F6] bg-[#121212] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
               <img
                 key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
                 src={getUserAvatarUrl(activeUser)}

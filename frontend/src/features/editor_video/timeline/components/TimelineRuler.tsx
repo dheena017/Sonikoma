@@ -157,10 +157,10 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         onMouseDown={(e) => onScrubStart?.(e)}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="h-8 flex shrink-0 bg-[#0a0a10] border-b border-white/[0.06] cursor-pointer select-none group/ruler"
+        className="h-8 flex shrink-0 bg-[#1E1E1E] border-b border-[#2F2F2F] cursor-pointer select-none group/ruler"
       >
         {/* Spacer aligned with the track labels column */}
-        <div className="w-48 shrink-0 sticky left-0 z-30 border-r border-white/10 bg-[#0d0d16] flex items-center justify-between px-3 shadow-[4px_0_16px_rgba(0,0,0,0.85)]">
+        <div className="w-48 shrink-0 sticky left-0 z-40 border-r border-[#2F2F2F] bg-[#1E1E1E] flex items-center justify-between px-3 shadow-[4px_0_16px_rgba(0,0,0,0.85)]">
           <div className="flex items-center gap-1.5 min-w-0">
             <Clock className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
             <span className="text-[10px] font-mono font-bold text-neutral-200 truncate">
@@ -249,7 +249,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         </div>
 
         {/* Right Symmetrical Header Spacer */}
-        <div className="w-32 shrink-0 sticky right-0 z-20 border-l border-white/10 bg-[#0d0d16] flex items-center justify-between px-3 shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
+        <div className="w-32 shrink-0 sticky right-0 z-40 border-l border-[#2F2F2F] bg-[#1E1E1E] flex items-center justify-between px-3 shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
           <span className="text-[10px] font-mono font-bold text-neutral-300 tracking-wider uppercase">
             Quick Add
           </span>

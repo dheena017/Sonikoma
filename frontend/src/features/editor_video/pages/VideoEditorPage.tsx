@@ -7,6 +7,7 @@ import { EditorViewport } from "@/features/editor_video/viewport/EditorViewport"
 import { Timeline } from "@/features/editor_video/timeline/Timeline";
 import { InspectorPanel } from "@/features/editor_video/inspector/InspectorPanel";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { WorkspaceId } from "@/features/editor_video/types/workspace.types";
 
 interface VideoEditorPageProps {
   appLogic?: any;
@@ -27,13 +28,24 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   projectTitle,
   user,
 }) => {
-  const [activeNav, setActiveNav] = useState("project");
+  const [activeWorkspace, setActiveWorkspace] =
+    useState<WorkspaceId>("imported_assets");
+  const [layoutMode, setLayoutMode] = useState<
+    "standard" | "full_timeline" | "preview_only"
+  >("standard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [layoutConfig, setLayoutConfig] = useState({
     mediaBin: true,
     rightInspector: true,
     timeline: true,
   });
+
+  const handleSelectWorkspace = (id: WorkspaceId) => {
+    setActiveWorkspace(id);
+    if (!layoutConfig.mediaBin) {
+      setLayoutConfig((prev) => ({ ...prev, mediaBin: true }));
+    }
+  };
   const [viewportZoom, setViewportZoom] = useState(100);
 
   // ── Panel Resizing Dimensions & Persistence ──────────────────────────────
@@ -263,9 +275,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#06060c] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
-      {/* Subtle ambient background glow */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(88,28,235,0.08),transparent)] z-0" />
+    <div className="flex flex-col h-screen w-screen bg-[#0A0A0A] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
 
       {/* ── Top Header Bar ──────────────────────────────────────────────────── */}
       <VideoEditorHeader
@@ -286,14 +296,16 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
         panelsCount={panels.length}
         navigateTo={navigateTo}
         user={user || appLogic?.user}
+        layoutMode={layoutMode}
+        onLayoutModeChange={setLayoutMode}
       />
 
       {/* ── Slide-Out Full Sidebar Drawer ───────────────────────────────────── */}
       <VideoEditorSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        activeNav={activeNav}
-        setActiveNav={setActiveNav}
+        activeWorkspace={activeWorkspace}
+        onSelectWorkspace={handleSelectWorkspace}
         seriesTitle={seriesTitle}
         chapterTitle={chapterTitle}
         panelsCount={panels.length}
@@ -306,11 +318,14 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
         {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
         <div
           className="h-full flex shrink-0 overflow-hidden"
-          style={{ width: layoutConfig.mediaBin ? leftWidth : 96 }}
+          style={{ width: layoutConfig.mediaBin ? leftWidth : 80 }}
         >
           <WorkspacePanel
             defaultWorkspace="imported_assets"
+            activeWorkspace={activeWorkspace}
+            onSelectWorkspace={handleSelectWorkspace}
             onBackToApp={handleReturn}
+            navigateTo={navigateTo}
             showContent={layoutConfig.mediaBin}
             appLogic={appLogic}
           />
@@ -338,78 +353,80 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
         {/* Studio Content Column (Preview Player Top + Timeline Bottom) */}
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           {/* ── Upper Row: Preview Player + Right Inspector ───────────────── */}
-          <div className="flex-1 flex min-h-0 w-full overflow-hidden">
-            {/* Center: Adaptation Player (full) */}
-            <EditorViewport
-              panels={panels}
-              videoUrl={videoUrl}
-              setVideoUrl={setVideoUrl}
-              currentPanelIndex={currentPanelIndex}
-              setCurrentPanelIndex={setCurrentPanelIndex}
-              activePreviewTab={activePreviewTab}
-              setActivePreviewTab={handleSetActivePreviewTab}
-              allowEditorTab={true}
-              musicTheme={musicTheme}
-              voiceActor={voiceActor}
-              navigateTo={navigateTo ?? (() => {})}
-              seriesTitle={seriesTitle}
-              chapterNumber={chapterNumber}
-              chapterTitle={chapterTitle}
-              targetUrl={targetUrl}
-              isRendering={isRendering}
-              renderProgress={renderProgress}
-              onExportVideo={handleExport}
-              handleRenderFinalVideo={handleExport}
-              onExport={handleExport}
-              progressStatus={progressStatus}
-              hasEnoughCredits={hasEnoughCredits}
-              addNotification={addNotification}
-              onOpenVideoEditor={() => {}}
-              variant="embedded"
-              zoomLevel={viewportZoom}
-              onZoomLevelChange={handleZoomLevelChange}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onZoomReset={handleZoomReset}
-              onSave={handleSave}
-              isSaving={isSaving}
-              isDirty={isDirty}
-              aspectRatio={currentAspectRatio}
-              onAspectRatioChange={handleAspectRatioChange}
-            />
+          {layoutMode !== "full_timeline" && (
+            <div className="flex-1 flex min-h-0 w-full overflow-hidden">
+              {/* Center: Adaptation Player (full) */}
+              <EditorViewport
+                panels={panels}
+                videoUrl={videoUrl}
+                setVideoUrl={setVideoUrl}
+                currentPanelIndex={currentPanelIndex}
+                setCurrentPanelIndex={setCurrentPanelIndex}
+                activePreviewTab={activePreviewTab}
+                setActivePreviewTab={handleSetActivePreviewTab}
+                allowEditorTab={true}
+                musicTheme={musicTheme}
+                voiceActor={voiceActor}
+                navigateTo={navigateTo ?? (() => {})}
+                seriesTitle={seriesTitle}
+                chapterNumber={chapterNumber}
+                chapterTitle={chapterTitle}
+                targetUrl={targetUrl}
+                isRendering={isRendering}
+                renderProgress={renderProgress}
+                onExportVideo={handleExport}
+                handleRenderFinalVideo={handleExport}
+                onExport={handleExport}
+                progressStatus={progressStatus}
+                hasEnoughCredits={hasEnoughCredits}
+                addNotification={addNotification}
+                onOpenVideoEditor={() => {}}
+                variant="embedded"
+                zoomLevel={viewportZoom}
+                onZoomLevelChange={handleZoomLevelChange}
+                onZoomIn={handleZoomIn}
+                onZoomOut={handleZoomOut}
+                onZoomReset={handleZoomReset}
+                onSave={handleSave}
+                isSaving={isSaving}
+                isDirty={isDirty}
+                aspectRatio={currentAspectRatio}
+                onAspectRatioChange={handleAspectRatioChange}
+              />
 
-            {/* Right Vertical Resizer Splitter */}
-            {layoutConfig.rightInspector && (
-              <div
-                onMouseDown={handleRightResizeStart}
-                onDoubleClick={() => {
-                  setRightWidth(DEFAULT_RIGHT_WIDTH);
-                  localStorage.setItem("sonikoma_right_panel_w", String(DEFAULT_RIGHT_WIDTH));
-                }}
-                className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
-                  isDraggingRight
-                    ? "bg-[#2A2A2A] "
-                    : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
-                }`}
-                title="Drag to resize Inspector Panel (Double click to reset)"
-              >
-                <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-[#2A2A2A] transition-colors" />
-              </div>
-            )}
+              {/* Right Vertical Resizer Splitter */}
+              {layoutConfig.rightInspector && (
+                <div
+                  onMouseDown={handleRightResizeStart}
+                  onDoubleClick={() => {
+                    setRightWidth(DEFAULT_RIGHT_WIDTH);
+                    localStorage.setItem("sonikoma_right_panel_w", String(DEFAULT_RIGHT_WIDTH));
+                  }}
+                  className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
+                    isDraggingRight
+                      ? "bg-[#2A2A2A] "
+                      : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
+                  }`}
+                  title="Drag to resize Inspector Panel (Double click to reset)"
+                >
+                  <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-[#2A2A2A] transition-colors" />
+                </div>
+              )}
 
-            {/* Right: Inspector Panel */}
-            {layoutConfig.rightInspector && (
-              <div
-                className="h-full shrink-0 overflow-hidden"
-                style={{ width: rightWidth }}
-              >
-                <InspectorPanel />
-              </div>
-            )}
-          </div>
+              {/* Right: Inspector Panel */}
+              {layoutConfig.rightInspector && (
+                <div
+                  className="h-full shrink-0 overflow-hidden"
+                  style={{ width: rightWidth }}
+                >
+                  <InspectorPanel />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Bottom Horizontal Resizer Splitter */}
-          {layoutConfig.timeline && (
+          {layoutMode === "standard" && layoutConfig.timeline && (
             <div
               onMouseDown={handleTimelineResizeStart}
               onDoubleClick={() => {
@@ -419,7 +436,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               className={`h-2 w-full relative cursor-row-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-t border-b border-white/[0.06] ${
                 isDraggingTimeline
                   ? "bg-[#2A2A2A] "
-                  : "bg-[#0c0c14] hover:bg-[#3B82F6]/30"
+                  : "bg-[#121212] hover:bg-[#3B82F6]/30"
               }`}
               title="Drag to resize Timeline (Double click to reset)"
             >
@@ -428,10 +445,12 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           )}
 
           {/* ── Bottom Multi-Track NLE Timeline ─────────────────────────────── */}
-          {layoutConfig.timeline && (
+          {(layoutMode === "full_timeline" || layoutConfig.timeline) && (
             <div
-              className="w-full shrink-0 overflow-hidden"
-              style={{ height: timelineHeight }}
+              className={`w-full overflow-hidden ${
+                layoutMode === "full_timeline" ? "flex-1 h-full" : "shrink-0"
+              }`}
+              style={{ height: layoutMode === "full_timeline" ? "100%" : timelineHeight }}
             >
               <Timeline
                 panels={panels}

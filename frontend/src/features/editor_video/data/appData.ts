@@ -38,7 +38,7 @@ export const MOCK_APP_EXTENSIONS: AppExtension[] = [
     icon: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=100&auto=format&fit=crop&q=80",
     installed: true,
     badge: "AI TTS",
-    color: "from-[#2A2A2A] to-indigo-900/40 border-[#3B82F6]/30",
+    color: "from-[#2A2A2A] to-blue-600/40 border-[#3B82F6]/30",
   },
   {
     id: "app-giphy",
@@ -48,7 +48,7 @@ export const MOCK_APP_EXTENSIONS: AppExtension[] = [
     icon: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=100&auto=format&fit=crop&q=80",
     installed: true,
     badge: "Memes & GIFs",
-    color: "from-pink-900/40 to-rose-900/40 border-pink-500/30",
+    color: "from-pink-900/40 to-rose-900/40 border-[#3B82F6]/30",
   },
   {
     id: "app-unsplash",

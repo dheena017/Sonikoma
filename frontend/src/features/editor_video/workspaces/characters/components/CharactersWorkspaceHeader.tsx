@@ -28,9 +28,9 @@ export const CharactersWorkspaceHeader: React.FC<
 }) => {
   return (
     <div className="shrink-0">
-      <div className="px-4 py-3 border-b border-[#2F2F2F] bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
+      <div className="px-4 py-3 border-b border-[#2F2F2F] bg-[#121212]/95 backdrop-blur-xl flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-10 w-10 rounded-3xl bg-indigo-500/12 border border-[#2F2F2F] flex items-center justify-center shadow-[0_0_18px_rgba(99,102,241,0.18)]">
+          <div className="h-10 w-10 rounded-3xl bg-[#3B82F6]/20 border border-[#2F2F2F] flex items-center justify-center shadow-sm">
             <Users className="h-4.5 w-4.5 text-neutral-300" />
           </div>
           <div className="min-w-0 space-y-0.5">
@@ -44,9 +44,9 @@ export const CharactersWorkspaceHeader: React.FC<
         </div>
         <button
           onClick={onAddCharacter}
-          className="inline-flex items-center gap-2 rounded-full bg-pink-500/12 px-3 py-1 text-[9px] font-semibold text-pink-100 border border-pink-500/25 shadow-sm transition hover:bg-pink-500/15"
+          className="inline-flex items-center gap-2 rounded-full bg-[#3B82F6]/20 px-3 py-1 text-[9px] font-semibold text-white border border-[#3B82F6]/30 shadow-sm transition hover:bg-[#2563EB]/15"
         >
-          <Plus className="h-3.5 w-3.5 text-pink-200" />
+          <Plus className="h-3.5 w-3.5 text-neutral-200" />
           Cast ({characterCount})
         </button>
       </div>

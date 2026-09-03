@@ -21,7 +21,7 @@ export const StoryWorkspaceHeader: React.FC<StoryWorkspaceHeaderProps> = ({
   onSearchChange,
 }) => (
   <div className="shrink-0">
-    <div className="px-4 py-3 border-b border-[#3B82F6]/15 bg-[#100f20]/95 backdrop-blur-xl flex items-center justify-between gap-3">
+    <div className="px-4 py-3 border-b border-[#3B82F6]/15 bg-[#121212]/95 backdrop-blur-xl flex items-center justify-between gap-3">
       <div className="flex items-center gap-3 min-w-0">
         <div className="h-10 w-10 rounded-3xl bg-[#2A2A2A] border border-[#3B82F6]/25 flex items-center justify-center ">
           <BookOpen className="h-4.5 w-4.5 text-[#60A5FA]" />
@@ -35,8 +35,8 @@ export const StoryWorkspaceHeader: React.FC<StoryWorkspaceHeaderProps> = ({
           </p>
         </div>
       </div>
-      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-pink-100 bg-pink-500/10 px-3 py-1 rounded-full border border-pink-500/25 shadow-sm">
-        <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-pink-300/15 text-pink-300">
+      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-white bg-[#3B82F6]/20 px-3 py-1 rounded-full border border-[#3B82F6]/30 shadow-sm">
+        <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#3B82F6]/15 text-[#60A5FA]">
           ❤️
         </span>
         Heart of Sonikoma

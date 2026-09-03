@@ -169,7 +169,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 
   return (
     <div
-      className={`h-[46px] border-b border-white/[0.04] flex items-center ${
+      className={`h-[46px] border-b border-white/10 bg-[#18181B] flex items-center ${
         muted ? "opacity-40" : ""
       }`}
     >
@@ -287,7 +287,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                     e.stopPropagation();
                     onContextMenu(e, "a1-0", 0);
                   }}
-                  className="group/btn h-5 px-1.5 flex items-center justify-center rounded-md bg-[#0c0c16]/85 hover:bg-emerald-600 text-neutral-300 hover:text-white border border-white/20 hover:border-emerald-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(110,231,183,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                  className="group/btn h-5 px-1.5 flex items-center justify-center rounded-md bg-[#121212]/85 hover:bg-emerald-600 text-neutral-300 hover:text-white border border-white/20 hover:border-emerald-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(110,231,183,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                   title="Music Options"
                 >
                   <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
@@ -309,7 +309,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
       </div>
 
       {/* Right Side Pinned Action Column matching Left Track Header */}
-      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#0d0d16] border-l border-white/10 shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
+      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#1E1E1E] border-l border-[#2F2F2F] shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
         <button
           type="button"
           onClick={onAddMusic}

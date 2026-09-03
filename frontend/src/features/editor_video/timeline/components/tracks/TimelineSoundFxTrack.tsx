@@ -187,7 +187,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
 
   return (
     <div
-      className={`border-b border-white/[0.04] flex items-center transition-all duration-300 ${
+      className={`border-b border-white/10 bg-[#18181B] flex items-center transition-all duration-300 ${
         muted ? "opacity-40" : ""
       }`}
       style={{ height: `${Math.max(46, outerHeightPx)}px` }}
@@ -210,7 +210,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
           <button
             type="button"
             onClick={onAddSfx}
-            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-[#93C5FD] italic px-2 hover:bg-cyan-950/20 rounded-md transition-colors cursor-pointer group"
+            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-[#93C5FD] italic px-2 hover:bg-neutral-900/20 rounded-md transition-colors cursor-pointer group"
           >
             <Plus className="h-2.5 w-2.5 text-blue-400/70 group-hover:text-[#93C5FD] transition-colors" />
             <span>Add sound effect / ambient SFX</span>
@@ -270,10 +270,10 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                   isMoving
                     ? "cursor-grabbing shadow-[0_4px_20px_rgba(103,232,249,0.4)] z-40"
                     : isResizing
-                    ? "cursor-col-resize border-cyan-300 shadow-[0_0_14px_rgba(103,232,249,0.5)] z-30"
+                    ? "cursor-col-resize border-[#60A5FA] shadow-[0_0_14px_rgba(103,232,249,0.5)] z-30"
                     : selectedClip === key
-                    ? "cursor-grab border-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.3)] z-20"
-                    : "cursor-grab border-blue-500/40 hover:border-cyan-300/80 z-10"
+                    ? "cursor-grab border-[#60A5FA] shadow-[0_0_8px_rgba(103,232,249,0.3)] z-20"
+                    : "cursor-grab border-blue-500/40 hover:border-[#60A5FA]/80 z-10"
                 } bg-[#0e7490]`}
                 style={{
                   left: `${finalLeftPx}px`,
@@ -308,7 +308,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                   <div className="flex items-center gap-0.5 z-20 pointer-events-auto shrink-0" style={{ cursor: "inherit" }}>
                     {/* Live Drag Delta Display */}
                     {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
-                      <span className="text-[7px] font-mono font-bold text-cyan-100 bg-cyan-900/90 px-1 py-0.2 rounded border border-cyan-300 shadow-[0_0_8px_rgba(6,182,212,0.7)] animate-pulse">
+                      <span className="text-[7px] font-mono font-bold text-white bg-neutral-900/90 px-1 py-0.2 rounded border border-[#60A5FA] shadow-[0_0_8px_rgba(6,182,212,0.7)] animate-pulse">
                         {movingInfo.deltaPx > 0
                           ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
                           : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
@@ -316,12 +316,12 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                     )}
 
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
-                      <span className="text-[7px] font-mono font-bold text-cyan-200 bg-cyan-950 px-1 py-0.2 rounded-sm border border-blue-400/50 animate-pulse">
+                      <span className="text-[7px] font-mono font-bold text-neutral-200 bg-neutral-900 px-1 py-0.2 rounded-sm border border-blue-400/50 animate-pulse">
                         {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
                     {displayWidthPx >= 45 && (
-                    <span className="text-[7.5px] font-mono font-bold text-cyan-100 bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
+                    <span className="text-[7.5px] font-mono font-bold text-white bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
                       {activeDur.toFixed(1)}s
                     </span>
                     )}
@@ -334,7 +334,7 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
                         e.stopPropagation();
                         onContextMenu(e, key, idx);
                       }}
-                      className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#0c0c16]/85 hover:bg-cyan-600 text-neutral-300 hover:text-white border border-white/20 hover:border-cyan-300 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(6,182,212,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                      className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#60A5FA] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(6,182,212,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                       title="Sound FX Options"
                     >
                       <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
@@ -361,11 +361,11 @@ export const TimelineSoundFxTrack: React.FC<TimelineSoundFxTrackProps> = ({
       </div>
 
       {/* Right Side Pinned Action Column matching Left Track Header */}
-      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#0d0d16] border-l border-white/10 shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
+      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#1E1E1E] border-l border-[#2F2F2F] shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
         <button
           type="button"
           onClick={onAddSfx}
-          className="w-full h-8 rounded-md border border-blue-500/30 hover:border-[#3B82F6]/80 bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover:shadow-[0_0_14px_rgba(103,232,249,0.35)] select-none group/add"
+          className="w-full h-8 rounded-md border border-blue-500/30 hover:border-[#3B82F6]/80 bg-neutral-900/40 hover:bg-neutral-900/60 text-neutral-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover:shadow-[0_0_14px_rgba(103,232,249,0.35)] select-none group/add"
           title="Add Sound FX"
         >
           <Zap className="h-3 w-3 text-blue-400 group-hover/add:scale-110 transition-transform" />

@@ -54,7 +54,7 @@ export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps>
   onPlayStoryboard,
 }) => {
   return (
-    <div className="shrink-0 border-b border-[#2F2F2F] bg-[#0c0d18]/95 backdrop-blur-2xl">
+    <div className="shrink-0 border-b border-[#2F2F2F] bg-[#121212]/95 backdrop-blur-2xl">
       {/* Title & Master Actions Row */}
       <div className="px-3.5 py-2.5 flex items-center justify-between gap-2 border-b border-white/5">
         <div className="flex items-center gap-2 min-w-0">
@@ -187,7 +187,7 @@ export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps>
               <button
                 type="button"
                 onClick={onAutoCameraPan}
-                className="px-2 py-0.5 rounded-md bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer"
+                className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer"
                 title="Apply dynamic camera motions to selected panels"
               >
                 <Camera className="h-2.5 w-2.5" />

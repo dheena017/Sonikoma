@@ -46,7 +46,7 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[12000] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
-      <div className="w-full max-w-lg bg-[#14141c] border border-white/10 rounded-2xl p-5 shadow-2xl space-y-4 text-white font-sans">
+      <div className="w-full max-w-lg bg-[#18181B] border border-white/10 rounded-2xl p-5 shadow-2xl space-y-4 text-white font-sans">
         <div className="flex items-center justify-between border-b border-white/10 pb-3">
           <h3 className="text-sm font-bold flex items-center gap-2 text-[#60A5FA]">
             <Sparkles className="h-4 w-4" />

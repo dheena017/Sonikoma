@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FolderOpen, LayoutDashboard } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 import { WorkspaceId } from "../types/workspace.types";
 import {
@@ -27,7 +27,7 @@ const SidebarItem: React.FC<{
       <div
         className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
           isActive
-            ? "h-5 bg-[#2A2A2A] shadow-[0_0_10px_rgba(192,132,252,0.9)] opacity-100"
+            ? "h-5 bg-[#3B82F6] opacity-100"
             : "h-0 bg-transparent opacity-0"
         }`}
       />
@@ -42,13 +42,13 @@ const SidebarItem: React.FC<{
         <div
           className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 cursor-pointer ${
             isActive
-              ? "bg-[#2A2A2A] border border-[#60A5FA]/40  text-white scale-105"
-              : "bg-[#18191f]/60 border border-white/5 text-neutral-400 group-hover:bg-[#23242c] group-hover:border-white/10 group-hover:text-white"
+              ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105 shadow-[0_4px_14px_rgba(59,130,246,0.28)]"
+              : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
           }`}
         >
           <Icon
             className={`w-[18px] h-[18px] transition-colors duration-200 ${
-              isActive ? "text-white" : "text-neutral-400 group-hover:text-white"
+              isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
             }`}
           />
         </div>
@@ -63,12 +63,14 @@ interface MiniSidebarProps {
   activeWorkspace: WorkspaceId;
   onSelectWorkspace: (id: WorkspaceId) => void;
   onBackToApp?: () => void;
+  navigateTo?: (path: string) => void;
 }
 
 export const MiniSidebar: React.FC<MiniSidebarProps> = ({
   activeWorkspace,
   onSelectWorkspace,
   onBackToApp,
+  navigateTo,
 }) => {
   const [returnHover, setReturnHover] = useState(false);
   const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
@@ -76,7 +78,7 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
   const groupedWorkspaces = getGroupedWorkspaces();
 
   return (
-    <aside className="hidden lg:flex w-20 h-full shrink-0 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-30 select-none overflow-hidden">
+    <aside className="hidden lg:flex w-20 h-full shrink-0 bg-[#121212]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-30 shadow-xl select-none overflow-hidden">
       {/* Workspace Groups List */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groupedWorkspaces.map((group, groupIdx) => (
@@ -110,11 +112,40 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
             ))}
           </div>
         ))}
+
+        <div className="w-full flex flex-col items-center pb-1">
+          <div className="w-full flex flex-col items-center" style={{ marginTop: "0.6rem", marginBottom: "0.4rem" }}>
+            <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
+            <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
+              Global
+            </span>
+          </div>
+          {[
+            { label: "Main Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+            { label: "Projects Gallery", icon: FolderOpen, path: "/projects" },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.path} className="relative group w-full flex justify-center py-0.5">
+                <button
+                  onClick={() => navigateTo?.(item.path)}
+                  aria-label={item.label}
+                  title={item.label}
+                  className="p-1 cursor-pointer transition-transform duration-200 active:scale-95 group"
+                >
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white">
+                    <Icon className="w-[18px] h-[18px] transition-colors duration-200 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
+                  </div>
+                </button>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Bottom Return Button */}
       {onBackToApp && (
-        <div className="pt-3 w-full flex justify-center border-t border-white/10 shrink-0 pb-1">
+        <div className="mt-auto pt-3 w-full flex justify-center border-t border-[#2F2F2F] shrink-0 pb-2">
           <button
             onClick={onBackToApp}
             onMouseEnter={(e) => {
@@ -123,7 +154,7 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Return to Creative Suite"
-            className="w-11 h-11 rounded-2xl bg-gradient-to-b from-[#8B5CF6] to-[#6366F1] hover:from-[#9d74f8] hover:to-[#7376f4] text-white shadow-[0_0_20px_rgba(139,92,246,0.6)] hover:shadow-[0_0_28px_rgba(139,92,246,0.85)] border border-[#A78BFA]/40 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95"
           >
             <ArrowLeft className="w-5 h-5 text-white stroke-[2.5]" />
           </button>

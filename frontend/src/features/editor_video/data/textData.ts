@@ -30,7 +30,7 @@ export const REAL_TEXT_PRESETS: TextPreset[] = [
     category: "titles",
     previewText: "CHAPTER 1: THE SHADOW AWAKENING",
     fontFamily: "Cinzel",
-    styleClass: "font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#2A2A2A] via-fuchsia-400 to-indigo-400 drop-shadow-lg uppercase text-sm",
+    styleClass: "font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#2A2A2A] via-blue-600 to-blue-600 drop-shadow-lg uppercase text-sm",
     badge: "Cinematic Title",
   },
   {
@@ -48,7 +48,7 @@ export const REAL_TEXT_PRESETS: TextPreset[] = [
     category: "narration",
     previewText: "[NOTIFICATION: PLAYER LEVEL INCREASED +10]",
     fontFamily: "Orbitron",
-    styleClass: "font-bold text-blue-300 bg-cyan-950/80 px-3 py-1.5 rounded-lg border border-blue-400/60 shadow-[0_0_12px_rgba(34,211,238,0.5)] text-xs",
+    styleClass: "font-bold text-blue-300 bg-neutral-900/80 px-3 py-1.5 rounded-lg border border-blue-400/60 shadow-[0_0_12px_rgba(34,211,238,0.5)] text-xs",
     badge: "System Prompt",
   },
   {

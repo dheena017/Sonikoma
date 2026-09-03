@@ -111,7 +111,7 @@ export const SliderField: React.FC<{
         max={max}
         value={val}
         onChange={(e) => setVal(Number(e.target.value))}
-        className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
+        className="w-full h-1 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-[#3B82F6]"
       />
     </div>
   );
@@ -346,7 +346,7 @@ export const InspectorPanel: React.FC<{
   const allSections = [...builtinSections, ...extraSections];
 
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-[#0c0d16]/75 text-white select-none backdrop-blur-3xl border-l border-white/10">
+    <div className="h-full flex flex-col overflow-hidden bg-[#121212] text-white select-none backdrop-blur-3xl border-l border-[#2F2F2F]">
       {/* Header */}
       <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#2F2F2F] bg-neutral-950/70 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-2">

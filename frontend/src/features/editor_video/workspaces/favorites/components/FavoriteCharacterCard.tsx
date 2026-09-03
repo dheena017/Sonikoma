@@ -9,7 +9,7 @@ export const FavoriteCharacterCard: React.FC<{
 }> = ({ item, onUse, onRemove }) => (
   <div
     onClick={onUse}
-    className="p-3 rounded-[1.75rem] bg-[#07060f] border border-white/5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:border-amber-400/25 hover:shadow-[0_18px_48px_rgba(245,158,11,0.22)] transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer"
+    className="p-3 rounded-[1.75rem] bg-[#1E1E1E] border border-[#2F2F2F] shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:border-amber-400/25 hover:shadow-[0_18px_48px_rgba(245,158,11,0.22)] transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer"
   >
     <div className="flex items-center gap-3 min-w-0 flex-1">
       {item.img ? (

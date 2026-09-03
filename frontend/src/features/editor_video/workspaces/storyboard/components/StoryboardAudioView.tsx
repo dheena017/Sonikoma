@@ -146,7 +146,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
                 ? "border-emerald-500 bg-emerald-950/25 ring-2 ring-emerald-500/50 shadow-md"
-                : "border-white/10 bg-[#0c0d1b] hover:border-emerald-500/40"
+                : "border-white/10 bg-[#121212] hover:border-emerald-500/40"
             }`}
           >
             {/* Top row: Thumbnail + Voice Player */}

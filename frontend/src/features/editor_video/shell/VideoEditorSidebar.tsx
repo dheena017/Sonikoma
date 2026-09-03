@@ -1,33 +1,22 @@
 import React, { useEffect } from "react";
 import {
   X,
-  Video,
-  BookOpen,
-  Image,
-  Users,
-  Wand2,
-  Type,
-  Shapes,
-  Music,
-  LayoutTemplate,
-  Package,
-  ShoppingBag,
-  AppWindow,
-  Star,
-  History,
-  LayoutDashboard,
-  FolderOpen,
   ArrowLeft,
   Zap,
   FolderSync,
+  FolderOpen,
+  LayoutDashboard,
 } from "lucide-react";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { SonikomaLogo } from "@/shared/ui/branding";
+import { WorkspaceId } from "../types/workspace.types";
+import { getGroupedWorkspaces } from "../registry/workspaceRegistry";
 
 interface VideoEditorSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  activeNav: string;
-  setActiveNav: (nav: string) => void;
+  activeWorkspace?: WorkspaceId;
+  onSelectWorkspace?: (id: WorkspaceId) => void;
   seriesTitle?: string;
   chapterTitle?: string;
   panelsCount?: number;
@@ -93,7 +82,7 @@ const ActiveProjectSidebarWidget: React.FC<{
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-indigo-600/30 border border-[#3B82F6]/20 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
+                <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-blue-600/30 border border-[#3B82F6]/20 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
                   {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
                 </div>
               )}
@@ -123,7 +112,7 @@ const ActiveProjectSidebarWidget: React.FC<{
           </p>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-black/50 cursor-pointer active:scale-98"
+            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-blue-600 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-black/50 cursor-pointer active:scale-98"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -137,8 +126,8 @@ const ActiveProjectSidebarWidget: React.FC<{
 const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
   isOpen,
   onClose,
-  activeNav,
-  setActiveNav,
+  activeWorkspace = "imported_assets",
+  onSelectWorkspace,
   seriesTitle,
   chapterTitle,
   panelsCount = 0,
@@ -156,51 +145,20 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
     };
   }, [isOpen]);
 
-  const navSections = [
+  const workspaceGroups = getGroupedWorkspaces();
+
+  const globalItems = [
     {
-      group: "Primary Workspaces",
-      items: [
-        { id: "favorites", label: "Favorites Vault", icon: Star },
-        { id: "recent", label: "Recently Used", icon: History },
-        { id: "story", label: "Story Studio (Heart)", icon: BookOpen },
-        { id: "media", label: "Media Bin", icon: Image },
-        { id: "characters", label: "Characters Roster", icon: Users },
-        { id: "ai", label: "Advanced AI Studio", icon: Wand2 },
-        { id: "text", label: "Text & Captions", icon: Type },
-      ],
+      id: "dashboard",
+      title: "Main Dashboard",
+      icon: LayoutDashboard,
+      path: "/dashboard",
     },
     {
-      group: "Secondary Workspaces",
-      items: [
-        { id: "elements", label: "Elements & FX", icon: Shapes },
-        { id: "audio", label: "Audio & Voiceover", icon: Music },
-        { id: "templates", label: "Comic Templates", icon: LayoutTemplate },
-        { id: "resources", label: "Creator Resources", icon: Package },
-      ],
-    },
-    {
-      group: "Utility & Store",
-      items: [
-        { id: "marketplace", label: "Marketplace Packs", icon: ShoppingBag },
-        { id: "apps", label: "Connected Apps", icon: AppWindow },
-      ],
-    },
-    {
-      group: "Global Navigation",
-      items: [
-        {
-          id: "dash",
-          label: "Main Dashboard",
-          icon: LayoutDashboard,
-          onClick: () => navigateTo?.("/dashboard"),
-        },
-        {
-          id: "proj",
-          label: "Projects Gallery",
-          icon: FolderOpen,
-          onClick: () => navigateTo?.("/projects"),
-        },
-      ],
+      id: "projects",
+      title: "Projects Gallery",
+      icon: FolderOpen,
+      path: "/projects",
     },
   ];
 
@@ -218,87 +176,75 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="w-full h-full bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex flex-col justify-between shadow-2xl select-none">
+        <div className="w-full h-full bg-[#09090B]/95 backdrop-blur-3xl border-r border-white/8 flex flex-col justify-between shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] select-none">
           {/* Header */}
-          <div className="p-4 flex items-center justify-between border-b border-white/10 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-fuchsia-600 to-indigo-600 flex items-center justify-center text-white  shrink-0">
-                <Video className="h-5 w-5" />
-              </div>
-              <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-extrabold text-sm tracking-tight text-white font-sans uppercase">
-                    Sonikoma Studio
-                  </h3>
-                </div>
-                <span className="text-[10px] text-neutral-400 font-sans truncate">
-                  {seriesTitle ? seriesTitle : "Comedy"}
-                </span>
-              </div>
-            </div>
+          <div className="h-16 px-4 flex items-center justify-between border-b border-white/5 shrink-0">
+            <SonikomaLogo
+              size="md"
+              badge="Studio"
+              showSubtitle={true}
+              subtitleText={seriesTitle || "Comic to Video Studio"}
+              onClick={() => navigateTo?.("/dashboard")}
+            />
 
             <button
               onClick={onClose}
               aria-label="Close sidebar"
-              className="w-8 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-900 border border-neutral-800 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Navigation Items List */}
-          <div className="flex-1 overflow-y-auto py-4 px-4 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            {navSections.map((sec, secIdx) => (
-              <div key={sec.group} className="space-y-2">
-                {secIdx > 0 && (
+          <div className="flex-1 overflow-y-auto py-6 px-3 space-y-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {workspaceGroups.map((group, groupIdx) => (
+              <div key={group.name} className="space-y-1.5">
+                {groupIdx > 0 && (
                   <div className="w-full flex flex-col pt-1 pb-1">
                     <div className="w-8 h-[1px] bg-white/10 rounded-full ml-3" />
                   </div>
                 )}
-                <h4 className="px-3 text-[10px] font-bold text-neutral-400 uppercase tracking-widest font-sans">
-                  {sec.group}
+                <h4 className="px-4 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans">
+                  {group.name}
                 </h4>
                 <ul className="space-y-1">
-                  {sec.items.map((item) => {
+                  {group.items.map((item) => {
                     const Icon = item.icon;
-                    const isActive = activeNav === item.id;
+                    const isActive = activeWorkspace === item.id;
 
                     return (
                       <li key={item.id} className="relative">
                         {/* Active Side Accent Indicator */}
                         <div
-                          className={`absolute left-1.5 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+                          className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
                             isActive
-                              ? "h-5 bg-[#2A2A2A] shadow-[0_0_12px_rgba(192,132,252,0.9)] opacity-100"
+                              ? "h-5 bg-gradient-to-b from-[#3B82F6] to-[#60A5FA] opacity-100"
                               : "h-0 bg-transparent opacity-0"
                           }`}
                         />
 
                         <button
                           onClick={() => {
-                            if (item.onClick) {
-                              item.onClick();
-                            } else {
-                              setActiveNav(item.id);
-                            }
+                            onSelectWorkspace?.(item.id);
                             onClose();
                           }}
-                          className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
+                          className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                             isActive
-                              ? "bg-[#2A2A2A] text-white shadow-[inset_0_0_16px_rgba(59,130,246,0.12)] border border-[#3B82F6]/30 font-bold"
-                              : "text-neutral-400 hover:text-white hover:bg-white/[0.05] border border-transparent"
+                              ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold shadow-sm"
+                              : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-transparent"
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <Icon
                               className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                                 isActive
-                                  ? "text-[#3B82F6]"
-                                  : "text-neutral-400 group-hover:scale-110 group-hover:text-[#93C5FD]"
+                                  ? "text-white"
+                                  : "text-neutral-400 group-hover:scale-110 group-hover:text-[#3B82F6]"
                               }`}
                             />
-                            <span className="text-xs font-semibold tracking-wide font-sans">
-                              {item.label}
+                            <span className="text-sm font-bold tracking-wide font-sans">
+                              {item.title}
                             </span>
                           </div>
                         </button>
@@ -308,10 +254,43 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                 </ul>
               </div>
             ))}
+
+            {/* Global Links Section */}
+            <div className="space-y-1.5 pt-1">
+              <div className="w-full flex flex-col pt-1 pb-1">
+                <div className="w-8 h-[1px] bg-white/10 rounded-full ml-3" />
+              </div>
+              <h4 className="px-4 text-[10px] font-bold text-neutral-400 uppercase tracking-[0.18em] font-sans">
+                Global
+              </h4>
+              <ul className="space-y-1">
+                {globalItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => {
+                          navigateTo?.(item.path);
+                          onClose();
+                        }}
+                        className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-transparent transition-all duration-300 group cursor-pointer active:scale-[0.98]"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className="w-4 h-4 shrink-0 text-neutral-400 group-hover:scale-110 group-hover:text-[#3B82F6] transition-all" />
+                          <span className="text-sm font-bold tracking-wide font-sans">
+                            {item.title}
+                          </span>
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
 
           {/* Sidebar Footer: Active Project Widget + Return Button */}
-          <div className="p-4 border-t border-white/10 shrink-0 space-y-3">
+          <div className="p-4 border-t border-white/5 bg-gradient-to-t from-black/30 to-transparent shrink-0 space-y-3">
             <ActiveProjectSidebarWidget
               setDrawerOpen={(open) =>
                 useProjectStore.getState().setDrawerOpen(open)
