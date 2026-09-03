@@ -876,8 +876,8 @@ const StoryboardCard = ({
       className={`${
         viewLayout === "grid"
           ? "w-full min-w-0"
-          : "w-[260px] sm:w-[280px] shrink-0"
-      } group relative rounded-[1.5rem] overflow-hidden border p-4 space-y-3.5 transition-all duration-300 ease-out select-none outline-none backdrop-blur-xl shadow-[0_20px_50px_-30px_rgba(0,0,0,0.65)] ${
+          : "w-[240px] sm:w-[260px] shrink-0"
+      } group relative rounded-2xl overflow-hidden border p-3 space-y-2.5 transition-all duration-300 ease-out select-none outline-none backdrop-blur-xl shadow-[0_20px_50px_-30px_rgba(0,0,0,0.65)] ${
         panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll
           ? "border-2 border-purple-500 bg-purple-950/30 shadow-[0_0_28px_rgba(168,85,247,0.55)] ring-1 ring-purple-400/40 scale-[1.02]"
           : isCurrent && isSelected
@@ -892,7 +892,7 @@ const StoryboardCard = ({
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className="relative h-56 sm:h-64 rounded-[1.5rem] overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb group-hover:border-purple-500/30 transition-all duration-300 ease-out"
+        className="relative h-44 sm:h-48 rounded-xl overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb group-hover:border-purple-500/30 transition-all duration-300 ease-out"
       >
         <img
           src={panel.image_url}
@@ -1030,68 +1030,68 @@ const StoryboardCard = ({
         </div>
       )}
 
-      <div className="space-y-3 w-full">
+      <div className="space-y-2 w-full">
         {/* Full-Width Segmented Content Inspector Tabs */}
-        <div className="grid grid-cols-4 gap-1 bg-neutral-900/90 p-1 rounded-xl border border-neutral-800/90 text-[10px] font-mono shadow-inner">
+        <div className="grid grid-cols-4 gap-0.5 bg-neutral-900/90 p-0.5 rounded-lg border border-neutral-800/90 text-[9.5px] font-mono shadow-inner">
           <button
             type="button"
             onClick={() => setActiveTab("dialogue")}
             title="Dialogue & Subtitles"
-            className={`flex items-center justify-center gap-1 px-1 py-1 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
               activeTab === "dialogue"
                 ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(168,85,247,0.35)]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
             }`}
           >
-            <MessageSquare className="w-3 h-3 shrink-0" />
-            <span className="whitespace-nowrap font-medium text-[9.5px]">Text</span>
+            <MessageSquare className="w-2.5 h-2.5 shrink-0" />
+            <span className="whitespace-nowrap font-medium text-[9px]">Text</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("narrative")}
             title="Narrative Voiceover"
-            className={`flex items-center justify-center gap-1 px-1 py-1 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
               activeTab === "narrative"
                 ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(168,85,247,0.35)]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
             }`}
           >
-            <BookOpen className="w-3 h-3 shrink-0" />
-            <span className="whitespace-nowrap font-medium text-[9.5px]">Voice</span>
+            <BookOpen className="w-2.5 h-2.5 shrink-0" />
+            <span className="whitespace-nowrap font-medium text-[9px]">Voice</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("sfx")}
             title="Sound Effects (SFX)"
-            className={`flex items-center justify-center gap-1 px-1 py-1 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
               activeTab === "sfx"
                 ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(168,85,247,0.35)]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
             }`}
           >
-            <Volume2 className="w-3 h-3 shrink-0" />
-            <span className="whitespace-nowrap font-medium text-[9.5px]">SFX</span>
+            <Volume2 className="w-2.5 h-2.5 shrink-0" />
+            <span className="whitespace-nowrap font-medium text-[9px]">SFX</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("visual")}
             title="Visual Scene Prompt"
-            className={`flex items-center justify-center gap-1 px-1 py-1 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
               activeTab === "visual"
                 ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-[0_2px_10px_rgba(168,85,247,0.35)]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
             }`}
           >
-            <Palette className="w-3 h-3 shrink-0" />
-            <span className="whitespace-nowrap font-medium text-[9.5px]">Scene</span>
+            <Palette className="w-2.5 h-2.5 shrink-0" />
+            <span className="whitespace-nowrap font-medium text-[9px]">Scene</span>
           </button>
         </div>
 
         {/* Tab Content Panels with Integrated Audio Preview Header */}
         {activeTab === "dialogue" && (
-          <div className="space-y-1.5 animate-in fade-in duration-150">
+          <div className="space-y-1 animate-in fade-in duration-150">
             <div className="flex items-center justify-between px-0.5">
-              <span className="text-[10px] font-mono font-semibold text-neutral-400">
+              <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
                 Dialogue Speech
               </span>
               <div className="flex items-center gap-1">
@@ -1101,7 +1101,7 @@ const StoryboardCard = ({
                     e.stopPropagation();
                     handleToggleDialogueAudio();
                   }}
-                  className={`px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
+                  className={`px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
                     isDialoguePlaying && !isDialoguePaused
                       ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
                       : "bg-purple-950/40 border-purple-700/50 text-purple-300 hover:bg-purple-900/60 hover:text-white"
@@ -1109,9 +1109,9 @@ const StoryboardCard = ({
                   title="Play Dialogue Preview"
                 >
                   {isDialoguePlaying && !isDialoguePaused ? (
-                    <Pause className="w-2.5 h-2.5 fill-current" />
+                    <Pause className="w-2 h-2 fill-current" />
                   ) : (
-                    <Play className="w-2.5 h-2.5 fill-current" />
+                    <Play className="w-2 h-2 fill-current" />
                   )}
                   <span>
                     {isDialoguePlaying && !isDialoguePaused ? "Pause" : "Play Audio"}
@@ -1124,21 +1124,21 @@ const StoryboardCard = ({
                       e.stopPropagation();
                       stopDialogueAudio();
                     }}
-                    className="p-1 rounded-lg text-[9px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
+                    className="p-0.5 rounded text-[8.5px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
                     title="Stop Dialogue"
                   >
-                    <Square className="w-2.5 h-2.5 fill-current" />
+                    <Square className="w-2 h-2 fill-current" />
                   </button>
                 )}
               </div>
             </div>
             <textarea
-              rows={2}
+              rows={1}
               disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
               value={panel.speech_text}
               onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
               placeholder="Enter dialogue or subtitle text..."
-              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
                   : "hover:border-neutral-700"
@@ -1148,9 +1148,9 @@ const StoryboardCard = ({
         )}
 
         {activeTab === "narrative" && (
-          <div className="space-y-1.5 animate-in fade-in duration-150">
+          <div className="space-y-1 animate-in fade-in duration-150">
             <div className="flex items-center justify-between px-0.5">
-              <span className="text-[10px] font-mono font-semibold text-neutral-400">
+              <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
                 Narrative Voiceover
               </span>
               <div className="flex items-center gap-1">
@@ -1160,7 +1160,7 @@ const StoryboardCard = ({
                     e.stopPropagation();
                     handleToggleNarrativeAudio();
                   }}
-                  className={`px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
+                  className={`px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
                     isNarrativePlaying && !isNarrativePaused
                       ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
                       : "bg-purple-950/40 border-purple-700/50 text-purple-300 hover:bg-purple-900/60 hover:text-white"
@@ -1168,9 +1168,9 @@ const StoryboardCard = ({
                   title="Play Narration Preview"
                 >
                   {isNarrativePlaying && !isNarrativePaused ? (
-                    <Pause className="w-2.5 h-2.5 fill-current" />
+                    <Pause className="w-2 h-2 fill-current" />
                   ) : (
-                    <Play className="w-2.5 h-2.5 fill-current" />
+                    <Play className="w-2 h-2 fill-current" />
                   )}
                   <span>
                     {isNarrativePlaying && !isNarrativePaused ? "Pause" : "Play Audio"}
@@ -1183,23 +1183,23 @@ const StoryboardCard = ({
                       e.stopPropagation();
                       stopNarrativeAudio();
                     }}
-                    className="p-1 rounded-lg text-[9px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
+                    className="p-0.5 rounded text-[8.5px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
                     title="Stop Narration"
                   >
-                    <Square className="w-2.5 h-2.5 fill-current" />
+                    <Square className="w-2 h-2 fill-current" />
                   </button>
                 )}
               </div>
             </div>
             <textarea
-              rows={2}
+              rows={1}
               disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
               value={panel.narrative || ""}
               onChange={(e) =>
                 handleModifyNarrative?.(panel.id, e.target.value)
               }
               placeholder="Enter narrative voiceover or scene description..."
-              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed border-purple-900/40 text-purple-300"
                   : "hover:border-neutral-700"
@@ -1209,9 +1209,9 @@ const StoryboardCard = ({
         )}
 
         {activeTab === "sfx" && (
-          <div className="space-y-1.5 animate-in fade-in duration-150">
+          <div className="space-y-1 animate-in fade-in duration-150">
             <div className="px-0.5">
-              <span className="text-[10px] font-mono font-semibold text-neutral-400">
+              <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
                 Sound Effects (SFX Cue)
               </span>
             </div>
@@ -1220,8 +1220,8 @@ const StoryboardCard = ({
               disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
               value={panel.sfx || ""}
               onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-              placeholder="e.g. door slam, footsteps, explosion..."
-              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all shadow-inner ${
+              placeholder="e.g. door slam, footsteps..."
+              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
                   : "hover:border-neutral-700"
@@ -1231,21 +1231,21 @@ const StoryboardCard = ({
         )}
 
         {activeTab === "visual" && (
-          <div className="space-y-1.5 animate-in fade-in duration-150">
+          <div className="space-y-1 animate-in fade-in duration-150">
             <div className="px-0.5">
-              <span className="text-[10px] font-mono font-semibold text-neutral-400">
+              <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
                 Visual Scene Prompt
               </span>
             </div>
             <textarea
-              rows={2}
+              rows={1}
               disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
               value={panel.visual_description || ""}
               onChange={(e) =>
                 handleModifyVisualDescription(panel.id, e.target.value)
               }
-              placeholder="Describe visual scene for lighting, atmosphere..."
-              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-xs rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
+              placeholder="Describe visual scene for lighting..."
+              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
                 panel.isAnalyzing || analyzingPanelId === panel.id
                   ? "opacity-60 cursor-not-allowed text-purple-300 border-purple-900/40"
                   : "hover:border-neutral-700"
@@ -1255,13 +1255,13 @@ const StoryboardCard = ({
         )}
 
         {/* Motion & Timing Row */}
-        <div className="grid grid-cols-2 gap-2 pt-1 border-t border-neutral-850">
-          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800 hover:border-purple-500/40 rounded-xl px-2.5 py-1.5 transition-all">
-            <Video className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+        <div className="grid grid-cols-2 gap-1.5 pt-0.5 border-t border-neutral-850">
+          <div className="flex items-center gap-1 bg-neutral-900/90 border border-neutral-800 hover:border-purple-500/40 rounded-lg px-2 py-1 transition-all">
+            <Video className="w-3 h-3 text-purple-400 shrink-0" />
             <select
               value={panel.motion_type ?? ""}
               onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
-              className="appearance-none bg-transparent text-[10.5px] font-mono text-neutral-200 w-full outline-none cursor-pointer"
+              className="appearance-none bg-transparent text-[10px] font-mono text-neutral-200 w-full outline-none cursor-pointer"
             >
               <option value="" className="bg-neutral-950 text-neutral-200">
                 Motion: None
@@ -1296,8 +1296,8 @@ const StoryboardCard = ({
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-neutral-900/90 border border-neutral-800 hover:border-purple-500/40 rounded-xl px-2.5 py-1.5 transition-all">
-            <Clock className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+          <div className="flex items-center gap-1 bg-neutral-900/90 border border-neutral-800 hover:border-purple-500/40 rounded-lg px-2 py-1 transition-all">
+            <Clock className="w-3 h-3 text-purple-400 shrink-0" />
             <input
               type="number"
               min={0.5}
@@ -1317,22 +1317,22 @@ const StoryboardCard = ({
                 }
               }}
               placeholder="3.0"
-              className="bg-transparent text-[10.5px] font-mono font-bold text-neutral-200 w-full outline-none text-left"
+              className="bg-transparent text-[10px] font-mono font-bold text-neutral-200 w-full outline-none text-left"
             />
-            <span className="text-[10px] font-mono text-neutral-450 shrink-0 font-semibold">
+            <span className="text-[9.5px] font-mono text-neutral-450 shrink-0 font-semibold">
               sec
             </span>
           </div>
         </div>
 
         {/* Unified 3-in-1 AI Action Toolbar */}
-        <div className="grid grid-cols-3 gap-1.5 pt-1">
+        <div className="grid grid-cols-3 gap-1 pt-0.5">
           {/* 1. Analyze Image */}
           {analyzingPanelId === panel.id ? (
             <button
               type="button"
               onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
-              className="py-2 rounded-xl border text-[10.5px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 text-rose-300 shadow-sm"
+              className="py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 text-rose-300 shadow-sm"
               title="Stop Analyzing"
             >
               <X className="h-3 w-3 text-rose-400" />
@@ -1345,7 +1345,7 @@ const StoryboardCard = ({
                 analyzingPanelId !== null && analyzingPanelId !== panel.id
               }
               onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
-              className="py-2 px-1 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-500/60 text-neutral-200 hover:text-purple-300 text-[10.5px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-40"
+              className="py-1.5 px-1 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-500/60 text-neutral-200 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-40"
               title="Analyze Scene with AI"
             >
               <Sparkles className="h-3 w-3 text-purple-400" />
@@ -1359,7 +1359,7 @@ const StoryboardCard = ({
               type="button"
               disabled={isMagicProcessing}
               onClick={handleMagicMotion}
-              className="py-2 px-1 rounded-xl border border-purple-500/50 bg-gradient-to-r from-purple-950/60 to-indigo-950/60 hover:from-purple-900/60 hover:to-indigo-900/60 text-purple-200 hover:text-white text-[10.5px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm disabled:opacity-40 active:scale-95"
+              className="py-1.5 px-1 rounded-lg border border-purple-500/50 bg-gradient-to-r from-purple-950/60 to-indigo-950/60 hover:from-purple-900/60 hover:to-indigo-900/60 text-purple-200 hover:text-white text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm disabled:opacity-40 active:scale-95"
               title="Apply Magic Motion"
             >
               {isMagicProcessing ? (
@@ -1384,7 +1384,7 @@ const StoryboardCard = ({
               );
               window.dispatchEvent(new Event("popstate"));
             }}
-            className="py-2 px-1 rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-500/60 text-neutral-200 hover:text-purple-300 text-[10.5px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95"
+            className="py-1.5 px-1 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-purple-500/60 text-neutral-200 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95"
             title="Open Panel Assistant"
           >
             <Bot className="h-3 w-3 text-purple-400" />

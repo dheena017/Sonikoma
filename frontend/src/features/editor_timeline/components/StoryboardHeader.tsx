@@ -118,16 +118,18 @@ export default function StoryboardHeader({
 
         {/* Busy / Progress Indicator */}
         {isBusy && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-500/40 text-purple-300 text-[11px] font-mono animate-pulse">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-950/60 border border-purple-500/40 rounded-xl text-purple-300 text-xs font-mono">
             <RefreshCw className="w-3.5 h-3.5 animate-spin text-purple-400" />
             <span>
-              {isBatchCropping && batchProgress
-                ? `Cropping ${batchProgress.current}/${batchProgress.total}`
-                : isCleaningBubbles && cleanProgress
-                ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
-                : isBatchMerging
-                ? "Stitching..."
-                : "Processing..."}
+              {isBatchCropping
+                ? `Cropping ${batchProgress?.current || 0}/${
+                    batchProgress?.total || selectedCount
+                  }...`
+                : isCleaningBubbles
+                ? `Cleaning ${cleanProgress?.current || 0}/${
+                    cleanProgress?.total || selectedCount
+                  }...`
+                : "Merging..."}
             </span>
           </div>
         )}
@@ -225,16 +227,15 @@ export default function StoryboardHeader({
       <EditorHeaderFrame
         left={selectionLeftBlock}
         right={selectionRightBlock}
-        className="border-b-0 rounded-2xl bg-gradient-to-r from-purple-950/80 via-neutral-950/95 to-neutral-950/95 border border-purple-500/35 p-3 shadow-lg"
       />
     );
   }
 
   // Standard Mode Left Title Block
   const titleBlock = (
-    <div className="flex items-center gap-3 min-w-0">
-      <div className="h-9 w-9 rounded-xl bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
-        <Film className="h-4.5 w-4.5 text-purple-400" />
+    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.35)] shrink-0">
+        <Film className="h-4 w-4 text-white" />
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
@@ -346,7 +347,6 @@ export default function StoryboardHeader({
       left={titleBlock}
       center={viewToggle}
       right={rightBlock}
-      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
   );
 }

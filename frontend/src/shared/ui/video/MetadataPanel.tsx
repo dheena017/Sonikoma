@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
   Download,
-  Youtube,
   Loader2,
   ExternalLink,
   Music,
@@ -147,7 +146,7 @@ const VideoPreviewMetadataPanel = React.memo(
             <div className="h-[2px] bg-gradient-to-r from-purple-500 via-indigo-500 to-cyan-500 opacity-80" />
 
             <div className="p-2 space-y-1.5">
-              {/* SECTION 0: Track Specs & Info Card (for repositioned/hidden header badges) */}
+              {/* SECTION 0: Track Specs & Info Card */}
               <div className="px-2.5 pt-1 text-[9px] font-black uppercase tracking-wider text-purple-400 font-mono flex items-center justify-between">
                 <span>Media Specs & Info</span>
                 <span className="text-[8px] text-neutral-500 font-normal">
@@ -349,7 +348,7 @@ const VideoPreviewMetadataPanel = React.memo(
 
     return (
       <>
-        {/* Γï» More Options 3-Dots Button */}
+        {/* More Options 3-Dots Button */}
         <button
           ref={btnRef}
           type="button"
@@ -370,7 +369,7 @@ const VideoPreviewMetadataPanel = React.memo(
           <MoreHorizontal className="h-3.5 w-3.5" />
         </button>
 
-        {/* Portal dropdown ΓÇö rendered on document.body */}
+        {/* Portal dropdown — rendered on document.body */}
         {dropdownPortal}
       </>
     );

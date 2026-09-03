@@ -48,7 +48,7 @@ export const VideoPreviewSettingsMenu: React.FC<
         </span>
         <button
           onClick={onClose}
-          className="text-neutral-500 hover:text-neutral-300 transition-colors"
+          className="text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
         >
           <X className="h-3 w-3" />
         </button>
@@ -62,7 +62,7 @@ export const VideoPreviewSettingsMenu: React.FC<
           </span>
           <button
             onClick={() => setIsLooping(!isLooping)}
-            className={`py-1 rounded text-[9px] font-bold border transition-all ${
+            className={`py-1 rounded text-[9px] font-bold border transition-all cursor-pointer ${
               isLooping
                 ? "bg-purple-950/40 border-purple-800/40 text-purple-400"
                 : "bg-neutral-950 border-neutral-800 text-neutral-500"
@@ -79,7 +79,7 @@ export const VideoPreviewSettingsMenu: React.FC<
           </span>
           <button
             onClick={() => setCinematicBars(!cinematicBars)}
-            className={`py-1 rounded text-[9px] font-bold border transition-all ${
+            className={`py-1 rounded text-[9px] font-bold border transition-all cursor-pointer ${
               cinematicBars
                 ? "bg-purple-950/40 border-purple-800/40 text-purple-400"
                 : "bg-neutral-950 border-neutral-800 text-neutral-500"

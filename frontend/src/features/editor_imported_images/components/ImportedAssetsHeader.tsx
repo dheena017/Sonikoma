@@ -298,9 +298,9 @@ export default function ImportedAssetsHeader({
   // Standard Deck Header Mode (Nothing Selected)
   // ──────────────────────────────────────────────────────────────────────────
   const titleBlock = (
-    <div className="flex items-center gap-3 min-w-0">
-      <div className="h-9 w-9 rounded-xl bg-purple-500/15 border border-purple-500/35 flex items-center justify-center text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.3)] shrink-0">
-        <Images className="h-4.5 w-4.5 text-purple-400" />
+    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-[0_0_12px_rgba(168,85,247,0.35)] shrink-0">
+        <Images className="h-4 w-4 text-white" />
       </div>
       <div className="min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
@@ -315,6 +315,9 @@ export default function ImportedAssetsHeader({
             {scrapedImagesLength === 1 ? "Asset" : "Assets"}
           </span>
         </div>
+        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
+          Source comic strips, extracted panels & raw scraped assets
+        </p>
       </div>
     </div>
   );
@@ -410,7 +413,6 @@ export default function ImportedAssetsHeader({
       left={titleBlock}
       center={centerBlock}
       right={rightBlock}
-      className="border-b-0 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-purple-950/40 border border-purple-500/30 backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
     />
   );
 }

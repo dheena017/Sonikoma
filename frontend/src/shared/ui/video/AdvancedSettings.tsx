@@ -1,9 +1,6 @@
 import React from "react";
 import {
-  Mic2,
-  Music,
   Tv,
-  Sliders,
   Palette,
   Copy,
   Trash2,
@@ -18,7 +15,6 @@ import {
   Clapperboard,
   ScanLine,
   Cpu,
-  Share2,
   Check,
   Save,
   Layout,
@@ -26,8 +22,6 @@ import {
 } from "lucide-react";
 import { AIModelSelector } from "@/features/ai_core";
 import {
-  DEFAULT_VIDEO_SETTINGS,
-  DEFAULT_AUDIO_SETTINGS,
   DEFAULT_AUTOCROP_SETTINGS,
   DEFAULT_TTS_VOICES,
   MUSIC_THEMES_CATALOG,
@@ -99,8 +93,6 @@ interface WorkspacePreset {
   bubbleDetectionStyle?: string;
 }
 
-// ── Shared sub-components ────────────────────────────────────────────────────
-
 function SectionHeader({
   icon: Icon,
   title,
@@ -142,7 +134,7 @@ function OptionChip({
   return (
     <button
       onClick={onClick}
-      className="py-1.5 px-2 text-[11px] rounded-xl border text-center font-bold font-mono transition-all duration-150"
+      className="py-1.5 px-2 text-[11px] rounded-xl border text-center font-bold font-mono transition-all duration-150 cursor-pointer"
       style={{
         borderColor: isActive ? "#7c3aed" : "#262626",
         backgroundColor: isActive ? "#7c3aed18" : "#0d0d14",
@@ -218,7 +210,7 @@ function Toggle({
   return (
     <button
       onClick={() => onChange(!value)}
-      className="relative inline-flex h-6 w-12 rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none flex-shrink-0"
+      className="relative inline-flex h-6 w-12 rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none flex-shrink-0 cursor-pointer"
       style={{ backgroundColor: value ? "#7c3aed" : "#374151" }}
     >
       <span
@@ -228,8 +220,6 @@ function Toggle({
     </button>
   );
 }
-
-// ── Main Component ────────────────────────────────────────────────────────────
 
 const VideoPreviewAdvancedSettings = React.memo(
   ({
@@ -247,7 +237,6 @@ const VideoPreviewAdvancedSettings = React.memo(
     selectedModel = "",
     selectedSource = "",
     addNotification,
-    fetchWithInterceptor,
 
     audioReactiveShake,
     setAudioReactiveShake,
@@ -282,7 +271,6 @@ const VideoPreviewAdvancedSettings = React.memo(
     const [presetName, setPresetName] = React.useState("");
     const [copied, setCopied] = React.useState(false);
 
-    // ── Local state fallbacks ──────────────────────────────────────────────
     const [localCropSensitivity, setLocalCropSensitivity] = React.useState(() =>
       parseInt(localStorage.getItem("ai_crop_sensitivity") || String(cropSensitivity), 10)
     );
@@ -304,7 +292,6 @@ const VideoPreviewAdvancedSettings = React.memo(
       () => localStorage.getItem("ai_bubble_detection_style") || bubbleDetectionStyle
     );
 
-    // ── Persist to localStorage ────────────────────────────────────────────
     React.useEffect(() => { localStorage.setItem("ai_crop_sensitivity", String(localCropSensitivity)); }, [localCropSensitivity]);
     React.useEffect(() => { localStorage.setItem("ai_crop_padding", String(localCropPaddingPx)); }, [localCropPaddingPx]);
     React.useEffect(() => { localStorage.setItem("ai_crop_focus_mode", localCropFocusMode); }, [localCropFocusMode]);
@@ -314,7 +301,6 @@ const VideoPreviewAdvancedSettings = React.memo(
     React.useEffect(() => { localStorage.setItem("ai_bubble_erase_method", localBubbleEraseMethod); }, [localBubbleEraseMethod]);
     React.useEffect(() => { localStorage.setItem("ai_bubble_detection_style", localBubbleDetectionStyle); }, [localBubbleDetectionStyle]);
 
-    // ── Handlers ──────────────────────────────────────────────────────────
     const handleCropSensitivityChange = (v: number) => { setLocalCropSensitivity(v); setCropSensitivity?.(v); };
     const handleCropPaddingChange = (v: number) => { setLocalCropPaddingPx(v); setCropPaddingPx?.(v); };
     const handleCropFocusChange = (v: string) => { setLocalCropFocusMode(v); setCropFocusMode?.(v); };
@@ -324,7 +310,6 @@ const VideoPreviewAdvancedSettings = React.memo(
     const handleBubbleEraseChange = (v: string) => { setLocalBubbleEraseMethod(v); setBubbleEraseMethod?.(v); };
     const handleBubbleDetectionChange = (v: string) => { setLocalBubbleDetectionStyle(v); setBubbleDetectionStyle?.(v); };
 
-    // ── Presets ───────────────────────────────────────────────────────────
     const [presets, setPresets] = React.useState<WorkspacePreset[]>(() => {
       try {
         const stored = localStorage.getItem("ai_comic_presets");
@@ -408,7 +393,7 @@ const VideoPreviewAdvancedSettings = React.memo(
               <button
                 key={id}
                 onClick={() => setActiveTab(id)}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200"
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer"
                 style={{
                   color: isActive ? "#fff" : "#6b7280",
                   backgroundColor: isActive ? "#7c3aed22" : "transparent",
@@ -455,7 +440,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                         <button
                           key={id}
                           onClick={() => setAspectRatio(id)}
-                          className="py-2.5 px-2 rounded-xl border text-center transition-all duration-150 space-y-0.5"
+                          className="py-2.5 px-2 rounded-xl border text-center transition-all duration-150 space-y-0.5 cursor-pointer"
                           style={{
                             borderColor: isActive ? "#7c3aed" : "#1e1e30",
                             backgroundColor: isActive ? "#7c3aed18" : "#0d0d14",
@@ -496,7 +481,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                       <button
                         key={id}
                         onClick={() => setVideoFormat(id as any)}
-                        className="py-2.5 px-2 rounded-xl border text-center transition-all duration-150 space-y-0.5"
+                        className="py-2.5 px-2 rounded-xl border text-center transition-all duration-150 space-y-0.5 cursor-pointer"
                         style={{
                           borderColor: videoFormat === id ? "#7c3aed" : "#1e1e30",
                           backgroundColor: videoFormat === id ? "#7c3aed18" : "#0d0d14",
@@ -564,7 +549,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                       <button
                         key={id}
                         onClick={() => setBackgroundStyle(id as any)}
-                        className="py-2 px-3 rounded-xl border text-left transition-all duration-150"
+                        className="py-2 px-3 rounded-xl border text-left transition-all duration-150 cursor-pointer"
                         style={{
                           borderColor: backgroundStyle === id ? "#6366f1" : "#1e1e30",
                           backgroundColor: backgroundStyle === id ? "#6366f118" : "#0d0d14",
@@ -730,7 +715,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => handleBubbleEraseChange("telea")}
-                      className="py-2.5 px-3 rounded-xl border text-center transition-all"
+                      className="py-2.5 px-3 rounded-xl border text-center transition-all cursor-pointer"
                       style={{
                         borderColor: localBubbleEraseMethod === "telea" ? "#f59e0b" : "#1e1e30",
                         backgroundColor: localBubbleEraseMethod === "telea" ? "#f59e0b18" : "#0d0d14",
@@ -741,7 +726,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                     </button>
                     <button
                       onClick={() => handleBubbleEraseChange("ns")}
-                      className="py-2.5 px-3 rounded-xl border text-center transition-all"
+                      className="py-2.5 px-3 rounded-xl border text-center transition-all cursor-pointer"
                       style={{
                         borderColor: localBubbleEraseMethod === "ns" ? "#f59e0b" : "#1e1e30",
                         backgroundColor: localBubbleEraseMethod === "ns" ? "#f59e0b18" : "#0d0d14",
@@ -782,7 +767,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                     <button
                       key={theme.id}
                       onClick={() => setActiveTheme(theme.id)}
-                      className="flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200"
+                      className="flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer"
                       style={{
                         borderColor: isActive ? theme.color : "#1e1e30",
                         backgroundColor: isActive ? `${theme.color}18` : "#0d0d14",
@@ -832,13 +817,13 @@ const VideoPreviewAdvancedSettings = React.memo(
                       <div className="flex gap-1.5 flex-shrink-0 ml-2">
                         <button
                           onClick={() => handleLoadPreset(p.name)}
-                          className="text-[10px] px-2 py-1 rounded-lg font-bold text-purple-400 hover:bg-purple-600/20 transition-colors"
+                          className="text-[10px] px-2 py-1 rounded-lg font-bold text-purple-400 hover:bg-purple-600/20 transition-colors cursor-pointer"
                         >
                           Load
                         </button>
                         <button
                           onClick={() => handleDeletePreset(p.name)}
-                          className="p-1 rounded-lg text-neutral-600 hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                          className="p-1 rounded-lg text-neutral-600 hover:text-red-400 hover:bg-red-400/10 transition-colors cursor-pointer"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
@@ -862,7 +847,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                   <button
                     type="submit"
                     disabled={!presetName.trim()}
-                    className="px-3 py-2 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-40"
+                    className="px-3 py-2 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-40 cursor-pointer"
                     style={{ backgroundColor: "#7c3aed" }}
                   >
                     Save
@@ -874,7 +859,7 @@ const VideoPreviewAdvancedSettings = React.memo(
               <div className="pt-1 border-t border-neutral-800">
                 <button
                   onClick={handleCopyShareLink}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-all duration-200"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-all duration-200 cursor-pointer"
                   style={{
                     background: copied
                       ? "linear-gradient(135deg, #16a34a, #15803d)"

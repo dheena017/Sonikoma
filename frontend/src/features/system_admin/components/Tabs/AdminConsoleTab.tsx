@@ -100,9 +100,6 @@ export function AdminConsoleTab() {
       case "WARN":
       case "WARNING":
         return "text-amber-400";
-      case "WARN":
-      case "WARNING":
-        return "text-amber-400";
       case "SUCCESS":
         return "text-emerald-400";
       case "NOTICE":

@@ -1,9 +1,9 @@
 import React from "react";
 import ChapterScraperDeck from "@/features/editor_imported_images/components/ImportedImagesSidebar";
 import StoryboardTimeline from "@/features/editor_timeline/components/StoryboardTimeline";
-import StudioVideoPreview from "@/features/editor_video_preview/components/StudioVideoPreview";
+import QuickVideoPreview from "@/features/editor_video_preview/components/QuickVideoPreview";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
-import { VideoPreviewAdvancedSettings } from "@/features/editor_video/viewport/monitor";
+import { VideoPreviewAdvancedSettings } from "@/shared/ui/video/AdvancedSettings";
 import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
 import { getUserCredits } from "@/api/endpoints/auth";
 import {
@@ -441,7 +441,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
             activeTab === "audio-settings" ||
             activeTab === "autocrop-settings"
               ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-5xl mx-auto"
-              : `border-t border-white/5 px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-8 w-full max-w-[1720px] mx-auto ${
+              : `border-t border-white/5 px-3 sm:px-5 lg:px-6 py-3 sm:py-4 flex flex-col gap-3.5 sm:gap-4 w-full max-w-[1720px] mx-auto ${
                   isFocusMode ? "hidden" : "block"
                 }`
           }`}
@@ -684,7 +684,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   data-section="section-monitor"
                   className="w-full scroll-mt-20 min-h-0 flex flex-col"
                 >
-                  <StudioVideoPreview
+                  <QuickVideoPreview
                     panels={panels}
                     videoUrl={videoUrl}
                     setVideoUrl={setVideoUrl}
@@ -701,11 +701,17 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     targetUrl={targetUrl}
                     isRendering={isRendering}
                     renderProgress={renderProgress}
+                    onExportVideo={handleRenderFinalVideo}
                     handleRenderFinalVideo={handleRenderFinalVideo}
+                    onSave={handleSave}
+                    isSaving={isSaving}
+                    isDirty={appLogic?.isDirty}
                     progressStatus={progressStatus}
                     hasEnoughCredits={hasEnoughCredits}
                     addNotification={addNotification}
                     onOpenVideoEditor={() => setCurrentSection("video-editor")}
+                    seriesSlug={seriesSlug}
+                    chapterSlug={chapterSlug}
                   />
                 </div>
               ) : (

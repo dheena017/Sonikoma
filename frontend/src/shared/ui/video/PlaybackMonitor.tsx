@@ -12,12 +12,12 @@ import {
   Video,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
-import { VideoPreviewHudHelp } from "../player/HudHelp";
-import { VideoPreviewSettingsMenu } from "../player/SettingsMenu";
-import { VideoPreviewChaptersMenu } from "../player/ChaptersMenu";
-import { VideoPreviewTopBar } from "../player/TopBar";
-import { VideoPreviewBottomControls } from "../player/BottomControls";
-import VideoPreviewQuickActionOverlay from "../overlays/QuickActionOverlay";
+import { VideoPreviewHudHelp } from "./player/HudHelp";
+import { VideoPreviewSettingsMenu } from "./player/SettingsMenu";
+import { VideoPreviewChaptersMenu } from "./player/ChaptersMenu";
+import { VideoPreviewTopBar } from "./player/TopBar";
+import { VideoPreviewBottomControls } from "./player/BottomControls";
+import VideoPreviewQuickActionOverlay from "./overlays/QuickActionOverlay";
 import {
   formatDisplayEpisodeLabel,
   getSortedEpisodeGroups,

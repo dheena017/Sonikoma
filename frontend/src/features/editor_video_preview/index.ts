@@ -1,7 +1,7 @@
-import StudioVideoPreview, { VideoPreviewDeck } from "./components/StudioVideoPreview";
-export { StudioVideoPreview, VideoPreviewDeck };
-export default StudioVideoPreview;
+import QuickVideoPreview, { QuickVideoPreview as StudioVideoPreview, QuickVideoPreview as VideoPreviewDeck } from "./components/QuickVideoPreview";
+export { QuickVideoPreview, StudioVideoPreview, VideoPreviewDeck };
+export default QuickVideoPreview;
 
-export { default as StudioVideoPreviewHeader } from "./components/StudioVideoPreviewHeader";
-export type { StudioVideoPreviewProps } from "./components/StudioVideoPreview";
-export type { StudioVideoPreviewHeaderProps } from "./components/StudioVideoPreviewHeader";
+export { default as QuickVideoPreviewHeader } from "./components/QuickVideoPreviewHeader";
+export type { QuickVideoPreviewProps } from "./components/QuickVideoPreview";
+export type { QuickVideoPreviewHeaderProps } from "./components/QuickVideoPreviewHeader";

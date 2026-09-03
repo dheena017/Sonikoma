@@ -788,7 +788,7 @@ const ChapterScraperDeck = React.memo(
       <>
         <div
           id="scraped_strips_deck"
-          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 lg:p-6 space-y-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full min-h-[500px] flex-1 flex flex-col overflow-hidden"
+          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full min-h-[190px] flex-1 flex flex-col overflow-hidden"
         >
           <ImportedAssetsHeader
             scrapedImagesLength={scrapedImages.length}

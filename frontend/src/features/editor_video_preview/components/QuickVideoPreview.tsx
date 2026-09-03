@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { GeneratedPanel } from "@/types";
 import PlaybackMonitor from "@/shared/ui/video/PlaybackMonitor";
-import VideoEditorViewportHeader from "./VideoEditorViewportHeader";
+import QuickVideoPreviewHeader from "./QuickVideoPreviewHeader";
 
-export interface EditorViewportProps {
+export interface QuickVideoPreviewProps {
   [key: string]: any;
   panels: GeneratedPanel[];
   videoUrl: string | null;
@@ -26,9 +26,10 @@ export interface EditorViewportProps {
   chapterNumber?: string | number;
   chapterTitle?: string;
   targetUrl?: string;
+  advancedSettingsProps?: any;
 }
 
-export const EditorViewport: React.FC<EditorViewportProps> = ({
+export const QuickVideoPreview: React.FC<QuickVideoPreviewProps> = ({
   panels,
   videoUrl,
   currentPanelIndex = 0,
@@ -43,32 +44,31 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
   handleRenderFinalVideo,
   onExport,
   isRendering = false,
+  onCloseFloating,
   musicTheme = "orchestral_battle",
   voiceActor = "en-US-GuyNeural",
   seriesTitle,
   chapterNumber,
   chapterTitle,
   targetUrl,
+  advancedSettingsProps,
 }) => {
   const [monitorTab, setMonitorTab] = useState<"timeline" | "video">("timeline");
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const resetZoom = () => setZoomLevel(1);
   const finalExport = onExportVideo || handleRenderFinalVideo || onExport;
   const finalSave = onSave || handleSave;
 
   return (
-    <div className="w-full h-full flex flex-col bg-[#0b0c14] overflow-hidden">
-      <VideoEditorViewportHeader
+    <div className="w-full bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-4 sm:p-5 lg:p-6 shadow-[0_10px_40px_rgba(0,0,0,0.6)] flex flex-col gap-4">
+      <QuickVideoPreviewHeader
         monitorTab={monitorTab}
         setMonitorTab={setMonitorTab}
         panelsCount={panels.length}
-        zoomLevel={zoomLevel}
-        setZoomLevel={setZoomLevel}
-        resetZoom={resetZoom}
+        activePanelIndex={currentPanelIndex}
         onSave={finalSave}
         isSaving={isSaving}
         onExportVideo={finalExport}
         isRendering={isRendering}
+        onClose={onCloseFloating}
         musicTheme={musicTheme}
         voiceActor={voiceActor}
         videoUrl={videoUrl}
@@ -77,31 +77,25 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
         chapterTitle={chapterTitle}
         targetUrl={targetUrl}
         navigateTo={navigateTo}
+        advancedSettingsProps={advancedSettingsProps}
       />
 
-      <div className="flex-1 w-full relative overflow-hidden bg-black flex items-center justify-center p-2">
-        <div
-          className="w-full h-full flex items-center justify-center transition-transform duration-150"
-          style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center center" }}
-        >
-          <div className="w-full h-full max-w-full max-h-full aspect-video">
-            <PlaybackMonitor
-              panels={panels}
-              videoUrl={videoUrl}
-              currentPanelIndex={currentPanelIndex}
-              seriesSlug={seriesSlug}
-              chapterSlug={chapterSlug}
-              navigateTo={navigateTo}
-              addNotification={addNotification}
-              mode={monitorTab}
-              variant="embedded"
-            />
-          </div>
-        </div>
+      <div className="w-full max-h-[460px] aspect-video mx-auto rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-2xl relative flex items-center justify-center">
+        <PlaybackMonitor
+          panels={panels}
+          videoUrl={videoUrl}
+          currentPanelIndex={currentPanelIndex}
+          seriesSlug={seriesSlug}
+          chapterSlug={chapterSlug}
+          navigateTo={navigateTo}
+          addNotification={addNotification}
+          mode={monitorTab}
+          variant="embedded"
+        />
       </div>
     </div>
   );
 };
 
-export default EditorViewport;
-export { EditorViewport as Viewport };
+export default QuickVideoPreview;
+export { QuickVideoPreview as StudioVideoPreview, QuickVideoPreview as VideoPreviewDeck };
