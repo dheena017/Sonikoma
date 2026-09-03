@@ -22,14 +22,14 @@ export function FeatureCard({
 
   return (
     <div
-      className={`p-7 rounded-2xl transition-all duration-300 border relative overflow-hidden ${
+      className={`p-7 rounded-2xl transition-all duration-300 border relative overflow-hidden hover:-translate-y-1.5 cursor-pointer ${
         isLight
-          ? "bg-white border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md"
-          : "bg-[#181818] border-[#2F2F2F] hover:border-blue-500/50 shadow-md"
+          ? "bg-white border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-lg"
+          : "bg-[#181818] border-[#2F2F2F] hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-950/20 shadow-md"
       }`}
     >
       <div
-        className={`mb-5 p-3.5 rounded-xl inline-flex border ${
+        className={`mb-5 p-3.5 rounded-xl inline-flex border transition-all duration-200 ${
           isLight
             ? "bg-slate-50 border-slate-200"
             : "bg-blue-500/10 border-blue-500/20 text-blue-400"

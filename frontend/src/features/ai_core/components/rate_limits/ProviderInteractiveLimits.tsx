@@ -27,10 +27,10 @@ export default function ProviderInteractiveLimits({
           <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-2.5" />
           <input
             type="text"
-            placeholder={`Search ${currentProvider.name} models...`}
+            placeholder={`Search ${currentProvider.name} models by name...`}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-xs font-mono text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500"
+            className="w-full bg-[#181818] border border-[#2F2F2F] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition-colors"
           />
         </div>
 
@@ -40,9 +40,9 @@ export default function ProviderInteractiveLimits({
               href={currentProvider.docsUrl}
               target="_blank"
               rel="noreferrer"
-              className="text-xs font-mono text-purple-400 hover:text-purple-300 flex items-center gap-1"
+              className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
             >
-              <span>{currentProvider.name} Official Docs</span>
+              <span>{currentProvider.name} Docs</span>
               <ExternalLink className="w-3 h-3" />
             </a>
           )}
@@ -62,12 +62,12 @@ export default function ProviderInteractiveLimits({
           ))}
         </div>
       ) : (
-        <div className="p-8 rounded-2xl border border-neutral-850 bg-neutral-900/40 text-center space-y-2">
-          <p className="text-sm font-bold text-neutral-300 font-sans">
+        <div className="p-8 rounded-2xl border border-[#2F2F2F] bg-[#181818] text-center space-y-2">
+          <p className="text-sm font-bold text-neutral-300">
             No models found matching "{searchQuery}" under {currentProvider.name}
           </p>
-          <span className="text-xs font-mono text-neutral-500">
-            Try searching another model identifier or clearing the search query.
+          <span className="text-xs text-neutral-500">
+            Try searching another model name or clearing the search query.
           </span>
         </div>
       )}

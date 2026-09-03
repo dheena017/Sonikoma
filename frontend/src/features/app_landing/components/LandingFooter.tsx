@@ -8,10 +8,10 @@ function FooterSocial({ icon }: { icon: React.ReactElement<any> }) {
   return (
     <a
       href="#"
-      className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer border ${
+      className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer border ${
         isLight
-          ? "bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-200"
-          : "bg-[#181818] border-[#2F2F2F] text-neutral-400 hover:text-white hover:bg-[#222]"
+          ? "bg-slate-100 border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50"
+          : "bg-[#181818] border-[#2F2F2F] text-neutral-400 hover:text-white hover:border-neutral-500 hover:bg-[#222]"
       }`}
     >
       {React.cloneElement(icon, { size: 16 })}
@@ -75,34 +75,34 @@ export function LandingFooter() {
           <ul className="space-y-2.5 text-sm">
             <li>
               <a
-                href="#features"
-                className={`transition-colors cursor-pointer ${
+                href="#how-it-works"
+                className={`transition-colors duration-200 cursor-pointer ${
                   isLight
-                    ? "text-slate-700 hover:text-slate-950 font-medium"
+                    ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
-                Features
+                How It Works
               </a>
             </li>
             <li>
               <a
-                href="#transformation-demo"
-                className={`transition-colors cursor-pointer ${
+                href="#demo-showcase"
+                className={`transition-colors duration-200 cursor-pointer ${
                   isLight
-                    ? "text-slate-700 hover:text-slate-950 font-medium"
+                    ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
-                Interactive Demo
+                Live Preview
               </a>
             </li>
             <li>
               <a
                 href="#pricing"
-                className={`transition-colors cursor-pointer ${
+                className={`transition-colors duration-200 cursor-pointer ${
                   isLight
-                    ? "text-slate-700 hover:text-slate-950 font-medium"
+                    ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
@@ -112,9 +112,9 @@ export function LandingFooter() {
             <li>
               <a
                 href="#faq"
-                className={`transition-colors cursor-pointer ${
+                className={`transition-colors duration-200 cursor-pointer ${
                   isLight
-                    ? "text-slate-700 hover:text-slate-950 font-medium"
+                    ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
@@ -136,9 +136,9 @@ export function LandingFooter() {
             <li>
               <a
                 href="#"
-                className={`transition-colors cursor-pointer ${
+                className={`transition-colors duration-200 cursor-pointer ${
                   isLight
-                    ? "text-slate-700 hover:text-slate-950 font-medium"
+                    ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
@@ -148,9 +148,9 @@ export function LandingFooter() {
             <li>
               <a
                 href="#"
-                className={`transition-colors cursor-pointer ${
+                className={`transition-colors duration-200 cursor-pointer ${
                   isLight
-                    ? "text-slate-700 hover:text-slate-950 font-medium"
+                    ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
@@ -160,9 +160,9 @@ export function LandingFooter() {
             <li>
               <a
                 href="#"
-                className={`transition-colors cursor-pointer ${
+                className={`transition-colors duration-200 cursor-pointer ${
                   isLight
-                    ? "text-slate-700 hover:text-slate-950 font-medium"
+                    ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >

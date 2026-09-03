@@ -30,14 +30,14 @@ export function PricingCard({
 
   return (
     <div
-      className={`p-7 rounded-[28px] border transition-all duration-300 flex flex-col justify-between relative ${
+      className={`p-7 rounded-[28px] border transition-all duration-300 flex flex-col justify-between relative hover:-translate-y-1.5 cursor-pointer ${
         isPopular
           ? isLight
-            ? "border-blue-500 bg-blue-50/60 shadow-lg"
-            : "border-blue-500 bg-[#161922] shadow-xl"
+            ? "border-blue-500 bg-blue-50/60 shadow-lg hover:border-blue-600 hover:shadow-xl"
+            : "border-blue-500 bg-[#161922] shadow-xl hover:border-blue-400 hover:shadow-blue-950/40"
           : isLight
-          ? "border-slate-200 bg-white hover:border-slate-300 shadow-sm"
-          : "border-[#2F2F2F] bg-[#181818] hover:border-neutral-600 shadow-md"
+          ? "border-slate-200 bg-white hover:border-slate-300 hover:shadow-md shadow-sm"
+          : "border-[#2F2F2F] bg-[#181818] hover:border-neutral-600 hover:shadow-xl shadow-md"
       }`}
     >
       {isPopular && (
@@ -124,12 +124,12 @@ export function PricingCard({
       </div>
       <button
         onClick={onClick}
-        className={`w-full mt-7 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 cursor-pointer shadow-sm ${
+        className={`w-full mt-7 py-3 rounded-xl text-sm font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-sm ${
           isPopular
-            ? "bg-blue-600 hover:bg-blue-500 text-white"
+            ? "bg-blue-600 hover:bg-blue-500 text-white hover:shadow-md hover:shadow-blue-500/20"
             : isLight
             ? "bg-slate-900 text-white hover:bg-slate-800"
-            : "bg-[#0E0E0E] border border-[#2F2F2F] text-white hover:bg-[#222]"
+            : "bg-[#0E0E0E] border border-[#2F2F2F] text-white hover:bg-[#222] hover:border-neutral-600"
         }`}
       >
         {btnText}
