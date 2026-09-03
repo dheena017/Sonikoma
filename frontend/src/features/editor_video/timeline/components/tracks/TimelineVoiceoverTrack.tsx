@@ -25,6 +25,8 @@ export interface TimelineVoiceoverTrackProps {
   onContextMenu: (e: React.MouseEvent, key: string, idx: number) => void;
   onDurationChange?: (key: string, duration: number) => void;
   onAddVoice?: () => void;
+  totalDuration?: number;
+  zoomLevel?: number;
 }
 
 export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
@@ -35,6 +37,8 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
   muted,
   locked,
   hidden,
+  totalDuration,
+  zoomLevel = 30,
   onToggleMute,
   onToggleLock,
   onToggleHide,
@@ -162,7 +166,8 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
       p.dialogue
   );
 
-  // Reactively compute lanes whenever clips are moved, resized, or when space opens up
+  const pxPerSec = zoomLevel ?? 30;
+
   const clipLanes = useMemo(() => {
     const allClips = panels
       .map((p: any, i: number) => {
@@ -178,22 +183,22 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
         const t: PanelTiming | undefined = panelTimings[i];
         const k = `a3-${i}`;
         const dur = p.voice_duration ?? t?.duration ?? p.duration ?? 0;
-        const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * 30;
+        const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * pxPerSec;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
         const isResizingThis = resizingInfo?.key === k;
         const resizeLeftDelta =
           isResizingThis && resizingInfo?.side === "left"
-            ? (dur - resizingInfo.initialDuration) * 30
+            ? (dur - resizingInfo.initialDuration) * pxPerSec
             : 0;
 
         const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
-        const width = dur * 30;
+        const width = dur * pxPerSec;
         return { key: k, left, width };
       })
       .filter((c): c is { key: string; left: number; width: number } => c !== null);
     return assignLanes(allClips);
-  }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo]);
+  }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo, pxPerSec]);
 
   const maxLane = useMemo(() => {
     const vals = Object.values(clipLanes);
@@ -202,17 +207,17 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
   const innerHeightPx = trackInnerHeight(maxLane, AUDIO_FX_LANE_HEIGHT);
   const outerHeightPx = innerHeightPx + 8;
 
+  const calcTotalDuration = useMemo(() => totalDuration ?? (panelTimings?.reduce((sum, p) => sum + (p.duration || 0), 0) || 3), [totalDuration, panelTimings]);
+
   return (
     <div
-      className={`border-b border-white/10 bg-[#18181B] flex items-center transition-all duration-300 ${
-        muted ? "opacity-40" : ""
-      }`}
+      className="border-b border-white/10 bg-[#18181B] flex items-center"
       style={{ height: `${Math.max(46, outerHeightPx)}px` }}
     >
       <TrackLabel
-        id="A3"
+        id="A1"
         label="Voiceover"
-        color="text-[#60A5FA]"
+        color="text-[#3B82F6]"
         type="audio"
         locked={locked}
         hidden={hidden}
@@ -223,16 +228,15 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
         onAdd={onAddVoice}
       />
 
-      <div className="flex-1 relative overflow-hidden transition-all duration-300" style={{ height: `${Math.max(38, innerHeightPx)}px`, clipPath: "inset(0)" }}>
+      <div className="flex-1 relative overflow-hidden" style={{ height: `${Math.max(38, innerHeightPx)}px`, clipPath: "inset(0)" }}>
         {!hasAnyVoice ? (
-          <button
-            type="button"
-            onClick={onAddVoice}
-            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-[#93C5FD] italic px-2 hover:bg-[#2A2A2A] rounded-md transition-colors cursor-pointer group"
-          >
-            <Plus className="h-2.5 w-2.5 text-[#3B82F6]/70 group-hover:text-[#93C5FD] transition-colors" />
-            <span>Add character voice / narration dialogue</span>
-          </button>
+          <div className="w-full h-full p-1 pointer-events-none select-none">
+            <div className="w-full h-full rounded border border-dashed border-white/[0.04] bg-white/[0.01] flex items-center px-3">
+              <span className="text-[9px] font-mono text-neutral-500/50 uppercase tracking-widest font-medium">
+                Empty Voiceover Track
+              </span>
+            </div>
+          </div>
         ) : (
           panels.map((panel: any, idx: number) => {
             const hasVoiceAudio = !!(
@@ -262,8 +266,8 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
               endTime: (idx + 1) * dur,
               startPct: (idx / Math.max(panels.length, 1)) * 100,
               widthPct: (1 / Math.max(panels.length, 1)) * 100,
-              startPx: idx * dur * 30,
-              widthPx: dur * 30,
+              startPx: idx * dur * pxPerSec,
+              widthPx: dur * pxPerSec,
             };
 
             const speaker =
@@ -274,7 +278,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
             const key = `a3-${idx}`;
             const isResizing = resizingInfo?.key === key;
             
-            const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * 30;
+            const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * pxPerSec;
             const offsetPx = clipOffsets[key] ?? 0;
 
             const activeDur = isResizing && resizingInfo
@@ -282,10 +286,10 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
               : dur;
 
             let displayLeftPx = baseLeftPx + offsetPx;
-            let displayWidthPx = activeDur * 30;
+            let displayWidthPx = activeDur * pxPerSec;
 
             if (isResizing && resizingInfo && resizingInfo.side === "left") {
-              const durDelta = resizingInfo.deltaSecs * 30;
+              const durDelta = resizingInfo.deltaSecs * pxPerSec;
               displayLeftPx = Math.max(0, baseLeftPx + offsetPx - durDelta);
             }
 
@@ -325,7 +329,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                   top: `${clipTop}px`,
                   height: `${clipHeight}px`,
                   cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
-                  transition: isMoving ? "none" : "top 0.2s ease",
+                  transition: "none",
                 }}
                 title={`VO #${idx + 1} (${speaker}): ${dialogue}`}
               >
@@ -402,19 +406,6 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
             );
           })
         )}
-      </div>
-
-      {/* Right Side Pinned Action Column matching Left Track Header */}
-      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#1E1E1E] border-l border-[#2F2F2F] shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
-        <button
-          type="button"
-          onClick={onAddVoice}
-          className="w-full h-8 rounded-md border border-[#3B82F6]/30 hover:border-[#60A5FA]/80 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover: select-none group/add"
-          title="Add Voiceover"
-        >
-          <Mic className="h-3 w-3 text-[#3B82F6] group-hover/add:scale-110 transition-transform" />
-          <span>Add Voice</span>
-        </button>
       </div>
     </div>
   );

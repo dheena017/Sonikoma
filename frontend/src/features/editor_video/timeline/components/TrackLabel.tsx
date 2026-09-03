@@ -31,22 +31,34 @@ const TrackLabel: React.FC<TrackLabelProps> = ({
   onToggleLock,
   onToggleHide,
   onToggleMute,
+  onAdd,
 }) => (
-  <div data-track-header="true" className="w-48 shrink-0 h-full sticky left-0 z-30 flex items-center justify-between px-3 border-r border-white/10 group bg-[#15161c] select-none">
+  <div data-track-header="true" className="w-56 shrink-0 h-full sticky left-0 z-40 flex items-center justify-between px-3 border-r border-[#2F2F2F] group bg-[#121212] select-none shadow-sm">
     {/* Track ID & Name (Always prominent & readable, never truncated) */}
-    <div className="flex items-center gap-2 min-w-0 pr-1 overflow-hidden">
+    <div className="flex items-center gap-1.5 min-w-0 pr-1 overflow-hidden">
       <span
         className={`text-[9px] font-mono font-black ${color} shrink-0 px-1 py-0.5 rounded bg-black/20 border border-white/10`}
       >
         {id}
       </span>
-      <span className="text-neutral-200 text-[10.5px] font-mono font-bold whitespace-nowrap group-hover:text-white transition-colors">
+      <span className="text-neutral-200 text-[10px] font-mono font-bold truncate max-w-[105px] group-hover:text-white transition-colors" title={label}>
         {label}
       </span>
     </div>
 
     {/* Compact Action Icons Toolbar */}
     <div className="flex items-center gap-0.5 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
+      {onAdd && (
+        <button
+          type="button"
+          onClick={onAdd}
+          title={`Add item to ${label}`}
+          className="h-5 w-5 flex items-center justify-center rounded transition-colors cursor-pointer text-neutral-400 hover:text-[#3B82F6] hover:bg-white/10"
+        >
+          <Plus className="h-3.5 w-3.5" />
+        </button>
+      )}
+
       <button
         type="button"
         onClick={onToggleLock}

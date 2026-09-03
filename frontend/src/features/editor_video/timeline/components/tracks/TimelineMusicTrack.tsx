@@ -23,6 +23,7 @@ export interface TimelineMusicTrackProps {
   onContextMenu: (e: React.MouseEvent, key: string, idx: number) => void;
   onDurationChange?: (key: string, duration: number) => void;
   onAddMusic?: () => void;
+  zoomLevel?: number;
 }
 
 export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
@@ -34,6 +35,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
   muted,
   locked,
   hidden,
+  zoomLevel = 30,
   onToggleMute,
   onToggleLock,
   onToggleHide,
@@ -162,9 +164,11 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
       ? musicTheme
       : (musicUrl ? musicUrl.split("/").pop() || musicUrl : musicTheme || "");
 
+  const pxPerSec = zoomLevel ?? 30;
+
   const displayWidthPx = Math.max(
     30,
-    (clipDuration + (resizingSide === "right" ? deltaSecs : resizingSide === "left" ? -deltaSecs : 0)) * 30
+    (clipDuration + (resizingSide === "right" ? deltaSecs : resizingSide === "left" ? -deltaSecs : 0)) * pxPerSec
   );
 
   return (
@@ -174,7 +178,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
       }`}
     >
       <TrackLabel
-        id="A1"
+        id="A3"
         label="Music (BGM)"
         color="text-emerald-400"
         type="audio"
@@ -188,14 +192,13 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
       />
       <div className="flex-1 relative h-[38px] overflow-hidden" style={{ clipPath: "inset(0)" }}>
         {!hasMusic ? (
-          <button
-            type="button"
-            onClick={onAddMusic}
-            className="h-full flex items-center gap-1.5 text-[9px] font-mono text-neutral-500 hover:text-emerald-300 italic px-2 hover:bg-emerald-950/20 rounded-md transition-colors cursor-pointer group"
-          >
-            <Plus className="h-2.5 w-2.5 text-emerald-400/70 group-hover:text-emerald-300 transition-colors" />
-            <span>Add background music / soundtrack</span>
-          </button>
+          <div className="w-full h-full p-1 pointer-events-none select-none">
+            <div className="w-full h-full rounded border border-dashed border-white/[0.04] bg-white/[0.01] flex items-center px-3">
+              <span className="text-[9px] font-mono text-neutral-500/50 uppercase tracking-widest font-medium">
+                Empty BGM Track
+              </span>
+            </div>
+          </div>
         ) : (
           <div
             onMouseDown={(e) =>
@@ -222,7 +225,7 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                 Math.max(
                   0,
                   (clipOffsets["a1-0"] ?? 0) -
-                    (resizingSide === "left" ? deltaSecs * 30 : 0)
+                    (resizingSide === "left" ? deltaSecs * pxPerSec : 0)
                 ) + (movingInfo?.key === "a1-0" ? movingInfo.deltaPx : 0)
               }px`,
               width: `${displayWidthPx}px`,
@@ -306,19 +309,6 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
             />
           </div>
         )}
-      </div>
-
-      {/* Right Side Pinned Action Column matching Left Track Header */}
-      <div className="w-32 shrink-0 h-full sticky right-0 z-20 flex items-center justify-center px-2.5 bg-[#1E1E1E] border-l border-[#2F2F2F] shadow-[-3px_0_12px_rgba(0,0,0,0.6)]">
-        <button
-          type="button"
-          onClick={onAddMusic}
-          className="w-full h-8 rounded-md border border-emerald-500/30 hover:border-emerald-400/80 bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-200 hover:text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono font-bold text-[9px] shadow-sm hover:shadow-[0_0_14px_rgba(52,211,153,0.35)] select-none group/add"
-          title="Add Background Music"
-        >
-          <Music className="h-3 w-3 text-emerald-400 group-hover/add:scale-110 transition-transform" />
-          <span>Add BGM</span>
-        </button>
       </div>
     </div>
   );

@@ -14,6 +14,8 @@ import {
   SplitSquareHorizontal,
   Play,
   Pause,
+  ZoomIn,
+  ZoomOut,
 } from "lucide-react";
 
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
@@ -28,6 +30,7 @@ interface TimelineToolbarProps {
   isPlaying?: boolean;
   playbackTime?: number;
   totalDuration?: number;
+  zoomLevel?: number;
   onToggleSnap: () => void;
   onToggleCaptions: () => void;
   onToggleKeyframes: () => void;
@@ -35,6 +38,9 @@ interface TimelineToolbarProps {
   onDelete: () => void;
   onDuplicate: () => void;
   onPlay?: () => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onZoomReset?: () => void;
 }
 
 /** Small reusable button used only within the toolbar. */
@@ -60,6 +66,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   isPlaying = false,
   playbackTime = 0,
   totalDuration = 0,
+  zoomLevel = 30,
   onToggleSnap,
   onToggleCaptions,
   onToggleKeyframes,
@@ -67,6 +74,9 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   onDelete,
   onDuplicate,
   onPlay,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
 }) => {
   const { formatTooltip } = useAppShortcuts();
   const formatTime = (seconds: number): string => {
@@ -74,16 +84,24 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
+    const frames = Math.floor((seconds % 1) * 30);
+
     if (hours > 0) {
-      return `${hours}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+      return `${hours.toString().padStart(2, "0")}:${mins
+        .toString()
+        .padStart(2, "0")}:${secs.toString().padStart(2, "0")}:${frames
+        .toString()
+        .padStart(2, "0")}`;
     }
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}:${frames.toString().padStart(2, "0")}`;
   };
 
   return (
-    <div className="h-10 px-3 border-b border-[#2F2F2F] flex items-center justify-between bg-[#1E1E1E] shrink-0 relative">
-      {/* ── Left: action buttons ────────────────────────────────────────────── */}
-      <div className="flex items-center gap-0.5">
+    <div className="h-8 shrink-0 border-b border-[#2F2F2F] bg-[#121212] px-3 flex items-center justify-between select-none">
+      {/* ── Left: tools ────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-1">
         {/* Undo / Redo */}
         <ToolBtn
           title={formatTooltip("Undo", "history_undo", "Ctrl+Z")}
@@ -167,6 +185,34 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         >
           <Magnet className="h-3.5 w-3.5" />
         </button>
+
+        {/* Zoom controls */}
+        <div className="flex items-center gap-1 border-l border-white/10 pl-2 ml-1">
+          <button
+            type="button"
+            onClick={onZoomOut}
+            title={formatTooltip("Zoom Out", "timeline_zoom_out", "-")}
+            className="p-1 text-neutral-400 hover:text-white rounded hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <ZoomOut className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={onZoomReset}
+            title={formatTooltip("Reset Zoom", "timeline_zoom_reset", "0")}
+            className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold text-neutral-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            {Math.round((zoomLevel / 30) * 100)}%
+          </button>
+          <button
+            type="button"
+            onClick={onZoomIn}
+            title={formatTooltip("Zoom In", "timeline_zoom_in", "+")}
+            className="p-1 text-neutral-400 hover:text-white rounded hover:bg-white/10 transition-colors cursor-pointer"
+          >
+            <ZoomIn className="h-3.5 w-3.5" />
+          </button>
+        </div>
 
         {/* Fit view */}
         <ToolBtn

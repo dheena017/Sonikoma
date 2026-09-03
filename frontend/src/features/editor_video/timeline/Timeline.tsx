@@ -313,8 +313,9 @@ const Timeline: React.FC<TimelineProps> = ({
       if (event.key === "ArrowRight") {
         event.preventDefault();
         const step = event.shiftKey ? 2.0 : 0.5;
+        const maxSeekDuration = Math.max(60, totalDuration + 30);
         setTimelineTime((prev) => {
-          const next = Math.min(totalDuration, prev + step);
+          const next = Math.min(maxSeekDuration, prev + step);
           const nextIdx = getPanelIndexAtTime(next);
           setCurrentPanelIndex?.(nextIdx);
           return next;
@@ -336,7 +337,9 @@ const Timeline: React.FC<TimelineProps> = ({
 
     const rect = rail.getBoundingClientRect();
     const relativeX = Math.max(0, clientX - rect.left);
-    const nextTime = Math.max(0, Math.min(totalDuration, relativeX / 30));
+    const maxSeekDuration = Math.max(60, totalDuration + 30);
+    const pxPerSec = s.zoomLevel || 30;
+    const nextTime = Math.max(0, Math.min(maxSeekDuration, relativeX / pxPerSec));
     const nextPanelIndex = getPanelIndexAtTime(nextTime);
 
     currentPanelIndexRef.current = nextPanelIndex;
@@ -403,7 +406,8 @@ const Timeline: React.FC<TimelineProps> = ({
   };
 
   const handlePlayClick = () => {
-    if (timelineTime >= totalDuration) {
+    const maxSeekDuration = Math.max(60, totalDuration + 30);
+    if (timelineTime >= maxSeekDuration) {
       setTimelineTime(0);
       currentPanelIndexRef.current = 0;
       setCurrentPanelIndex?.(0);
@@ -488,6 +492,7 @@ const Timeline: React.FC<TimelineProps> = ({
         isPlaying={isPlaying}
         playbackTime={timelineTime}
         totalDuration={totalDuration}
+        zoomLevel={s.zoomLevel}
         onToggleSnap={s.toggleSnap}
         onToggleCaptions={() => s.setCaptionsVisible((v) => !v)}
         onToggleKeyframes={s.keyframesState.toggleKeyframeRows}
@@ -495,6 +500,9 @@ const Timeline: React.FC<TimelineProps> = ({
         onDelete={s.handleRemoveDuration}
         onPlay={handlePlayClick}
         onDuplicate={s.handleDuplicate}
+        onZoomIn={s.handleZoomIn}
+        onZoomOut={s.handleZoomOut}
+        onZoomReset={s.handleZoomReset}
       />
 
       {/* ── Track Workspace ──────────────────────────────────────────────────── */}
@@ -506,9 +514,22 @@ const Timeline: React.FC<TimelineProps> = ({
         <div
           ref={timelineScrollRef}
           onWheel={(e) => {
-            if (e.ctrlKey || e.metaKey) return;
-            if (timelineScrollRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-              timelineScrollRef.current.scrollLeft += e.deltaY;
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              if (e.deltaY < 0) {
+                s.handleZoomIn();
+              } else {
+                s.handleZoomOut();
+              }
+              return;
+            }
+            if (!timelineScrollRef.current) return;
+            if (e.shiftKey) {
+              timelineScrollRef.current.scrollLeft += e.deltaY || e.deltaX;
+            } else if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+              timelineScrollRef.current.scrollLeft += e.deltaX;
+            } else {
+              timelineScrollRef.current.scrollTop += e.deltaY;
             }
           }}
           className="timeline-scroll-area flex-1 overflow-auto min-h-0 relative"
@@ -520,14 +541,26 @@ const Timeline: React.FC<TimelineProps> = ({
           {/* Inner wrapper with flush right edge, generous end-buffer and synchronized tracks */}
           <div
             className="min-h-full relative"
+            onMouseDown={(e) => {
+              const target = e.target as HTMLElement | null;
+              if (
+                target &&
+                !target.closest("button") &&
+                !target.closest(".group") &&
+                !target.closest(".pointer-events-auto")
+              ) {
+                handlePlayheadScrubStart(e);
+              }
+            }}
             style={{
-              minWidth: `${Math.max(1000, totalDuration * 30 + 192 + 130 + 50)}px`,
+              minWidth: `${Math.max(1800, Math.max(60, totalDuration + 30) * s.zoomLevel + 224 + 60)}px`,
             }}
           >
             {/* Sticky Synchronized Top Ruler */}
             <div className="sticky top-0 z-40 bg-[#121212]">
               <TimelineRuler
                 totalDuration={totalDuration}
+                zoomLevel={s.zoomLevel}
                 onScrubStart={handlePlayheadScrubStart}
                 onHoverPctChange={(pct) => {
                   setRulerHoverPct(pct);
@@ -540,6 +573,7 @@ const Timeline: React.FC<TimelineProps> = ({
             <TimelinePlayhead
               currentTime={timelineTime}
               playheadPercent={playheadPct}
+              zoomLevel={s.zoomLevel}
               onScrubStart={handlePlayheadScrubStart}
             />
 
@@ -551,6 +585,8 @@ const Timeline: React.FC<TimelineProps> = ({
                 panelTimings={panelTimings}
                 currentPanelIndex={currentPanelIndex}
                 selectedClip={s.selectedClip}
+                totalDuration={totalDuration}
+                zoomLevel={s.zoomLevel}
                 getClipDuration={s.getClipDuration}
                 onDurationChange={handleDurationChange}
                 keyframesVisible={s.keyframesState.keyframeRowsVisible}
@@ -574,6 +610,8 @@ const Timeline: React.FC<TimelineProps> = ({
                 panelTimings={panelTimings}
                 totalPanels={totalPanels}
                 selectedClip={s.selectedClip}
+                totalDuration={totalDuration}
+                zoomLevel={s.zoomLevel}
                 {...trackControls("V2")}
                 {...clipCbs}
                 onAddFx={s.openFxPicker}
@@ -587,6 +625,8 @@ const Timeline: React.FC<TimelineProps> = ({
                 panelTimings={panelTimings}
                 totalPanels={totalPanels}
                 selectedClip={s.selectedClip}
+                totalDuration={totalDuration}
+                zoomLevel={s.zoomLevel}
                 {...trackControls("V3")}
                 {...clipCbs}
                 onAddSubtitle={s.openSubtitlesPicker}
@@ -595,14 +635,16 @@ const Timeline: React.FC<TimelineProps> = ({
 
             {/* ── Audio Tracks ──────────────────────────────────────────────── */}
             {/* A1 — Voiceover & Narration Track */}
-            {!s.hiddenTracks["A3"] && (
+            {!s.hiddenTracks["A1"] && (
               <TimelineVoiceoverTrack
                 panels={displayPanels}
                 panelTimings={panelTimings}
                 totalPanels={totalPanels}
                 voiceActor={voiceActor}
                 selectedClip={s.selectedClip}
-                {...trackControls("A3")}
+                totalDuration={totalDuration}
+                zoomLevel={s.zoomLevel}
+                {...trackControls("A1")}
                 {...clipCbs}
                 onAddVoice={s.openVoicePicker}
               />
@@ -615,6 +657,8 @@ const Timeline: React.FC<TimelineProps> = ({
                 panelTimings={panelTimings}
                 totalPanels={totalPanels}
                 selectedClip={s.selectedClip}
+                totalDuration={totalDuration}
+                zoomLevel={s.zoomLevel}
                 {...trackControls("A2")}
                 {...clipCbs}
                 onAddSfx={s.openSfxPicker}
@@ -622,7 +666,7 @@ const Timeline: React.FC<TimelineProps> = ({
             )}
 
             {/* A3 — Background Music (BGM) Track */}
-            {!s.hiddenTracks["A1"] && (
+            {!s.hiddenTracks["A3"] && (
               <TimelineMusicTrack
                 musicTheme={
                   (projectStore?.activeProjectData as any)?.bgm_theme ||
@@ -637,10 +681,11 @@ const Timeline: React.FC<TimelineProps> = ({
                     ? musicTheme
                     : undefined)
                 }
-                duration={s.clipDurations["a1-0"]}
+                duration={s.clipDurations["a3-0"]}
                 totalDuration={totalDuration}
+                zoomLevel={s.zoomLevel}
                 selectedClip={s.selectedClip}
-                {...trackControls("A1")}
+                {...trackControls("A3")}
                 {...clipCbs}
                 onAddMusic={s.openMusicPicker}
               />
