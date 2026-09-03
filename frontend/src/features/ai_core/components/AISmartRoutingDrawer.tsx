@@ -260,18 +260,20 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
           setIsOpen(true);
           fetchRoutingConfig();
         }}
-        className={`h-8.5 flex items-center gap-2 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-xs font-medium text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
+        className={`h-8.5 flex items-center gap-2 px-3 max-lg:gap-1 max-lg:px-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-xs font-medium text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
           isOpen ? "border-[#3B82F6] bg-[#2A2A2A]" : ""
         }`}
         title="AI Smart Routing: Open Multi-Model Cascades Matrix"
       >
         <Workflow className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
-        <span className="font-semibold text-white tracking-tight">AI Routing</span>
-        <span className="px-1.5 py-0.5 rounded-md bg-[#1E1E1E] text-neutral-300 border border-[#2F2F2F] font-mono text-[10px] font-bold hidden sm:inline">
+        <span className={compact ? "font-semibold text-white tracking-tight max-lg:hidden" : "font-semibold text-white tracking-tight"}>AI Routing</span>
+        <span className={`px-1.5 py-0.5 rounded-md bg-[#1E1E1E] text-neutral-300 border border-[#2F2F2F] font-mono text-[10px] font-bold ${compact ? "hidden lg:inline" : "hidden sm:inline"}`}>
           11 Tasks
         </span>
         <ChevronDown
           className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 shrink-0 ${
+            compact ? "max-lg:hidden" : ""
+          } ${
             isOpen ? "rotate-180 text-[#3B82F6]" : ""
           }`}
         />

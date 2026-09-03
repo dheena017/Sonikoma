@@ -185,10 +185,10 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   return (
     <header
       id="creative_header_pane"
-      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 selection:bg-[#2A2A2A] shadow-md shadow-black/20"
+      className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {/* Left side: Hamburger and Brand */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0 h-full">
         <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
           <button
             onClick={onToggleSidebar}
@@ -209,12 +209,12 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
 
       {/* Right side: Standardized Controls Suite */}
-      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0 overflow-x-visible">
         {/* Server Status Indicator */}
         <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
 
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector className="flex" />
+        <AIModelSelector compact className="flex shrink-0" />
 
         {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
         {credits !== null && (

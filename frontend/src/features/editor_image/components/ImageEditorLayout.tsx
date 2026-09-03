@@ -33,7 +33,7 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
 
       <div className="flex-grow flex flex-row overflow-hidden w-full min-h-0 relative z-10">
         {/* Left Column: Mini Sidebar */}
-        <aside className="w-20 h-full bg-[#121212] border-r border-[#2F2F2F] shadow-lg flex-shrink-0 z-10">
+        <aside className="hidden lg:block w-20 h-full bg-[#121212] border-r border-[#2F2F2F] shadow-lg flex-shrink-0 z-10">
           <ImageEditorMiniSidebar
             onOpenToolsPanel={onOpenToolsPanel}
             onToggleSidebar={onToggleSidebar}

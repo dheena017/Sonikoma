@@ -307,17 +307,17 @@ const ImageEditorPage = React.memo(
           chapterSlug={chapterSlug}
         />
 
-        <div className="flex-1 flex flex-row overflow-hidden w-full relative">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden w-full relative">
           {/* Left Tools Sidebar */}
           <aside
-            className={`h-full bg-[#0a0b10] border-r border-white/10 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] relative ${
+            className={`w-full lg:w-[min(420px,calc(100vw-80px))] h-[52vh] lg:h-full bg-[#0a0b10] border-r border-white/10 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] relative ${
               isToolsPanelOpen
-                ? "w-[360px] lg:w-[420px]"
-                : "w-0 border-none"
+                ? ""
+                : "h-0 lg:h-full lg:w-0 border-none"
             }`}
           >
             <div
-              className={`w-[360px] lg:w-[420px] h-full flex flex-col min-h-0 overflow-hidden transition-opacity duration-200 ${
+                className={`w-full lg:w-[min(420px,calc(100vw-80px))] h-full flex flex-col min-h-0 overflow-hidden transition-opacity duration-200 ${
                 !isToolsPanelOpen ? "pointer-events-none opacity-0 invisible" : "opacity-100"
               }`}
             >
@@ -353,82 +353,82 @@ const ImageEditorPage = React.memo(
                       p.image_url === appLogic.scrapedImages[editingImageIdx!]
                   ) || null
                 }
-                handleModifyBrightness={(panelId, val) =>
+                handleModifyBrightness={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, brightness: val } : p
                     )
                   )
                 }
-                handleModifyContrast={(panelId, val) =>
+                handleModifyContrast={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, contrast: val } : p
                     )
                   )
                 }
-                handleModifySaturation={(panelId, val) =>
+                handleModifySaturation={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, saturation: val } : p
                     )
                   )
                 }
-                handleModifyFilterPreset={(panelId, val) =>
+                handleModifyFilterPreset={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, filter_preset: val } : p
                     )
                   )
                 }
-                handleModifyGrayscale={(panelId, val) =>
+                handleModifyGrayscale={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, grayscale: val } : p
                     )
                   )
                 }
-                handleModifyDuration={(panelId, val) =>
+                handleModifyDuration={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, duration: val } : p
                     )
                   )
                 }
-                handleModifyMotionType={(panelId, val) =>
+                handleModifyMotionType={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, motion_type: val } : p
                     )
                   )
                 }
-                handleModifySpeechText={(panelId, val) =>
+                handleModifySpeechText={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, speech_text: val } : p
                     )
                   )
                 }
-                handleModifyNarrative={(panelId, val) =>
+                handleModifyNarrative={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, narrative: val } : p
                     )
                   )
                 }
-                handleModifyVisualDescription={(panelId, val) =>
+                handleModifyVisualDescription={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, visual_description: val } : p
                     )
                   )
                 }
-                handleModifySfx={(panelId, val) =>
+                handleModifySfx={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) => (p.id === panelId ? { ...p, sfx: val } : p))
                   )
                 }
-                handleModifyCropPadding={(panelId, val) =>
+                handleModifyCropPadding={(panelId: any, val: any) =>
                   appLogic.setPanels?.((prev: any[]) =>
                     prev.map((p) =>
                       p.id === panelId ? { ...p, crop_padding: val } : p

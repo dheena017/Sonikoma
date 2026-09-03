@@ -40,11 +40,13 @@ export const WorkspacePanel: React.FC<WorkspacePanelProps> = ({
 
   return (
     <div className="w-full flex h-full overflow-hidden relative">
-      <MiniSidebar
-        activeWorkspace={activeWorkspace}
-        onSelectWorkspace={setActiveWorkspace}
-        onBackToApp={onBackToApp}
-      />
+      <div className="hidden lg:block h-full shrink-0">
+        <MiniSidebar
+          activeWorkspace={activeWorkspace}
+          onSelectWorkspace={setActiveWorkspace}
+          onBackToApp={onBackToApp}
+        />
+      </div>
 
       {showContent && (
         <div className="flex-1 w-full min-w-0 flex flex-col h-full bg-[#0c0d16]/75 backdrop-blur-2xl border-r border-white/10 shadow-[inset_0_0_32px_rgba(0,0,0,0.22)]">

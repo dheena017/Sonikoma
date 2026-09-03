@@ -76,7 +76,7 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
   const groupedWorkspaces = getGroupedWorkspaces();
 
   return (
-    <aside className="w-20 h-full shrink-0 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex flex-col items-center py-3 z-30 select-none overflow-hidden">
+    <aside className="hidden lg:flex w-20 h-full shrink-0 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-30 select-none overflow-hidden">
       {/* Workspace Groups List */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groupedWorkspaces.map((group, groupIdx) => (

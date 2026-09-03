@@ -426,7 +426,7 @@ const EditorMiniSidebarInner = ({
   return (
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className="hidden md:flex fixed bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-[90] shadow-xl select-none overflow-hidden"
+      className="hidden lg:flex fixed bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-[90] shadow-xl select-none overflow-hidden"
     >
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">

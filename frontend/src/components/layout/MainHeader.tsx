@@ -469,15 +469,17 @@ const HeaderInner = ({
       </div>
 
       {/* Center Side: Global Search Bar */}
-      <GlobalSearchBar className="hidden md:flex flex-1 max-w-xs lg:max-w-sm mx-4" />
+      <GlobalSearchBar className="hidden lg:flex flex-1 max-w-xs lg:max-w-sm mx-4" />
 
       {/* Right side: Volume, Notifications, Stats, Profile */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 ml-auto">
+      <div className="flex items-center gap-1 max-lg:gap-1.5 sm:gap-2 min-w-0 shrink-0 ml-auto">
         {/* Server Status Pill */}
-        <ServerStatusIndicator status={backendStatus} />
+        <div className="max-lg:[&>button]:px-2 max-lg:[&>button]:gap-1">
+          <ServerStatusIndicator status={backendStatus} />
+        </div>
 
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector className="flex" />
+        <AIModelSelector compact className="flex" />
 
         {/* 🧼 Speech Bubble Cleaning Processing Pill */}
         {isCleaningBubbles && (
@@ -634,7 +636,7 @@ const HeaderInner = ({
             className="h-8.5 flex items-center gap-2 pl-3 pr-1.5 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] transition-all cursor-pointer select-none group shrink-0 shadow-2xs active:scale-95"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-semibold text-white truncate max-w-[120px] hidden sm:inline">
+            <span className="text-xs font-semibold text-white truncate max-w-[120px] hidden lg:inline">
               {user?.full_name ||
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}

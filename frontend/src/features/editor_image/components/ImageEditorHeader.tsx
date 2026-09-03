@@ -187,10 +187,10 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className={`sticky top-0 left-0 right-0 h-16 w-full bg-[#141414] border-b border-[#2F2F2F] shadow-md flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex-shrink-0 gap-2 sm:gap-4 ${isSidebarOpen ? "z-0 pointer-events-none" : "z-50"}`}>
+    <header className={`sticky top-0 left-0 right-0 h-16 w-full min-w-0 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${isSidebarOpen ? "z-0 pointer-events-none" : "z-50"}`}>
       {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full mr-1 sm:mr-2">
+        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
           <button
             onClick={() => {
               if (onToggleSidebar) {
@@ -199,7 +199,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 useProjectStore.getState().setDrawerOpen(true);
               }
             }}
-            className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] flex items-center justify-center text-neutral-300 hover:text-white cursor-pointer transition-all duration-300 active:scale-95 shadow-sm"
+            className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
             title="Toggle Navigation Menu"
             aria-label="Toggle Navigation Menu"
           >
@@ -214,7 +214,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         />
 
         {scrapedImages && scrapedImages.length > 0 && (
-          <div className="flex items-center space-x-1 bg-neutral-900/90 rounded-xl px-1.5 py-1 border border-white/8 shadow-xs">
+          <div className="flex items-center space-x-1 bg-neutral-900/90 rounded-xl px-1.5 py-1 border border-white/8 shadow-xs shrink-0">
             <button
               onClick={handlePrevImage}
               disabled={editingImageIdx === null || editingImageIdx <= 0}
@@ -252,12 +252,14 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
       </div>
 
       {/* ── Right: AI Routing, Credits, Notifications, Profile & Actions ─── */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+      <div className="flex items-center gap-1 max-lg:gap-1.5 sm:gap-2 min-w-0 shrink-0 ml-auto">
         {/* 🟢 Server Status Indicator */}
-        <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+        <div className="max-lg:[&>button]:px-2 max-lg:[&>button]:gap-1">
+          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+        </div>
 
         {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector compact className="flex" />
+        <AIModelSelector compact className="flex shrink-0" />
 
         {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
         {credits !== null && (
@@ -268,7 +270,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
                 setShowNotifications(false);
               }}
               title="Your credit balance & daily rewards — click to view"
-              className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-xs font-medium text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
+              className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
                 showCreditsPopover ? "border-amber-500 bg-[#2A2A2A]" : ""
               }`}
             >
@@ -300,7 +302,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               setShowNotifications(!showNotifications);
               setShowCreditsPopover(false);
             }}
-            className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-neutral-300 hover:text-white transition-all shadow-sm cursor-pointer active:scale-95 shrink-0 relative ${
+            className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
               showNotifications ? "border-[#3B82F6] bg-[#2A2A2A]" : ""
             }`}
             title="Notifications"
@@ -342,7 +344,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="h-9 w-9 flex items-center justify-center text-[#9CA3AF] hover:text-white rounded-xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] transition-all relative cursor-pointer active:scale-95"
+            className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative"
             title={
               activeProjectId && activeProjectData
                 ? `Active Project: ${
@@ -361,16 +363,16 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
         {/* User Profile Pill at Far Right */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#181818] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 h-9"
+          className="h-8.5 flex items-center gap-2 pl-3 pr-1.5 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] transition-all cursor-pointer select-none group shrink-0 shadow-2xs active:scale-95"
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >
-          <span className="text-xs font-bold text-[#E5E5E5] group-hover:text-white truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#121212] border border-[#2F2F2F]">
+          <span className="text-xs font-semibold text-white truncate max-w-[120px] hidden lg:inline">
             {user?.full_name ||
               user?.username ||
               (user?.email ? user.email.split("@")[0] : "Studio Creator")}
           </span>
-          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#3B82F6] bg-[#121212] shrink-0 shadow-sm flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
+          <div className="relative w-6 h-6 rounded-lg overflow-hidden border border-[#33353e] bg-black shrink-0 flex items-center justify-center">
             <img
               key={user?.avatar_url || user?.full_name || "avatar"}
               src={getUserAvatarUrl(user)}

@@ -46,11 +46,8 @@ export default function YouTubeAppNavBar({
   onPublish,
 }: YouTubeAppNavBarProps) {
   return (
-    <header className="relative w-full rounded-2xl bg-neutral-950/80 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-2xl overflow-hidden mb-6">
-      {/* Top Ambient Glow Hairline */}
-      <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-red-500/80 to-transparent shadow-[0_0_16px_rgba(239,68,68,0.7)]" />
-
-      <div className="px-4 py-2.5 flex items-center justify-between gap-3 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <header className="relative w-full h-16 shrink-0 bg-neutral-950/80 border-b border-white/10 shadow-md shadow-black/20 backdrop-blur-xl overflow-x-auto mb-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="h-full px-4 flex items-center justify-between gap-3 min-w-max">
         {/* ── LEFT: BRAND & CHANNEL SELECTOR ── */}
         <div className="flex items-center gap-3 shrink-0">
           {/* Brand */}

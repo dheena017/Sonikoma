@@ -220,7 +220,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   return (
     <>
-      <header className="h-16 w-full bg-[#06060c]/80 backdrop-blur-2xl border-b border-white/8 shadow-[0_4px_32px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(59,130,246,0.08)] pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 flex items-center justify-between z-30 shrink-0 select-none gap-2 sm:gap-4">
+      <header className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-30">
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
           <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1 sm:mr-2">
             <button
@@ -245,7 +245,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* 🤖 Global AI Model Selector */}
           <AIModelSelector className="flex" />
 

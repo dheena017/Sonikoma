@@ -125,7 +125,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
         <div
           className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
             active
-              ? "h-5 bg-[#3B82F6]  opacity-100"
+              ? "h-5 bg-[#3B82F6] opacity-100"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -144,10 +144,10 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           aria-label={item.label}
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
+            className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-neutral-400 group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
             }`}
           >
             <Icon
@@ -174,7 +174,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
   };
 
   return (
-    <div className="w-20 h-full flex flex-col items-center py-3 bg-[#121212] border-r border-[#2F2F2F] select-none shrink-0 z-30 overflow-hidden">
+    <div className="w-20 h-full flex flex-col items-center py-3 bg-neutral-950/85 border-r border-white/10 select-none shrink-0 z-30 overflow-hidden">
       {/* Tool Icons List */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -193,7 +193,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
               {groupIdx > 0 && (
                 <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
+              <span className="text-[8.5px] font-sans font-bold uppercase tracking-[0.16em] text-neutral-400 select-none text-center w-full px-1">
                 {group.name}
               </span>
             </div>
@@ -215,7 +215,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           }}
           onMouseLeave={() => setReturnHover(false)}
           aria-label="Return to Storyboard"
-          className="w-11 h-11 rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] text-neutral-400 hover:text-[#3B82F6] border border-[#2F2F2F] hover:border-[#3B82F6] flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 shadow-sm"
+          className="w-11 h-11 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] text-neutral-400 hover:text-[#3B82F6] border border-[#2F2F2F] hover:border-[#3B82F6] flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 shadow-sm"
         >
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
