@@ -217,7 +217,7 @@ export default function LandingPage({
             </div>
 
             <h1
-              className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] max-w-4xl mx-auto transition-colors ${
+              className={`text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.05] max-w-4xl mx-auto transition-colors drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] ${
                 isLight ? "text-slate-950" : "text-white"
               }`}
             >
@@ -234,8 +234,8 @@ export default function LandingPage({
             </h1>
 
             <p
-              className={`text-base md:text-lg max-w-2xl mx-auto font-medium leading-relaxed transition-colors ${
-                isLight ? "text-slate-700" : "text-neutral-300"
+              className={`text-base md:text-lg max-w-2xl mx-auto font-medium leading-relaxed transition-colors drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] ${
+                isLight ? "text-slate-700" : "text-neutral-200"
               }`}
             >
               Paste a link or upload images. Sonikoma cuts each panel, erases speech bubbles, adds realistic character voiceovers, and generates videos ready for TikTok and Shorts.
@@ -247,7 +247,7 @@ export default function LandingPage({
                 className={`rounded-[28px] border p-5 sm:p-6 transition-all space-y-4 ${
                   isLight
                     ? "bg-white border-slate-200 shadow-md"
-                    : "border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] shadow-2xl"
+                    : "border-[#2F2F2F] bg-[#141414]/95 backdrop-blur-2xl shadow-2xl"
                 }`}
               >
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
