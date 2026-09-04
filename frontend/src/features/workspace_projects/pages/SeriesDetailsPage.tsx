@@ -431,9 +431,9 @@ export default function SeriesDetailsPage({
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/90 to-transparent pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
+        <div className="relative z-10 flex flex-col md:flex-row gap-6 md:gap-7 items-center md:items-start">
           {/* Cover Poster */}
-          <div className="w-48 h-64 md:w-56 md:h-76 shrink-0 rounded-2xl overflow-hidden border border-white/15 bg-neutral-950 shadow-2xl relative group">
+          <div className="w-40 h-56 sm:w-44 sm:h-60 shrink-0 rounded-2xl overflow-hidden border border-white/15 bg-neutral-950 shadow-2xl relative group">
             {series.cover ? (
               <img
                 src={series.cover}
@@ -465,7 +465,7 @@ export default function SeriesDetailsPage({
                 </span>
               </div>
 
-              <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white line-clamp-2 font-sans">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-white line-clamp-2 font-sans">
                 {series.title}
               </h1>
 
@@ -480,7 +480,7 @@ export default function SeriesDetailsPage({
             <div className="flex flex-wrap gap-3 items-center pt-2">
               <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
                 <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
-                <span>{series.chapterCount} Chapters</span>
+                <span>{series.chapterCount} {series.chapterCount === 1 ? "Chapter" : "Chapters"}</span>
               </div>
 
               <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
