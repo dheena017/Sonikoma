@@ -14,8 +14,6 @@ import {
   SplitSquareHorizontal,
   Play,
   Pause,
-  ZoomIn,
-  ZoomOut,
 } from "lucide-react";
 
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
@@ -185,34 +183,6 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         >
           <Magnet className="h-3.5 w-3.5" />
         </button>
-
-        {/* Zoom controls */}
-        <div className="flex items-center gap-1 border-l border-white/10 pl-2 ml-1">
-          <button
-            type="button"
-            onClick={onZoomOut}
-            title={formatTooltip("Zoom Out", "timeline_zoom_out", "-")}
-            className="p-1 text-neutral-400 hover:text-white rounded hover:bg-white/10 transition-colors cursor-pointer"
-          >
-            <ZoomOut className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={onZoomReset}
-            title={formatTooltip("Reset Zoom", "timeline_zoom_reset", "0")}
-            className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold text-neutral-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-          >
-            {Math.round((zoomLevel / 30) * 100)}%
-          </button>
-          <button
-            type="button"
-            onClick={onZoomIn}
-            title={formatTooltip("Zoom In", "timeline_zoom_in", "+")}
-            className="p-1 text-neutral-400 hover:text-white rounded hover:bg-white/10 transition-colors cursor-pointer"
-          >
-            <ZoomIn className="h-3.5 w-3.5" />
-          </button>
-        </div>
 
         {/* Fit view */}
         <ToolBtn
