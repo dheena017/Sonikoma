@@ -178,33 +178,46 @@ const Timeline: React.FC<TimelineProps> = ({
     if (!el) return;
 
     const handleWheel = (e: WheelEvent) => {
-      // Allow browser zoom or system modifiers (Ctrl/Cmd) to pass through
-      if (e.ctrlKey || e.metaKey) return;
+      // Ctrl / Cmd key pressed -> Scroll horizontally (Left to Right)
+      if (e.ctrlKey || e.metaKey) {
+        if (Math.abs(e.deltaY) > 0) {
+          el.scrollLeft += e.deltaY;
+          setScrollLeft(el.scrollLeft);
+          e.preventDefault();
+        }
+        return;
+      }
 
-      // Check if mouse is hovering over the left track headers / action columns
+      // Check if mouse is hovering over the left track headers / action columns or Shift key is held
       const target = e.target as HTMLElement | null;
       const isOverTrackHeader = Boolean(
         target?.closest('[data-track-header="true"]') ||
         target?.closest('.w-48')
       );
 
-      if (isOverTrackHeader || e.shiftKey) {
+      if (isOverTrackHeader) {
         // Vertical track scrolling across rows/lanes
         if (Math.abs(e.deltaY) > 0) {
           el.scrollTop += e.deltaY;
           e.preventDefault();
         }
+      } else if (e.shiftKey) {
+        // Shift + Wheel -> Scroll horizontally Left to Right
+        if (Math.abs(e.deltaY) > 0 || Math.abs(e.deltaX) > 0) {
+          el.scrollLeft += e.deltaY || e.deltaX;
+          setScrollLeft(el.scrollLeft);
+          e.preventDefault();
+        }
       } else {
-        // Horizontal timeline time scrolling
+        // Standard mouse wheel vs touchpad swipe
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
           // Native touchpad horizontal swipe
           el.scrollLeft += e.deltaX;
           setScrollLeft(el.scrollLeft);
           e.preventDefault();
         } else if (Math.abs(e.deltaY) > 0) {
-          // Standard mouse wheel up/down -> scroll left/right along timeline
-          el.scrollLeft += e.deltaY;
-          setScrollLeft(el.scrollLeft);
+          // Standard mouse wheel up/down -> scroll top/bottom (vertical track scroll)
+          el.scrollTop += e.deltaY;
           e.preventDefault();
         }
       }
@@ -535,16 +548,14 @@ const Timeline: React.FC<TimelineProps> = ({
         <div
           ref={timelineScrollRef}
           onWheel={(e) => {
+            if (!timelineScrollRef.current) return;
             if (e.ctrlKey || e.metaKey) {
               e.preventDefault();
-              if (e.deltaY < 0) {
-                s.handleZoomIn();
-              } else {
-                s.handleZoomOut();
+              if (Math.abs(e.deltaY) > 0) {
+                timelineScrollRef.current.scrollLeft += e.deltaY;
               }
               return;
             }
-            if (!timelineScrollRef.current) return;
             if (e.shiftKey) {
               timelineScrollRef.current.scrollLeft += e.deltaY || e.deltaX;
             } else if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {

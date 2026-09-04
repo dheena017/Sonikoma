@@ -109,15 +109,28 @@ export const HorizontalScrollContainer: React.FC<{
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", checkScroll, { passive: true });
 
-    // Smooth horizontal translation for vertical mouse wheel without main-thread blocking
+    // Smooth horizontal translation for Ctrl/Shift mouse wheel without main-thread blocking
     const handleNativeWheel = (e: WheelEvent) => {
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && e.deltaY !== 0) {
-        // Translate vertical wheel scroll to horizontal scroll directly
-        el.scrollLeft += e.deltaY;
+      // Touchpad horizontal swipe
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        el.scrollLeft += e.deltaX;
+        return;
       }
+
+      // Ctrl + wheel or Shift + wheel -> scroll Left to Right
+      if (e.ctrlKey || e.shiftKey) {
+        if (e.deltaY !== 0) {
+          el.scrollLeft += e.deltaY;
+          e.preventDefault();
+        }
+        return;
+      }
+
+      // Standard mouse wheel (without Ctrl/Shift):
+      // Allow natural top-to-bottom vertical page/container scrolling
     };
 
-    el.addEventListener("wheel", handleNativeWheel, { passive: true });
+    el.addEventListener("wheel", handleNativeWheel, { passive: false });
 
     const observer = new ResizeObserver(() => checkScroll());
     observer.observe(el);
