@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   Save,
@@ -53,6 +54,17 @@ export default function SeriesEditModal({
     setCover(series.cover || "");
   }, [series]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.style.overflow = "hidden";
+    const container = document.getElementById("main-scroll-container");
+    if (container) container.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+      if (container) container.style.overflow = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,11 +92,19 @@ export default function SeriesEditModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      data-modal="true"
+    >
+      <div
+        className="absolute inset-0 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+        onClick={onClose}
+      />
+      <div className="relative w-full max-w-2xl bg-neutral-950/90 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#3B82F6] via-[#60A5FA] to-[#3B82F6] blur-[1px]" />
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800/80 bg-neutral-955/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20">
               <Sparkles className="w-5 h-5" />
@@ -99,8 +119,10 @@ export default function SeriesEditModal({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 text-neutral-400 hover:text-white rounded-xl hover:bg-neutral-800 transition-all cursor-pointer"
+            aria-label="Close edit series dialog"
+            className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -109,7 +131,7 @@ export default function SeriesEditModal({
         {/* Body Form */}
         <form
           onSubmit={handleSubmit}
-          className="p-6 overflow-y-auto space-y-5 flex-1"
+          className="p-6 overflow-y-auto space-y-5 flex-1 text-left"
         >
           {error && (
             <div className="p-3.5 bg-rose-950/60 border border-rose-800/60 rounded-xl text-xs font-semibold text-rose-300">
@@ -203,18 +225,18 @@ export default function SeriesEditModal({
           </div>
 
           {/* Footer Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-neutral-800/80">
+          <div className="px-0 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl border border-neutral-800 text-xs font-bold text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all cursor-pointer"
+              className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-extrabold uppercase tracking-wider shadow-lg shadow-black/50 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#2563EB] to-[#4F46E5] hover:from-[#3B82F6] hover:to-[#6366F1] border border-[#60A5FA]/30 text-white text-xs font-extrabold uppercase tracking-wider shadow-[0_0_20px_-5px_rgba(59,130,246,0.5)] transition-all cursor-pointer active:scale-95 disabled:opacity-50"
             >
               {isSaving ? (
                 <>
@@ -230,6 +252,7 @@ export default function SeriesEditModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
