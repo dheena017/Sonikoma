@@ -90,12 +90,21 @@ _proxy_http_client: Optional[httpx.AsyncClient] = None
 def get_proxy_http_client() -> httpx.AsyncClient:
     global _proxy_http_client
     if _proxy_http_client is None or _proxy_http_client.is_closed:
-        _proxy_http_client = httpx.AsyncClient(
-            follow_redirects=True,
-            timeout=httpx.Timeout(25.0, connect=10.0),
-            limits=httpx.Limits(max_keepalive_connections=60, max_connections=120, keepalive_expiry=60.0),
-            http2=True,
-        )
+        try:
+            _proxy_http_client = httpx.AsyncClient(
+                follow_redirects=True,
+                timeout=httpx.Timeout(25.0, connect=10.0),
+                limits=httpx.Limits(max_keepalive_connections=60, max_connections=120, keepalive_expiry=60.0),
+                http2=True,
+            )
+        except Exception as err:
+            logger.warning(f"[Proxy] HTTP/2 initialization failed ({err}); falling back to HTTP/1.1")
+            _proxy_http_client = httpx.AsyncClient(
+                follow_redirects=True,
+                timeout=httpx.Timeout(25.0, connect=10.0),
+                limits=httpx.Limits(max_keepalive_connections=60, max_connections=120, keepalive_expiry=60.0),
+                http2=False,
+            )
     return _proxy_http_client
 
 

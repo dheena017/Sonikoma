@@ -159,6 +159,19 @@ const Timeline: React.FC<TimelineProps> = ({
   } | null>(null);
   const timelineScrollRef = useRef<HTMLDivElement>(null);
 
+  const fitTimelineView = useCallback(() => {
+    const scrollArea = timelineScrollRef.current;
+    if (!scrollArea) return;
+
+    const trackHeaderWidth = 224;
+    const visibleTrackWidth = Math.max(1, scrollArea.clientWidth - trackHeaderWidth);
+    const fitDuration = Math.max(60, totalDuration + 30);
+    const fitZoom = Math.max(10, Math.min(120, visibleTrackWidth / fitDuration));
+
+    s.setZoomLevel(fitZoom);
+    scrollArea.scrollLeft = 0;
+  }, [s, totalDuration]);
+
   // Dedicated wheel listener: clean separation of horizontal timeline scrolling vs vertical track scrolling
   useEffect(() => {
     const el = timelineScrollRef.current;
@@ -503,6 +516,11 @@ const Timeline: React.FC<TimelineProps> = ({
         onDelete={s.handleRemoveDuration}
         onPlay={handlePlayClick}
         onDuplicate={s.handleDuplicate}
+        onUndo={projectStore.undo}
+        onRedo={projectStore.redo}
+        canUndo={projectStore.canUndo}
+        canRedo={projectStore.canRedo}
+        onFitView={fitTimelineView}
         onZoomIn={s.handleZoomIn}
         onZoomOut={s.handleZoomOut}
         onZoomReset={s.handleZoomReset}

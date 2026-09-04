@@ -61,6 +61,12 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
   onDurationChange,
   onAddPanel,
   onOffsetChange,
+  keyframesVisible,
+  keyframesByClip = {},
+  selectedKeyframeId,
+  onSelectKeyframe,
+  onCycleEasing,
+  onAddKeyframe,
 }) => {
   const [resizingInfo, setResizingInfo] = useState<{
     idx: number;
@@ -197,7 +203,8 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     return vals.length > 0 ? Math.max(...vals) : 0;
   }, [clipLanes]);
   const innerHeightPx = trackInnerHeight(maxLane, STORY_PANEL_LANE_HEIGHT);
-  const outerHeightPx = innerHeightPx + 8;
+  const keyframeRowHeight = keyframesVisible ? 24 : 0;
+  const outerHeightPx = innerHeightPx + 8 + keyframeRowHeight;
 
   const calcTotalDuration = useMemo(() => totalDuration ?? (panelTimings?.reduce((sum, p) => sum + (p.duration || 0), 0) || 3), [totalDuration, panelTimings]);
 
@@ -219,7 +226,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         onToggleMute={() => {}}
         onAdd={onAddPanel}
       />
-      <div className="flex-1 relative" style={{ height: `${Math.max(56, innerHeightPx)}px` }}>
+      <div className="flex-1 relative" style={{ height: `${Math.max(56, innerHeightPx) + keyframeRowHeight}px` }}>
         {panels.length === 0 ? (
           <div className="w-full h-full p-1 pointer-events-none select-none">
             <div className="w-full h-full rounded border border-dashed border-white/[0.04] bg-white/[0.01] flex items-center px-3">
@@ -417,6 +424,47 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                 </div>
               );
             })}
+            {keyframesVisible && (
+              <div className="absolute inset-x-0 bottom-0 h-6 border-t border-white/10 bg-black/20">
+                {panels.map((panel: any, idx: number) => {
+                  const key = `v1-${idx}`;
+                  const timing = panelTimings[idx];
+                  const duration = timing?.duration ?? panel.duration ?? 1;
+                  const left = (timing?.startTime ?? idx * duration) * pxPerSec;
+                  const width = duration * pxPerSec;
+                  const clipKeyframes = keyframesByClip[key] ?? [];
+
+                  return (
+                    <React.Fragment key={`keyframes-${key}`}>
+                      <button
+                        type="button"
+                        onClick={() => onAddKeyframe?.(key, duration / 2)}
+                        className="absolute bottom-1 flex h-4 w-4 items-center justify-center rounded text-neutral-500 hover:bg-white/10 hover:text-white cursor-pointer"
+                        style={{ left: `${left + Math.max(2, width / 2 - 8)}px` }}
+                        title={`Add keyframe to panel ${idx + 1}`}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </button>
+                      {clipKeyframes.map((keyframe) => (
+                        <button
+                          type="button"
+                          key={keyframe.id}
+                          onClick={() => onSelectKeyframe?.(keyframe.id)}
+                          onDoubleClick={() => onCycleEasing?.(key, keyframe.id)}
+                          className={`absolute bottom-1 h-3 w-3 rotate-45 border cursor-pointer ${
+                            selectedKeyframeId === keyframe.id
+                              ? "border-[#60A5FA] bg-[#3B82F6]"
+                              : "border-neutral-400 bg-neutral-700 hover:border-white"
+                          }`}
+                          style={{ left: `${left + keyframe.time * pxPerSec - 6}px` }}
+                          title={`${keyframe.property} keyframe (${keyframe.easing})`}
+                        />
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

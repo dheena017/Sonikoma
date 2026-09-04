@@ -9,7 +9,8 @@ fastapi>=0.110.0
 google_api_python_client==2.198.0
 google_auth_oauthlib==1.4.0
 google-genai
-httpx==0.28.1
+httpx[http2]==0.28.1
+h2>=4.1.0
 huggingface_hub==1.21.0
 moviepy==1.0.3
 numpy>=1.22,<2.5
