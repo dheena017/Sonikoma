@@ -621,9 +621,9 @@ export default function SeriesDetailsPage({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/5">
         {/* Title + Chapter Counter */}
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-white font-sans flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-white font-sans flex items-center gap-3 min-w-0">
             Chapters
-            <span className="text-xs font-mono bg-neutral-800 border border-neutral-750 px-3 py-1 rounded-full text-[#3B82F6] font-bold">
+            <span className="inline-flex items-center justify-center shrink-0 whitespace-nowrap text-xs leading-none font-mono bg-[#3B82F6]/10 border border-[#3B82F6]/25 px-2.5 py-1.5 rounded-lg text-[#93C5FD] font-bold">
               {filteredChapters.length} of {series.chapterCount}
             </span>
           </h2>
