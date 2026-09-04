@@ -633,7 +633,9 @@ const HeaderInner = ({
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="h-8.5 flex items-center gap-2 pl-3 pr-1.5 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] transition-all cursor-pointer select-none group shrink-0 shadow-2xs active:scale-95"
+            className="h-9 min-w-9 flex items-center justify-center gap-2 p-1 rounded-full bg-[#18191e]/90 hover:bg-[#22232a] border border-white/10 hover:border-[#8b5cf6]/70 hover:shadow-[0_0_0_3px_rgba(139,92,246,0.12)] transition-all cursor-pointer select-none group shrink-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            data-no-transform
+            title="View Profile & Settings"
             aria-label="Open User profile"
           >
             <span className="text-xs font-semibold text-white truncate max-w-[120px] hidden lg:inline">
@@ -641,7 +643,7 @@ const HeaderInner = ({
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-6 h-6 rounded-lg overflow-hidden border border-[#33353e] bg-black shrink-0 flex items-center justify-center">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6]/70 bg-[#201833] shrink-0 flex items-center justify-center shadow-[0_0_8px_rgba(139,92,246,0.3)] group-hover:border-[#c4b5fd] transition-colors">
               <img
                 key={user?.avatar_url || user?.full_name || "avatar"}
                 src={getUserAvatarUrl(user)}
