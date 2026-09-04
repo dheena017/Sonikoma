@@ -618,10 +618,10 @@ export default function SeriesDetailsPage({
       </div>
 
       {/* 4. Filter, Search & View Mode Controls Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/5">
         {/* Title + Chapter Counter */}
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-white font-sans flex items-center gap-3 min-w-0">
+          <h2 className="text-2xl font-bold text-white font-sans flex items-center gap-3 min-w-0 whitespace-nowrap">
             Chapters
             <span className="inline-flex items-center justify-center shrink-0 whitespace-nowrap text-xs leading-none font-mono bg-[#3B82F6]/10 border border-[#3B82F6]/25 px-2.5 py-1.5 rounded-lg text-[#93C5FD] font-bold">
               {filteredChapters.length} of {series.chapterCount}
@@ -630,9 +630,9 @@ export default function SeriesDetailsPage({
         </div>
 
         {/* Controls Row */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full lg:w-auto min-w-0">
           {/* Search Box */}
-          <div className="relative flex-1 min-w-[200px] max-w-xs">
+          <div className="relative flex-1 min-w-0 w-full md:w-[clamp(160px,22vw,260px)] md:flex-none lg:flex-1 lg:min-w-[200px] lg:max-w-xs">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
             <input
               type="text"
