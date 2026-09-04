@@ -345,7 +345,7 @@ export default function ImportedAssetsHeader({
     <div className="flex items-center gap-2 shrink-0">
       {/* Shift+Click Range Selection Tip */}
       {scrapedImagesLength > 1 && (
-        <span className="hidden xl:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 text-[10px] text-neutral-400 font-mono">
+        <span className="hidden 2xl:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-950/80 border border-neutral-800 text-[10px] text-neutral-400 font-mono">
           <span className="text-amber-400">💡</span>
           <span>Hold</span>
           <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-neutral-300 font-mono text-[9px] leading-none">
@@ -360,10 +360,11 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={handleSelectAllToggle}
+          title={isAllSelected ? "Deselect all assets" : "Select all assets"}
           className="text-[11px] font-mono font-bold border border-[#3B82F6]/35 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all  active:scale-95 cursor-pointer"
         >
           <CheckSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
-          <span>Select All</span>
+          <span className="hidden 2xl:inline">Select All</span>
         </button>
       )}
 
@@ -375,7 +376,7 @@ export default function ImportedAssetsHeader({
           className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white hover:border-[#3B82F6] transition-all cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Reload Assets</span>
+          <span className="hidden 2xl:inline">Reload Assets</span>
         </button>
       )}
 

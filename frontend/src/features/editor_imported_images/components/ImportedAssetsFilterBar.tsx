@@ -161,7 +161,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
             >
               <div className="flex items-center gap-2">
                 <Layers className="w-3.5 h-3.5 text-emerald-400" />
-                <span>All Assets</span>
+                <span className="hidden 2xl:inline">All Assets</span>
               </div>
               <span className="text-[10px] text-neutral-400 font-normal">
                 {totalAssetsCount}
@@ -325,7 +325,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
           }`}
         >
           <Rows className="w-3.5 h-3.5" />
-          <span className="hidden md:inline">Scroll</span>
+            <span className="hidden 2xl:inline">Scroll</span>
         </button>
         <button
           type="button"
@@ -338,7 +338,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
           }`}
         >
           <LayoutGrid className="w-3.5 h-3.5" />
-          <span className="hidden md:inline">Grid</span>
+            <span className="hidden 2xl:inline">Grid</span>
         </button>
       </div>
     </div>
