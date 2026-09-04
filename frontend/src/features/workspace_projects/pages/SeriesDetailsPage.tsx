@@ -504,7 +504,7 @@ export default function SeriesDetailsPage({
             </div>
 
             {/* Hero Quick Action Buttons */}
-            <div className="flex flex-wrap gap-3 pt-3 border-t border-white/10">
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10 xl:flex xl:flex-wrap">
               <button
                 onClick={handleNewChapter}
                 className="flex items-center gap-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95"
