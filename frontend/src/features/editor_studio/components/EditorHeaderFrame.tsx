@@ -5,6 +5,7 @@ export interface EditorHeaderFrameProps {
   center?: React.ReactNode;
   right?: React.ReactNode;
   className?: string;
+  centerClassName?: string;
 }
 
 export default function EditorHeaderFrame({
@@ -12,6 +13,7 @@ export default function EditorHeaderFrame({
   center,
   right,
   className = "",
+  centerClassName = "",
 }: EditorHeaderFrameProps) {
   return (
     <div
@@ -21,7 +23,7 @@ export default function EditorHeaderFrame({
         {left}
       </div>
       {center && (
-        <div className="flex items-center justify-center shrink-0">
+        <div className={`flex items-center justify-center shrink-0 ${centerClassName}`}>
           {center}
         </div>
       )}

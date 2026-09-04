@@ -417,7 +417,7 @@ export default function ImportedAssetsHeader({
           className="relative overflow-hidden h-8 px-3.5 rounded-xl font-black text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-[#3B82F6]/30 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
         >
           <Save className="w-3.5 h-3.5 text-[#3B82F6]" />
-          <span>Save</span>
+          <span className="hidden sm:inline">Save</span>
         </button>
       )}
     </div>
@@ -428,6 +428,8 @@ export default function ImportedAssetsHeader({
       left={titleBlock}
       center={centerBlock}
       right={rightBlock}
+      centerClassName="order-3 w-full sm:order-none sm:w-auto sm:flex-1 sm:min-w-0"
+      className="flex-wrap sm:flex-nowrap"
     />
   );
 }

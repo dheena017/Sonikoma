@@ -97,7 +97,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
   };
 
   return (
-    <div className="flex items-center gap-2 flex-1 max-w-xl mx-2 font-mono text-xs select-none">
+    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 flex-1 w-full max-w-none sm:max-w-xl mx-0 sm:mx-2 font-mono text-xs select-none">
       {/* Search Input Box */}
       <div className="relative flex-1 min-w-[140px] max-w-[260px] flex items-center">
         <Search className="absolute left-2.5 w-3.5 h-3.5 text-neutral-400 pointer-events-none shrink-0" />
