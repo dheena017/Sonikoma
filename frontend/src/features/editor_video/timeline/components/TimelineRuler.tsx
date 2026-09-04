@@ -208,7 +208,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
                   }}
                 >
                   {tick.label && (
-                    <span className="text-[8px] font-mono text-neutral-400 mb-0.5 whitespace-nowrap select-none group-hover/ruler:text-[#3B82F6] transition-colors font-semibold">
+                    <span className="text-[8px] font-mono text-neutral-400 mb-0.5 whitespace-nowrap select-none transition-colors font-semibold">
                       {tick.label}
                     </span>
                   )}
