@@ -44,6 +44,7 @@ export interface ImportedAssetsHeaderProps {
   handleDeleteSelected?: () => void;
   handleCancelBatch?: () => void;
   handleSaveAssets?: () => void;
+  handleReloadAssets?: () => void;
   isBatchCropping?: boolean;
   batchProgress?: { current: number; total: number } | null;
   isCleaningBubbles?: boolean;
@@ -79,6 +80,7 @@ export default function ImportedAssetsHeader({
   handleDeleteSelected,
   handleCancelBatch,
   handleSaveAssets,
+  handleReloadAssets,
   isBatchCropping,
   batchProgress,
   isCleaningBubbles,
@@ -362,6 +364,18 @@ export default function ImportedAssetsHeader({
         >
           <CheckSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
           <span>Select All</span>
+        </button>
+      )}
+
+      {scrapedImagesLength > 0 && handleReloadAssets && (
+        <button
+          type="button"
+          onClick={handleReloadAssets}
+          title="Reload all assets"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white hover:border-[#3B82F6] transition-all cursor-pointer"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          <span>Reload Assets</span>
         </button>
       )}
 

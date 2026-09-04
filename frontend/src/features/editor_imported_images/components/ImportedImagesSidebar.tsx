@@ -246,6 +246,10 @@ const ChapterScraperDeck = React.memo(
       useState<AssetFilterStatus>("all");
     const [assetSortOrder, setAssetSortOrder] = useState<"asc" | "desc">("asc");
 
+    const handleReloadAssets = useCallback(() => {
+      window.dispatchEvent(new Event("scraped-assets-reload"));
+    }, []);
+
     const imageDimensionsRef = useRef<Map<string, { width: number; height: number }>>(
       new Map()
     );
@@ -811,6 +815,7 @@ const ChapterScraperDeck = React.memo(
             handleDeleteSelected={handleDeleteSelected}
             handleCancelBatch={handleCancelBatch}
             handleSaveAssets={handleSaveAssets}
+            handleReloadAssets={handleReloadAssets}
             isBatchCropping={isBatchCropping}
             batchProgress={batchProgress}
             isCleaningBubbles={isCleaningBubbles}

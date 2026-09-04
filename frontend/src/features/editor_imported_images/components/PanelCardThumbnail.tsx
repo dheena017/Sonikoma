@@ -1,7 +1,6 @@
 import React from "react";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 import {
-  RefreshCw,
   Check,
   RotateCw,
   FlipHorizontal,
@@ -78,14 +77,17 @@ export function PanelCardThumbnail({
     setIsLoaded(false);
   }, [imgUrl]);
 
-  const handleRetry = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setHasError(false);
-    setIsLoaded(false);
-    setRetryKey((prev) => prev + 1);
-  };
-
   const resolvedImgSrc = getProxiedImageUrl(imgUrl);
+
+  React.useEffect(() => {
+    const handleReloadAll = () => {
+      setHasError(false);
+      setIsLoaded(false);
+      setRetryKey((prev) => prev + 1);
+    };
+    window.addEventListener("scraped-assets-reload", handleReloadAll);
+    return () => window.removeEventListener("scraped-assets-reload", handleReloadAll);
+  }, []);
 
   const resolvedDisplayIdx = displayIdx ?? idx;
 
@@ -107,14 +109,9 @@ export function PanelCardThumbnail({
           <span className="text-[9px] font-mono font-extrabold text-rose-350 uppercase tracking-widest mb-3">
             Load Failed
           </span>
-          <button
-            type="button"
-            onClick={handleRetry}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-bold font-mono uppercase bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-[#93C5FD] border border-neutral-800 hover:border-[#3B82F6]/40 rounded-xl cursor-pointer transition-all shadow-sm active:scale-95"
-          >
-            <RefreshCw className="h-3 w-3 animate-spin-reverse-once" />
-            Reload Frame
-          </button>
+          <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider">
+            Use Reload Assets above
+          </span>
         </div>
       ) : (
         <img
