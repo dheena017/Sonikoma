@@ -624,6 +624,20 @@ export default function ProjectConfirmModal({
                     />
                   </div>
                 </div>
+
+                <div className="space-y-1.5">
+                  <label className={labelCls}>
+                    <AlignLeft className="h-3 w-3 text-[#3B82F6]" />
+                    Series Synopsis
+                  </label>
+                  <textarea
+                    value={seriesSynopsis}
+                    onChange={(e) => setSeriesSynopsis(e.target.value)}
+                    rows={3}
+                    placeholder="Enter series summary or story overview..."
+                    className={`${inputCls} resize-none leading-relaxed`}
+                  />
+                </div>
               </div>
 
               <div className={cardCls}>
@@ -759,20 +773,6 @@ export default function ProjectConfirmModal({
                       </div>
                     )}
                   </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className={labelCls}>
-                    <AlignLeft className="h-3 w-3 text-indigo-400" />
-                    Series Synopsis
-                  </label>
-                  <textarea
-                    value={seriesSynopsis}
-                    onChange={(e) => setSeriesSynopsis(e.target.value)}
-                    rows={3}
-                    placeholder="Enter series summary or story overview..."
-                    className={`${inputCls} resize-none leading-relaxed`}
-                  />
                 </div>
 
                 <div className="space-y-1.5">

@@ -129,6 +129,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+  const scrapeInFlightRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   // Active View & Filters
@@ -354,6 +355,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     titleNo?: string,
     bypassCache = true
   ) => {
+    if (scrapeInFlightRef.current) return;
+
     const activeUrl = url !== undefined ? url : urlInput;
     const activeTitleNo = titleNo !== undefined ? titleNo : titleNoInput;
 
@@ -363,6 +366,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       return;
     }
 
+    scrapeInFlightRef.current = true;
     setIsLoading(true);
     setError(null);
 
@@ -479,6 +483,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       addNotification(errorMsg, "error");
     } finally {
       setIsLoading(false);
+      scrapeInFlightRef.current = false;
     }
   };
 
