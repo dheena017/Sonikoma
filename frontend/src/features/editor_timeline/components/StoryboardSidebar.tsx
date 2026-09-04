@@ -4,7 +4,7 @@ import { GeneratedPanel } from "@/types";
 import {
   formatDisplayEpisodeLabel,
   getSortedEpisodeGroups,
-} from "@/features/editor_imported_images/components/ImportedImagesSidebar";
+} from "@/features/editor_imported_images/components/ImportedImagesDeck";
 
 type EpisodeGroupRecord = {
   episodeLabel: string;

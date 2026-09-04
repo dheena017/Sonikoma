@@ -1,4 +1,4 @@
-import ChapterScraperDeck from "./components/ImportedImagesSidebar";
+import ChapterScraperDeck from "./components/ImportedImagesDeck";
 export { ChapterScraperDeck, ChapterScraperDeck as ImportedImagesDeck };
 export default ChapterScraperDeck;
 

@@ -20,7 +20,7 @@ import VideoPreviewQuickActionOverlay from "./overlays/QuickActionOverlay";
 import {
   formatDisplayEpisodeLabel,
   getSortedEpisodeGroups,
-} from "@/features/editor_imported_images/components/ImportedImagesSidebar";
+} from "@/features/editor_imported_images/components/ImportedImagesDeck";
 import {
   startAmbientBackgroundMusic,
   stopAmbientBackgroundMusic,

@@ -11,7 +11,7 @@ export default function StoryboardEmptyState({
   return (
     <div
       id="panels_timeline_section_empty"
-      className="relative w-full flex-1 min-h-[140px] sm:min-h-[160px] flex flex-col items-center justify-center p-4 sm:p-6 my-auto rounded-2xl bg-white/[0.02] border border-white/5 text-center space-y-2 select-none"
+      className="relative w-full h-[160px] sm:h-[180px] flex-none flex flex-col items-center justify-center p-4 sm:p-6 rounded-2xl bg-white/[0.02] border border-white/5 text-center space-y-2 select-none"
     >
       <div className="h-9 w-9 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6]">
         {hasScrapedImages ? (

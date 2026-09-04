@@ -5,7 +5,7 @@ import {
   formatDisplayEpisodeLabel,
   getSortedEpisodeGroups,
   HorizontalScrollContainer,
-} from "@/features/editor_imported_images/components/ImportedImagesSidebar";
+} from "@/features/editor_imported_images/components/ImportedImagesDeck";
 
 type ChapterGroupRecord = {
   episodeLabel: string;
