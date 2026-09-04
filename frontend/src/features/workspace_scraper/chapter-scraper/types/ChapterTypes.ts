@@ -11,4 +11,13 @@ export interface Chapter {
   rating?: number;
   likes?: string;
   views?: number;
+  page_count?: number;
+  images_count?: number;
+  duration?: string;
+  language?: string;
+  is_locked?: boolean;
+  comment_count?: number;
+  author?: string;
+  genre?: string;
+  summary?: string;
 }

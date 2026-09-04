@@ -18,6 +18,11 @@ import {
   Sparkles,
   BookOpen,
   Tag,
+  Layers,
+  MessageSquare,
+  Lock,
+  Unlock,
+  Globe,
 } from "lucide-react";
 
 import type { Chapter as BaseChapter } from "../types/ChapterTypes";
@@ -30,6 +35,12 @@ type ChapterCardChapter = BaseChapter & {
   index?: number;
   language?: string;
   is_locked?: boolean;
+  page_count?: number;
+  images_count?: number;
+  comment_count?: number;
+  author?: string;
+  genre?: string;
+  summary?: string;
 };
 
 interface ChapterCardProps {
@@ -44,6 +55,27 @@ interface ChapterCardProps {
   isSelected?: boolean;
   onToggleSelect?: (chapterUrl: string) => void;
 }
+
+const formatLikesCount = (likesStr?: string): string => {
+  if (!likesStr) return "";
+  const cleaned = likesStr.replace(/likes?/gi, "").replace(/,/g, "").trim();
+  if (!cleaned) return "";
+  if (/[0-9.]+[KMB]$/i.test(cleaned)) {
+    return cleaned.toUpperCase();
+  }
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return cleaned;
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
+  return String(num);
+};
+
+const formatViewsCount = (views?: number): string => {
+  if (views === undefined || views === null || views <= 0) return "";
+  if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
+  if (views >= 1_000) return `${(views / 1_000).toFixed(1)}K`;
+  return String(views);
+};
 
 export const ChapterCard: React.FC<ChapterCardProps> = ({
   chapter,
@@ -61,6 +93,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [imageError, setImageError] = useState(false);
+
   const getFirstPanel = () => {
     if (chapter.first_panel_image) return chapter.first_panel_image;
     if (chapter.images && chapter.images.length > 0) {
@@ -158,7 +191,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     return "bg-[#2A2A2A] shadow-black/50";
   };
 
-  // Format Display Title with "Chapter [Num]" or custom subtitle
+  // Format Display Title
   const renderTitle = () => {
     const rawNum = (chapter.number || "").trim();
     const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim();
@@ -175,7 +208,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
     const displayNum = cleanNum || rawNum || (chapter.index !== undefined ? String(chapter.index + 1) : "");
 
-    // If there is no custom subtitle, render "Chapter [Num]"
     if (!rawTitle || rawTitle.toLowerCase() === displayNum.toLowerCase() || rawTitle.toLowerCase() === `chapter ${displayNum}`.toLowerCase()) {
       return (
         <h3
@@ -189,7 +221,6 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       );
     }
 
-    // If there is a distinct subtitle, render "Chapter [Num]: [Subtitle]"
     return (
       <h3
         className="text-sm font-bold text-white line-clamp-2 leading-snug flex-1 tracking-tight"
@@ -203,16 +234,28 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     );
   };
 
-  const isPopular = chapter.rating && chapter.rating >= 4.0;
+  const isPopular = (chapter.rating && chapter.rating >= 4.0) || (chapter.likes && chapter.likes.toLowerCase().includes("m"));
   const rawNum = (chapter.number || "").trim();
   const cleanBadgeNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() || (chapter.index !== undefined ? String(chapter.index + 1) : "");
+
+  const panelCount =
+    chapter.page_count ||
+    chapter.images_count ||
+    (chapter.images && chapter.images.length > 0 ? chapter.images.length : undefined);
+
+  const formattedLikes = formatLikesCount(chapter.likes);
+  const formattedViews = formatViewsCount(chapter.views);
+
+  const estReadingTime =
+    chapter.duration ||
+    (panelCount ? `~${Math.max(1, Math.round((panelCount * 12) / 60))}m read` : undefined);
 
   return (
     <div
       onClick={handleCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`w-full min-h-[300px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0e0e14] border ${
+      className={`w-full min-h-[310px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0e0e14] border ${
         isSelected
           ? "border-[#3B82F6] ring-2 ring-[#3B82F6]/50 shadow-[0_0_30px_rgba(59,130,246,0.35)] bg-[#2A2A2A]"
           : "border-neutral-800/80 hover:border-[#3B82F6]/50 shadow-xl hover:shadow-2xl hover:shadow-black/50"
@@ -229,7 +272,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               type="checkbox"
               checked={isSelected}
               onChange={() => onToggleSelect?.(chapter.url)}
-              className="w-5 h-5 rounded-md border-neutral-700 text-[#3B82F6] focus:ring-[#3B82F6]/50 focus:ring-offset-neutral-900 bg-neutral-955 cursor-pointer accent-purple-600 transition-transform duration-200 hover:scale-105 shadow-md"
+              className="w-5 h-5 rounded-md border-neutral-700 text-[#3B82F6] focus:ring-[#3B82F6]/50 focus:ring-offset-neutral-900 bg-neutral-955 cursor-pointer accent-blue-600 transition-transform duration-200 hover:scale-105 shadow-md"
             />
           </div>
         )}
@@ -307,6 +350,18 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               </span>
             </div>
           )}
+          {chapter.is_locked !== undefined && (
+            <span
+              className={`text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider shadow-md flex items-center gap-0.5 font-mono shrink-0 ${
+                chapter.is_locked
+                  ? "bg-rose-950/80 text-rose-300 border border-rose-500/30"
+                  : "bg-emerald-950/80 text-emerald-300 border border-emerald-500/30"
+              }`}
+            >
+              {chapter.is_locked ? <Lock size={9} /> : <Unlock size={9} />}
+              {chapter.is_locked ? "Locked" : "Free"}
+            </span>
+          )}
         </div>
 
         {/* Top Right Action Controls */}
@@ -340,17 +395,34 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           </button>
         </div>
 
-        {chapter.duration && (
-          <div className="absolute bottom-2.5 right-2.5 bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono z-10">
-            <Clock size={11} className="text-[#3B82F6]" />
-            {chapter.duration}
-          </div>
-        )}
+        {/* Bottom Thumbnail Overlay (Panels count & Estimated reading time) */}
+        <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-10">
+          {panelCount !== undefined && panelCount > 0 ? (
+            <div
+              className="bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono shadow-md"
+              title={`${panelCount} panels/images in this chapter`}
+            >
+              <Layers size={10} className="text-sky-400" />
+              <span>{panelCount} Panels</span>
+            </div>
+          ) : <div />}
+
+          {estReadingTime && (
+            <div
+              className="bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono shadow-md"
+              title="Estimated reading duration"
+            >
+              <Clock size={10} className="text-[#3B82F6]" />
+              <span>{estReadingTime}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Card Content & Metadata */}
       <div className="p-4 space-y-3 flex flex-col justify-between flex-1 relative bg-neutral-900/70">
         <div className="space-y-2">
+          {/* Title & Sequence Row */}
           <div className="flex justify-between items-start gap-2">
             {renderTitle()}
             <div className="flex items-center gap-1 shrink-0">
@@ -406,8 +478,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             </div>
           )}
 
-          {/* Source Platform Badge & Release Date Row */}
-          <div className="flex items-center justify-between text-xs text-neutral-400 pt-1 border-t border-neutral-850/60">
+          {/* Source Platform Badge & Metadata Row */}
+          <div className="flex items-center justify-between text-xs text-neutral-400 pt-1.5 border-t border-neutral-850/60 flex-wrap gap-1.5">
             {chapter.url && (
               <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-widest text-[#60A5FA] bg-[#2A2A2A] border border-[#3B82F6]/20 px-2 py-0.5 rounded-lg font-mono">
                 <span
@@ -419,36 +491,59 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               </span>
             )}
 
-            <div className="flex items-center gap-1 text-[11px] font-mono text-neutral-400">
-              <Calendar className="w-3.5 h-3.5 text-[#3B82F6]/70" />
-              <span>{chapter.date || "Available"}</span>
+            <div className="flex items-center gap-2 text-[11px] font-mono text-neutral-400 ml-auto">
+              {chapter.language && (
+                <span className="flex items-center gap-0.5 text-[10px] text-neutral-400 bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
+                  <Globe size={10} className="text-neutral-500" />
+                  {chapter.language.toUpperCase()}
+                </span>
+              )}
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-[#3B82F6]/70" />
+                <span>{chapter.date || "Available"}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Interactive Bottom Action Bar */}
         <div className="pt-2.5 border-t border-neutral-800/80 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            {chapter.likes && (
-              <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono truncate">
+          {/* Formatted Engagement Metrics */}
+          <div className="flex items-center gap-2.5 min-w-0 overflow-hidden">
+            {formattedLikes ? (
+              <div
+                className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono truncate shrink-0"
+                title={`${chapter.likes || formattedLikes} Likes`}
+              >
                 <ThumbsUp
                   size={12}
-                  className="text-[#3B82F6] fill-purple-400/20 shrink-0"
+                  className="text-[#3B82F6] fill-blue-500/20 shrink-0"
                 />
-                <span>{chapter.likes}</span>
+                <span className="truncate">{formattedLikes}</span>
               </div>
-            )}
-            {chapter.views !== undefined && chapter.views > 0 && (
-              <div className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono truncate">
+            ) : null}
+
+            {formattedViews ? (
+              <div
+                className="flex items-center gap-1 text-xs font-bold text-neutral-300 font-mono truncate shrink-0"
+                title={`${chapter.views} Total Views`}
+              >
                 <Eye size={12} className="text-sky-400 shrink-0" />
-                <span>
-                  {chapter.views >= 1000
-                    ? `${(chapter.views / 1000).toFixed(1)}K`
-                    : chapter.views}
-                </span>
+                <span className="truncate">{formattedViews}</span>
+              </div>
+            ) : null}
+
+            {chapter.comment_count !== undefined && chapter.comment_count > 0 && (
+              <div
+                className="flex items-center gap-1 text-xs font-bold text-neutral-400 font-mono truncate shrink-0"
+                title={`${chapter.comment_count} Comments`}
+              >
+                <MessageSquare size={12} className="text-purple-400 shrink-0" />
+                <span className="truncate">{chapter.comment_count}</span>
               </div>
             )}
-            {!chapter.likes && !chapter.views && (
+
+            {!formattedLikes && !formattedViews && !chapter.comment_count && (
               <div className="text-[10px] font-mono text-neutral-500 flex items-center gap-1 truncate">
                 <Tag size={10} className="text-neutral-600 shrink-0" />
                 <span>{cleanBadgeNum ? `Chapter ${cleanBadgeNum}` : "Ready"}</span>
@@ -456,6 +551,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             )}
           </div>
 
+          {/* Action Buttons */}
           <div className="flex items-center gap-1.5 shrink-0">
             {onPreviewClick && (
               <button
@@ -463,7 +559,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                   e.stopPropagation();
                   onPreviewClick(chapter);
                 }}
-                className="px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+                className="px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-sm"
                 title="Read Full Chapter Strip"
               >
                 <Eye size={12} className="text-[#3B82F6]" />
@@ -475,7 +571,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                 e.stopPropagation();
                 onClick(chapter);
               }}
-              className="px-3.5 py-1.5 bg-[#2A2A2A] hover:bg-[#333333] hover:border-[#3B82F6] text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-black/50 cursor-pointer active:scale-95 border border-white/10"
+              className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-blue-900/30 cursor-pointer active:scale-95 border border-blue-400/30"
               title="Open Chapter in Storyboard Timeline Editor"
             >
               <span>Import</span>
@@ -571,3 +667,4 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 };
 
 export const EpisodeCard = ChapterCard;
+
