@@ -349,7 +349,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       </div>
 
       {/* Card Content & Metadata */}
-      <div className="p-4 space-y-3 flex flex-col justify-between flex-1 relative">
+      <div className="p-4 space-y-3 flex flex-col justify-between flex-1 relative bg-neutral-900/70">
         <div className="space-y-2">
           <div className="flex justify-between items-start gap-2">
             {renderTitle()}
@@ -457,23 +457,25 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onPreviewClick?.(chapter);
-              }}
-              className="px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
-              title="Read Full Chapter Strip"
-            >
-              <Eye size={12} className="text-[#3B82F6]" />
-              <span>Read</span>
-            </button>
+            {onPreviewClick && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPreviewClick(chapter);
+                }}
+                className="px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
+                title="Read Full Chapter Strip"
+              >
+                <Eye size={12} className="text-[#3B82F6]" />
+                <span>Read</span>
+              </button>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onClick(chapter);
               }}
-              className="px-3.5 py-1.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-black/50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+              className="px-3.5 py-1.5 bg-[#2A2A2A] hover:bg-[#333333] hover:border-[#3B82F6] text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-black/50 cursor-pointer active:scale-95 border border-white/10"
               title="Open Chapter in Storyboard Timeline Editor"
             >
               <span>Import</span>
