@@ -41,7 +41,9 @@ export const ChapterWorkspaceTabs: React.FC<ChapterWorkspaceTabsProps> = ({
             setShowFavorites(false);
             setShowRecent(false);
           }}
-          className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+          className={`px-5 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-2 disabled:pointer-events-none disabled:cursor-not-allowed ${
+            isLoading ? "cursor-wait" : "cursor-pointer"
+          } ${
             isChaptersTabActive
               ? "bg-[#2A2A2A] text-white shadow-lg shadow-black/50"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
@@ -66,7 +68,9 @@ export const ChapterWorkspaceTabs: React.FC<ChapterWorkspaceTabsProps> = ({
             setShowFavorites(false);
             setShowRecent(false);
           }}
-          className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 disabled:pointer-events-none disabled:cursor-not-allowed ${
+            isLoading ? "cursor-wait" : "cursor-pointer"
+          } ${
             activeTab === "bookmarks"
               ? "bg-[#2A2A2A] text-white shadow-lg shadow-black/50"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"
@@ -90,7 +94,9 @@ export const ChapterWorkspaceTabs: React.FC<ChapterWorkspaceTabsProps> = ({
             setShowRecent(true);
             setShowFavorites(false);
           }}
-          className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 text-xs rounded-xl transition-all flex items-center gap-2 disabled:pointer-events-none disabled:cursor-not-allowed ${
+            isLoading ? "cursor-wait" : "cursor-pointer"
+          } ${
             activeTab === "recent"
               ? "bg-[#2A2A2A] text-white shadow-lg shadow-black/50"
               : "text-neutral-400 hover:text-white hover:bg-neutral-900"

@@ -329,12 +329,14 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
         {actionSlot || (
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <Tooltip text="Extract and import panel images directly from this chapter URL" placement="bottom">
+            <Tooltip text="Extract and import panel images directly from this chapter URL" placement="bottom" disabled={isScraping}>
               <button
                 type="button"
                 onClick={handleImportClick}
                 disabled={isScraping || !targetUrl.trim()}
-                className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2 cursor-pointer ${
+                className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
+                  isScraping ? "cursor-wait" : "cursor-pointer"
+                } ${
                   separatedData?.is_chapter_url || !separatedData?.is_series_url
                     ? "btn-primary"
                     : "btn-secondary"
@@ -354,12 +356,14 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               </button>
             </Tooltip>
 
-            <Tooltip text="Browse series catalog & select multiple chapters to scrape" placement="bottom">
+            <Tooltip text="Browse series catalog & select multiple chapters to scrape" placement="bottom" disabled={isScraping}>
               <button
                 type="button"
                 onClick={handleOpenChapterScraperClick}
-                disabled={!targetUrl.trim()}
-                className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 flex items-center gap-2 cursor-pointer ${
+                disabled={!targetUrl.trim() || isScraping}
+                className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
+                  isScraping ? "cursor-wait" : "cursor-pointer"
+                } ${
                   separatedData?.is_series_url && !separatedData?.is_chapter_url
                     ? "btn-primary"
                     : "btn-secondary"

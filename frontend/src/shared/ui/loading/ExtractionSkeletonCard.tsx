@@ -16,7 +16,7 @@ export function ExtractionSkeletonCard({
 }: ExtractionSkeletonCardProps) {
   return (
     <div
-      className={`relative group overflow-hidden rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-3 space-y-2.5 backdrop-blur-sm cursor-wait select-none transition-all duration-200 hover:border-neutral-700/80 ${
+      className={`relative group overflow-hidden rounded-xl border border-neutral-800/80 bg-neutral-900/60 p-3 space-y-2.5 backdrop-blur-sm cursor-wait select-none transition-all duration-200 pointer-events-none ${
         isScroll ? "w-[220px] sm:w-[250px] shrink-0" : "w-full"
       }`}
     >

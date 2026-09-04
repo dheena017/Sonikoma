@@ -456,6 +456,16 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const triggerRef = useRef<HTMLElement | null>(null);
   const timerRef = useRef<number | null>(null);
 
+  const isChildDisabled = isValidElement(children) && Boolean(
+    (children.props as any)?.disabled ||
+    (children.props as any)?.['aria-disabled'] ||
+    (children.props as any)?.isLoading ||
+    (children.props as any)?.loading ||
+    (children.props as any)?.isScraping
+  );
+
+  const isDisabled = disabled || isChildDisabled;
+
   const clearTimer = () => {
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
@@ -463,9 +473,16 @@ export const Tooltip: React.FC<TooltipProps> = ({
     }
   };
 
+  useEffect(() => {
+    if (isDisabled) {
+      clearTimer();
+      setVisible(false);
+    }
+  }, [isDisabled]);
+
   const handleMouseEnter = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
-      if (disabled) return;
+      if (isDisabled) return;
       clearTimer();
       const rect = e.currentTarget.getBoundingClientRect();
       setAnchorRect(rect);
@@ -477,7 +494,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         setVisible(true);
       }
     },
-    [disabled, delay]
+    [isDisabled, delay]
   );
 
   const handleMouseLeave = useCallback(() => {
@@ -492,11 +509,11 @@ export const Tooltip: React.FC<TooltipProps> = ({
   }, [hideDelay]);
 
   const handleFocus = useCallback((e: React.FocusEvent<HTMLElement>) => {
-    if (disabled) return;
+    if (isDisabled) return;
     const rect = e.currentTarget.getBoundingClientRect();
     setAnchorRect(rect);
     setVisible(true);
-  }, [disabled]);
+  }, [isDisabled]);
 
   const handleBlur = useCallback(() => {
     setVisible(false);
@@ -545,7 +562,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       {trigger}
       <TooltipPortal
         text={text}
-        visible={visible && !disabled}
+        visible={visible && !isDisabled}
         anchorRect={anchorRect}
         placement={placement}
         offset={offset}
