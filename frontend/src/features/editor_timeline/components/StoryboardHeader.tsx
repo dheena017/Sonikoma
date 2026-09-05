@@ -267,7 +267,7 @@ export default function StoryboardHeader({
         }`}
       >
         <Rows className="w-3.5 h-3.5" />
-        <span>Scroll</span>
+        <span className="hidden sm:inline">Scroll</span>
       </button>
       <button
         type="button"
@@ -280,7 +280,7 @@ export default function StoryboardHeader({
         }`}
       >
         <LayoutGrid className="w-3.5 h-3.5" />
-        <span>Grid</span>
+        <span className="hidden sm:inline">Grid</span>
       </button>
     </div>
   ) : null;
@@ -292,6 +292,7 @@ export default function StoryboardHeader({
           type="button"
           onClick={handleAnalyzeAllPanels}
           disabled={isAnalyzingAll}
+          title="Analyze full sequence"
           className="text-[11px] font-mono font-bold border border-[#3B82F6]/40 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 disabled:bg-neutral-800 disabled:border-neutral-750 disabled:text-neutral-500 text-white rounded-xl px-3.5 py-1.5 flex items-center gap-1.5 transition-all  hover: active:scale-95 cursor-pointer disabled:cursor-not-allowed"
         >
           <Sparkles
@@ -301,7 +302,7 @@ export default function StoryboardHeader({
                 : "text-[#3B82F6]"
             }`}
           />
-          <span>
+          <span className="hidden sm:inline">
             {isAnalyzingAll
               ? "Generating Narrative..."
               : "Analyze Full Sequence"}
@@ -314,10 +315,11 @@ export default function StoryboardHeader({
           type="button"
           onClick={handleDownloadZip}
           disabled={isZipping}
+          title="Download ZIP"
           className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
         >
           <Download className="w-3.5 h-3.5 text-neutral-400" />
-          <span>{isZipping ? "Zipping..." : "Download ZIP"}</span>
+          <span className="hidden sm:inline">{isZipping ? "Zipping..." : "Download ZIP"}</span>
         </button>
       )}
 
@@ -325,13 +327,14 @@ export default function StoryboardHeader({
         <button
           type="button"
           onClick={() => setShowBulkOps(!showBulkOps)}
+          title="Bulk actions"
           className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
             showBulkOps
               ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] "
               : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
           }`}
         >
-          <span>Bulk Actions</span>
+          <span className="hidden sm:inline">Bulk Actions</span>
         </button>
       )}
 
@@ -347,6 +350,8 @@ export default function StoryboardHeader({
       left={titleBlock}
       center={viewToggle}
       right={rightBlock}
+      centerClassName="order-3 w-full sm:order-none sm:w-auto"
+      className="flex-wrap sm:flex-nowrap"
     />
   );
 }
