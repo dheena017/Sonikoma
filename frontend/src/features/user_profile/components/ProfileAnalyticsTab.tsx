@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import * as api from "@/api/index";
-import { parseUtcDate } from "@/utils/dateUtils";
+import { parseUtcDate, formatDetailedTime } from "@/utils/dateUtils";
 import {
   Activity,
   Film,
@@ -372,7 +372,7 @@ export default function ProfileAnalyticsTab() {
                   {act.title}
                 </h6>
                 <span className="text-[9px] text-neutral-500 font-mono">
-                  {act.time}
+                  {formatDetailedTime(act.time || act.timestamp || act.created_at)}
                 </span>
               </div>
               <p className="text-[10px] text-neutral-500 font-medium leading-relaxed">
