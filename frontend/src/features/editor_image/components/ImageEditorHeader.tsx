@@ -187,7 +187,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className={`sticky top-0 left-0 right-0 h-16 w-full min-w-0 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${isSidebarOpen ? "z-0 pointer-events-none" : "z-50"}`}>
+    <header className={`site-header sticky top-0 left-0 right-0 w-full border-white/10 bg-neutral-950/80 backdrop-blur-xl flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 gap-2 sm:gap-4 select-none overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${isSidebarOpen ? "z-0 pointer-events-none" : "z-50"}`}>
       {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
         <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
