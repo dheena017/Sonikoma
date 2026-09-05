@@ -307,8 +307,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
       {/* Right Section - Action Buttons (Unified h-9 height and clean spacing) */}
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
-        {/* 🟢 Server Status Indicator */}
-        <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+        {/* 🟢 Server Status Indicator - Hidden on ultra-small screens (<480px) */}
+        <div className="hidden min-[480px]:block">
+          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+        </div>
 
         {/* 🤖 Global AI Model Selector */}
         <AIModelSelector className="flex" />

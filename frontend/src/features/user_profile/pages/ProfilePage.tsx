@@ -142,7 +142,7 @@ export default function ProfilePage(props: ProfilePageProps) {
   return (
     <div className="w-full flex-1 text-[#E5E5E5] flex flex-col font-sans py-4 sm:py-6 max-w-7xl mx-auto animate-fade-in text-left">
       {/* ── MAIN COVER WRAPPER CARD ── */}
-      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
         {/* Compact Breadcrumb & Quick Actions Bar */}
         <div className="flex items-center justify-between border-b border-[#2F2F2F] pb-3">
           <div className="flex items-center gap-2 text-xs font-mono text-[#9CA3AF]">

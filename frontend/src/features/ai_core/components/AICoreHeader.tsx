@@ -211,8 +211,10 @@ export default function AICoreHeader({
 
       {/* Right side: Standardized Controls Suite */}
       <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0 overflow-x-visible">
-        {/* Server Status Indicator */}
-        <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+        {/* Server Status Indicator - Hidden on ultra-small screens (<480px) */}
+        <div className="hidden min-[480px]:block">
+          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+        </div>
 
         {/* 🤖 Global AI Model Selector */}
         <AIModelSelector compact className="flex shrink-0" />

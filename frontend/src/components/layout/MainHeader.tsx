@@ -445,12 +445,12 @@ const HeaderInner = ({
   return (
     <header
       id="header_pane"
-      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20"
+      className="w-full h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-1.5 sm:gap-4 select-none shadow-md shadow-black/20"
     >
       {/* Left side: Hamburger, Brand, and User Profile */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
-        {/* NEW: Wrapper added here to perfectly match the 80px (w-20) width of the mini sidebar */}
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 h-full">
+        {/* Wrapper added here to perfectly match the width of the mini sidebar */}
+        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-0.5 sm:mr-4">
           <Tooltip text="Toggle Navigation Menu" placement="bottom" shortcut="Ctrl+B">
             <button
               onClick={onToggleSidebar}
@@ -472,9 +472,9 @@ const HeaderInner = ({
       <GlobalSearchBar className="hidden lg:flex flex-1 max-w-xs lg:max-w-sm mx-4" />
 
       {/* Right side: Volume, Notifications, Stats, Profile */}
-      <div className="flex items-center gap-1 max-lg:gap-1.5 sm:gap-2 min-w-0 shrink-0 ml-auto">
-        {/* Server Status Pill */}
-        <div className="max-lg:[&>button]:px-2 max-lg:[&>button]:gap-1">
+      <div className="flex items-center gap-1 sm:gap-2 min-w-0 shrink-0 ml-auto">
+        {/* Server Status Pill - Hidden on ultra-small screens (<480px) */}
+        <div className="hidden min-[480px]:block max-lg:[&>button]:px-2 max-lg:[&>button]:gap-1">
           <ServerStatusIndicator status={backendStatus} />
         </div>
 
