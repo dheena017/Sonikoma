@@ -81,14 +81,6 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
           isOpen ? "bg-[#282a32]" : ""
         }`}
       >
-        <span className="relative flex h-2 w-2 items-center justify-center shrink-0">
-          <span
-            className={`absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping ${colors.pulseBg}`}
-          />
-          <span
-            className={`relative inline-flex rounded-full h-2 w-2 ${colors.dotBg}`}
-          />
-        </span>
         {showLabel && (
           <span className="hidden sm:inline text-white font-medium">Server:</span>
         )}
