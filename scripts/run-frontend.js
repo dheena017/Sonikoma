@@ -565,9 +565,9 @@ async function start() {
     const pkgTailwind = b("Tailwind", "tailwindcss");
     const pkgLucide = b("Lucide-React", "lucide-react");
     const pkgFabric = b("Fabric.js", "fabric");
+    const pkg3D = b("Three.js", "three");
     const pkgRnd = b("React-RND", "react-rnd");
 
-    const pkgSupa = b("Supabase", "@supabase/supabase-js");
     const pkgZip = b("JSZip", "jszip");
     const pkgSaver = b("File-Saver", "file-saver");
     const pkgFns = b("Date-Fns", "date-fns");
@@ -628,7 +628,7 @@ async function start() {
       `● ${CLR_MUTED}UI & Styling      :${CLR_RESET} ${pkgTailwind} │ ${pkgLucide} │ ${pkgFabric} │ ${pkgRnd}`
     );
     const lineData = formatLine(
-      `● ${CLR_MUTED}Data & Storage    :${CLR_RESET} ${pkgSupa} │ ${pkgZip} │ ${pkgSaver} │ ${pkgFns}`
+      `● ${CLR_MUTED}3D & Utilities    :${CLR_RESET} ${pkg3D} │ ${pkgZip} │ ${pkgSaver} │ ${pkgFns}`
     );
     const lineDev = formatLine(
       `● ${CLR_MUTED}Dev Tools & Build :${CLR_RESET} ${pkgEsbuild} │ ${pkgAutoP}`
