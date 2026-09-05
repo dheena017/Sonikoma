@@ -462,9 +462,10 @@ async function start() {
     }
   }
 
-  // Set up file watcher to restart backend on changes
+  // Set up file watcher to restart backend on changes (.py files and .env)
   if (!onlyFrontend) {
     const backendDir = path.resolve(__dirname, "../backend/app");
+    const envFile = path.resolve(__dirname, "../.env");
     const fileMtimes = new Map();
 
     function populateMtimes(dir) {
@@ -494,38 +495,48 @@ async function start() {
     populateMtimes(backendDir);
 
     let restartTimeout = null;
-    fs.watch(backendDir, { recursive: true }, (eventType, filename) => {
-      if (filename && filename.endsWith(".py")) {
-        const fullPath = path.resolve(backendDir, filename);
-        const key = fullPath.toLowerCase();
-        try {
-          if (fs.existsSync(fullPath)) {
-            const stat = fs.statSync(fullPath);
-            if (stat.isFile()) {
-              const lastMtime = fileMtimes.get(key) || 0;
-              if (stat.mtimeMs > lastMtime) {
-                fileMtimes.set(key, stat.mtimeMs);
-                if (restartTimeout) clearTimeout(restartTimeout);
-                restartTimeout = setTimeout(() => {
-                  restartBackend(filename);
-                }, 500);
-              }
-            }
-          } else {
-            // File was deleted
-            if (fileMtimes.has(key)) {
-              fileMtimes.delete(key);
+    const handleFileChange = (filename, fullPath) => {
+      const key = fullPath.toLowerCase();
+      try {
+        if (fs.existsSync(fullPath)) {
+          const stat = fs.statSync(fullPath);
+          if (stat.isFile()) {
+            const lastMtime = fileMtimes.get(key) || 0;
+            if (stat.mtimeMs > lastMtime) {
+              fileMtimes.set(key, stat.mtimeMs);
               if (restartTimeout) clearTimeout(restartTimeout);
               restartTimeout = setTimeout(() => {
+                if (fullPath === envFile) {
+                  dotenv.config({ path: envFile, override: true });
+                }
                 restartBackend(filename);
               }, 500);
             }
           }
-        } catch (e) {
-          // Ignore stat errors
+        } else if (fileMtimes.has(key)) {
+          fileMtimes.delete(key);
+          if (restartTimeout) clearTimeout(restartTimeout);
+          restartTimeout = setTimeout(() => {
+            restartBackend(filename);
+          }, 500);
         }
+      } catch (e) {
+        // Ignore stat errors
+      }
+    };
+
+    fs.watch(backendDir, { recursive: true }, (eventType, filename) => {
+      if (filename && filename.endsWith(".py")) {
+        const fullPath = path.resolve(backendDir, filename);
+        handleFileChange(filename, fullPath);
       }
     });
+
+    if (fs.existsSync(envFile)) {
+      fs.watch(envFile, (eventType) => {
+        handleFileChange(".env", envFile);
+      });
+    }
   }
 
   function printFrontendBanner() {
