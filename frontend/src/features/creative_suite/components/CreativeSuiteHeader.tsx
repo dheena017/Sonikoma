@@ -185,11 +185,11 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   return (
     <header
       id="creative_header_pane"
-      className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 pr-3 sm:pr-6 md:pr-8 flex items-center justify-between gap-1 sm:gap-3 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {/* Left side: Hamburger and Brand */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0 h-full">
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
+      <div className="flex items-center gap-1 sm:gap-2.5 shrink-0 min-w-0 h-full">
+        <div className="w-9 sm:w-14 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-3">
           <button
             onClick={onToggleSidebar}
             className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
@@ -206,10 +206,8 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
         />
       </div>
 
-
-
       {/* Right side: Standardized Controls Suite */}
-      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0 overflow-x-visible">
+      <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 shrink-0 overflow-x-visible pr-0.5 sm:pr-1">
         {/* Server Status Indicator - Hidden on ultra-small screens (<480px) */}
         <div className="hidden min-[480px]:block">
           <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
@@ -218,7 +216,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
         {/* 🤖 Global AI Model Selector */}
         <AIModelSelector compact className="flex shrink-0" />
 
-        {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
+        {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
           <div className="relative" ref={creditsRef}>
             <Tooltip text="Credits & Daily Bonus" placement="bottom">
@@ -228,7 +226,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
                   setShowNotifications(false);
                 }}
                 aria-label="Your credit balance & daily rewards"
-                className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                className={`h-8.5 flex items-center gap-1 px-2.5 sm:px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
                   showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
                 }`}
               >
@@ -313,7 +311,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className="icon-pill cursor-pointer transition-all relative hover:bg-[#3B82F6]/20 hover:text-[#93C5FD]"
+              className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative"
               aria-label="Active Project Selector"
             >
               <FolderSync className="h-4 w-4 text-[#3B82F6]" />
@@ -324,14 +322,14 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           </Tooltip>
         </div>
 
-        {/* User Profile Pill at Far Right End (Image 2 Style) */}
+        {/* User Profile Pill at Far Right End */}
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
               {activeUser?.full_name ||
                 activeUser?.username ||
                 (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}

@@ -114,7 +114,7 @@ export function SonikomaLogo({
         <div className="flex flex-col text-left leading-tight">
           <div className="flex items-center gap-2">
             <span
-              className={`${config.textSize} transition-colors duration-200 ${
+              className={`${config.textSize} transition-colors duration-200 hidden min-[380px]:inline-block ${
                 isLight
                   ? "text-slate-900 group-hover:text-blue-600"
                   : "text-white group-hover:text-neutral-200"
@@ -125,7 +125,7 @@ export function SonikomaLogo({
 
             {badge && (
               <span
-                className={`text-[9px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full ${
+                className={`hidden min-[520px]:inline-flex text-[9px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded-full shrink-0 ${
                   isLight
                     ? "bg-blue-50 text-blue-700 border border-blue-200"
                     : "bg-white/5 text-neutral-300 border border-white/10"
