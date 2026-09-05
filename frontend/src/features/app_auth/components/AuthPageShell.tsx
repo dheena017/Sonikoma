@@ -24,12 +24,12 @@ export default function AuthPageShell({
       {/* RIGHT PANEL */}
       <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left">
         {/* Pinned header — never scrolls */}
-        <div className="relative z-10 px-8 lg:px-16 pt-8 lg:pt-10 flex-shrink-0">
+        <div className="relative z-10 px-4 sm:px-8 lg:px-16 pt-4 sm:pt-8 lg:pt-10 flex-shrink-0">
           {rightHeader}
         </div>
 
         {/* Scrollable body — starts below header */}
-        <div className="custom-scrollbar flex-1 overflow-y-auto px-8 lg:px-16 pb-8 lg:pb-16">
+        <div className="custom-scrollbar flex-1 overflow-y-auto px-4 sm:px-8 lg:px-16 pb-6 sm:pb-8 lg:pb-16">
           <div className="my-auto w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 py-6">
             {rightBody}
           </div>

@@ -58,12 +58,12 @@ export default function ForgotPasswordPage({
       {/* RIGHT PANEL: Clean Solid Studio Form */}
       <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left z-10">
         {/* Top Controls Toolbar */}
-        <div className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-6 flex-shrink-0">
+        <div className="relative z-10 flex items-center justify-between px-4 sm:px-8 lg:px-16 py-4 sm:py-6 flex-shrink-0">
           <div className="flex items-center gap-2 lg:gap-3">
             <Tooltip text="Return to Sign In" placement="bottom">
               <button
                 onClick={onNavigateToLogin}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
+                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 bg-[#181818] hover:bg-[#222] border border-[#2F2F2F] hover:border-neutral-600 rounded-xl text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer shadow-sm group"
               >
                 <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
                 <span>Back to Login</span>
@@ -73,7 +73,7 @@ export default function ForgotPasswordPage({
         </div>
 
         {/* Scrollable form body */}
-        <div className="custom-scrollbar flex-1 overflow-y-auto px-8 lg:px-16 pb-8 lg:pb-16 flex flex-col justify-center">
+        <div className="custom-scrollbar flex-1 overflow-y-auto px-4 sm:px-8 lg:px-16 pb-6 sm:pb-8 lg:pb-16 flex flex-col justify-center">
           <div className="my-auto w-full max-w-md mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 relative z-10 py-4 text-left">
             {/* Header */}
             <div className="space-y-2">
@@ -81,16 +81,16 @@ export default function ForgotPasswordPage({
                 <Sparkles className="w-3.5 h-3.5 text-blue-400" />
                 <span>Account Recovery</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
                 Reset Password
               </h2>
-              <p className="text-neutral-400 text-sm font-medium leading-relaxed">
+              <p className="text-neutral-400 text-xs sm:text-sm font-medium leading-relaxed">
                 Enter your email address and we'll send you a recovery code.
               </p>
             </div>
 
             {/* Form Card */}
-            <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl space-y-5">
+            <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 shadow-2xl space-y-5">
               {isCompleted ? (
                 <div className="text-center space-y-4 py-4">
                   <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto">

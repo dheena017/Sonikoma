@@ -87,10 +87,10 @@ export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallback
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#181818] text-white flex flex-col items-center justify-between p-8 font-sans select-none">
+    <div className="min-h-screen w-full bg-[#181818] text-white flex flex-col items-center justify-between p-4 sm:p-8 font-sans select-none">
       <div className="w-full h-8" />
 
-      <div className="flex flex-col items-center text-center space-y-6 my-auto max-w-md">
+      <div className="flex flex-col items-center text-center space-y-6 my-auto max-w-xs sm:max-w-md">
         {errorMsg ? (
           <div className="flex flex-col items-center text-center space-y-3">
             <AlertCircle className="w-10 h-10 text-red-400" />
@@ -109,10 +109,10 @@ export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallback
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-normal text-neutral-200 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-normal text-neutral-200 tracking-tight">
                 Authenticating Sonikoma
               </h1>
-              <p className="text-sm text-neutral-400 font-normal">
+              <p className="text-xs sm:text-sm text-neutral-400 font-normal">
                 Setting up your secure studio session...
               </p>
               <p className="text-xs text-neutral-500 max-w-sm pt-1 leading-relaxed">

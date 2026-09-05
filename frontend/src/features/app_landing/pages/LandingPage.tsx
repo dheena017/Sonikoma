@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Play,
   Scissors,
@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   Sparkles,
   CheckCircle2,
+  Menu,
+  X,
 } from "lucide-react";
 import { useLandingPage } from "@/features/app_landing/hooks";
 import {
@@ -77,6 +79,7 @@ export default function LandingPage({
   onLogin,
   themeMode = "dark",
 }: LandingPageProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const {
     demoTab,
     setDemoTab,
@@ -143,7 +146,7 @@ export default function LandingPage({
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Tooltip text="Log in to your Sonikoma account" placement="bottom">
               <button
                 onClick={onLogin}
@@ -160,13 +163,77 @@ export default function LandingPage({
             <Tooltip text="Start creating comic videos for free" placement="bottom">
               <button
                 onClick={onGetStarted}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none"
+                className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none"
               >
                 Get Started Free
               </button>
             </Tooltip>
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`md:hidden p-2 rounded-xl border transition-colors cursor-pointer ${
+                isLight
+                  ? "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
+                  : "bg-[#181818] border-[#2F2F2F] text-neutral-300 hover:bg-[#222]"
+              }`}
+              aria-label="Toggle Navigation Menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Dropdown */}
+        {isMobileMenuOpen && (
+          <div
+            className={`md:hidden border-t px-4 py-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200 ${
+              isLight
+                ? "bg-white border-slate-200 text-slate-900 shadow-lg"
+                : "bg-[#0d0e12] border-[#2F2F2F] text-white shadow-2xl"
+            }`}
+          >
+            {[
+              { label: "How It Works", target: "how-it-works" },
+              { label: "Live Demo", target: "demo-showcase" },
+              { label: "Pricing", target: "pricing" },
+              { label: "FAQ", target: "faq" },
+            ].map((link) => (
+              <button
+                key={link.target}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  document
+                    .getElementById(link.target)
+                    ?.scrollIntoView({ behavior: "smooth" });
+                }}
+                className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer ${
+                  isLight
+                    ? "hover:bg-slate-100 text-slate-700"
+                    : "hover:bg-white/5 text-neutral-300"
+                }`}
+              >
+                {link.label}
+              </button>
+            ))}
+
+            <div className="pt-2 border-t border-[#2F2F2F]/30 flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onLogin();
+                }}
+                className={`w-full text-center px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors cursor-pointer border ${
+                  isLight
+                    ? "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100"
+                    : "border-[#2F2F2F] bg-[#181818] text-white hover:bg-[#222]"
+                }`}
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* SCROLLABLE CONTENT AREA */}
