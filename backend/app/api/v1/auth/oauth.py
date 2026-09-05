@@ -247,8 +247,10 @@ async def google_callback(
         if not email:
             raise HTTPException(status_code=400, detail="Google account did not return a valid email address")
 
+        is_new_user = False
         user = get_user_by_email(email)
         if not user:
+            is_new_user = True
             # Generate a clean unique username based on the Google display name / email prefix
             raw_base = name.strip() if (isinstance(name, str) and name.strip()) else email.split("@")[0]
             base_username = re.sub(r"[^\w.-]", "_", raw_base).strip("_") or "user"
@@ -313,9 +315,9 @@ async def google_callback(
 
         access_token = create_access_token(data={"sub": user["user_id"]})
 
-        # Redirect to frontend OAuth launch page with token parameter for animated landing & session hydration
+        # Redirect to frontend OAuth launch page with token and is_new parameters for animated landing & modal trigger
         base_target = (APP_URL or "http://localhost:5173").rstrip("/")
-        redirect_url = f"{base_target}/auth/callback?token={access_token}"
+        redirect_url = f"{base_target}/auth/callback?token={access_token}&is_new={'1' if is_new_user else '0'}"
         resp = RedirectResponse(redirect_url)
 
         cookie_kwargs = {

@@ -5,6 +5,7 @@ import DashboardQuickLinks from "@/features/app_dashboard/components/DashboardQu
 import DashboardProjectSection from "@/features/app_dashboard/components/DashboardProjectSection";
 import DashboardActivityFeed from "@/features/app_dashboard/components/DashboardActivityFeed";
 import useDashboardPage from "@/features/app_dashboard/hooks/useDashboardPage";
+import { WelcomeUserModal, WelcomeBackUserModal, ComeBackUserModal } from "@/shared/ui/modal";
 
 export default function DashboardPage() {
   const {
@@ -31,6 +32,44 @@ export default function DashboardPage() {
     toggleMenu,
     saveProjectName,
   } = useDashboardPage();
+
+  const [showWelcomeUser, setShowWelcomeUser] = React.useState(() => {
+    return sessionStorage.getItem("sonikoma_show_welcome_user") === "true";
+  });
+
+  const [showWelcomeBack, setShowWelcomeBack] = React.useState(() => {
+    return sessionStorage.getItem("sonikoma_show_welcome_back") === "true";
+  });
+
+  React.useEffect(() => {
+    if (sessionStorage.getItem("sonikoma_show_welcome_user") === "true") {
+      setShowWelcomeUser(true);
+    }
+    if (sessionStorage.getItem("sonikoma_show_welcome_back") === "true") {
+      setShowWelcomeBack(true);
+    }
+  }, []);
+
+  const [showComeBack, setShowComeBack] = React.useState(() => {
+    const isReturning = localStorage.getItem("sonikoma_returning_user") === "true";
+    const alreadyShown = sessionStorage.getItem("sonikoma_comeback_shown") === "true";
+    return isReturning && !alreadyShown && !showWelcomeUser && !showWelcomeBack;
+  });
+
+  const handleConfirmWelcomeUser = () => {
+    sessionStorage.removeItem("sonikoma_show_welcome_user");
+    setShowWelcomeUser(false);
+  };
+
+  const handleConfirmWelcomeBack = () => {
+    sessionStorage.removeItem("sonikoma_show_welcome_back");
+    setShowWelcomeBack(false);
+  };
+
+  const handleConfirmComeBack = () => {
+    sessionStorage.setItem("sonikoma_comeback_shown", "true");
+    setShowComeBack(false);
+  };
 
   return (
     <div className="w-full flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-4 sm:py-6 max-w-7xl mx-auto">
@@ -90,6 +129,30 @@ export default function DashboardPage() {
           <DashboardActivityFeed analytics={analytics} />
         </div>
       </div>
+
+      {/* New User Welcome Onboarding Modal */}
+      <WelcomeUserModal
+        isOpen={showWelcomeUser}
+        onConfirm={handleConfirmWelcomeUser}
+        onCancel={handleConfirmWelcomeUser}
+      />
+
+      {/* Returning User Welcome Back Login Modal */}
+      <WelcomeBackUserModal
+        isOpen={showWelcomeBack}
+        onConfirm={handleConfirmWelcomeBack}
+        onCancel={handleConfirmWelcomeBack}
+      />
+
+      {/* Come Back User Re-engagement Modal */}
+      <ComeBackUserModal
+        isOpen={showComeBack}
+        onConfirm={handleConfirmComeBack}
+        onCancel={() => {
+          sessionStorage.setItem("sonikoma_comeback_shown", "true");
+          setShowComeBack(false);
+        }}
+      />
     </div>
   );
 }

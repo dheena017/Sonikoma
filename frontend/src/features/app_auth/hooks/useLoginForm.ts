@@ -44,6 +44,19 @@ export default function useLoginForm(props: LoginFormProps) {
     return password.length >= 6;
   }, [password]);
 
+  const [showWelcomeBack, setShowWelcomeBack] = React.useState(false);
+
+  const confirmWelcomeBack = () => {
+    setShowWelcomeBack(false);
+    const target = "/dashboard";
+    if (typeof (window as any).navigateTo === "function") {
+      (window as any).navigateTo(target);
+    } else {
+      window.history.replaceState({}, "", target);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
@@ -70,6 +83,7 @@ export default function useLoginForm(props: LoginFormProps) {
       if (res === false) {
         throw new Error("Invalid email or password. Please try again.");
       }
+      sessionStorage.setItem("sonikoma_show_welcome_back", "true");
       const target = "/dashboard";
       if (typeof (window as any).navigateTo === "function") {
         (window as any).navigateTo(target);
@@ -123,7 +137,9 @@ export default function useLoginForm(props: LoginFormProps) {
     checkCapsLock,
     currentTheme: THEMES[activeTheme],
     t: TRANSLATIONS[language],
-    tourSteps: TOUR_STEPS,
+    showWelcomeBack,
+    setShowWelcomeBack,
+    confirmWelcomeBack,
     onNavigateToRegister: props.onNavigateToRegister,
     onNavigateToForgotPassword: props.onNavigateToForgotPassword,
     onNavigateHome: props.onNavigateHome,

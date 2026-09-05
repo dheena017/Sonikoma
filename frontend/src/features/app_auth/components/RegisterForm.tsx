@@ -15,6 +15,7 @@ import AuthPageShell from "@/features/app_auth/components/AuthPageShell";
 import { useRegisterForm } from "@/features/app_auth/hooks";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 import { SonikomaLogo } from "@/shared/ui/branding";
+import { WelcomeUserModal } from "@/shared/ui/modal";
 
 interface RegisterFormProps {
   onRegister: (data: any) => Promise<any>;
@@ -47,6 +48,9 @@ export default function RegisterForm({
     isFormValid,
     handleSubmit,
     handleSocialRegister,
+    showWelcomeUser,
+    setShowWelcomeUser,
+    confirmWelcomeUser,
   } = useRegisterForm({
     onRegister,
     onNavigateToLogin,

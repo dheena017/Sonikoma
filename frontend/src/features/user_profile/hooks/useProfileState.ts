@@ -605,8 +605,9 @@ export function useProfileState({
     addNotification?.("Exported user data to JSON file", "success");
   };
 
-  const handleDeleteAccountConfirm = async () => {
+  const handleDeleteAccountConfirm = async (skipConfirm = false) => {
     if (
+      !skipConfirm &&
       !window.confirm(
         "Are you absolutely sure you want to delete your account? This action is permanent and irreversible."
       )

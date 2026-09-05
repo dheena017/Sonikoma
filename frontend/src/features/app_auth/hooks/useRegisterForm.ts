@@ -111,6 +111,7 @@ export default function useRegisterForm(props: RegisterFormProps) {
       if (res === false) {
         throw new Error("Failed to create account. Please try again.");
       }
+      sessionStorage.setItem("sonikoma_show_welcome_user", "true");
       const target = "/dashboard";
       if (typeof (window as any).navigateTo === "function") {
         (window as any).navigateTo(target);
@@ -122,6 +123,19 @@ export default function useRegisterForm(props: RegisterFormProps) {
       setError(err.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const [showWelcomeUser, setShowWelcomeUser] = React.useState(false);
+
+  const confirmWelcomeUser = () => {
+    setShowWelcomeUser(false);
+    const target = "/dashboard";
+    if (typeof (window as any).navigateTo === "function") {
+      (window as any).navigateTo(target);
+    } else {
+      window.history.replaceState({}, "", target);
+      window.dispatchEvent(new Event("popstate"));
     }
   };
 
@@ -174,6 +188,9 @@ export default function useRegisterForm(props: RegisterFormProps) {
     handleSubmit,
     handleSocialRegister,
     currentTheme: THEMES[activeTheme],
+    showWelcomeUser,
+    setShowWelcomeUser,
+    confirmWelcomeUser,
     onNavigateToLogin: props.onNavigateToLogin,
     onNavigateHome: props.onNavigateHome,
   };

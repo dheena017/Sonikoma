@@ -29,6 +29,7 @@ import {
 
 import { useProfileState, ProfileTabId } from "../hooks/useProfileState";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { ConfirmModal, GoodbyeUserModal, ComeBackUserModal } from "@/shared/ui/modal";
 
 export interface ProfilePageProps {
   user?: any;
@@ -63,10 +64,50 @@ export default function ProfilePage(props: ProfilePageProps) {
   } = props;
 
   const state = useProfileState(props);
+  // Stage 1 Confirmation Modal states
+  const [showSignOutConfirm, setShowSignOutConfirm] = React.useState(false);
+  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = React.useState(false);
+
+  // Stage 2 User Lifecycle Modal states
+  const [showComeBackModal, setShowComeBackModal] = React.useState(false);
+  const [showGoodbyeModal, setShowGoodbyeModal] = React.useState(false);
+
   const [privacy, setPrivacy] = React.useState({
     analyticsTelemetry: true,
     publicProfile: false,
   });
+
+  // Flow 1: Sign Out / Log Out
+  const handleSignOutClick = () => {
+    setShowSignOutConfirm(true);
+  };
+
+  const handleAcceptSignOutConfirm = () => {
+    setShowSignOutConfirm(false);
+    setShowComeBackModal(true);
+  };
+
+  const handleFinalSignOut = () => {
+    setShowComeBackModal(false);
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
+  // Flow 2: Delete Account
+  const handleDeleteAccountRequest = () => {
+    setShowDeleteAccountConfirm(true);
+  };
+
+  const handleAcceptDeleteAccountConfirm = () => {
+    setShowDeleteAccountConfirm(false);
+    setShowGoodbyeModal(true);
+  };
+
+  const handleFinalDeleteAccount = async () => {
+    setShowGoodbyeModal(false);
+    await state.handleDeleteAccountConfirm(true);
+  };
 
   const tabsList = useMemo(
     () => [
@@ -124,7 +165,7 @@ export default function ProfilePage(props: ProfilePageProps) {
           {onLogout && (
             <Tooltip text="Log out of your account" placement="bottom">
               <button
-                onClick={onLogout}
+                onClick={handleSignOutClick}
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#EF4444]/20 bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20 text-xs font-medium transition-all cursor-pointer"
                 aria-label="Sign Out"
               >
@@ -339,12 +380,58 @@ export default function ProfilePage(props: ProfilePageProps) {
               is2faEnabled={state.is2faEnabled}
               handleToggleMfa={state.handleToggleMfa}
               onExportData={state.handleExportData}
-              onDeleteAccount={state.handleDeleteAccountConfirm}
+              onDeleteAccount={handleDeleteAccountRequest}
               fetchWithInterceptor={fetchWithInterceptor}
             />
           )}
         </div>
       </div>
+
+      {/* STAGE 1: Confirmation Modal when clicking "Log Out" / "Sign Out" */}
+      {showSignOutConfirm && (
+        <ConfirmModal
+          title="Sign Out Confirmation"
+          message="Are you sure you want to sign out of your Sonikoma account?"
+          accentColor="blue"
+          onConfirm={handleAcceptSignOutConfirm}
+          onCancel={() => setShowSignOutConfirm(false)}
+        />
+      )}
+
+      {/* STAGE 2: Come Back Lifecycle Modal on Sign Out */}
+      <ComeBackUserModal
+        isOpen={showComeBackModal}
+        username={user?.full_name || state?.profileUser?.fullName || undefined}
+        title="Leaving Sonikoma?"
+        message="You are signing out. Your studio projects, custom assets, and workspace configuration are safely stored. We look forward to seeing you back soon!"
+        confirmText="Confirm Sign Out"
+        cancelText="Stay Signed In"
+        onConfirm={handleFinalSignOut}
+        onCancel={() => setShowComeBackModal(false)}
+      />
+
+      {/* STAGE 1: Confirmation Modal when clicking "Delete Account" */}
+      {showDeleteAccountConfirm && (
+        <ConfirmModal
+          title="Delete Account Confirmation"
+          message="Are you sure you want to delete your account? This action will erase your data and cannot be undone."
+          accentColor="red"
+          onConfirm={handleAcceptDeleteAccountConfirm}
+          onCancel={() => setShowDeleteAccountConfirm(false)}
+        />
+      )}
+
+      {/* STAGE 2: Goodbye Farewell Lifecycle Modal on Account Deletion */}
+      <GoodbyeUserModal
+        isOpen={showGoodbyeModal}
+        username={user?.full_name || state?.profileUser?.fullName || undefined}
+        title="Account Deleted"
+        message="Your account deletion process is complete. All projects, generated videos, assets, and subscription history have been permanently erased."
+        confirmText="Return Home"
+        cancelText="Close"
+        onConfirm={handleFinalDeleteAccount}
+        onCancel={() => setShowGoodbyeModal(false)}
+      />
     </div>
   );
 }

@@ -9,6 +9,7 @@ export interface AuthCallbackPageProps {
 
 export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallbackPageProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const isNewUserRef = useRef(false);
   const hasProcessedRef = useRef(false);
 
   useEffect(() => {
@@ -16,12 +17,14 @@ export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallback
     hasProcessedRef.current = true;
 
     try {
-      // Extract current query parameters from URL (e.g. ?token=xyz or ?code=xyz)
+      // Extract query parameters (e.g. ?token=xyz&is_new=1)
       const queryParams = window.location.search;
       const params = new URLSearchParams(queryParams);
       
       let token = params.get("token") || params.get("code");
-      
+      const isNewParam = params.get("is_new") === "1" || params.get("is_new_user") === "true";
+      isNewUserRef.current = isNewParam;
+
       if (!token && typeof window !== "undefined") {
         token = localStorage.getItem("sonikoma_token");
       }
@@ -36,36 +39,47 @@ export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallback
         return;
       }
 
-      // Save token to localStorage for web session persistence
+      // Save token to localStorage for session persistence
       localStorage.setItem("sonikoma_token", token);
 
-      // Hydrate user auth session
-      if (typeof checkAuth === "function") {
-        checkAuth().catch(() => {});
-      }
-
-      // Clean sensitive query parameters from the address bar
+      // Clean query parameters from address bar
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
-      // Smooth web redirect to your app dashboard
-      const timer = setTimeout(() => {
-        navigateTo("/dashboard");
-      }, 1500);
+      // Store flag for Welcome modal before navigating to Dashboard
+      if (isNewParam) {
+        sessionStorage.setItem("sonikoma_show_welcome_user", "true");
+      } else {
+        sessionStorage.setItem("sonikoma_show_welcome_back", "true");
+      }
 
-      return () => clearTimeout(timer);
+      // Trigger checkAuth in parallel to hydrate user state
+      if (typeof checkAuth === "function") {
+        checkAuth().catch(() => {});
+      }
+
+      // Navigate immediately to Dashboard so the modal shows directly on the Dashboard UI
+      navigateTo("/dashboard");
     } catch (err: any) {
       setErrorMsg(err.message || "Authentication failed.");
     }
   }, [navigateTo, checkAuth]);
 
+  // When user clicks the blue "Go to Dashboard" button (in error fallback):
+  const handleGoToDashboardButtonClick = () => {
+    if (isNewUserRef.current) {
+      sessionStorage.setItem("sonikoma_show_welcome_user", "true");
+    } else {
+      sessionStorage.setItem("sonikoma_show_welcome_back", "true");
+    }
+    navigateTo("/dashboard");
+  };
+
   return (
     <div className="min-h-screen w-full bg-[#181818] text-white flex flex-col items-center justify-between p-8 font-sans select-none">
-      {/* Top Spacer */}
       <div className="w-full h-8" />
 
-      {/* Center Brand Logo, Descriptive Words & Status */}
       <div className="flex flex-col items-center text-center space-y-6 my-auto max-w-md">
         {errorMsg ? (
           <div className="flex flex-col items-center text-center space-y-3">
@@ -89,30 +103,26 @@ export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallback
                 Authenticating Sonikoma
               </h1>
               <p className="text-sm text-neutral-400 font-normal">
-                Setting up your secure workspace session...
+                Setting up your secure studio session...
               </p>
               <p className="text-xs text-neutral-500 max-w-sm pt-1 leading-relaxed">
-                We&apos;re verifying your Google credentials and preparing your AI comic &amp; video creation studio.
+                Verifying credentials and preparing your AI comic &amp; video creation workspace.
               </p>
             </div>
 
-            {/* Action Button and helper note */}
+            {/* Click button to enter Dashboard where WelcomeUser / WelcomeBack modal pops up */}
             <div className="pt-4 flex flex-col items-center space-y-3">
               <button
-                onClick={() => navigateTo("/dashboard")}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-md transition-colors cursor-pointer shadow-lg active:scale-95"
+                onClick={handleGoToDashboardButtonClick}
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-all cursor-pointer shadow-lg active:scale-95"
               >
                 Go to Dashboard
               </button>
-              <p className="text-[11px] text-neutral-500">
-                If you are not redirected automatically in a moment, click above to enter your studio.
-              </p>
             </div>
           </>
         )}
       </div>
 
-      {/* Bottom Spacer */}
       <div className="pb-6" />
     </div>
   );

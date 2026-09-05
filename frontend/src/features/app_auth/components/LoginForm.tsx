@@ -14,6 +14,7 @@ import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { useLoginForm } from "@/features/app_auth/hooks";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 import { SonikomaLogo } from "@/shared/ui/branding";
+import { WelcomeBackUserModal } from "@/shared/ui/modal";
 
 interface LoginPageProps {
   onLogin: (data: any) => Promise<any>;
@@ -44,6 +45,9 @@ export default function LoginPage({
     handleSubmit,
     handleSocialLogin,
     checkCapsLock,
+    showWelcomeBack,
+    setShowWelcomeBack,
+    confirmWelcomeBack,
   } = useLoginForm({
     onLogin,
     onNavigateToRegister,
