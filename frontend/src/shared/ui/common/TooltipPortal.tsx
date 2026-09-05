@@ -201,7 +201,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
 
     const posStyle: React.CSSProperties = {
       position: "fixed",
-      zIndex: 999999,
+      zIndex: 9900,
       pointerEvents: "none",
     };
 
@@ -345,7 +345,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       }}
       className={`
         pointer-events-none border backdrop-blur-md flex flex-col justify-center
-        duration-150 ease-out select-none whitespace-nowrap z-[999999]
+        duration-150 ease-out select-none whitespace-nowrap z-[9900]
         ${sizeConfig.root}
         ${variantClass}
         ${glowClass}
@@ -466,19 +466,24 @@ export const Tooltip: React.FC<TooltipProps> = ({
 
   const isDisabled = disabled || isChildDisabled;
 
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  };
+  }, []);
+
+  const hideTooltip = useCallback(() => {
+    clearTimer();
+    setVisible(false);
+    setAnchorRect(null);
+  }, [clearTimer]);
 
   useEffect(() => {
     if (isDisabled) {
-      clearTimer();
-      setVisible(false);
+      hideTooltip();
     }
-  }, [isDisabled]);
+  }, [isDisabled, hideTooltip]);
 
   const handleMouseEnter = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
@@ -488,25 +493,33 @@ export const Tooltip: React.FC<TooltipProps> = ({
       setAnchorRect(rect);
       if (delay > 0) {
         timerRef.current = window.setTimeout(() => {
+          if (triggerRef.current && !document.body.contains(triggerRef.current)) {
+            hideTooltip();
+            return;
+          }
           setVisible(true);
         }, delay);
       } else {
         setVisible(true);
       }
     },
-    [isDisabled, delay]
+    [isDisabled, delay, clearTimer, hideTooltip]
   );
 
   const handleMouseLeave = useCallback(() => {
     clearTimer();
     if (hideDelay > 0) {
       timerRef.current = window.setTimeout(() => {
-        setVisible(false);
+        hideTooltip();
       }, hideDelay);
     } else {
-      setVisible(false);
+      hideTooltip();
     }
-  }, [hideDelay]);
+  }, [hideDelay, clearTimer, hideTooltip]);
+
+  const handleClick = useCallback(() => {
+    hideTooltip();
+  }, [hideTooltip]);
 
   const handleFocus = useCallback((e: React.FocusEvent<HTMLElement>) => {
     if (isDisabled) return;
@@ -516,12 +529,27 @@ export const Tooltip: React.FC<TooltipProps> = ({
   }, [isDisabled]);
 
   const handleBlur = useCallback(() => {
-    setVisible(false);
-  }, []);
+    hideTooltip();
+  }, [hideTooltip]);
 
   useEffect(() => {
-    return () => clearTimer();
-  }, []);
+    const handleGlobalHide = () => {
+      hideTooltip();
+    };
+
+    window.addEventListener("scroll", handleGlobalHide, { capture: true, passive: true });
+    window.addEventListener("resize", handleGlobalHide, { capture: true, passive: true });
+    window.addEventListener("pointerdown", handleGlobalHide, { capture: true, passive: true });
+    window.addEventListener("popstate", handleGlobalHide);
+
+    return () => {
+      hideTooltip();
+      window.removeEventListener("scroll", handleGlobalHide, { capture: true });
+      window.removeEventListener("resize", handleGlobalHide, { capture: true });
+      window.removeEventListener("pointerdown", handleGlobalHide, { capture: true });
+      window.removeEventListener("popstate", handleGlobalHide);
+    };
+  }, [hideTooltip]);
 
   if (!isValidElement(children)) {
     return children;
@@ -546,6 +574,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
     onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
       childProps.onMouseLeave?.(e);
       handleMouseLeave();
+    },
+    onClick: (e: React.MouseEvent<HTMLElement>) => {
+      childProps.onClick?.(e);
+      handleClick();
     },
     onFocus: (e: React.FocusEvent<HTMLElement>) => {
       childProps.onFocus?.(e);
@@ -601,12 +633,18 @@ export function useTooltip(options: UseTooltipOptions = {}) {
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
       window.clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  };
+  }, []);
+
+  const hide = useCallback(() => {
+    clearTimer();
+    setVisible(false);
+    setAnchorRect(null);
+  }, [clearTimer]);
 
   const onMouseEnter = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
@@ -620,21 +658,21 @@ export function useTooltip(options: UseTooltipOptions = {}) {
         setVisible(true);
       }
     },
-    [disabled, delay]
+    [disabled, delay, clearTimer]
   );
 
   const onMouseLeave = useCallback(() => {
     clearTimer();
     if (hideDelay > 0) {
-      timerRef.current = window.setTimeout(() => setVisible(false), hideDelay);
+      timerRef.current = window.setTimeout(() => hide(), hideDelay);
     } else {
-      setVisible(false);
+      hide();
     }
-  }, [hideDelay]);
+  }, [hideDelay, clearTimer, hide]);
 
   useEffect(() => {
-    return () => clearTimer();
-  }, []);
+    return () => hide();
+  }, [hide]);
 
   return {
     visible: visible && !disabled,
@@ -642,18 +680,19 @@ export function useTooltip(options: UseTooltipOptions = {}) {
     triggerProps: {
       onMouseEnter,
       onMouseLeave,
+      onClick: hide,
       onFocus: (e: React.FocusEvent<HTMLElement>) => {
         if (disabled) return;
         setAnchorRect(e.currentTarget.getBoundingClientRect());
         setVisible(true);
       },
-      onBlur: () => setVisible(false),
+      onBlur: hide,
     },
     show: (rect: DOMRect) => {
       setAnchorRect(rect);
       setVisible(true);
     },
-    hide: () => setVisible(false),
+    hide,
   };
 }
 
