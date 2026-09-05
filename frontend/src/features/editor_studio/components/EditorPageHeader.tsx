@@ -207,13 +207,13 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`site-header fixed top-0 left-0 right-0 z-[100] flex min-w-0 flex-nowrap items-center justify-between gap-2 sm:gap-3 border-white/10 bg-neutral-950/80 backdrop-blur-xl pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+      className={`site-header fixed top-0 left-0 right-0 z-[100] flex min-w-0 flex-wrap items-center justify-between gap-2 sm:flex-nowrap sm:gap-3 border-white/10 bg-neutral-950/80 backdrop-blur-xl pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 max-sm:h-auto max-sm:min-h-[7rem] max-sm:py-2 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
         className || ""
       }`}
       style={style}
     >
       {/* Left Section - Menu Icon + Title + Metadata */}
-      <div className="flex items-center shrink-0 h-full">
+      <div className="flex items-center shrink-0 h-full max-sm:w-full max-sm:h-12">
         {/* PREMIUM ALIGNMENT FIX: w-20 wrapper perfectly aligns the menu button above the mini-sidebar */}
         <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1.5 sm:mr-3">
           {onToggleSidebar && (
@@ -306,7 +306,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
 
       {/* Right Section - Action Buttons (Unified h-9 height and clean spacing) */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
+      <div className="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0 flex-nowrap max-sm:w-full max-sm:h-12">
         {/* 🟢 Server Status Indicator */}
         <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
 

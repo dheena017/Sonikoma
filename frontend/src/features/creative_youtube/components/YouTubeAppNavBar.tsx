@@ -46,7 +46,7 @@ export default function YouTubeAppNavBar({
   onPublish,
 }: YouTubeAppNavBarProps) {
   return (
-    <header className="relative w-full h-16 shrink-0 bg-neutral-950/80 border-b border-white/10 shadow-md shadow-black/20 backdrop-blur-xl overflow-x-auto mb-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <header className="site-header relative w-full bg-neutral-950/80 border-white/10 overflow-x-auto mb-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <div className="h-full px-4 flex items-center justify-between gap-3 min-w-max">
         {/* ── LEFT: BRAND & CHANNEL SELECTOR ── */}
         <div className="flex items-center gap-3 shrink-0">
