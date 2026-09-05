@@ -24,13 +24,19 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
     }
   };
 
-  const filteredLogs = logs.filter((log) => {
-    const matchesSearch =
-      (log.action || "").toLowerCase().includes(search.toLowerCase()) ||
-      (log.email || "").toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "ALL" || log.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredLogs = logs
+    .filter((log) => {
+      const matchesSearch =
+        (log.action || "").toLowerCase().includes(search.toLowerCase()) ||
+        (log.email || "").toLowerCase().includes(search.toLowerCase());
+      const matchesStatus = statusFilter === "ALL" || log.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      const timeA = new Date(a.created_at || 0).getTime();
+      const timeB = new Date(b.created_at || 0).getTime();
+      return timeB - timeA;
+    });
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">

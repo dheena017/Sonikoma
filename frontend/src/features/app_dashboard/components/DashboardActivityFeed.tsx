@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { formatDetailedTime } from "@/utils/dateUtils";
+import { formatDetailedTime, parseUtcDate } from "@/utils/dateUtils";
 import {
   Activity,
   ArrowUpRight,
@@ -11,6 +11,7 @@ interface ActivityItem {
   title: string;
   desc: string;
   time: string;
+  rawTime?: any;
   type: "scrape" | "panel" | "voice" | "render" | "general";
   projectId?: string;
   coverImage?: string;
@@ -29,23 +30,30 @@ export default function DashboardActivityFeed({
 
   // Derive dynamic activity items from real analytics only
   const activities: ActivityItem[] = useMemo(() => {
-    const items: ActivityItem[] = [];
+    const items: (ActivityItem & { rawTimeVal?: number })[] = [];
 
     // Only use explicit activities from the analytics API — no synthesized/fake items
     if (analytics?.activities && Array.isArray(analytics.activities)) {
       analytics.activities.forEach((act, idx) => {
-        const timeDisplay = formatDetailedTime(act.timestamp || act.time);
+        const rawT = act.timestamp || act.created_at || act.time;
+        const parsedD = parseUtcDate(rawT);
+        const timeDisplay = formatDetailedTime(rawT);
         items.push({
-          id: `analytics-${idx}`,
+          id: `analytics-${idx}-${act.title || ""}`,
           title: act.title || "Project Update",
           desc: act.desc || act.description || "",
           time: timeDisplay,
+          rawTime: rawT,
+          rawTimeVal: parsedD ? parsedD.getTime() : 0,
           type: act.type || "general",
           badge: act.badge || "Live",
           badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
         });
       });
     }
+
+    // Sort descending: newest activity at the top
+    items.sort((a, b) => (b.rawTimeVal || 0) - (a.rawTimeVal || 0));
 
     return items;
   }, [analytics]);

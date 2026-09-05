@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import * as api from "@/api/index";
+import { parseUtcDate } from "@/utils/dateUtils";
 import {
   Activity,
   Film,
@@ -73,7 +74,16 @@ export default function ProfileAnalyticsTab() {
   const badgesPct = analytics?.narrations?.["Storyteller Badges"] ?? 0;
   const subtitlesPct = analytics?.narrations?.["Snappy Subtitles"] ?? 0;
 
-  const activities = analytics?.activities ?? [];
+  const rawActivities: any[] = analytics?.activities ?? [];
+  const activities = useMemo(() => {
+    return [...rawActivities].sort((a, b) => {
+      const dateA = parseUtcDate(a.timestamp || a.created_at || a.time);
+      const dateB = parseUtcDate(b.timestamp || b.created_at || b.time);
+      const timeA = dateA ? dateA.getTime() : 0;
+      const timeB = dateB ? dateB.getTime() : 0;
+      return timeB - timeA; // Newest first
+    });
+  }, [rawActivities]);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 text-left">

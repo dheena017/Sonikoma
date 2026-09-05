@@ -406,10 +406,16 @@ export function AdminCreditsTab({
     );
   }, [users]);
 
-  // Filtered transactions specific to the currently selected user
-  const selectedUserTransactions = transactions.filter(
-    (tx) => tx.user_id === selectedUserId
-  );
+  // Filtered transactions specific to the currently selected user (newest first)
+  const selectedUserTransactions = React.useMemo(() => {
+    return transactions
+      .filter((tx) => tx.user_id === selectedUserId)
+      .sort((a, b) => {
+        const timeA = new Date(a.created_at || 0).getTime();
+        const timeB = new Date(b.created_at || 0).getTime();
+        return timeB - timeA;
+      });
+  }, [transactions, selectedUserId]);
 
   const selectedUserActivitySummary = React.useMemo(() => {
     return selectedUserTransactions.reduce(

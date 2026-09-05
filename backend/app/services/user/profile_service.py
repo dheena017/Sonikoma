@@ -120,7 +120,24 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
                 "time": audit["created_at"],
             })
 
-        activities.sort(key=lambda x: x.get("time") or "", reverse=True)
+        def parse_to_timestamp(val):
+            if not val:
+                return 0.0
+            if isinstance(val, (int, float)):
+                return float(val)
+            clean_val = str(val).strip().replace("Z", "+00:00")
+            try:
+                if "T" in clean_val:
+                    dt = datetime.datetime.fromisoformat(clean_val)
+                else:
+                    dt = datetime.datetime.strptime(clean_val.split(".")[0], "%Y-%m-%d %H:%M:%S")
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=datetime.timezone.utc)
+                return dt.timestamp()
+            except Exception:
+                return 0.0
+
+        activities.sort(key=lambda x: parse_to_timestamp(x.get("time")), reverse=True)
         activities = activities[:6]
 
         def format_relative_time(raw_time):
