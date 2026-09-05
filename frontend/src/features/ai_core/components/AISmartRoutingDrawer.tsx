@@ -265,7 +265,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
         }`}
         title="AI Smart Routing: Open Multi-Model Cascades Matrix"
       >
-        <Workflow className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
+        <Workflow className="w-3.5 h-3.5 text-white shrink-0" />
         <span className={compact ? "font-semibold text-white tracking-tight max-lg:hidden" : "font-semibold text-white tracking-tight"}>AI Routing</span>
         <span className={`px-1.5 py-0.5 rounded-md bg-[#1E1E1E] text-neutral-300 border border-[#2F2F2F] font-mono text-[10px] font-bold ${compact ? "hidden lg:inline" : "hidden sm:inline"}`}>
           11 Tasks
