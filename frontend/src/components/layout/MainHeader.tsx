@@ -635,7 +635,6 @@ const HeaderInner = ({
             onClick={() => navigateTo && navigateTo("/profile")}
             className="h-9 min-w-9 flex items-center justify-center gap-2 p-1 rounded-full bg-[#18191e]/90 hover:bg-[#22232a] border border-white/10 hover:border-[#8b5cf6]/70 hover:shadow-[0_0_0_3px_rgba(139,92,246,0.12)] transition-all cursor-pointer select-none group shrink-0 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
             data-no-transform
-            title="View Profile & Settings"
             aria-label="Open User profile"
           >
             <span className="text-xs font-semibold text-white truncate max-w-[120px] hidden lg:inline">

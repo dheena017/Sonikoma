@@ -567,6 +567,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         existingRef.current = node;
       }
     },
+    title: undefined,
     onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
       childProps.onMouseEnter?.(e);
       handleMouseEnter(e);
