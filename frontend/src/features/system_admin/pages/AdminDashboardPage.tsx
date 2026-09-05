@@ -1079,7 +1079,7 @@ const AdminDashboardPage = React.memo(
         {/* Audit Logs and Users Impersonation Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* User Impersonation Table */}
-          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+          <div className="self-start h-fit bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-md font-extrabold text-[#E5E5E5] flex items-center gap-2">
