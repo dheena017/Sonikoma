@@ -1079,7 +1079,7 @@ const AdminDashboardPage = React.memo(
         {/* Audit Logs and Users Impersonation Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* User Impersonation Table */}
-          <div className="self-start h-fit bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-md font-extrabold text-[#E5E5E5] flex items-center gap-2">
@@ -1098,7 +1098,7 @@ const AdminDashboardPage = React.memo(
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
                 {loadingUsers ? (
                   <div className="text-center py-6 text-xs text-[#6B7280] italic">
                     Fetching creators community...
@@ -1139,7 +1139,7 @@ const AdminDashboardPage = React.memo(
           </div>
 
           {/* Audit Logs list */}
-          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+          <div className="self-start h-fit bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
             <div>
               <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#3B82F6]" /> Security
