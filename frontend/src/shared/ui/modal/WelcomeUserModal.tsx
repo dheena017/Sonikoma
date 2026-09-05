@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { X, Sparkles, ArrowRight, Wand2, Mic, Film, CheckCircle2 } from "lucide-react";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface WelcomeUserModalProps {
   username?: string;
@@ -15,13 +16,13 @@ export interface WelcomeUserModalProps {
 
 export function WelcomeUserModal({
   username,
-  title = username ? `Welcome to Sonikoma, ${username}!` : "Welcome to Sonikoma Studio!",
-  message = "Your AI comic & video production suite is fully provisioned! You now have access to high-resolution panel synthesis, voice cloning, automatic chapter scraping, and multi-track audio mixing.",
+  title = username ? `Welcome, ${username}!` : "Welcome to Sonikoma Studio!",
+  message = "Your studio is ready! Easily transform your favorite comic and webtoon strips into animated videos with AI narration and music.",
   isOpen = true,
   onConfirm,
   onCancel,
-  confirmText = "Explore Studio Workspace",
-  cancelText = "Skip Tour",
+  confirmText = "Explore Studio",
+  cancelText = "Skip",
 }: WelcomeUserModalProps) {
   const isExecutingRef = React.useRef(false);
 
@@ -58,12 +59,12 @@ export function WelcomeUserModal({
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-purple-500/20 to-blue-500/20 border border-purple-500/30 text-purple-400">
-              <Sparkles className="h-5 w-5 animate-pulse" />
+            <div className="p-1.5 rounded-2xl bg-gradient-to-tr from-purple-500/20 to-blue-500/20 border border-purple-500/30 flex items-center justify-center shrink-0">
+              <SonikomaLogo iconOnly size="sm" />
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
-                🎉 New Creator Onboarded
+                🎉 Welcome Aboard
               </span>
               <h2 className="text-base font-bold text-white tracking-tight mt-0.5">
                 {title}
@@ -94,9 +95,9 @@ export function WelcomeUserModal({
                 <Wand2 className="h-4 w-4" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-white">AI Panel & Script Generator</h4>
+                <h4 className="text-xs font-bold text-white">Comic Animation</h4>
                 <p className="text-[11px] text-neutral-400 leading-normal">
-                  Convert prompt ideas and webtoon strips into animated storyboard frames instantly.
+                  Turn comic panels into smooth animated video scenes effortlessly.
                 </p>
               </div>
             </div>
@@ -106,9 +107,9 @@ export function WelcomeUserModal({
                 <Mic className="h-4 w-4" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-white">Voice Studio & Audio Lab</h4>
+                <h4 className="text-xs font-bold text-white">AI Voice Studio</h4>
                 <p className="text-[11px] text-neutral-400 leading-normal">
-                  Synthesize character voiceovers with automated music ducking and sound effects.
+                  Add natural character voiceovers and background music.
                 </p>
               </div>
             </div>
@@ -118,9 +119,9 @@ export function WelcomeUserModal({
                 <Film className="h-4 w-4" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-white">High-Definition Episode Renderer</h4>
+                <h4 className="text-xs font-bold text-white">Easy HD Export</h4>
                 <p className="text-[11px] text-neutral-400 leading-normal">
-                  Export ultra-smooth video reels optimized for YouTube, TikTok, and Instagram.
+                  Download high-quality videos formatted for YouTube Shorts, TikTok & Reels.
                 </p>
               </div>
             </div>

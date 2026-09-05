@@ -42,11 +42,15 @@ export default function DashboardPage() {
   });
 
   React.useEffect(() => {
-    if (sessionStorage.getItem("sonikoma_show_welcome_user") === "true") {
+    const isNew = sessionStorage.getItem("sonikoma_show_welcome_user") === "true";
+    const isBack = sessionStorage.getItem("sonikoma_show_welcome_back") === "true";
+
+    if (isNew) {
       setShowWelcomeUser(true);
-    }
-    if (sessionStorage.getItem("sonikoma_show_welcome_back") === "true") {
+      setShowWelcomeBack(false);
+    } else if (isBack) {
       setShowWelcomeBack(true);
+      setShowWelcomeUser(false);
     }
   }, []);
 

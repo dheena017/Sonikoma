@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { X, LogOut, Heart, AlertTriangle, Trash2, CreditCard, ShieldX } from "lucide-react";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface GoodbyeUserModalProps {
   username?: string;
@@ -15,12 +16,12 @@ export interface GoodbyeUserModalProps {
 
 export function GoodbyeUserModal({
   username,
-  title = username ? `Account Deletion, ${username}` : "Account Deletion Completed",
-  message = "Your Sonikoma studio account and profile data have been permanently removed from our servers. We sincerely thank you for bringing stories to life with our studio.",
+  title = username ? `Goodbye, ${username}` : "Account Deleted",
+  message = "Your Sonikoma account and saved data have been permanently removed as requested.",
   isOpen = true,
   onConfirm,
   onCancel,
-  confirmText = "Return to Home",
+  confirmText = "Return Home",
   cancelText = "Close",
 }: GoodbyeUserModalProps) {
   const isExecutingRef = React.useRef(false);
@@ -58,12 +59,12 @@ export function GoodbyeUserModal({
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-rose-500/20 border border-amber-500/30 text-amber-400">
-              <LogOut className="h-5 w-5" />
+            <div className="p-1.5 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-rose-500/20 border border-amber-500/30 flex items-center justify-center shrink-0">
+              <SonikomaLogo iconOnly size="sm" />
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
-                ⚠️ Account Purge Completed
+                👋 Account Removed
               </span>
               <h2 className="text-base font-bold text-white tracking-tight mt-0.5">
                 {title}
@@ -92,19 +93,19 @@ export function GoodbyeUserModal({
             <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <div className="flex items-center gap-2.5">
                 <Trash2 className="h-4 w-4 text-rose-400 shrink-0" />
-                <span className="font-semibold text-white">Project Files & Media</span>
+                <span className="font-semibold text-white">Projects & Storyboards</span>
               </div>
-              <span className="text-[11px] font-mono text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded-lg border border-rose-500/20">
-                Permanently Erased
+              <span className="text-[11px] text-rose-400 font-bold bg-rose-500/10 px-2.5 py-0.5 rounded-lg border border-rose-500/20">
+                Deleted
               </span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <div className="flex items-center gap-2.5">
                 <CreditCard className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="font-semibold text-white">Subscriptions & Billing</span>
+                <span className="font-semibold text-white">Subscriptions & Credits</span>
               </div>
-              <span className="text-[11px] font-mono text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">
+              <span className="text-[11px] text-amber-400 font-bold bg-amber-500/10 px-2.5 py-0.5 rounded-lg border border-amber-500/20">
                 Cancelled
               </span>
             </div>
@@ -112,17 +113,17 @@ export function GoodbyeUserModal({
             <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <div className="flex items-center gap-2.5">
                 <ShieldX className="h-4 w-4 text-purple-400 shrink-0" />
-                <span className="font-semibold text-white">API Keys & Tokens</span>
+                <span className="font-semibold text-white">Personal Data</span>
               </div>
-              <span className="text-[11px] font-mono text-purple-300 font-bold bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
-                Revoked
+              <span className="text-[11px] text-purple-300 font-bold bg-purple-500/10 px-2.5 py-0.5 rounded-lg border border-purple-500/20">
+                Removed
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-neutral-400 bg-neutral-900/60 border border-white/5 p-3 rounded-xl">
             <Heart className="h-4 w-4 text-rose-400 shrink-0" />
-            <span>Thank you for being part of Sonikoma Studio. You are always welcome back!</span>
+            <span>Thank you for using Sonikoma Studio. You're always welcome back!</span>
           </div>
         </div>
 

@@ -22,7 +22,11 @@ export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallback
       const params = new URLSearchParams(queryParams);
       
       let token = params.get("token") || params.get("code");
-      const isNewParam = params.get("is_new") === "1" || params.get("is_new_user") === "true";
+      const isNewParam =
+        params.get("is_new") === "1" ||
+        params.get("is_new") === "true" ||
+        params.get("is_new_user") === "true" ||
+        params.get("is_new_user") === "1";
       isNewUserRef.current = isNewParam;
 
       if (!token && typeof window !== "undefined") {
@@ -47,11 +51,13 @@ export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallback
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
-      // Store flag for Welcome modal before navigating to Dashboard
+      // Store explicit mutually exclusive flag for Welcome modal before navigating to Dashboard
       if (isNewParam) {
         sessionStorage.setItem("sonikoma_show_welcome_user", "true");
+        sessionStorage.removeItem("sonikoma_show_welcome_back");
       } else {
         sessionStorage.setItem("sonikoma_show_welcome_back", "true");
+        sessionStorage.removeItem("sonikoma_show_welcome_user");
       }
 
       // Trigger checkAuth in parallel to hydrate user state
@@ -59,14 +65,18 @@ export default function AuthCallbackPage({ navigateTo, checkAuth }: AuthCallback
         checkAuth().catch(() => {});
       }
 
-      // Navigate immediately to Dashboard so the modal shows directly on the Dashboard UI
-      navigateTo("/dashboard");
+      // Transition timer: displays Callback page 1st, then redirects to Dashboard where Welcome modal opens
+      const timer = setTimeout(() => {
+        navigateTo("/dashboard");
+      }, 1500);
+
+      return () => clearTimeout(timer);
     } catch (err: any) {
       setErrorMsg(err.message || "Authentication failed.");
     }
   }, [navigateTo, checkAuth]);
 
-  // When user clicks the blue "Go to Dashboard" button (in error fallback):
+  // When user clicks the blue "Go to Dashboard" button:
   const handleGoToDashboardButtonClick = () => {
     if (isNewUserRef.current) {
       sessionStorage.setItem("sonikoma_show_welcome_user", "true");

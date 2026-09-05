@@ -112,6 +112,7 @@ export default function useRegisterForm(props: RegisterFormProps) {
         throw new Error("Failed to create account. Please try again.");
       }
       sessionStorage.setItem("sonikoma_show_welcome_user", "true");
+      sessionStorage.removeItem("sonikoma_show_welcome_back");
       const target = "/dashboard";
       if (typeof (window as any).navigateTo === "function") {
         (window as any).navigateTo(target);
@@ -140,10 +141,11 @@ export default function useRegisterForm(props: RegisterFormProps) {
   };
 
   const handleSocialRegister = (provider: string) => {
-    console.log(`[OAuth] Register with ${provider}`);
-    setError(
-      `OAuth register via ${provider} is not configured for this environment.`
-    );
+    if (provider === "Google") {
+      window.location.href = "/api/auth/google/login";
+    } else {
+      setError(`OAuth register via ${provider} is not configured yet.`);
+    }
   };
 
   return {

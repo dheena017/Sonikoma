@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { X, Hand, ArrowRight, FolderKanban, Zap, Cpu } from "lucide-react";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface WelcomeBackUserModalProps {
   username?: string;
@@ -15,12 +16,12 @@ export interface WelcomeBackUserModalProps {
 
 export function WelcomeBackUserModal({
   username,
-  title = username ? `Welcome Back, ${username}!` : "Welcome Back, Creator!",
-  message = "Great to see you again in Sonikoma Studio! All your active storyboards, custom AI character profiles, and saved export settings have been restored.",
+  title = username ? `Welcome back, ${username}!` : "Welcome Back!",
+  message = "Good to see you again! We've saved your progress so you can jump right back into creating.",
   isOpen = true,
   onConfirm,
   onCancel,
-  confirmText = "Enter Studio Workspace",
+  confirmText = "Go to Dashboard",
   cancelText = "Close",
 }: WelcomeBackUserModalProps) {
   const isExecutingRef = React.useRef(false);
@@ -58,12 +59,12 @@ export function WelcomeBackUserModal({
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-blue-500/20 to-purple-500/20 border border-blue-500/30 text-blue-400">
-              <Hand className="h-5 w-5 animate-bounce" />
+            <div className="p-1.5 rounded-2xl bg-gradient-to-tr from-blue-500/20 to-purple-500/20 border border-blue-500/30 flex items-center justify-center shrink-0">
+              <SonikomaLogo iconOnly size="sm" />
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
-                👋 Workspace Restored & Synced
+                👋 Workspace Ready
               </span>
               <h2 className="text-base font-bold text-white tracking-tight mt-0.5">
                 {title}
@@ -92,30 +93,30 @@ export function WelcomeBackUserModal({
             <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <div className="flex items-center gap-2.5">
                 <FolderKanban className="h-4 w-4 text-blue-400 shrink-0" />
-                <span className="font-semibold text-white">Active Projects</span>
+                <span className="font-semibold text-white">Your Projects</span>
               </div>
-              <span className="text-[11px] font-mono text-neutral-400 font-bold bg-neutral-800 px-2 py-0.5 rounded-lg border border-white/5">
-                Drafts Ready
+              <span className="text-[11px] text-blue-300 font-bold bg-blue-500/10 px-2.5 py-0.5 rounded-lg border border-blue-500/20">
+                Saved & Ready
               </span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <div className="flex items-center gap-2.5">
                 <Zap className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="font-semibold text-white">AI Credit Balance</span>
+                <span className="font-semibold text-white">AI Credits</span>
               </div>
-              <span className="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
-                Active & Available
+              <span className="text-[11px] text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-500/20">
+                Available
               </span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <div className="flex items-center gap-2.5">
                 <Cpu className="h-4 w-4 text-purple-400 shrink-0" />
-                <span className="font-semibold text-white">Render Pipeline</span>
+                <span className="font-semibold text-white">Video Studio</span>
               </div>
-              <span className="text-[11px] font-mono text-purple-300 font-bold bg-purple-500/10 px-2 py-0.5 rounded-lg border border-purple-500/20">
-                GPU Accelerated
+              <span className="text-[11px] text-purple-300 font-bold bg-purple-500/10 px-2.5 py-0.5 rounded-lg border border-purple-500/20">
+                Ready
               </span>
             </div>
           </div>

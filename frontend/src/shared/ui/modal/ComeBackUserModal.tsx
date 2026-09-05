@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { X, Sparkles, ArrowRight, Flame, ShieldCheck, Cloud, Clock } from "lucide-react";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface ComeBackUserModalProps {
   username?: string;
@@ -15,12 +16,12 @@ export interface ComeBackUserModalProps {
 
 export function ComeBackUserModal({
   username,
-  title = username ? `Leaving Sonikoma, ${username}?` : "Leaving Sonikoma Studio?",
-  message = "You are signing out of your creator session. Don't worry—your active storyboards, audio voiceovers, panel crops, and AI credit balances are safely stored in cloud backup.",
+  title = username ? `Leaving so soon, ${username}?` : "Signing Out?",
+  message = "Don't worry—all your active storyboards, character settings, and credits are safely saved.",
   isOpen = true,
   onConfirm,
   onCancel,
-  confirmText = "Confirm Sign Out",
+  confirmText = "Sign Out",
   cancelText = "Stay Signed In",
 }: ComeBackUserModalProps) {
   const isExecutingRef = React.useRef(false);
@@ -58,12 +59,12 @@ export function ComeBackUserModal({
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-400">
-              <Flame className="h-5 w-5 animate-pulse" />
+            <div className="p-1.5 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <SonikomaLogo iconOnly size="sm" />
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                ✨ See You Soon, Creator
+                👋 See You Soon
               </span>
               <h2 className="text-base font-bold text-white tracking-tight mt-0.5">
                 {title}
@@ -92,23 +93,23 @@ export function ComeBackUserModal({
             <div className="flex items-center gap-3 p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <Cloud className="h-4 w-4 text-emerald-400 shrink-0" />
               <div>
-                <h4 className="font-bold text-white">Automatic Cloud Backup</h4>
-                <p className="text-[11px] text-neutral-400">Your latest edits and character models are safe.</p>
+                <h4 className="font-bold text-white">Cloud Backup</h4>
+                <p className="text-[11px] text-neutral-400">Your work stays safe in your account.</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <Clock className="h-4 w-4 text-teal-400 shrink-0" />
               <div>
-                <h4 className="font-bold text-white">Instant Resume Anytime</h4>
-                <p className="text-[11px] text-neutral-400">Log back in on any browser to resume creating.</p>
+                <h4 className="font-bold text-white">Instant Resume</h4>
+                <p className="text-[11px] text-neutral-400">Log back in anytime to continue where you left off.</p>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2 text-[11px] text-emerald-300/90 bg-emerald-950/30 border border-emerald-500/20 p-3 rounded-xl">
             <Sparkles className="h-4 w-4 text-emerald-400 shrink-0" />
-            <span>Thank you for building with Sonikoma Studio. Have a productive break!</span>
+            <span>Thank you for creating with Sonikoma Studio!</span>
           </div>
         </div>
 

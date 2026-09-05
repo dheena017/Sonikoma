@@ -84,6 +84,7 @@ export default function useLoginForm(props: LoginFormProps) {
         throw new Error("Invalid email or password. Please try again.");
       }
       sessionStorage.setItem("sonikoma_show_welcome_back", "true");
+      sessionStorage.removeItem("sonikoma_show_welcome_user");
       const target = "/dashboard";
       if (typeof (window as any).navigateTo === "function") {
         (window as any).navigateTo(target);
