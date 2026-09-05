@@ -17,17 +17,17 @@ export default function EditorHeaderFrame({
 }: EditorHeaderFrameProps) {
   return (
     <div
-      className={`relative flex items-center justify-between w-full min-h-12 px-3.5 shrink-0 bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-[#2A2A2A] border border-[#3B82F6]/30 rounded-2xl backdrop-blur-xl p-3 shadow-[0_8px_30px_rgba(0,0,0,0.5)] select-none gap-2 z-10 ${className}`}
+      className={`editor-header-frame relative flex w-full min-h-12 shrink-0 items-center justify-between gap-2 rounded-2xl border border-[#3B82F6]/30 bg-gradient-to-r from-neutral-900/95 via-neutral-900/75 to-[#2A2A2A] p-3 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.5)] select-none z-10 ${className}`}
     >
-      <div className="flex items-center gap-2.5 shrink-0 min-w-0">
+      <div className="editor-header-frame__left flex min-w-0 items-center gap-2.5">
         {left}
       </div>
       {center && (
-        <div className={`flex items-center justify-center shrink-0 ${centerClassName}`}>
+        <div className={`editor-header-frame__center flex shrink-0 items-center justify-center ${centerClassName}`}>
           {center}
         </div>
       )}
-      <div className="flex items-center gap-2 shrink-0 justify-end">
+      <div className="editor-header-frame__right flex shrink-0 items-center justify-end gap-2">
         {right}
       </div>
     </div>

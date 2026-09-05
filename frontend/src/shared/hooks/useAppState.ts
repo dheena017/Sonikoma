@@ -283,9 +283,7 @@ export function useAppState() {
         const urlToken = params.get("token");
         if (urlToken) {
           localStorage.setItem("sonikoma_token", urlToken);
-          params.delete("token");
-          const newSearch = params.toString() ? `?${params.toString()}` : "";
-          window.history.replaceState({}, "", `${window.location.pathname}${newSearch}`);
+          window.history.replaceState({}, "", window.location.pathname);
         }
       }
 

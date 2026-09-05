@@ -23,6 +23,9 @@ const RegisterPage = React.lazy(
 const ForgotPasswordPage = React.lazy(
   () => import("@/features/app_auth/pages/ForgotPasswordPage")
 );
+const AuthCallbackPage = React.lazy(
+  () => import("@/features/app_auth/pages/AuthCallbackPage")
+);
 
 // --- Lazy Loaded Feature Pages & Modals ---
 const ScraperPage = React.lazy(
@@ -658,6 +661,24 @@ export default function AppRouter(props: AppRouterProps) {
           onNavigateToLogin={() => navigateTo("/login")}
           onNavigateHome={() => navigateTo("/")}
         />
+      </React.Suspense>
+    );
+  }
+
+  // --- Guard: OAuth Callback Launch Screen ---
+  if (
+    currentPath.startsWith("/auth/callback") ||
+    currentPath.startsWith("/auth/redirect") ||
+    currentPath.startsWith("/auth/google/callback") ||
+    currentPath.startsWith("/auth/launch")
+  ) {
+    return (
+      <React.Suspense
+        fallback={
+          <LoadingPage status="Launching Sonikoma..." themeMode={themeMode} />
+        }
+      >
+        <AuthCallbackPage navigateTo={navigateTo} checkAuth={checkAuth} />
       </React.Suspense>
     );
   }

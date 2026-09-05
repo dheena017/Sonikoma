@@ -313,9 +313,9 @@ async def google_callback(
 
         access_token = create_access_token(data={"sub": user["user_id"]})
 
-        # Redirect to frontend dashboard with token parameter for client-side state hydration
+        # Redirect to frontend OAuth launch page with token parameter for animated landing & session hydration
         base_target = (APP_URL or "http://localhost:5173").rstrip("/")
-        redirect_url = f"{base_target}/dashboard?token={access_token}"
+        redirect_url = f"{base_target}/auth/callback?token={access_token}"
         resp = RedirectResponse(redirect_url)
 
         cookie_kwargs = {
