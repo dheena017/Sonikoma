@@ -878,7 +878,7 @@ const StoryboardTimeline = React.memo(
       return (
         <div
           id="panels_timeline_section"
-          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[190px] flex-1 flex flex-col"
+          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[calc(100vh-200px)] lg:min-h-[190px] flex-1 flex flex-col w-full"
         >
           <StoryboardHeader
             panelsLength={0}
@@ -895,7 +895,7 @@ const StoryboardTimeline = React.memo(
     return (
       <div
         id="panels_timeline_section"
-        className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 transition-all pb-3 relative shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[190px] flex-1 flex flex-col"
+        className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 transition-all pb-3 relative shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-h-[calc(100vh-200px)] lg:min-h-[190px] flex-1 flex flex-col w-full"
       >
         <StoryboardAnalysisBanner
           isAnalyzingAll={isAnalyzingAll}
@@ -998,7 +998,7 @@ const StoryboardTimeline = React.memo(
           }
 
           return (
-            <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+            <div className="flex flex-col lg:flex-row gap-6 w-full items-stretch flex-1 min-h-0">
               <StoryboardSidebar
                 episodeGroups={episodeGroups}
                 panels={panels}

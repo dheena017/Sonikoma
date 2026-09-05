@@ -264,10 +264,10 @@ function PanelCard({
       aria-label={`Panel ${idx + 1}${isSelected ? ", selected" : ""}`}
       aria-pressed={isSelected}
       className={[
-        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90 [content-visibility:auto] [contain-intrinsic-size:260px_320px]",
+        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90",
         viewLayout === "grid"
           ? "w-full min-w-0"
-          : "w-[240px] sm:w-[260px] shrink-0",
+          : "w-full sm:w-[300px] shrink-0",
         isProcessing
           ? "border-2 border-[#3B82F6] bg-[#2A2A2A]  ring-1 ring-[#3B82F6]/50 scale-[1.02]"
           : isSelected

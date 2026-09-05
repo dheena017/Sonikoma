@@ -95,18 +95,18 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   return (
     <div
       id="dynamic_input_box"
-      className="relative z-20 rounded-[28px] border border-[#2F2F2F] bg-[#121212]/95 backdrop-blur-2xl p-4 sm:p-8 shadow-2xl space-y-6 min-w-0 w-full overflow-visible animate-fade-in"
+      className="relative z-20 rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#121212] to-[#0E0E0E] backdrop-blur-2xl p-4 sm:p-8 shadow-2xl space-y-6 min-w-0 w-full overflow-visible animate-fade-in"
     >
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1.5">
-          <div className="w-fit flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E1E1E] border border-[#2F2F2F] text-[#60A5FA] ">
+          <div className="w-fit flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E1E1E] border border-[#2F2F2F] text-[#60A5FA] shadow-sm">
             <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
             <span className="text-[10px] font-black tracking-[0.2em] uppercase font-mono">
               Project Constructor
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-[1.1]">
             Initialize New Video Pipeline
           </h2>
           <p className="text-xs sm:text-sm text-neutral-400 font-medium">
@@ -119,12 +119,12 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
       {/* 2. Input Mode Selector & Tab Header */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2F2F2F] pb-4">
-          <div className="flex p-1 rounded-2xl bg-[#121212] border border-[#2F2F2F] gap-1.5 shadow-inner">
+          <div className="grid grid-cols-2 w-full sm:w-fit p-1 rounded-2xl bg-[#121212] border border-[#2F2F2F] gap-1.5 shadow-inner">
             <Tooltip text="Import panels via online webtoon, manga, or comic reader URL" placement="bottom">
               <button
                 type="button"
                 onClick={() => setInputMode("url")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                className={`min-w-0 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 text-center leading-tight cursor-pointer ${
                   inputMode === "url"
                     ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
                     : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-[#2F2F2F]"
@@ -132,7 +132,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 aria-label="Scrape Comic / Manhwa URL"
               >
                 <Book className={`w-4 h-4 ${inputMode === "url" ? "text-white" : "text-[#3B82F6]"}`} />
-                <span>Scrape Comic / Manhwa URL</span>
+                <span className="min-w-0">Scrape Comic / Manhwa URL</span>
               </button>
             </Tooltip>
 
@@ -140,7 +140,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               <button
                 type="button"
                 onClick={() => setInputMode("upload")}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                className={`min-w-0 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 text-center leading-tight cursor-pointer ${
                   inputMode === "upload"
                     ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
                     : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-[#2F2F2F]"
@@ -148,7 +148,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 aria-label="Upload Local Images"
               >
                 <UploadCloud className={`w-4 h-4 ${inputMode === "upload" ? "text-white" : "text-[#3B82F6]"}`} />
-                <span>Upload Local Images</span>
+                <span className="min-w-0">Upload Local Images</span>
                 {selectedFiles.length > 0 && (
                   <span className="px-2 py-0.5 text-[9px] font-black bg-white/20 text-white rounded-full font-mono">
                     {selectedFiles.length}

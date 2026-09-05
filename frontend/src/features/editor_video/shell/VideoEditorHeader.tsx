@@ -272,16 +272,16 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           </button>
         </div>
 
-        {/* Server Status Indicator */}
-        <div className="flex items-center justify-center">
+        {/* Server Status Indicator - Hidden on mobile (<580px) */}
+        <div className="hidden min-[580px]:flex items-center justify-center">
           <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-          {/* 🤖 Global AI Model Selector */}
-          <AIModelSelector className="flex" />
+          {/* 🤖 Global AI Model Selector - Hidden on very narrow mobile (<480px) */}
+          <AIModelSelector compact className="hidden min-[480px]:flex shrink-0" />
 
-          {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
+          {/* ⚡ Credits Pill & Popover */}
           {credits !== null && (
             <div className="relative" ref={creditsRef}>
               <button
@@ -290,7 +290,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                   setShowNotifications(false);
                 }}
                 title="Your credit balance & daily rewards — click to view"
-                className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                className={`h-8.5 flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
                   showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#2A2A2A]" : ""
                 }`}
               >
@@ -475,7 +475,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
           <div className="relative">
             <button
               onClick={() => setDrawerOpen(true)}
-              className="w-9 h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-[#93C5FD] hover:bg-[#3B82F6]/10 transition-all cursor-pointer flex items-center justify-center relative shadow-sm"
+              className="w-8.5 h-8.5 sm:w-9 sm:h-9 rounded-xl border border-neutral-700/60 bg-neutral-800/80 text-neutral-300 hover:text-[#93C5FD] hover:bg-[#3B82F6]/10 transition-all cursor-pointer flex items-center justify-center relative shadow-sm shrink-0"
               title={
                 activeProjectId && activeProjectData
                   ? `Active Project: ${
@@ -491,14 +491,14 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           </div>
 
-          {/* User Profile Pill at Far Right End (Matches MainHeader) */}
+          {/* User Profile Pill at Far Right End */}
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
             className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
             title="View Profile & Account Settings"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#1E1E1E] border border-white/5">
+            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#1E1E1E] border border-white/5">
               {activeUser?.full_name ||
                 activeUser?.username ||
                 (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}

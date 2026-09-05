@@ -57,9 +57,9 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
   };
 
   return (
-    <div className="h-8 px-3 border-t border-[#2F2F2F] bg-[#1E1E1E] flex items-center justify-between shrink-0 gap-2">
+    <div className="min-h-[36px] h-auto md:h-8 px-3 border-t border-[#2F2F2F] bg-[#1E1E1E] flex items-center justify-between shrink-0 gap-2.5 overflow-x-auto py-1 md:py-0 select-none">
       {/* Add audio */}
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-2 shrink-0">
         <Tooltip text="Add audio track or sound effect" placement="top">
           <button
             onClick={onOpenMediaPicker}

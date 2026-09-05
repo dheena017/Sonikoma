@@ -163,9 +163,11 @@ const BlankViewport: React.FC<BlankViewportProps> = ({
   };
 
   const handleBackgroundWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const factor = e.deltaY < 0 ? 1.08 : 0.92;
-    updateBackgroundZoom(layerTransforms.background.scale * factor);
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.08 : 0.92;
+      updateBackgroundZoom(layerTransforms.background.scale * factor);
+    }
   };
 
   const renderZoomToolbar = () => (

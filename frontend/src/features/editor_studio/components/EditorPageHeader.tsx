@@ -207,28 +207,28 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-2 sm:gap-3 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 shadow-md shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-1 sm:gap-2.5 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl pl-2 sm:pl-4 pr-3 sm:pr-6 md:pr-8 shadow-md shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
         className || ""
       }`}
       style={style}
     >
       {/* Left Section - Menu Icon + Title + Metadata */}
       <div className="flex items-center shrink-0 h-full">
-        {/* PREMIUM ALIGNMENT FIX: w-20 wrapper perfectly aligns the menu button above the mini-sidebar */}
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1.5 sm:mr-3">
+        {/* PREMIUM ALIGNMENT FIX: w-14 wrapper aligns the menu button above mini-sidebar */}
+        <div className="w-9 sm:w-14 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1 sm:mr-3">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
+              className="w-8.5 h-8.5 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
               title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
             >
-              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Menu className="h-4 w-4" />
             </button>
           )}
         </div>
 
         <div
-          className="flex items-center gap-3 cursor-pointer"
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer"
           onClick={onBackToApp}
         >
           {coverImage ? (
@@ -238,7 +238,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
               alt={title}
-              className="h-10 w-10 rounded-xl bg-[#1E1E1E] object-cover border border-[#2F2F2F] shrink-0 shadow-md"
+              className="h-8.5 w-8.5 sm:h-10 sm:w-10 rounded-xl bg-[#1E1E1E] object-cover border border-[#2F2F2F] shrink-0 shadow-md"
             />
           ) : (
             <img
@@ -247,11 +247,11 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
               }}
               alt="Sonikoma Logo"
-              className="h-10 w-10 rounded-full bg-[#1E1E1E] object-cover border border-[#2F2F2F] shrink-0 shadow-md"
+              className="h-8.5 w-8.5 sm:h-10 sm:w-10 rounded-full bg-[#1E1E1E] object-cover border border-[#2F2F2F] shrink-0 shadow-md"
             />
           )}
 
-          <div className="min-w-0 hidden sm:block max-w-[280px] md:max-w-[340px] lg:max-w-[420px]">
+          <div className="min-w-0 hidden min-[540px]:block max-w-[180px] sm:max-w-[280px] md:max-w-[340px] lg:max-w-[420px]">
             {/* Top Workspace & Source Website Badge */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#3B82F6]/90 leading-none">
@@ -303,21 +303,19 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         </div>
       </div>
 
-
-
-      {/* Right Section - Action Buttons (Unified h-9 height and clean spacing) */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-nowrap">
-        {/* 🟢 Server Status Indicator - Hidden on ultra-small screens (<480px) */}
-        <div className="hidden min-[480px]:block">
+      {/* Right Section - Action Buttons */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-nowrap pr-0.5 sm:pr-1">
+        {/* 🟢 Server Status Indicator - Hidden on screens (<580px) */}
+        <div className="hidden min-[580px]:block">
           <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
         </div>
 
-        {/* 🤖 Global AI Model Selector */}
-        <AIModelSelector className="flex" />
+        {/* 🤖 Global AI Model Selector - Hidden on narrow mobile (<640px) */}
+        <AIModelSelector compact className="hidden min-[640px]:flex shrink-0" />
 
-        {/* ⚡ Credits Pill & Popover (Image 1 Style) */}
+        {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (
-          <div className="relative" ref={creditsRef}>
+          <div className="relative shrink-0" ref={creditsRef}>
             <Tooltip text="Credits & Daily Bonus" placement="bottom">
               <button
                 onClick={() => {
@@ -325,10 +323,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                   setShowNotifications(false);
                 }}
                 aria-label="Your credit balance & daily rewards"
-                className="flex h-9 items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 rounded-full border border-[#2b2d35] bg-[#18191e] hover:bg-[#202127] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm"
+                className="flex h-8.5 items-center gap-1 px-2.5 sm:px-3 rounded-xl border border-[#33353e] bg-[#202127] hover:bg-[#282a32] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm shrink-0"
               >
-                <Zap className="h-3.5 sm:h-4 w-3.5 sm:w-4 shrink-0 fill-amber-400 text-amber-400" />
-                <span>{credits.toLocaleString()}</span>
+                <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
+                <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
               </button>
             </Tooltip>
 
@@ -349,43 +347,47 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           </div>
         )}
 
-        {/* Player Toggle Button */}
-        <Tooltip text="Toggle Floating Video Preview" placement="bottom">
-          <button
-            type="button"
-            onClick={() => {
-              const current =
-                useImageEditorStore.getState().playerSettings.isPlayerOpen;
-              useImageEditorStore
-                .getState()
-                .setPlayerSettings({ isPlayerOpen: !current });
-            }}
-            aria-label="Toggle Floating Player"
-            className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
-              isPlayerOpen
-                ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]"
-                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/20 hover:text-[#93C5FD]"
-            }`}
-          >
-            <Monitor className="h-4 w-4" />
-          </button>
-        </Tooltip>
+        {/* Player Toggle Button - Hidden on mobile (<640px) */}
+        <div className="hidden sm:block">
+          <Tooltip text="Toggle Floating Video Preview" placement="bottom">
+            <button
+              type="button"
+              onClick={() => {
+                const current =
+                  useImageEditorStore.getState().playerSettings.isPlayerOpen;
+                useImageEditorStore
+                  .getState()
+                  .setPlayerSettings({ isPlayerOpen: !current });
+              }}
+              aria-label="Toggle Floating Player"
+              className={`flex items-center justify-center h-8.5 w-8.5 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                isPlayerOpen
+                  ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]"
+                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-[#93C5FD]"
+              }`}
+            >
+              <Monitor className="h-4 w-4" />
+            </button>
+          </Tooltip>
+        </div>
 
-        {/* Focus Mode */}
-        <Tooltip text={isFocusMode ? "Exit Focus Mode" : "Focus Mode"} placement="bottom">
-          <button
-            type="button"
-            onClick={() => setIsFocusMode((value) => !value)}
-            aria-label={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
-            className={`flex items-center justify-center h-9 w-9 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
-              isFocusMode
-                ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]"
-                : "border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/20 hover:text-[#93C5FD]"
-            }`}
-          >
-            <Focus className="h-4 w-4" />
-          </button>
-        </Tooltip>
+        {/* Focus Mode - Hidden on narrow screens (<520px) */}
+        <div className="hidden min-[520px]:block">
+          <Tooltip text={isFocusMode ? "Exit Focus Mode" : "Focus Mode"} placement="bottom">
+            <button
+              type="button"
+              onClick={() => setIsFocusMode((value) => !value)}
+              aria-label={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
+              className={`flex items-center justify-center h-8.5 w-8.5 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                isFocusMode
+                  ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]"
+                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-[#93C5FD]"
+              }`}
+            >
+              <Focus className="h-4 w-4" />
+            </button>
+          </Tooltip>
+        </div>
 
         {/* Save Button */}
         <Tooltip text={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"} placement="bottom">
@@ -394,12 +396,12 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             onClick={onSave}
             disabled={isSaving}
             aria-label={isDirty ? "Save Unsaved Changes" : "Project Saved"}
-            className={`flex items-center gap-1.5 px-3 h-9 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 h-8.5 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border shrink-0 ${
               isSaving
                 ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-[#3B82F6] cursor-wait opacity-80"
                 : isDirty
                 ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white border-[#60A5FA]/50 shadow-lg shadow-black/50 animate-pulse"
-                : "bg-neutral-900 hover:bg-neutral-800 border-neutral-800 text-neutral-300 hover:text-white"
+                : "bg-[#202127] hover:bg-[#282a32] border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white"
             }`}
           >
             <Save
@@ -411,19 +413,19 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                   : "text-neutral-400"
               }`}
             />
-            <span className="hidden sm:inline font-sans text-[11px]">
+            <span className="hidden min-[480px]:inline font-sans text-[11px]">
               {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
             </span>
           </button>
         </Tooltip>
 
         {/* Notifications */}
-        <div className="relative" ref={notificationsRef}>
+        <div className="relative shrink-0" ref={notificationsRef}>
           <Tooltip text="Notifications" placement="bottom">
             <button
               onClick={() => setShowNotifications((v) => !v)}
               aria-label="Notifications"
-              className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/20 hover:text-[#93C5FD] transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
+              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-[#93C5FD] transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
             >
               {notificationsMuted ? (
                 <BellOff className="h-4 w-4 text-rose-500" />
@@ -452,8 +454,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           )}
         </div>
 
-        {/* Active Project Selector Icon Button */}
-        <div className="relative">
+        {/* Active Project Selector Icon Button - Hidden on narrow mobile (<480px) */}
+        <div className="hidden min-[480px]:block relative shrink-0">
           <Tooltip
             text={
               activeProjectId && activeProjectData
@@ -464,7 +466,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className="h-9 w-9 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-400 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/20 hover:text-[#93C5FD] transition-all cursor-pointer active:scale-95 flex items-center justify-center relative"
+              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-[#93C5FD] transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
               aria-label="Active Project Selector"
             >
               <FolderSync className="h-4 w-4 text-[#3B82F6]" />
@@ -475,14 +477,14 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           </Tooltip>
         </div>
 
-        {/* User Profile Pill at Far Right End (Image 2 Style) */}
+        {/* User Profile Pill at Far Right End */}
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo?.("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
               {user?.full_name ||
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}

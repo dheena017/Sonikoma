@@ -159,7 +159,7 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         className="h-8 flex shrink-0 bg-[#1E1E1E] border-b border-[#2F2F2F] cursor-pointer select-none group/ruler"
       >
         {/* Spacer aligned with the track labels column */}
-        <div className="w-56 shrink-0 sticky left-0 z-50 border-r border-[#2F2F2F] bg-[#121212] flex items-center justify-between px-3 shadow-md">
+        <div className="w-36 sm:w-56 shrink-0 border-r border-[#2F2F2F] bg-[#121212] flex items-center justify-between px-2 sm:px-3 shadow-md">
           <div className="flex items-center gap-1.5 min-w-0">
             <Clock className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
             <span className="text-[10px] font-mono font-bold text-neutral-200 truncate">

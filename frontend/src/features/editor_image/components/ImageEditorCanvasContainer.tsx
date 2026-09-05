@@ -173,24 +173,25 @@ export default function ImageEditorCanvasContainer({
 
   return (
     <div
-      className="flex flex-col space-y-2 lg:h-full flex-1 min-h-[350px] lg:min-h-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="flex flex-col space-y-2 h-full w-full flex-1 min-h-0 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{
         pointerEvents: "auto",
       }}
     >
-      <div className="flex justify-between items-center bg-[#141414] px-3 py-1.5 rounded-xl border border-[#2F2F2F] shadow-sm">
+      <div className="flex flex-nowrap items-center justify-between gap-1.5 sm:gap-2 bg-gradient-to-r from-[#171717] to-[#121212] px-2.5 sm:px-3 py-1.5 rounded-xl border border-[#2F2F2F] shadow-sm select-none shrink-0 overflow-hidden">
         {/* Left: Canvas Title */}
-        <div className="flex items-center gap-2">
-          <div className="p-1 rounded-lg bg-[#1E1E1E] border border-[#2F2F2F]">
+        <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="p-1 rounded-lg bg-[#1E1E1E] border border-[#2F2F2F] shrink-0">
             <Move className="h-3.5 w-3.5 text-[#3B82F6]" />
           </div>
-          <span className="text-[11px] uppercase font-mono font-bold text-[#E5E5E5] tracking-wider">
-            Interactive Viewport Canvas
+          <span className="min-w-0 truncate text-[10px] sm:text-[11px] uppercase font-mono font-bold text-[#E5E5E5] tracking-wider whitespace-nowrap">
+            <span className="hidden sm:inline">Interactive Viewport Canvas</span>
+            <span className="sm:hidden">Canvas Viewport</span>
           </span>
         </div>
 
         {/* Center: Canvas Action & Status Toolbar */}
-        <div className="flex items-center gap-1.5 bg-[#121212] px-2.5 py-1 rounded-xl border border-[#2F2F2F] shadow-inner">
+        <div className="flex items-center gap-1 bg-[#121212] px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[#2F2F2F] shadow-inner shrink-0">
           {handleUndo && (
             <button
               onClick={handleUndo}
@@ -244,7 +245,7 @@ export default function ImageEditorCanvasContainer({
         </div>
 
         {/* Right: Actions, AI Smart Crop & Mode Badges */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center justify-end gap-1.5 shrink-0 ml-auto">
           {/* Cancel Button */}
           <button
             onClick={() => {
@@ -264,11 +265,11 @@ export default function ImageEditorCanvasContainer({
                 }
               }
             }}
-            className="h-7 px-2.5 text-[10px] font-mono font-bold rounded-lg flex items-center gap-1 bg-[#1E1E1E] text-[#9CA3AF] hover:text-white hover:bg-[#262626] border border-[#2F2F2F] transition-all cursor-pointer active:scale-95"
+            className="h-7 px-2 sm:px-2.5 text-[10px] font-mono font-bold rounded-lg flex items-center gap-1 bg-[#1E1E1E] text-[#9CA3AF] hover:text-white hover:bg-[#262626] border border-[#2F2F2F] transition-all cursor-pointer active:scale-95 shrink-0"
             title="Cancel changes and return"
           >
             <X className="w-3 h-3 text-[#9CA3AF]" />
-            <span>Cancel</span>
+            <span className="hidden min-[480px]:inline">Cancel</span>
           </button>
 
           {/* Apply Changes Button */}
@@ -282,7 +283,7 @@ export default function ImageEditorCanvasContainer({
               }
             }}
             disabled={isSavingEdit}
-            className="h-7 px-3 text-[10px] font-mono font-black rounded-lg flex items-center gap-1.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white  hover: border border-[#60A5FA]/40 transition-all cursor-pointer active:scale-95 uppercase tracking-wider disabled:opacity-50"
+            className="h-7 px-2.5 sm:px-3 text-[10px] font-mono font-black rounded-lg flex items-center gap-1 sm:gap-1.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white hover:border border-[#60A5FA]/40 transition-all cursor-pointer active:scale-95 uppercase tracking-wider disabled:opacity-50 shrink-0"
             title="Apply & Save Changes"
           >
             {isSavingEdit ? (
@@ -290,15 +291,16 @@ export default function ImageEditorCanvasContainer({
             ) : (
               <Check className="w-3 h-3 text-white" />
             )}
-            <span>Apply Changes</span>
+            <span className="hidden sm:inline">Apply Changes</span>
+            <span className="sm:hidden">Apply</span>
           </button>
 
-          <div className="w-px h-3.5 bg-[#2F2F2F] mx-0.5" />
+          <div className="hidden min-[640px]:block w-px h-3.5 bg-[#2F2F2F] mx-0.5" />
 
           <button
             onClick={handleAiCrop}
             disabled={isAiDetecting}
-            className="btn-secondary flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold"
+            className="hidden min-[640px]:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] font-mono font-bold bg-[#1E1E1E] border border-[#2F2F2F] text-white hover:bg-[#262626] transition-all cursor-pointer shrink-0"
           >
             {isAiDetecting ? (
               <RefreshCw className="h-3 w-3 animate-spin text-[#3B82F6]" />
@@ -307,10 +309,10 @@ export default function ImageEditorCanvasContainer({
             )}
             <span>AI Smart Crop</span>
           </button>
-          <span className="text-[9px] bg-[#1E1E1E] text-[#3B82F6] font-mono font-bold px-2 py-1 rounded-lg border border-[#2F2F2F]">
+          <span className="hidden min-[768px]:inline-flex text-[9px] bg-[#1E1E1E] text-[#3B82F6] font-mono font-bold px-2 py-1 rounded-lg border border-[#2F2F2F] shrink-0">
             Draw
           </span>
-          <span className="text-[9px] bg-[#1E1E1E] text-[#10B981] font-mono font-bold px-2 py-1 rounded-lg border border-[#2F2F2F]">
+          <span className="hidden min-[768px]:inline-flex text-[9px] bg-[#1E1E1E] text-[#10B981] font-mono font-bold px-2 py-1 rounded-lg border border-[#2F2F2F] shrink-0">
             Move
           </span>
         </div>

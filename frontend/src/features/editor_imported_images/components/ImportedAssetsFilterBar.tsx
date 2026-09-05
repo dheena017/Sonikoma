@@ -92,42 +92,42 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
       case "too_tall_strip":
         return "Too Tall";
       default:
-        return "All Assets";
+        return "All";
     }
   };
 
   return (
-    <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 flex-1 w-full max-w-none sm:max-w-xl mx-0 sm:mx-2 font-mono text-xs select-none">
+    <div className="flex items-center justify-between gap-1.5 sm:gap-2 flex-1 w-full min-w-0 max-w-none sm:max-w-xl mx-0 font-mono text-xs select-none">
       {/* Search Input Box */}
-      <div className="relative flex-1 min-w-[140px] max-w-[260px] flex items-center">
+      <div className="relative flex-1 min-w-[80px] max-w-[240px] flex items-center">
         <Search className="absolute left-2.5 w-3.5 h-3.5 text-neutral-400 pointer-events-none shrink-0" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search frame (#1, #77)..."
-          className="w-full h-8 pl-8 pr-7 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-[#3B82F6]/60 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-all shadow-inner"
+          placeholder="Search frame..."
+          className="w-full h-8 pl-8 pr-6 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-[#3B82F6]/60 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-all shadow-inner"
         />
         {searchQuery && (
           <button
             type="button"
             onClick={() => setSearchQuery("")}
             title="Clear search"
-            className="absolute right-2 p-0.5 rounded-md text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            className="absolute right-1.5 p-0.5 rounded-md text-neutral-400 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
 
-      {/* Filter Status Dropdown Menu (Opens to the right side) */}
+      {/* Filter Status Dropdown Menu */}
       <div className="relative shrink-0" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className={`h-8 px-3 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+          className={`h-8 px-2 sm:px-3 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-sm ${
             filterStatus !== "all"
-              ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA] "
+              ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
               : "bg-neutral-950/80 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
           }`}
         >

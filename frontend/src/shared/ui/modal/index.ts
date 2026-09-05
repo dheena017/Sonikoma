@@ -14,4 +14,3 @@ export { default as ComeBackUserModal } from "./ComeBackUserModal";
 export type { WelcomeUserModalProps } from "./WelcomeUserModal";
 export type { WelcomeBackUserModalProps } from "./WelcomeBackUserModal";
 export type { GoodbyeUserModalProps } from "./GoodbyeUserModal";
-export type { ComeBackUserModalProps } from "./ComeBackUserModal";

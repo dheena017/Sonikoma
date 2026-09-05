@@ -47,7 +47,7 @@ export const ImageEditorLayout: React.FC<ImageEditorLayoutProps> = ({
         </aside>
 
         {/* Center Canvas & Right properties sidebar (handled by children) */}
-        <main className="flex-grow flex flex-row overflow-hidden relative min-h-0 bg-[#0A0A0A]">
+        <main className="flex-grow flex flex-col overflow-hidden relative min-h-0 bg-[#0A0A0A]">
           {children}
         </main>
       </div>

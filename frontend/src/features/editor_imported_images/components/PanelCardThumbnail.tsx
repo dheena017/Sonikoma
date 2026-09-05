@@ -71,6 +71,7 @@ export function PanelCardThumbnail({
   const [hasError, setHasError] = React.useState(false);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [retryKey, setRetryKey] = React.useState(0);
+  const imgRef = React.useRef<HTMLImageElement | null>(null);
 
   React.useEffect(() => {
     setHasError(false);
@@ -78,6 +79,20 @@ export function PanelCardThumbnail({
   }, [imgUrl]);
 
   const resolvedImgSrc = getProxiedImageUrl(imgUrl);
+
+  // Check if image is already cached/loaded when mounted or src changes
+  React.useEffect(() => {
+    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+      setIsLoaded(true);
+      const dims = {
+        width: imgRef.current.naturalWidth,
+        height: imgRef.current.naturalHeight,
+      };
+      if (onLoadDimensions) {
+        onLoadDimensions(dims);
+      }
+    }
+  }, [resolvedImgSrc, onLoadDimensions]);
 
   React.useEffect(() => {
     const handleReloadAll = () => {
@@ -92,7 +107,7 @@ export function PanelCardThumbnail({
   const resolvedDisplayIdx = displayIdx ?? idx;
 
   return (
-    <div className="relative h-44 sm:h-48 rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-[#3B82F6]/30 transition-all duration-300 ease-out select-none">
+    <div className="relative h-56 sm:h-64 rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-[#3B82F6]/30 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent z-10 pointer-events-none" />
 
@@ -115,12 +130,12 @@ export function PanelCardThumbnail({
         </div>
       ) : (
         <img
+          ref={imgRef}
           key={`${imgUrl}-${retryKey}`}
           src={resolvedImgSrc}
           alt={`Panel #${resolvedDisplayIdx + 1}`}
-          loading="lazy"
           className={`w-full h-full object-contain transition-all duration-300 ease-out z-10 ${
-            !isLoaded ? "opacity-0 scale-98" : "opacity-100 scale-100"
+            !isLoaded ? "opacity-90 scale-98" : "opacity-100 scale-100"
           } ${
             isProcessing
               ? "opacity-20 scale-95 blur-[3px]"
@@ -132,17 +147,17 @@ export function PanelCardThumbnail({
             setIsLoaded(true);
             const img = e.currentTarget;
             if (img.naturalWidth && img.naturalHeight) {
-              onLoadDimensions?.({
+              const dims = {
                 width: img.naturalWidth,
                 height: img.naturalHeight,
-              });
+              };
+              onLoadDimensions?.(dims);
             }
           }}
           onError={(e) => {
             const img = e.currentTarget;
             const currentSrc = img.src;
 
-            // Never proxy local data or blob URIs
             if (
               !currentSrc ||
               currentSrc.startsWith("data:") ||
@@ -158,7 +173,6 @@ export function PanelCardThumbnail({
             }
             img.dataset.retried = "1";
 
-            // If already using the proxy or internal API path, don't wrap again
             if (
               currentSrc.includes("/api/proxy-image") ||
               currentSrc.includes("/api/") ||
@@ -169,13 +183,12 @@ export function PanelCardThumbnail({
               return;
             }
 
-            // Otherwise, last resort: proxy external URL.
             img.src = `/api/proxy-image?url=${encodeURIComponent(currentSrc)}`;
           }}
         />
       )}
 
-      {/* Processing overlay — imported from shared/ui/loading */}
+      {/* Processing overlay */}
       {isProcessing && (
         <PanelProcessingOverlay
           label={getPanelProcessingLabel(
@@ -187,7 +200,7 @@ export function PanelCardThumbnail({
         />
       )}
 
-      {/* Index badge — glassmorphic purple gradient when selected, dark when not */}
+      {/* Index badge */}
       <div
         className={[
           "absolute top-2 left-2 z-20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
@@ -224,7 +237,7 @@ export function PanelCardThumbnail({
         </div>
       )}
 
-      {/* Selection checkbox circle with animated pulse ring */}
+      {/* Selection checkbox circle */}
       <div className="absolute top-2 right-2 z-20">
         {isSelected && (
           <div className="absolute inset-0 rounded-full bg-[#2A2A2A] animate-ping" />
@@ -247,16 +260,17 @@ export function PanelCardThumbnail({
         </div>
       </div>
 
-      {/* Persistent bottom shadow fade — gives depth to the dock area */}
+      {/* Persistent bottom shadow fade */}
       <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none z-20" />
 
-      {/* Floating Quick-action Dock (hover) */}
+      {/* Floating Quick-action Dock */}
       {!isProcessing && (
         <div
           onClick={(e) => e.stopPropagation()}
           className="absolute bottom-2.5 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-out flex gap-1 bg-neutral-950/95 border border-neutral-700/80 px-2 py-1 rounded-2xl z-30 shadow-[0_8px_32px_rgba(0,0,0,0.7)] backdrop-blur-xl"
         >
           <button
+            type="button"
             onClick={handleRotateClockwise}
             title="Rotate 90° Clockwise"
             className="p-1.5 rounded-xl text-neutral-450 hover:text-[#93C5FD] hover:bg-[#2A2A2A] transition-all duration-150 cursor-pointer active:scale-90"
@@ -264,6 +278,7 @@ export function PanelCardThumbnail({
             <RotateCw className="h-3.5 w-3.5" />
           </button>
           <button
+            type="button"
             onClick={handleFlipHorizontal}
             title="Flip Horizontally"
             className="p-1.5 rounded-xl text-neutral-450 hover:text-[#93C5FD] hover:bg-[#2A2A2A] transition-all duration-150 cursor-pointer active:scale-90"
@@ -272,6 +287,7 @@ export function PanelCardThumbnail({
           </button>
           {imgUrl.includes("/cached/") && (
             <button
+              type="button"
               onClick={handleUndo}
               title="Undo Last Edit"
               className="p-1.5 rounded-xl text-neutral-450 hover:text-amber-300 hover:bg-amber-950/40 transition-all duration-150 cursor-pointer active:scale-90"
@@ -284,3 +300,5 @@ export function PanelCardThumbnail({
     </div>
   );
 }
+
+export default React.memo(PanelCardThumbnail);

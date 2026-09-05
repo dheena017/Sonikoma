@@ -328,13 +328,13 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         </div>
 
         {actionSlot || (
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
             <Tooltip text="Extract and import panel images directly from this chapter URL" placement="bottom" disabled={isScraping}>
               <button
                 type="button"
                 onClick={handleImportClick}
                 disabled={isScraping || !targetUrl.trim()}
-                className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
+                className={`relative w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
                   isScraping ? "cursor-wait" : "cursor-pointer"
                 } ${
                   separatedData?.is_chapter_url || !separatedData?.is_series_url
@@ -361,7 +361,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                 type="button"
                 onClick={handleOpenChapterScraperClick}
                 disabled={!targetUrl.trim() || isScraping}
-                className={`relative px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
+                className={`relative w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
                   isScraping ? "cursor-wait" : "cursor-pointer"
                 } ${
                   separatedData?.is_series_url && !separatedData?.is_chapter_url

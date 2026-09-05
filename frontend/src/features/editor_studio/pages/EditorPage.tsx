@@ -432,17 +432,17 @@ const EditorPage: React.FC<EditorPageProps> = ({
       locationSearch={window.location.search}
       user={appLogic.user}
     >
-      <main className="flex-1 w-full relative bg-transparent min-w-0">
+      <main className="flex-1 w-full relative bg-transparent min-w-0 flex flex-col">
         {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
-          className={`relative z-10 bg-transparent min-h-0 min-w-0 ${
+          className={`relative z-10 bg-transparent min-h-0 min-w-0 flex-1 flex flex-col ${
             activeTab === "video-settings" ||
             activeTab === "settings" ||
             activeTab === "audio-settings" ||
             activeTab === "autocrop-settings"
               ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-5xl mx-auto"
-              : `border-t border-white/5 px-3 sm:px-5 lg:px-6 py-3 sm:py-4 flex flex-col gap-3.5 sm:gap-4 w-full max-w-[1720px] mx-auto ${
-                  isFocusMode ? "hidden" : "block"
+              : `border-t border-white/5 px-3 sm:px-5 lg:px-6 py-3 sm:py-4 flex flex-col gap-3.5 sm:gap-4 w-full max-w-[1720px] mx-auto flex-1 min-h-0 ${
+                  isFocusMode ? "hidden" : "flex flex-col flex-1"
                 }`
           }`}
         >
@@ -678,12 +678,16 @@ const EditorPage: React.FC<EditorPageProps> = ({
           ) : (
             <>
               {/* TOP: Video Preview Player / Viewport Monitor */}
-              {playerSettings.isPlayerOpen ? (
-                <div
-                  id="section-monitor"
-                  data-section="section-monitor"
-                  className="w-full scroll-mt-20 min-h-0 flex flex-col"
-                >
+              <div
+                id="section-monitor"
+                data-section="section-monitor"
+                className={`w-full scroll-mt-20 min-h-0 ${
+                  currentSection === "monitor"
+                    ? "flex flex-col flex-1 h-full min-h-[calc(100vh-180px)]"
+                    : "hidden lg:flex lg:flex-col"
+                }`}
+              >
+                {playerSettings.isPlayerOpen ? (
                   <QuickVideoPreview
                     panels={panels}
                     videoUrl={videoUrl}
@@ -713,45 +717,49 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     seriesSlug={seriesSlug}
                     chapterSlug={chapterSlug}
                   />
-                </div>
-              ) : (
-                <div className="w-full mb-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      useImageEditorStore
-                        .getState()
-                        .setPlayerSettings({ isPlayerOpen: true });
-                    }}
-                    className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/80 to-[#2A2A2A] hover:from-neutral-850 hover:to-[#2A2A2A] border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 text-[#60A5FA] hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <div className="h-8 w-8 rounded-xl bg-[#3B82F6]/20 border border-[#3B82F6]/40 flex items-center justify-center text-[#60A5FA] group-hover:scale-105 transition-transform ">
-                        <Tv className="h-4 w-4" />
+                ) : (
+                  <div className="w-full mb-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        useImageEditorStore
+                          .getState()
+                          .setPlayerSettings({ isPlayerOpen: true });
+                      }}
+                      className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/80 to-[#2A2A2A] hover:from-neutral-850 hover:to-[#2A2A2A] border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 text-[#60A5FA] hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <div className="h-8 w-8 rounded-xl bg-[#3B82F6]/20 border border-[#3B82F6]/40 flex items-center justify-center text-[#60A5FA] group-hover:scale-105 transition-transform ">
+                          <Tv className="h-4 w-4" />
+                        </div>
+                        <div className="text-left">
+                          <span className="text-xs font-bold font-mono tracking-wider uppercase block text-white">
+                            Video Preview Viewport
+                          </span>
+                          <span className="text-[10px] text-neutral-400 font-mono">
+                            Click to expand video preview player & visual canvas
+                            monitor
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-left">
-                        <span className="text-xs font-bold font-mono tracking-wider uppercase block text-white">
-                          Video Preview Viewport
-                        </span>
-                        <span className="text-[10px] text-neutral-400 font-mono">
-                          Click to expand video preview player & visual canvas
-                          monitor
-                        </span>
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/40 text-xs font-mono text-[#60A5FA] group-hover:bg-[#2A2A2A] group-hover:text-[#3B82F6] transition-colors shadow-sm">
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>Expand Preview</span>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/40 text-xs font-mono text-[#60A5FA] group-hover:bg-[#2A2A2A] group-hover:text-[#3B82F6] transition-colors shadow-sm">
-                      <Eye className="h-3.5 w-3.5" />
-                      <span>Expand Preview</span>
-                    </div>
-                  </button>
-                </div>
-              )}
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* MIDDLE: Storyboard Workspace */}
               <div
                 id="section-storyboard"
                 data-section="section-timeline"
-                className="w-full scroll-mt-20 min-h-0 flex flex-col"
+                className={`w-full scroll-mt-20 min-h-0 ${
+                  currentSection === "storyboard" || currentSection === "timeline"
+                    ? "flex flex-col flex-1 h-full min-h-[calc(100vh-180px)]"
+                    : "hidden lg:flex lg:flex-col"
+                }`}
               >
                 <StoryboardTimeline
                   panels={panels}
@@ -802,12 +810,17 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   setSelectedPanelIds={handleSetSelectedPanelIds}
                 />
               </div>
+
               {/* BOTTOM: Imported Assets (Resource Pool) */}
               <div
                 id="section-assets"
-                className="w-full scroll-mt-20 min-h-0 flex flex-col"
+                className={`w-full scroll-mt-20 min-h-0 ${
+                  currentSection === "assets" || currentSection === "raw-images"
+                    ? "flex flex-col flex-1 h-full min-h-[calc(100vh-180px)]"
+                    : "hidden lg:flex lg:flex-col"
+                }`}
               >
-                <div className="bg-transparent">
+                <div className="bg-transparent flex-1 flex flex-col h-full min-h-0">
                   <ChapterScraperDeck
                     isDashboardOnly={false}
                     scrapedImages={scrapedImages}

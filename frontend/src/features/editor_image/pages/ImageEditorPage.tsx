@@ -9,7 +9,7 @@ import ImageEditorSidebar from "@/features/editor_image/components/ImageEditorSi
 import { ImageEditorLayout } from "@/features/editor_image/components/ImageEditorLayout";
 import { ImageEditorEmptyState } from "@/features/editor_image/components/ImageEditorEmptyState";
 import { GeneratedPanel } from "@/types";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sliders, Wrench, Save } from "lucide-react";
 
 interface ImageEditorPageProps {
   appLogic: ReturnType<typeof useAppLogic>;
@@ -310,14 +310,14 @@ const ImageEditorPage = React.memo(
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden w-full relative">
           {/* Left Tools Sidebar */}
           <aside
-            className={`w-full lg:w-[min(420px,calc(100vw-80px))] h-[52vh] lg:h-full bg-[#0a0b10] border-r border-white/10 flex-shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] relative ${
+            className={`w-full lg:w-[min(420px,calc(100vw-80px))] bg-[#0a0b10] border-b lg:border-b-0 lg:border-r border-white/10 shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] relative ${
               isToolsPanelOpen
-                ? ""
-                : "h-0 lg:h-full lg:w-0 border-none"
+                ? "flex-1 h-full w-full lg:h-full lg:flex-none lg:w-[min(420px,calc(100vw-80px))]"
+                : "hidden lg:flex h-0 lg:h-full lg:w-0 border-none pointer-events-none opacity-0"
             }`}
           >
             <div
-                className={`w-full lg:w-[min(420px,calc(100vw-80px))] h-full flex flex-col min-h-0 overflow-hidden transition-opacity duration-200 ${
+              className={`w-full lg:w-[min(420px,calc(100vw-80px))] h-full flex flex-col min-h-0 overflow-hidden transition-opacity duration-200 ${
                 !isToolsPanelOpen ? "pointer-events-none opacity-0 invisible" : "opacity-100"
               }`}
             >
@@ -520,14 +520,14 @@ const ImageEditorPage = React.memo(
               />
             </div>
 
-            {/* Floating Sidebar Collapse/Expand Tab Button on the Exact Sidebar Border */}
+            {/* Floating Sidebar Collapse/Expand Tab Button (Desktop Only) */}
             <button
               type="button"
               onClick={() => setIsToolsPanelOpen((prev) => !prev)}
               aria-label={
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }
-              className="absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 sm:w-7 h-24 rounded-r-2xl bg-[#141524] hover:bg-[#1f2138] border-y border-r border-[#3B82F6]/40 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white flex flex-col items-center justify-center gap-1 shadow-[6px_0_20px_rgba(59,130,246,0.35)] transition-all cursor-pointer group active:scale-95 select-none pointer-events-auto"
+              className="hidden lg:flex absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 sm:w-7 h-24 rounded-r-2xl bg-[#141524] hover:bg-[#1f2138] border-y border-r border-[#3B82F6]/40 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white flex-col items-center justify-center gap-1 shadow-[6px_0_20px_rgba(59,130,246,0.35)] transition-all cursor-pointer group active:scale-95 select-none pointer-events-auto"
               title={
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }
@@ -543,7 +543,9 @@ const ImageEditorPage = React.memo(
           </aside>
 
           {/* Center Canvas */}
-          <main className="flex-1 h-full relative overflow-hidden bg-black/30 backdrop-blur-sm flex items-center justify-center">
+          <main className={`flex-1 h-full min-h-0 relative overflow-hidden bg-black/30 backdrop-blur-sm flex items-center justify-center ${
+            isToolsPanelOpen ? "hidden lg:flex" : "flex"
+          }`}>
             <div
               className="absolute inset-0 opacity-20 pointer-events-none"
               style={{
@@ -551,10 +553,69 @@ const ImageEditorPage = React.memo(
                 backgroundSize: "20px 20px",
               }}
             />
-            <div className="relative w-full h-full z-10 flex items-center justify-center p-4">
+            <div className="relative w-full h-full z-10 flex items-center justify-center p-2 sm:p-4">
               {canvasSubtree}
             </div>
           </main>
+        </div>
+
+        {/* ── Mobile Viewport Bottom Navigation Bar (< 1024px) ────────── */}
+        <div className="flex lg:hidden items-center justify-around bg-[#0B0C0E] border-t border-white/10 pt-2 pb-4.5 px-3 shrink-0 z-40 select-none shadow-2xl backdrop-blur-xl">
+          <button
+            type="button"
+            onClick={() => setIsToolsPanelOpen(false)}
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] ${
+              !isToolsPanelOpen
+                ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Sliders className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">Canvas</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsToolsPanelOpen((prev) => !prev)}
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] ${
+              isToolsPanelOpen
+                ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Wrench className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">Tools</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => editorProps.handlePrevImage()}
+            disabled={editingImageIdx === null || editingImageIdx <= 0}
+            className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] text-neutral-400 hover:text-white disabled:opacity-35 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">Prev</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => editorProps.handleNextImage()}
+            disabled={editingImageIdx === null || editingImageIdx >= (appLogic.scrapedImages?.length || 1) - 1}
+            className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] text-neutral-400 hover:text-white disabled:opacity-35 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">Next</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => editorProps.handleExecuteSave()}
+            disabled={appLogic.isSavingEdit}
+            className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 active:scale-95"
+          >
+            <Save className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">{appLogic.isSavingEdit ? "Saving" : "Save"}</span>
+          </button>
         </div>
       </ImageEditorLayout>
     );

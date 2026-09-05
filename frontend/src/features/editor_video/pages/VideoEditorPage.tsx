@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Film, FolderSync, Zap, Layers } from "lucide-react";
 // ── Subsystem imports (new architecture) ─────────────────────────────────────
 import VideoEditorHeader from "@/features/editor_video/shell/VideoEditorHeader";
 import VideoEditorSidebar from "@/features/editor_video/shell/VideoEditorSidebar";
@@ -274,6 +275,10 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
     }
   };
 
+  const [mobileTab, setMobileTab] = useState<
+    "player" | "assets" | "timeline" | "inspector"
+  >("player");
+
   return (
     <div className="flex flex-col h-screen w-screen bg-[#0A0A0A] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
 
@@ -314,11 +319,24 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
       />
 
       {/* ── Main Workspace Row ───────────────────────────────────────────────── */}
-      <div className="flex-1 flex min-h-0 relative select-none">
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 relative select-none overflow-hidden">
         {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
         <div
-          className="h-full flex shrink-0 overflow-hidden"
-          style={{ width: layoutConfig.mediaBin ? leftWidth : 80 }}
+          className={`h-full shrink-0 overflow-hidden transition-all duration-200 ${
+            mobileTab === "assets"
+              ? "flex w-full min-w-0"
+              : layoutConfig.mediaBin
+              ? "hidden md:flex"
+              : "hidden md:flex md:w-20"
+          }`}
+          style={{
+            width:
+              typeof window !== "undefined" && window.innerWidth >= 768
+                ? layoutConfig.mediaBin
+                  ? leftWidth
+                  : 80
+                : undefined,
+          }}
         >
           <WorkspacePanel
             defaultWorkspace="imported_assets"
@@ -326,12 +344,16 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
             onSelectWorkspace={handleSelectWorkspace}
             onBackToApp={handleReturn}
             navigateTo={navigateTo}
-            showContent={layoutConfig.mediaBin}
+            showContent={
+              typeof window !== "undefined" && window.innerWidth < 768
+                ? true
+                : layoutConfig.mediaBin
+            }
             appLogic={appLogic}
           />
         </div>
 
-        {/* Left Vertical Resizer Splitter */}
+        {/* Left Vertical Resizer Splitter - Hidden on mobile */}
         {layoutConfig.mediaBin && (
           <div
             onMouseDown={handleLeftResizeStart}
@@ -339,7 +361,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               setLeftWidth(DEFAULT_LEFT_WIDTH);
               localStorage.setItem("sonikoma_left_panel_w", String(DEFAULT_LEFT_WIDTH));
             }}
-            className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
+            className={`hidden md:flex w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-l border-r border-white/5 ${
               isDraggingLeft
                 ? "bg-[#2A2A2A] "
                 : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
@@ -354,47 +376,59 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           {/* ── Upper Row: Preview Player + Right Inspector ───────────────── */}
           {layoutMode !== "full_timeline" && (
-            <div className="flex-1 flex min-h-0 w-full overflow-hidden">
-              {/* Center: Adaptation Player (full) */}
-              <EditorViewport
-                panels={panels}
-                videoUrl={videoUrl}
-                setVideoUrl={setVideoUrl}
-                currentPanelIndex={currentPanelIndex}
-                setCurrentPanelIndex={setCurrentPanelIndex}
-                activePreviewTab={activePreviewTab}
-                setActivePreviewTab={handleSetActivePreviewTab}
-                allowEditorTab={true}
-                musicTheme={musicTheme}
-                voiceActor={voiceActor}
-                navigateTo={navigateTo ?? (() => {})}
-                seriesTitle={seriesTitle}
-                chapterNumber={chapterNumber}
-                chapterTitle={chapterTitle}
-                targetUrl={targetUrl}
-                isRendering={isRendering}
-                renderProgress={renderProgress}
-                onExportVideo={handleExport}
-                handleRenderFinalVideo={handleExport}
-                onExport={handleExport}
-                progressStatus={progressStatus}
-                hasEnoughCredits={hasEnoughCredits}
-                addNotification={addNotification}
-                onOpenVideoEditor={() => {}}
-                variant="embedded"
-                zoomLevel={viewportZoom}
-                onZoomLevelChange={handleZoomLevelChange}
-                onZoomIn={handleZoomIn}
-                onZoomOut={handleZoomOut}
-                onZoomReset={handleZoomReset}
-                onSave={handleSave}
-                isSaving={isSaving}
-                isDirty={isDirty}
-                aspectRatio={currentAspectRatio}
-                onAspectRatioChange={handleAspectRatioChange}
-              />
+            <div
+              className={`flex-1 min-h-0 w-full overflow-hidden ${
+                mobileTab === "timeline" ? "hidden md:flex" : "flex"
+              }`}
+            >
+              {/* Center: Adaptation Player Viewport */}
+              <div
+                className={`min-h-0 overflow-hidden ${
+                  mobileTab === "player"
+                    ? "flex flex-1 w-full"
+                    : "hidden md:flex md:flex-1 md:min-w-0"
+                }`}
+              >
+                <EditorViewport
+                  panels={panels}
+                  videoUrl={videoUrl}
+                  setVideoUrl={setVideoUrl}
+                  currentPanelIndex={currentPanelIndex}
+                  setCurrentPanelIndex={setCurrentPanelIndex}
+                  activePreviewTab={activePreviewTab}
+                  setActivePreviewTab={handleSetActivePreviewTab}
+                  allowEditorTab={true}
+                  musicTheme={musicTheme}
+                  voiceActor={voiceActor}
+                  navigateTo={navigateTo ?? (() => {})}
+                  seriesTitle={seriesTitle}
+                  chapterNumber={chapterNumber}
+                  chapterTitle={chapterTitle}
+                  targetUrl={targetUrl}
+                  isRendering={isRendering}
+                  renderProgress={renderProgress}
+                  onExportVideo={handleExport}
+                  handleRenderFinalVideo={handleExport}
+                  onExport={handleExport}
+                  progressStatus={progressStatus}
+                  hasEnoughCredits={hasEnoughCredits}
+                  addNotification={addNotification}
+                  onOpenVideoEditor={() => {}}
+                  variant="embedded"
+                  zoomLevel={viewportZoom}
+                  onZoomLevelChange={handleZoomLevelChange}
+                  onZoomIn={handleZoomIn}
+                  onZoomOut={handleZoomOut}
+                  onZoomReset={handleZoomReset}
+                  onSave={handleSave}
+                  isSaving={isSaving}
+                  isDirty={isDirty}
+                  aspectRatio={currentAspectRatio}
+                  onAspectRatioChange={handleAspectRatioChange}
+                />
+              </div>
 
-              {/* Right Vertical Resizer Splitter */}
+              {/* Right Vertical Resizer Splitter - Hidden on mobile */}
               {layoutConfig.rightInspector && (
                 <div
                   onMouseDown={handleRightResizeStart}
@@ -402,7 +436,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
                     setRightWidth(DEFAULT_RIGHT_WIDTH);
                     localStorage.setItem("sonikoma_right_panel_w", String(DEFAULT_RIGHT_WIDTH));
                   }}
-                  className={`w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-l border-r border-white/5 ${
+                  className={`hidden md:flex w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-l border-r border-white/5 ${
                     isDraggingRight
                       ? "bg-[#2A2A2A] "
                       : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
@@ -414,14 +448,25 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               )}
 
               {/* Right: Inspector Panel */}
-              {layoutConfig.rightInspector && (
-                <div
-                  className="h-full shrink-0 overflow-hidden"
-                  style={{ width: rightWidth }}
-                >
-                  <InspectorPanel />
-                </div>
-              )}
+              <div
+                className={`h-full shrink-0 overflow-hidden transition-all duration-200 ${
+                  mobileTab === "inspector"
+                    ? "flex flex-col w-full min-w-0"
+                    : layoutConfig.rightInspector
+                    ? "hidden md:flex md:flex-col md:w-full"
+                    : "hidden"
+                }`}
+                style={{
+                  width:
+                    typeof window !== "undefined" && window.innerWidth >= 768
+                      ? layoutConfig.rightInspector
+                        ? rightWidth
+                        : 0
+                      : undefined,
+                }}
+              >
+                <InspectorPanel />
+              </div>
             </div>
           )}
 
@@ -433,7 +478,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
                 setTimelineHeight(DEFAULT_TIMELINE_HEIGHT);
                 localStorage.setItem("sonikoma_timeline_h", String(DEFAULT_TIMELINE_HEIGHT));
               }}
-              className={`h-2 w-full relative cursor-row-resize select-none shrink-0 z-20 group transition-colors duration-150 flex items-center justify-center border-t border-b border-white/[0.06] ${
+              className={`hidden md:flex h-2 w-full relative cursor-row-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-t border-b border-white/[0.06] ${
                 isDraggingTimeline
                   ? "bg-[#2A2A2A] "
                   : "bg-[#121212] hover:bg-[#3B82F6]/30"
@@ -445,23 +490,82 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
           )}
 
           {/* ── Bottom Multi-Track NLE Timeline ─────────────────────────────── */}
-          {(layoutMode === "full_timeline" || layoutConfig.timeline) && (
-            <div
-              className={`w-full overflow-hidden ${
-                layoutMode === "full_timeline" ? "flex-1 h-full" : "shrink-0"
-              }`}
-              style={{ height: layoutMode === "full_timeline" ? "100%" : timelineHeight }}
-            >
-              <Timeline
-                panels={panels}
-                currentPanelIndex={currentPanelIndex}
-                setCurrentPanelIndex={setCurrentPanelIndex}
-                musicTheme={musicTheme}
-                voiceActor={voiceActor}
-              />
-            </div>
-          )}
+          <div
+            className={`w-full overflow-hidden transition-all duration-150 ${
+              mobileTab === "timeline"
+                ? "flex flex-1 h-full"
+                : mobileTab === "player"
+                ? "flex shrink-0 border-t border-white/10 h-[260px] md:h-auto"
+                : layoutConfig.timeline
+                ? "hidden md:block"
+                : "hidden"
+            } ${
+              layoutMode === "full_timeline" ? "flex-1 h-full" : "shrink-0"
+            }`}
+            style={{
+              height:
+                mobileTab === "timeline"
+                  ? "100%"
+                  : mobileTab === "player"
+                  ? undefined
+                  : layoutMode === "full_timeline"
+                  ? "100%"
+                  : layoutConfig.timeline
+                  ? Math.min(timelineHeight, 380)
+                  : 0,
+            }}
+          >
+            <Timeline
+              panels={panels}
+              currentPanelIndex={currentPanelIndex}
+              setCurrentPanelIndex={setCurrentPanelIndex}
+              musicTheme={musicTheme}
+              voiceActor={voiceActor}
+            />
+          </div>
         </div>
+      </div>
+
+      {/* ── Mobile Viewport Bottom Studio Navigation Bar (< 768px) ────────── */}
+      <div className="flex md:hidden items-center justify-around bg-[#0B0C0E] border-t border-white/10 pt-2 pb-4.5 px-3 shrink-0 z-40 select-none shadow-2xl backdrop-blur-xl">
+        <button
+          type="button"
+          onClick={() => setMobileTab("player")}
+          className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[64px] ${
+            mobileTab === "player"
+              ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          <Film className="w-4 h-4 shrink-0" />
+          <span className="leading-none mt-0.5">Player</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileTab("assets")}
+          className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[64px] ${
+            mobileTab === "assets"
+              ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          <FolderSync className="w-4 h-4 shrink-0" />
+          <span className="leading-none mt-0.5">Assets</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileTab("inspector")}
+          className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[64px] ${
+            mobileTab === "inspector"
+              ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          <Layers className="w-4 h-4 shrink-0" />
+          <span className="leading-none mt-0.5">Inspector</span>
+        </button>
       </div>
     </div>
   );

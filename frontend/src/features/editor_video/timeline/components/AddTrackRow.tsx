@@ -10,7 +10,7 @@ interface AddTrackRowProps {
 
 const AddTrackRow: React.FC<AddTrackRowProps> = ({ onOpenMediaPicker }) => (
   <div className="h-9 flex items-center border-b border-[#2F2F2F] bg-[#121212]">
-    <div className="w-56 shrink-0 h-full sticky left-0 z-40 flex items-center px-3 border-r border-[#2F2F2F] bg-[#121212] shadow-sm">
+    <div className="w-36 sm:w-56 shrink-0 h-full flex items-center px-2 sm:px-3 border-r border-[#2F2F2F] bg-[#121212] shadow-sm">
       <button
         type="button"
         onClick={onOpenMediaPicker || (() => {})}

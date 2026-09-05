@@ -104,10 +104,12 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
       <div
         className="flex-1 w-full relative overflow-hidden bg-black flex items-center justify-center p-2"
         onWheel={(event) => {
-          event.preventDefault();
-          setZoomLevel((current) =>
-            Math.min(2, Math.max(0.5, current + (event.deltaY < 0 ? 0.1 : -0.1)))
-          );
+          if (event.ctrlKey || event.metaKey) {
+            event.preventDefault();
+            setZoomLevel((current) =>
+              Math.min(2, Math.max(0.5, current + (event.deltaY < 0 ? 0.1 : -0.1)))
+            );
+          }
         }}
       >
         <div
