@@ -187,7 +187,14 @@ export default function ForgotPasswordPage({
                       disabled={isLoading}
                       className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
                     >
-                      {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <span>Update Password</span>}
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>Updating Password...</span>
+                        </>
+                      ) : (
+                        <span>Update Password</span>
+                      )}
                     </button>
                   </Tooltip>
                 </form>
@@ -236,7 +243,10 @@ export default function ForgotPasswordPage({
                       className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
                     >
                       {isLoading ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span>Sending Recovery Code...</span>
+                        </>
                       ) : (
                         <>
                           <span>Send Recovery Code</span>

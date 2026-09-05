@@ -99,8 +99,11 @@ export default function useLoginForm(props: LoginFormProps) {
     }
   };
 
+  const [isSocialLoading, setIsSocialLoading] = React.useState(false);
+
   const handleSocialLogin = (provider: string) => {
     if (provider === "Google") {
+      setIsSocialLoading(true);
       window.location.href = "/api/auth/google/login";
     } else {
       setError(`OAuth sign in with ${provider} is not configured yet.`);
@@ -117,6 +120,7 @@ export default function useLoginForm(props: LoginFormProps) {
     password,
     setPassword,
     isLoading,
+    isSocialLoading,
     error,
     showPassword,
     setShowPassword,

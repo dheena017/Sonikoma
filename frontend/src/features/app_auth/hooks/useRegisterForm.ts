@@ -140,8 +140,11 @@ export default function useRegisterForm(props: RegisterFormProps) {
     }
   };
 
+  const [isSocialLoading, setIsSocialLoading] = React.useState(false);
+
   const handleSocialRegister = (provider: string) => {
     if (provider === "Google") {
+      setIsSocialLoading(true);
       window.location.href = "/api/auth/google/login";
     } else {
       setError(`OAuth register via ${provider} is not configured yet.`);
@@ -156,6 +159,7 @@ export default function useRegisterForm(props: RegisterFormProps) {
     password,
     setPassword,
     isLoading,
+    isSocialLoading,
     error,
     showPassword,
     setShowPassword,

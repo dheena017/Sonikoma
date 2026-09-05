@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Menu,
   X,
+  Loader2,
 } from "lucide-react";
 import { useLandingPage } from "@/features/app_landing/hooks";
 import {
@@ -80,6 +81,13 @@ export default function LandingPage({
   themeMode = "dark",
 }: LandingPageProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handleAction = (callback: () => void) => {
+    setIsNavigating(true);
+    callback();
+  };
+
   const {
     demoTab,
     setDemoTab,
@@ -149,7 +157,8 @@ export default function LandingPage({
           <div className="flex items-center gap-2 sm:gap-3">
             <Tooltip text="Log in to your Sonikoma account" placement="bottom">
               <button
-                onClick={onLogin}
+                disabled={isNavigating}
+                onClick={() => handleAction(onLogin)}
                 className={`hidden sm:inline-flex px-4 py-2 text-sm font-semibold transition-all duration-200 cursor-pointer rounded-xl select-none focus:outline-none ${
                   isLight
                     ? "text-slate-700 hover:text-slate-950 hover:bg-slate-100"
@@ -162,10 +171,18 @@ export default function LandingPage({
 
             <Tooltip text="Start creating comic videos for free" placement="bottom">
               <button
-                onClick={onGetStarted}
-                className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none"
+                disabled={isNavigating}
+                onClick={() => handleAction(onGetStarted)}
+                className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none flex items-center gap-2"
               >
-                Get Started Free
+                {isNavigating ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  <span>Get Started Free</span>
+                )}
               </button>
             </Tooltip>
 
@@ -320,11 +337,21 @@ export default function LandingPage({
                   </div>
                   <Tooltip text="Process this chapter and create a video" placement="top">
                     <button
-                      onClick={onGetStarted}
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl transition-all duration-200 active:scale-95 cursor-pointer shrink-0 shadow-md hover:shadow-blue-500/20"
+                      disabled={isNavigating}
+                      onClick={() => handleAction(onGetStarted)}
+                      className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold text-sm rounded-xl transition-all duration-200 active:scale-95 cursor-pointer shrink-0 shadow-md hover:shadow-blue-500/20"
                     >
-                      <Play className="w-3.5 h-3.5 fill-white" />
-                      Create Video
+                      {isNavigating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-white" />
+                          <span>Processing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-3.5 h-3.5 fill-white" />
+                          <span>Create Video</span>
+                        </>
+                      )}
                     </button>
                   </Tooltip>
                 </div>
@@ -716,7 +743,7 @@ export default function LandingPage({
                   "Custom 4K Video Exports",
                 ]}
                 btnText="Start Free"
-                onClick={onGetStarted}
+                onClick={() => handleAction(onGetStarted)}
                 themeMode={themeMode}
               />
 
@@ -736,7 +763,7 @@ export default function LandingPage({
                   "No Watermark",
                 ]}
                 btnText="Upgrade to Pro"
-                onClick={onGetStarted}
+                onClick={() => handleAction(onGetStarted)}
                 themeMode={themeMode}
               />
 
@@ -755,7 +782,7 @@ export default function LandingPage({
                   "Fastest Rendering Priority",
                 ]}
                 btnText="Contact Sales"
-                onClick={onGetStarted}
+                onClick={() => handleAction(onGetStarted)}
                 themeMode={themeMode}
               />
             </div>
@@ -867,11 +894,21 @@ export default function LandingPage({
 
             <Tooltip text="Create your free account and export videos" placement="top">
               <button
-                onClick={onGetStarted}
-                className="mx-auto px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 cursor-pointer text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20"
+                disabled={isNavigating}
+                onClick={() => handleAction(onGetStarted)}
+                className="mx-auto px-7 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 cursor-pointer text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20"
               >
-                Start Creating Free
-                <ArrowRight className="w-4 h-4" />
+                {isNavigating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Loading Studio...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Start Creating Free</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </Tooltip>
           </div>
