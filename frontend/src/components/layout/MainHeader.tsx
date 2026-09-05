@@ -607,7 +607,7 @@ const HeaderInner = ({
               onClick={() => setDrawerOpen(true)}
               className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
                 projectState === "active"
-                  ? "text-blue-400 border-blue-500/40 bg-blue-500/10"
+                  ? "text-white border-white/30 bg-white/10"
                   : projectState === "missing"
                   ? "text-rose-400 border-rose-500/40 bg-rose-500/10"
                   : ""
@@ -617,7 +617,7 @@ const HeaderInner = ({
               {projectState === "missing" ? (
                 <AlertCircle className="h-4 w-4 text-rose-400" />
               ) : projectState === "loading" ? (
-                <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />
+                <Loader2 className="h-4 w-4 text-white animate-spin" />
               ) : (
                 <FolderSync className="h-4 w-4" />
               )}
