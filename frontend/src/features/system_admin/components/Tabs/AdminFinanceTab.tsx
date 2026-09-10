@@ -22,11 +22,11 @@ export function AdminFinanceTab({ fetchWithInterceptor, analytics }: any) {
   const fetchInvoices = async () => {
     try {
       const res = await fetchWithInterceptor(
-        "/api/auth/admin/db/query?table=user_invoices&limit=50"
+        "/api/auth/admin/finance/invoices?limit=50"
       );
       if (res.ok) {
         const data = await res.json();
-        setInvoices(data.data || []);
+        setInvoices(data.invoices || data.data || []);
       }
     } catch (err) {
       console.error("Finance fetch failed", err);

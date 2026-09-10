@@ -3,9 +3,7 @@ import { ShieldAlert, Lock, ArrowLeft } from "lucide-react";
 import * as api from "@/api";
 import {
   AdminActivityTab,
-  AdminAnalyticsTab,
   AdminAnnouncementsTab,
-  AdminConsoleTab,
   AdminContentTab,
   AdminExplorerTab,
   AdminFinanceTab,
@@ -322,10 +320,6 @@ const AdminPage = React.memo(
               analytics={analytics}
             />
           );
-        case "analytics":
-          return (
-            <AdminAnalyticsTab fetchWithInterceptor={fetchWithInterceptor} />
-          );
         case "settings":
           return (
             <AdminSettingsTab
@@ -343,8 +337,6 @@ const AdminPage = React.memo(
           return (
             <AdminExplorerTab fetchWithInterceptor={fetchWithInterceptor} />
           );
-        case "console":
-          return <AdminConsoleTab />;
         default:
           return (
             <AdminDashboardPage

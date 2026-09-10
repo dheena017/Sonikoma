@@ -13,6 +13,7 @@ import jwt
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 
 from app.core.security import SECRET_KEY
 from api.dependencies.auth import get_admin_user
@@ -468,4 +469,278 @@ async def admin_cancel_all_active_jobs(request: Request, current_user: dict = De
     count = job_manager.cancel_all_active_admin()
     write_audit_log(current_user['user_id'], f'Admin cancelled all {count} active jobs', ip_addr, 'Success')
     return {'success': True, 'cancelled_count': count, 'message': f'Successfully cancelled {count} active jobs.'}
+
+
+# ── Dedicated Admin Subsystem Endpoints ─────────────────────────────────────
+
+from database.engine import get_db_connection
+
+
+@router.get('/admin/credits/transactions', summary="Get admin credit transactions ledger with real stats")
+async def admin_get_credit_transactions(
+    user_id: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    filter_type: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_admin_user)
+):
+    """Retrieves dynamic credit transaction ledger records from the database."""
+    conn = get_db_connection()
+    try:
+        query = """
+            SELECT ct.*, u.email as user_email, u.username as creator_username
+            FROM credit_transactions ct
+            LEFT JOIN users u ON ct.user_id = u.id
+            WHERE 1=1
+        """
+        params = []
+        if user_id:
+            query += " AND ct.user_id = ?"
+            params.append(user_id)
+        if filter_type == 'additions':
+            query += " AND ct.amount > 0"
+        elif filter_type == 'deductions':
+            query += " AND ct.amount < 0"
+        if search:
+            query += " AND (u.email LIKE ? OR ct.feature_name LIKE ? OR ct.user_id LIKE ?)"
+            params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
+
+        query += " ORDER BY ct.created_at DESC LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
+
+        rows = conn.execute(query, tuple(params)).fetchall()
+        transactions = [dict(r) for r in rows]
+
+        stat_row = conn.execute("""
+            SELECT 
+                SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as total_added,
+                SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END) as total_deducted,
+                COUNT(*) as total_count
+            FROM credit_transactions
+        """).fetchone()
+
+        stats = {
+            "total_transactions": stat_row["total_count"] if stat_row else 0,
+            "total_added": stat_row["total_added"] or 0 if stat_row else 0,
+            "total_deducted": stat_row["total_deducted"] or 0 if stat_row else 0,
+        }
+
+        return {
+            "success": True,
+            "total": len(transactions),
+            "transactions": transactions,
+            "stats": stats
+        }
+    finally:
+        conn.close()
+
+
+@router.get('/admin/finance/invoices', summary="Get admin finance ledger and real revenue metrics")
+async def admin_get_finance_invoices(
+    status: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_admin_user)
+):
+    """Retrieves dynamic billing invoices from the database."""
+    conn = get_db_connection()
+    try:
+        query = """
+            SELECT inv.*, u.email as user_email, u.full_name as user_full_name
+            FROM user_invoices inv
+            LEFT JOIN users u ON inv.user_id = u.id
+            WHERE 1=1
+        """
+        params = []
+        if status:
+            query += " AND LOWER(inv.status) = LOWER(?)"
+            params.append(status)
+
+        query += " ORDER BY inv.created_at DESC LIMIT ? OFFSET ?"
+        params.extend([limit, offset])
+
+        rows = conn.execute(query, tuple(params)).fetchall()
+        invoices = [dict(r) for r in rows]
+
+        revenue_row = conn.execute("""
+            SELECT 
+                SUM(CASE WHEN LOWER(status) = 'paid' THEN amount ELSE 0 END) as total_revenue,
+                COUNT(CASE WHEN LOWER(status) = 'paid' THEN 1 END) as paid_count,
+                COUNT(CASE WHEN LOWER(status) = 'pending' THEN 1 END) as pending_count
+            FROM user_invoices
+        """).fetchone()
+
+        summary = {
+            "total_revenue": revenue_row["total_revenue"] or 0.0 if revenue_row else 0.0,
+            "paid_count": revenue_row["paid_count"] if revenue_row else 0,
+            "pending_count": revenue_row["pending_count"] if revenue_row else 0,
+        }
+
+        return {
+            "success": True,
+            "total": len(invoices),
+            "invoices": invoices,
+            "summary": summary
+        }
+    finally:
+        conn.close()
+
+
+@router.get('/admin/usage/tokens', summary="Get real AI model token usage and cost breakdown")
+async def admin_get_token_usage(
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_admin_user)
+):
+    """Retrieves dynamic LLM token usage logs and cost breakdown from the database."""
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("""
+            SELECT t.*, s.title as series_title, u.email as user_email
+            FROM token_usage_logs t
+            LEFT JOIN series s ON t.project_id = s.id
+            LEFT JOIN users u ON t.user_id = u.id
+            ORDER BY t.created_at DESC LIMIT ? OFFSET ?
+        """, (limit, offset)).fetchall()
+        logs = [dict(r) for r in rows]
+
+        summary_row = conn.execute("""
+            SELECT 
+                SUM(input_tokens) as total_input,
+                SUM(output_tokens) as total_output,
+                SUM(total_tokens) as total_tokens,
+                SUM(estimated_cost_usd) as total_cost_usd
+            FROM token_usage_logs
+        """).fetchone()
+
+        summary = {
+            "total_input_tokens": summary_row["total_input"] or 0 if summary_row else 0,
+            "total_output_tokens": summary_row["total_output"] or 0 if summary_row else 0,
+            "total_tokens": summary_row["total_tokens"] or 0 if summary_row else 0,
+            "total_cost_usd": round(summary_row["total_cost_usd"] or 0.0, 4) if summary_row else 0.0,
+        }
+
+        return {
+            "success": True,
+            "total": len(logs),
+            "logs": logs,
+            "summary": summary
+        }
+    finally:
+        conn.close()
+
+
+@router.get('/admin/scrapers/rules', summary="Get registered domain scraping rules and blocklists")
+async def admin_get_scraper_rules(current_user: dict = Depends(get_admin_user)):
+    """Retrieves domain scraping rules from the database."""
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("SELECT * FROM scraper_rules ORDER BY domain ASC").fetchall()
+        rules = [dict(r) for r in rows]
+        from services.scraper.scraper_constants import ALLOWED_DOMAINS
+        return {
+            "success": True,
+            "total": len(rules),
+            "rules": rules,
+            "whitelisted_domains": ALLOWED_DOMAINS
+        }
+    finally:
+        conn.close()
+
+
+class ScraperRulePayload(BaseModel):
+    domain: str
+    is_blocked: bool = False
+    rate_limit_per_min: int = 30
+    proxy_required: bool = False
+    engine_strategy: Optional[str] = "auto"
+    timeout_sec: Optional[int] = 30
+    max_concurrency: Optional[int] = 2
+    retry_attempts: Optional[int] = 2
+    notes: Optional[str] = ""
+    custom_headers: Optional[str] = "{}"
+
+
+@router.post('/admin/scrapers/rules', summary="Add or update a domain scraping rule")
+async def admin_save_scraper_rule(
+    payload: ScraperRulePayload,
+    request: Request = None,
+    current_user: dict = Depends(get_admin_user)
+):
+    """Persists a domain scraping rule or blocklist entry in the database."""
+    ip_addr = request.client.host if request and request.client else '127.0.0.1'
+    conn = get_db_connection()
+    try:
+        domain = payload.domain.strip().lower()
+        blocked_val = 1 if payload.is_blocked else 0
+        proxy_val = 1 if payload.proxy_required else 0
+        engine_strategy = payload.engine_strategy or "auto"
+        timeout_sec = payload.timeout_sec or 30
+        max_concurrency = payload.max_concurrency or 2
+        retry_attempts = payload.retry_attempts or 2
+        notes = payload.notes or ""
+        custom_headers = payload.custom_headers or "{}"
+
+        conn.execute("""
+            INSERT INTO scraper_rules (
+                domain, is_blocked, rate_limit_per_min, proxy_required,
+                engine_strategy, timeout_sec, max_concurrency, retry_attempts, notes, custom_headers
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(domain) DO UPDATE SET
+                is_blocked = excluded.is_blocked,
+                rate_limit_per_min = excluded.rate_limit_per_min,
+                proxy_required = excluded.proxy_required,
+                engine_strategy = excluded.engine_strategy,
+                timeout_sec = excluded.timeout_sec,
+                max_concurrency = excluded.max_concurrency,
+                retry_attempts = excluded.retry_attempts,
+                notes = excluded.notes,
+                custom_headers = excluded.custom_headers
+        """, (
+            domain, blocked_val, payload.rate_limit_per_min, proxy_val,
+            engine_strategy, timeout_sec, max_concurrency, retry_attempts, notes, custom_headers
+        ))
+        conn.commit()
+        write_audit_log(current_user['user_id'], f"Admin updated scraper rule for domain '{domain}'", ip_addr, "Success")
+        return {"success": True, "message": f"Scraper rule for '{domain}' saved successfully."}
+    finally:
+        conn.close()
+
+
+@router.delete('/admin/scrapers/rules/{rule_id}', summary="Delete a domain scraping rule")
+async def admin_delete_scraper_rule(rule_id: int, request: Request, current_user: dict = Depends(get_admin_user)):
+    """Deletes a domain scraping rule from the database."""
+    ip_addr = request.client.host if request.client else '127.0.0.1'
+    conn = get_db_connection()
+    try:
+        conn.execute("DELETE FROM scraper_rules WHERE id = ?", (rule_id,))
+        conn.commit()
+        write_audit_log(current_user['user_id'], f"Admin deleted scraper rule #{rule_id}", ip_addr, "Success")
+        return {"success": True, "message": "Scraper rule deleted successfully."}
+    finally:
+        conn.close()
+
+
+@router.get('/admin/moderation/logs', summary="Get content moderation audit logs with series & admin info")
+async def admin_get_moderation_logs(
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_admin_user)
+):
+    """Retrieves content moderation audit logs from the database."""
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("""
+            SELECT m.*, u.email as admin_email, s.title as series_title
+            FROM content_moderation_logs m
+            LEFT JOIN users u ON m.admin_id = u.id
+            LEFT JOIN series s ON m.series_id = s.id
+            ORDER BY m.created_at DESC LIMIT ? OFFSET ?
+        """, (limit, offset)).fetchall()
+        return {"success": True, "total": len(rows), "logs": [dict(r) for r in rows]}
+    finally:
+        conn.close()
+
 

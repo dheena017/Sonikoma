@@ -479,12 +479,19 @@ export const updateScraperCache = async (
 export interface DomainRecord {
   domain: string;
   status: "approved" | "pending" | "blocked";
+  rate_limit_per_min?: number;
+  proxy_required?: boolean;
+  engine_strategy?: "auto" | "http_fast" | "browser_playwright";
+  timeout_sec?: number;
+  max_concurrency?: number;
+  retry_attempts?: number;
+  notes?: string | null;
+  custom_headers?: string;
   blueprint?: Record<string, any> | null;
-  success_count: number;
-  failure_count: number;
+  success_count?: number;
+  failure_count?: number;
   requested_by?: string | null;
   sample_url?: string | null;
-  notes?: string | null;
   last_success_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -764,6 +771,36 @@ export const getChapterReaderPanels = async (
       url: payload.url,
       force_refresh: payload.force_refresh ?? false,
     }),
+  });
+};
+
+export const clearScraperCache = async (
+  fetchWithInterceptor: FetchClient
+): Promise<{ success: boolean; message: string }> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/cache/clear", {
+    method: "POST",
+  });
+};
+
+export const saveDomainRule = async (
+  fetchWithInterceptor: FetchClient,
+  payload: {
+    domain: string;
+    is_blocked?: boolean;
+    rate_limit_per_min?: number;
+    proxy_required?: boolean;
+    engine_strategy?: string;
+    timeout_sec?: number;
+    max_concurrency?: number;
+    retry_attempts?: number;
+    notes?: string;
+    custom_headers?: string;
+  }
+): Promise<{ success: boolean; message: string }> => {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/scrapers/rules", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 };
 

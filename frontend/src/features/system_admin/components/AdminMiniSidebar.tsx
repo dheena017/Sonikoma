@@ -86,12 +86,6 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           path: "/admin/scrapers",
         },
         {
-          id: "analytics",
-          label: "Analytics",
-          icon: BarChart3,
-          path: "/admin/analytics",
-        },
-        {
           id: "credits",
           label: "Credits",
           icon: Coins,
@@ -107,12 +101,6 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           label: "Explorer",
           icon: Database,
           path: "/admin/explorer",
-        },
-        {
-          id: "console",
-          label: "Console",
-          icon: Terminal,
-          path: "/admin/console",
         },
         {
           id: "settings",

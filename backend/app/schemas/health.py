@@ -79,6 +79,9 @@ class DatabaseTableCounts(BaseModel):
     system_logs: int = 0
     token_usage_logs: int = 0
     credit_transactions: int = 0
+    platform_settings: int = 0
+    content_moderation_logs: int = 0
+    scraper_rules: int = 0
 
 
 class DatabaseHealthStatus(BaseModel):
@@ -99,6 +102,7 @@ class StorageFolderStatus(BaseModel):
     exists: bool = True
     size_bytes: int = 0
     file_count: int = 0
+    formatted_size: str = "0 B"
 
 
 class DiskPartitionStatus(BaseModel):

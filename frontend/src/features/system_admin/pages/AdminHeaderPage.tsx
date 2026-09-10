@@ -212,11 +212,6 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
       path: "/admin/activity",
       keyword: "audit logs security activity actions",
     },
-    {
-      label: "Interactive Console",
-      path: "/admin/console",
-      keyword: "console terminal prompt execute",
-    },
   ];
 
   const filteredNavItems = quickNavItems.filter(

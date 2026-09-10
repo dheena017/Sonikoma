@@ -452,7 +452,8 @@ def get_all_projects_admin() -> list[dict]:
     conn = get_db_connection()
     try:
         rows = conn.execute('''
-            SELECT s.*, u.email as user_email
+            SELECT s.*, u.email as user_email,
+                   (SELECT COUNT(*) FROM chapters c WHERE c.series_id = s.id) as chapters_count
             FROM series s
             LEFT JOIN users u ON s.user_id = u.id
             ORDER BY s.created_at DESC
@@ -461,6 +462,7 @@ def get_all_projects_admin() -> list[dict]:
         return [dict(row) for row in rows]
     finally:
         conn.close()
+
 
 
 def get_project_settings(project_id: str) -> Optional[Dict[str, Any]]:

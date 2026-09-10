@@ -1,7 +1,5 @@
 export * from "./AdminActivityTab";
-export * from "./AdminAnalyticsTab";
 export * from "./AdminAnnouncementsTab";
-export * from "./AdminConsoleTab";
 export * from "./AdminContentTab";
 export * from "./AdminCreditsTab";
 export * from "./AdminExplorerTab";

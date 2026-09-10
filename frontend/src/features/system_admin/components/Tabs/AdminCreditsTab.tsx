@@ -108,66 +108,30 @@ export function AdminCreditsTab({
     setLoading(true);
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/db/query?table=credit_transactions&limit=${limit}&offset=${offset}`
+        `/api/auth/admin/credits/transactions?limit=${limit}&offset=${offset}`
       );
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          setTransactions(data.data);
-          setHasMore(data.data.length === limit);
-          const pageAdded = data.data.reduce(
-            (acc: number, tx: any) => acc + (tx.amount > 0 ? tx.amount : 0),
-            0
-          );
-          const pageDeducted = data.data.reduce(
-            (acc: number, tx: any) =>
-              acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0),
-            0
-          );
-          const now = new Date();
-          const monthAdded = data.data.reduce((acc: number, tx: any) => {
-            const created = new Date(tx.created_at);
-            return created.getFullYear() === now.getFullYear() &&
-              created.getMonth() === now.getMonth()
-              ? acc + (tx.amount > 0 ? tx.amount : 0)
-              : acc;
-          }, 0);
-          const monthDeducted = data.data.reduce((acc: number, tx: any) => {
-            const created = new Date(tx.created_at);
-            return created.getFullYear() === now.getFullYear() &&
-              created.getMonth() === now.getMonth()
-              ? acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0)
-              : acc;
-          }, 0);
-          const today = new Date();
-          const dayAdded = data.data.reduce((acc: number, tx: any) => {
-            const created = new Date(tx.created_at);
-            return created.toDateString() === today.toDateString()
-              ? acc + (tx.amount > 0 ? tx.amount : 0)
-              : acc;
-          }, 0);
-          const dayDeducted = data.data.reduce((acc: number, tx: any) => {
-            const created = new Date(tx.created_at);
-            return created.toDateString() === today.toDateString()
-              ? acc + (tx.amount < 0 ? Math.abs(tx.amount) : 0)
-              : acc;
-          }, 0);
-          setStats((prev) => ({
-            ...prev,
-            totalTransactions: data.data.length,
-            totalAdded: pageAdded,
-            totalDeducted: pageDeducted,
-          }));
-          setMonthSummary({
-            added: monthAdded,
-            deducted: monthDeducted,
-            net: monthAdded - monthDeducted,
-          });
-          setDailySummary({
-            added: dayAdded,
-            deducted: dayDeducted,
-            net: dayAdded - dayDeducted,
-          });
+        if (data.success) {
+          setTransactions(data.transactions || []);
+          if (data.summary) {
+            setStats((prev) => ({
+              ...prev,
+              totalTransactions: data.summary.total_count || 0,
+              totalAdded: data.summary.total_added || 0,
+              totalDeducted: data.summary.total_deducted || 0,
+            }));
+            setDailySummary({
+              added: data.summary.daily_added || 0,
+              deducted: data.summary.daily_deducted || 0,
+              net: (data.summary.daily_added || 0) - (data.summary.daily_deducted || 0),
+            });
+            setMonthSummary({
+              added: data.summary.month_added || 0,
+              deducted: data.summary.month_deducted || 0,
+              net: (data.summary.month_added || 0) - (data.summary.month_deducted || 0),
+            });
+          }
         }
       }
     } catch (err) {
@@ -177,6 +141,7 @@ export function AdminCreditsTab({
       setLoading(false);
     }
   };
+
 
   const handleSortTransactions = (
     key: "user_id" | "feature_name" | "amount" | "created_at"

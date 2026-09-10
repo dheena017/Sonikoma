@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS users (
   last_claimed_date TEXT,
   unlocked_rewards TEXT   NOT NULL DEFAULT '[]',
   mfa_enabled     INTEGER NOT NULL DEFAULT 0,
+  is_locked       INTEGER NOT NULL DEFAULT 0,
+  is_banned       INTEGER NOT NULL DEFAULT 0,
+  ban_reason      TEXT,
+  last_login_at   TEXT,
+  last_login_ip   TEXT,
   social_connections TEXT NOT NULL DEFAULT '{"google":true,"github":false,"discord":false}',
   created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at      TEXT    NOT NULL DEFAULT (datetime('now'))
@@ -40,7 +45,13 @@ CREATE TABLE IF NOT EXISTS series (
   cover_image     TEXT,                             -- URL to the thumbnail/cover image
   genre           TEXT    NOT NULL DEFAULT 'general',
   synopsis        TEXT,                             -- Series synopsis/description
+  status          TEXT    NOT NULL DEFAULT 'ready',  -- pending | processing | ready | archived | failed
+  is_flagged      INTEGER NOT NULL DEFAULT 0,
+  flag_reason     TEXT,
+  flagged_by      TEXT,
+  flagged_at      TEXT,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
+  updated_at      TEXT    NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -158,6 +169,38 @@ CREATE TABLE IF NOT EXISTS user_api_keys (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- 11. Platform Settings
+CREATE TABLE IF NOT EXISTS platform_settings (
+  key         TEXT PRIMARY KEY,
+  value       TEXT NOT NULL,
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- 12. Content Moderation Audit Logs
+CREATE TABLE IF NOT EXISTS content_moderation_logs (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  series_id     TEXT,
+  chapter_id    TEXT,
+  admin_id      TEXT NOT NULL,
+  action        TEXT NOT NULL,
+  reason        TEXT NOT NULL,
+  previous_state TEXT,
+  new_state     TEXT,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 13. Scraper Rules Configuration
+CREATE TABLE IF NOT EXISTS scraper_rules (
+  id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  domain              TEXT UNIQUE NOT NULL,
+  is_blocked          INTEGER NOT NULL DEFAULT 0,
+  rate_limit_per_min  INTEGER NOT NULL DEFAULT 30,
+  proxy_required      INTEGER NOT NULL DEFAULT 0,
+  custom_headers      TEXT DEFAULT '{}',
+  created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Indexes for performance optimizations
 CREATE INDEX IF NOT EXISTS idx_panels_chapter_id ON panels(chapter_id);
 CREATE INDEX IF NOT EXISTS idx_scrape_url ON scrape_sessions(url);
@@ -168,14 +211,20 @@ CREATE INDEX IF NOT EXISTS idx_user_invoices_user ON user_invoices(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_api_keys_user ON user_api_keys(user_id);
 CREATE INDEX IF NOT EXISTS idx_series_user_id ON series(user_id);
 CREATE INDEX IF NOT EXISTS idx_series_slug ON series(slug);
+CREATE INDEX IF NOT EXISTS idx_series_is_flagged ON series(is_flagged);
+CREATE INDEX IF NOT EXISTS idx_series_status ON series(status);
 CREATE INDEX IF NOT EXISTS idx_chapters_series_id ON chapters(series_id);
 CREATE INDEX IF NOT EXISTS idx_chapters_slug ON chapters(slug);
 
--- 11. Token Usage Logs (Time-Series)
+-- 14. Token Usage Logs (Time-Series)
 CREATE TABLE IF NOT EXISTS token_usage_logs (
   id                  TEXT PRIMARY KEY,
+  user_id             TEXT,
   project_id          TEXT NOT NULL,
+  chapter_id          TEXT,
   job_id              TEXT,
+  model_name          TEXT,
+  provider            TEXT,
   input_tokens        INTEGER NOT NULL DEFAULT 0,
   output_tokens       INTEGER NOT NULL DEFAULT 0,
   total_tokens        INTEGER NOT NULL DEFAULT 0,
@@ -184,32 +233,39 @@ CREATE TABLE IF NOT EXISTS token_usage_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_token_logs_project_id ON token_usage_logs(project_id);
+CREATE INDEX IF NOT EXISTS idx_token_logs_user_id ON token_usage_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at);
 
--- 11b. Credit Transactions Ledger
+-- 15. Credit Transactions Ledger
 CREATE TABLE IF NOT EXISTS credit_transactions (
   id              TEXT PRIMARY KEY,
   user_id         TEXT NOT NULL,
   amount          INTEGER NOT NULL,
   feature_name    TEXT NOT NULL,
+  transaction_type TEXT DEFAULT 'grant',
+  reference_id    TEXT,
+  metadata        TEXT DEFAULT '{}',
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id);
 
-
--- 12. System Announcements
+-- 16. System Announcements
 CREATE TABLE IF NOT EXISTS system_announcements (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT NOT NULL,
-  message TEXT NOT NULL,
-  type TEXT NOT NULL DEFAULT 'info',
-  status TEXT NOT NULL DEFAULT 'active',
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  title       TEXT NOT NULL,
+  message     TEXT NOT NULL,
+  type        TEXT NOT NULL DEFAULT 'info',
+  status      TEXT NOT NULL DEFAULT 'active',
+  target_role TEXT NOT NULL DEFAULT 'all',
+  starts_at   TEXT,
+  expires_at  TEXT,
+  created_by  TEXT,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- 13. YouTube Publishing Profiles (Custom Settings)
+-- 17. YouTube Publishing Profiles (Custom Settings)
 CREATE TABLE IF NOT EXISTS youtube_profiles (
   id                  INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id             TEXT    NOT NULL,
@@ -232,7 +288,7 @@ CREATE TABLE IF NOT EXISTS youtube_profiles (
   UNIQUE(user_id, name)
 );
 
--- 14. YouTube Publications Log (Upload History)
+-- 18. YouTube Publications Log (Upload History)
 CREATE TABLE IF NOT EXISTS youtube_publications (
   id                  INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id             TEXT    NOT NULL,
@@ -248,7 +304,7 @@ CREATE TABLE IF NOT EXISTS youtube_publications (
 CREATE INDEX IF NOT EXISTS idx_youtube_profiles_user ON youtube_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_youtube_publications_user ON youtube_publications(user_id);
 
--- 15. YouTube Custom OAuth Credentials
+-- 19. YouTube Custom OAuth Credentials
 CREATE TABLE IF NOT EXISTS youtube_credentials (
   user_id             TEXT    PRIMARY KEY,
   client_id           TEXT    NOT NULL,
@@ -258,7 +314,7 @@ CREATE TABLE IF NOT EXISTS youtube_credentials (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 16. Persistent System Logs (High Volume Diagnostic Data)
+-- 20. Persistent System Logs (High Volume Diagnostic Data)
 CREATE TABLE IF NOT EXISTS system_logs (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   timestamp   TEXT    NOT NULL,                 -- Display time (HH:MM:SS)
@@ -266,6 +322,9 @@ CREATE TABLE IF NOT EXISTS system_logs (
   level       TEXT    NOT NULL,                 -- INFO, SUCCESS, WARN, ERROR, etc.
   module      TEXT    NOT NULL,                 -- Scraper, Model, AI, API, etc.
   details     TEXT,                             -- JSON or raw payload details
+  correlation_id TEXT,
+  user_id     TEXT,
+  snapshot    TEXT,
   created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -273,8 +332,7 @@ CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level);
 CREATE INDEX IF NOT EXISTS idx_system_logs_module ON system_logs(module);
 CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at);
 
-
--- 17. Persistent Background Jobs
+-- 21. Persistent Background Jobs
 CREATE TABLE IF NOT EXISTS jobs (
   id              TEXT    PRIMARY KEY,              -- Replaces job_id as the canonical identifier
   user_id         TEXT    NOT NULL,
@@ -286,7 +344,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   stage           TEXT    NOT NULL DEFAULT 'QUEUED',
   result          TEXT,                             -- JSON string for result payload
   error           TEXT,
-  metadata        TEXT,                             -- JSON string for metadata payload                             -- JSON string for error payload
+  metadata        TEXT,                             -- JSON string for metadata payload
   created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
   started_at      TEXT,
   completed_at    TEXT,
@@ -296,3 +354,4 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id);
+

@@ -224,24 +224,39 @@ def _probe_gpu() -> GPUUsageStatus:
     )
 
 
+def _format_bytes(size_bytes: int) -> str:
+    if size_bytes < 1024:
+        return f"{size_bytes} B"
+    elif size_bytes < 1024 * 1024:
+        return f"{round(size_bytes / 1024, 1)} KB"
+    elif size_bytes < 1024 * 1024 * 1024:
+        return f"{round(size_bytes / (1024 * 1024), 2)} MB"
+    else:
+        return f"{round(size_bytes / (1024 * 1024 * 1024), 2)} GB"
+
+
 def _get_dir_stats(path: str) -> StorageFolderStatus:
     """Calculates authentic file count and size in bytes for a directory."""
     abs_path = os.path.abspath(path)
     if not os.path.exists(abs_path):
-        return StorageFolderStatus(path=abs_path, exists=False, size_bytes=0, file_count=0)
+        return StorageFolderStatus(path=abs_path, exists=False, size_bytes=0, file_count=0, formatted_size="0 B")
 
     total_size = 0
     count = 0
     try:
-        for root, _, files in os.walk(abs_path):
-            for f in files:
-                fp = os.path.join(root, f)
-                if not os.path.islink(fp):
-                    try:
-                        total_size += os.path.getsize(fp)
-                        count += 1
-                    except OSError:
-                        pass
+        if os.path.isfile(abs_path):
+            total_size = os.path.getsize(abs_path)
+            count = 1
+        else:
+            for root, _, files in os.walk(abs_path):
+                for f in files:
+                    fp = os.path.join(root, f)
+                    if not os.path.islink(fp):
+                        try:
+                            total_size += os.path.getsize(fp)
+                            count += 1
+                        except OSError:
+                            pass
     except Exception:
         pass
 
@@ -249,7 +264,8 @@ def _get_dir_stats(path: str) -> StorageFolderStatus:
         path=abs_path,
         exists=True,
         size_bytes=total_size,
-        file_count=count
+        file_count=count,
+        formatted_size=_format_bytes(total_size)
     )
 
 
@@ -350,6 +366,9 @@ def get_comprehensive_backend_status(
         counts.system_logs = _get_count("system_logs")
         counts.token_usage_logs = _get_count("token_usage_logs")
         counts.credit_transactions = _get_count("credit_transactions")
+        counts.platform_settings = _get_count("platform_settings")
+        counts.content_moderation_logs = _get_count("content_moderation_logs")
+        counts.scraper_rules = _get_count("scraper_rules")
 
         # SQLite Pragmas
         db_journal_mode = None
@@ -390,11 +409,13 @@ def get_comprehensive_backend_status(
 
     dirs_to_inspect = {
         "media": os.path.join(root_path, "data", "media"),
-        "local_media": os.path.join(root_path, "data", "local_media"),
-        "temp": os.path.join(root_path, "data", "temp"),
-        "image_cache": os.path.join(root_path, "data", "image_cache"),
-        "training_data": os.path.join(root_path, "data", "training_data"),
+        "local_media": os.path.join(root_path, "backend", "app", "local_media"),
+        "scraped_cache": os.path.join(root_path, "data", "image_cache"),
+        "chapter_cache": os.path.join(root_path, "data", "chapter_cache"),
+        "temp_workspace": os.path.join(root_path, "data", "temp"),
         "exports": os.path.join(root_path, "public", "exports"),
+        "database": DB_PATH if os.path.exists(DB_PATH) else os.path.join(root_path, "data", "sonikoma.db"),
+        "yolo_model": os.path.join(root_path, "yolov8n-seg.pt"),
     }
 
     dir_stats = {name: _get_dir_stats(p) for name, p in dirs_to_inspect.items()}

@@ -65,11 +65,11 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
 
 def get_all_users() -> List[Dict[str, Any]]:
     """
-    Get all registered users safely.
+    Get all registered users safely for admin dashboard view.
     """
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT id, email, full_name, avatar_url, creator_role, credits, created_at FROM users ORDER BY created_at DESC').fetchall()
+        rows = conn.execute('SELECT id, username, email, full_name, avatar_url, creator_role, credits, credit_balance, is_locked, is_banned, created_at FROM users ORDER BY created_at DESC').fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()

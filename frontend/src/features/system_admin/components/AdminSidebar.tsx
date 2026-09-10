@@ -100,14 +100,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       ],
     },
     {
-      name: "Financials & Analytics",
+      name: "Financials & Quotas",
       items: [
-        {
-          id: "analytics",
-          label: "Platform Growth",
-          icon: BarChart3,
-          path: "/admin/analytics",
-        },
         {
           id: "credits",
           label: "Credits Ledger",
@@ -136,12 +130,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: "Database Explorer",
           icon: Database,
           path: "/admin/explorer",
-        },
-        {
-          id: "console",
-          label: "Server Shell & Logs",
-          icon: Terminal,
-          path: "/admin/console",
         },
         {
           id: "settings",

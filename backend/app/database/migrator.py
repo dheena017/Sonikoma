@@ -303,17 +303,39 @@ def init_sqlite(conn) -> None:
                         "ALTER TABLE users ADD COLUMN is_locked INTEGER NOT NULL DEFAULT 0",
                         "added 'is_locked' to 'users'")
         _run_safe_alter(cursor, conn,
+                        "ALTER TABLE users ADD COLUMN is_banned INTEGER NOT NULL DEFAULT 0",
+                        "added 'is_banned' to 'users'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN ban_reason TEXT",
+                        "added 'ban_reason' to 'users'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN last_login_at TEXT",
+                        "added 'last_login_at' to 'users'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN last_login_ip TEXT",
+                        "added 'last_login_ip' to 'users'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE series ADD COLUMN status TEXT NOT NULL DEFAULT 'ready'",
+                        "added 'status' to 'series'")
+        _run_safe_alter(cursor, conn,
                         "ALTER TABLE series ADD COLUMN is_flagged INTEGER NOT NULL DEFAULT 0",
                         "added 'is_flagged' to 'series'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN flag_reason TEXT",
+                        "added 'flag_reason' to 'series'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN flagged_by TEXT",
+                        "added 'flagged_by' to 'series'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN flagged_at TEXT",
+                        "added 'flagged_at' to 'series'")
+        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN updated_at TEXT",
+                        "added 'updated_at' to 'series'")
         # project_type lifecycle column: 'temp' | 'permanent'
         _run_safe_alter(cursor, conn,
                         "ALTER TABLE chapters ADD COLUMN project_type TEXT NOT NULL DEFAULT 'permanent'",
                         "added 'project_type' to 'chapters'")
 
-        # ── Slug indexes ──────────────────────────────────────────────────
+        # ── Slug indexes & Moderation indexes ─────────────────────────────
         try:
             cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_series_slug ON series(slug)")
             cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_chapters_slug ON chapters(slug)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_series_is_flagged ON series(is_flagged)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_series_status ON series(status)")
             conn.commit()
         except Exception:
             pass
@@ -321,13 +343,67 @@ def init_sqlite(conn) -> None:
         # ── Backfill missing slugs ────────────────────────────────────────
         generate_missing_slugs(conn)
 
+        # ── content_moderation_logs table ─────────────────────────────────
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS content_moderation_logs (
+          id            INTEGER PRIMARY KEY AUTOINCREMENT,
+          series_id     TEXT,
+          chapter_id    TEXT,
+          admin_id      TEXT NOT NULL,
+          action        TEXT NOT NULL,
+          reason        TEXT NOT NULL,
+          previous_state TEXT,
+          new_state     TEXT,
+          created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+          FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """)
+
+        # ── scraper_rules table ───────────────────────────────────────────
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS scraper_rules (
+          id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+          domain              TEXT UNIQUE NOT NULL,
+          is_blocked          INTEGER NOT NULL DEFAULT 0,
+          rate_limit_per_min  INTEGER NOT NULL DEFAULT 30,
+          proxy_required      INTEGER NOT NULL DEFAULT 0,
+          custom_headers      TEXT DEFAULT '{}',
+          engine_strategy     TEXT DEFAULT 'auto',
+          timeout_sec         INTEGER DEFAULT 30,
+          max_concurrency     INTEGER DEFAULT 2,
+          retry_attempts      INTEGER DEFAULT 2,
+          notes               TEXT DEFAULT '',
+          created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+        )
+        """)
+
+        try:
+            existing_cols = [r[1] for r in cursor.execute("PRAGMA table_info(scraper_rules)").fetchall()]
+            if "engine_strategy" not in existing_cols:
+                cursor.execute("ALTER TABLE scraper_rules ADD COLUMN engine_strategy TEXT DEFAULT 'auto'")
+            if "timeout_sec" not in existing_cols:
+                cursor.execute("ALTER TABLE scraper_rules ADD COLUMN timeout_sec INTEGER DEFAULT 30")
+            if "max_concurrency" not in existing_cols:
+                cursor.execute("ALTER TABLE scraper_rules ADD COLUMN max_concurrency INTEGER DEFAULT 2")
+            if "retry_attempts" not in existing_cols:
+                cursor.execute("ALTER TABLE scraper_rules ADD COLUMN retry_attempts INTEGER DEFAULT 2")
+            if "notes" not in existing_cols:
+                cursor.execute("ALTER TABLE scraper_rules ADD COLUMN notes TEXT DEFAULT ''")
+        except Exception as e:
+            logger.warning(f"Could not alter scraper_rules table: {e}")
+
+
         # ── token_usage_logs table ────────────────────────────────────────
         try:
             cursor.execute("""
             CREATE TABLE IF NOT EXISTS token_usage_logs (
               id                  TEXT PRIMARY KEY,
+              user_id             TEXT,
               project_id          TEXT NOT NULL,
+              chapter_id          TEXT,
               job_id              TEXT,
+              model_name          TEXT,
+              provider            TEXT,
               input_tokens        INTEGER NOT NULL DEFAULT 0,
               output_tokens       INTEGER NOT NULL DEFAULT 0,
               total_tokens        INTEGER NOT NULL DEFAULT 0,
@@ -335,6 +411,10 @@ def init_sqlite(conn) -> None:
               created_at          TEXT NOT NULL DEFAULT (datetime('now'))
             )
             """)
+            _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN user_id TEXT", "added user_id to token_usage_logs")
+            _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN chapter_id TEXT", "added chapter_id to token_usage_logs")
+            _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN model_name TEXT", "added model_name to token_usage_logs")
+            _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN provider TEXT", "added provider to token_usage_logs")
             cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_token_logs_project_id ON token_usage_logs(project_id)"
             )
@@ -448,6 +528,7 @@ def init_sqlite(conn) -> None:
             "ALTER TABLE users ADD COLUMN credit_balance INTEGER NOT NULL DEFAULT 840",
             "added 'credit_balance' to 'users'",
         )
+
         _run_safe_alter(
             cursor, conn,
             "ALTER TABLE users ADD COLUMN google_access_token TEXT",

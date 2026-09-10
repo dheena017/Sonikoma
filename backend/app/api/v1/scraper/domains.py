@@ -144,3 +144,145 @@ async def clear_cache_endpoint(
     ScraperCacheManager.clear()
     logger.info("[Domains API] In-memory scraper cache flushed")
     return {"success": True, "message": "In-memory scraper cache flushed."}
+
+
+# ─── Scraper Admin Domain Registry Endpoints ─────────────────────────────────
+
+from database.engine import get_db_connection
+from services.scraper.scraper_constants import ALLOWED_DOMAINS
+
+
+@router.get(
+    "/admin/domains",
+    summary="List all domain onboarding status and rules (Admin only)"
+)
+async def list_admin_domains_endpoint(
+    status: str = Query(None),
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db_connection()
+    try:
+        rows = conn.execute("SELECT * FROM scraper_rules").fetchall()
+        db_rules = {r["domain"]: dict(r) for r in rows}
+
+        domains_list = []
+        for d in ALLOWED_DOMAINS:
+            rule = db_rules.get(d.lower(), {})
+            st = "blocked" if rule.get("is_blocked") else "approved"
+            if status and status.lower() != st:
+                continue
+            domains_list.append({
+                "domain": d,
+                "status": st,
+                "rate_limit_per_min": rule.get("rate_limit_per_min", 30),
+                "proxy_required": bool(rule.get("proxy_required", False)),
+                "engine_strategy": rule.get("engine_strategy") or "auto",
+                "timeout_sec": rule.get("timeout_sec", 30),
+                "max_concurrency": rule.get("max_concurrency", 2),
+                "retry_attempts": rule.get("retry_attempts", 2),
+                "notes": rule.get("notes") or "",
+                "custom_headers": rule.get("custom_headers") or "{}",
+                "created_at": rule.get("created_at") or None,
+            })
+
+        for dom, r in db_rules.items():
+            if dom not in ALLOWED_DOMAINS:
+                st = "blocked" if r.get("is_blocked") else "approved"
+                if status and status.lower() != st:
+                    continue
+                domains_list.append({
+                    "domain": dom,
+                    "status": st,
+                    "rate_limit_per_min": r.get("rate_limit_per_min", 30),
+                    "proxy_required": bool(r.get("proxy_required", False)),
+                    "engine_strategy": r.get("engine_strategy") or "auto",
+                    "timeout_sec": r.get("timeout_sec", 30),
+                    "max_concurrency": r.get("max_concurrency", 2),
+                    "retry_attempts": r.get("retry_attempts", 2),
+                    "notes": r.get("notes") or "",
+                    "custom_headers": r.get("custom_headers") or "{}",
+                    "created_at": r.get("created_at") or None,
+                })
+
+        return {"success": True, "total": len(domains_list), "domains": domains_list}
+    finally:
+        conn.close()
+
+
+@router.post(
+    "/admin/domains/request",
+    summary="Submit domain for onboarding"
+)
+async def request_domain_onboarding_endpoint(
+    payload: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    url = payload.get("url", "")
+    domain = urlparse(url).netloc or url
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            INSERT INTO scraper_rules (domain, is_blocked, rate_limit_per_min)
+            VALUES (?, 0, 30)
+            ON CONFLICT(domain) DO NOTHING
+        """, (domain.strip().lower(),))
+        conn.commit()
+        return {
+            "success": True,
+            "domain": domain,
+            "status": "pending",
+            "message": f"Domain '{domain}' submitted for onboarding review."
+        }
+    finally:
+        conn.close()
+
+
+@router.post(
+    "/admin/domains/{domain}/status",
+    summary="Update domain status (approved | blocked)"
+)
+async def update_domain_status_endpoint(
+    domain: str,
+    payload: dict,
+    current_user: dict = Depends(get_current_user)
+):
+    target_status = payload.get("status", "approved")
+    is_blocked = 1 if target_status.lower() == "blocked" else 0
+    conn = get_db_connection()
+    try:
+        conn.execute("""
+            INSERT INTO scraper_rules (domain, is_blocked)
+            VALUES (?, ?)
+            ON CONFLICT(domain) DO UPDATE SET is_blocked = excluded.is_blocked
+        """, (domain.strip().lower(), is_blocked))
+        conn.commit()
+        return {
+            "success": True,
+            "domain": domain,
+            "status": target_status,
+            "message": f"Domain '{domain}' status updated to {target_status}."
+        }
+    finally:
+        conn.close()
+
+
+@router.delete(
+    "/admin/domains/{domain}",
+    summary="Delete a domain configuration rule"
+)
+async def delete_admin_domain_endpoint(
+    domain: str,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db_connection()
+    try:
+        conn.execute("DELETE FROM scraper_rules WHERE domain = ?", (domain.strip().lower(),))
+        conn.commit()
+        return {
+            "success": True,
+            "domain": domain,
+            "message": f"Domain rule for '{domain}' deleted successfully."
+        }
+    finally:
+        conn.close()
+

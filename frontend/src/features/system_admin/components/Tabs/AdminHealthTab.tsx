@@ -235,7 +235,7 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
               {Math.round((database.file_size_bytes || 0) / 1024)} KB on disk
             </span>
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Users", count: counts.users, color: "text-blue-400" },
               { label: "Series", count: counts.series, color: "text-[#3B82F6]" },
@@ -246,6 +246,9 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
               { label: "Logs", count: counts.system_logs, color: "text-blue-400" },
               { label: "Token Logs", count: counts.token_usage_logs, color: "text-violet-400" },
               { label: "Transactions", count: counts.credit_transactions, color: "text-teal-400" },
+              { label: "Settings", count: counts.platform_settings, color: "text-cyan-400" },
+              { label: "Moderation", count: counts.content_moderation_logs, color: "text-fuchsia-400" },
+              { label: "Scraper Rules", count: counts.scraper_rules, color: "text-orange-400" },
             ].map((item) => (
               <div key={item.label} className="bg-[#0b0b0e] border border-neutral-800/80 rounded-lg p-3 text-center">
                 <div className={`text-xl font-bold font-mono ${item.color}`}>{item.count ?? 0}</div>
@@ -389,8 +392,10 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
               <h3 className="font-bold text-white flex items-center gap-2">
                 <HardDrive className="w-5 h-5 text-amber-400" /> Storage Breakdown
               </h3>
-              <span className="text-[11px] font-mono text-neutral-400">
-                {Math.round((storage.total_app_storage_bytes || 0) / (1024 * 1024) * 10) / 10} MB App Total
+              <span className="text-[11px] font-mono text-neutral-400 font-semibold">
+                {(storage.total_app_storage_bytes || 0) < 1024 * 1024
+                  ? `${Math.round((storage.total_app_storage_bytes || 0) / 1024)} KB`
+                  : `${Math.round((storage.total_app_storage_bytes || 0) / (1024 * 1024) * 10) / 10} MB`} App Total
               </span>
             </div>
 
@@ -410,12 +415,17 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
               </div>
             </div>
 
-            {/* Sub-directories list */}
+            {/* Sub-directories & files list */}
             <div className="grid grid-cols-2 gap-2 text-xs">
               {Object.entries(directories).map(([name, dir]: [string, any]) => (
-                <div key={name} className="flex justify-between p-2 bg-[#0b0b0e] border border-neutral-800/60 rounded">
-                  <span className="text-neutral-400 capitalize">{name.replace("_", " ")}</span>
-                  <span className="font-mono text-neutral-200">{Math.round((dir.size_bytes || 0) / 1024)} KB</span>
+                <div key={name} className="flex items-center justify-between p-2.5 bg-[#0b0b0e] border border-neutral-800/60 rounded-lg">
+                  <div className="min-w-0">
+                    <div className="text-neutral-300 capitalize font-medium truncate">{name.replace("_", " ")}</div>
+                    <div className="text-[10px] text-neutral-500 font-mono">{dir.file_count || 0} file(s)</div>
+                  </div>
+                  <span className="font-mono text-amber-400 font-semibold text-xs ml-2">
+                    {dir.formatted_size || (dir.size_bytes ? `${Math.round(dir.size_bytes / 1024)} KB` : "0 B")}
+                  </span>
                 </div>
               ))}
             </div>
