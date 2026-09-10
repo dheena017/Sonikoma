@@ -609,6 +609,7 @@ const Timeline: React.FC<TimelineProps> = ({
               zoomLevel={s.zoomLevel}
               scrollLeft={scrollLeft}
               onScrubStart={handlePlayheadScrubStart}
+              trackBounds={trackBounds}
             />
 
             {/* ── Video Tracks ──────────────────────────────────────────────── */}

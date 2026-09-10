@@ -9,12 +9,16 @@ import {
   EyeOff,
   Check,
   Sparkles,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  KeyRound,
+  Github,
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { useLoginForm } from "@/features/app_auth/hooks";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 import { SonikomaLogo } from "@/shared/ui/branding";
-import { WelcomeBackUserModal } from "@/shared/ui/modal";
 
 interface LoginPageProps {
   onLogin: (data: any) => Promise<any>;
@@ -36,19 +40,20 @@ export default function LoginPage({
     setPassword,
     isLoading,
     isSocialLoading,
+    socialProviderLoading,
     error,
+    infoMessage,
     showPassword,
     setShowPassword,
     rememberMe,
     setRememberMe,
     activeTheme,
     isEmailValid,
+    isCapsLockOn,
+    fillDemoCredentials,
     handleSubmit,
     handleSocialLogin,
     checkCapsLock,
-    showWelcomeBack,
-    setShowWelcomeBack,
-    confirmWelcomeBack,
   } = useLoginForm({
     onLogin,
     onNavigateToRegister,
@@ -82,6 +87,18 @@ export default function LoginPage({
               <SonikomaLogo size="sm" />
             </div>
           </div>
+
+          {/* Quick Demo Fill Shortcut */}
+          <Tooltip text="Auto-fill sample creator credentials" placement="bottom">
+            <button
+              type="button"
+              onClick={fillDemoCredentials}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-xl text-blue-400 text-xs font-semibold transition-all cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Demo Account</span>
+            </button>
+          </Tooltip>
         </div>
 
         {/* Scrollable form body */}
@@ -91,28 +108,45 @@ export default function LoginPage({
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold tracking-wide">
                 <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-                <span>Sonikoma</span>
+                <span>Sonikoma Studio</span>
               </div>
               <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
                 Sign In
               </h2>
               <p className="text-neutral-400 text-xs sm:text-sm font-medium leading-relaxed">
-                Log in to access your dashboard and comic video projects.
+                Log in to access your dashboard, comic panel slicer, and video tools.
               </p>
             </div>
 
-            {/* Google Sign-In */}
-            <div>
+            {/* Status / Success Banner Message */}
+            {infoMessage && (
+              <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium flex items-start gap-2.5 shadow-sm animate-in fade-in duration-300">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{infoMessage}</span>
+              </div>
+            )}
+
+            {/* Error Message Banner */}
+            {error && (
+              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium flex items-start gap-2.5 shadow-sm animate-in fade-in duration-300">
+                <Info className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{error}</span>
+              </div>
+            )}
+
+            {/* Multi-Provider Social Sign-In */}
+            <div className="space-y-2.5">
+              {/* Google */}
               <Tooltip text="Fast 1-click login with Google OAuth" placement="top">
                 <button
                   type="button"
                   disabled={isSocialLoading || isLoading}
                   onClick={() => handleSocialLogin("Google")}
-                  className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold text-sm transition-all duration-200 cursor-pointer shadow-md hover:shadow-blue-500/20 active:scale-[0.99] group"
+                  className="w-full flex items-center justify-center gap-3 py-3 px-5 rounded-xl bg-[#1A1D24] hover:bg-[#232730] border border-[#2F2F2F] hover:border-neutral-500 disabled:opacity-60 text-white font-semibold text-sm transition-all duration-200 cursor-pointer shadow-sm active:scale-[0.99] group"
                 >
-                  {isSocialLoading ? (
+                  {socialProviderLoading === "Google" ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
                       <span>Connecting to Google...</span>
                     </>
                   ) : (
@@ -136,11 +170,53 @@ export default function LoginPage({
                         />
                       </svg>
                       <span>Continue with Google</span>
-                      <ArrowRight className="w-4 h-4 text-blue-200 group-hover:translate-x-1 transition-transform" />
+                      <ArrowRight className="w-4 h-4 text-neutral-400 group-hover:translate-x-1 transition-transform ml-auto" />
                     </>
                   )}
                 </button>
               </Tooltip>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* GitHub */}
+                <Tooltip text="Sign in with GitHub" placement="bottom">
+                  <button
+                    type="button"
+                    disabled={isSocialLoading || isLoading}
+                    onClick={() => handleSocialLogin("GitHub")}
+                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#14161B] hover:bg-[#1C2028] border border-[#2F2F2F] hover:border-neutral-600 disabled:opacity-60 text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    {socialProviderLoading === "GitHub" ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <>
+                        <Github className="w-3.5 h-3.5 text-neutral-300" />
+                        <span>GitHub</span>
+                      </>
+                    )}
+                  </button>
+                </Tooltip>
+
+                {/* Discord */}
+                <Tooltip text="Sign in with Discord" placement="bottom">
+                  <button
+                    type="button"
+                    disabled={isSocialLoading || isLoading}
+                    onClick={() => handleSocialLogin("Discord")}
+                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#14161B] hover:bg-[#1C2028] border border-[#2F2F2F] hover:border-neutral-600 disabled:opacity-60 text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+                  >
+                    {socialProviderLoading === "Discord" ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <>
+                        <svg className="w-3.5 h-3.5 fill-[#5865F2]" viewBox="0 0 24 24">
+                          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.893.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028z" />
+                        </svg>
+                        <span>Discord</span>
+                      </>
+                    )}
+                  </button>
+                </Tooltip>
+              </div>
             </div>
 
             {/* Separator */}
@@ -155,12 +231,6 @@ export default function LoginPage({
             {/* Form Card */}
             <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 shadow-2xl space-y-5">
               <form noValidate className="space-y-4" onSubmit={handleSubmit}>
-                {error && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
-                    {error}
-                  </div>
-                )}
-
                 {/* Email Input */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between ml-0.5">
@@ -239,6 +309,14 @@ export default function LoginPage({
                       </Tooltip>
                     </div>
                   </div>
+
+                  {/* Caps Lock Warning Badge */}
+                  {isCapsLockOn && (
+                    <div className="flex items-center gap-1.5 text-amber-400 text-xs font-semibold pt-1 ml-0.5 animate-in fade-in duration-200">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Warning: Caps Lock is ON</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Remember Me Toggle */}
@@ -272,7 +350,7 @@ export default function LoginPage({
                 </div>
 
                 {/* Submit Button */}
-                <Tooltip text="Sign in to your account" placement="bottom">
+                <Tooltip text="Sign in to your studio account" placement="bottom">
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -316,3 +394,4 @@ export default function LoginPage({
     </div>
   );
 }
+

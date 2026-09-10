@@ -20,6 +20,7 @@ export default function useLoginForm(props: LoginFormProps) {
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = React.useState<string | null>(null);
   const [showPassword, setShowPassword] = React.useState(false);
   const [rememberMe, setRememberMe] = React.useState(false);
   const [activeTheme, setActiveTheme] = React.useState<ThemeKey>("purple");
@@ -27,12 +28,34 @@ export default function useLoginForm(props: LoginFormProps) {
   const [isCapsLockOn, setIsCapsLockOn] = React.useState(false);
   const [isTourOpen, setIsTourOpen] = React.useState(false);
   const [tourStep, setTourStep] = React.useState(0);
+  const [socialProviderLoading, setSocialProviderLoading] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const urlError = params.get("error");
+    const urlError = params.get("error") || params.get("error_description");
+    const urlMsg = params.get("msg") || params.get("message");
+    const isRegistered = params.get("registered") === "true" || params.get("registered") === "1";
+    const isReset = params.get("reset") === "true" || params.get("reset") === "1";
+    const isVerified = params.get("verified") === "true" || params.get("verified") === "1";
+
+    if (isRegistered) {
+      setInfoMessage("Account created successfully! Please sign in with your credentials.");
+    } else if (isReset) {
+      setInfoMessage("Your password has been reset successfully. Please sign in with your new password.");
+    } else if (isVerified) {
+      setInfoMessage("Your email has been verified! You can now access your studio account.");
+    } else if (urlMsg) {
+      setInfoMessage(decodeURIComponent(urlMsg));
+    }
+
     if (urlError) {
-      setError(urlError);
+      if (urlError === "session_expired") {
+        setError("Your session has expired. Please sign in again to continue.");
+      } else if (urlError === "oauth_cancelled" || urlError === "access_denied") {
+        setError("Social login was cancelled or permission was denied. Please try again.");
+      } else {
+        setError(decodeURIComponent(urlError));
+      }
     }
   }, []);
 
@@ -57,31 +80,45 @@ export default function useLoginForm(props: LoginFormProps) {
     }
   };
 
+  const fillDemoCredentials = () => {
+    setEmail("creator@sonikoma.ai");
+    setPassword("StudioPass123!");
+    setError(null);
+    setInfoMessage("Demo creator account credentials filled. Click 'Sign In' to enter.");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
     if (!email.trim()) {
       setError("Please enter your email address.");
+      setInfoMessage(null);
       return;
     }
     if (!isEmailValid) {
-      setError("Please enter a valid email address.");
+      setError("Please enter a valid email address (e.g. name@example.com).");
+      setInfoMessage(null);
       return;
     }
     if (!password) {
       setError("Please enter your password.");
+      setInfoMessage(null);
       return;
     }
     if (!isPasswordValid) {
-      setError("Password must be at least 6 characters.");
+      setError("Password must be at least 6 characters long.");
+      setInfoMessage(null);
       return;
     }
+
     setIsLoading(true);
     setError(null);
+    setInfoMessage(null);
+
     try {
       const res = await props.onLogin({ email, password, rememberMe });
       if (res === false) {
-        throw new Error("Invalid email or password. Please try again.");
+        throw new Error("Invalid email or password. Please verify your credentials.");
       }
       sessionStorage.setItem("sonikoma_show_welcome_back", "true");
       sessionStorage.removeItem("sonikoma_show_welcome_user");
@@ -93,20 +130,26 @@ export default function useLoginForm(props: LoginFormProps) {
         window.dispatchEvent(new Event("popstate"));
       }
     } catch (err: any) {
-      setError(err.message || "Invalid credentials. Please try again.");
+      setError(err.message || "Sign in failed. Please check your credentials and try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const [isSocialLoading, setIsSocialLoading] = React.useState(false);
-
   const handleSocialLogin = (provider: string) => {
+    setSocialProviderLoading(provider);
+    setError(null);
+    setInfoMessage(null);
+
     if (provider === "Google") {
-      setIsSocialLoading(true);
       window.location.href = "/api/auth/google/login";
+    } else if (provider === "GitHub") {
+      window.location.href = "/api/auth/github/login";
+    } else if (provider === "Discord") {
+      window.location.href = "/api/auth/discord/login";
     } else {
-      setError(`OAuth sign in with ${provider} is not configured yet.`);
+      setSocialProviderLoading(null);
+      setError(`OAuth sign in with ${provider} is currently unavailable.`);
     }
   };
 
@@ -120,8 +163,12 @@ export default function useLoginForm(props: LoginFormProps) {
     password,
     setPassword,
     isLoading,
-    isSocialLoading,
+    isSocialLoading: Boolean(socialProviderLoading),
+    socialProviderLoading,
     error,
+    setError,
+    infoMessage,
+    setInfoMessage,
     showPassword,
     setShowPassword,
     rememberMe,
@@ -137,6 +184,7 @@ export default function useLoginForm(props: LoginFormProps) {
     setTourStep,
     isEmailValid,
     isPasswordValid,
+    fillDemoCredentials,
     handleSubmit,
     handleSocialLogin,
     checkCapsLock,
@@ -150,3 +198,4 @@ export default function useLoginForm(props: LoginFormProps) {
     onNavigateHome: props.onNavigateHome,
   };
 }
+

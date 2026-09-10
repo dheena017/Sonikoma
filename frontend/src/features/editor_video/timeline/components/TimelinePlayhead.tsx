@@ -38,13 +38,20 @@ const TimelinePlayhead: React.FC<TimelinePlayheadProps> = ({
   };
 
   const pxPerSec = zoomLevel;
-  const left = 224 + Math.max(0, (currentTime ?? 0)) * pxPerSec;
+  const headerOffset =
+    trackBounds?.left !== undefined && trackBounds.left > 0
+      ? trackBounds.left + (scrollLeft ?? 0)
+      : typeof window !== "undefined" && window.innerWidth < 640
+      ? 144
+      : 224;
+
+  const left = headerOffset + Math.max(0, currentTime ?? 0) * pxPerSec;
 
   // Screen position relative to visible timeline rail
   const screenX = scrollLeft !== undefined ? left - scrollLeft : left;
 
-  // Instantly hide playhead at the exact 224px header boundary line
-  if (screenX < 224) {
+  // Instantly hide playhead if scrolled out of view past header boundary
+  if (screenX < headerOffset - 10) {
     return null;
   }
 
