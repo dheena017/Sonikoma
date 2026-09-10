@@ -3,6 +3,8 @@ export interface WorkspaceReturnPathOptions {
   jobId?: string | null;
   seriesSlug?: string | null;
   chapterSlug?: string | null;
+  seriesTitle?: string | null;
+  chapterNumber?: string | number | null;
   searchParams?: URLSearchParams | string | null;
   storage?: Pick<Storage, "getItem"> | null;
 }
@@ -24,6 +26,12 @@ export function createTempProjectId(titleOrSlug?: string): string {
     if (slug) return `temp_${slug}_${hash}`;
   }
   return `temp_draft_${hash}`;
+}
+
+export function extractDraftHash(projectId?: string | null): string {
+  if (!projectId) return "draft";
+  const parts = projectId.split("_");
+  return parts[parts.length - 1] || "draft";
 }
 
 export function formatProjectIdDisplay(id?: string | null): string {
@@ -86,6 +94,33 @@ export function parseWorkspaceParams(
   return { projectId, jobId };
 }
 
+export function getHumanEditorPath(options: WorkspaceReturnPathOptions = {}): string {
+  const { projectId, seriesSlug, chapterSlug, seriesTitle, chapterNumber, jobId } = options;
+
+  const activeSeries = seriesSlug || (seriesTitle ? slugify(seriesTitle) : null);
+  const activeChapter = chapterSlug || (chapterNumber ? `chapter-${chapterNumber}` : null);
+
+  const jobQuery = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
+
+  if (activeSeries && activeChapter) {
+    const cleanChapter = activeChapter.startsWith("chapter-") || activeChapter.startsWith("ch-")
+      ? activeChapter
+      : `chapter-${activeChapter}`;
+    return `/editor/${activeSeries}/${cleanChapter}${jobQuery}`;
+  }
+
+  if (projectId) {
+    if (projectId.startsWith("temp_") || projectId.startsWith("draft_")) {
+      const hash = extractDraftHash(projectId);
+      return `/editor/draft-${hash}${jobQuery}`;
+    }
+    const cleanSlug = slugify(projectId);
+    return `/editor/${cleanSlug || projectId}${jobQuery}`;
+  }
+
+  return `/editor`;
+}
+
 export function resolveWorkspaceReturnPath(
   options: WorkspaceReturnPathOptions = {}
 ): string {
@@ -106,24 +141,12 @@ export function resolveWorkspaceReturnPath(
   const activeChapterSlug =
     options.chapterSlug ?? storage?.getItem("active_chapter_slug") ?? null;
 
-  if (activeSeriesSlug && activeChapterSlug) {
-    const jobQuery = activeJobId
-      ? `?job_id=${encodeURIComponent(activeJobId)}`
-      : "";
-    return `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}${jobQuery}`;
-  }
-
-  if (activeProjectId) {
-    const query = activeJobId
-      ? `project_id=${encodeURIComponent(
-          activeProjectId
-        )}&job_id=${encodeURIComponent(activeJobId)}`
-      : `id=${encodeURIComponent(activeProjectId)}`;
-
-    return activeProjectId.startsWith("temp_")
-      ? `/scraper/editor?${query}`
-      : `/scraper?${query}`;
-  }
-
-  return "/scraper";
+  return getHumanEditorPath({
+    projectId: activeProjectId,
+    jobId: activeJobId,
+    seriesSlug: activeSeriesSlug,
+    chapterSlug: activeChapterSlug,
+    storage,
+  });
 }
+

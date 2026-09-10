@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
+import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
 import { GeneratedPanel } from "@/types";
 import { Notification } from "@/features/app_notification";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
@@ -255,19 +256,12 @@ const SidebarInner = ({
     const activeChapterSlug =
       localStorage.getItem("active_chapter_slug") || chapterSlug;
 
-    if (activeProjId) {
-      if (activeSeriesSlug && activeChapterSlug) {
-        navigateTo(
-          `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
-        );
-      } else if (activeProjId.startsWith("temp_")) {
-        navigateTo(`/scraper/editor?id=${activeProjId}`);
-      } else {
-        navigateTo(`/scraper?id=${activeProjId}`);
-      }
-    } else {
-      navigateTo("/scraper");
-    }
+    const path = getHumanEditorPath({
+      projectId: activeProjId,
+      seriesSlug: activeSeriesSlug,
+      chapterSlug: activeChapterSlug,
+    });
+    navigateTo(path);
   };
 
   const handleNavigateToDashboardOverview = () => {

@@ -14,6 +14,7 @@ import {
   useProjectStore,
 } from "@/shared/hooks";
 import { useAutoSave } from "@/shared/hooks/useAutoSave";
+import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
 import * as api from "@/api";
 
 // --- Components ---
@@ -646,6 +647,19 @@ export default function App() {
 
       if (!saved) {
         return false;
+      }
+
+      // 🌟 Dynamically update browser address bar to clean human URL on save
+      const humanPath = getHumanEditorPath({
+        projectId: currentProjectId,
+        seriesSlug: seriesSlugState,
+        chapterSlug: chapterSlugState,
+        seriesTitle: details.seriesTitle || seriesTitleState,
+        chapterNumber: details.chapterNumber || chapterNumberState,
+      });
+
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, humanPath);
       }
 
       if (shouldGenerate) {

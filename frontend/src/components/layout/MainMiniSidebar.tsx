@@ -22,6 +22,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
+import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
 
 interface MiniSidebarProps {
   currentPath: string;
@@ -75,19 +76,12 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
     const activeChapterSlug =
       chapterSlug || localStorage.getItem("active_chapter_slug");
 
-    if (activeProjId) {
-      if (activeSeriesSlug && activeChapterSlug) {
-        navigateTo(
-          `/scraper/editor/series/${activeSeriesSlug}/chapters/${activeChapterSlug}`
-        );
-      } else if (activeProjId.startsWith("temp_")) {
-        navigateTo(`/scraper/editor?id=${activeProjId}`);
-      } else {
-        navigateTo(`/scraper?id=${activeProjId}`);
-      }
-    } else {
-      navigateTo("/scraper");
-    }
+    const path = getHumanEditorPath({
+      projectId: activeProjId,
+      seriesSlug: activeSeriesSlug,
+      chapterSlug: activeChapterSlug,
+    });
+    navigateTo(path);
   };
 
   const isAdmin = React.useMemo(() => {

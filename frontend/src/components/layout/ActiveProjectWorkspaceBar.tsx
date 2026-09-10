@@ -18,6 +18,7 @@ import {
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { getProxiedImageUrl } from "@/utils";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
 
 interface ActiveProjectWorkspaceBarProps {
   navigateTo?: (path: string) => void;
@@ -43,10 +44,6 @@ export const ActiveProjectWorkspaceBar: React.FC<
   const handleNavigate = (path: string) => {
     if (navigateTo) {
       navigateTo(path);
-    } else if ((window as any).navigateTo) {
-      (window as any).navigateTo(path);
-    } else {
-      window.location.href = path;
     }
   };
 
@@ -73,6 +70,20 @@ export const ActiveProjectWorkspaceBar: React.FC<
             },
           });
         }
+      }
+
+      // 🌟 Dynamically update browser address bar to clean human URL
+      const proj = activeProjectData?.project;
+      const humanPath = getHumanEditorPath({
+        projectId: activeProjectId,
+        seriesSlug: proj?.series_slug,
+        chapterSlug: proj?.chapter_slug,
+        seriesTitle: proj?.title,
+        chapterNumber: proj?.episode,
+      });
+
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, humanPath);
       }
     } catch (err) {
       console.error("[WorkspaceBar] Failed to promote project:", err);

@@ -1,6 +1,7 @@
 import React from "react";
 import { Sliders, ArrowLeft } from "lucide-react";
 import { GeneratedPanel } from "@/types";
+import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
 
 // --- Custom Logic Hooks ---
 import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
@@ -687,6 +688,7 @@ export default function AppRouter(props: AppRouterProps) {
   if (
     !isAuthenticated &&
     currentPath !== "/scraper" &&
+    !currentPath.startsWith("/editor") &&
     !currentPath.startsWith("/scraper/editor")
   ) {
     setTimeout(() => navigateTo("/"), 0);
@@ -945,20 +947,30 @@ export default function AppRouter(props: AppRouterProps) {
     }
   }, [currentPath, navigateTo]);
 
-  // Cleanly normalize /scraper/series/... URLs to /scraper/editor/series/...
+  // Cleanly normalize legacy /scraper/editor & /scraper/series URLs to clean human-readable /editor URLs
   React.useEffect(() => {
     if (
-      currentPath.startsWith("/scraper/series/") &&
-      !currentPath.startsWith("/scraper/editor/series/")
+      currentPath.startsWith("/scraper/editor") ||
+      currentPath.startsWith("/scraper/series/")
     ) {
-      const newPath = currentPath.replace(
-        /^\/scraper\/series\//,
-        "/scraper/editor/series/"
-      );
       const search = window.location.search;
-      navigateTo(`${newPath}${search}`);
+      const params = new URLSearchParams(search);
+      const projId = params.get("id") || params.get("project_id") || projectId;
+
+      const humanPath = getHumanEditorPath({
+        projectId: projId,
+        seriesSlug: seriesSlugState,
+        chapterSlug: chapterSlugState,
+        jobId: params.get("job_id"),
+      });
+
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, humanPath);
+      } else {
+        navigateTo(humanPath);
+      }
     }
-  }, [currentPath, navigateTo]);
+  }, [currentPath, projectId, seriesSlugState, chapterSlugState, navigateTo]);
 
   React.useEffect(() => {
     return () => {
