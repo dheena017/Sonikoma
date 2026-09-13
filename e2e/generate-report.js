@@ -917,9 +917,38 @@ const TEST_ITEMS = [
 // LINK TRACES DIRECTLY INTO E2E/PLAYWRIGHT-REPORT/DATA/<id>-trace.zip
 // ─────────────────────────────────────────────────────────────────────────────
 if (fs.existsSync(testResultsDir)) {
-  const resultDirs = fs.readdirSync(testResultsDir);
+  const resultDirs = fs.readdirSync(testResultsDir).filter(d => {
+    try {
+      return fs.statSync(path.join(testResultsDir, d)).isDirectory();
+    } catch {
+      return false;
+    }
+  });
+
   TEST_ITEMS.forEach(test => {
-    const matchedDir = resultDirs.find(d => d.startsWith(test.tracePrefix) || d.toLowerCase().includes(test.id.toLowerCase()));
+    // 1. Direct prefix or substring match if present
+    let matchedDir = resultDirs.find(d => d.startsWith(test.tracePrefix) || d.toLowerCase().includes(test.id.toLowerCase()));
+
+    // 2. Robust prefix + keyword match against Playwright's truncated/hashed folder names
+    if (!matchedDir) {
+      const fileIndex = test.tracePrefix.match(/(\d+)/)?.[1] || '';
+      const prefix = test.suite + '-' + fileIndex;
+      const candidates = resultDirs.filter(d => d.startsWith(prefix));
+      const testWords = test.name.toLowerCase().replace(/[^a-z0-9]/g, ' ').split(/\s+/).filter(w => w.length >= 3);
+
+      let bestScore = -1;
+      candidates.forEach(c => {
+        let score = 0;
+        testWords.forEach(tw => {
+          if (c.toLowerCase().includes(tw)) score += tw.length;
+        });
+        if (score > bestScore) {
+          bestScore = score;
+          matchedDir = c;
+        }
+      });
+    }
+
     if (matchedDir) {
       const srcTrace = path.join(testResultsDir, matchedDir, 'trace.zip');
       if (fs.existsSync(srcTrace)) {
@@ -1700,7 +1729,10 @@ const generatedHTML = `<!DOCTYPE html>
 
       const traceBtn = document.getElementById('insp-trace-btn');
       const traceFile = test.traceFile || (test.id + '-trace.zip');
-      traceBtn.href = 'trace/index.html?trace=' + encodeURIComponent(window.location.origin + '/data/' + traceFile);
+      const traceUrl = (window.location.origin && window.location.origin !== 'null')
+        ? (window.location.origin + '/data/' + traceFile)
+        : (new URL('data/' + traceFile, window.location.href).href);
+      traceBtn.href = 'trace/index.html?trace=' + encodeURIComponent(traceUrl);
 
       const redocBtn = document.getElementById('insp-redoc-btn');
       const swaggerBtn = document.getElementById('insp-swagger-btn');
