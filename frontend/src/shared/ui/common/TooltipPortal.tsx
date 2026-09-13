@@ -86,7 +86,7 @@ export interface TooltipPortalProps {
 // Variant & Style Helpers
 // --------------------------------------------------------------------------
 const VARIANT_STYLES: Record<TooltipVariant, string> = {
-  dark: "bg-neutral-900/95 border-neutral-700/80 text-neutral-100 shadow-black/70 shadow-2xl",
+  dark: "bg-[#111116]/95 border-[#282832] text-neutral-100 shadow-[0_12px_36px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)]",
   glass: "bg-neutral-900/85 backdrop-blur-xl border-white/15 text-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.6)]",
   neon: "bg-[#0c1017]/95 border-blue-500/50 text-cyan-50 shadow-[0_0_20px_rgba(6,182,212,0.3)] shadow-cyan-950/50",
   cyber: "bg-[#110d1f]/95 border-[#3B82F6]/50 text-[#3B82F6]  shadow-black/50",
@@ -109,11 +109,23 @@ const GLOW_COLORS: Record<TooltipVariant, string> = {
   danger: "shadow-[0_0_25px_rgba(244,63,94,0.4)]",
 };
 
+const ARROW_STYLES: Record<TooltipVariant, string> = {
+  dark: "bg-[#111116] border-[#282832]",
+  glass: "bg-neutral-900 border-white/20",
+  neon: "bg-[#0c1017] border-blue-500/50",
+  cyber: "bg-[#110d1f] border-[#3B82F6]/50",
+  gradient: "bg-[#1f1f26] border-[#3B82F6]/40",
+  primary: "bg-blue-950 border-blue-500/50",
+  success: "bg-emerald-950 border-emerald-500/50",
+  warning: "bg-amber-950 border-amber-500/50",
+  danger: "bg-rose-950 border-rose-500/50",
+};
+
 const SIZE_STYLES: Record<TooltipSize, { root: string; text: string; shortcut: string; desc: string }> = {
-  xs: { root: "px-2 py-0.5 gap-1.5 text-[11px] rounded-md", text: "text-[11px] font-medium", shortcut: "text-[9px] px-1 py-0.5", desc: "text-[10px]" },
-  sm: { root: "px-2.5 py-1 gap-2 text-xs rounded-lg", text: "text-xs font-medium", shortcut: "text-[10px] px-1.5 py-0.5", desc: "text-[11px]" },
-  md: { root: "px-3 py-1.5 gap-2.5 text-xs rounded-lg", text: "text-xs font-semibold", shortcut: "text-[11px] px-1.5 py-0.5", desc: "text-xs" },
-  lg: { root: "px-3.5 py-2 gap-3 text-sm rounded-xl", text: "text-sm font-semibold", shortcut: "text-xs px-2 py-0.5", desc: "text-xs" },
+  xs: { root: "px-2.5 py-1 gap-1.5 text-[11px] rounded-lg", text: "text-[11px] font-medium", shortcut: "text-[9px] px-1 py-0.5", desc: "text-[10px]" },
+  sm: { root: "px-3.5 py-2 gap-2 text-xs rounded-xl", text: "text-xs font-medium tracking-normal text-neutral-200", shortcut: "text-[10px] px-1.5 py-0.5", desc: "text-[11px] text-neutral-400" },
+  md: { root: "px-4 py-2.5 gap-2.5 text-xs rounded-xl", text: "text-xs font-semibold", shortcut: "text-[11px] px-1.5 py-0.5", desc: "text-xs" },
+  lg: { root: "px-5 py-3 gap-3 text-sm rounded-2xl", text: "text-sm font-semibold", shortcut: "text-xs px-2 py-0.5", desc: "text-xs" },
 };
 
 const BADGE_STYLES: Record<string, string> = {
@@ -168,9 +180,9 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
   }, [shortcut]);
 
   // Compute positioning CSS directly and reliably
-  const { calculatedStyle, resolvedPlacement, arrowPlacement } = useMemo(() => {
+  const { calculatedStyle, resolvedPlacement, arrowPlacement, arrowDeltaX } = useMemo(() => {
     if (!anchorRect) {
-      return { calculatedStyle: {}, resolvedPlacement: placement, arrowPlacement: "left" };
+      return { calculatedStyle: {}, resolvedPlacement: placement, arrowPlacement: "left", arrowDeltaX: 0 };
     }
 
     const { top, left, right, bottom, width, height } = anchorRect;
@@ -190,14 +202,10 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       finalPlacement = finalPlacement.replace("bottom", "top") as TooltipPlacement;
     }
 
-    // Auto align start/end if centered tooltip would overflow viewport sides
-    if (finalPlacement === "bottom" || finalPlacement === "top") {
-      if (left + width / 2 - 110 < 12) {
-        finalPlacement = (finalPlacement + "-start") as TooltipPlacement;
-      } else if (left + width / 2 + 110 > vpWidth - 12) {
-        finalPlacement = (finalPlacement + "-end") as TooltipPlacement;
-      }
-    }
+    const anchorCenterX = left + width / 2 + crossOffset;
+    const estHalfWidth = 140;
+    const clampedLeft = Math.max(estHalfWidth + 12, Math.min(vpWidth - estHalfWidth - 12, anchorCenterX));
+    const deltaX = anchorCenterX - clampedLeft;
 
     const posStyle: React.CSSProperties = {
       position: "fixed",
@@ -244,49 +252,31 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
         arrowPos = "right-end";
         break;
       case "top":
-        posStyle.left = Math.max(12, Math.min(vpWidth - 12, left + width / 2 + crossOffset));
+      case "top-start":
+      case "top-end":
+        posStyle.left = clampedLeft;
         posStyle.top = top - offset;
         posStyle.transform = "translate(-50%, -100%)";
         arrowPos = "bottom";
         break;
-      case "top-start":
-        posStyle.left = Math.max(12, left + crossOffset);
-        posStyle.top = top - offset;
-        posStyle.transform = "translateY(-100%)";
-        arrowPos = "bottom-start";
-        break;
-      case "top-end":
-        posStyle.left = Math.min(vpWidth - 12, right + crossOffset);
-        posStyle.top = top - offset;
-        posStyle.transform = "translate(-100%, -100%)";
-        arrowPos = "bottom-end";
-        break;
       case "bottom":
-        posStyle.left = Math.max(12, Math.min(vpWidth - 12, left + width / 2 + crossOffset));
+      case "bottom-start":
+      case "bottom-end":
+        posStyle.left = clampedLeft;
         posStyle.top = bottom + offset;
         posStyle.transform = "translateX(-50%)";
         arrowPos = "top";
         break;
-      case "bottom-start":
-        posStyle.left = Math.max(12, left + crossOffset);
-        posStyle.top = bottom + offset;
-        arrowPos = "top-start";
-        break;
-      case "bottom-end":
-        posStyle.left = Math.min(vpWidth - 12, right + crossOffset);
-        posStyle.top = bottom + offset;
-        posStyle.transform = "translateX(-100%)";
-        arrowPos = "top-end";
-        break;
     }
 
-    return { calculatedStyle: posStyle, resolvedPlacement: finalPlacement, arrowPlacement: arrowPos };
+    return { calculatedStyle: posStyle, resolvedPlacement: finalPlacement, arrowPlacement: arrowPos, arrowDeltaX: deltaX };
   }, [anchorRect, placement, offset, crossOffset]);
 
   if (!mounted || !visible || !anchorRect || (!content && !description)) {
     return null;
   }
 
+  const isLongText = typeof content === "string" ? content.length > 25 : Boolean(description);
   const sizeConfig = SIZE_STYLES[size] || SIZE_STYLES.sm;
   const variantClass = VARIANT_STYLES[variant] || VARIANT_STYLES.dark;
   const glowClass = glow ? GLOW_COLORS[variant] || "" : "";
@@ -300,32 +290,31 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
   };
 
   const getArrowStyle = (): { className: string; style: React.CSSProperties } => {
-    const base = "absolute w-2 h-2 pointer-events-none bg-neutral-900 border border-neutral-700/80 rotate-45";
+    const arrowVariantTheme = ARROW_STYLES[variant] || ARROW_STYLES.dark;
+    const base = `absolute w-2 h-2 pointer-events-none rotate-45 ${arrowVariantTheme}`;
     switch (arrowPlacement) {
       case "left":
         return { className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`, style: {} };
       case "left-start":
-        return { className: `${base} -left-1 top-2 border-t-0 border-r-0`, style: {} };
+        return { className: `${base} -left-1 top-2.5 border-t-0 border-r-0`, style: {} };
       case "left-end":
-        return { className: `${base} -left-1 bottom-2 border-t-0 border-r-0`, style: {} };
+        return { className: `${base} -left-1 bottom-2.5 border-t-0 border-r-0`, style: {} };
       case "right":
         return { className: `${base} -right-1 top-1/2 -translate-y-1/2 border-b-0 border-l-0`, style: {} };
       case "right-start":
-        return { className: `${base} -right-1 top-2 border-b-0 border-l-0`, style: {} };
+        return { className: `${base} -right-1 top-2.5 border-b-0 border-l-0`, style: {} };
       case "right-end":
-        return { className: `${base} -right-1 bottom-2 border-b-0 border-l-0`, style: {} };
+        return { className: `${base} -right-1 bottom-2.5 border-b-0 border-l-0`, style: {} };
       case "top":
-        return { className: `${base} -top-1 left-1/2 -translate-x-1/2 border-b-0 border-r-0`, style: {} };
-      case "top-start":
-        return { className: `${base} -top-1 left-5 border-b-0 border-r-0`, style: {} };
-      case "top-end":
-        return { className: `${base} -top-1 right-5 border-b-0 border-r-0`, style: {} };
+        return {
+          className: `${base} -top-1 -translate-x-1/2 border-b-0 border-r-0`,
+          style: { left: `calc(50% + ${Math.max(-110, Math.min(110, arrowDeltaX))}px)` }
+        };
       case "bottom":
-        return { className: `${base} -bottom-1 left-1/2 -translate-x-1/2 border-t-0 border-l-0`, style: {} };
-      case "bottom-start":
-        return { className: `${base} -bottom-1 left-5 border-t-0 border-l-0`, style: {} };
-      case "bottom-end":
-        return { className: `${base} -bottom-1 right-5 border-t-0 border-l-0`, style: {} };
+        return {
+          className: `${base} -bottom-1 -translate-x-1/2 border-t-0 border-l-0`,
+          style: { left: `calc(50% + ${Math.max(-110, Math.min(110, arrowDeltaX))}px)` }
+        };
       default:
         return { className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`, style: {} };
     }
@@ -340,12 +329,13 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       aria-hidden={!visible}
       style={{
         ...calculatedStyle,
-        maxWidth,
+        maxWidth: isLongText ? (typeof maxWidth === "number" ? Math.min(maxWidth, 280) : 280) : maxWidth,
         ...userStyle,
       }}
       className={`
         pointer-events-none border backdrop-blur-md flex flex-col justify-center
-        duration-150 ease-out select-none whitespace-nowrap z-[9900]
+        duration-150 ease-out select-none z-[9900]
+        ${isLongText ? "whitespace-normal text-balance" : "whitespace-nowrap"}
         ${sizeConfig.root}
         ${variantClass}
         ${glowClass}
@@ -360,10 +350,10 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
 
       {/* Main Content Row */}
       <div className="flex items-center gap-2 w-full">
-        {icon && <span className="shrink-0 flex items-center opacity-85">{icon}</span>}
+        {icon && <span className="shrink-0 flex items-center opacity-90">{icon}</span>}
 
         {content && (
-          <span className={`font-medium tracking-tight whitespace-nowrap ${sizeConfig.text}`}>
+          <span className={`font-medium tracking-normal break-words ${isLongText ? "whitespace-normal text-balance leading-relaxed" : "whitespace-nowrap"} ${icon ? "text-left" : "text-center"} ${sizeConfig.text}`}>
             {content}
           </span>
         )}

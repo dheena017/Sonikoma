@@ -6,6 +6,8 @@ import {
   Zap,
   MoreVertical,
   Clock,
+  Copy,
+  Trash2,
 } from "lucide-react";
 import { FavoritesManager } from "@/features/workspace_scraper/chapter-scraper/utils/FavoritesManager";
 import { separateComicUrl, type SeparateUrlResult } from "@/api/endpoints/scraper";
@@ -27,6 +29,37 @@ export interface ScraperInputToolbarProps {
   setChapterTitle?: (title: string) => void;
   fetchWithInterceptor?: typeof fetch;
   onSeparatedDataChange?: (data: SeparateUrlResult | null) => void;
+}
+
+function formatSeriesDisplay(url: string, rawTitle?: string) {
+  if (rawTitle && rawTitle !== url && !rawTitle.startsWith("http")) {
+    return { title: rawTitle, subtitle: "Saved Series", domain: "" };
+  }
+  try {
+    const parsed = new URL(url);
+    const domain = parsed.hostname.replace(/^www\./, "");
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    const contentSegments = segments.filter(
+      (s) => !["en", "viewer", "read", "manga", "series", "comic", "chapter"].includes(s.toLowerCase())
+    );
+    let title = "";
+    let chapter = "";
+    for (const seg of contentSegments) {
+      if (/^(ep|ch|chapter|episode)[-_]?\d+/i.test(seg)) {
+        chapter = seg.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      } else if (!title && seg.length > 2 && !/^(genre|romance|action|fantasy|drama|comedy|horror|slice-of-life)$/i.test(seg)) {
+        title = seg.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      }
+    }
+    if (!title && contentSegments.length > 0) {
+      title = contentSegments[0].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+    const displayTitle = title || domain;
+    const displaySubtitle = [domain, chapter, "Saved Series"].filter(Boolean).join(" • ");
+    return { title: displayTitle, subtitle: displaySubtitle, domain };
+  } catch {
+    return { title: url, subtitle: "Saved Series", domain: "" };
+  }
 }
 
 export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
@@ -252,24 +285,21 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           />
 
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute left-0 right-0 top-full mt-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl shadow-2xl z-[1000] overflow-hidden animate-fade-in">
-              <div className="px-4 py-3 border-b border-[#2F2F2F] bg-[#121212]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#3B82F6]" />
-                    <span className="text-[11px] font-bold text-[#E5E5E5] uppercase tracking-wider font-mono">
-                      Recent &amp; Bookmarked Episodes
-                    </span>
-                    <span className="px-2 py-0.5 text-[9px] font-bold bg-[#3B82F6]/15 text-[#3B82F6] rounded-full border border-[#3B82F6]/30">
-                      {suggestions.length}
-                    </span>
-                  </div>
+            <div className="absolute left-0 right-0 top-full mt-2 bg-[#121217]/98 backdrop-blur-xl border border-[#282834] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(59,130,246,0.12)] z-[1000] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
+              <div className="px-4 py-3 border-b border-[#282834] bg-[#0E0E12] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#3B82F6]" />
+                  <span className="text-[11px] font-bold text-[#E5E5E5] uppercase tracking-wider font-mono">
+                    Recent &amp; Bookmarked Episodes
+                  </span>
+                  <span className="px-2 py-0.5 text-[9px] font-bold bg-[#3B82F6]/20 text-[#60A5FA] rounded-full border border-[#3B82F6]/40 shadow-[0_0_8px_rgba(59,130,246,0.3)]">
+                    {suggestions.length}
+                  </span>
                 </div>
               </div>
-              <div className="max-h-72 overflow-y-auto divide-y divide-[#2F2F2F]/40 bg-[#1E1E1E]">
+              <div className="max-h-72 overflow-y-auto divide-y divide-[#282834]/50 bg-[#121217]">
                 {suggestions.map((series, idx) => {
-                  const seriesTitleText = series.title || series.url || "Webtoon Series";
-                  const chapterText = "Saved Series";
+                  const displayInfo = formatSeriesDisplay(series.url, series.title);
 
                   return (
                     <div
@@ -284,40 +314,80 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                         }
                         setShowSuggestions(false);
                       }}
-                      className="w-full px-4 py-3 hover:bg-[#262626] border-b border-[#2F2F2F]/30 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-[#1E1E1E]"
+                      className="w-full px-4 py-3 hover:bg-[#181D2A] border-b border-[#282834]/50 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-[#121217]"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-8 h-8 bg-[#121212] rounded-lg flex items-center justify-center border border-[#2F2F2F] group-hover:border-[#3B82F6]/60 flex-shrink-0 shadow-sm">
-                          <Book className="w-4 h-4 text-[#3B82F6]" />
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#181820] border border-[#2F2F38] group-hover:bg-[#3B82F6] group-hover:border-[#60A5FA] group-hover:shadow-[0_0_14px_rgba(59,130,246,0.6)] transition-all duration-200 flex-shrink-0 shadow-sm">
+                          <Book className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-all duration-200 transform group-hover:scale-110" />
                         </div>
                         <div className="flex-grow min-w-0">
-                          <p className="text-xs font-bold text-[#E5E5E5] group-hover:text-[#3B82F6] truncate leading-snug transition-colors">
-                            {seriesTitleText}
+                          <p className="text-xs font-bold text-[#E5E5E5] group-hover:text-[#60A5FA] truncate leading-snug transition-colors">
+                            {displayInfo.title}
                           </p>
-                          <p className="text-[10px] text-[#9CA3AF] truncate mt-0.5 transition-colors">
-                            {chapterText}
+                          <p className="text-[10.5px] text-[#9CA3AF] group-hover:text-neutral-300 truncate mt-0.5 transition-colors">
+                            {displayInfo.subtitle}
                           </p>
-                          <p className="text-[9px] text-[#6B7280] font-mono truncate mt-0.5 select-all transition-colors">
+                          <p className="text-[9px] text-[#6B7280] group-hover:text-neutral-400 font-mono truncate mt-0.5 select-all transition-colors">
                             {series.url}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-widest rounded border bg-[#121212] text-[#9CA3AF] border-[#2F2F2F] group-hover:border-[#3B82F6]/40 transition-colors">
+                        <span className="px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-widest rounded border bg-[#181820] text-[#9CA3AF] border-[#2F2F38] group-hover:bg-[#3B82F6]/20 group-hover:text-[#93C5FD] group-hover:border-[#3B82F6]/50 transition-all">
                           Recent
                         </span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenSuggestionMenuIdx(
-                              openSuggestionMenuIdx === idx ? null : idx
-                            );
-                          }}
-                          className="w-7 h-7 rounded-lg bg-[#121212] hover:bg-[#262626] text-[#9CA3AF] hover:text-[#E5E5E5] border border-[#2F2F2F] flex items-center justify-center transition-all cursor-pointer active:scale-95"
-                        >
-                          <MoreVertical className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenSuggestionMenuIdx(
+                                openSuggestionMenuIdx === idx ? null : idx
+                              );
+                            }}
+                            className="w-7 h-7 rounded-lg bg-[#181820] hover:bg-[#3B82F6] hover:border-[#60A5FA] text-[#9CA3AF] hover:text-white border border-[#2F2F38] flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm hover:shadow-[0_0_10px_rgba(59,130,246,0.4)]"
+                            title="Options"
+                          >
+                            <MoreVertical className="w-3.5 h-3.5" />
+                          </button>
+                          {openSuggestionMenuIdx === idx && (
+                            <div
+                              onClick={(e) => e.stopPropagation()}
+                              className="absolute right-0 top-full mt-1.5 w-36 bg-[#16161D] border border-[#2F2F3D] rounded-xl shadow-2xl py-1 z-50 animate-in fade-in-0 zoom-in-95 duration-100"
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (series.url) {
+                                    navigator.clipboard.writeText(series.url);
+                                  }
+                                  setOpenSuggestionMenuIdx(null);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-xs text-neutral-200 hover:text-white hover:bg-[#3B82F6]/20 flex items-center gap-2 transition-colors cursor-pointer"
+                              >
+                                <Copy className="w-3 h-3 text-[#3B82F6]" />
+                                <span>Copy URL</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (series.url) {
+                                    FavoritesManager.removeEnteredUrl(series.url);
+                                    FavoritesManager.removeBookmark(series.url);
+                                    setSuggestions((prev) => prev.filter((item) => item.url !== series.url));
+                                  }
+                                  setOpenSuggestionMenuIdx(null);
+                                }}
+                                className="w-full px-3 py-1.5 text-left text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="w-3 h-3 text-rose-400" />
+                                <span>Remove</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -329,16 +399,21 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
         {actionSlot || (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
-            <Tooltip text="Extract and import panel images directly from this chapter URL" placement="bottom" disabled={isScraping}>
+            <Tooltip
+              text="Extract and import panel images directly from this chapter URL"
+              placement="bottom"
+              offset={10}
+              disabled={isScraping}
+            >
               <button
                 type="button"
                 onClick={handleImportClick}
                 disabled={isScraping || !targetUrl.trim()}
-                className={`btn-primary relative w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
+                className={`btn-primary group relative w-full justify-center px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2.5 ${
                   isScraping ? "cursor-wait" : "cursor-pointer"
                 } ${
                   separatedData?.is_chapter_url || !separatedData?.is_series_url
-                    ? "border-[#3B82F6]/50 shadow-[0_0_12px_rgba(59,130,246,0.2)]"
+                    ? "border-[#3B82F6]/60 shadow-[0_0_15px_rgba(59,130,246,0.22)]"
                     : ""
                 }`}
                 aria-label="Import Chapter Images"
@@ -350,27 +425,33 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                   </>
                 ) : (
                   <>
-                    <ImageIcon className="h-4 w-4 text-white" /> Import Chapter Images
+                    <ImageIcon className="h-4 w-4 text-white transition-transform duration-200 group-hover:scale-110" />
+                    <span>Import Chapter Images</span>
                   </>
                 )}
               </button>
             </Tooltip>
 
-            <Tooltip text="Browse series catalog & select multiple chapters to scrape" placement="bottom" disabled={isScraping}>
+            <Tooltip
+              text="Browse series catalog & batch scrape multiple chapters"
+              placement="bottom"
+              offset={10}
+              disabled={isScraping}
+            >
               <button
                 type="button"
                 onClick={handleOpenChapterScraperClick}
                 disabled={!targetUrl.trim() || isScraping}
-                className={`btn-primary relative w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
+                className={`btn-primary group relative w-full justify-center px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2.5 ${
                   isScraping ? "cursor-wait" : "cursor-pointer"
                 } ${
                   separatedData?.is_series_url && !separatedData?.is_chapter_url
-                    ? "border-[#3B82F6]/50 shadow-[0_0_12px_rgba(59,130,246,0.2)]"
+                    ? "border-[#3B82F6]/60 shadow-[0_0_15px_rgba(59,130,246,0.22)]"
                     : ""
                 }`}
                 aria-label="Import Chapter Scraper"
               >
-                <Zap className="h-4 w-4 text-white" />
+                <Zap className="h-4 w-4 text-white transition-transform duration-200 group-hover:scale-110" />
                 <span>Import Chapter Scraper</span>
               </button>
             </Tooltip>

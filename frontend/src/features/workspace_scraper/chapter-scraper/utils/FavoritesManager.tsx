@@ -179,6 +179,15 @@ export class FavoritesManager {
     );
     this.notifyUpdated();
   }
+
+  static removeEnteredUrl(url: string) {
+    const urls = this.getEnteredUrls().filter((u) => u !== url);
+    localStorage.setItem(
+      "sonikoma_entered_urls",
+      JSON.stringify(urls)
+    );
+    this.notifyUpdated();
+  }
 }
 
 interface FavoritesListProps {
