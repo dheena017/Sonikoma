@@ -122,10 +122,10 @@ const ARROW_STYLES: Record<TooltipVariant, string> = {
 };
 
 const SIZE_STYLES: Record<TooltipSize, { root: string; text: string; shortcut: string; desc: string }> = {
-  xs: { root: "px-2.5 py-1 gap-1.5 text-[11px] rounded-lg", text: "text-[11px] font-medium", shortcut: "text-[9px] px-1 py-0.5", desc: "text-[10px]" },
-  sm: { root: "px-3.5 py-2 gap-2 text-xs rounded-xl", text: "text-xs font-medium tracking-normal text-neutral-200", shortcut: "text-[10px] px-1.5 py-0.5", desc: "text-[11px] text-neutral-400" },
-  md: { root: "px-4 py-2.5 gap-2.5 text-xs rounded-xl", text: "text-xs font-semibold", shortcut: "text-[11px] px-1.5 py-0.5", desc: "text-xs" },
-  lg: { root: "px-5 py-3 gap-3 text-sm rounded-2xl", text: "text-sm font-semibold", shortcut: "text-xs px-2 py-0.5", desc: "text-xs" },
+  xs: { root: "px-2 py-0.5 gap-1 text-[11px] rounded-lg", text: "text-[11px] font-medium", shortcut: "text-[9px] px-1 py-0.5", desc: "text-[10px]" },
+  sm: { root: "px-2.5 py-1.5 gap-1.5 text-xs rounded-xl", text: "text-xs font-medium tracking-normal text-neutral-200", shortcut: "text-[10px] px-1.5 py-0.5", desc: "text-[11px] text-neutral-400" },
+  md: { root: "px-3.5 py-2 gap-2 text-xs rounded-xl", text: "text-xs font-semibold", shortcut: "text-[11px] px-1.5 py-0.5", desc: "text-xs" },
+  lg: { root: "px-4.5 py-2.5 gap-2.5 text-sm rounded-2xl", text: "text-sm font-semibold", shortcut: "text-xs px-2 py-0.5", desc: "text-xs" },
 };
 
 const BADGE_STYLES: Record<string, string> = {
@@ -203,7 +203,7 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
     }
 
     const anchorCenterX = left + width / 2 + crossOffset;
-    const estHalfWidth = 140;
+    const estHalfWidth = 100;
     const clampedLeft = Math.max(estHalfWidth + 12, Math.min(vpWidth - estHalfWidth - 12, anchorCenterX));
     const deltaX = anchorCenterX - clampedLeft;
 
@@ -308,12 +308,12 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       case "top":
         return {
           className: `${base} -top-1 -translate-x-1/2 border-b-0 border-r-0`,
-          style: { left: `calc(50% + ${Math.max(-110, Math.min(110, arrowDeltaX))}px)` }
+          style: { left: `calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)` }
         };
       case "bottom":
         return {
           className: `${base} -bottom-1 -translate-x-1/2 border-t-0 border-l-0`,
-          style: { left: `calc(50% + ${Math.max(-110, Math.min(110, arrowDeltaX))}px)` }
+          style: { left: `calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)` }
         };
       default:
         return { className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`, style: {} };
@@ -329,13 +329,14 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       aria-hidden={!visible}
       style={{
         ...calculatedStyle,
-        maxWidth: isLongText ? (typeof maxWidth === "number" ? Math.min(maxWidth, 280) : 280) : maxWidth,
+        width: "max-content",
+        maxWidth: isLongText ? 220 : maxWidth,
         ...userStyle,
       }}
       className={`
-        pointer-events-none border backdrop-blur-md flex flex-col justify-center
+        pointer-events-none border backdrop-blur-md flex flex-col items-center justify-center
         duration-150 ease-out select-none z-[9900]
-        ${isLongText ? "whitespace-normal text-balance" : "whitespace-nowrap"}
+        ${isLongText ? "whitespace-normal text-center" : "whitespace-nowrap"}
         ${sizeConfig.root}
         ${variantClass}
         ${glowClass}
@@ -349,11 +350,11 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
       )}
 
       {/* Main Content Row */}
-      <div className="flex items-center gap-2 w-full">
+      <div className="flex items-center justify-center gap-1.5 w-fit">
         {icon && <span className="shrink-0 flex items-center opacity-90">{icon}</span>}
 
         {content && (
-          <span className={`font-medium tracking-normal break-words ${isLongText ? "whitespace-normal text-balance leading-relaxed" : "whitespace-nowrap"} ${icon ? "text-left" : "text-center"} ${sizeConfig.text}`}>
+          <span className={`font-medium tracking-normal break-words text-center ${isLongText ? "whitespace-normal leading-snug" : "whitespace-nowrap"} ${sizeConfig.text}`}>
             {content}
           </span>
         )}
