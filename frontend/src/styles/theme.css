@@ -117,7 +117,9 @@ p {
 
 /* ── Primary Button (Electric Blue) ─────────────────────── */
 .btn-primary,
-button.btn-primary {
+button.btn-primary,
+a.btn-primary,
+[role="button"].btn-primary {
   background-color: #2A2A2A !important;
   color: #FFFFFF !important;
   border: 1px solid #2F2F2F !important;
@@ -129,18 +131,44 @@ button.btn-primary {
 }
 
 .btn-primary:hover,
-button.btn-primary:hover {
+button.btn-primary:hover,
+a.btn-primary:hover,
+[role="button"].btn-primary:hover,
+.btn-primary:not(:disabled):hover,
+button.btn-primary:not(:disabled):hover {
   background-color: #3B82F6 !important;
   border-color: #60A5FA !important;
   color: #FFFFFF !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.45) !important;
   filter: none !important;
 }
 
+.btn-primary:hover svg,
+button.btn-primary:hover svg,
+a.btn-primary:hover svg {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
 .btn-primary:active,
-button.btn-primary:active {
+button.btn-primary:active,
+a.btn-primary:active {
   transform: translateY(0) scale(0.98) !important;
+}
+
+.btn-primary:disabled,
+button.btn-primary:disabled,
+.btn-primary:disabled:hover,
+button.btn-primary:disabled:hover,
+.btn-primary[aria-disabled="true"],
+button.btn-primary[aria-disabled="true"] {
+  background-color: #2A2A2A !important;
+  border-color: #2F2F2F !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 /* ── Secondary Button (Dark Gray Surface) ───────────────── */

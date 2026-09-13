@@ -334,12 +334,12 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                 type="button"
                 onClick={handleImportClick}
                 disabled={isScraping || !targetUrl.trim()}
-                className={`relative w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
+                className={`btn-primary relative w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
                   isScraping ? "cursor-wait" : "cursor-pointer"
                 } ${
                   separatedData?.is_chapter_url || !separatedData?.is_series_url
-                    ? "btn-primary"
-                    : "btn-secondary"
+                    ? "border-[#3B82F6]/50 shadow-[0_0_12px_rgba(59,130,246,0.2)]"
+                    : ""
                 }`}
                 aria-label="Import Chapter Images"
               >
@@ -350,7 +350,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                   </>
                 ) : (
                   <>
-                    <ImageIcon className="h-4 w-4" /> Import Chapter Images
+                    <ImageIcon className="h-4 w-4 text-white" /> Import Chapter Images
                   </>
                 )}
               </button>
@@ -361,12 +361,12 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                 type="button"
                 onClick={handleOpenChapterScraperClick}
                 disabled={!targetUrl.trim() || isScraping}
-                className={`relative w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
+                className={`btn-primary relative w-full justify-center px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2 ${
                   isScraping ? "cursor-wait" : "cursor-pointer"
                 } ${
                   separatedData?.is_series_url && !separatedData?.is_chapter_url
-                    ? "btn-primary"
-                    : "btn-secondary"
+                    ? "border-[#3B82F6]/50 shadow-[0_0_12px_rgba(59,130,246,0.2)]"
+                    : ""
                 }`}
                 aria-label="Import Chapter Scraper"
               >
