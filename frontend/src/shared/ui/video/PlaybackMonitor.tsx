@@ -1268,7 +1268,21 @@ export default function VideoPreviewCinemaPlayer({
                 </div>
               )}
             </div>
-          ) : null}
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-3 select-none z-20 my-auto animate-in fade-in-0 zoom-in-95 duration-200">
+              <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="space-y-1 max-w-sm">
+                <h3 className="text-xs sm:text-sm font-mono font-bold text-white uppercase tracking-wider">
+                  Storyboard Awaiting Panels
+                </h3>
+                <p className="text-[11px] sm:text-xs text-neutral-400 font-mono leading-relaxed">
+                  Enter a Webtoon URL above or import images to generate storyboard panel cuts.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Subtitles Overlay */}
