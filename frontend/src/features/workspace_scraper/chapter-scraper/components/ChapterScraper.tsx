@@ -824,7 +824,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
       {/* ── 1. AMBIENT GLASSMORPHIC HERO BANNER (MATCHING SERIES DETAILS PAGE) ── */}
       {!isLoading && !isErrorSeries && seriesMetadata && (
-        <div className="relative rounded-3xl overflow-hidden border border-white/10 bg-neutral-900/80 backdrop-blur-2xl shadow-2xl p-6 md:p-8">
+        <div className="relative rounded-3xl overflow-hidden border border-transparent bg-neutral-900/80 backdrop-blur-2xl shadow-2xl p-6 md:p-8">
           {/* Cover Background Blur Glow */}
           {seriesMetadata.cover_image && (
             <div
@@ -841,7 +841,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
           <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
             {/* Cover Poster */}
-            <div className="w-48 h-64 md:w-56 md:h-76 shrink-0 rounded-2xl overflow-hidden border border-white/15 bg-neutral-950 shadow-2xl relative group">
+            <div className="w-48 h-64 md:w-56 md:h-76 shrink-0 rounded-2xl overflow-hidden border border-transparent bg-neutral-950 shadow-2xl relative group">
               {seriesMetadata.cover_image ? (
                 <img
                   src={getProxiedImageUrl(
@@ -859,7 +859,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   </span>
                 </div>
               )}
-              <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-white/10 text-[9px] font-extrabold font-mono text-[#60A5FA] uppercase tracking-wider">
+              <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-transparent text-[9px] font-extrabold font-mono text-[#60A5FA] uppercase tracking-wider">
                 {seriesMetadata.platform
                   ? seriesMetadata.platform.toUpperCase()
                   : "WEBTOON"}
@@ -873,7 +873,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold font-mono">
                     {seriesMetadata.genre || "Comic"}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-neutral-750 text-neutral-300 text-xs font-mono">
+                  <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-transparent text-neutral-300 text-xs font-mono">
                     By {seriesMetadata.author || "Unknown Author"}
                   </span>
                 </div>
@@ -891,17 +891,17 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
               {/* Metadata Chips Row */}
               <div className="flex flex-wrap gap-3 items-center pt-2">
-                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-transparent px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
                   <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
                   <span>{chapters.length} Chapters</span>
                 </div>
 
-                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-transparent px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
                   <Zap className="w-3.5 h-3.5 text-amber-400" />
                   <span>{totalPanels} Sliced Panels</span>
                 </div>
 
-                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-transparent px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
                   <Clock className="w-3.5 h-3.5 text-emerald-400" />
                   <span>~{estimatedRuntimeMinutes} Min Video</span>
                 </div>
@@ -914,7 +914,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               </div>
 
               {/* Hero Quick Action Buttons */}
-              <div className="flex flex-wrap gap-3 pt-3 border-t border-white/10">
+              <div className="flex flex-wrap gap-3 pt-3 border-t border-neutral-850/50">
                 <button
                   type="button"
                   onClick={() => triggerScrape(undefined, undefined, true)}
@@ -927,7 +927,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 <button
                   type="button"
                   onClick={handleExportJSON}
-                  className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
                 >
                   <Film className="h-4 w-4 text-[#3B82F6]" />
                   <span>Export Full Series</span>
@@ -940,7 +940,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                       setPreviewChapter(chapters[0]);
                     }
                   }}
-                  className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
                 >
                   <BookOpen className="h-4 w-4 text-emerald-400" />
                   <span>Read Series</span>
@@ -952,7 +952,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                     const nav = (window as any).navigateTo;
                     if (typeof nav === "function") nav("/creative-suite/ai-voice");
                   }}
-                  className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
                 >
                   <Volume2 className="h-4 w-4 text-amber-400" />
                   <span>Audio Studio</span>
@@ -966,7 +966,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       {/* ── 2. DEEP SERIES ANALYTICS DASHBOARD (4 GLASS CARDS) ── */}
       {seriesMetadata && chapters.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-transparent flex items-center gap-4 shadow-lg">
             <div className="p-3 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0">
               <Layers className="w-6 h-6" />
             </div>
@@ -981,7 +981,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-transparent flex items-center gap-4 shadow-lg">
             <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
               <Zap className="w-6 h-6" />
             </div>
@@ -995,7 +995,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-transparent flex items-center gap-4 shadow-lg">
             <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
               <Clock className="w-6 h-6" />
             </div>
@@ -1009,8 +1009,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4 shadow-lg">
-            <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-[#2F2F2F] shrink-0">
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-transparent flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-transparent shrink-0">
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <div className="w-full">
@@ -1051,12 +1051,12 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search chapter..."
-                  className="w-full rounded-xl border border-neutral-800 bg-neutral-900/80 py-2 pl-9 pr-3 text-xs text-white placeholder:text-neutral-500 focus:border-[#3B82F6] focus:outline-none font-mono"
+                  className="w-full rounded-xl border border-transparent bg-neutral-900/80 py-2 pl-9 pr-3 text-xs text-white placeholder:text-neutral-500 focus:border-[#3B82F6] focus:outline-none font-mono"
                 />
               </div>
 
               {/* Status Filter Tabs */}
-              <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-xl p-0.5 text-xs font-mono">
+              <div className="flex items-center bg-neutral-900 border border-transparent rounded-xl p-0.5 text-xs font-mono">
                 <button
                   type="button"
                   onClick={() => setReadStatusFilter("all")}
@@ -1096,7 +1096,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-[#3B82F6] cursor-pointer"
+                className="px-3 py-2 bg-neutral-900 border border-transparent text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-[#3B82F6] cursor-pointer"
               >
                 <option value="latest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -1105,7 +1105,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               </select>
 
               {/* View Mode Toggle */}
-              <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-xl p-0.5">
+              <div className="flex items-center bg-neutral-900 border border-transparent rounded-xl p-0.5">
                 <button
                   type="button"
                   onClick={() => setViewMode("grid")}
@@ -1142,7 +1142,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
                   isMultiSelectMode
                     ? "bg-[#2A2A2A] border-[#3B82F6] text-white shadow-md shadow-black/50"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white"
+                    : "bg-neutral-900 border-transparent text-neutral-300 hover:text-white"
                 }`}
               >
                 <SlidersHorizontal size={13} />
@@ -1210,10 +1210,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 <div
                   key={chapter.url}
                   onClick={() => handleChapterClick(chapter)}
-                  className="flex items-center justify-between p-3.5 bg-neutral-900/60 hover:bg-neutral-850/80 border border-neutral-800/80 hover:border-[#3B82F6]/40 rounded-2xl transition-all cursor-pointer group shadow-sm"
+                  className="flex items-center justify-between p-3.5 bg-neutral-900/60 hover:bg-neutral-850/80 border border-transparent hover:border-[#3B82F6]/40 rounded-2xl transition-all cursor-pointer group shadow-sm"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-16 h-12 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-white/10 relative">
+                    <div className="w-16 h-12 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-transparent relative">
                       <img
                         src={getProxiedImageUrl(
                           chapter.cover_image || seriesMetadata?.cover_image,
@@ -1279,7 +1279,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
       {/* ── EMPTY / ONBOARDING STATE (WHEN NO SERIES LOADED) ── */}
       {!seriesMetadata && chapters.length === 0 && !isLoading && (
-        <div className="p-12 text-center bg-neutral-900/40 border border-neutral-800/80 rounded-3xl backdrop-blur-xl space-y-6 shadow-2xl">
+        <div className="p-12 text-center bg-neutral-900/40 border border-transparent rounded-3xl backdrop-blur-xl space-y-6 shadow-2xl">
           <div className="w-16 h-16 rounded-3xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center mx-auto text-[#3B82F6] shadow-xl shadow-black/50">
             <Zap className="h-8 w-8 text-[#3B82F6]" />
           </div>
@@ -1295,7 +1295,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-3xl mx-auto pt-4">
-            <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+            <div className="bg-neutral-955 border border-transparent rounded-2xl p-4 space-y-2">
               <div className="flex items-center gap-2 text-[#3B82F6] font-bold text-xs font-mono">
                 <span className="w-5 h-5 rounded-full bg-[#3B82F6]/20 flex items-center justify-center text-[10px]">
                   1
@@ -1307,7 +1307,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               </p>
             </div>
 
-            <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+            <div className="bg-neutral-955 border border-transparent rounded-2xl p-4 space-y-2">
               <div className="flex items-center gap-2 text-[#3B82F6] font-bold text-xs font-mono">
                 <span className="w-5 h-5 rounded-full bg-[#3B82F6]/20 flex items-center justify-center text-[10px]">
                   2
@@ -1319,7 +1319,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               </p>
             </div>
 
-            <div className="bg-neutral-955 border border-neutral-800/80 rounded-2xl p-4 space-y-2">
+            <div className="bg-neutral-955 border border-transparent rounded-2xl p-4 space-y-2">
               <div className="flex items-center gap-2 text-[#3B82F6] font-bold text-xs font-mono">
                 <span className="w-5 h-5 rounded-full bg-[#3B82F6]/20 flex items-center justify-center text-[10px]">
                   3

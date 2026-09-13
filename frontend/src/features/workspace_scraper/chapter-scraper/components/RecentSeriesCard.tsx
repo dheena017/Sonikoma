@@ -62,7 +62,7 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
       role="button"
       tabIndex={0}
       aria-label={`Open chapters for ${series.title || "untitled series"}`}
-      className="group relative min-h-[160px] bg-gradient-to-br from-neutral-900/60 to-neutral-950/40 hover:from-[#2A2A2A] hover:to-neutral-950/60 border border-neutral-800/60 hover:border-[#3B82F6]/50 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/50 flex flex-col justify-between overflow-hidden"
+      className="group relative min-h-[160px] bg-gradient-to-br from-neutral-900/60 to-neutral-950/40 hover:from-[#2A2A2A] hover:to-neutral-950/60 border border-transparent hover:border-[#3B82F6]/50 rounded-2xl p-4 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/50 flex flex-col justify-between overflow-hidden"
     >
       {/* Remove Button */}
       {isHovered && (
@@ -81,7 +81,7 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
           <img
             src={imgSrc}
             alt={series.title}
-            className="w-16 h-20 object-cover rounded-lg border border-neutral-700/60 flex-shrink-0 group-hover:scale-105 transition-transform shadow-md"
+            className="w-16 h-20 object-cover rounded-lg border border-transparent flex-shrink-0 group-hover:scale-105 transition-transform shadow-md"
             onError={() => {
               if (imgSrc.includes("/api/proxy-image") && series.cover_image) {
                 setImgSrc(series.cover_image);
@@ -91,7 +91,7 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
             }}
           />
         ) : (
-          <div className="w-16 h-20 bg-gradient-to-br from-[#2A2A2A] to-[#2A2A2A] border border-[#2F2F2F] rounded-lg flex items-center justify-center text-[#3B82F6] flex-shrink-0 shadow-md">
+          <div className="w-16 h-20 bg-gradient-to-br from-[#2A2A2A] to-[#2A2A2A] border border-transparent rounded-lg flex items-center justify-center text-[#3B82F6] flex-shrink-0 shadow-md">
             <BookOpen className="w-5 h-5" />
           </div>
         )}

@@ -258,11 +258,11 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       className={`w-full min-h-[310px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0e0e14] border ${
         isSelected
           ? "border-[#3B82F6] ring-2 ring-[#3B82F6]/50 shadow-[0_0_30px_rgba(59,130,246,0.35)] bg-[#2A2A2A]"
-          : "border-neutral-800/80 hover:border-[#3B82F6]/50 shadow-xl hover:shadow-2xl hover:shadow-black/50"
+          : "border-transparent hover:border-[#3B82F6]/50 shadow-xl hover:shadow-2xl hover:shadow-black/50"
       }`}
     >
       {/* Top Banner / Image Area */}
-      <div className="relative w-full bg-neutral-950 aspect-[16/9] overflow-hidden border-b border-neutral-850">
+      <div className="relative w-full bg-neutral-950 aspect-[16/9] overflow-hidden border-b border-transparent">
         {isMultiSelectMode && (
           <div
             className="absolute top-3 left-3 z-30"
@@ -343,7 +343,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             </span>
           )}
           {chapter.rating !== null && chapter.rating !== undefined && (
-            <div className="bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1 shadow-md border border-white/10 shrink-0">
+            <div className="bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md flex items-center gap-1 shadow-md border border-transparent shrink-0">
               <Star size={10} className="fill-amber-400 text-amber-400" />
               <span className="text-[10px] font-extrabold text-amber-300 font-mono">
                 {Number(chapter.rating).toFixed(1)}
@@ -371,7 +371,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             className={`p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border cursor-pointer ${
               isBookmarked
                 ? "bg-amber-500 text-black border-amber-400 shadow-lg shadow-amber-500/25 scale-105"
-                : "bg-black/70 text-neutral-300 hover:bg-white hover:text-black border-white/10"
+                : "bg-black/70 text-neutral-300 hover:bg-white hover:text-black border-transparent"
             }`}
             title={isBookmarked ? "Remove Bookmark" : "Bookmark Chapter"}
           >
@@ -384,7 +384,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
           <button
             onClick={handleCopyLink}
-            className="p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border bg-black/70 text-neutral-300 hover:bg-white hover:text-black border-white/10 active:scale-90 cursor-pointer"
+            className="p-1.5 rounded-xl backdrop-blur-md transition-all duration-200 border bg-black/70 text-neutral-300 hover:bg-white hover:text-black border-transparent active:scale-90 cursor-pointer"
             title="Copy Chapter Link"
           >
             {copied ? (
@@ -399,7 +399,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-10">
           {panelCount !== undefined && panelCount > 0 ? (
             <div
-              className="bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono shadow-md"
+              className="bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-transparent flex items-center gap-1 font-mono shadow-md"
               title={`${panelCount} panels/images in this chapter`}
             >
               <Layers size={10} className="text-sky-400" />
@@ -409,7 +409,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
           {estReadingTime && (
             <div
-              className="bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 flex items-center gap-1 font-mono shadow-md"
+              className="bg-black/80 backdrop-blur-md text-neutral-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-transparent flex items-center gap-1 font-mono shadow-md"
               title="Estimated reading duration"
             >
               <Clock size={10} className="text-[#3B82F6]" />
@@ -428,7 +428,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             <div className="flex items-center gap-1 shrink-0">
               {chapter.index !== undefined && (
                 <span
-                  className="text-[10px] font-bold text-neutral-400 font-mono bg-neutral-900 border border-neutral-800 px-2 py-0.5 rounded-lg"
+                  className="text-[10px] font-bold text-neutral-400 font-mono bg-neutral-900 border border-transparent px-2 py-0.5 rounded-lg"
                   title={`Release sequence #${chapter.index}`}
                 >
                   #{chapter.index}
@@ -493,7 +493,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 
             <div className="flex items-center gap-2 text-[11px] font-mono text-neutral-400 ml-auto">
               {chapter.language && (
-                <span className="flex items-center gap-0.5 text-[10px] text-neutral-400 bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
+                <span className="flex items-center gap-0.5 text-[10px] text-neutral-400 bg-neutral-900 border border-transparent px-1.5 py-0.5 rounded">
                   <Globe size={10} className="text-neutral-500" />
                   {chapter.language.toUpperCase()}
                 </span>
@@ -507,7 +507,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
         </div>
 
         {/* Interactive Bottom Action Bar */}
-        <div className="pt-2.5 border-t border-neutral-800/80 flex items-center justify-between gap-2">
+        <div className="pt-2.5 border-t border-neutral-850/40 flex items-center justify-between gap-2">
           {/* Formatted Engagement Metrics */}
           <div className="flex items-center gap-2.5 min-w-0 overflow-hidden">
             {formattedLikes ? (
@@ -559,7 +559,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                   e.stopPropagation();
                   onPreviewClick(chapter);
                 }}
-                className="px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-750 text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-sm"
+                className="px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-transparent text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-sm"
                 title="Read Full Chapter Strip"
               >
                 <Eye size={12} className="text-[#3B82F6]" />

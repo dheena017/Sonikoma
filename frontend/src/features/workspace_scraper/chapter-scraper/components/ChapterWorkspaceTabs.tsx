@@ -27,7 +27,7 @@ export const ChapterWorkspaceTabs: React.FC<ChapterWorkspaceTabsProps> = ({
       <div
         role="tablist"
         aria-label="Chapter scraper views"
-        className="grid grid-cols-3 items-center gap-1.5 border border-neutral-800 bg-neutral-955 p-1.5 rounded-2xl"
+        className="grid grid-cols-3 items-center gap-1.5 border border-transparent bg-neutral-955 p-1.5 rounded-2xl"
       >
         <button
           disabled={isLoading}
