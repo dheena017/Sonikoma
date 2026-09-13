@@ -91,7 +91,7 @@ export const StoryboardChapterGroup = ({
     return (
       <div className="w-full flex-1 min-w-0">
         {storyboardViewLayout === "scroll" ? (
-          <HorizontalScrollContainer className="py-2">
+          <HorizontalScrollContainer>
             {panels.map((panel, idx) => (
               <StoryboardCard
                 key={panel.id}
@@ -227,7 +227,7 @@ export const StoryboardChapterGroup = ({
             </div>
 
             {storyboardViewLayout === "scroll" ? (
-              <HorizontalScrollContainer className="py-2">
+              <HorizontalScrollContainer>
                 {grpPanels.map((panel, localIdx) => {
                   const globalIdx = grp.startIndex + localIdx;
                   return (

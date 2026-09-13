@@ -1124,8 +1124,11 @@ export default function VideoPreviewCinemaPlayer({
 
       {/* MAIN SCREEN CANVAS */}
       <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden bg-[#09090f]">
-        {/* Workspace dot grid pattern */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]" />
+        {/* Workspace dot grid pattern - hidden during empty state for clean cinematic canvas */}
+        {((mode === "video" && videoUrl && !videoHasError) ||
+          (mode === "timeline" && activePanelNow && (activePanelImg || activePanelNow.layers?.background_url))) && (
+          <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]" />
+        )}
 
         <div className="relative w-full h-full flex items-center justify-center bg-transparent overflow-hidden">
           {mode === "video" ? (
@@ -1156,12 +1159,26 @@ export default function VideoPreviewCinemaPlayer({
                 style={{ width: "auto", height: "auto" }}
                 playsInline
               />
+            ) : panels.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-3 select-none z-20 my-auto animate-in fade-in-0 zoom-in-95 duration-200">
+                <div className="h-10 w-10 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div className="space-y-1 max-w-sm">
+                  <h3 className="text-xs sm:text-sm font-mono font-bold text-white uppercase tracking-wider">
+                    Storyboard Awaiting Panels
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-neutral-400 font-mono leading-relaxed">
+                    Enter a Webtoon URL above or import images to generate storyboard panel cuts.
+                  </p>
+                </div>
+              </div>
             ) : (
-              <div className="flex flex-col items-center justify-center text-center p-6 space-y-3 select-none my-auto">
-                <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+              <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 space-y-3 select-none z-20 my-auto animate-in fade-in-0 zoom-in-95 duration-200">
+                <div className="h-12 w-12 rounded-2xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center text-[#3B82F6] shadow-[0_0_24px_rgba(59,130,246,0.25)]">
                   <Video className="h-5 w-5" />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 max-w-sm">
                   <h3 className="text-xs sm:text-sm font-bold text-white font-mono uppercase tracking-wider">
                     No Compiled Video Yet
                   </h3>
@@ -1322,7 +1339,7 @@ export default function VideoPreviewCinemaPlayer({
         />
       )}
 
-      {mode === "video" && (
+      {mode === "video" && panels.length > 0 && (
         <>
           {/* SUB-COMPONENT: Floating Chapters Menu */}
           <VideoPreviewChaptersMenu

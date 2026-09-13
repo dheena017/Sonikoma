@@ -853,17 +853,30 @@ const StoryboardCard = ({
     return "Portrait";
   }, [dimensions]);
 
+  const cardRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (isCurrent && cardRef.current && viewLayout === "scroll") {
+      cardRef.current.scrollIntoView({
+        behavior: "auto",
+        block: "nearest",
+        inline: "center",
+      });
+    }
+  }, [isCurrent, viewLayout]);
+
   return (
     <div
+      ref={cardRef}
       className={`${
         viewLayout === "grid"
           ? "w-full min-w-0"
-          : "w-full sm:w-[260px] shrink-0"
-      } group relative rounded-2xl overflow-hidden border p-3 space-y-2.5 transition-all duration-200 ease-out select-none outline-none backdrop-blur-md shadow-md [content-visibility:auto] [contain-intrinsic-size:260px_350px] will-change-transform ${
+          : "w-full sm:w-[300px] shrink-0"
+      } group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out select-none outline-none backdrop-blur-md shadow-md ${
         panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll
-          ? "border-2 border-[#3B82F6] bg-[#2A2A2A]  ring-1 ring-[#3B82F6]/50 scale-[1.02]"
+          ? "border-2 border-[#3B82F6] bg-[#2A2A2A] ring-1 ring-[#3B82F6]/50 scale-[1.02]"
           : isCurrent && isSelected
-          ? "bg-[#2A2A2A] border-[#60A5FA] ring-2 ring-[#3B82F6]/50  scale-[1.02]"
+          ? "bg-[#2A2A2A] border-[#60A5FA] ring-2 ring-[#3B82F6]/50 scale-[1.02]"
           : isCurrent
           ? "bg-[#0c0d16]/90 border-[#3B82F6] shadow-md scale-[1.01]"
           : isSelected
@@ -874,7 +887,7 @@ const StoryboardCard = ({
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className="relative h-44 sm:h-48 rounded-xl overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb group-hover:border-[#3B82F6]/30 transition-all duration-300 ease-out"
+        className="relative h-56 sm:h-64 rounded-xl overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb group-hover:border-[#3B82F6]/30 transition-all duration-300 ease-out"
       >
         <img
           src={panel.image_url}
@@ -976,7 +989,7 @@ const StoryboardCard = ({
 
         {/* Selection checkbox circle with animated pulse ring at Top-Right */}
         <div className="absolute top-2 right-2 z-20">
-          {isSelected && (
+          {(isSelected || isCurrent) && (
             <div className="absolute inset-0 rounded-full bg-[#2A2A2A] animate-ping" />
           )}
           <button
@@ -986,15 +999,15 @@ const StoryboardCard = ({
               onToggleSelect();
             }}
             className={`relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90 ${
-              isSelected
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] border-[#60A5FA] shadow-[0_4px_12px_rgba(59,130,246,0.4)] scale-110"
+              isSelected || isCurrent
+                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] border-[#60A5FA] shadow-[0_4px_12px_rgba(59,130,246,0.4)] scale-110 opacity-100"
                 : "bg-neutral-900/60 border-neutral-600/70 hover:border-neutral-400 opacity-0 group-hover/thumb:opacity-100"
             }`}
             title={isSelected ? "Deselect panel" : "Select panel"}
           >
             <Check
               className={`h-2.5 w-2.5 ${
-                isSelected ? "text-white" : "text-neutral-400"
+                isSelected || isCurrent ? "text-white" : "text-neutral-400"
               }`}
               strokeWidth={3.5}
             />

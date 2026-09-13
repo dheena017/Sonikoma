@@ -156,6 +156,46 @@ const StoryboardTimeline = React.memo(
     const [timelineEpSortAscending, setTimelineEpSortAscending] =
       useState(true);
     const [isTimelineEpCollapsed, setIsTimelineEpCollapsed] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterStatus, setFilterStatus] = useState("all");
+
+    const filteredPanels = React.useMemo(() => {
+      return panels.filter((panel, idx) => {
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase().trim();
+          const matchSpeech = panel.speech_text?.toLowerCase().includes(q);
+          const matchNarrative = panel.narrative?.toLowerCase().includes(q);
+          const matchVisual = panel.visual_description?.toLowerCase().includes(q);
+          const matchSfx = panel.sfx?.toLowerCase().includes(q);
+          const matchIndex = `#${idx + 1}`.includes(q) || `${idx + 1}` === q;
+          if (
+            !matchSpeech &&
+            !matchNarrative &&
+            !matchVisual &&
+            !matchSfx &&
+            !matchIndex
+          ) {
+            return false;
+          }
+        }
+
+        if (filterStatus === "selected") {
+          return selectedPanelIds.has(panel.id);
+        }
+        if (filterStatus === "with_speech") {
+          return Boolean(panel.speech_text?.trim());
+        }
+        if (filterStatus === "with_motion") {
+          return Boolean(
+            panel.motion_type &&
+              panel.motion_type !== "none" &&
+              panel.motion_type !== "static"
+          );
+        }
+
+        return true;
+      });
+    }, [panels, searchQuery, filterStatus, selectedPanelIds]);
 
     const handlePanelClick = useCallback(
       (
@@ -906,6 +946,11 @@ const StoryboardTimeline = React.memo(
           setShowBulkOps={setShowBulkOps}
           isZipping={isZipping}
           panelsLength={panels.length}
+          filteredCount={filteredPanels.length}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          filterStatus={filterStatus}
+          setFilterStatus={setFilterStatus}
           viewLayout={storyboardViewLayout}
           setViewLayout={setStoryboardViewLayout}
           selectedCount={selectedCount}
@@ -951,7 +996,23 @@ const StoryboardTimeline = React.memo(
           />
         )}
 
-        {(() => {
+        {filteredPanels.length === 0 && panels.length > 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center space-y-3 font-mono">
+            <p className="text-neutral-400 text-xs">
+              No scenes match your search or filter
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("");
+                setFilterStatus("all");
+              }}
+              className="px-3 py-1.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/40 text-[#60A5FA] text-xs font-bold hover:bg-[#3B82F6]/20 transition-all cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (() => {
           const episodeGroups =
             ((window as any).__scrapeEpisodeGroups as EpisodeGroupRecord[]) ||
             [];
@@ -962,7 +1023,7 @@ const StoryboardTimeline = React.memo(
                 <StoryboardChapterGroup
                   episodeGroups={[]}
                   selectedTimelineEp={selectedTimelineEp}
-                  panels={panels}
+                  panels={filteredPanels}
                   currentPanelIndex={currentPanelIndex}
                   activePreviewTab={activePreviewTab}
                   setCurrentPanelIndex={setCurrentPanelIndex}
@@ -1020,7 +1081,7 @@ const StoryboardTimeline = React.memo(
                 <StoryboardChapterGroup
                   episodeGroups={episodeGroups}
                   selectedTimelineEp={selectedTimelineEp}
-                  panels={panels}
+                  panels={filteredPanels}
                   currentPanelIndex={currentPanelIndex}
                   activePreviewTab={activePreviewTab}
                   setCurrentPanelIndex={setCurrentPanelIndex}

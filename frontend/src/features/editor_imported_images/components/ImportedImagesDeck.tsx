@@ -86,6 +86,14 @@ export const HorizontalScrollContainer: React.FC<{
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const animFrameRef = useRef<number | null>(null);
+  const targetScrollRef = useRef<number>(0);
+  const isAnimatingRef = useRef<boolean>(false);
+
+  // Mouse Drag to Scroll state
+  const isMouseDownRef = useRef(false);
+  const startXRef = useRef(0);
+  const startScrollLeftRef = useRef(0);
+  const hasDraggedRef = useRef(false);
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -94,71 +102,189 @@ export const HorizontalScrollContainer: React.FC<{
     setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 5);
   }, []);
 
+  const startSmoothLerp = useCallback(() => {
+    if (isAnimatingRef.current) return;
+    isAnimatingRef.current = true;
+
+    const step = () => {
+      const el = scrollRef.current;
+      if (!el) {
+        isAnimatingRef.current = false;
+        return;
+      }
+
+      const current = el.scrollLeft;
+      const target = targetScrollRef.current;
+      const diff = target - current;
+
+      if (Math.abs(diff) < 0.6) {
+        el.scrollLeft = target;
+        isAnimatingRef.current = false;
+        checkScroll();
+        return;
+      }
+
+      // 0.16 lerp factor provides buttery smooth glide feel
+      el.scrollLeft += diff * 0.16;
+      checkScroll();
+      animFrameRef.current = requestAnimationFrame(step);
+    };
+
+    animFrameRef.current = requestAnimationFrame(step);
+  }, [checkScroll]);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     checkScroll();
 
     const onScroll = () => {
-      if (animFrameRef.current !== null) return;
-      animFrameRef.current = requestAnimationFrame(() => {
-        checkScroll();
-        animFrameRef.current = null;
-      });
+      checkScroll();
     };
 
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", checkScroll, { passive: true });
 
-    // Smooth horizontal translation for Ctrl/Shift mouse wheel without main-thread blocking
+    // Smooth horizontal translation for mouse wheel with momentum lerp
     const handleNativeWheel = (e: WheelEvent) => {
-      // Touchpad horizontal swipe
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+
+      // Trackpad horizontal swipe
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        el.scrollLeft += e.deltaX;
-        return;
-      }
-
-      // Ctrl + wheel or Shift + wheel -> scroll Left to Right
-      if (e.ctrlKey || e.shiftKey) {
-        if (e.deltaY !== 0) {
-          el.scrollLeft += e.deltaY;
-          e.preventDefault();
+        if (isAnimatingRef.current && animFrameRef.current) {
+          cancelAnimationFrame(animFrameRef.current);
+          isAnimatingRef.current = false;
         }
+        el.scrollLeft += e.deltaX;
+        targetScrollRef.current = el.scrollLeft;
+        checkScroll();
         return;
       }
 
-      // Standard mouse wheel (without Ctrl/Shift):
-      // Allow natural top-to-bottom vertical page/container scrolling
+      // Vertical mouse wheel translated to horizontal smooth gliding
+      const delta = e.deltaY;
+      if (delta === 0) return;
+
+      // Check if we can scroll in this direction
+      const goingRight = delta > 0;
+      const canScroll = goingRight
+        ? el.scrollLeft < maxScroll - 1
+        : el.scrollLeft > 1;
+
+      if (canScroll || e.shiftKey || e.ctrlKey) {
+        e.preventDefault();
+        const base = isAnimatingRef.current
+          ? targetScrollRef.current
+          : el.scrollLeft;
+        // Natural step per wheel notch (~140px)
+        const scrollStep = delta * 1.35;
+        targetScrollRef.current = Math.max(
+          0,
+          Math.min(maxScroll, base + scrollStep)
+        );
+        startSmoothLerp();
+      }
     };
 
     el.addEventListener("wheel", handleNativeWheel, { passive: false });
 
+    // Global mouse move & up for smooth grab-to-drag
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isMouseDownRef.current || !el) return;
+      const dx = e.pageX - startXRef.current;
+      if (Math.abs(dx) > 5) {
+        hasDraggedRef.current = true;
+      }
+      if (hasDraggedRef.current) {
+        e.preventDefault();
+        if (isAnimatingRef.current && animFrameRef.current) {
+          cancelAnimationFrame(animFrameRef.current);
+          isAnimatingRef.current = false;
+        }
+        el.scrollLeft = startScrollLeftRef.current - dx * 1.25;
+        targetScrollRef.current = el.scrollLeft;
+        checkScroll();
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      if (isMouseDownRef.current) {
+        isMouseDownRef.current = false;
+        setTimeout(() => {
+          hasDraggedRef.current = false;
+        }, 80);
+      }
+    };
+
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+
     const observer = new ResizeObserver(() => checkScroll());
     observer.observe(el);
+
+    const mutObserver = new MutationObserver(() => checkScroll());
+    mutObserver.observe(el, { childList: true, subtree: true });
+
+    const timer1 = setTimeout(checkScroll, 100);
+    const timer2 = setTimeout(checkScroll, 400);
 
     return () => {
       el.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", checkScroll);
       el.removeEventListener("wheel", handleNativeWheel);
+      window.removeEventListener("mousemove", handleGlobalMouseMove);
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
       observer.disconnect();
+      mutObserver.disconnect();
+      clearTimeout(timer1);
+      clearTimeout(timer2);
       if (animFrameRef.current !== null) {
         cancelAnimationFrame(animFrameRef.current);
       }
     };
-  }, [checkScroll]);
+  }, [checkScroll, children, startSmoothLerp]);
 
   const scroll = (direction: "left" | "right") => {
     const el = scrollRef.current;
     if (!el) return;
-    const scrollAmount = el.clientWidth * 0.75;
-    el.scrollBy({
-      left: direction === "left" ? -scrollAmount : scrollAmount,
-      behavior: "smooth",
-    });
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    const scrollAmount = Math.max(340, el.clientWidth * 0.75);
+    const base = isAnimatingRef.current ? targetScrollRef.current : el.scrollLeft;
+    targetScrollRef.current = Math.max(
+      0,
+      Math.min(
+        maxScroll,
+        base + (direction === "left" ? -scrollAmount : scrollAmount)
+      )
+    );
+    startSmoothLerp();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Don't hijack clicks on buttons, inputs, links, textareas
+    if (
+      (e.target as HTMLElement).closest(
+        "button, input, textarea, select, a, [contenteditable='true']"
+      )
+    ) {
+      return;
+    }
+    isMouseDownRef.current = true;
+    startXRef.current = e.pageX;
+    startScrollLeftRef.current = scrollRef.current?.scrollLeft || 0;
+    hasDraggedRef.current = false;
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (hasDraggedRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
   };
 
   return (
-    <div className="w-full min-w-0 flex items-center gap-2 relative">
+    <div className="w-full min-w-0 flex items-center gap-2 relative group/scrollcontainer">
       {/* Left Arrow */}
       {canScrollLeft && (
         <button
@@ -175,7 +301,9 @@ export const HorizontalScrollContainer: React.FC<{
       {/* Scroll Track — ultra-smooth, hardware accelerated horizontal scrolling */}
       <div
         ref={scrollRef}
-        className={`flex-1 min-w-0 flex gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain [transform:translateZ(0)] ${className}`}
+        onMouseDown={handleMouseDown}
+        onClickCapture={handleClickCapture}
+        className={`flex-1 min-w-0 flex gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain touch-pan-x [transform:translateZ(0)] ${className}`}
       >
         {children}
       </div>
