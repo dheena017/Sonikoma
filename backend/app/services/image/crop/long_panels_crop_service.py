@@ -40,26 +40,43 @@ os.makedirs(MEDIA_DIR, exist_ok=True)
 def _box_to_dict(box) -> dict:
     """Safely converts a PanelBoundingBox (Pydantic model) or dict into a standard dict."""
     if isinstance(box, dict):
-        return box
-    if hasattr(box, "model_dump") and callable(box.model_dump):
-        return box.model_dump()
-    if hasattr(box, "dict") and callable(box.dict):
-        return box.dict()
-    if hasattr(box, "__dict__"):
-        return vars(box)
-    return {
-        "id": getattr(box, "id", None),
-        "panel_id": getattr(box, "panel_id", None),
-        "x": getattr(box, "x", 0),
-        "y": getattr(box, "y", 0),
-        "width": getattr(box, "width", 0),
-        "height": getattr(box, "height", 0),
-        "crop_top": getattr(box, "crop_top", 0.0),
-        "crop_bottom": getattr(box, "crop_bottom", 0.0),
-        "crop_left": getattr(box, "crop_left", 0.0),
-        "crop_right": getattr(box, "crop_right", 0.0),
-        "padding_px": getattr(box, "padding_px", 0),
-    }
+        d = dict(box)
+    elif hasattr(box, "model_dump") and callable(box.model_dump):
+        d = box.model_dump()
+    elif hasattr(box, "dict") and callable(box.dict):
+        d = box.dict()
+    elif hasattr(box, "__dict__"):
+        d = dict(vars(box))
+    else:
+        d = {
+            "id": getattr(box, "id", None),
+            "panel_id": getattr(box, "panel_id", None),
+            "x": getattr(box, "x", 0),
+            "y": getattr(box, "y", 0),
+            "width": getattr(box, "width", None),
+            "w": getattr(box, "w", None),
+            "height": getattr(box, "height", None),
+            "h": getattr(box, "h", None),
+            "crop_top": getattr(box, "crop_top", 0.0),
+            "crop_bottom": getattr(box, "crop_bottom", 0.0),
+            "crop_left": getattr(box, "crop_left", 0.0),
+            "crop_right": getattr(box, "crop_right", 0.0),
+            "padding_px": getattr(box, "padding_px", 0),
+        }
+
+    # Normalize coordinate fields
+    x = d.get("x") if d.get("x") is not None else d.get("left", 0)
+    y = d.get("y") if d.get("y") is not None else d.get("top", 0)
+    w = d.get("width") if (d.get("width") is not None and d.get("width") != 0) else d.get("w", 0)
+    h = d.get("height") if (d.get("height") is not None and d.get("height") != 0) else d.get("h", 0)
+
+    d["x"] = int(x or 0)
+    d["y"] = int(y or 0)
+    d["width"] = int(w or 0)
+    d["w"] = int(w or 0)
+    d["height"] = int(h or 0)
+    d["h"] = int(h or 0)
+    return d
 
 
 def _slice_and_encode_worker(args: Tuple) -> Optional[CroppedSliceItem]:
@@ -85,19 +102,19 @@ def _slice_and_encode_worker(args: Tuple) -> Optional[CroppedSliceItem]:
         with Image.open(io.BytesIO(img_bytes)) as parent_img:
             img_w, img_h = parent_img.size
 
-            x = box_dict.get("x", 0)
-            y = box_dict.get("y", 0)
-            w = box_dict.get("width", 0)
-            h = box_dict.get("height", 0)
+            x = int(box_dict.get("x") or 0)
+            y = int(box_dict.get("y") or 0)
+            w = int(box_dict.get("width") or box_dict.get("w") or 0)
+            h = int(box_dict.get("height") or box_dict.get("h") or 0)
             panel_id = box_dict.get("panel_id") or str(box_dict.get("id") or f"panel_{order_idx + 1}")
-            padding = box_dict.get("padding_px", 0) + bleed_guard_px
+            padding = int(box_dict.get("padding_px") or 0) + int(bleed_guard_px or 0)
 
             # Convert percentage or normalized coordinates if pixel w/h missing
             if w <= 0 or h <= 0:
-                crop_top = box_dict.get("crop_top", 0.0)
-                crop_bottom = box_dict.get("crop_bottom", 0.0)
-                crop_left = box_dict.get("crop_left", 0.0)
-                crop_right = box_dict.get("crop_right", 0.0)
+                crop_top = float(box_dict.get("crop_top") or 0.0)
+                crop_bottom = float(box_dict.get("crop_bottom") or 0.0)
+                crop_left = float(box_dict.get("crop_left") or 0.0)
+                crop_right = float(box_dict.get("crop_right") or 0.0)
 
                 # Normalized (0-1.0) vs percentage (0-100)
                 top_pct = crop_top if crop_top <= 1.0 else (crop_top / 100.0)
@@ -205,17 +222,18 @@ async def crop_long_panels_batch(request: LongPanelsCropRequest) -> LongPanelsCr
     # 1. Sort panels strictly top-to-bottom, left-to-right to guarantee reading sequence
     sorted_boxes = sorted(
         [_box_to_dict(p) for p in request.panels],
-        key=lambda b: (b.get("y", 0), b.get("x", 0))
+        key=lambda b: (int(b.get("y") or 0), int(b.get("x") or 0))
     )
-
 
     # 2. Compute gutter distances between adjacent panels
     worker_tasks = []
     for i, box in enumerate(sorted_boxes):
-        y_curr_end = box.get("y", 0) + box.get("height", 0)
+        box_y = int(box.get("y") or 0)
+        box_h = int(box.get("height") or box.get("h") or 0)
+        y_curr_end = box_y + box_h
         gutter_after = 0
         if i + 1 < len(sorted_boxes):
-            y_next_start = sorted_boxes[i + 1].get("y", 0)
+            y_next_start = int(sorted_boxes[i + 1].get("y") or 0)
             gutter_after = max(0, y_next_start - y_curr_end)
 
 

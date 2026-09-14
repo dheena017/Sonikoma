@@ -867,18 +867,23 @@ def _normalize_box(box: Dict[str, Any]) -> Dict[str, Any]:
     if y is None:
         y = box.get("top", 0)
     width = box.get("w")
-    if width is None:
+    if width is None or width == 0:
         width = box.get("width", 0)
     height = box.get("h")
-    if height is None:
+    if height is None or height == 0:
         height = box.get("height", 0)
+
+    w_val = max(1, int(width or 1))
+    h_val = max(1, int(height or 1))
 
     return {
         **box,
         "x": int(max(0, int(x or 0))),
         "y": int(max(0, int(y or 0))),
-        "w": max(1, int(width or 1)),
-        "h": max(1, int(height or 1)),
+        "w": w_val,
+        "h": h_val,
+        "width": w_val,
+        "height": h_val,
         "confidence": float(box.get("confidence", 0.90) or 0.90),
         "lineage": list(box.get("lineage", [box.get("id", "0")])),
         "bubble_candidate": bool(box.get("bubble_candidate", False)),

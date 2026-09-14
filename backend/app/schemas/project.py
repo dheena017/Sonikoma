@@ -5,7 +5,7 @@ Pydantic request/response schemas for comic projects, storyboards, and panel ite
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from typing import List, Dict, Any, Optional, Literal
 
 
@@ -258,6 +258,26 @@ class PanelBoundingBox(BaseModel):
     dialogue_transcript: Optional[str] = Field(None, description="Combined dialogue transcript of this panel")
     cinematography: Optional[PanelCinematography] = Field(None, description="Cinematography and framing metadata")
     margins: Optional[Dict[str, int]] = Field(None, description="Directional margins (crop_top, crop_bottom, etc.)")
+
+    @model_validator(mode="before")
+    @classmethod
+    def sync_dimensions(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            x = data.get("x") if data.get("x") is not None else data.get("left", 0)
+            y = data.get("y") if data.get("y") is not None else data.get("top", 0)
+            w = data.get("w")
+            if w is None or w == 0:
+                w = data.get("width", 0)
+            h = data.get("h")
+            if h is None or h == 0:
+                h = data.get("height", 0)
+            data["x"] = int(x or 0)
+            data["y"] = int(y or 0)
+            data["w"] = int(w or 0)
+            data["h"] = int(h or 0)
+            data["width"] = int(w or 0)
+            data["height"] = int(h or 0)
+        return data
 
 
 class DetectCharactersRequest(BaseModel):

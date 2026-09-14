@@ -28,7 +28,7 @@ async def _process_single_url(url: str, options: DetectPanelsBatchRequest) -> Di
     try:
         # Step 1: Detect layout type
         type_res = await detect_image_layout_type(url=url)
-        is_tall = type_res.crop_type == "long_panels" or type_res.aspect_ratio >= 2.2
+        is_tall = str(type_res.crop_type.value if hasattr(type_res.crop_type, 'value') else type_res.crop_type) in ("long_panels", "ultra_long_panels", "four_koma") or (type_res.aspect_ratio or 0) >= 2.0
 
         # Step 2: Route to appropriate service
         if is_tall:

@@ -343,16 +343,17 @@ export function useBatchImageActions({
 
             const isTallStrip =
               detectedLayout?.crop_type === "long_panels" ||
-              (detectedLayout?.aspect_ratio != null && detectedLayout.aspect_ratio >= 2.2);
+              detectedLayout?.crop_type === "ultra_long_panels" ||
+              (detectedLayout?.aspect_ratio != null && detectedLayout.aspect_ratio >= 2.0);
 
             let croppedUrls: string[] = [];
 
             if (!isTallStrip) {
-              // ── Route 3A: Small Image 4-Directional Margin Crop ───────────
-              // 1. Detect tight frame, bind nearby speech bubbles, and drop gutter SFX
+              // ── Route 3A: Small Image / 2D Manga Grid / Multi-Panel Page ───
+              let detectRes: any = null;
               let appliedMargins: any = {};
               try {
-                const detectRes = await api.detectSmallPanels(
+                detectRes = await api.detectSmallPanels(
                   fetchWithInterceptor,
                   {
                     url: url,
@@ -369,7 +370,7 @@ export function useBatchImageActions({
                 if (detectRes && detectRes.success && detectRes.margins) {
                   appliedMargins = detectRes.margins;
                   console.log(
-                    `[Auto Cropper: Small] Snapped frame with ${detectRes.bound_speech_bubbles_count || 0} bound dialogue bubbles:`,
+                    `[Auto Cropper: Small] Detected frame with ${detectRes.bound_speech_bubbles_count || 0} bound dialogue bubbles:`,
                     appliedMargins
                   );
                 }
@@ -377,41 +378,84 @@ export function useBatchImageActions({
                 console.warn("[Auto Cropper] detectSmallPanels fallback:", detErr);
               }
 
-              // 2. Execute tight crop
-              try {
-                const smallRes = await api.cropSmallPanels(
-                  fetchWithInterceptor,
-                  {
-                    url: url,
-                    crop_top: appliedMargins.crop_top || 0,
-                    crop_bottom: appliedMargins.crop_bottom || 0,
-                    crop_left: appliedMargins.crop_left || 0,
-                    crop_right: appliedMargins.crop_right || 0,
-                    unit: appliedMargins.unit || "pixels",
-                    aspect_ratio: aspectRatioLock && aspectRatioLock !== "free" ? (aspectRatioLock as any) : "free",
-                    auto_trim: true,
-                    padding_px: cropPaddingPx,
-                    output_format: "webp",
-                    quality: 90,
-                  },
-                  { signal: controller.signal }
-                );
+              // Check if multiple panels or distinct panel frames were detected
+              const detectedPanels = Array.isArray(detectRes?.panels) ? detectRes.panels : [];
+              if (detectedPanels.length > 0) {
+                const sortedPanels = [...detectedPanels].sort((a: any, b: any) => {
+                  const dy = (a.y ?? 0) - (b.y ?? 0);
+                  if (Math.abs(dy) > 30) return dy;
+                  return (a.x ?? 0) - (b.x ?? 0);
+                });
 
-                if (smallRes && smallRes.success && smallRes.url) {
-                  croppedUrls = [smallRes.url];
-                  console.log(
-                    `[Auto Cropper] ✓ Small image cropped in ${smallRes.processing_time_ms}ms via small-panels`
+                try {
+                  const sliceRes = await api.cropLongPanels(
+                    fetchWithInterceptor,
+                    {
+                      url: url,
+                      panels: sortedPanels,
+                      bleed_guard_px: cropPaddingPx || 5,
+                      background_mode: cropBackgroundMode || "auto",
+                      output_format: "webp",
+                      quality: 90,
+                    },
+                    { signal: controller.signal }
                   );
-                } else {
+
+                  if (
+                    sliceRes &&
+                    sliceRes.success &&
+                    Array.isArray(sliceRes.slices) &&
+                    sliceRes.slices.length > 0
+                  ) {
+                    croppedUrls = sliceRes.slices
+                      .sort((a: any, b: any) => a.index - b.index)
+                      .map((s: any) => s.url);
+                    console.log(
+                      `[Auto Cropper] ✓ Sliced ${croppedUrls.length} panel(s) from image via panel bounding boxes`
+                    );
+                  }
+                } catch (sliceErr) {
+                  console.warn("[Auto Cropper] multi-panel slicing fallback:", sliceErr);
+                }
+              }
+
+              // Fallback to single margin crop if slicing didn't return slices
+              if (croppedUrls.length === 0) {
+                try {
+                  const smallRes = await api.cropSmallPanels(
+                    fetchWithInterceptor,
+                    {
+                      url: url,
+                      crop_top: appliedMargins.crop_top || 0,
+                      crop_bottom: appliedMargins.crop_bottom || 0,
+                      crop_left: appliedMargins.crop_left || 0,
+                      crop_right: appliedMargins.crop_right || 0,
+                      unit: appliedMargins.unit || "pixels",
+                      aspect_ratio: aspectRatioLock && aspectRatioLock !== "free" ? (aspectRatioLock as any) : "free",
+                      auto_trim: true,
+                      padding_px: cropPaddingPx,
+                      output_format: "webp",
+                      quality: 90,
+                    },
+                    { signal: controller.signal }
+                  );
+
+                  if (smallRes && smallRes.success && smallRes.url) {
+                    croppedUrls = [smallRes.url];
+                    console.log(
+                      `[Auto Cropper] ✓ Small image cropped in ${smallRes.processing_time_ms}ms via small-panels`
+                    );
+                  } else {
+                    croppedUrls = [url];
+                  }
+                } catch (smallErr) {
+                  console.warn("[Auto Cropper] cropSmallPanels fallback:", smallErr);
                   croppedUrls = [url];
                 }
-              } catch (smallErr) {
-                console.warn("[Auto Cropper] cropSmallPanels fallback:", smallErr);
-                croppedUrls = [url];
               }
 
               setConsoleLogs((prev) => [
-                `[Auto Cropper] ✓ Small Image processed (${detectedLayout?.width || "auto"}x${detectedLayout?.height || "auto"}px)`,
+                `[Auto Cropper] ✓ Image processed into ${croppedUrls.length} panel(s) (${detectedLayout?.width || "auto"}x${detectedLayout?.height || "auto"}px)`,
                 ...prev,
               ]);
             } else {

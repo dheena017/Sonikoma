@@ -65,6 +65,9 @@ class DetectTypeResponse(BaseModel):
     message: Optional[str] = None
 
 
+from pydantic import BaseModel, Field, model_validator
+
+
 # ─── 3. Long-Panels (Batch Slicing) Schemas ───────────────────────────────────
 
 class PanelBoundingBox(BaseModel):
@@ -73,6 +76,8 @@ class PanelBoundingBox(BaseModel):
     panel_id: Optional[str] = Field(default=None, description="String panel ID (e.g., 'panel_01')")
     x: int = Field(default=0, description="X pixel start coordinate")
     y: int = Field(default=0, description="Y pixel start coordinate")
+    w: Optional[int] = Field(default=None, description="Width alias in pixels")
+    h: Optional[int] = Field(default=None, description="Height alias in pixels")
     width: int = Field(default=0, description="Width in pixels")
     height: int = Field(default=0, description="Height in pixels")
     crop_top: float = Field(default=0.0, description="Normalized or percentage top crop offset")
@@ -80,6 +85,30 @@ class PanelBoundingBox(BaseModel):
     crop_left: float = Field(default=0.0, description="Normalized or percentage left crop offset")
     crop_right: float = Field(default=0.0, description="Normalized or percentage right crop offset")
     padding_px: int = Field(default=0, description="Optional extra border padding")
+
+    @model_validator(mode="before")
+    @classmethod
+    def sync_dimensions(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            # Resolve x, y
+            x = data.get("x") if data.get("x") is not None else data.get("left", 0)
+            y = data.get("y") if data.get("y") is not None else data.get("top", 0)
+            # Resolve width / w
+            w = data.get("width")
+            if w is None or w == 0:
+                w = data.get("w", 0)
+            # Resolve height / h
+            h = data.get("height")
+            if h is None or h == 0:
+                h = data.get("h", 0)
+
+            data["x"] = int(x or 0)
+            data["y"] = int(y or 0)
+            data["width"] = int(w or 0)
+            data["height"] = int(h or 0)
+            data["w"] = int(w or 0)
+            data["h"] = int(h or 0)
+        return data
 
 
 class CroppedSliceItem(BaseModel):
