@@ -9,7 +9,7 @@ interface Chapter {
 export interface VideoPreviewChaptersMenuProps {
   show: boolean;
   chapters: Chapter[];
-  activeChapter: Chapter;
+  activeChapter?: Chapter | null;
   onSelectChapter: (startTime: number) => void;
   formatTime: (sec: number) => string;
 }
@@ -27,7 +27,7 @@ export const VideoPreviewChaptersMenu: React.FC<
         </span>
       </div>
       {chapters.map((chapter, idx) => {
-        const isActive = activeChapter.title === chapter.title;
+        const isActive = activeChapter?.title === chapter.title;
         return (
           <button
             key={idx}

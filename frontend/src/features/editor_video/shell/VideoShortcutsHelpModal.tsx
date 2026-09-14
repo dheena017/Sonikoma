@@ -175,6 +175,13 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
 
       // Layout & General
       {
+        id: "horizontal_scroll",
+        label: "Horizontal Scrolling",
+        description: "Hold Shift or Ctrl while scrolling mouse wheel to scroll horizontally",
+        keys: ["Shift", "Scroll"],
+        category: "layout" as const,
+      },
+      {
         id: "open_shortcuts",
         label: "Keyboard Shortcuts",
         description: "Open this cheat sheet modal",

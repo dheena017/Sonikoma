@@ -102,7 +102,7 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
       />
 
       <div
-        className="flex-1 w-full relative overflow-hidden bg-black flex items-center justify-center p-2"
+        className="flex-1 w-full relative overflow-hidden bg-black flex items-center justify-center p-0"
         onWheel={(event) => {
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();

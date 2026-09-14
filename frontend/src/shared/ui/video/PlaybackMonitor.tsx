@@ -73,7 +73,7 @@ export default function VideoPreviewCinemaPlayer({
         )
         : 0;
 
-  // Define Chapters dynamically from scraped episode groups or scene panels
+  // Define Chapters dynamically from scraped episode groups if multiple exist
   const chapters: Chapter[] = useMemo(() => {
     const rawGroups =
       ((window as any).__scrapeEpisodeGroups as Array<{
@@ -82,7 +82,7 @@ export default function VideoPreviewCinemaPlayer({
         count: number;
       }>) || [];
 
-    if (rawGroups.length > 0) {
+    if (rawGroups.length > 1) {
       const sorted = getSortedEpisodeGroups(rawGroups);
       return sorted.map(({ grp }) => {
         const startIdx = Math.max(
@@ -103,41 +103,13 @@ export default function VideoPreviewCinemaPlayer({
         return {
           title: formatDisplayEpisodeLabel(grp.episodeLabel),
           startTime,
-          endTime: endTime > startTime ? endTime : startTime + 10,
+          endTime: endTime > startTime ? endTime : startTime,
         };
       });
     }
 
-    if (panels.length === 0) {
-      return [
-        { title: "Full Video", startTime: 0, endTime: totalDuration || 10 },
-      ];
-    }
-
-    // Single episode / un-grouped panels: split into logical scene chapters (e.g. Scene 1, Scene 2...)
-    const sceneChunkSize = Math.max(1, Math.ceil(panels.length / 3));
-    const result: Chapter[] = [];
-    let accTime = 0;
-
-    for (let i = 0; i < panels.length; i += sceneChunkSize) {
-      const chunk = panels.slice(i, i + sceneChunkSize);
-      const chunkDuration = chunk.reduce(
-        (acc, p) => acc + (p.duration ?? 0),
-        0
-      );
-      const sceneNum = Math.floor(i / sceneChunkSize) + 1;
-
-      result.push({
-        title: `Scene ${sceneNum}`,
-        startTime: accTime,
-        endTime: accTime + chunkDuration,
-      });
-
-      accTime += chunkDuration;
-    }
-
-    return result;
-  }, [panels, totalDuration]);
+    return [];
+  }, [panels]);
 
   // States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -398,8 +370,6 @@ export default function VideoPreviewCinemaPlayer({
       } else {
         videoRef.current.play().catch((err) => {
           console.error("[AdaptationPlayer] Playback start error:", err);
-          setVideoHasError(true);
-          setIsPlaying(true);
         });
       }
     } else {
@@ -549,14 +519,18 @@ export default function VideoPreviewCinemaPlayer({
     },
     [panels]
   );
+  const prevSyncedPanelIndexRef = useRef<number | undefined>(undefined);
+
   // Synchronize playback timeline whenever a storyboard panel is selected / clicked
   useEffect(() => {
     if (
       currentPanelIndex !== undefined &&
       panels &&
       panels.length > 0 &&
-      !isPlaying
+      !isPlaying &&
+      prevSyncedPanelIndexRef.current !== currentPanelIndex
     ) {
+      prevSyncedPanelIndexRef.current = currentPanelIndex;
       const validIdx = Math.max(
         0,
         Math.min(currentPanelIndex, panels.length - 1)
@@ -569,6 +543,8 @@ export default function VideoPreviewCinemaPlayer({
       if (videoRef.current) {
         videoRef.current.currentTime = accTime;
       }
+    } else if (prevSyncedPanelIndexRef.current !== currentPanelIndex) {
+      prevSyncedPanelIndexRef.current = currentPanelIndex;
     }
   }, [currentPanelIndex, panels, isPlaying]);
 
@@ -677,11 +653,12 @@ export default function VideoPreviewCinemaPlayer({
   ]);
 
   // Find active chapter by current time
-  const getActiveChapter = (time: number): Chapter => {
+  const getActiveChapter = (time: number): Chapter | null => {
+    if (!chapters || chapters.length === 0) return null;
     const active = chapters.find(
       (c) => time >= c.startTime && time <= c.endTime
     );
-    return active || chapters[0];
+    return active || chapters[0] || null;
   };
 
   const activeChapter = getActiveChapter(currentTime);
@@ -707,34 +684,54 @@ export default function VideoPreviewCinemaPlayer({
     e: React.MouseEvent<HTMLDivElement>
   ) => {
     if (!progressBarRef.current) return;
-    const rect = progressBarRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const percentage = Math.max(0, Math.min(1, clickX / rect.width));
-    let targetTime = percentage * totalDuration;
+    
+    // Helper function for the scrubbing calculation
+    const calculateAndSetTime = (clientX: number, isShiftPressed: boolean) => {
+      const rect = progressBarRef.current!.getBoundingClientRect();
+      const clickX = clientX - rect.left;
+      const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+      let targetTime = percentage * totalDuration;
 
-    if (e.shiftKey) {
-      const closestChapter = chapters.reduce((prev, curr) => {
-        const prevDiffStart = Math.abs(prev.startTime - targetTime);
-        const prevDiffEnd = Math.abs(prev.endTime - targetTime);
-        const currDiffStart = Math.abs(curr.startTime - targetTime);
-        const currDiffEnd = Math.abs(curr.endTime - targetTime);
+      if (isShiftPressed && chapters && chapters.length > 0) {
+        const closestChapter = chapters.reduce((prev, curr) => {
+          const prevDiffStart = Math.abs(prev.startTime - targetTime);
+          const prevDiffEnd = Math.abs(prev.endTime - targetTime);
+          const currDiffStart = Math.abs(curr.startTime - targetTime);
+          const currDiffEnd = Math.abs(curr.endTime - targetTime);
 
-        const minPrev = Math.min(prevDiffStart, prevDiffEnd);
-        const minCurr = Math.min(currDiffStart, currDiffEnd);
+          const minPrev = Math.min(prevDiffStart, prevDiffEnd);
+          const minCurr = Math.min(currDiffStart, currDiffEnd);
 
-        return minPrev < minCurr ? prev : curr;
-      });
+          return minPrev < minCurr ? prev : curr;
+        });
 
-      const startDiff = Math.abs(closestChapter.startTime - targetTime);
-      const endDiff = Math.abs(closestChapter.endTime - targetTime);
-      targetTime =
-        startDiff < endDiff ? closestChapter.startTime : closestChapter.endTime;
-    }
+        const startDiff = Math.abs(closestChapter.startTime - targetTime);
+        const endDiff = Math.abs(closestChapter.endTime - targetTime);
+        targetTime =
+          startDiff < endDiff ? closestChapter.startTime : closestChapter.endTime;
+      }
 
-    setCurrentTime(targetTime);
-    if (videoRef.current) {
-      videoRef.current.currentTime = targetTime;
-    }
+      setCurrentTime(targetTime);
+      if (videoRef.current) {
+        videoRef.current.currentTime = targetTime;
+      }
+    };
+
+    // Initial click seek
+    calculateAndSetTime(e.clientX, e.shiftKey);
+
+    // Setup drag listeners for smooth scrubbing outside the bar
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      calculateAndSetTime(moveEvent.clientX, moveEvent.shiftKey);
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
   };
 
   // Hover precise seeking calculations
@@ -1130,7 +1127,10 @@ export default function VideoPreviewCinemaPlayer({
           <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]" />
         )}
 
-        <div className="relative w-full h-full flex items-center justify-center bg-transparent overflow-hidden">
+        <div 
+          className="relative w-full h-full flex items-center justify-center bg-transparent overflow-hidden cursor-pointer"
+          onClick={togglePlay}
+        >
           {mode === "video" ? (
             videoUrl && !videoHasError ? (
               <video
@@ -1155,8 +1155,7 @@ export default function VideoPreviewCinemaPlayer({
                   );
                   setVideoHasError(true);
                 }}
-                className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image border border-neutral-900 rounded-3xl shadow-2xl bg-neutral-950"
-                style={{ width: "auto", height: "auto" }}
+                className="w-full h-full max-w-full max-h-full object-contain player-panel-image shadow-2xl bg-black"
                 playsInline
               />
             ) : panels.length === 0 ? (
@@ -1203,57 +1202,34 @@ export default function VideoPreviewCinemaPlayer({
               </div>
 
               {activePanelNow.layers ? (
-                <div className="relative w-full h-full flex items-center justify-center z-10 p-2 sm:p-4">
+                <div className="relative w-full h-full flex items-center justify-center z-10 p-0">
                   <div className="relative w-full h-full flex items-center justify-center">
                     <img
                       src={activePanelNow.layers.background_url}
-                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] rounded-lg"
-                      style={{ width: "auto", height: "auto" }}
+                      className="absolute w-full h-full max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
                       alt="Background"
                     />
                     <img
                       src={activePanelNow.layers.background_url}
-                      className="absolute w-auto h-auto max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] rounded-lg"
-                      style={{
-                        width: "auto",
-                        height: "auto",
-                        transform: isPlaying
-                          ? subtitlesStyle === "karaoke"
-                            ? `scale(${1 + (currentTime % 4.5) * 0.015})`
-                            : "scale(1.05) translateY(-2px)"
-                          : "scale(1)",
-                        transition: "transform 100ms linear",
-                      }}
+                      className="absolute w-full h-full max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
                       alt="Background"
                     />
                     <img
                       src={activePanelNow.layers.character_url}
-                      className="absolute w-auto h-auto max-w-full max-h-full object-contain z-10 player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)] rounded-lg"
-                      style={{
-                        width: "auto",
-                        height: "auto",
-                        transform: isPlaying
-                          ? subtitlesStyle === "karaoke"
-                            ? `scale(${1 + (currentTime % 4.5) * 0.035
-                            }) translateY(-4px)`
-                            : "scale(1.08) translateY(-6px)"
-                          : "scale(1)",
-                        transition: "transform 100ms linear",
-                      }}
+                      className="absolute w-full h-full max-w-full max-h-full object-contain z-10 player-panel-image drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
                       alt="Character"
                     />
                     {showSubtitles && activePanelNow.layers.text_url && (
                       <img
                         src={activePanelNow.layers.text_url}
-                        className="absolute w-auto h-auto max-w-full max-h-full object-contain z-20 player-panel-image"
-                        style={{ width: "auto", height: "auto" }}
+                        className="absolute w-full h-full max-w-full max-h-full object-contain z-20 player-panel-image"
                         alt="Subtitles Layer"
                       />
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10 p-2 sm:p-4">
+                <div className="absolute inset-0 w-full h-full flex items-center justify-center z-10 p-0">
                   <img
                     src={activePanelImg || undefined}
                     onError={(e) => {
@@ -1271,10 +1247,8 @@ export default function VideoPreviewCinemaPlayer({
                         )}`;
                       }
                     }}
-                    className="w-auto h-auto max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)] rounded-lg"
+                    className="w-full h-full max-w-full max-h-full object-contain player-panel-image drop-shadow-[0_15px_35px_rgba(0,0,0,0.85)]"
                     style={{
-                      width: "auto",
-                      height: "auto",
                       transform: isPlaying
                         ? `scale(${1 + (currentTime % 4.5) * 0.02})`
                         : "scale(1)",
@@ -1339,20 +1313,22 @@ export default function VideoPreviewCinemaPlayer({
         />
       )}
 
-      {mode === "video" && panels.length > 0 && (
+      {((mode === "video" && videoUrl && !videoHasError) || mode === "timeline") && (
         <>
           {/* SUB-COMPONENT: Floating Chapters Menu */}
-          <VideoPreviewChaptersMenu
-            show={showChaptersMenu && controlsVisible}
-            chapters={chapters}
-            activeChapter={activeChapter}
-            onSelectChapter={(startTime) => {
-              setCurrentTime(startTime);
-              if (videoRef.current) videoRef.current.currentTime = startTime;
-              setShowChaptersMenu(false);
-            }}
-            formatTime={formatTime}
-          />
+          {chapters.length > 1 && (
+            <VideoPreviewChaptersMenu
+              show={showChaptersMenu && controlsVisible}
+              chapters={chapters}
+              activeChapter={activeChapter}
+              onSelectChapter={(startTime) => {
+                setCurrentTime(startTime);
+                if (videoRef.current) videoRef.current.currentTime = startTime;
+                setShowChaptersMenu(false);
+              }}
+              formatTime={formatTime}
+            />
+          )}
 
           {/* SUB-COMPONENT: Settings Menu */}
           <VideoPreviewSettingsMenu

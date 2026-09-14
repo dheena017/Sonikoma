@@ -9,7 +9,7 @@ interface Chapter {
 
 export interface VideoPreviewTopBarProps {
   visible: boolean;
-  activeChapter: Chapter;
+  activeChapter?: Chapter | null;
   panelCounterText: string;
   onClose: () => void;
   videoUrl?: string | null;

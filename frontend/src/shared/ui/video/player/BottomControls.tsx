@@ -39,11 +39,11 @@ export interface VideoPreviewBottomControlsProps {
   hoverProgress: HoverProgress;
   activePanelForHover: GeneratedPanel | null;
   chapters: Chapter[];
-  activeChapter: Chapter;
+  activeChapter?: Chapter | null;
   totalDuration: number;
   currentTime: number;
   formatTime: (sec: number) => string;
-  getActiveChapter: (time: number) => Chapter;
+  getActiveChapter?: (time: number) => Chapter | null;
   handleSkipBackward: () => void;
   handleSkipForward: () => void;
   togglePlay: () => void;
@@ -166,9 +166,11 @@ export const VideoPreviewBottomControls: React.FC<
                   <span className="text-[10px] font-black font-mono text-[#3B82F6] tabular-nums">
                     {formatTime(hoverProgress.time)}
                   </span>
-                  <span className="text-[9px] font-bold px-1.5 py-0.5 bg-neutral-950/60 rounded border border-neutral-800 text-neutral-400 uppercase">
-                    {getActiveChapter(hoverProgress.time).title}
-                  </span>
+                  {getActiveChapter?.(hoverProgress.time)?.title && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-neutral-950/60 rounded border border-neutral-800 text-neutral-400 uppercase">
+                      {getActiveChapter(hoverProgress.time)!.title}
+                    </span>
+                  )}
                 </div>
                 {activePanelForHover?.speech_text && (
                   <p className="text-[8px] text-neutral-500 truncate leading-normal font-sans mt-0.5">
@@ -193,7 +195,7 @@ export const VideoPreviewBottomControls: React.FC<
         {/* SENSITIVE INTERACTION TRACK BAR */}
         <div
           ref={progressBarRef}
-          onClick={handleProgressBarInteraction}
+          onMouseDown={handleProgressBarInteraction}
           onMouseMove={handleProgressBarMouseMove}
           onMouseLeave={handleProgressBarMouseLeave}
           className="relative h-1.5 group-hover/scrub:h-2 bg-neutral-800/90 rounded-full cursor-pointer transition-all duration-200 flex items-center"
@@ -304,20 +306,22 @@ export const VideoPreviewBottomControls: React.FC<
           </div>
 
           {/* CHAPTER DROPDOWN SELECTION */}
-          <div className="relative">
-            <button
-              onClick={() => {
-                setShowChaptersMenu(!showChaptersMenu);
-                setShowSettings(false);
-              }}
-              className="flex items-center gap-1 px-3 py-1.5 bg-neutral-900/80 hover:bg-neutral-800 rounded-xl border border-white/10 text-[11px] font-mono text-neutral-300 transition-all cursor-pointer"
-            >
-              <span className="font-bold text-[#3B82F6] capitalize">
-                {activeChapter.title}
-              </span>
-              <ChevronRight className="h-3 w-3 shrink-0" />
-            </button>
-          </div>
+          {chapters && chapters.length > 1 && activeChapter && (
+            <div className="relative">
+              <button
+                onClick={() => {
+                  setShowChaptersMenu(!showChaptersMenu);
+                  setShowSettings(false);
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 bg-neutral-900/80 hover:bg-neutral-800 rounded-xl border border-white/10 text-[11px] font-mono text-neutral-300 transition-all cursor-pointer"
+              >
+                <span className="font-bold text-[#3B82F6] capitalize">
+                  {activeChapter.title}
+                </span>
+                <ChevronRight className="h-3 w-3 shrink-0" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* RIGHT COMMANDS */}

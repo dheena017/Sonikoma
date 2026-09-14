@@ -855,23 +855,13 @@ const StoryboardCard = ({
 
   const cardRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    if (isCurrent && cardRef.current && viewLayout === "scroll") {
-      cardRef.current.scrollIntoView({
-        behavior: "auto",
-        block: "nearest",
-        inline: "center",
-      });
-    }
-  }, [isCurrent, viewLayout]);
-
   return (
     <div
       ref={cardRef}
       className={`${
         viewLayout === "grid"
           ? "w-full min-w-0"
-          : "w-full sm:w-[300px] shrink-0"
+          : "w-[260px] sm:w-[300px] shrink-0"
       } group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out select-none outline-none backdrop-blur-md shadow-md ${
         panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll
           ? "border-2 border-[#3B82F6] bg-[#2A2A2A] ring-1 ring-[#3B82F6]/50 scale-[1.02]"
@@ -934,7 +924,7 @@ const StoryboardCard = ({
 
         {/* Selection indicator overlay when selected */}
         {isSelected && (
-          <div className="absolute inset-0 bg-[#2A2A2A] border-2 border-[#3B82F6]/60 rounded-xl pointer-events-none z-[5]" />
+          <div className="absolute inset-0 bg-[#3B82F6]/10 border-2 border-[#3B82F6]/60 rounded-xl pointer-events-none z-[5]" />
         )}
 
         {/* Hover hint label overlay */}

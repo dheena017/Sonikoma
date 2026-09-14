@@ -85,15 +85,12 @@ export const HorizontalScrollContainer: React.FC<{
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-  const animFrameRef = useRef<number | null>(null);
-  const targetScrollRef = useRef<number>(0);
-  const isAnimatingRef = useRef<boolean>(false);
 
-  // Mouse Drag to Scroll state
+  // Mouse drag-to-scroll refs
   const isMouseDownRef = useRef(false);
   const startXRef = useRef(0);
-  const startScrollLeftRef = useRef(0);
-  const hasDraggedRef = useRef(false);
+  const scrollLeftStartRef = useRef(0);
+  const isDraggingRef = useRef(false);
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -101,37 +98,6 @@ export const HorizontalScrollContainer: React.FC<{
     setCanScrollLeft(el.scrollLeft > 5);
     setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 5);
   }, []);
-
-  const startSmoothLerp = useCallback(() => {
-    if (isAnimatingRef.current) return;
-    isAnimatingRef.current = true;
-
-    const step = () => {
-      const el = scrollRef.current;
-      if (!el) {
-        isAnimatingRef.current = false;
-        return;
-      }
-
-      const current = el.scrollLeft;
-      const target = targetScrollRef.current;
-      const diff = target - current;
-
-      if (Math.abs(diff) < 0.6) {
-        el.scrollLeft = target;
-        isAnimatingRef.current = false;
-        checkScroll();
-        return;
-      }
-
-      // 0.16 lerp factor provides buttery smooth glide feel
-      el.scrollLeft += diff * 0.16;
-      checkScroll();
-      animFrameRef.current = requestAnimationFrame(step);
-    };
-
-    animFrameRef.current = requestAnimationFrame(step);
-  }, [checkScroll]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -145,76 +111,65 @@ export const HorizontalScrollContainer: React.FC<{
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", checkScroll, { passive: true });
 
-    // Smooth horizontal translation for mouse wheel with momentum lerp
+    // Wheel event handler: translates vertical mouse wheel to horizontal scroll when hovering over container
     const handleNativeWheel = (e: WheelEvent) => {
       const maxScroll = el.scrollWidth - el.clientWidth;
       if (maxScroll <= 0) return;
 
-      // Trackpad horizontal swipe
+      // Trackpad native horizontal swipe
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        if (isAnimatingRef.current && animFrameRef.current) {
-          cancelAnimationFrame(animFrameRef.current);
-          isAnimatingRef.current = false;
-        }
         el.scrollLeft += e.deltaX;
-        targetScrollRef.current = el.scrollLeft;
         checkScroll();
         return;
       }
 
-      // Vertical mouse wheel translated to horizontal smooth gliding
-      const delta = e.deltaY;
-      if (delta === 0) return;
-
-      // Check if we can scroll in this direction
-      const goingRight = delta > 0;
-      const canScroll = goingRight
-        ? el.scrollLeft < maxScroll - 1
-        : el.scrollLeft > 1;
-
-      if (canScroll || e.shiftKey || e.ctrlKey) {
-        e.preventDefault();
-        const base = isAnimatingRef.current
-          ? targetScrollRef.current
-          : el.scrollLeft;
-        // Natural step per wheel notch (~140px)
-        const scrollStep = delta * 1.35;
-        targetScrollRef.current = Math.max(
-          0,
-          Math.min(maxScroll, base + scrollStep)
-        );
-        startSmoothLerp();
+      // Shift or Ctrl + wheel -> always horizontal scroll
+      if (e.shiftKey || e.ctrlKey) {
+        if (e.deltaY !== 0) {
+          e.preventDefault();
+          el.scrollLeft += e.deltaY * 1.2;
+          checkScroll();
+        }
+        return;
       }
+
+      // Vertical wheel: scroll container horizontally if it can scroll in that direction
+      const isScrollingDown = e.deltaY > 0;
+      const isScrollingUp = e.deltaY < 0;
+      const canScrollRightNow = el.scrollLeft < maxScroll - 1;
+      const canScrollLeftNow = el.scrollLeft > 1;
+
+      if ((isScrollingDown && canScrollRightNow) || (isScrollingUp && canScrollLeftNow)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY * 1.2;
+        checkScroll();
+      }
+      // If at end of horizontal scroll, standard vertical page scrolling occurs naturally!
     };
 
     el.addEventListener("wheel", handleNativeWheel, { passive: false });
 
-    // Global mouse move & up for smooth grab-to-drag
+    // Mouse drag movement listeners
     const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isMouseDownRef.current || !el) return;
+      if (!isMouseDownRef.current || !scrollRef.current) return;
       const dx = e.pageX - startXRef.current;
+
+      // Require > 5px drag distance before intercepting clicks (prevents swallowing card clicks)
       if (Math.abs(dx) > 5) {
-        hasDraggedRef.current = true;
+        isDraggingRef.current = true;
       }
-      if (hasDraggedRef.current) {
-        e.preventDefault();
-        if (isAnimatingRef.current && animFrameRef.current) {
-          cancelAnimationFrame(animFrameRef.current);
-          isAnimatingRef.current = false;
-        }
-        el.scrollLeft = startScrollLeftRef.current - dx * 1.25;
-        targetScrollRef.current = el.scrollLeft;
+
+      if (isDraggingRef.current) {
+        scrollRef.current.scrollLeft = scrollLeftStartRef.current - dx;
         checkScroll();
       }
     };
 
     const handleGlobalMouseUp = () => {
-      if (isMouseDownRef.current) {
-        isMouseDownRef.current = false;
-        setTimeout(() => {
-          hasDraggedRef.current = false;
-        }, 80);
-      }
+      isMouseDownRef.current = false;
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 50);
     };
 
     window.addEventListener("mousemove", handleGlobalMouseMove);
@@ -239,52 +194,41 @@ export const HorizontalScrollContainer: React.FC<{
       mutObserver.disconnect();
       clearTimeout(timer1);
       clearTimeout(timer2);
-      if (animFrameRef.current !== null) {
-        cancelAnimationFrame(animFrameRef.current);
-      }
     };
-  }, [checkScroll, children, startSmoothLerp]);
-
-  const scroll = (direction: "left" | "right") => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    const scrollAmount = Math.max(340, el.clientWidth * 0.75);
-    const base = isAnimatingRef.current ? targetScrollRef.current : el.scrollLeft;
-    targetScrollRef.current = Math.max(
-      0,
-      Math.min(
-        maxScroll,
-        base + (direction === "left" ? -scrollAmount : scrollAmount)
-      )
-    );
-    startSmoothLerp();
-  };
+  }, [checkScroll, children]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Don't hijack clicks on buttons, inputs, links, textareas
-    if (
-      (e.target as HTMLElement).closest(
-        "button, input, textarea, select, a, [contenteditable='true']"
-      )
-    ) {
-      return;
+    // Ignore clicks on buttons, inputs, links, textareas
+    const target = e.target as HTMLElement;
+    if (target.closest("button, input, textarea, a, select")) return;
+
+    if (scrollRef.current) {
+      isMouseDownRef.current = true;
+      isDraggingRef.current = false;
+      startXRef.current = e.pageX;
+      scrollLeftStartRef.current = scrollRef.current.scrollLeft;
     }
-    isMouseDownRef.current = true;
-    startXRef.current = e.pageX;
-    startScrollLeftRef.current = scrollRef.current?.scrollLeft || 0;
-    hasDraggedRef.current = false;
   };
 
   const handleClickCapture = (e: React.MouseEvent) => {
-    if (hasDraggedRef.current) {
+    if (isDraggingRef.current) {
       e.stopPropagation();
       e.preventDefault();
     }
   };
 
+  const scroll = (direction: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollAmount = Math.max(340, el.clientWidth * 0.75);
+    el.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <div className="w-full min-w-0 flex items-center gap-2 relative group/scrollcontainer">
+    <div className="w-full min-w-0 flex items-center gap-2 relative">
       {/* Left Arrow */}
       {canScrollLeft && (
         <button
