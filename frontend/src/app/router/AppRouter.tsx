@@ -947,15 +947,39 @@ export default function AppRouter(props: AppRouterProps) {
     }
   }, [currentPath, navigateTo]);
 
-  // Cleanly normalize legacy /scraper/editor & /scraper/series URLs to clean human-readable /editor URLs
+  // Redirect legacy or draft URLs back to the old temp route
   React.useEffect(() => {
     if (
-      currentPath.startsWith("/scraper/editor") ||
-      currentPath.startsWith("/scraper/series/")
+      currentPath.startsWith("/editor/draft-") ||
+      currentPath === "/editor/draft"
+    ) {
+      const activeProjId =
+        projectId ||
+        (typeof window !== "undefined"
+          ? localStorage.getItem("active_project_id")
+          : null);
+      if (activeProjId) {
+        navigateTo(`/scraper/editor?id=${encodeURIComponent(activeProjId)}`);
+      } else {
+        navigateTo(`/scraper/editor`);
+      }
+      return;
+    }
+
+    // Cleanly normalize saved series / chapters to /editor/series/chapter, but keep temp projects on /scraper/editor?id=temp_...
+    if (
+      currentPath.startsWith("/scraper/series/") ||
+      (currentPath.startsWith("/scraper/editor") &&
+        seriesSlugState &&
+        chapterSlugState)
     ) {
       const search = window.location.search;
       const params = new URLSearchParams(search);
       const projId = params.get("id") || params.get("project_id") || projectId;
+
+      if (projId && (projId.startsWith("temp_") || projId.startsWith("draft_"))) {
+        return;
+      }
 
       const humanPath = getHumanEditorPath({
         projectId: projId,
@@ -964,10 +988,16 @@ export default function AppRouter(props: AppRouterProps) {
         jobId: params.get("job_id"),
       });
 
-      if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, document.title, humanPath);
-      } else {
-        navigateTo(humanPath);
+      if (
+        humanPath &&
+        humanPath !== currentPath &&
+        !humanPath.includes("/draft-")
+      ) {
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, humanPath);
+        } else {
+          navigateTo(humanPath);
+        }
       }
     }
   }, [currentPath, projectId, seriesSlugState, chapterSlugState, navigateTo]);
@@ -1485,6 +1515,8 @@ export default function AppRouter(props: AppRouterProps) {
               selectedCount={selectedScraped.length}
               isApplying={isBatchCropping}
               scrapedImages={scrapedImages}
+              setScrapedImages={memoizedAppLogic?.setScrapedImages}
+              setPanels={memoizedAppLogic?.setPanels}
               selectedScraped={selectedScraped}
               setSelectedScraped={setSelectedScraped}
               setConsoleLogs={setConsoleLogs}

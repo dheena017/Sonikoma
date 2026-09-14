@@ -111,8 +111,8 @@ export function getHumanEditorPath(options: WorkspaceReturnPathOptions = {}): st
 
   if (projectId) {
     if (projectId.startsWith("temp_") || projectId.startsWith("draft_")) {
-      const hash = extractDraftHash(projectId);
-      return `/editor/draft-${hash}${jobQuery}`;
+      const jobQueryParam = jobId ? `&job_id=${encodeURIComponent(jobId)}` : "";
+      return `/scraper/editor?id=${encodeURIComponent(projectId)}${jobQueryParam}`;
     }
     const cleanSlug = slugify(projectId);
     return `/editor/${cleanSlug || projectId}${jobQuery}`;
