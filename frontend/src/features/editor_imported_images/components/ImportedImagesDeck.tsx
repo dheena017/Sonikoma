@@ -104,8 +104,15 @@ export const HorizontalScrollContainer: React.FC<{
     if (!el) return;
     checkScroll();
 
+    let ticking = false;
     const onScroll = () => {
-      checkScroll();
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          checkScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     el.addEventListener("scroll", onScroll, { passive: true });
@@ -116,10 +123,8 @@ export const HorizontalScrollContainer: React.FC<{
       const maxScroll = el.scrollWidth - el.clientWidth;
       if (maxScroll <= 0) return;
 
-      // Trackpad native horizontal swipe
+      // Trackpad native horizontal swipe - Let the browser handle it natively
       if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-        el.scrollLeft += e.deltaX;
-        checkScroll();
         return;
       }
 
@@ -128,7 +133,6 @@ export const HorizontalScrollContainer: React.FC<{
         if (e.deltaY !== 0) {
           e.preventDefault();
           el.scrollLeft += e.deltaY * 1.2;
-          checkScroll();
         }
         return;
       }
@@ -142,9 +146,7 @@ export const HorizontalScrollContainer: React.FC<{
       if ((isScrollingDown && canScrollRightNow) || (isScrollingUp && canScrollLeftNow)) {
         e.preventDefault();
         el.scrollLeft += e.deltaY * 1.2;
-        checkScroll();
       }
-      // If at end of horizontal scroll, standard vertical page scrolling occurs naturally!
     };
 
     el.addEventListener("wheel", handleNativeWheel, { passive: false });
@@ -161,7 +163,6 @@ export const HorizontalScrollContainer: React.FC<{
 
       if (isDraggingRef.current) {
         scrollRef.current.scrollLeft = scrollLeftStartRef.current - dx;
-        checkScroll();
       }
     };
 
