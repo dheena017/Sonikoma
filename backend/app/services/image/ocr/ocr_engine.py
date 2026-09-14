@@ -49,7 +49,9 @@ def _load_ocr_reader(langs: List[str] = ["en"]) -> Optional[Any]:
         logger.info(f"[OCR] Initialising EasyOCR reader — languages: {langs}")
         try:
             import easyocr
-            _ocr_reader = easyocr.Reader(langs, gpu=False)
+            import torch
+            use_gpu = torch.cuda.is_available()
+            _ocr_reader = easyocr.Reader(langs, gpu=use_gpu, verbose=False)
         except ImportError:
             logger.warning("[OCR] EasyOCR is not actually installed.")
             return None
