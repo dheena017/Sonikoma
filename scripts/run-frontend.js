@@ -404,6 +404,27 @@ async function start() {
       `⚠️ Port ${port} is occupied, but backend is not responding yet. It might be starting up.`
     );
     logger.info(`Waiting for existing process to initialize...`);
+    await new Promise((resolve) => {
+      function pollBackendHealth() {
+        http
+          .get(url, (res) => {
+            if (
+              res.statusCode === 200 ||
+              res.statusCode === 307 ||
+              res.statusCode === 302
+            ) {
+              logger.success(`Existing backend initialized successfully!`);
+              resolve();
+            } else {
+              setTimeout(pollBackendHealth, 300);
+            }
+          })
+          .on("error", () => {
+            setTimeout(pollBackendHealth, 300);
+          });
+      }
+      setTimeout(pollBackendHealth, 300);
+    });
   } else {
     if (onlyFrontend) {
       logger.warn(`⚠️ WARNING: Backend is not running on port ${port}!`);
@@ -435,30 +456,36 @@ async function start() {
         handleBackendExit(initialProcess, code);
       });
 
-      // Poll backend health in background without blocking frontend startup
-      function pollBackendHealth() {
-        if (initialProcess.exitCode !== null) return;
-        http
-          .get(url, (res) => {
-            if (
-              res.statusCode === 200 ||
-              res.statusCode === 307 ||
-              res.statusCode === 302
-            ) {
-              if (initialProcess.exitCode === null) {
-                logger.success(
-                  `Backend initialized successfully and online on port ${port}!`
-                );
+      // Poll backend health and wait for it to be ready before starting frontend
+      await new Promise((resolve) => {
+        function pollBackendHealth() {
+          if (initialProcess.exitCode !== null) {
+            resolve();
+            return;
+          }
+          http
+            .get(url, (res) => {
+              if (
+                res.statusCode === 200 ||
+                res.statusCode === 307 ||
+                res.statusCode === 302
+              ) {
+                if (initialProcess.exitCode === null) {
+                  logger.success(
+                    `Backend initialized successfully and online on port ${port}!`
+                  );
+                  resolve();
+                }
+              } else {
+                setTimeout(pollBackendHealth, 300);
               }
-            } else {
+            })
+            .on("error", () => {
               setTimeout(pollBackendHealth, 300);
-            }
-          })
-          .on("error", () => {
-            setTimeout(pollBackendHealth, 300);
-          });
-      }
-      setTimeout(pollBackendHealth, 300);
+            });
+        }
+        setTimeout(pollBackendHealth, 300);
+      });
     }
   }
 
