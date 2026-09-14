@@ -85,7 +85,7 @@ def detect_opencv_boxes(
         area = w * h
 
         # Filter out tiny noise contours
-        if w < min_w or h < min_h or (area / total_area) < 0.02:
+        if w < min_w or h < min_h or (area / total_area) < 0.002:
             continue
 
         # Polygon approximation to check if frame is rectangular or diagonal

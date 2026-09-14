@@ -312,7 +312,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
             # Filter out tiny noise slivers (e.g., logo watermarks or border artifacts)
             valid_dicts = [
                 cd for cd in cleaned_dicts
-                if int(cd.get("w", 0)) >= max(50, int(img_w * 0.25)) and int(cd.get("h", 0)) >= 50
+                if int(cd.get("w", 0)) >= max(50, int(img_w * 0.15)) and int(cd.get("h", 0)) >= 50
             ]
             fused_panels = [
                 PanelBoundingBox(**cd) for cd in (valid_dicts if valid_dicts else cleaned_dicts)
