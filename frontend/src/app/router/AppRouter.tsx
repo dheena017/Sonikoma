@@ -1515,8 +1515,6 @@ export default function AppRouter(props: AppRouterProps) {
               selectedCount={selectedScraped.length}
               isApplying={isBatchCropping}
               scrapedImages={scrapedImages}
-              setScrapedImages={memoizedAppLogic?.setScrapedImages}
-              setPanels={memoizedAppLogic?.setPanels}
               selectedScraped={selectedScraped}
               setSelectedScraped={setSelectedScraped}
               setConsoleLogs={setConsoleLogs}

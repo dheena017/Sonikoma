@@ -155,6 +155,8 @@ export function useAppRouter(props?: UseAppRouterProps) {
       const newPath = window.location.pathname;
 
       setCurrentPath(newPath);
+      window.dispatchEvent(new Event("popstate"));
+      window.dispatchEvent(new Event("locationchange"));
 
       if (newPath.includes("/editor")) {
         setLastEditorPath(newPath + window.location.search);
