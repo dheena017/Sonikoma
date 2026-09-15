@@ -9,6 +9,7 @@ import {
   Menu,
   Zap,
   FolderSync,
+  MoreHorizontal,
 } from "lucide-react";
 import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
 import {
@@ -104,6 +105,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
+  const [showMoreActions, setShowMoreActions] = useState(false);
   const [credits, setCredits] = useState<number | null>(
     user?.credits !== undefined ? user.credits : null
   );
@@ -114,6 +116,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
+  const moreActionsRef = useRef<HTMLDivElement>(null);
 
   const handleClaimDailyBonus = async () => {
     if (!fetchWithInterceptor) return;
@@ -162,6 +165,12 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
       }
       if (creditsRef.current && !creditsRef.current.contains(target)) {
         setShowCreditsPopover(false);
+      }
+      if (
+        moreActionsRef.current &&
+        !moreActionsRef.current.contains(target)
+      ) {
+        setShowMoreActions(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -260,6 +269,51 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
         {/* 🤖 Global AI Model Selector - Hidden on narrow mobile (<640px) */}
         <AIModelSelector compact className="hidden min-[640px]:flex shrink-0" />
+
+        <div className="relative md:hidden" ref={moreActionsRef}>
+          <button
+            type="button"
+            onClick={() => {
+              setShowMoreActions((v) => !v);
+              setShowNotifications(false);
+              setShowCreditsPopover(false);
+            }}
+            className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative"
+            title="More actions"
+            aria-label="More actions"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+
+          {showMoreActions && (
+            <div className="absolute right-0 top-full mt-2 z-50 w-52 rounded-2xl border border-white/10 bg-[#141414]/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-2 space-y-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsToolsPanelOpen((prev) => !prev);
+                    setShowMoreActions(false);
+                  }}
+                  className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                >
+                  <Menu className="w-4 h-4 text-neutral-400" />
+                  {isToolsPanelOpen ? "Hide Tools" : "Show Tools"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPipMode?.(!isPipMode);
+                    setShowMoreActions(false);
+                  }}
+                  className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                >
+                  <Check className="w-4 h-4 text-neutral-400" />
+                  {isPipMode ? "Exit PIP" : "Open PIP"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* ⚡ Credits Pill & Popover */}
         {credits !== null && (

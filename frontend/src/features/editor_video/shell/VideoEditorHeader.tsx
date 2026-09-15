@@ -15,6 +15,7 @@ import {
   Film,
   FolderSync,
   Keyboard,
+  MoreHorizontal,
 } from "lucide-react";
 import VideoCustomizeLayoutModal from "./VideoCustomizeLayoutModal";
 import VideoShortcutsHelpModal from "./VideoShortcutsHelpModal";
@@ -121,6 +122,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
   const [showShortcutsModal, setShowShortcutsModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
+  const [showMoreActions, setShowMoreActions] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
 
   useEffect(() => {
@@ -157,6 +159,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const creditsRef = useRef<HTMLDivElement | null>(null);
+  const moreActionsRef = useRef<HTMLDivElement | null>(null);
 
   const handleClaimDailyBonus = async () => {
     if (!fetchWithInterceptor) return;
@@ -209,6 +212,12 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
         !creditsRef.current.contains(e.target as Node)
       ) {
         setShowCreditsPopover(false);
+      }
+      if (
+        moreActionsRef.current &&
+        !moreActionsRef.current.contains(e.target as Node)
+      ) {
+        setShowMoreActions(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -280,6 +289,104 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* 🤖 Global AI Model Selector - Hidden on very narrow mobile (<480px) */}
           <AIModelSelector compact className="hidden min-[480px]:flex shrink-0" />
+
+          <div className="relative md:hidden" ref={moreActionsRef}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowMoreActions((v) => !v);
+                setShowNotifications(false);
+                setShowCreditsPopover(false);
+              }}
+              className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative"
+              title="More studio actions"
+              aria-label="More studio actions"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+
+            {showMoreActions && (
+              <div className="absolute right-0 top-full mt-2 z-50 w-60 rounded-2xl border border-white/10 bg-[#121212]/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+                <div className="p-2 space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowShortcutsModal(true);
+                      setShowMoreActions(false);
+                    }}
+                    className="w-full flex items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Keyboard className="w-4 h-4 text-neutral-400" />
+                      Shortcuts
+                    </span>
+                    <span className="text-[10px] uppercase tracking-wider text-neutral-500">?</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowCustomizeLayout(true);
+                      setShowMoreActions(false);
+                    }}
+                    className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400">
+                      <rect x="3" y="4" width="4" height="16" rx="1" />
+                      <rect x="10" y="4" width="11" height="7" rx="1" />
+                      <rect x="10" y="13" width="11" height="7" rx="1" />
+                    </svg>
+                    Layout
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onTogglePanel?.("mediaBin");
+                      setShowMoreActions(false);
+                    }}
+                    className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400">
+                      <rect x="3" y="4" width="18" height="16" rx="2" />
+                      <rect x="3" y="4" width="8" height="16" rx="1" className="fill-current stroke-none" />
+                    </svg>
+                    {layoutConfig?.mediaBin ? "Hide Media Bin" : "Show Media Bin"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onTogglePanel?.("timeline");
+                      setShowMoreActions(false);
+                    }}
+                    className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400">
+                      <rect x="3" y="4" width="18" height="16" rx="2" />
+                      <rect x="3" y="12" width="18" height="8" rx="1" className="fill-current stroke-none" />
+                    </svg>
+                    {layoutConfig?.timeline ? "Hide Timeline" : "Show Timeline"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onTogglePanel?.("rightInspector");
+                      setShowMoreActions(false);
+                    }}
+                    className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                  >
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400">
+                      <rect x="3" y="4" width="18" height="16" rx="2" />
+                      <rect x="13" y="4" width="8" height="16" rx="1" className="fill-current stroke-none" />
+                    </svg>
+                    {layoutConfig?.rightInspector ? "Hide Inspector" : "Show Inspector"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* ⚡ Credits Pill & Popover */}
           {credits !== null && (
