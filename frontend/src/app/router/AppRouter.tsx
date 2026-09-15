@@ -35,8 +35,8 @@ const ScraperPage = React.lazy(
 const EditorPage = React.lazy(
   () => import("@/features/editor_studio/pages/EditorPage")
 );
-const AutoCropModal = React.lazy(
-  () => import("@/features/editor_auto_crop/components/AutoCropModal")
+const AutoCropSettingsModal = React.lazy(
+  () => import("@/features/editor_auto_crop/components/AutoCropSettingsModal")
 );
 const ProjectsPage = React.lazy(
   () => import("@/features/workspace_projects/pages/ProjectsPage")
@@ -1480,7 +1480,7 @@ export default function AppRouter(props: AppRouterProps) {
         {/* PAGE VIEW 18: Batch Panel Auto Crop Page */}
         {isAutoCropPath && (
           <div className="page-transition w-full flex-1 flex flex-col">
-            <AutoCropModal
+            <AutoCropSettingsModal
               isPage={true}
               onClose={handleAutoCropClose}
               onApply={handleAutoCropApply}

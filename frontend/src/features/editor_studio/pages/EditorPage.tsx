@@ -27,8 +27,8 @@ const AudioSettingsPage = React.lazy(
 const VideoEditorPage = React.lazy(
   () => import("@/features/editor_video/pages/VideoEditorPage")
 );
-const AutoCropModal = React.lazy(
-  () => import("@/features/editor_auto_crop/components/AutoCropModal")
+const AutoCropSettingsModal = React.lazy(
+  () => import("@/features/editor_auto_crop/components/AutoCropSettingsModal")
 );
 
 interface EditorPageProps {
@@ -611,7 +611,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
             <div className="w-full space-y-6">
               <React.Suspense fallback={null}>
                 <div className="rounded-3xl border border-neutral-800/80 overflow-hidden bg-[#050508] shadow-2xl">
-                  <AutoCropModal
+                  <AutoCropSettingsModal
                     isPage={true}
                     onClose={handleCloseSettings}
                     onApply={async () => {

@@ -20,7 +20,7 @@ import { useAIModels } from "@/features/ai_core/hooks/useAIModels";
 import * as api from "@/api";
 import { getProxiedImageUrl } from "@/utils";
 
-interface AutoCropModalProps {
+interface AutoCropSettingsModalProps {
   onClose: () => void;
   onApply: () => void;
   sensitivity: number;
@@ -69,7 +69,7 @@ interface AutoCropModalProps {
   fetchWithInterceptor?: any;
 }
 
-export default function AutoCropModal({
+export default function AutoCropSettingsModal({
   onClose,
   onApply,
   sensitivity,
@@ -109,7 +109,7 @@ export default function AutoCropModal({
   addNotification,
   isPage = false,
   fetchWithInterceptor,
-}: AutoCropModalProps) {
+}: AutoCropSettingsModalProps) {
   const { models } = useAIModels();
   
   // Dynamically group vision-capable models from backend catalog
@@ -216,7 +216,7 @@ export default function AutoCropModal({
         addNotification?.("Detection completed: No panel boundaries found.", "info");
       }
     } catch (err: any) {
-      console.error("[AutoCropModal] Single detection test failed:", err);
+      console.error("[AutoCropSettingsModal] Single detection test failed:", err);
       addNotification?.(
         `Test detection failed: ${err?.message || "Internal server error"}`,
         "error"
@@ -294,13 +294,13 @@ export default function AutoCropModal({
           </div>
           <div>
             <h2 className="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
-              Auto-Crop & Panel Slicer
+              Auto Crop Settings
               <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
                 PRO CV
               </span>
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Automated comic panel segmentation using local OpenCV or Gemini Multimodal Vision
+              Auto crop settings for comic panel segmentation using local OpenCV or Gemini Multimodal Vision
             </p>
           </div>
         </div>
@@ -331,7 +331,7 @@ export default function AutoCropModal({
           {/* Section 1: Engine Strategy Selector */}
           <div className="space-y-3">
             <label className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">
-              Detection Engine
+              Auto Crop Engine
             </label>
             <div className="grid grid-cols-2 gap-3">
               {/* OpenCV Button */}
@@ -422,7 +422,7 @@ export default function AutoCropModal({
           <div className="p-5 rounded-2xl bg-neutral-900/50 border border-neutral-800/80 space-y-5 shadow-lg">
             <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-2">
               <Layers className="h-3.5 w-3.5 text-[#3B82F6]" />
-              Segmentation Parameters
+              Auto Crop Settings
             </h3>
 
             {/* Edge Sensitivity Slider */}
@@ -531,7 +531,7 @@ export default function AutoCropModal({
             <div className="flex items-center justify-between text-xs font-mono">
               <span className="font-bold text-neutral-400 uppercase tracking-wider flex items-center gap-2">
                 <ImageIcon className="h-3.5 w-3.5 text-[#3B82F6]" />
-                Target Test Image ({targetList.length} total)
+                Auto Crop Preview Image ({targetList.length} total)
               </span>
               <span className="text-neutral-500">
                 Page {activeImageIdx + 1} of {Math.max(1, targetList.length)}
@@ -639,7 +639,7 @@ export default function AutoCropModal({
                 ) : (
                   <>
                     <Play className="h-3.5 w-3.5 text-[#3B82F6] fill-purple-400" />
-                    <span>Test Detection on Current Image</span>
+                    <span>Preview Auto Crop</span>
                   </>
                 )}
               </button>
@@ -680,7 +680,7 @@ export default function AutoCropModal({
               <>
                 <Sparkles className="h-4 w-4 text-[#3B82F6]" />
                 <span>
-                  Auto-Crop All ({targetList.length} Images)
+                  Apply Auto Crop ({targetList.length} Images)
                 </span>
               </>
             )}

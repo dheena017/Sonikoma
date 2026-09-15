@@ -47,8 +47,8 @@ const AICoreMiniSidebar = React.lazy(
 const ActiveProjectSelectorDrawer = React.lazy(
   () => import("@/components/layout/ActiveProjectSelectorDrawer")
 );
-const AutoCropModal = React.lazy(
-  () => import("@/features/editor_auto_crop/components/AutoCropModal")
+const AutoCropSettingsModal = React.lazy(
+  () => import("@/features/editor_auto_crop/components/AutoCropSettingsModal")
 );
 
 export interface MainLayoutProps {
@@ -613,7 +613,7 @@ export default function MainLayout(props: MainLayoutProps) {
           >
             {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (
               <React.Suspense fallback={null}>
-                <AutoCropModal
+                <AutoCropSettingsModal
                   isPage={false}
                   onClose={handleAutoCropClose}
                   onApply={handleAutoCropApply}
