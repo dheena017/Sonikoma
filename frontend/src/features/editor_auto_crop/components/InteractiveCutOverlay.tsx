@@ -55,6 +55,7 @@ export function InteractiveCutOverlay({
   const dragRef = useRef<DragAction | null>(null);
   const lastDragEndTimeRef = useRef<number>(0);
   const lastDirectInteractionRef = useRef<number>(0);
+  const lastUserScrollTimeRef = useRef<number>(0);
 
   // Synchronize natural dimensions if cached
   useEffect(() => {
@@ -73,6 +74,8 @@ export function InteractiveCutOverlay({
 
   const handleViewportScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    lastUserScrollTimeRef.current = Date.now();
+
     const imgEl = imgRef.current;
     if (imgEl && imgEl.clientHeight > 0) {
       const imgTop = imgEl.offsetTop;
@@ -83,6 +86,37 @@ export function InteractiveCutOverlay({
       const heightPct = Math.max(5, Math.min(100, (visibleHeightInImg / imgHeight) * 100));
       const topPct = scrollRatio * 100;
       setScrollProgress({ topPct, heightPct, scrollRatio });
+
+      // Auto-select / highlight the panel currently in the center of the viewport
+      if (
+        boxes.length > 0 &&
+        totalHeight > 0 &&
+        !dragAction &&
+        !dragRef.current &&
+        Date.now() - lastDirectInteractionRef.current > 500
+      ) {
+        const viewportCenterY = scrollTop + clientHeight / 2;
+        const visibleCenterInImg = Math.max(0, Math.min(imgHeight, viewportCenterY - imgTop));
+        const centerRatio = visibleCenterInImg / imgHeight;
+        const centerPixelY = centerRatio * totalHeight;
+
+        let closestIdx = 0;
+        let minDiff = Infinity;
+        boxes.forEach((b, i) => {
+          const boxTop = b.y ?? 0;
+          const boxH = b.height ?? (totalHeight / boxes.length);
+          const boxCenter = boxTop + boxH / 2;
+          const diff = Math.abs(boxCenter - centerPixelY);
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestIdx = i;
+          }
+        });
+
+        if (closestIdx !== selectedPanelIndex) {
+          onSelectPanel(closestIdx);
+        }
+      }
     } else if (scrollHeight > clientHeight) {
       const maxScroll = Math.max(1, scrollHeight - clientHeight);
       const scrollRatio = Math.max(0, Math.min(1, scrollTop / maxScroll));
@@ -267,6 +301,7 @@ export function InteractiveCutOverlay({
       selectedPanelIndex === prevSelectedPanelRef.current ||
       dragAction !== null ||
       dragRef.current !== null ||
+      Date.now() - lastUserScrollTimeRef.current < 500 ||
       Date.now() - lastDirectInteractionRef.current < 1000 ||
       !containerRef.current
     ) {
