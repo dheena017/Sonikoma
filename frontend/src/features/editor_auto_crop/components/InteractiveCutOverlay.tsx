@@ -242,6 +242,23 @@ export function InteractiveCutOverlay({
     prevZoomScaleRef.current = zoomScale;
   }, [zoomScale]);
 
+  // Smooth Ctrl+Wheel zoom support on canvas container
+  useEffect(() => {
+    const el = scrollViewportRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.15 : 0.15;
+        setZoomScale((prev) => Math.max(0.4, Math.min(3.0, +(prev + delta).toFixed(2))));
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, []);
+
   // Smooth scroll into view ONLY when selected panel actually changes, NOT on zoom or re-renders
   useEffect(() => {
     if (
@@ -264,7 +281,7 @@ export function InteractiveCutOverlay({
     if (targetBox) {
       targetBox.scrollIntoView({
         behavior: "smooth",
-        block: "nearest",
+        block: "center",
         inline: "nearest",
       });
     }
@@ -892,7 +909,7 @@ export function InteractiveCutOverlay({
           <div
             ref={scrollViewportRef}
             onScroll={handleViewportScroll}
-            className="w-full h-full overflow-y-auto overflow-x-hidden scroll-auto overscroll-contain scrollbar-thin p-2 sm:p-4"
+            className="w-full h-full overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-thin p-2 sm:p-4 touch-pan-y will-change-scroll transform-gpu [contain:paint] [-webkit-overflow-scrolling:touch]"
           >
             <div className="mx-auto w-full max-w-xl md:max-w-2xl pb-16 pt-2 flex flex-col items-center px-4 sm:px-12">
               {/* ── MAIN INTERACTIVE IMAGE CANVAS ── */}

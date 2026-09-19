@@ -133,20 +133,6 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
     return Math.max(trackHeight, naturalHeight * zoomMultiplier);
   }, [totalWidth, totalHeight, trackWidth, trackHeight, zoomMultiplier]);
 
-  // Compute Viewport Finder Lens (Accurately mirrors visible canvas scroll window)
-  const lensStats = useMemo(() => {
-    const topFraction = Math.max(0, Math.min(1, (scrollProgress.topPct || 0) / 100));
-    const heightFraction = Math.max(0.02, Math.min(1, (scrollProgress.heightPct || 15) / 100));
-    const lensHeightPx = Math.max(20, naturalMinimapHeight * heightFraction);
-    const maxTop = Math.max(0, naturalMinimapHeight - lensHeightPx);
-    const lensTopPx = Math.max(0, Math.min(maxTop, topFraction * naturalMinimapHeight));
-
-    return {
-      lensTopPx,
-      lensHeightPx,
-    };
-  }, [scrollProgress, naturalMinimapHeight]);
-
   // Keep minimap scroll centered ONLY when panel selection or main scroll changes, NOT on zoom
   const lastSyncedScrollRatio = useRef<number | null>(null);
   const lastSyncedPanel = useRef<number | null>(null);
@@ -162,19 +148,26 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
     prevNaturalHeightRef.current = naturalMinimapHeight;
   }, [naturalMinimapHeight]);
 
-  // Sync minimap scroll when active panel or canvas scroll changes
+  // Sync minimap scroll smoothly when active panel or canvas scroll changes
   useEffect(() => {
     if (isDragging || !trackRef.current) return;
     const currentScrollRatio = scrollProgress.scrollRatio ?? 0;
     const isPanelChanged = selectedPanelIndex !== lastSyncedPanel.current;
-    const isScrollChanged = Math.abs((lastSyncedScrollRatio.current ?? -1) - currentScrollRatio) > 0.005;
+    const isScrollChanged = Math.abs((lastSyncedScrollRatio.current ?? -1) - currentScrollRatio) > 0.001;
 
     if (isPanelChanged || isScrollChanged) {
       lastSyncedPanel.current = selectedPanelIndex;
       lastSyncedScrollRatio.current = currentScrollRatio;
 
-      const targetScroll =
-        (lensStats.lensTopPx || 0) + (lensStats.lensHeightPx || 0) / 2 - trackRef.current.clientHeight / 2;
+      let targetScroll = 0;
+      if (isPanelChanged && selectedPanelIndex !== null && boxes[selectedPanelIndex] && totalHeight > 0) {
+        const b = boxes[selectedPanelIndex];
+        const panelCenterRatio = ((b.y ?? 0) + (b.height ?? (totalHeight / boxes.length)) / 2) / totalHeight;
+        targetScroll = panelCenterRatio * naturalMinimapHeight - trackRef.current.clientHeight / 2;
+      } else {
+        targetScroll = currentScrollRatio * naturalMinimapHeight - trackRef.current.clientHeight / 2;
+      }
+
       const maxScroll = Math.max(0, trackRef.current.scrollHeight - trackRef.current.clientHeight);
       if (maxScroll > 0) {
         trackRef.current.scrollTo({
@@ -183,66 +176,51 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         });
       }
     }
-  }, [selectedPanelIndex, scrollProgress.scrollRatio, lensStats.lensTopPx, lensStats.lensHeightPx, isDragging]);
+  }, [selectedPanelIndex, scrollProgress.scrollRatio, naturalMinimapHeight, totalHeight, boxes, isDragging]);
+
+  const rafScrubRef = useRef<number | null>(null);
 
   const handlePointerScrub = useCallback(
     (clientY: number) => {
       if (!trackRef.current || !scrollViewportRef?.current || totalHeight <= 0) return;
-      const rect = trackRef.current.getBoundingClientRect();
-      const clickY = Math.max(0, Math.min(rect.height, clientY - rect.top));
+      if (rafScrubRef.current) cancelAnimationFrame(rafScrubRef.current);
 
-      const scrollYInMinimap = clickY + trackRef.current.scrollTop;
-      const targetRatio = Math.max(0, Math.min(1, scrollYInMinimap / (naturalMinimapHeight || 1)));
+      rafScrubRef.current = requestAnimationFrame(() => {
+        if (!trackRef.current || !scrollViewportRef?.current) return;
+        const rect = trackRef.current.getBoundingClientRect();
+        const clickY = Math.max(0, Math.min(rect.height, clientY - rect.top));
 
-      const scrollH = scrollViewportRef.current.scrollHeight;
-      const clientH = scrollViewportRef.current.clientHeight;
-      const maxScroll = Math.max(0, scrollH - clientH);
-      scrollViewportRef.current.scrollTo({ top: targetRatio * maxScroll, behavior: "auto" });
+        const scrollYInMinimap = clickY + trackRef.current.scrollTop;
+        const targetRatio = Math.max(0, Math.min(1, scrollYInMinimap / (naturalMinimapHeight || 1)));
 
-      // Closest box selection
-      const targetPixelY = targetRatio * totalHeight;
-      let closestIdx = 0;
-      let minDiff = Infinity;
-      boxes.forEach((b, i) => {
-        const bY = b.y ?? 0;
-        const diff = Math.abs(bY - targetPixelY);
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIdx = i;
-        }
+        const scrollH = scrollViewportRef.current.scrollHeight;
+        const clientH = scrollViewportRef.current.clientHeight;
+        const maxScroll = Math.max(0, scrollH - clientH);
+        scrollViewportRef.current.scrollTo({ top: targetRatio * maxScroll, behavior: "auto" });
       });
-      onSelectPanel(closestIdx);
     },
-    [totalHeight, boxes, naturalMinimapHeight, scrollViewportRef, onSelectPanel]
+    [naturalMinimapHeight, scrollViewportRef, totalHeight]
   );
 
   // Global overview rail scrubbing (Jump anywhere from 0% to 100% of the entire strip)
   const handleOverviewRailScrub = useCallback(
     (clientY: number) => {
       if (!overviewRailRef.current || !scrollViewportRef?.current || totalHeight <= 0) return;
-      const rect = overviewRailRef.current.getBoundingClientRect();
-      const clickY = Math.max(0, Math.min(rect.height, clientY - rect.top));
-      const targetRatio = clickY / rect.height;
+      if (rafScrubRef.current) cancelAnimationFrame(rafScrubRef.current);
 
-      const scrollH = scrollViewportRef.current.scrollHeight;
-      const clientH = scrollViewportRef.current.clientHeight;
-      const maxScroll = Math.max(0, scrollH - clientH);
-      scrollViewportRef.current.scrollTo({ top: targetRatio * maxScroll, behavior: "auto" });
+      rafScrubRef.current = requestAnimationFrame(() => {
+        if (!overviewRailRef.current || !scrollViewportRef?.current) return;
+        const rect = overviewRailRef.current.getBoundingClientRect();
+        const clickY = Math.max(0, Math.min(rect.height, clientY - rect.top));
+        const targetRatio = Math.max(0, Math.min(1, clickY / rect.height));
 
-      const targetPixelY = targetRatio * totalHeight;
-      let closestIdx = 0;
-      let minDiff = Infinity;
-      boxes.forEach((b, i) => {
-        const bY = b.y ?? 0;
-        const diff = Math.abs(bY - targetPixelY);
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIdx = i;
-        }
+        const scrollH = scrollViewportRef.current.scrollHeight;
+        const clientH = scrollViewportRef.current.clientHeight;
+        const maxScroll = Math.max(0, scrollH - clientH);
+        scrollViewportRef.current.scrollTo({ top: targetRatio * maxScroll, behavior: "auto" });
       });
-      onSelectPanel(closestIdx);
     },
-    [boxes, totalHeight, scrollViewportRef, onSelectPanel]
+    [scrollViewportRef]
   );
 
   useEffect(() => {
@@ -423,23 +401,37 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               return (
                 <div
                   key={b.id ?? i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectPanel(i);
+                    if (scrollViewportRef?.current && totalHeight > 0) {
+                      const boxTop = b.y ?? 0;
+                      const boxH = b.height ?? 200;
+                      const scrollH = scrollViewportRef.current.scrollHeight;
+                      const clientH = scrollViewportRef.current.clientHeight;
+                      const targetScroll = ((boxTop + boxH / 2) / totalHeight) * scrollH - clientH / 2;
+                      scrollViewportRef.current.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+                    }
+                  }}
+                  onMouseEnter={() => setHoverPanelIndex(i)}
+                  onMouseLeave={() => setHoverPanelIndex(null)}
                   style={{
                     top: `${topPct}%`,
                     left: `${leftPct}%`,
                     width: `${widthPct}%`,
                     height: `${heightPct}%`,
                   }}
-                  className={`absolute transition-all pointer-events-none rounded-[2px] ${
+                  className={`absolute transition-all pointer-events-auto cursor-pointer rounded-[2px] ${
                     isSel
                       ? "border-2 border-emerald-400 bg-emerald-400/35 z-25 shadow-[0_0_0_1px_rgba(0,0,0,0.9),0_0_10px_rgba(52,211,153,0.9)] ring-1 ring-white/70"
                       : isHov
                       ? "border-2 border-cyan-400 bg-cyan-400/20 z-15 shadow-[0_0_0_1px_rgba(0,0,0,0.8),0_0_6px_rgba(6,182,212,0.6)]"
-                      : "border border-emerald-400/60 bg-emerald-500/[0.04] shadow-[0_0_0_1px_rgba(0,0,0,0.7)] z-10"
+                      : "border border-emerald-400/60 bg-emerald-500/[0.04] shadow-[0_0_0_1px_rgba(0,0,0,0.7)] hover:border-emerald-300 z-10"
                   }`}
                 >
                   {(isSel || isHov || isExpanded) && (
                     <span
-                      className={`absolute left-0.5 top-0.5 px-1 py-0.2 rounded-[2px] text-[7px] font-mono font-bold leading-tight shadow-md z-30 ${
+                      className={`absolute left-0.5 top-0.5 px-1 py-0.2 rounded-[2px] text-[7px] font-mono font-bold leading-tight shadow-md z-30 pointer-events-none ${
                         isSel
                           ? "bg-emerald-400 text-black font-extrabold shadow-emerald-500/50 scale-105 origin-top-left"
                           : isHov
@@ -453,21 +445,6 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                 </div>
               );
             })}
-
-            {/* ── VIEWFINDER LENS (Visible Canvas Viewport Frame) ── */}
-            <div
-              style={{
-                top: `${Math.round(lensStats.lensTopPx || 0)}px`,
-                height: `${Math.round(lensStats.lensHeightPx || 28)}px`,
-              }}
-              className="absolute inset-x-0 rounded-[3px] border border-cyan-400/40 bg-cyan-400/[0.04] shadow-[0_0_0_1px_rgba(0,0,0,0.5)] pointer-events-none transition-all duration-75 z-20"
-            >
-              {/* Corner Reticles */}
-              <div className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 border-t-2 border-l-2 border-cyan-400/80 rounded-tl-[2px]" />
-              <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 border-t-2 border-r-2 border-cyan-400/80 rounded-tr-[2px]" />
-              <div className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 border-b-2 border-l-2 border-cyan-400/80 rounded-bl-[2px]" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 border-b-2 border-r-2 border-cyan-400/80 rounded-br-[2px]" />
-            </div>
           </div>
 
           {/* ── FLOATING HOVER CARD ── */}
