@@ -122,6 +122,7 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
     ? `rgba(${activeTheme.rgb}, ${fillAlpha})`
     : undefined;
 
+  const [isHovered, setIsHovered] = useState(false);
   const [toolbarDragOffset, setToolbarDragOffset] = useState<{ x: number; y: number } | null>(null);
   const toolbarDragStartRef = useRef<{ startX: number; startY: number; initX: number; initY: number } | null>(null);
 
@@ -168,6 +169,8 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
   return (
     <div
       data-panel-idx={idx}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onMouseDown={(e) => {
         e.stopPropagation();
         onSelectPanel(idx);
@@ -193,14 +196,17 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
         backgroundColor: bgFillStyle,
         boxShadow: isSelected && showPanelBoxes ? activeTheme.glowShadow : undefined,
       }}
-      className={`absolute pointer-events-auto transition-[border-color,box-shadow,background-color] select-none ${showPanelBoxes
+      className={`absolute pointer-events-auto transition-[border-color,box-shadow,background-color] select-none ${
+        showPanelBoxes
           ? isSelected
-            ? `border-2 ${borderClass} ${activeTheme.borderActive} ring-2 ${activeTheme.ring} z-20`
-            : `border-2 ${borderClass} ${activeTheme.borderInactive} hover:${activeTheme.borderActive} z-10`
+            ? `border-2 ${borderClass} ${activeTheme.borderActive} shadow-[0_0_0_1.5px_rgba(0,0,0,0.95),0_0_15px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400/60 z-20`
+            : isHovered
+            ? `border-2 ${borderClass} ${activeTheme.borderActive} shadow-[0_0_0_1px_rgba(0,0,0,0.9)] z-15`
+            : `border ${borderClass} border-emerald-400/70 shadow-[0_0_0_1px_rgba(0,0,0,0.85)] z-10`
           : isSelected
-            ? `border-2 border-dashed ${activeTheme.borderActive} z-20`
-            : "z-10"
-        }`}
+          ? `border-2 border-dashed ${activeTheme.borderActive} shadow-[0_0_0_1.5px_rgba(0,0,0,0.95)] z-20`
+          : "z-10"
+      }`}
     >
       {/* Rule of Thirds (3×3 Composition Grid) */}
       {showRuleOfThirds && isSelected && (
@@ -346,28 +352,30 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
         </div>
       )}
 
-      {/* Header: Panel Number Badge, Move Drag Handle & Dimension Tag */}
-      <div className="absolute top-1.5 inset-x-1.5 flex items-center justify-between z-30 pointer-events-auto gap-1">
+      {/* Header: Panel Number Badge & Dimension Tag */}
+      <div className="absolute top-1.5 inset-x-2 flex items-center justify-between z-30 pointer-events-auto gap-1 select-none">
         <div className="flex items-center gap-1">
-          {showPanelBadges && !isSelected && (
-            <span
-              className={`px-1.5 py-0.5 rounded bg-neutral-950/90 text-[10px] font-mono font-bold ${activeTheme.text} border ${activeTheme.borderInactive} shadow-md select-none`}
-            >
-              #{idx + 1}
-            </span>
-          )}
+          <span
+            className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold border shadow-md select-none transition-all ${
+              isSelected
+                ? "bg-neutral-950/95 text-emerald-400 border-emerald-500/50 ring-1 ring-emerald-500/30"
+                : "bg-neutral-950/90 text-neutral-300 border-neutral-700/80"
+            }`}
+          >
+            #{idx + 1}
+          </span>
 
-          {/* 4-Way Full Move Button / Drag Handle (only when unselected) */}
+          {/* 4-Way Move Handle (only shown when unselected and enabled) */}
           {showMoveBadges && !isSelected && (
             <div
               onMouseDown={(e) => handleBoxMoveStart(idx, e)}
               onTouchStart={(e) => handleBoxMoveStart(idx, e)}
               style={{ touchAction: "none" }}
-              className={`p-1 rounded text-[10px] font-mono font-bold flex items-center gap-1 border transition-all !cursor-move active:!cursor-grabbing select-none shadow-md ${isBeingMoved
+              className={`p-1 rounded text-[10px] font-mono font-bold flex items-center gap-1 border transition-all !cursor-move active:!cursor-grabbing select-none shadow-md ${
+                isBeingMoved
                   ? `${activeTheme.handleBg} text-black border-white ring-2 ${activeTheme.ring}/50 scale-105`
                   : `bg-neutral-900/95 ${activeTheme.text} border-neutral-700 hover:bg-neutral-800`
-                }`}
-              title="Click and drag to move panel anywhere"
+              }`}
             >
               <Move className="h-3 w-3 pointer-events-none" />
             </div>
@@ -385,7 +393,7 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
               </span>
             )}
             {curH > 0 && (
-              <span className="px-1.5 py-0.5 rounded bg-black/85 text-[9px] font-mono text-neutral-300 border border-neutral-700 shadow-sm">
+              <span className="px-2 py-0.5 rounded-md bg-black/90 text-[9px] font-mono text-neutral-300 border border-neutral-700/80 shadow-md">
                 {curW}×{curH}px {ratio ? `· ${ratio}:1` : ""}
               </span>
             )}
@@ -393,29 +401,27 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
         )}
       </div>
 
-      {/* Interior Draggable Move Zone */}
+      {/* Interior Draggable Move Zone (Without annoying native tooltip popup) */}
       <div
         onMouseDown={(e) => handleBoxMoveStart(idx, e)}
         onTouchStart={(e) => handleBoxMoveStart(idx, e)}
         style={{ touchAction: "none" }}
-        className="absolute inset-4 sm:inset-6 !cursor-move active:!cursor-grabbing z-10"
-        title="Drag anywhere inside to move panel"
+        className="absolute inset-4 sm:inset-6 !cursor-grab active:!cursor-grabbing z-10"
       />
 
-      {/* ── 4-SIDED EDGE RESIZE HANDLES (With Expanded Touch Hitboxes) ── */}
-      {showEdgeHandles && (
+      {/* ── 4-SIDED EDGE RESIZE HANDLES (Contextual: Selected or Hovered) ── */}
+      {(isSelected || isBeingMoved || isBeingResized || isHovered) && showEdgeHandles && (
         <>
           {/* Top Edge */}
           <div
             onMouseDown={(e) => handleBoxResizeStart(idx, "n", e)}
             onTouchStart={(e) => handleBoxResizeStart(idx, "n", e)}
             style={{ touchAction: "none" }}
-            className="absolute -top-4 inset-x-6 h-8 sm:h-6 !cursor-ns-resize z-30 flex items-center justify-center group/h-top pointer-events-auto"
-            title="Drag to resize top edge"
+            className="absolute -top-3 inset-x-6 h-6 !cursor-ns-resize z-30 flex items-center justify-center group/h-top pointer-events-auto"
           >
             <div
               style={{ backgroundColor: activeTheme.hex }}
-              className="w-24 h-2 rounded-full group-hover/h-top:h-2.5 group-hover/h-top:w-32 shadow-lg transition-all"
+              className="w-16 h-1 rounded-full border border-black/40 group-hover/h-top:h-1.5 group-hover/h-top:w-24 shadow-sm transition-all"
             />
           </div>
 
@@ -424,12 +430,11 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
             onMouseDown={(e) => handleBoxResizeStart(idx, "s", e)}
             onTouchStart={(e) => handleBoxResizeStart(idx, "s", e)}
             style={{ touchAction: "none" }}
-            className="absolute -bottom-4 inset-x-6 h-8 sm:h-6 !cursor-ns-resize z-30 flex items-center justify-center group/h-bottom pointer-events-auto"
-            title="Drag to resize bottom edge"
+            className="absolute -bottom-3 inset-x-6 h-6 !cursor-ns-resize z-30 flex items-center justify-center group/h-bottom pointer-events-auto"
           >
             <div
               style={{ backgroundColor: activeTheme.hex }}
-              className="w-24 h-2 rounded-full group-hover/h-bottom:h-2.5 group-hover/h-bottom:w-32 shadow-lg transition-all"
+              className="w-16 h-1 rounded-full border border-black/40 group-hover/h-bottom:h-1.5 group-hover/h-bottom:w-24 shadow-sm transition-all"
             />
           </div>
 
@@ -438,12 +443,11 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
             onMouseDown={(e) => handleBoxResizeStart(idx, "w", e)}
             onTouchStart={(e) => handleBoxResizeStart(idx, "w", e)}
             style={{ touchAction: "none" }}
-            className="absolute -left-4 inset-y-6 w-8 sm:w-6 !cursor-ew-resize z-30 flex items-center justify-center group/h-left pointer-events-auto"
-            title="Drag to resize left edge"
+            className="absolute -left-3 inset-y-6 w-6 !cursor-ew-resize z-30 flex items-center justify-center group/h-left pointer-events-auto"
           >
             <div
               style={{ backgroundColor: activeTheme.hex }}
-              className="h-24 w-2 rounded-full group-hover/h-left:w-2.5 group-hover/h-left:h-32 shadow-lg transition-all"
+              className="h-16 w-1 rounded-full border border-black/40 group-hover/h-left:w-1.5 group-hover/h-left:h-24 shadow-sm transition-all"
             />
           </div>
 
@@ -452,30 +456,28 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
             onMouseDown={(e) => handleBoxResizeStart(idx, "e", e)}
             onTouchStart={(e) => handleBoxResizeStart(idx, "e", e)}
             style={{ touchAction: "none" }}
-            className="absolute -right-4 inset-y-6 w-8 sm:w-6 !cursor-ew-resize z-30 flex items-center justify-center group/h-right pointer-events-auto"
-            title="Drag to resize right edge"
+            className="absolute -right-3 inset-y-6 w-6 !cursor-ew-resize z-30 flex items-center justify-center group/h-right pointer-events-auto"
           >
             <div
               style={{ backgroundColor: activeTheme.hex }}
-              className="h-24 w-2 rounded-full group-hover/h-right:w-2.5 group-hover/h-right:h-32 shadow-lg transition-all"
+              className="h-16 w-1 rounded-full border border-black/40 group-hover/h-right:w-1.5 group-hover/h-right:h-24 shadow-sm transition-all"
             />
           </div>
         </>
       )}
 
-      {/* ── 4 CORNER RESIZE HANDLES (With Large Touch Targets) ── */}
-      {showCornerHandles && (
+      {/* ── 4 CORNER RESIZE HANDLES (Contextual: Sleek Circular Precision Points) ── */}
+      {(isSelected || isBeingMoved || isBeingResized || isHovered) && showCornerHandles && (
         <>
           <div
             onMouseDown={(e) => handleBoxResizeStart(idx, "nw", e)}
             onTouchStart={(e) => handleBoxResizeStart(idx, "nw", e)}
             style={{ touchAction: "none" }}
-            className="absolute -top-4 -left-4 w-9 h-9 !cursor-nwse-resize z-40 flex items-center justify-center pointer-events-auto group/c-nw"
-            title="Resize Top-Left"
+            className="absolute -top-3 -left-3 w-6 h-6 !cursor-nwse-resize z-40 flex items-center justify-center pointer-events-auto group/c-nw"
           >
             <div
               style={{ backgroundColor: activeTheme.hex }}
-              className="w-5 h-5 rounded-md border-2 border-white shadow-xl transition-transform group-hover/c-nw:scale-125"
+              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-nw:scale-125"
             />
           </div>
 
@@ -483,12 +485,11 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
             onMouseDown={(e) => handleBoxResizeStart(idx, "ne", e)}
             onTouchStart={(e) => handleBoxResizeStart(idx, "ne", e)}
             style={{ touchAction: "none" }}
-            className="absolute -top-4 -right-4 w-9 h-9 !cursor-nesw-resize z-40 flex items-center justify-center pointer-events-auto group/c-ne"
-            title="Resize Top-Right"
+            className="absolute -top-3 -right-3 w-6 h-6 !cursor-nesw-resize z-40 flex items-center justify-center pointer-events-auto group/c-ne"
           >
             <div
               style={{ backgroundColor: activeTheme.hex }}
-              className="w-5 h-5 rounded-md border-2 border-white shadow-xl transition-transform group-hover/c-ne:scale-125"
+              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-ne:scale-125"
             />
           </div>
 
@@ -496,12 +497,11 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
             onMouseDown={(e) => handleBoxResizeStart(idx, "sw", e)}
             onTouchStart={(e) => handleBoxResizeStart(idx, "sw", e)}
             style={{ touchAction: "none" }}
-            className="absolute -bottom-4 -left-4 w-9 h-9 !cursor-nesw-resize z-40 flex items-center justify-center pointer-events-auto group/c-sw"
-            title="Resize Bottom-Left"
+            className="absolute -bottom-3 -left-3 w-6 h-6 !cursor-nesw-resize z-40 flex items-center justify-center pointer-events-auto group/c-sw"
           >
             <div
               style={{ backgroundColor: activeTheme.hex }}
-              className="w-5 h-5 rounded-md border-2 border-white shadow-xl transition-transform group-hover/c-sw:scale-125"
+              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-sw:scale-125"
             />
           </div>
 
@@ -509,12 +509,11 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
             onMouseDown={(e) => handleBoxResizeStart(idx, "se", e)}
             onTouchStart={(e) => handleBoxResizeStart(idx, "se", e)}
             style={{ touchAction: "none" }}
-            className="absolute -bottom-4 -right-4 w-9 h-9 !cursor-nwse-resize z-40 flex items-center justify-center pointer-events-auto group/c-se"
-            title="Resize Bottom-Right"
+            className="absolute -bottom-3 -right-3 w-6 h-6 !cursor-nwse-resize z-40 flex items-center justify-center pointer-events-auto group/c-se"
           >
             <div
               style={{ backgroundColor: activeTheme.hex }}
-              className="w-5 h-5 rounded-md border-2 border-white shadow-xl transition-transform group-hover/c-se:scale-125"
+              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-se:scale-125"
             />
           </div>
         </>

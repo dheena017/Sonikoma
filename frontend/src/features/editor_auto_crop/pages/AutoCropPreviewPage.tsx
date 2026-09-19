@@ -28,6 +28,8 @@ import {
   Copy,
   Maximize2,
   Split,
+  Plus,
+  Minus,
   X,
 } from "lucide-react";
 import * as api from "@/api";
@@ -172,6 +174,13 @@ export default function AutoCropPreviewPage({
   const [autoSplitTallStrips, setAutoSplitTallStrips] = useState(initialAutoSplit);
   const [aspectRatioLock, setAspectRatioLock] = useState(initialAspectRatio);
   const [minPanelHeightPx, setMinPanelHeightPx] = useState(initialMinHeight);
+  const [overlapMergeGap, setOverlapMergeGap] = useState(overlapMergeThreshold || 8);
+  const [outputFormat, setOutputFormat] = useState("webp");
+  const [outputQuality, setOutputQuality] = useState(90);
+  const [filterGutterSfx, setFilterGutterSfx] = useState(true);
+  const [mergeSpeechBubbles, setMergeSpeechBubbles] = useState(true);
+  const [autoTrimGutter, setAutoTrimGutter] = useState(true);
+  const [readingFlow, setReadingFlow] = useState("top_to_bottom");
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -1037,106 +1046,108 @@ export default function AutoCropPreviewPage({
                   <ChevronDown className="h-3 w-3 opacity-70" />
                 </button>
 
-                {showLayoutDropdown && (
-                  <div
-                    className="fixed inset-0 z-[100000] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150"
-                    onClick={() => setShowLayoutDropdown(false)}
-                  >
+                {showLayoutDropdown &&
+                  createPortal(
                     <div
-                      className="w-full max-w-sm p-5 bg-neutral-950/98 border border-neutral-700/90 rounded-3xl shadow-2xl backdrop-blur-2xl space-y-4 animate-in zoom-in-95 duration-150 max-h-[85vh] overflow-y-auto scrollbar-thin text-white"
-                      onClick={(e) => e.stopPropagation()}
+                      className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150"
+                      onClick={() => setShowLayoutDropdown(false)}
                     >
-                      {/* Header */}
-                      <div className="flex items-center justify-between pb-3 border-b border-neutral-800/80">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                            <Layers className="h-4 w-4" />
-                          </div>
-                          <span className="text-xs font-bold text-white uppercase tracking-wider">
-                            Layout & Specs
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setShowLayoutDropdown(false)}
-                          className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors !cursor-pointer"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-
-                      {/* Specs List */}
-                      <div className="space-y-2.5 text-xs">
-                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
-                          <span className="text-neutral-400 font-medium">Format:</span>
-                          <span className="font-bold text-emerald-300 text-right">
-                            {activePreview.layout}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
-                          <span className="text-neutral-400 font-medium">Reading Flow:</span>
-                          <span className="text-sky-300 font-semibold text-right">
-                            {activePreview.readingFlow === "top_to_bottom"
-                              ? "Top-to-Bottom (Webtoon)"
-                              : activePreview.readingFlow === "right_to_left"
-                              ? "Right-to-Left (Manga)"
-                              : "Left-to-Right (Comic)"}
-                          </span>
-                        </div>
-
-                        {activePreview.dimensions && (
-                          <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80 font-mono">
-                            <span className="text-neutral-400 font-sans">Dimensions:</span>
-                            <span className="text-neutral-200 text-right font-medium">
-                              {activePreview.dimensions.width} × {activePreview.dimensions.height}px
-                              {activePreview.aspectRatio ? ` (${activePreview.aspectRatio.toFixed(2)}:1)` : ""}
+                      <div
+                        className="w-full max-w-sm p-5 bg-neutral-950 border border-neutral-700/90 rounded-3xl shadow-2xl backdrop-blur-2xl space-y-4 animate-in zoom-in-95 duration-150 max-h-[88vh] overflow-y-auto scrollbar-thin text-white my-auto"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {/* Header */}
+                        <div className="flex items-center justify-between pb-3 border-b border-neutral-800/80">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                              <Layers className="h-4 w-4" />
+                            </div>
+                            <span className="text-xs font-bold text-white uppercase tracking-wider">
+                              Layout & Specs
                             </span>
                           </div>
-                        )}
+                          <button
+                            type="button"
+                            onClick={() => setShowLayoutDropdown(false)}
+                            className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors !cursor-pointer"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
 
-                        {activePreview.confidence && (
+                        {/* Specs List */}
+                        <div className="space-y-2 text-xs">
                           <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
-                            <span className="text-neutral-400 font-medium">AI Confidence:</span>
-                            <span className="text-emerald-400 font-mono font-bold">
-                              {Math.round(activePreview.confidence * 100)}%
+                            <span className="text-neutral-400 font-medium">Format:</span>
+                            <span className="font-bold text-emerald-300 text-right">
+                              {activePreview.layout}
                             </span>
                           </div>
-                        )}
 
-                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
-                          <span className="text-neutral-400 font-medium">Detected Panels:</span>
-                          <span className="text-emerald-300 font-mono font-bold">
-                            {activePreview.panelUrls?.length || 0} Panels
-                          </span>
+                          <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
+                            <span className="text-neutral-400 font-medium">Reading Flow:</span>
+                            <span className="text-sky-300 font-semibold text-right">
+                              {activePreview.readingFlow === "top_to_bottom"
+                                ? "Top-to-Bottom (Webtoon)"
+                                : activePreview.readingFlow === "right_to_left"
+                                ? "Right-to-Left (Manga)"
+                                : "Left-to-Right (Comic)"}
+                            </span>
+                          </div>
+
+                          {activePreview.dimensions && (
+                            <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80 font-mono">
+                              <span className="text-neutral-400 font-sans">Dimensions:</span>
+                              <span className="text-neutral-200 text-right font-medium">
+                                {activePreview.dimensions.width} × {activePreview.dimensions.height}px
+                                {activePreview.aspectRatio ? ` (${activePreview.aspectRatio.toFixed(2)}:1)` : ""}
+                              </span>
+                            </div>
+                          )}
+
+                          {activePreview.confidence && (
+                            <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
+                              <span className="text-neutral-400 font-medium">AI Confidence:</span>
+                              <span className="text-emerald-400 font-mono font-bold">
+                                {Math.round(activePreview.confidence * 100)}%
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
+                            <span className="text-neutral-400 font-medium">Detected Panels:</span>
+                            <span className="text-emerald-300 font-mono font-bold">
+                              {activePreview.panelUrls?.length || 0} Panels
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="pt-3 border-t border-neutral-800/80 flex flex-col gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              handleResetSlices(activeIndex);
+                              setShowLayoutDropdown(false);
+                            }}
+                            className="w-full py-2 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors !cursor-pointer active:scale-95"
+                          >
+                            <Undo2 className="h-3.5 w-3.5 text-neutral-400" />
+                            <span>Reset Slices to Original</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowLayoutDropdown(false)}
+                            className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold flex items-center justify-center gap-1.5 transition-all !cursor-pointer active:scale-95 shadow-md shadow-emerald-500/20"
+                          >
+                            <span>Done</span>
+                          </button>
                         </div>
                       </div>
-
-                      {/* Actions */}
-                      <div className="pt-3 border-t border-neutral-800/80 flex flex-col gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleResetSlices(activeIndex);
-                            setShowLayoutDropdown(false);
-                          }}
-                          className="w-full py-2 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors !cursor-pointer active:scale-95"
-                        >
-                          <Undo2 className="h-3.5 w-3.5 text-neutral-400" />
-                          <span>Reset Slices to Original</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setShowLayoutDropdown(false)}
-                          className="w-full py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold flex items-center justify-center gap-1.5 transition-all !cursor-pointer active:scale-95 shadow-md shadow-emerald-500/20"
-                        >
-                          <span>Done</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                    </div>,
+                    document.body
+                  )}
               </div>
             )}
 
@@ -1425,10 +1436,26 @@ export default function AutoCropPreviewPage({
                         sensitivity={sensitivity}
                         aspectRatioLock={aspectRatioLock}
                         backgroundColorMode={backgroundColorMode}
+                        minPanelHeightPx={minPanelHeightPx}
+                        overlapMergeThreshold={overlapMergeGap}
+                        outputFormat={outputFormat}
+                        outputQuality={outputQuality}
+                        filterGutterSfx={filterGutterSfx}
+                        mergeSpeechBubbles={mergeSpeechBubbles}
+                        autoTrimGutter={autoTrimGutter}
+                        readingFlow={readingFlow}
                         onPaddingChange={setPadding}
                         onSensitivityChange={setSensitivity}
                         onAspectRatioChange={setAspectRatioLock}
                         onBackgroundColorModeChange={setBackgroundColorMode}
+                        onMinPanelHeightChange={setMinPanelHeightPx}
+                        onOverlapMergeThresholdChange={setOverlapMergeGap}
+                        onOutputFormatChange={setOutputFormat}
+                        onOutputQualityChange={setOutputQuality}
+                        onFilterGutterSfxChange={setFilterGutterSfx}
+                        onMergeSpeechBubblesChange={setMergeSpeechBubbles}
+                        onAutoTrimGutterChange={setAutoTrimGutter}
+                        onReadingFlowChange={setReadingFlow}
                         onApplyPreset={applyPreset}
                         onApplySettingsAndRecrop={() => {
                           void runPreview();
@@ -1461,12 +1488,47 @@ export default function AutoCropPreviewPage({
             {selectedPanelIndex !== null &&
             selectedPanelIndex >= 0 &&
             activePreview?.boxes?.[selectedPanelIndex] ? (
-              /* Selected Panel Actions Toolbar (in Footer Center) */
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-neutral-900 border border-emerald-500/50 shadow-xl shadow-emerald-500/10 text-xs animate-in fade-in zoom-in-95 duration-150">
+              /* Selected Panel Actions Toolbar (Clean Dark Glassmorphic Hub) */
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-neutral-900/95 backdrop-blur-md border border-neutral-700/80 shadow-2xl text-xs animate-in fade-in zoom-in-95 duration-150">
+                {/* 1. Panel Step Navigation & Index */}
                 <div className="flex items-center gap-1 border-r border-neutral-800 pr-2">
-                  <span className="text-[11px] font-mono font-bold text-emerald-400">
+                  <button
+                    type="button"
+                    disabled={selectedPanelIndex <= 0}
+                    onClick={() => setSelectedPanelIndex(Math.max(0, selectedPanelIndex - 1))}
+                    className="p-1 rounded-lg hover:bg-neutral-800 disabled:opacity-30 disabled:hover:bg-transparent text-neutral-400 hover:text-white transition-colors !cursor-pointer"
+                    title="Previous Panel (Step Up)"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="text-[11px] font-mono font-bold text-emerald-400 px-0.5">
                     #{selectedPanelIndex + 1}
+                    <span className="text-neutral-500 font-normal">/{activePreview.boxes?.length || 1}</span>
                   </span>
+                  <button
+                    type="button"
+                    disabled={selectedPanelIndex >= (activePreview.boxes?.length || 1) - 1}
+                    onClick={() => setSelectedPanelIndex(Math.min((activePreview.boxes?.length || 1) - 1, selectedPanelIndex + 1))}
+                    className="p-1 rounded-lg hover:bg-neutral-800 disabled:opacity-30 disabled:hover:bg-transparent text-neutral-400 hover:text-white transition-colors !cursor-pointer"
+                    title="Next Panel (Step Down)"
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+
+                {/* 2. Dimensions Tag */}
+                {(() => {
+                  const b = activePreview.boxes?.[selectedPanelIndex];
+                  if (!b) return null;
+                  return (
+                    <div className="hidden lg:flex items-center text-[10px] font-mono text-neutral-400 bg-neutral-800/80 px-2 py-0.5 rounded-md border border-neutral-700/50 mr-0.5">
+                      {Math.round(b.width ?? 0)}×{Math.round(b.height ?? 0)}px
+                    </div>
+                  );
+                })()}
+
+                {/* 3. 4-Way Position Nudge (Y Up/Down & X Left/Right) */}
+                <div className="flex items-center gap-0.5 border-r border-neutral-800 pr-2">
                   <button
                     type="button"
                     onClick={() => handleNudgePanel(activeIndex, selectedPanelIndex, -5)}
@@ -1483,8 +1545,63 @@ export default function AutoCropPreviewPage({
                   >
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const b = activePreview.boxes?.[selectedPanelIndex];
+                      if (b) {
+                        const newX = Math.max(0, (b.x ?? 0) - 5);
+                        handleUpdateBox(activeIndex, selectedPanelIndex, { ...b, x: newX });
+                      }
+                    }}
+                    className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors !cursor-pointer text-[10px] font-mono"
+                    title="Nudge Left 5px (←)"
+                  >
+                    ◀
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const b = activePreview.boxes?.[selectedPanelIndex];
+                      if (b) {
+                        const maxW = activePreview.dimensions?.width || 800;
+                        const newX = Math.min(maxW - (b.width ?? 100), (b.x ?? 0) + 5);
+                        handleUpdateBox(activeIndex, selectedPanelIndex, { ...b, x: newX });
+                      }
+                    }}
+                    className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors !cursor-pointer text-[10px] font-mono"
+                    title="Nudge Right 5px (→)"
+                  >
+                    ▶
+                  </button>
                 </div>
 
+                {/* 4. Insert Slice Below */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const targetBox = activePreview.boxes?.[selectedPanelIndex];
+                    if (targetBox) {
+                      const imgH = activePreview.dimensions?.height || 1200;
+                      const imgW = activePreview.dimensions?.width || 800;
+                      const newY = Math.min(imgH - 100, (targetBox.y ?? 0) + (targetBox.height ?? 200) + 8);
+                      const newH = Math.min(240, imgH - newY);
+                      handleAddBox(activeIndex, {
+                        x: targetBox.x ?? 0,
+                        y: newY,
+                        width: targetBox.width ?? imgW,
+                        height: Math.max(60, newH),
+                      });
+                    }
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer"
+                  title="Insert New Panel Below"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Add Below</span>
+                </button>
+
+                {/* 5. Duplicate Panel */}
                 <button
                   type="button"
                   onClick={() => {
@@ -1508,6 +1625,7 @@ export default function AutoCropPreviewPage({
                   <span className="hidden sm:inline">Duplicate</span>
                 </button>
 
+                {/* 6. Snap to Full Width */}
                 <button
                   type="button"
                   onClick={() => {
@@ -1527,6 +1645,40 @@ export default function AutoCropPreviewPage({
                   <span className="hidden sm:inline">Full Width</span>
                 </button>
 
+                {/* 7. Height Adjust (+20 / -20) */}
+                <div className="hidden md:flex items-center gap-0.5 border-l border-neutral-800 pl-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const b = activePreview.boxes?.[selectedPanelIndex];
+                      if (b) {
+                        const newH = Math.max(40, (b.height ?? 100) - 20);
+                        handleUpdateBox(activeIndex, selectedPanelIndex, { ...b, height: newH });
+                      }
+                    }}
+                    className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors !cursor-pointer text-[10px] font-mono"
+                    title="Shrink Height (-20px)"
+                  >
+                    -H
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const b = activePreview.boxes?.[selectedPanelIndex];
+                      if (b) {
+                        const maxH = activePreview.dimensions?.height || 2000;
+                        const newH = Math.min(maxH - (b.y ?? 0), (b.height ?? 100) + 20);
+                        handleUpdateBox(activeIndex, selectedPanelIndex, { ...b, height: newH });
+                      }
+                    }}
+                    className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors !cursor-pointer text-[10px] font-mono"
+                    title="Expand Height (+20px)"
+                  >
+                    +H
+                  </button>
+                </div>
+
+                {/* 8. Merge with below (if available) */}
                 {selectedPanelIndex < (activePreview.boxes?.length || 0) - 1 && (
                   <button
                     type="button"
@@ -1548,7 +1700,7 @@ export default function AutoCropPreviewPage({
                         handleDeletePanel(activeIndex, selectedPanelIndex + 1);
                       }
                     }}
-                    className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer"
+                    className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer border-l border-neutral-800 pl-1.5"
                     title="Merge with below"
                   >
                     <Layers className="h-3.5 w-3.5" />
@@ -1556,6 +1708,7 @@ export default function AutoCropPreviewPage({
                   </button>
                 )}
 
+                {/* 9. Split Panel in half */}
                 <button
                   type="button"
                   onClick={() => handleSplitPanelInHalf(activeIndex, selectedPanelIndex)}
@@ -1566,6 +1719,7 @@ export default function AutoCropPreviewPage({
                   <span className="hidden sm:inline">Split</span>
                 </button>
 
+                {/* 10. Delete Panel */}
                 {(activePreview.boxes?.length || 0) > 1 && (
                   <button
                     type="button"
@@ -1573,7 +1727,7 @@ export default function AutoCropPreviewPage({
                       handleDeletePanel(activeIndex, selectedPanelIndex);
                       setSelectedPanelIndex(null);
                     }}
-                    className="p-1.5 rounded-lg hover:bg-rose-950 text-neutral-400 hover:text-rose-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer"
+                    className="p-1.5 rounded-lg hover:bg-rose-950/80 text-neutral-400 hover:text-rose-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer border-l border-neutral-800 pl-1.5"
                     title="Delete Panel (Del)"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -1581,11 +1735,12 @@ export default function AutoCropPreviewPage({
                   </button>
                 )}
 
+                {/* 11. Deselect Close */}
                 <button
                   type="button"
                   onClick={() => setSelectedPanelIndex(null)}
-                  className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-neutral-300 transition-colors ml-1 border-l border-neutral-800 pl-1.5 !cursor-pointer"
-                  title="Deselect Panel"
+                  className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-neutral-300 transition-colors ml-0.5 border-l border-neutral-800 pl-1.5 !cursor-pointer"
+                  title="Deselect Panel (Esc)"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>

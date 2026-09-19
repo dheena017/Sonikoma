@@ -1,7 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
-  Minimize2,
-  Maximize2,
   ChevronUp,
   ChevronDown,
   Layers,
@@ -359,14 +357,6 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
             title={`Zoom In (${Math.round(zoomMultiplier * 100)}%)`}
           >
             <ZoomIn className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={toggleExpanded}
-            className="text-neutral-400 hover:text-white p-1 rounded-md hover:bg-neutral-800/80 transition-colors !cursor-pointer"
-            title={isExpanded ? "Compact View (205px)" : "Expanded View (290px)"}
-          >
-            {isExpanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
           </button>
           {onClose && (
             <button
