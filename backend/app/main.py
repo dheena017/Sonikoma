@@ -122,7 +122,27 @@ if __name__ == "__main__":
                 "level": "INFO",
                 "propagate": False,
             },
+            "pydub": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "pydub.logging_utils": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": False,
+            },
             "httpcore": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "httpx": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "urllib3": {
                 "handlers": ["default"],
                 "level": "INFO",
                 "propagate": False,

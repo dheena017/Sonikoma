@@ -59,11 +59,11 @@ async def lifespan(app: FastAPI):
         else:
             print("\x1b[1;33mSome AI and cloud features may be disabled. Local SQLite will be used if DATABASE_URL is unset.\x1b[0m\n")
 
-    # Filter out noisy system-logs polling/SSE stream logs
+    # Filter out noisy system-logs polling/SSE stream logs and subprocess dumps
     for logger_name in ("uvicorn.access", "uvicorn.error", "uvicorn"):
         logging.getLogger(logger_name).addFilter(EndpointFilter())
-    logging.getLogger("PIL").setLevel(logging.INFO)
-    logging.getLogger("httpcore").setLevel(logging.INFO)
+    for noisy in ("pydub", "pydub.logging_utils", "PIL", "httpcore", "httpx", "urllib3", "asyncio", "watchfiles", "google", "absl"):
+        logging.getLogger(noisy).setLevel(logging.INFO)
     logging.getLogger().addFilter(EndpointFilter())
 
     # Initialize database inside the worker process

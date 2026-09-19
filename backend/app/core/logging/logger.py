@@ -91,6 +91,24 @@ def setup_logging():
         for h in u_log.handlers:
             h.addFilter(endpoint_filter)
 
+    # Silence noisy low-level third-party debug logs (e.g. pydub subprocess byte dumps, socket frames)
+    for noisy in (
+        "pydub",
+        "pydub.logging_utils",
+        "PIL",
+        "httpcore",
+        "httpx",
+        "urllib3",
+        "asyncio",
+        "watchfiles",
+        "multipart",
+        "google",
+        "absl",
+    ):
+        n_log = logging.getLogger(noisy)
+        n_log.setLevel(logging.INFO)
+        n_log.addFilter(endpoint_filter)
+
 
 def get_logs(since: int = 0) -> List[Dict[str, Any]]:
     """Get all logs generated since a given sequence number."""
