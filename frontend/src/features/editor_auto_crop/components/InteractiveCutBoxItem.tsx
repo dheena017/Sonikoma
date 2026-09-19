@@ -174,12 +174,12 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
         </div>
       )}
 
-      {/* Selected Floating Quick Actions Toolbar */}
+      {/* Selected Floating Quick Actions Toolbar on the LEFT side */}
       {isSelected && showQuickToolbar && !isBeingMoved && !isBeingResized && (
         <div
-          className={`absolute left-2 top-2 z-40 flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-950/95 border ${
+          className={`absolute -left-2.5 top-2 -translate-x-full z-40 flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-950/95 border ${
             activeTheme.borderActive
-          }/90 shadow-2xl backdrop-blur-md transition-all duration-150 pointer-events-auto`}
+          }/90 shadow-2xl backdrop-blur-md transition-all duration-150 pointer-events-auto whitespace-nowrap animate-in fade-in slide-in-from-right-1 duration-150`}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}

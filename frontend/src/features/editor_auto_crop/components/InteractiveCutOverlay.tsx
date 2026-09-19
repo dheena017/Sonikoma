@@ -872,7 +872,7 @@ export function InteractiveCutOverlay({
             onScroll={handleViewportScroll}
             className="w-full h-full overflow-y-auto overflow-x-hidden scroll-auto overscroll-contain scrollbar-thin p-2 sm:p-4"
           >
-            <div className="mx-auto w-full max-w-xl md:max-w-2xl pb-16 pt-2 flex flex-col items-center">
+            <div className="mx-auto w-full max-w-xl md:max-w-2xl pb-16 pt-2 flex flex-col items-center px-4 sm:px-12">
               {/* ── MAIN INTERACTIVE IMAGE CANVAS ── */}
               <div
                 ref={containerRef}
@@ -885,7 +885,7 @@ export function InteractiveCutOverlay({
                   transformOrigin: "top center",
                   transition: "transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
-                className={`relative select-none touch-none shadow-2xl rounded-xl overflow-hidden border border-neutral-800/80 bg-neutral-900 ${getCanvasCursorClass()}`}
+                className={`relative select-none touch-none shadow-2xl rounded-xl overflow-visible border border-neutral-800/80 bg-neutral-900 ${getCanvasCursorClass()}`}
               >
                 {/* Comic Strip Image */}
                 <img
@@ -897,7 +897,7 @@ export function InteractiveCutOverlay({
                     setNaturalWidth(e.currentTarget.naturalWidth);
                     setNaturalHeight(e.currentTarget.naturalHeight);
                   }}
-                  className="w-full h-auto block select-none pointer-events-none"
+                  className="w-full h-auto block select-none pointer-events-none rounded-xl"
                 />
 
                 {/* Dim Inactive Panels Layer */}
