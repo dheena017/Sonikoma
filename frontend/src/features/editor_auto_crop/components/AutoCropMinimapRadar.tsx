@@ -133,48 +133,19 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
     return Math.max(trackHeight, naturalHeight * zoomMultiplier);
   }, [totalWidth, totalHeight, trackWidth, trackHeight, zoomMultiplier]);
 
-  // Compute Viewport Finder Lens
+  // Compute Viewport Finder Lens (Accurately mirrors visible canvas scroll window)
   const lensStats = useMemo(() => {
-    let lensTopPx = 0;
-    let lensHeightPx = 36;
-
-    if (selectedPanelIndex !== null && selectedPanelIndex >= 0 && boxes[selectedPanelIndex]) {
-      const selBox = boxes[selectedPanelIndex];
-      lensTopPx = ((selBox.y ?? 0) / (totalHeight || 1)) * naturalMinimapHeight;
-      const boxHPx = ((selBox.height ?? (totalHeight / boxes.length)) / (totalHeight || 1)) * naturalMinimapHeight;
-      lensHeightPx = Math.max(24, boxHPx);
-    } else {
-      const scrollRatio = scrollProgress.scrollRatio || 0;
-      const heightFraction = Math.max(0.04, Math.min(0.5, (scrollProgress.heightPct || 10) / 100));
-      lensHeightPx = Math.max(30, naturalMinimapHeight * heightFraction);
-      lensTopPx = scrollRatio * naturalMinimapHeight;
-    }
-
-    // Detect visible panels in lens
-    const visiblePanels = boxes
-      .map((b, i) => {
-        const bTop = ((b.y ?? 0) / (totalHeight || 1)) * naturalMinimapHeight;
-        const bBottom =
-          (((b.y ?? 0) + (b.height ?? totalHeight / boxes.length)) / (totalHeight || 1)) * naturalMinimapHeight;
-        return bBottom >= lensTopPx && bTop <= lensTopPx + lensHeightPx ? i + 1 : null;
-      })
-      .filter((p): p is number => p !== null);
-
-    const visibleRangeStr =
-      selectedPanelIndex !== null && selectedPanelIndex >= 0
-        ? `#${selectedPanelIndex + 1}`
-        : visiblePanels.length > 0
-        ? visiblePanels.length === 1
-          ? `#${visiblePanels[0]}`
-          : `#${visiblePanels[0]}-${visiblePanels[visiblePanels.length - 1]}`
-        : "";
+    const topFraction = Math.max(0, Math.min(1, (scrollProgress.topPct || 0) / 100));
+    const heightFraction = Math.max(0.02, Math.min(1, (scrollProgress.heightPct || 15) / 100));
+    const lensHeightPx = Math.max(20, naturalMinimapHeight * heightFraction);
+    const maxTop = Math.max(0, naturalMinimapHeight - lensHeightPx);
+    const lensTopPx = Math.max(0, Math.min(maxTop, topFraction * naturalMinimapHeight));
 
     return {
       lensTopPx,
       lensHeightPx,
-      visibleRangeStr,
     };
-  }, [selectedPanelIndex, scrollProgress, naturalMinimapHeight, boxes, totalHeight]);
+  }, [scrollProgress, naturalMinimapHeight]);
 
   // Keep minimap scroll centered ONLY when panel selection or main scroll changes, NOT on zoom
   const lastSyncedScrollRatio = useRef<number | null>(null);
@@ -440,11 +411,11 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               className="w-full block select-none pointer-events-none opacity-95 group-hover/radar:opacity-100 transition-opacity"
             />
 
-            {/* Panel Slices & Clean Hairlines */}
+            {/* Panel Slices with Precise 2D Coordinates & Full 4-Sided Borders */}
             {boxes.map((b, i) => {
               const topPct = ((b.y ?? 0) / totalHeight) * 100;
               const leftPct = ((b.x ?? 0) / totalWidth) * 100;
-              const widthPct = Math.max(6, ((b.width ?? totalWidth) / totalWidth) * 100);
+              const widthPct = Math.max(3, Math.min(100 - leftPct, ((b.width ?? totalWidth) / totalWidth) * 100));
               const heightPct = Math.max(0.4, ((b.height ?? (totalHeight / boxes.length)) / totalHeight) * 100);
               const isSel = selectedPanelIndex === i;
               const isHov = hoverPanelIndex === i;
@@ -458,22 +429,22 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                     width: `${widthPct}%`,
                     height: `${heightPct}%`,
                   }}
-                  className={`absolute transition-all pointer-events-none ${
+                  className={`absolute transition-all pointer-events-none rounded-[2px] ${
                     isSel
-                      ? "border-y border-emerald-400 bg-emerald-500/[0.08] z-20 shadow-[0_0_8px_rgba(52,211,153,0.4)]"
+                      ? "border-2 border-emerald-400 bg-emerald-400/35 z-25 shadow-[0_0_0_1px_rgba(0,0,0,0.9),0_0_10px_rgba(52,211,153,0.9)] ring-1 ring-white/70"
                       : isHov
-                      ? "border-y border-cyan-400/80 bg-cyan-500/[0.06] z-15"
-                      : "border-b border-dashed border-white/20 z-10"
+                      ? "border-2 border-cyan-400 bg-cyan-400/20 z-15 shadow-[0_0_0_1px_rgba(0,0,0,0.8),0_0_6px_rgba(6,182,212,0.6)]"
+                      : "border border-emerald-400/60 bg-emerald-500/[0.04] shadow-[0_0_0_1px_rgba(0,0,0,0.7)] z-10"
                   }`}
                 >
                   {(isSel || isHov || isExpanded) && (
                     <span
-                      className={`absolute left-0.5 top-0.5 px-1 py-0 rounded-[2px] text-[7px] font-mono font-bold leading-tight shadow-md z-30 ${
+                      className={`absolute left-0.5 top-0.5 px-1 py-0.2 rounded-[2px] text-[7px] font-mono font-bold leading-tight shadow-md z-30 ${
                         isSel
-                          ? "bg-emerald-400 text-black font-extrabold shadow-emerald-500/50"
+                          ? "bg-emerald-400 text-black font-extrabold shadow-emerald-500/50 scale-105 origin-top-left"
                           : isHov
                           ? "bg-cyan-400 text-black shadow-cyan-500/40"
-                          : "bg-neutral-900/90 text-neutral-300 border border-neutral-700/80"
+                          : "bg-neutral-950/90 text-emerald-400 border border-emerald-500/40 font-semibold"
                       }`}
                     >
                       #{i + 1}
@@ -483,30 +454,19 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               );
             })}
 
-            {/* ── ULTRA-CLEAN VIEWFINDER LENS (Clear Artwork View with Focus Reticles) ── */}
+            {/* ── VIEWFINDER LENS (Visible Canvas Viewport Frame) ── */}
             <div
               style={{
                 top: `${Math.round(lensStats.lensTopPx || 0)}px`,
-                height: `${Math.round(lensStats.lensHeightPx || 32)}px`,
+                height: `${Math.round(lensStats.lensHeightPx || 28)}px`,
               }}
-              className="absolute inset-x-0 rounded-[4px] border border-emerald-400/90 bg-emerald-400/[0.04] shadow-[0_0_12px_rgba(52,211,153,0.3)] pointer-events-none transition-all duration-75 z-30 flex flex-col justify-between p-1"
+              className="absolute inset-x-0 rounded-[3px] border border-cyan-400/40 bg-cyan-400/[0.04] shadow-[0_0_0_1px_rgba(0,0,0,0.5)] pointer-events-none transition-all duration-75 z-20"
             >
-              {/* Corner Focus Reticles */}
-              <div className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 border-t-2 border-l-2 border-emerald-400 rounded-tl-[2px]" />
-              <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 border-t-2 border-r-2 border-emerald-400 rounded-tr-[2px]" />
-              <div className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 border-b-2 border-l-2 border-emerald-400 rounded-bl-[2px]" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 border-b-2 border-r-2 border-emerald-400 rounded-br-[2px]" />
-
-              <div className="flex items-center justify-between w-full pointer-events-none">
-                <span className="px-1 py-0.2 rounded bg-black/85 border border-emerald-500/50 text-[6px] font-mono font-bold text-emerald-300 shadow">
-                  VIEW
-                </span>
-                {lensStats.visibleRangeStr && (
-                  <span className="px-1 py-0.2 rounded bg-black/85 border border-emerald-400 text-[6px] font-mono font-bold text-emerald-300 shadow">
-                    {lensStats.visibleRangeStr}
-                  </span>
-                )}
-              </div>
+              {/* Corner Reticles */}
+              <div className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 border-t-2 border-l-2 border-cyan-400/80 rounded-tl-[2px]" />
+              <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 border-t-2 border-r-2 border-cyan-400/80 rounded-tr-[2px]" />
+              <div className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 border-b-2 border-l-2 border-cyan-400/80 rounded-bl-[2px]" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 border-b-2 border-r-2 border-cyan-400/80 rounded-br-[2px]" />
             </div>
           </div>
 
