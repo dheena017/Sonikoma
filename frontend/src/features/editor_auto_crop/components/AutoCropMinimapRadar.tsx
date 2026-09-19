@@ -401,7 +401,6 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         <div
           ref={trackRef}
           className="relative flex-1 h-full bg-neutral-950 rounded-xl overflow-y-auto overflow-x-hidden border border-neutral-800/90 cursor-pointer shadow-inner group/radar scrollbar-thin scrollbar-thumb-neutral-700/80 hover:scrollbar-thumb-emerald-500/80 scrollbar-track-neutral-950/60 select-none"
-          title="Click or drag to scrub & navigate (Mouse wheel to scroll)"
           onPointerDown={(e) => {
             setIsDragging(true);
             handlePointerScrub(e.clientY);
@@ -563,7 +562,6 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
           ref={overviewRailRef}
           onPointerDown={(e) => handleOverviewRailScrub(e.clientY)}
           className="w-2.5 shrink-0 h-full rounded-md bg-neutral-900/80 border border-neutral-800/60 relative cursor-pointer group/rail overflow-hidden hover:bg-neutral-900 transition-colors"
-          title="Global overview rail: Click or drag to jump anywhere in the strip"
         >
           {/* Mini tick marks for panel boundaries */}
           {boxes.map((b, i) => (

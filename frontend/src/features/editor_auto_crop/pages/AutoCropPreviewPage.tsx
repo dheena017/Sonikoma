@@ -22,8 +22,12 @@ import {
   Undo2,
   FileWarning,
   ChevronDown,
+  ChevronUp,
   ChevronLeft,
   ChevronRight,
+  Copy,
+  Maximize2,
+  Split,
   X,
 } from "lucide-react";
 import * as api from "@/api";
@@ -1452,66 +1456,202 @@ export default function AutoCropPreviewPage({
             </span>
           </div>
 
-          {/* Center Hub: Strip Specs & Multi-Image Pager (Clean & Non-redundant) */}
+          {/* Center Hub: Selected Panel Actions OR Strip Specs */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center w-full md:w-auto">
-            {/* Active Strip Specs Pill */}
-            {activePreview && (
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-[11px] font-mono text-neutral-300">
-                {activePreview.dimensions && (
-                  <span className="text-neutral-400">
-                    {activePreview.dimensions.width}×{activePreview.dimensions.height}px
+            {selectedPanelIndex !== null &&
+            selectedPanelIndex >= 0 &&
+            activePreview?.boxes?.[selectedPanelIndex] ? (
+              /* Selected Panel Actions Toolbar (in Footer Center) */
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-neutral-900 border border-emerald-500/50 shadow-xl shadow-emerald-500/10 text-xs animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center gap-1 border-r border-neutral-800 pr-2">
+                  <span className="text-[11px] font-mono font-bold text-emerald-400">
+                    #{selectedPanelIndex + 1}
                   </span>
-                )}
-                {activePreview.layout && (
-                  <span className="text-emerald-400 font-semibold border-l border-neutral-800 pl-2">
-                    {activePreview.layout}
-                  </span>
-                )}
-                <span className="text-emerald-300 font-bold border-l border-neutral-800 pl-2">
-                  {activePreview.boxes?.length || 0} panels
-                </span>
-              </div>
-            )}
+                  <button
+                    type="button"
+                    onClick={() => handleNudgePanel(activeIndex, selectedPanelIndex, -5)}
+                    className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors !cursor-pointer"
+                    title="Nudge Up 5px (↑)"
+                  >
+                    <ChevronUp className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleNudgePanel(activeIndex, selectedPanelIndex, 5)}
+                    className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white transition-colors !cursor-pointer"
+                    title="Nudge Down 5px (↓)"
+                  >
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </div>
 
-            {/* Quick Strip Navigator (if multiple images) */}
-            {previews.length > 1 && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-900 border border-neutral-800 text-[11px] font-mono">
                 <button
                   type="button"
-                  onClick={() => setActiveIndex(Math.max(0, activeIndex - 1))}
-                  disabled={activeIndex === 0}
-                  className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent !cursor-pointer transition-colors"
-                  title="Previous Image"
+                  onClick={() => {
+                    const targetBox = activePreview.boxes?.[selectedPanelIndex];
+                    if (targetBox) {
+                      handleAddBox(activeIndex, {
+                        x: targetBox.x ?? 0,
+                        y: Math.min(
+                          (activePreview.dimensions?.height || 1200) - (targetBox.height ?? 200),
+                          (targetBox.y ?? 0) + (targetBox.height ?? 200) + 12
+                        ),
+                        width: targetBox.width ?? (activePreview.dimensions?.width || 800),
+                        height: targetBox.height ?? 240,
+                      });
+                    }
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer"
+                  title="Duplicate Panel (D)"
                 >
-                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <Copy className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Duplicate</span>
                 </button>
-                <span className="text-neutral-300 font-semibold px-1 select-none">
-                  Image #{activeIndex + 1}/{previews.length}
-                </span>
+
                 <button
                   type="button"
-                  onClick={() => setActiveIndex(Math.min(previews.length - 1, activeIndex + 1))}
-                  disabled={activeIndex === previews.length - 1}
-                  className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent !cursor-pointer transition-colors"
-                  title="Next Image"
+                  onClick={() => {
+                    const b = activePreview.boxes?.[selectedPanelIndex];
+                    if (b) {
+                      handleUpdateBox(activeIndex, selectedPanelIndex, {
+                        ...b,
+                        x: 0,
+                        width: activePreview.dimensions?.width || 800,
+                      });
+                    }
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer"
+                  title="Snap to Full Width (F)"
                 >
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <Maximize2 className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Full Width</span>
+                </button>
+
+                {selectedPanelIndex < (activePreview.boxes?.length || 0) - 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const curr = activePreview.boxes?.[selectedPanelIndex];
+                      const next = activePreview.boxes?.[selectedPanelIndex + 1];
+                      if (curr && next) {
+                        const topY = Math.min(curr.y ?? 0, next.y ?? 0);
+                        const bottomY = Math.max((curr.y ?? 0) + (curr.height ?? 0), (next.y ?? 0) + (next.height ?? 0));
+                        const leftX = Math.min(curr.x ?? 0, next.x ?? 0);
+                        const rightX = Math.max((curr.x ?? 0) + (curr.width ?? 800), (next.x ?? 0) + (next.width ?? 800));
+                        handleUpdateBox(activeIndex, selectedPanelIndex, {
+                          ...curr,
+                          x: leftX,
+                          y: topY,
+                          width: rightX - leftX,
+                          height: bottomY - topY,
+                        });
+                        handleDeletePanel(activeIndex, selectedPanelIndex + 1);
+                      }
+                    }}
+                    className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer"
+                    title="Merge with below"
+                  >
+                    <Layers className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Merge</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => handleSplitPanelInHalf(activeIndex, selectedPanelIndex)}
+                  className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-300 hover:text-emerald-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer"
+                  title="Split Panel in half (S)"
+                >
+                  <Split className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Split</span>
+                </button>
+
+                {(activePreview.boxes?.length || 0) > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleDeletePanel(activeIndex, selectedPanelIndex);
+                      setSelectedPanelIndex(null);
+                    }}
+                    className="p-1.5 rounded-lg hover:bg-rose-950 text-neutral-400 hover:text-rose-400 transition-colors flex items-center gap-1 text-[11px] !cursor-pointer"
+                    title="Delete Panel (Del)"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Delete</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedPanelIndex(null)}
+                  className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-neutral-300 transition-colors ml-1 border-l border-neutral-800 pl-1.5 !cursor-pointer"
+                  title="Deselect Panel"
+                >
+                  <X className="h-3.5 w-3.5" />
                 </button>
               </div>
-            )}
+            ) : (
+              <>
+                {/* Active Strip Specs Pill */}
+                {activePreview && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900 border border-neutral-800 text-[11px] font-mono text-neutral-300">
+                    {activePreview.dimensions && (
+                      <span className="text-neutral-400">
+                        {activePreview.dimensions.width}×{activePreview.dimensions.height}px
+                      </span>
+                    )}
+                    {activePreview.layout && (
+                      <span className="text-emerald-400 font-semibold border-l border-neutral-800 pl-2">
+                        {activePreview.layout}
+                      </span>
+                    )}
+                    <span className="text-emerald-300 font-bold border-l border-neutral-800 pl-2">
+                      {activePreview.boxes?.length || 0} panels
+                    </span>
+                  </div>
+                )}
 
-            {/* Quick Re-detect Button */}
-            {activePreview && (
-              <button
-                type="button"
-                onClick={() => handleRetrySingle(activeIndex)}
-                disabled={isReCropping || activePreview.status === "loading"}
-                className="px-2.5 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/90 text-neutral-300 hover:text-white hover:bg-neutral-800 text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors !cursor-pointer active:scale-95"
-                title="Re-run AI Panel Detection on this image"
-              >
-                <RefreshCw className={`h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-400 ${isReCropping ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">Re-detect</span>
-              </button>
+                {/* Quick Strip Navigator (if multiple images) */}
+                {previews.length > 1 && (
+                  <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-900 border border-neutral-800 text-[11px] font-mono">
+                    <button
+                      type="button"
+                      onClick={() => setActiveIndex(Math.max(0, activeIndex - 1))}
+                      disabled={activeIndex === 0}
+                      className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent !cursor-pointer transition-colors"
+                      title="Previous Image"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                    </button>
+                    <span className="text-neutral-300 font-semibold px-1 select-none">
+                      Image #{activeIndex + 1}/{previews.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveIndex(Math.min(previews.length - 1, activeIndex + 1))}
+                      disabled={activeIndex === previews.length - 1}
+                      className="p-1 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent !cursor-pointer transition-colors"
+                      title="Next Image"
+                    >
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Quick Re-detect Button */}
+                {activePreview && (
+                  <button
+                    type="button"
+                    onClick={() => handleRetrySingle(activeIndex)}
+                    disabled={isReCropping || activePreview.status === "loading"}
+                    className="px-2.5 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/90 text-neutral-300 hover:text-white hover:bg-neutral-800 text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors !cursor-pointer active:scale-95"
+                    title="Re-run AI Panel Detection on this image"
+                  >
+                    <RefreshCw className={`h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-400 ${isReCropping ? "animate-spin" : ""}`} />
+                    <span className="hidden sm:inline">Re-detect</span>
+                  </button>
+                )}
+              </>
             )}
           </div>
 

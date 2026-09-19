@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import {
   Move,
   ChevronUp,
@@ -8,6 +8,7 @@ import {
   Layers,
   Split,
   Trash2,
+  GripVertical,
 } from "lucide-react";
 import * as api from "@/api";
 import {
@@ -90,13 +91,13 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
   const curX = isBeingMoved
     ? dragAction.currentX
     : isBeingResized
-    ? dragAction.currentX
-    : (box.x ?? 0);
+      ? dragAction.currentX
+      : (box.x ?? 0);
   const curY = isBeingMoved
     ? dragAction.currentY
     : isBeingResized
-    ? dragAction.currentY
-    : (box.y ?? 0);
+      ? dragAction.currentY
+      : (box.y ?? 0);
   const curW = isBeingResized
     ? dragAction.currentW
     : (box.width ?? totalWidth);
@@ -120,6 +121,49 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
   const bgFillStyle = showPanelBoxes
     ? `rgba(${activeTheme.rgb}, ${fillAlpha})`
     : undefined;
+
+  const [toolbarDragOffset, setToolbarDragOffset] = useState<{ x: number; y: number } | null>(null);
+  const toolbarDragStartRef = useRef<{ startX: number; startY: number; initX: number; initY: number } | null>(null);
+
+  const handleToolbarDragStart = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    if ("cancelable" in e && e.cancelable) e.preventDefault();
+    const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
+
+    const currentOffset = toolbarDragOffset || { x: 0, y: 0 };
+    toolbarDragStartRef.current = {
+      startX: clientX,
+      startY: clientY,
+      initX: currentOffset.x,
+      initY: currentOffset.y,
+    };
+
+    const handleMove = (ev: MouseEvent | TouchEvent) => {
+      if (!toolbarDragStartRef.current) return;
+      const curClientX = "touches" in ev ? ev.touches[0].clientX : ev.clientX;
+      const curClientY = "touches" in ev ? ev.touches[0].clientY : ev.clientY;
+      const dx = curClientX - toolbarDragStartRef.current.startX;
+      const dy = curClientY - toolbarDragStartRef.current.startY;
+      setToolbarDragOffset({
+        x: toolbarDragStartRef.current.initX + dx,
+        y: toolbarDragStartRef.current.initY + dy,
+      });
+    };
+
+    const handleEnd = () => {
+      toolbarDragStartRef.current = null;
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleEnd);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("touchmove", handleMove, { passive: false });
+    window.addEventListener("touchend", handleEnd);
+  };
 
   return (
     <div
@@ -149,15 +193,14 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
         backgroundColor: bgFillStyle,
         boxShadow: isSelected && showPanelBoxes ? activeTheme.glowShadow : undefined,
       }}
-      className={`absolute pointer-events-auto transition-[border-color,box-shadow,background-color] select-none ${
-        showPanelBoxes
+      className={`absolute pointer-events-auto transition-[border-color,box-shadow,background-color] select-none ${showPanelBoxes
           ? isSelected
             ? `border-2 ${borderClass} ${activeTheme.borderActive} ring-2 ${activeTheme.ring} z-20`
             : `border-2 ${borderClass} ${activeTheme.borderInactive} hover:${activeTheme.borderActive} z-10`
           : isSelected
-          ? `border-2 border-dashed ${activeTheme.borderActive} z-20`
-          : "z-10"
-      }`}
+            ? `border-2 border-dashed ${activeTheme.borderActive} z-20`
+            : "z-10"
+        }`}
     >
       {/* Rule of Thirds (3×3 Composition Grid) */}
       {showRuleOfThirds && isSelected && (
@@ -174,32 +217,46 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
         </div>
       )}
 
-      {/* Selected Floating Quick Actions Toolbar on the LEFT side */}
+      {/* Selected Floating Quick Actions Toolbar on the LEFT side (Draggable / Movable) */}
       {isSelected && showQuickToolbar && !isBeingMoved && !isBeingResized && (
         <div
-          className={`absolute -left-2.5 top-2 -translate-x-full z-40 flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-950/95 border ${
-            activeTheme.borderActive
-          }/90 shadow-2xl backdrop-blur-md transition-all duration-150 pointer-events-auto whitespace-nowrap animate-in fade-in slide-in-from-right-1 duration-150`}
+          style={{
+            transform: toolbarDragOffset
+              ? `translate(${toolbarDragOffset.x}px, ${toolbarDragOffset.y}px)`
+              : "translateX(-100%)",
+          }}
+          className={`absolute -left-2.5 top-2 z-40 flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-950/95 border ${activeTheme.borderActive
+            }/90 shadow-2xl backdrop-blur-md transition-[box-shadow,border-color] duration-150 pointer-events-auto whitespace-nowrap animate-in fade-in slide-in-from-right-1 duration-150`}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
         >
-          {showPanelBadges && (
-            <span
-              className={`text-[10px] font-mono font-bold ${activeTheme.text} px-1 select-none`}
-            >
-              #{idx + 1}
-            </span>
-          )}
+          {/* Draggable Grip Handle to Move Toolbar Anywhere */}
+          <div
+            onMouseDown={handleToolbarDragStart}
+            onTouchStart={handleToolbarDragStart}
+            onDoubleClick={() => setToolbarDragOffset(null)}
+            className="flex items-center gap-1 cursor-grab active:cursor-grabbing p-0.5 rounded-lg hover:bg-neutral-800 transition-colors select-none"
+            title="Drag toolbar anywhere (Double-click to reset)"
+          >
+            <GripVertical className="h-3 w-3 text-neutral-400 pointer-events-none" />
+            {showPanelBadges && (
+              <span
+                className={`text-[10px] font-mono font-bold ${activeTheme.text} px-0.5 pointer-events-none`}
+              >
+                #{idx + 1}
+              </span>
+            )}
+          </div>
 
-          {/* Move Handle Pill in Toolbar */}
+          {/* Move Handle Pill for the Panel Box */}
           {showMoveBadges && (
             <div
               onMouseDown={(e) => handleBoxMoveStart(idx, e)}
               onTouchStart={(e) => handleBoxMoveStart(idx, e)}
               style={{ touchAction: "none" }}
               className={`p-1 rounded-lg ${activeTheme.badgeBg} hover:opacity-90 ${activeTheme.text} flex items-center justify-center border ${activeTheme.borderInactive} !cursor-move active:!cursor-grabbing transition-colors shadow-sm`}
-              title="Drag to move panel anywhere"
+              title="Drag to move panel box"
             >
               <Move className="h-3 w-3 pointer-events-none" />
             </div>
@@ -306,11 +363,10 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
               onMouseDown={(e) => handleBoxMoveStart(idx, e)}
               onTouchStart={(e) => handleBoxMoveStart(idx, e)}
               style={{ touchAction: "none" }}
-              className={`p-1 rounded text-[10px] font-mono font-bold flex items-center gap-1 border transition-all !cursor-move active:!cursor-grabbing select-none shadow-md ${
-                isBeingMoved
+              className={`p-1 rounded text-[10px] font-mono font-bold flex items-center gap-1 border transition-all !cursor-move active:!cursor-grabbing select-none shadow-md ${isBeingMoved
                   ? `${activeTheme.handleBg} text-black border-white ring-2 ${activeTheme.ring}/50 scale-105`
                   : `bg-neutral-900/95 ${activeTheme.text} border-neutral-700 hover:bg-neutral-800`
-              }`}
+                }`}
               title="Click and drag to move panel anywhere"
             >
               <Move className="h-3 w-3 pointer-events-none" />
