@@ -72,9 +72,9 @@ export function PanelCardActions({
             type="button"
             onClick={handleEditClick}
             aria-label="Open Image Editor"
-            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-2xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-neutral-300 transition-all duration-150 hover:bg-[#2A2A2A] hover:text-[#93C5FD] hover:border-[#3B82F6]/30 active:scale-[0.98] cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-1.5 h-8.5 rounded-xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-300 transition-all duration-150 hover:bg-neutral-800 hover:text-blue-400 hover:border-blue-500/40 active:scale-[0.98] cursor-pointer"
           >
-            <Edit2 className="h-4 w-4 shrink-0" />
+            <Edit2 className="h-3.5 w-3.5 shrink-0" />
             <span>Edit</span>
           </button>
         </Tooltip>
@@ -85,9 +85,9 @@ export function PanelCardActions({
             type="button"
             onClick={handleDeleteClick}
             aria-label="Remove panel from deck"
-            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-2xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-semibold uppercase tracking-[0.18em] text-neutral-300 transition-all duration-150 hover:bg-red-950/60 hover:text-red-300 hover:border-red-500/30 active:scale-[0.98] cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-1.5 h-8.5 rounded-xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400 transition-all duration-150 hover:bg-rose-950/60 hover:text-rose-300 hover:border-rose-500/40 active:scale-[0.98] cursor-pointer"
           >
-            <Trash2 className="h-4 w-4 shrink-0" />
+            <Trash2 className="h-3.5 w-3.5 shrink-0" />
             <span>Delete</span>
           </button>
         </Tooltip>

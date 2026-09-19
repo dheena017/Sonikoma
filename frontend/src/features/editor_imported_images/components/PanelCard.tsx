@@ -264,15 +264,15 @@ function PanelCard({
       aria-label={`Panel ${idx + 1}${isSelected ? ", selected" : ""}`}
       aria-pressed={isSelected}
       className={[
-        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90",
+        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/95 backdrop-blur-md",
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center",
         isProcessing
-          ? "border-2 border-[#3B82F6] bg-[#2A2A2A]  ring-1 ring-[#3B82F6]/50 scale-[1.02]"
+          ? "border-2 border-blue-500 bg-neutral-900/90 shadow-[0_12px_36px_rgba(0,0,0,0.8),0_0_20px_rgba(59,130,246,0.3)] ring-1 ring-blue-400/60 scale-[1.01]"
           : isSelected
-          ? "border-[#3B82F6] bg-[#2A2A2A] shadow-md ring-1 ring-[#3B82F6]/50 scale-[1.02]"
-          : "border-neutral-800/60 bg-neutral-950 hover:border-[#3B82F6]/50 hover:shadow-md hover:scale-[1.02]",
+          ? "border-blue-500 bg-neutral-900/90 shadow-[0_12px_36px_rgba(0,0,0,0.8),0_0_20px_rgba(59,130,246,0.25)] ring-1 ring-blue-400/50 scale-[1.01]"
+          : "border-neutral-800/80 hover:border-neutral-700 hover:bg-neutral-900/60 hover:shadow-[0_12px_36px_rgba(0,0,0,0.7)] hover:scale-[1.01]",
         className || "",
       ].join(" ")}
     >

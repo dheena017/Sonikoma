@@ -104,6 +104,7 @@ async def analyze_image(
     user_api_key: dict = Depends(get_user_gemini_key),
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[AI Analysis] >>> Hit endpoint /api/analyze-single-image (Model: {body.model or 'default'}, URL: {body.url[:50]}...)")
     COST = 8
     if get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
@@ -117,8 +118,10 @@ async def analyze_image(
         )
         result = (await _attach_narratives_to_results([result], body.model, body.voice, user_api_key))[0]
         record_credit_transaction(current_user["user_id"], -COST, "analyze_image")
+        logger.info(f"[AI Analysis] <<< Completed /api/analyze-single-image successfully")
         return result
     except Exception as e:
+        logger.error(f"[AI Analysis] Error during analyze_image: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -127,6 +130,7 @@ async def analyze_batch(
     body: AnalyzeBatchRequest,
     user_api_key: dict = Depends(get_user_gemini_key)
 ):
+    logger.info(f"[AI Analysis] >>> Hit endpoint /api/analyze-batch with {len(body.urls)} panels")
     if not body.urls:
         raise HTTPException(status_code=400, detail="Field 'urls' must be a non-empty list.")
     if len(body.urls) > 20:
@@ -212,6 +216,7 @@ async def analyze_panels(
     user_api_key: dict = Depends(get_user_gemini_key),
     current_user: dict = Depends(get_current_user)
 ):
+    logger.info(f"[AI Analysis] >>> Hit endpoint /api/analyze-panels with {len(body.panels or [])} panels (Model: {body.model or 'default'})")
     if not body.panels:
         raise HTTPException(status_code=400, detail="Panels list cannot be empty")
 
@@ -244,6 +249,7 @@ async def analyze_panels(
     results = await _attach_narratives_to_results(results, body.model, body.voice, user_api_key)
     if any(item.get("success") for item in results):
         record_credit_transaction(current_user["user_id"], -COST, "analyze_panels")
+    logger.info(f"[AI Analysis] <<< Completed /api/analyze-panels with {len(results)} results")
     return {"success": True, "results": results}
 
 

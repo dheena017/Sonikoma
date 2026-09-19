@@ -39,7 +39,7 @@ export function PanelCardControls({
             );
             addPanelsToStoryboard([imgUrl]);
           }}
-          className="w-full flex items-center justify-center gap-2 bg-[#2A2A2A] hover:bg-[#2A2A2A] active:bg-[#2A2A2A] text-white text-[10px] h-10 rounded-2xl font-mono font-semibold tracking-[0.12em] transition-all duration-150 cursor-pointer border border-white/10 hover:border-[#3B82F6]"
+          className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-[11px] h-9 rounded-xl font-mono font-bold tracking-wider transition-all duration-150 cursor-pointer border border-blue-400/40 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_22px_rgba(37,99,235,0.5)] active:scale-[0.98]"
         >
           <PlusCircle className="h-4 w-4 shrink-0" />
           <span>Add to Timeline</span>
@@ -71,18 +71,18 @@ export function PanelCardControls({
           }}
           disabled={isMerging || isLast}
           className={[
-            "w-full flex items-center justify-center gap-2 text-[10px] h-10 rounded-2xl font-mono font-medium tracking-[0.12em] transition-all duration-150 border",
+            "w-full flex items-center justify-center gap-2 text-[11px] h-9 rounded-xl font-mono font-medium tracking-wide transition-all duration-150 border",
             isLast
-              ? "bg-white/[0.02] border-white/[0.05] text-neutral-600 cursor-not-allowed select-none opacity-40"
+              ? "bg-neutral-900/30 border-neutral-800/40 text-neutral-600 cursor-not-allowed select-none opacity-40"
               : isMerging
-              ? "bg-[#2A2A2A] border-white/10 text-neutral-300 opacity-70 cursor-wait"
-              : "bg-[#2A2A2A] hover:bg-[#2A2A2A] border-white/10 hover:border-[#3B82F6] text-neutral-300 hover:text-neutral-300 cursor-pointer",
+              ? "bg-neutral-900 border-neutral-700 text-neutral-300 opacity-70 cursor-wait"
+              : "bg-neutral-900/90 hover:bg-neutral-800 border-neutral-750 hover:border-neutral-600 text-neutral-300 hover:text-white cursor-pointer active:scale-[0.98]",
           ].join(" ")}
         >
           {isMerging ? (
-            <Loader2 className="h-4 w-4 animate-spin text-indigo-400 shrink-0" />
+            <Loader2 className="h-4 w-4 animate-spin text-blue-400 shrink-0" />
           ) : (
-            <Link2 className="h-4 w-4 shrink-0" />
+            <Link2 className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
           )}
           <span>
             {isMerging

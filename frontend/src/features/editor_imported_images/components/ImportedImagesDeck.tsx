@@ -229,42 +229,68 @@ export const HorizontalScrollContainer: React.FC<{
   };
 
   return (
-    <div className="w-full min-w-0 relative group/hscroll">
-      {/* Left Arrow (Floating desktop navigation) */}
-      {canScrollLeft && (
-        <button
-          type="button"
-          onClick={() => scroll("left")}
-          aria-label="Scroll Left"
-          title="Scroll Left"
-          className="hidden sm:flex absolute left-1.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-neutral-900/90 hover:bg-[#3B82F6] border border-neutral-700/80 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.7)] items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-      )}
+    <div className="w-full max-w-full min-w-0 relative isolate flex items-center justify-center group/hscroll overflow-hidden rounded-2xl">
+      {/* Left Edge Gradient Mask */}
+      <div
+        className={`absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-[#0c0d16] via-[#0c0d16]/80 to-transparent pointer-events-none z-30 transition-opacity duration-300 ${
+          canScrollLeft ? "opacity-100" : "opacity-0"
+        }`}
+      />
 
-      {/* Scroll Track — snap-scrolling on mobile, hardware accelerated horizontal scrolling */}
+      {/* Left Arrow (Vertically Centered on Left Edge with Smooth Transitions) */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          scroll("left");
+        }}
+        aria-label="Scroll Left"
+        title="Scroll Left"
+        disabled={!canScrollLeft}
+        className={`flex absolute left-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-blue-400 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
+          canScrollLeft
+            ? "opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            : "opacity-0 scale-75 pointer-events-none"
+        }`}
+      >
+        <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
+      </button>
+
+      {/* Scroll Track */}
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onClickCapture={handleClickCapture}
-        className={`w-full min-w-0 flex gap-3 sm:gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain touch-pan-x snap-x snap-mandatory sm:snap-none [transform:translateZ(0)] px-2 sm:px-0 ${className}`}
+        className={`w-full min-w-0 flex items-center gap-3 sm:gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain touch-pan-x snap-x snap-mandatory sm:snap-none [transform:translateZ(0)] px-3 sm:px-2 ${className}`}
       >
         {children}
       </div>
 
-      {/* Right Arrow (Floating desktop navigation) */}
-      {canScrollRight && (
-        <button
-          type="button"
-          onClick={() => scroll("right")}
-          aria-label="Scroll Right"
-          title="Scroll Right"
-          className="hidden sm:flex absolute right-1.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-neutral-900/90 hover:bg-[#3B82F6] border border-neutral-700/80 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.7)] items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      )}
+      {/* Right Edge Gradient Mask */}
+      <div
+        className={`absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-[#0c0d16] via-[#0c0d16]/80 to-transparent pointer-events-none z-30 transition-opacity duration-300 ${
+          canScrollRight ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      {/* Right Arrow (Vertically Centered on Right Edge with Smooth Transitions) */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          scroll("right");
+        }}
+        aria-label="Scroll Right"
+        title="Scroll Right"
+        disabled={!canScrollRight}
+        className={`flex absolute right-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-blue-400 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
+          canScrollRight
+            ? "opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            : "opacity-0 scale-75 pointer-events-none"
+        }`}
+      >
+        <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+      </button>
     </div>
   );
 };
@@ -961,17 +987,17 @@ const ChapterScraperDeck = React.memo(
                   const visibleGroups =
                     selectedEpisodeIdx === "all"
                       ? sortedGroups.map(({ grp, originalIdx }) => ({
-                          grp,
-                          gIdx: originalIdx,
-                        }))
+                        grp,
+                        gIdx: originalIdx,
+                      }))
                       : episodeGroups[selectedEpisodeIdx]
-                      ? [
+                        ? [
                           {
                             grp: episodeGroups[selectedEpisodeIdx],
                             gIdx: selectedEpisodeIdx as number,
                           },
                         ]
-                      : sortedGroups.map(({ grp, originalIdx }) => ({
+                        : sortedGroups.map(({ grp, originalIdx }) => ({
                           grp,
                           gIdx: originalIdx,
                         }));
