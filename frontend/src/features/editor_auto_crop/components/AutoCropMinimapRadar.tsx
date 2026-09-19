@@ -11,6 +11,9 @@ import {
   ChevronsUp,
   ChevronsDown,
   Compass,
+  ArrowUp,
+  ArrowDown,
+  Eye,
 } from "lucide-react";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
 
@@ -78,10 +81,10 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
   const toggleExpanded = onToggleExpanded || (() => setInternalExpanded((prev) => !prev));
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [hoverPanelIndex, setHoverPanelIndex] = useState<number | null>(null);
-  // Default zoom multiplier (0.45) renders 12-18 panels comfortably in view
   const [zoomMultiplier, setZoomMultiplier] = useState<number>(0.45);
   const [trackContainerHeight, setTrackContainerHeight] = useState<number>(600);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const overviewRailRef = useRef<HTMLDivElement | null>(null);
 
   // ResizeObserver to dynamically match available full-height container height
   useEffect(() => {
@@ -101,9 +104,9 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
   }, []);
 
   // Panel dock width
-  const baseWidth = isExpanded ? 280 : 195;
+  const baseWidth = isExpanded ? 290 : 205;
   const currentCardWidth = baseWidth;
-  const trackWidth = currentCardWidth - 16;
+  const trackWidth = currentCardWidth - 28;
   const trackHeight = trackContainerHeight;
 
   // Compute currently in-view active panel from scroll progress or selection
@@ -132,7 +135,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
     return Math.max(trackHeight, naturalHeight * zoomMultiplier);
   }, [totalWidth, totalHeight, trackWidth, trackHeight, zoomMultiplier]);
 
-  // Compute Viewport Finder Lens (Accurately synchronized with selected panel & viewport)
+  // Compute Viewport Finder Lens
   const lensStats = useMemo(() => {
     let lensTopPx = 0;
     let lensHeightPx = 36;
@@ -201,7 +204,8 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
       lastSyncedPanel.current = selectedPanelIndex;
       lastSyncedScrollRatio.current = currentScrollRatio;
 
-      const targetScroll = (lensStats.lensTopPx || 0) + (lensStats.lensHeightPx || 0) / 2 - trackRef.current.clientHeight / 2;
+      const targetScroll =
+        (lensStats.lensTopPx || 0) + (lensStats.lensHeightPx || 0) / 2 - trackRef.current.clientHeight / 2;
       const maxScroll = Math.max(0, trackRef.current.scrollHeight - trackRef.current.clientHeight);
       if (maxScroll > 0) {
         trackRef.current.scrollTo({
@@ -243,6 +247,35 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
     [totalHeight, boxes, naturalMinimapHeight, scrollViewportRef, onSelectPanel]
   );
 
+  // Global overview rail scrubbing (Jump anywhere from 0% to 100% of the entire strip)
+  const handleOverviewRailScrub = useCallback(
+    (clientY: number) => {
+      if (!overviewRailRef.current || !scrollViewportRef?.current || totalHeight <= 0) return;
+      const rect = overviewRailRef.current.getBoundingClientRect();
+      const clickY = Math.max(0, Math.min(rect.height, clientY - rect.top));
+      const targetRatio = clickY / rect.height;
+
+      const scrollH = scrollViewportRef.current.scrollHeight;
+      const clientH = scrollViewportRef.current.clientHeight;
+      const maxScroll = Math.max(0, scrollH - clientH);
+      scrollViewportRef.current.scrollTo({ top: targetRatio * maxScroll, behavior: "auto" });
+
+      const targetPixelY = targetRatio * totalHeight;
+      let closestIdx = 0;
+      let minDiff = Infinity;
+      boxes.forEach((b, i) => {
+        const bY = b.y ?? 0;
+        const diff = Math.abs(bY - targetPixelY);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIdx = i;
+        }
+      });
+      onSelectPanel(closestIdx);
+    },
+    [boxes, totalHeight, scrollViewportRef, onSelectPanel]
+  );
+
   useEffect(() => {
     if (!isDragging) return;
 
@@ -271,6 +304,9 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
   const activeBox = boxes[inViewPanelIndex];
   const activeBoxWidth = Math.round(activeBox?.width ?? totalWidth);
   const activeBoxHeight = Math.round(activeBox?.height ?? (totalHeight / boxes.length));
+  const activeRatio = activeBoxWidth > 0 ? (activeBoxHeight / activeBoxWidth).toFixed(2) : "1.0";
+  const activeRatioTag =
+    +activeRatio > 1.8 ? "Tall Strip" : +activeRatio > 1.3 ? "Portrait" : +activeRatio < 0.8 ? "Wide" : "Square";
 
   if (!boxes.length || totalHeight <= 0) return null;
 
@@ -299,7 +335,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         </div>
 
         <div className="flex items-center gap-0.5">
-          {/* Zoom In/Out Controls */}
+          {/* Density presets / Zoom controls */}
           <button
             type="button"
             onClick={(e) => {
@@ -328,7 +364,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
             type="button"
             onClick={toggleExpanded}
             className="text-neutral-400 hover:text-white p-1 rounded-md hover:bg-neutral-800/80 transition-colors !cursor-pointer"
-            title={isExpanded ? "Compact View (195px)" : "Expanded View (280px)"}
+            title={isExpanded ? "Compact View (205px)" : "Expanded View (290px)"}
           >
             {isExpanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
           </button>
@@ -350,9 +386,8 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         <div className="w-full px-2.5 py-1.5 flex items-center justify-between text-[10px] font-mono bg-neutral-900/90 rounded-lg border border-neutral-800 text-neutral-300 shadow-sm">
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span className="text-emerald-400 font-bold">
-              Panel #{inViewPanelIndex + 1}
-            </span>
+            <span className="text-emerald-400 font-bold">Panel #{inViewPanelIndex + 1}</span>
+            <span className="text-[8px] px-1 py-0.2 rounded bg-neutral-800 text-neutral-400">{activeRatioTag}</span>
           </div>
           <span className="text-neutral-400 font-medium text-[9px] bg-neutral-950 px-1.5 py-0.5 rounded border border-neutral-800">
             {activeBoxWidth}×{activeBoxHeight}px
@@ -360,11 +395,12 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         </div>
       </div>
 
-      {/* ── RADAR TRACK VIEWPORT (Fills full remaining height with scrollbar) ── */}
-      <div className="flex-1 min-h-0 w-full px-2 py-1 flex flex-col relative">
+      {/* ── RADAR TRACK & GLOBAL OVERVIEW RAIL ── */}
+      <div className="flex-1 min-h-0 w-full px-2 py-1 flex flex-row gap-1 relative">
+        {/* ── MAIN RADAR TRACK VIEWPORT ── */}
         <div
           ref={trackRef}
-          className="relative w-full h-full bg-neutral-950 rounded-xl overflow-y-auto overflow-x-hidden border border-neutral-800/90 cursor-pointer shadow-inner group/radar scrollbar-thin scrollbar-thumb-neutral-700/80 hover:scrollbar-thumb-emerald-500/80 scrollbar-track-neutral-950/60 select-none"
+          className="relative flex-1 h-full bg-neutral-950 rounded-xl overflow-y-auto overflow-x-hidden border border-neutral-800/90 cursor-pointer shadow-inner group/radar scrollbar-thin scrollbar-thumb-neutral-700/80 hover:scrollbar-thumb-emerald-500/80 scrollbar-track-neutral-950/60 select-none"
           title="Click or drag to scrub & navigate (Mouse wheel to scroll)"
           onPointerDown={(e) => {
             setIsDragging(true);
@@ -491,7 +527,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               style={{
                 top: `${Math.max(6, Math.min(94, ((boxes[hoverPanelIndex]?.y ?? 0) / totalHeight) * 100))}%`,
               }}
-              className="absolute right-full mr-2 z-50 p-2.5 rounded-xl bg-neutral-950/98 border border-neutral-700 text-white text-[10px] font-mono shadow-2xl pointer-events-none -translate-y-1/2 min-w-[145px] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 space-y-1.5"
+              className="absolute right-full mr-2 z-50 p-2.5 rounded-xl bg-neutral-950/98 border border-neutral-700 text-white text-[10px] font-mono shadow-2xl pointer-events-none -translate-y-1/2 min-w-[155px] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 space-y-1.5"
             >
               <div className="flex items-center justify-between gap-1.5 border-b border-neutral-800 pb-1 font-bold">
                 <span className="text-emerald-400 flex items-center gap-1 text-[10px]">
@@ -515,11 +551,41 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                   <span className="text-neutral-300 font-mono">{Math.round(boxes[hoverPanelIndex]?.y ?? 0)}px</span>
                 </div>
                 <div className="text-[8px] text-emerald-400 pt-1 border-t border-neutral-800/80 font-medium">
-                  Click / Drag to scrub
+                  Click / Drag to jump
                 </div>
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── FULL-STRIP OVERVIEW SCRUB RAIL (Global 0-100% position scrubber) ── */}
+        <div
+          ref={overviewRailRef}
+          onPointerDown={(e) => handleOverviewRailScrub(e.clientY)}
+          className="w-2.5 shrink-0 h-full rounded-md bg-neutral-900/80 border border-neutral-800/60 relative cursor-pointer group/rail overflow-hidden hover:bg-neutral-900 transition-colors"
+          title="Global overview rail: Click or drag to jump anywhere in the strip"
+        >
+          {/* Mini tick marks for panel boundaries */}
+          {boxes.map((b, i) => (
+            <div
+              key={`tick-${b.id ?? i}`}
+              style={{
+                top: `${((b.y ?? 0) / (totalHeight || 1)) * 100}%`,
+              }}
+              className={`absolute left-0 right-0 h-[1px] pointer-events-none ${
+                selectedPanelIndex === i ? "bg-emerald-400 z-10" : "bg-white/15"
+              }`}
+            />
+          ))}
+
+          {/* Active viewport indicator thumb on rail */}
+          <div
+            style={{
+              top: `${Math.max(0, Math.min(94, (scrollProgress.topPct || 0)))}%`,
+              height: `${Math.max(6, Math.min(40, (scrollProgress.heightPct || 10)))}%`,
+            }}
+            className="absolute inset-x-0.5 rounded-sm bg-emerald-400/80 border border-emerald-300 shadow-[0_0_6px_rgba(52,211,153,0.8)] pointer-events-none group-hover/rail:bg-emerald-300 transition-all"
+          />
         </div>
       </div>
 
@@ -534,7 +600,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               }
             }}
             className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors !cursor-pointer"
-            title="Jump to Top"
+            title="Jump to Top (Home)"
           >
             <ChevronsUp className="h-3.5 w-3.5" />
           </button>
@@ -582,7 +648,7 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
               }
             }}
             className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors !cursor-pointer"
-            title="Jump to Bottom"
+            title="Jump to Bottom (End)"
           >
             <ChevronsDown className="h-3.5 w-3.5" />
           </button>
