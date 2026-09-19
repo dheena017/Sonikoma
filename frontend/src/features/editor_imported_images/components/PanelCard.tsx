@@ -267,7 +267,7 @@ function PanelCard({
         "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-[#3B82F6]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/90",
         viewLayout === "grid"
           ? "w-full min-w-0"
-          : "w-full sm:w-[300px] shrink-0",
+          : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center",
         isProcessing
           ? "border-2 border-[#3B82F6] bg-[#2A2A2A]  ring-1 ring-[#3B82F6]/50 scale-[1.02]"
           : isSelected
@@ -290,6 +290,7 @@ function PanelCard({
         handleUndo={handleUndo}
         onCheckboxClick={handleCheckboxClick}
         onLoadDimensions={handleDimensionsLoaded}
+        aspectRatioLabel={aspectRatioLabel}
       />
 
       {/* Dynamic Resolution & Aspect Ratio Badges */}

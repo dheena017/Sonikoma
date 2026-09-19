@@ -229,38 +229,38 @@ export const HorizontalScrollContainer: React.FC<{
   };
 
   return (
-    <div className="w-full min-w-0 flex items-center gap-2 relative">
-      {/* Left Arrow */}
+    <div className="w-full min-w-0 relative group/hscroll">
+      {/* Left Arrow (Floating desktop navigation) */}
       {canScrollLeft && (
         <button
           type="button"
           onClick={() => scroll("left")}
           aria-label="Scroll Left"
           title="Scroll Left"
-          className="shrink-0 w-8 h-8 rounded-full bg-neutral-900/90 hover:bg-[#3B82F6] border border-neutral-700/80 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md z-10"
+          className="hidden sm:flex absolute left-1.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-neutral-900/90 hover:bg-[#3B82F6] border border-neutral-700/80 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.7)] items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
       )}
 
-      {/* Scroll Track — ultra-smooth, hardware accelerated horizontal scrolling */}
+      {/* Scroll Track — snap-scrolling on mobile, hardware accelerated horizontal scrolling */}
       <div
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onClickCapture={handleClickCapture}
-        className={`flex-1 min-w-0 flex gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain touch-pan-x [transform:translateZ(0)] ${className}`}
+        className={`w-full min-w-0 flex gap-3 sm:gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain touch-pan-x snap-x snap-mandatory sm:snap-none [transform:translateZ(0)] px-2 sm:px-0 ${className}`}
       >
         {children}
       </div>
 
-      {/* Right Arrow */}
+      {/* Right Arrow (Floating desktop navigation) */}
       {canScrollRight && (
         <button
           type="button"
           onClick={() => scroll("right")}
           aria-label="Scroll Right"
           title="Scroll Right"
-          className="shrink-0 w-8 h-8 rounded-full bg-neutral-900/90 hover:bg-[#3B82F6] border border-neutral-700/80 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md z-10"
+          className="hidden sm:flex absolute right-1.5 top-1/2 -translate-y-1/2 z-30 w-8 h-8 rounded-full bg-neutral-900/90 hover:bg-[#3B82F6] border border-neutral-700/80 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.7)] items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 cursor-pointer backdrop-blur-md"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

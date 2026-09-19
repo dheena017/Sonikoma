@@ -25,6 +25,7 @@ interface PanelCardThumbnailProps {
   handleUndo: () => void;
   onCheckboxClick?: (e: React.MouseEvent) => void;
   onLoadDimensions?: (dimensions: { width: number; height: number }) => void;
+  aspectRatioLabel?: string | null;
 }
 
 const getScrapedImageStatus = (url: string) => {
@@ -65,6 +66,7 @@ export function PanelCardThumbnail({
   handleUndo,
   onCheckboxClick,
   onLoadDimensions,
+  aspectRatioLabel,
 }: PanelCardThumbnailProps) {
   const status = getScrapedImageStatus(imgUrl);
 
