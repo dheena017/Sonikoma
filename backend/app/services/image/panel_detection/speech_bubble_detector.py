@@ -119,14 +119,19 @@ def _set_loaded_yolo_model(model_instance: Any):
 
 
 def detect_yolo_entities(
-    image_bytes: bytes,
+    image_input: Any,
     conf_threshold: float = 0.30
 ) -> List[SpeechBubbleItem]:
     """
-    Executes YOLOv8m-seg semantic inference on comic image bytes.
+    Executes YOLOv8m-seg semantic inference on comic image bytes or PIL Image.
     Extracts dialogue bubbles, thought clouds, captions, and polygon masks.
     """
-    pil_img = Image.open(io.BytesIO(image_bytes))
+    if isinstance(image_input, Image.Image):
+        pil_img = image_input
+    elif isinstance(image_input, bytes):
+        pil_img = Image.open(io.BytesIO(image_input))
+    else:
+        raise ValueError("image_input must be bytes or a PIL Image.")
     img_w, img_h = pil_img.size
 
     model = get_yolo_speech_bubble_model()

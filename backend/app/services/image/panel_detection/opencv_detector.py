@@ -26,7 +26,7 @@ logger = logging.getLogger("sonikoma.services.panel_detection.opencv")
 
 
 def detect_opencv_boxes(
-    image_bytes: bytes,
+    image_bytes: Any,
     canny_low: int = 20,
     canny_high: int = 100,
     close_kernel_size: int = 15,
@@ -35,16 +35,33 @@ def detect_opencv_boxes(
     bleed_padding_px: int = 5
 ) -> Dict[str, Any]:
     """
-    Executes pure OpenCV geometric contour and gutter analysis on image bytes.
+    Executes pure OpenCV geometric contour and gutter analysis on image bytes or numpy array.
     Returns detected rectangular panels, webtoon gutter valleys, and edge energy.
     """
     if cv2 is None or not HAS_CV:
         logger.warning("[OpenCV Detector] cv2 module not installed. Returning empty results.")
         return {"panels": [], "gutters": [], "edge_energy": 0.0, "image_width": 0, "image_height": 0}
 
-    # Decode image buffer into OpenCV BGR matrix
-    nparr = np.frombuffer(image_bytes, np.uint8)
-    img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    # Extract OpenCV BGR matrix from bytes or numpy array
+    if isinstance(image_bytes, np.ndarray):
+        if len(image_bytes.shape) == 2:
+            img_bgr = cv2.cvtColor(image_bytes, cv2.COLOR_GRAY2BGR)
+        elif image_bytes.shape[2] == 4:
+            img_bgr = cv2.cvtColor(image_bytes, cv2.COLOR_RGBA2BGR)
+        elif image_bytes.shape[2] == 3:
+            img_bgr = cv2.cvtColor(image_bytes, cv2.COLOR_RGB2BGR)
+        else:
+            img_bgr = image_bytes
+    elif isinstance(image_bytes, bytes):
+        nparr = np.frombuffer(image_bytes, np.uint8)
+        img_bgr = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    elif hasattr(image_bytes, "convert"):
+        # PIL Image
+        img_rgb = np.array(image_bytes.convert("RGB"))
+        img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
+    else:
+        raise ValueError("Could not decode image input into OpenCV matrix.")
+
     if img_bgr is None:
         raise ValueError("Could not decode image bytes into OpenCV matrix.")
 

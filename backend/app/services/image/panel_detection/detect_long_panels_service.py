@@ -64,27 +64,29 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
     yolo_bubbles = []
     try:
         if img_h > 4000:
-            # Ultra-Long Webtoon Strip: Sliding Window to maintain speech bubble resolution
-            chunk_h = 3000
-            overlap = 300
+            # Ultra-Long Webtoon Strip: Adaptive chunks to maintain speech bubble resolution with high speed
+            chunk_h = 6000
+            overlap = 400
             step = chunk_h - overlap
             seen_bubbles = []
-            
+            max_chunks = 6
+            chunks_processed = 0
+
             for y_offset in range(0, img_h, step):
+                if chunks_processed >= max_chunks:
+                    break
                 box_top = y_offset
                 box_bottom = min(img_h, y_offset + chunk_h)
                 chunk_img = pil_img.crop((0, box_top, img_w, box_bottom))
-                chunk_buf = io.BytesIO()
-                chunk_img.save(chunk_buf, format="PNG")
-                chunk_bytes = chunk_buf.getvalue()
 
-                chunk_bubbles = detect_yolo_entities(chunk_bytes, conf_threshold=0.25)
+                chunk_bubbles = detect_yolo_entities(chunk_img, conf_threshold=0.25)
+                chunks_processed += 1
                 for cb in chunk_bubbles:
                     # Offset Y coordinate to absolute image coordinates
                     cb.y += box_top
                     if cb.polygon:
                         cb.polygon = [[pt[0], pt[1] + box_top] for pt in cb.polygon]
-                    
+
                     # Deduplicate overlapping bubbles
                     is_dup = any(
                         abs(cb.x - prev.x) < 30 and abs(cb.y - prev.y) < 30
@@ -92,21 +94,16 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                     )
                     if not is_dup:
                         seen_bubbles.append(cb)
-                    else:
-                        pass
-            
+
             seen_bubbles.sort(key=lambda b: (b.y, b.x))
             for idx, b in enumerate(seen_bubbles):
                 b.bubble_id = f"bubble_{idx + 1}"
                 b.reading_order = idx + 1
             yolo_bubbles = seen_bubbles
-            logger.info(f"[LongPanels: YOLO] Sliding window detected {len(yolo_bubbles)} speech bubbles.")
+            logger.info(f"[LongPanels: YOLO] Sliding window detected {len(yolo_bubbles)} speech bubbles across {chunks_processed} chunks.")
         else:
-            yolo_bubbles = detect_yolo_entities(raw_bytes, conf_threshold=0.25)
+            yolo_bubbles = detect_yolo_entities(pil_img, conf_threshold=0.25)
             logger.info(f"[LongPanels: YOLO] Single-pass detected {len(yolo_bubbles)} speech bubbles.")
-        
-        for bi, b in enumerate(yolo_bubbles):
-            pass
     except Exception as e:
         logger.warning(f"[LongPanels: YOLO] YOLO detection error: {e}", exc_info=True)
 
@@ -117,7 +114,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
 
     # ── ENGINE 2: OpenCV & Webtoon Adaptive Gutter Variance Slicing ───────────
     cv_res = detect_opencv_boxes(
-        image_bytes=raw_bytes,
+        image_bytes=pil_img,
         min_width_pct=0.15,
         min_height_px=request.min_panel_height,
         bleed_padding_px=request.bleed_padding_px
@@ -152,9 +149,7 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
             webtoon_boxes = webtoon_res.panels if hasattr(webtoon_res, "panels") else (webtoon_res[0] if isinstance(webtoon_res, tuple) else [])
             if webtoon_boxes:
                 cv_panels = webtoon_boxes
-                logger.info(f"[LongPanels: OpenCV] Webtoon gutter segmenter extracted {len(cv_panels)} panel seams (guided by {len(yolo_ocr_boxes)} bubbles).")
-                for wbi, wb in enumerate(cv_panels):
-                    pass
+                logger.info(f"[LongPanels: OpenCV] Webtoon gutter segmenter extracted {len(cv_panels)} panel seams.")
         except Exception as e:
             logger.warning(f"[LongPanels: OpenCV] Webtoon seam segmenter fallback: {e}", exc_info=True)
 
@@ -187,14 +182,11 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                     subdivided_cv.append(p)
                     continue
 
-                # Crop sub-slice for internal 2D panel grid detection
+                # Crop sub-slice for internal 2D panel grid detection directly from PIL in memory
                 page_crop = pil_img.crop((px, py, px + pw, py + ph))
-                buf = io.BytesIO()
-                page_crop.save(buf, format="PNG")
-                page_bytes = buf.getvalue()
 
                 cv_grid = detect_opencv_boxes(
-                    page_bytes,
+                    page_crop,
                     min_width_pct=0.20,
                     min_height_px=max(int(pw * 0.12), int(ph * 0.08)),
                     bleed_padding_px=request.bleed_padding_px

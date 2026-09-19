@@ -79,124 +79,81 @@ def _box_to_dict(box) -> dict:
     return d
 
 
-def _slice_and_encode_worker(args: Tuple) -> Optional[CroppedSliceItem]:
+def _encode_slice_worker(args: Tuple) -> Optional[CroppedSliceItem]:
     """
     Worker function executed in parallel thread:
-    Crops the specific bounding box from the shared PIL image, encodes to WebP,
-    and writes to disk/cache.
+    Encodes the pre-cropped PIL image to WebP and writes to disk/cache.
     """
     (
-        img_bytes,
-        raw_box,
+        cropped_img,
+        box_dict,
         order_idx,
         total_boxes,
         gutter_after,
-        bleed_guard_px,
         output_format,
         quality,
         bg_mode
     ) = args
 
     try:
-        box_dict = _box_to_dict(raw_box)
-        with Image.open(io.BytesIO(img_bytes)) as parent_img:
-            img_w, img_h = parent_img.size
+        x = int(box_dict.get("x") or 0)
+        y = int(box_dict.get("y") or 0)
+        w = int(box_dict.get("width") or box_dict.get("w") or cropped_img.width)
+        h = int(box_dict.get("height") or box_dict.get("h") or cropped_img.height)
+        panel_id = box_dict.get("panel_id") or str(box_dict.get("id") or f"panel_{order_idx + 1}")
 
-            x = int(box_dict.get("x") or 0)
-            y = int(box_dict.get("y") or 0)
-            w = int(box_dict.get("width") or box_dict.get("w") or 0)
-            h = int(box_dict.get("height") or box_dict.get("h") or 0)
-            panel_id = box_dict.get("panel_id") or str(box_dict.get("id") or f"panel_{order_idx + 1}")
-            padding = int(box_dict.get("padding_px") or 0) + int(bleed_guard_px or 0)
+        target_fmt = (output_format or "webp").upper()
+        if target_fmt in ("JPG", "JPEG"):
+            target_fmt = "JPEG"
+            content_type = "image/jpeg"
+            ext = "jpg"
+            if cropped_img.mode in ("RGBA", "LA", "P"):
+                bg = Image.new("RGB", cropped_img.size, (255, 255, 255) if bg_mode != "black" else (0, 0, 0))
+                if cropped_img.mode != "RGBA":
+                    cropped_img = cropped_img.convert("RGBA")
+                bg.paste(cropped_img, mask=cropped_img.split()[3])
+                cropped_img = bg
+            elif cropped_img.mode != "RGB":
+                cropped_img = cropped_img.convert("RGB")
+        elif target_fmt == "PNG":
+            content_type = "image/png"
+            ext = "png"
+        else:
+            target_fmt = "WEBP"
+            content_type = "image/webp"
+            ext = "webp"
 
-            # Convert percentage or normalized coordinates if pixel w/h missing
-            if w <= 0 or h <= 0:
-                crop_top = float(box_dict.get("crop_top") or 0.0)
-                crop_bottom = float(box_dict.get("crop_bottom") or 0.0)
-                crop_left = float(box_dict.get("crop_left") or 0.0)
-                crop_right = float(box_dict.get("crop_right") or 0.0)
+        out_io = io.BytesIO()
+        save_opts = {"quality": quality} if target_fmt in ("WEBP", "JPEG") else {}
+        cropped_img.save(out_io, format=target_fmt, **save_opts)
+        slice_bytes = out_io.getvalue()
 
-                # Normalized (0-1.0) vs percentage (0-100)
-                top_pct = crop_top if crop_top <= 1.0 else (crop_top / 100.0)
-                bot_pct = crop_bottom if crop_bottom <= 1.0 else (crop_bottom / 100.0)
-                left_pct = crop_left if crop_left <= 1.0 else (crop_left / 100.0)
-                right_pct = crop_right if crop_right <= 1.0 else (crop_right / 100.0)
+        # Save locally to /media/
+        unique_filename = f"slice_{int(time.time()*1000)}_{order_idx}_{uuid.uuid4().hex[:6]}.{ext}"
+        file_path = os.path.join(MEDIA_DIR, unique_filename)
+        with open(file_path, "wb") as f:
+            f.write(slice_bytes)
 
-                y1 = max(0, min(img_h - 1, int(top_pct * img_h)))
-                y2 = max(y1 + 10, min(img_h, int((1.0 - bot_pct) * img_h))) if bot_pct > 0 else img_h
-                x1 = max(0, min(img_w - 1, int(left_pct * img_w)))
-                x2 = max(x1 + 10, min(img_w, int((1.0 - right_pct) * img_w))) if right_pct > 0 else img_w
-            else:
-                x1 = max(0, min(img_w - 1, x - padding))
-                y1 = max(0, min(img_h - 1, y - padding))
-                x2 = max(x1 + 10, min(img_w, x + w + padding))
-                y2 = max(y1 + 10, min(img_h, y + h + padding))
+        media_url = f"/media/{unique_filename}"
+        cache_id = f"slice_{unique_filename}"
+        stitched_cache.set(cache_id, {"data": slice_bytes, "content_type": content_type})
 
-            crop_w = x2 - x1
-            crop_h = y2 - y1
-
-            if crop_w < 5 or crop_h < 5:
-                logger.warning(f"[LongPanelsCrop] Skipping box {order_idx}: invalid dimensions ({crop_w}x{crop_h})")
-                return None
-
-            # Crop from RAM
-            cropped = parent_img.crop((x1, y1, x2, y2))
-
-            # Format determination
-            target_fmt = (output_format or "webp").upper()
-            if target_fmt in ("JPG", "JPEG"):
-                target_fmt = "JPEG"
-                content_type = "image/jpeg"
-                ext = "jpg"
-                if cropped.mode in ("RGBA", "LA", "P"):
-                    bg = Image.new("RGB", cropped.size, (255, 255, 255) if bg_mode != "black" else (0, 0, 0))
-                    if cropped.mode != "RGBA":
-                        cropped = cropped.convert("RGBA")
-                    bg.paste(cropped, mask=cropped.split()[3])
-                    cropped = bg
-                elif cropped.mode != "RGB":
-                    cropped = cropped.convert("RGB")
-            elif target_fmt == "PNG":
-                content_type = "image/png"
-                ext = "png"
-            else:
-                target_fmt = "WEBP"
-                content_type = "image/webp"
-                ext = "webp"
-
-            out_io = io.BytesIO()
-            save_opts = {"quality": quality} if target_fmt in ("WEBP", "JPEG") else {}
-            cropped.save(out_io, format=target_fmt, **save_opts)
-            slice_bytes = out_io.getvalue()
-
-            # Save locally to /media/
-            unique_filename = f"slice_{int(time.time()*1000)}_{order_idx}_{uuid.uuid4().hex[:6]}.{ext}"
-            file_path = os.path.join(MEDIA_DIR, unique_filename)
-            with open(file_path, "wb") as f:
-                f.write(slice_bytes)
-
-            media_url = f"/media/{unique_filename}"
-            # Also register in stitched_cache for session fallback
-            cache_id = f"slice_{unique_filename}"
-            stitched_cache.set(cache_id, {"data": slice_bytes, "content_type": content_type})
-
-            slice_aspect = round(crop_w / float(crop_h), 3) if crop_h > 0 else 1.0
-
-            return CroppedSliceItem(
-                index=order_idx,
-                panel_id=str(panel_id),
-                url=media_url,
-                x=x1,
-                y=y1,
-                width=crop_w,
-                height=crop_h,
-                crop_width=crop_w,
-                crop_height=crop_h,
-                aspect_ratio=slice_aspect,
-                gutter_after_px=gutter_after,
-                file_size_bytes=len(slice_bytes)
-            )
-
+        return CroppedSliceItem(
+            index=order_idx,
+            panel_id=panel_id,
+            url=media_url,
+            cache_id=cache_id,
+            x=x,
+            y=y,
+            width=w,
+            height=h,
+            aspect_ratio=round(w / float(max(1, h)), 3),
+            reading_flow="top_to_bottom",
+            gutter_after_px=gutter_after,
+            content_type=content_type,
+            file_size_bytes=len(slice_bytes),
+            label=f"Panel {order_idx + 1}"
+        )
     except Exception as e:
         logger.error(f"[LongPanelsCrop] Failed to slice box index {order_idx}: {e}", exc_info=True)
         return None
@@ -219,40 +176,55 @@ async def crop_long_panels_batch(request: LongPanelsCropRequest) -> LongPanelsCr
         logger.warning("[LongPanelsCrop] No panel bounding boxes provided for slicing")
         raise ValueError("No panel bounding boxes provided for slicing.")
 
-    # 1. Sort panels strictly top-to-bottom, left-to-right to guarantee reading sequence
-    sorted_boxes = sorted(
-        [_box_to_dict(p) for p in request.panels],
-        key=lambda b: (int(b.get("y") or 0), int(b.get("x") or 0))
-    )
+    # 1. Single-pass master decode in RAM
+    with Image.open(io.BytesIO(img_bytes)) as master_img:
+        master_img = master_img.convert("RGB")
+        img_w, img_h = master_img.size
 
-    # 2. Compute gutter distances between adjacent panels
-    worker_tasks = []
-    for i, box in enumerate(sorted_boxes):
-        box_y = int(box.get("y") or 0)
-        box_h = int(box.get("height") or box.get("h") or 0)
-        y_curr_end = box_y + box_h
-        gutter_after = 0
-        if i + 1 < len(sorted_boxes):
-            y_next_start = int(sorted_boxes[i + 1].get("y") or 0)
-            gutter_after = max(0, y_next_start - y_curr_end)
+        # 2. Sort panels strictly top-to-bottom, left-to-right to guarantee reading sequence
+        sorted_boxes = sorted(
+            [_box_to_dict(p) for p in request.panels],
+            key=lambda b: (int(b.get("y") or 0), int(b.get("x") or 0))
+        )
 
+        # 3. Pre-crop slices in memory
+        worker_tasks = []
+        for i, box in enumerate(sorted_boxes):
+            box_dict = box
+            box_y = int(box_dict.get("y") or 0)
+            box_h = int(box_dict.get("height") or box_dict.get("h") or 0)
+            box_x = int(box_dict.get("x") or 0)
+            box_w = int(box_dict.get("width") or box_dict.get("w") or img_w)
+            padding = int(box_dict.get("padding_px") or 0) + int(request.bleed_guard_px or 0)
 
-        worker_tasks.append((
-            img_bytes,
-            box,
-            i,
-            len(sorted_boxes),
-            gutter_after,
-            request.bleed_guard_px,
-            request.output_format,
-            request.quality,
-            request.background_mode
-        ))
+            x1 = max(0, min(img_w - 1, box_x - padding))
+            y1 = max(0, min(img_h - 1, box_y - padding))
+            x2 = max(x1 + 10, min(img_w, box_x + box_w + padding))
+            y2 = max(y1 + 10, min(img_h, box_y + box_h + padding))
 
-    # 3. Parallel in-memory slicing via ThreadPoolExecutor
+            cropped_slice = master_img.crop((x1, y1, x2, y2))
+
+            y_curr_end = box_y + box_h
+            gutter_after = 0
+            if i + 1 < len(sorted_boxes):
+                y_next_start = int(sorted_boxes[i + 1].get("y") or 0)
+                gutter_after = max(0, y_next_start - y_curr_end)
+
+            worker_tasks.append((
+                cropped_slice,
+                box_dict,
+                i,
+                len(sorted_boxes),
+                gutter_after,
+                request.output_format,
+                request.quality,
+                request.background_mode
+            ))
+
+    # 4. Parallel WebP encoding via ThreadPoolExecutor
     max_workers = min(16, max(4, len(sorted_boxes)))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        results = list(executor.map(_slice_and_encode_worker, worker_tasks))
+        results = list(executor.map(_encode_slice_worker, worker_tasks))
 
     valid_slices = [r for r in results if r is not None]
     # Ensure sorted by index

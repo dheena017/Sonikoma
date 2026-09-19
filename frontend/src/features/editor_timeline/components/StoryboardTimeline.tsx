@@ -15,6 +15,10 @@ import StoryboardChapterGroup from "@/features/editor_timeline/components/Storyb
 import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
 import StoryboardAnalysisBanner from "./StoryboardAnalysisBanner";
 
+const AutoCropPreviewPage = React.lazy(
+  () => import("@/features/editor_auto_crop/pages/AutoCropPreviewPage")
+);
+
 type EpisodeGroupRecord = {
   episodeLabel: string;
   startIndex: number;
@@ -617,7 +621,43 @@ const StoryboardTimeline = React.memo(
       }
     };
 
-    const handleAutoCropSelected = async () => {
+    // ── Interactive Auto-Crop Preview & Confirmation ─────────────────────────
+    const [showAutoCropPreview, setShowAutoCropPreview] = useState(false);
+
+    const handleAutoCropSelected = () => {
+      if (selectedPanelIds.size === 0) {
+        addNotification?.("Please select storyboard panels to auto-crop.", "info");
+        return;
+      }
+      setShowAutoCropPreview(true);
+    };
+
+    const handleConfirmTimelineAutoCrop = (confirmedMap?: Record<string, string[]>) => {
+      setShowAutoCropPreview(false);
+      if (confirmedMap && Object.keys(confirmedMap).length > 0) {
+        let nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
+        const updatedPanels = panels.flatMap((p) => {
+          if (!selectedPanelIds.has(p.id)) return [p];
+          const slices = confirmedMap[p.image_url];
+          if (slices && slices.length > 0) {
+            return slices.map((sliceUrl) => ({
+              ...p,
+              id: nextId++,
+              image_url: sliceUrl,
+            }));
+          }
+          return [p];
+        });
+        setPanels(updatedPanels);
+        clearSelection();
+        addNotification?.("Successfully auto-cropped storyboard panels!", "success");
+        audioFeedback?.playSuccess?.();
+      } else {
+        void handleDirectTimelineAutoCrop();
+      }
+    };
+
+    const handleDirectTimelineAutoCrop = async () => {
       if (selectedPanelIds.size === 0) return;
       const selectedIds = Array.from(selectedPanelIds);
       const targetPanels = panels.filter((p) => selectedPanelIds.has(p.id));
@@ -1128,6 +1168,33 @@ const StoryboardTimeline = React.memo(
             }}
             onCancel={() => setShowDeleteConfirm(false)}
           />
+        )}
+
+        {/* ✂️ Interactive Auto-Crop Preview & Panel Type Confirmation Modal */}
+        {showAutoCropPreview && (
+          <React.Suspense fallback={null}>
+            <AutoCropPreviewPage
+              isModal={true}
+              onClose={() => setShowAutoCropPreview(false)}
+              onConfirm={handleConfirmTimelineAutoCrop}
+              scrapedImages={panels
+                .filter((p) => selectedPanelIds.has(p.id))
+                .map((p) => p.image_url)}
+              selectedScraped={panels
+                .filter((p) => selectedPanelIds.has(p.id))
+                .map((p) => p.image_url)}
+              fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
+              sensitivity={cropSensitivity}
+              padding={cropPaddingPx}
+              backgroundColorMode={cropBackgroundMode}
+              autoSplitTallStrips={autoSplitTallStrips}
+              aspectRatioLock={aspectRatioLock}
+              overlapMergeThreshold={overlapMergeThreshold}
+              minPanelHeightPx={cropMinHeightPx}
+              isApplying={isBatchCropping}
+            />
+          </React.Suspense>
         )}
       </div>
     );

@@ -38,6 +38,9 @@ const EditorPage = React.lazy(
 const AutoCropSettingsModal = React.lazy(
   () => import("@/features/editor_auto_crop/components/AutoCropSettingsModal")
 );
+const AutoCropPreviewPage = React.lazy(
+  () => import("@/features/editor_auto_crop/pages/AutoCropPreviewPage")
+);
 const ProjectsPage = React.lazy(
   () => import("@/features/workspace_projects/pages/ProjectsPage")
 );
@@ -1480,49 +1483,40 @@ export default function AppRouter(props: AppRouterProps) {
         {/* PAGE VIEW 18: Batch Panel Auto Crop Page */}
         {isAutoCropPath && (
           <div className="page-transition w-full flex-1 flex flex-col">
-            <AutoCropSettingsModal
-              isPage={true}
+            <AutoCropPreviewPage
               onClose={handleAutoCropClose}
-              onApply={handleAutoCropApply}
-              sensitivity={cropSensitivity}
-              setSensitivity={setCropSensitivity}
-              padding={cropPaddingPx}
-              setPadding={setCropPaddingPx}
-              backgroundColorMode={cropBackgroundMode}
-              setBackgroundColorMode={setCropBackgroundMode}
-              autoSplitTallStrips={autoSplitTallStrips}
-              setAutoSplitTallStrips={setAutoSplitTallStrips}
-              aspectRatioLock={aspectRatioLock}
-              setAspectRatioLock={setAspectRatioLock}
-              minPanelAreaPct={minPanelAreaPct}
-              setMinPanelAreaPct={setMinPanelAreaPct}
-              overlapMergeThreshold={overlapMergeThreshold}
-              setOverlapMergeThreshold={setOverlapMergeThreshold}
-              useLocalCV={useLocalCV}
-              setUseLocalCV={setUseLocalCV}
-              cropModel={cropModel}
-              setCropModel={setCropModel}
-              cropMinHeightPx={cropMinHeightPx}
-              setCropMinHeightPx={setCropMinHeightPx}
-              cropCannyLow={cropCannyLow}
-              setCropCannyLow={setCropCannyLow}
-              cropCannyHigh={cropCannyHigh}
-              setCropCannyHigh={setCropCannyHigh}
-              cropCloseKernelSize={cropCloseKernelSize}
-              setCropCloseKernelSize={setCropCloseKernelSize}
-              activeTab={activeAutoCropTab}
-              setActiveTab={setActiveAutoCropTab}
-              selectedCount={selectedScraped.length}
-              isApplying={isBatchCropping}
+              onConfirm={async (confirmedResults) => {
+                if (confirmedResults && Object.keys(confirmedResults).length > 0) {
+                  appLogic?.setScrapedImages?.((prev: string[]) => {
+                    const copy: string[] = [];
+                    prev.forEach((img) => {
+                      if (confirmedResults[img]) {
+                        copy.push(...confirmedResults[img]);
+                      } else {
+                        copy.push(img);
+                      }
+                    });
+                    return copy;
+                  });
+                  setSelectedScraped([]);
+                  addNotification?.("Successfully sliced & auto-cropped panels!", "success");
+                } else {
+                  await handleAutoCropSelected();
+                }
+                handleAutoCropClose();
+              }}
               scrapedImages={scrapedImages}
               selectedScraped={selectedScraped}
-              setSelectedScraped={setSelectedScraped}
-              setConsoleLogs={setConsoleLogs}
+              fetchWithInterceptor={fetchWithInterceptor}
               addNotification={addNotification}
-              cropGuidance={cropGuidance}
-              setCropGuidance={setCropGuidance}
-              cropFocusMode={cropFocusMode}
-              setCropFocusMode={setCropFocusMode}
+              sensitivity={cropSensitivity}
+              padding={cropPaddingPx}
+              backgroundColorMode={cropBackgroundMode}
+              autoSplitTallStrips={autoSplitTallStrips}
+              aspectRatioLock={aspectRatioLock}
+              overlapMergeThreshold={overlapMergeThreshold}
+              minPanelHeightPx={cropMinHeightPx}
+              isApplying={isBatchCropping}
             />
           </div>
         )}

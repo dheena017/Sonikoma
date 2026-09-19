@@ -319,6 +319,10 @@ export default defineConfig(({ mode, command }) => {
       {
         name: "hmr-file-change-logger",
         handleHotUpdate({ file, server }) {
+          if (file.endsWith(".tsbuildinfo") || file.includes(".git") || file.includes("dist")) {
+            return [];
+          }
+
           const relativePath = file
             .replace(path.resolve(__dirname, "src") + path.sep, "src/")
             .replace(/\\/g, "/");
@@ -408,6 +412,8 @@ export default defineConfig(({ mode, command }) => {
                 "**/*.db*",
                 "**/dist/**",
                 "**/node_modules/**",
+                "**/.tsbuildinfo",
+                "**/.git/**",
               ],
             },
       proxy: {

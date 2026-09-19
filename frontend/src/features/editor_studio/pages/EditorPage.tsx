@@ -30,6 +30,9 @@ const VideoEditorPage = React.lazy(
 const AutoCropSettingsModal = React.lazy(
   () => import("@/features/editor_auto_crop/components/AutoCropSettingsModal")
 );
+const AutoCropPreviewPage = React.lazy(
+  () => import("@/features/editor_auto_crop/pages/AutoCropPreviewPage")
+);
 
 interface EditorPageProps {
   appLogic: any;
@@ -368,6 +371,69 @@ const EditorPage: React.FC<EditorPageProps> = ({
       setCurrentSection("assets");
     }
   }, [currentSection]);
+
+  // ── Interactive Auto-Crop Preview & Confirmation ───────────────────────────
+  const [showAutoCropPreview, setShowAutoCropPreview] = React.useState(false);
+
+  const handleOpenAutoCropPreview = React.useCallback(() => {
+    const targetCount =
+      selectedScraped && selectedScraped.length > 0
+        ? selectedScraped.length
+        : scrapedImages.length;
+    if (targetCount === 0) {
+      addNotification?.("Please select or import comic frames to auto-crop.", "info");
+      return;
+    }
+    setShowAutoCropPreview(true);
+  }, [selectedScraped, scrapedImages, addNotification]);
+
+  const handleConfirmAutoCropPreview = React.useCallback(
+    (confirmedMap?: Record<string, string[]>) => {
+      setShowAutoCropPreview(false);
+      if (confirmedMap && Object.keys(confirmedMap).length > 0) {
+        const selectedTargets =
+          selectedScraped && selectedScraped.length > 0
+            ? selectedScraped
+            : Object.keys(confirmedMap);
+        const selectedSet = new Set(selectedTargets);
+
+        setScrapedImages((prev) => {
+          let injected = false;
+          const copy: string[] = [];
+          prev.forEach((img) => {
+            if (confirmedMap[img]) {
+              if (selectedSet.has(img)) {
+                if (!injected) {
+                  Object.keys(confirmedMap).forEach((k) => {
+                    copy.push(...confirmedMap[k]);
+                  });
+                  injected = true;
+                }
+              } else {
+                copy.push(...confirmedMap[img]);
+              }
+            } else {
+              copy.push(img);
+            }
+          });
+          return copy;
+        });
+        setSelectedScraped([]);
+        addNotification?.("Successfully sliced & auto-cropped panels!", "success");
+        audioFeedback?.playSuccess?.();
+      } else {
+        void handleAutoCropSelected();
+      }
+    },
+    [
+      selectedScraped,
+      setScrapedImages,
+      setSelectedScraped,
+      addNotification,
+      audioFeedback,
+      handleAutoCropSelected,
+    ]
+  );
 
   const hasEnoughCredits = userCredits === null || userCredits >= 20;
 
@@ -854,7 +920,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     isBatchCropping={isBatchCropping}
                     batchProgress={batchProgress}
                     croppingImgUrl={croppingImgUrl}
-                    handleAutoCropSelected={handleAutoCropSelected}
+                    handleAutoCropSelected={handleOpenAutoCropPreview}
                     handleCleanBubblesSelected={handleCleanBubblesSelected}
                     handleCancelBatch={handleCancelBatch}
                     addPanelsToStoryboard={addPanelsToStoryboard}
@@ -874,6 +940,29 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 </div>
               </div>
             </>
+          )}
+
+          {/* ✂️ Interactive Auto-Crop Preview & Panel Type Confirmation Modal */}
+          {showAutoCropPreview && (
+            <React.Suspense fallback={null}>
+              <AutoCropPreviewPage
+                isModal={true}
+                onClose={() => setShowAutoCropPreview(false)}
+                onConfirm={handleConfirmAutoCropPreview}
+                scrapedImages={scrapedImages}
+                selectedScraped={selectedScraped}
+                fetchWithInterceptor={fetchWithInterceptor}
+                addNotification={addNotification}
+                sensitivity={cropSensitivity}
+                padding={cropPaddingPx}
+                backgroundColorMode={appLogic.cropBackgroundMode}
+                autoSplitTallStrips={appLogic.autoSplitTallStrips}
+                aspectRatioLock={appLogic.aspectRatioLock}
+                overlapMergeThreshold={appLogic.overlapMergeThreshold}
+                minPanelHeightPx={appLogic.cropMinHeightPx}
+                isApplying={isBatchCropping}
+              />
+            </React.Suspense>
           )}
         </div>
       </main>

@@ -10,10 +10,14 @@ import {
   Check,
   Sparkles,
   AlertTriangle,
+  AlertCircle,
   CheckCircle2,
   Info,
   KeyRound,
   Github,
+  WifiOff,
+  X,
+  RotateCw,
 } from "lucide-react";
 import AuthShowcase from "@/features/app_auth/components/AuthShowcase";
 import { useLoginForm } from "@/features/app_auth/hooks";
@@ -42,6 +46,10 @@ export default function LoginPage({
     isSocialLoading,
     socialProviderLoading,
     error,
+    setError,
+    errorType,
+    fieldErrors,
+    isOnline,
     infoMessage,
     showPassword,
     setShowPassword,
@@ -93,7 +101,7 @@ export default function LoginPage({
             <button
               type="button"
               onClick={fillDemoCredentials}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-xl text-blue-400 text-xs font-semibold transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-xl text-blue-400 text-xs font-semibold transition-all cursor-pointer active:scale-95"
             >
               <KeyRound className="w-3.5 h-3.5" />
               <span>Demo Account</span>
@@ -118,19 +126,84 @@ export default function LoginPage({
               </p>
             </div>
 
+            {/* Offline Status Warning */}
+            {!isOnline && (
+              <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium flex items-center justify-between gap-2.5 shadow-sm animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <WifiOff className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>You appear to be offline. Reconnecting automatically...</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[10px] font-bold transition-colors flex items-center gap-1"
+                >
+                  <RotateCw className="w-3 h-3" />
+                  <span>Retry</span>
+                </button>
+              </div>
+            )}
+
             {/* Status / Success Banner Message */}
             {infoMessage && (
               <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium flex items-start gap-2.5 shadow-sm animate-in fade-in duration-300">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span className="leading-relaxed">{infoMessage}</span>
+                <span className="leading-relaxed flex-1">{infoMessage}</span>
               </div>
             )}
 
-            {/* Error Message Banner */}
+            {/* Smart Categorized Error Message Banner */}
             {error && (
-              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium flex items-start gap-2.5 shadow-sm animate-in fade-in duration-300">
-                <Info className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                <span className="leading-relaxed">{error}</span>
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-medium flex items-start justify-between gap-3 shadow-lg shadow-rose-950/20 animate-in fade-in duration-300">
+                <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                  <div className="space-y-1.5 min-w-0">
+                    <span className="leading-relaxed block font-medium">{error}</span>
+
+                    {/* Quick Recovery Action Buttons inside Error Banner */}
+                    {errorType === "invalid_credentials" && (
+                      <button
+                        type="button"
+                        onClick={onNavigateToForgotPassword}
+                        className="text-xs font-bold text-rose-300 hover:text-white underline underline-offset-2 flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <span>Forgot your password? Reset it here</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    )}
+
+                    {errorType === "user_not_found" && (
+                      <button
+                        type="button"
+                        onClick={onNavigateToRegister}
+                        className="text-xs font-bold text-rose-300 hover:text-white underline underline-offset-2 flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <span>Create a new free account</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
+                    )}
+
+                    {errorType === "network" && (
+                      <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className="text-xs font-bold text-rose-300 hover:text-white underline underline-offset-2 flex items-center gap-1 transition-colors cursor-pointer"
+                      >
+                        <RotateCw className="w-3 h-3" />
+                        <span>Refresh connection</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setError(null)}
+                  className="p-1 rounded-lg text-rose-400 hover:text-rose-200 hover:bg-rose-500/20 transition-colors shrink-0"
+                  title="Dismiss error"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
               </div>
             )}
 
@@ -140,7 +213,7 @@ export default function LoginPage({
               <Tooltip text="Fast 1-click login with Google OAuth" placement="top">
                 <button
                   type="button"
-                  disabled={isSocialLoading || isLoading}
+                  disabled={isSocialLoading || isLoading || !isOnline}
                   onClick={() => handleSocialLogin("Google")}
                   className="w-full flex items-center justify-center gap-3 py-3 px-5 rounded-xl bg-[#1A1D24] hover:bg-[#232730] border border-[#2F2F2F] hover:border-neutral-500 disabled:opacity-60 text-white font-semibold text-sm transition-all duration-200 cursor-pointer shadow-sm active:scale-[0.99] group"
                 >
@@ -181,7 +254,7 @@ export default function LoginPage({
                 <Tooltip text="Sign in with GitHub" placement="bottom">
                   <button
                     type="button"
-                    disabled={isSocialLoading || isLoading}
+                    disabled={isSocialLoading || isLoading || !isOnline}
                     onClick={() => handleSocialLogin("GitHub")}
                     className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#14161B] hover:bg-[#1C2028] border border-[#2F2F2F] hover:border-neutral-600 disabled:opacity-60 text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
                   >
@@ -200,7 +273,7 @@ export default function LoginPage({
                 <Tooltip text="Sign in with Discord" placement="bottom">
                   <button
                     type="button"
-                    disabled={isSocialLoading || isLoading}
+                    disabled={isSocialLoading || isLoading || !isOnline}
                     onClick={() => handleSocialLogin("Discord")}
                     className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-[#14161B] hover:bg-[#1C2028] border border-[#2F2F2F] hover:border-neutral-600 disabled:opacity-60 text-neutral-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
                   >
@@ -237,7 +310,7 @@ export default function LoginPage({
                     <label className="text-xs font-bold uppercase tracking-wider text-neutral-300">
                       Email Address
                     </label>
-                    {email && (
+                    {email && !fieldErrors.email && (
                       <span
                         className={`text-[10px] font-bold ${
                           isEmailValid ? "text-emerald-400" : "text-amber-400"
@@ -256,10 +329,20 @@ export default function LoginPage({
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className={`w-full bg-[#141414] border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none transition-all font-medium ${
+                        fieldErrors.email
+                          ? "border-rose-500 ring-2 ring-rose-500/20"
+                          : "border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      }`}
                       placeholder="name@example.com"
                     />
                   </div>
+                  {fieldErrors.email && (
+                    <p className="text-[11px] text-rose-400 font-semibold flex items-center gap-1 ml-0.5 animate-in fade-in">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
+                      <span>{fieldErrors.email}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Password Input */}
@@ -289,7 +372,11 @@ export default function LoginPage({
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyDown={checkCapsLock}
                       onKeyUp={checkCapsLock}
-                      className="w-full bg-[#141414] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                      className={`w-full bg-[#141414] border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none transition-all font-medium ${
+                        fieldErrors.password
+                          ? "border-rose-500 ring-2 ring-rose-500/20"
+                          : "border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      }`}
                       placeholder="Enter your password"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
@@ -309,6 +396,12 @@ export default function LoginPage({
                       </Tooltip>
                     </div>
                   </div>
+                  {fieldErrors.password && (
+                    <p className="text-[11px] text-rose-400 font-semibold flex items-center gap-1 ml-0.5 animate-in fade-in">
+                      <AlertCircle className="w-3 h-3 shrink-0" />
+                      <span>{fieldErrors.password}</span>
+                    </p>
+                  )}
 
                   {/* Caps Lock Warning Badge */}
                   {isCapsLockOn && (
