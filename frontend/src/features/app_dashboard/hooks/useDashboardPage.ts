@@ -232,8 +232,10 @@ export default function useDashboardPage() {
       project.series_slug && project.chapter_slug
         ? `/scraper/editor/series/${project.series_slug}/chapters/${
             project.chapter_slug
-          }${jobId ? `?job_id=${encodeURIComponent(jobId)}` : ""}`
-        : `/scraper?project_id=${project.project_id}${
+          }?project_id=${encodeURIComponent(project.project_id)}${
+            jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
+          }`
+        : `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}${
             jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
           }`;
 

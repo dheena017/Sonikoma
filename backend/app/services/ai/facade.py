@@ -313,7 +313,7 @@ async def facade_analyze_image(
 
     skill = registry.get("panel_analysis")
     raw_text = await skill.execute(
-        model=target_model,
+        model=model,
         image_bytes=img_buffer,
         user_keys=user_keys,
         tone_hint=tone_hint,
@@ -326,7 +326,7 @@ async def facade_analyze_image(
         try:
             storyteller_skill = registry.get("panel_storyteller")
             narration = await storyteller_skill.execute(
-                model=target_model,
+                model=model,
                 image_bytes=img_buffer,
                 user_keys=user_keys,
                 visual_scene_description=analysis.get("visual_description", ""),
@@ -364,13 +364,25 @@ async def facade_analyze_image(
         pass
 
     elapsed = int((time.time() - start_time) * 1000)
+    meta = getattr(skill, "last_execution_meta", {}) or {}
+    model_used = meta.get("model") or model or "dynamic-routing"
+    tier_label = meta.get("tier_label") or "Tier 1: Primary"
+    tier = meta.get("tier") or "Tier 1"
+    attempt = meta.get("attempt") or 1
+    total_candidates = meta.get("total_candidates") or 1
+
     return {
         "success": True,
         "analysis": analysis,
         "audio_url": audio_url,
-        "source": "gemini",
-        "model": target_model,
-        "latencyMs": elapsed,
+        "source": meta.get("provider", "gemini"),
+        "model": model_used,
+        "tier": tier,
+        "tier_label": tier_label,
+        "attempt": attempt,
+        "total_candidates": total_candidates,
+        "latencyMs": meta.get("latency_ms", elapsed),
+        "latency_ms": meta.get("latency_ms", elapsed),
         "inputTokens": getattr(skill, "last_input_tokens", 0),
         "outputTokens": getattr(skill, "last_output_tokens", 0)
     }

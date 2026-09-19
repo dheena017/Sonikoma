@@ -322,16 +322,30 @@ export default function MainLayout(props: MainLayoutProps) {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const urlProjectId = params.get("id") || params.get("project_id");
+    const queryId = params.get("id") || params.get("project_id");
+    const chapterSlugMatch = currentPath.match(
+      /\/series\/[^\/]+\/chapters\/([^\/]+)/
+    );
+    const routeChapterSlug = chapterSlugMatch ? chapterSlugMatch[1] : null;
+    const targetIdentifier = queryId || routeChapterSlug;
+
     const storeState = useProjectStore.getState();
-    if (urlProjectId) {
+    if (targetIdentifier) {
+      const currentActiveId = storeState.activeProjectId;
+      const currentChapterSlug =
+        storeState.activeProjectData?.project?.chapter_slug;
+
+      const isMismatch =
+        currentActiveId !== targetIdentifier &&
+        currentChapterSlug !== targetIdentifier;
+
       if (
-        storeState.activeProjectId !== urlProjectId ||
+        isMismatch ||
         !storeState.activeProjectData ||
         storeState.projectState !== "active"
       ) {
-        storeState.setActiveProjectId(urlProjectId);
-        storeState.hydrateActiveProject(urlProjectId, fetchWithInterceptor);
+        storeState.setActiveProjectId(targetIdentifier);
+        storeState.hydrateActiveProject(targetIdentifier, fetchWithInterceptor);
       }
     } else {
       if (storeState.activeProjectId && !storeState.activeProjectData) {

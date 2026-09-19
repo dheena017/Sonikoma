@@ -238,6 +238,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
   );
 
   const [isSaving, setIsSaving] = React.useState(false);
+  const stableNoop = React.useCallback(() => {}, []);
   const [userCredits, setUserCredits] = React.useState<number | null>(
     appLogic.user?.credit_balance ?? appLogic.user?.credits ?? null
   );
@@ -841,7 +842,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   targetUrl={targetUrl}
                   fetchWithInterceptor={fetchWithInterceptor}
                   selectedModel={selectedModel}
-                  setConsoleLogs={() => {}}
+                  setConsoleLogs={stableNoop}
                   voiceActor={voiceActor}
                   musicTheme={musicTheme}
                   speechRate={appLogic.speechRate}
@@ -895,7 +896,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     setSelectedScraped={handleSetSelectedScraped}
                     setScrapedImages={setScrapedImages}
                     mergingIndices={mergingIndices}
-                    setConsoleLogs={() => {}}
+                    setConsoleLogs={stableNoop}
                     panels={panels}
                     setPanels={setPanels}
                     currentPanelIndex={currentPanelIndex}

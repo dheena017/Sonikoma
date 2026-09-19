@@ -52,7 +52,7 @@ class AnalyzeSequenceRequest(BaseModel):
 
 class AnalyzePanelItem(BaseModel):
     """Individual panel item containing an ID and image URL."""
-    id: int
+    id: Any
     url: str
 
 

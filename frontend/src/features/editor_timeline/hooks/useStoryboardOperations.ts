@@ -72,6 +72,7 @@ export function useStoryboardOperations({
   const {
     analyzingPanelId,
     isAnalyzingAll,
+    isAnalyzingSelected,
     isZipping,
     handleDownloadZip,
     handleAnalyzePanel,
@@ -135,6 +136,7 @@ export function useStoryboardOperations({
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
     isAnalyzingAll,
+    isAnalyzingSelected,
     handleCancelAnalysis,
   };
 }

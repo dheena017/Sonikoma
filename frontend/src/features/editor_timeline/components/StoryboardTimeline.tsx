@@ -936,6 +936,7 @@ const StoryboardTimeline = React.memo(
       handleAnalyzeAllPanels,
       handleAnalyzeSelectedPanels,
       isAnalyzingAll,
+      isAnalyzingSelected,
       handleCancelAnalysis,
     } = useStoryboardOperations({
       panels,
@@ -996,11 +997,10 @@ const StoryboardTimeline = React.memo(
           selectedCount={selectedCount}
           totalCount={panels.length}
           handleDownloadZip={handleDownloadZip}
-          isAnalyzingAll={isAnalyzingAll}
+          isAnalyzingAll={isAnalyzingAll || isAnalyzingSelected}
           handleAnalyzeAllPanels={handleAnalyzeAllPanels}
           handleAnalyzeSelected={() => {
             handleAnalyzeSelectedPanels(Array.from(selectedPanelIds));
-            clearSelection();
           }}
           selectAllPanels={selectAllPanels}
           clearSelection={clearSelection}

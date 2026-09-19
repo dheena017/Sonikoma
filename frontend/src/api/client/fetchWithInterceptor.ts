@@ -37,7 +37,16 @@ export function createFetchWithInterceptor({
     input: RequestInfo | URL,
     init?: RequestInit
   ): Promise<Response> => {
-    console.log(`[API Interceptor] Fetching: ${input}`);
+    const inputStr = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as any)?.url || "";
+    const isQuiet =
+      inputStr.includes("/auth/credits") ||
+      inputStr.includes("/metrics") ||
+      inputStr.includes("/health") ||
+      inputStr.includes("system-logs");
+
+    if (!isQuiet) {
+      console.log(`[API Interceptor] Fetching: ${inputStr}`);
+    }
 
     return new Promise<Response>((resolve, reject) => {
       const executeFetch = async () => {
@@ -274,9 +283,11 @@ export function createFetchWithInterceptor({
             return;
           }
 
-          console.log(
-            `[API Interceptor] Response OK: ${input} (${response.status})`
-          );
+          if (!isQuiet) {
+            console.log(
+              `[API Interceptor] Response OK: ${inputStr} (${response.status})`
+            );
+          }
           resolve(response);
         } catch (error: any) {
           if (error.intercepted) {

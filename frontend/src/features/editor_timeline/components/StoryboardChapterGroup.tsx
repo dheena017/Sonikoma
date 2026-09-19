@@ -23,24 +23,24 @@ interface StoryboardChapterGroupProps {
   setActivePreviewTab: (tab: "video" | "timeline") => void;
   setPlaybackTime: (time: number) => void;
   isAnalyzingAll: boolean;
-  analyzingPanelId: number | null;
-  selectedPanelIds: Set<number>;
-  togglePanelSelection: (id: number) => void;
+  analyzingPanelId: number | string | null;
+  selectedPanelIds: Set<any>;
+  togglePanelSelection: (id: any) => void;
   handlePanelClick: (
     idx: number,
-    panelId: number,
+    panelId: any,
     shiftKey: boolean,
     ctrlOrMeta: boolean
   ) => void;
-  handlePanelDoubleClick: (idx: number, panelId: number) => void;
+  handlePanelDoubleClick: (idx: number, panelId: any) => void;
   handleShiftPanel: (idx: number, direction: "left" | "right") => void;
-  handleModifySpeechText: (idx: number, value: string) => void;
-  handleModifyMotion: (idx: number, value: string) => void;
-  handleModifyDuration: (idx: number, value: number) => void;
-  handleModifySFX: (idx: number, value: string) => void;
-  handleModifyVisualDescription: (idx: number, value: string) => void;
-  handleModifyNarrative: (idx: number, value: string) => void;
-  handleAnalyzePanel: (panelId: number, imageUrl: string) => void;
+  handleModifySpeechText: (idx: any, value: string) => void;
+  handleModifyMotion: (idx: any, value: string) => void;
+  handleModifyDuration: (idx: any, value: number) => void;
+  handleModifySFX: (idx: any, value: string) => void;
+  handleModifyVisualDescription: (idx: any, value: string) => void;
+  handleModifyNarrative: (idx: any, value: string) => void;
+  handleAnalyzePanel: (panelId: any, imageUrl: string) => void;
   handleCancelAnalysis?: () => void;
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   autoPlayAudio?: boolean;

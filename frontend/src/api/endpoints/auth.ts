@@ -38,10 +38,31 @@ export const register = async (
   });
 };
 
+let inFlightCurrentUserPromise: Promise<ApiResponse<any>> | null = null;
+let lastCurrentUserCache: { data: ApiResponse<any>; timestamp: number } | null = null;
+
 export const getCurrentUser = async (
-  fetchWithInterceptor: FetchClient
+  fetchWithInterceptor: FetchClient,
+  force = false
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/auth/me");
+  const now = Date.now();
+  if (!force && lastCurrentUserCache && now - lastCurrentUserCache.timestamp < 3000) {
+    return lastCurrentUserCache.data;
+  }
+  if (!force && inFlightCurrentUserPromise) {
+    return inFlightCurrentUserPromise;
+  }
+
+  inFlightCurrentUserPromise = apiRequest(fetchWithInterceptor, "/api/v1/auth/me")
+    .then((res) => {
+      lastCurrentUserCache = { data: res, timestamp: Date.now() };
+      return res;
+    })
+    .finally(() => {
+      inFlightCurrentUserPromise = null;
+    });
+
+  return inFlightCurrentUserPromise;
 };
 
 export const forgotPassword = async (
@@ -231,43 +252,53 @@ export const deleteAccount = async (
   });
 };
 
+let inFlightCreditsPromise: Promise<CreditsPayload | null> | null = null;
+let lastCreditsCache: { data: CreditsPayload; timestamp: number } | null = null;
+
 export const getUserCredits = async (
   fetchWithInterceptor: FetchClient
 ): Promise<number | null> => {
-  try {
-    const data = await apiRequest<any>(
-      fetchWithInterceptor,
-      "/api/v1/auth/credits"
-    );
-    if (data.success && typeof data.credits === "number") {
-      return data.credits;
-    }
-    return null;
-  } catch {
-    return null;
-  }
+  const payload = await getUserCreditsPayload(fetchWithInterceptor);
+  return payload ? payload.credits : null;
 };
 
-/** Full credits payload including low_balance flag. */
+/** Full credits payload including low_balance flag with in-flight deduplication & micro-caching. */
 export const getUserCreditsPayload = async (
-  fetchWithInterceptor: FetchClient
+  fetchWithInterceptor: FetchClient,
+  force = false
 ): Promise<CreditsPayload | null> => {
-  try {
-    const data = await apiRequest<any>(
-      fetchWithInterceptor,
-      "/api/v1/auth/credits"
-    );
-    if (data.success && typeof data.credits === "number") {
-      return {
-        credits: data.credits,
-        low_balance: data.low_balance ?? data.credits < 20,
-        threshold: data.threshold ?? 20,
-      };
-    }
-    return null;
-  } catch {
-    return null;
+  const now = Date.now();
+  if (!force && lastCreditsCache && now - lastCreditsCache.timestamp < 3000) {
+    return lastCreditsCache.data;
   }
+  if (!force && inFlightCreditsPromise) {
+    return inFlightCreditsPromise;
+  }
+
+  inFlightCreditsPromise = (async () => {
+    try {
+      const data = await apiRequest<any>(
+        fetchWithInterceptor,
+        "/api/v1/auth/credits"
+      );
+      if (data.success && typeof data.credits === "number") {
+        const payload: CreditsPayload = {
+          credits: data.credits,
+          low_balance: data.low_balance ?? data.credits < 20,
+          threshold: data.threshold ?? 20,
+        };
+        lastCreditsCache = { data: payload, timestamp: Date.now() };
+        return payload;
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      inFlightCreditsPromise = null;
+    }
+  })();
+
+  return inFlightCreditsPromise;
 };
 
 export const getTransactions = async (

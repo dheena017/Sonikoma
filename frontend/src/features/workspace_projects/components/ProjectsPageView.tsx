@@ -1,5 +1,6 @@
 import React from "react";
 import { FolderOpen, Layers, Zap, Clock, ArrowRight } from "lucide-react";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import ProjectsPageHeader from "@/features/workspace_projects/components/ProjectsPageHeader";
 import ProjectsFilters from "@/features/workspace_projects/components/ProjectsFilters";
 import ProjectsStats from "@/features/workspace_projects/components/ProjectsStats";
@@ -74,6 +75,7 @@ export default function ProjectsPageView({
   setSortBy,
   setViewMode,
   handleNewSeries,
+  handleOpenProject,
   handleOpenSeries,
   handleOpenCreativeSuite,
   handleExport,
@@ -131,6 +133,7 @@ export default function ProjectsPageView({
             toggleSelection={toggleSelection}
             toggleSelectAll={toggleSelectAll}
             onOpenSeries={handleOpenSeries}
+            onOpenProject={handleOpenProject}
             onOpenCreativeSuite={handleOpenCreativeSuite}
             onOpenDetails={handleOpenDetails}
             onRename={handleRename}

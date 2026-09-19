@@ -14,7 +14,7 @@ from fastapi import FastAPI
 
 from app.core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT
 from app.core.utils.banner import _print_startup_banner
-from app.core.logging import logger, ColoredFormatter
+from app.core.logging import logger, ColoredFormatter, setup_logging
 from app.core.logging.handlers import UIStreamLogHandler
 
 SERVER_START = time.time()
@@ -46,6 +46,9 @@ def _clean_temp_workspace():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Initialize global logging handlers and formatting
+    setup_logging()
+
     # Step 1: Environment Security Validation
     required_envs = ["SUPABASE_URL", "GEMINI_API_KEY"]
     missing_envs = [env for env in required_envs if not os.getenv(env)]
@@ -59,6 +62,8 @@ async def lifespan(app: FastAPI):
     # Filter out noisy system-logs polling/SSE stream logs
     for logger_name in ("uvicorn.access", "uvicorn.error", "uvicorn"):
         logging.getLogger(logger_name).addFilter(EndpointFilter())
+    logging.getLogger("PIL").setLevel(logging.INFO)
+    logging.getLogger("httpcore").setLevel(logging.INFO)
     logging.getLogger().addFilter(EndpointFilter())
 
     # Initialize database inside the worker process
@@ -102,8 +107,10 @@ async def lifespan(app: FastAPI):
             try:
                 from app.services.image.layer_separation.sam import get_rembg_session
                 from app.services.image.panel_detection.speech_bubble_detector import get_yolo_speech_bubble_model
+                from app.services.image.ocr.ocr_engine import _load_ocr_reader
                 await asyncio.to_thread(get_rembg_session)
                 await asyncio.to_thread(get_yolo_speech_bubble_model)
+                await asyncio.to_thread(_load_ocr_reader, ["en"])
             except Exception as e:
                 logger.warning(f"[Startup] Model pre-warm failed (non-critical, will lazy-load on first request): {e}")
         else:

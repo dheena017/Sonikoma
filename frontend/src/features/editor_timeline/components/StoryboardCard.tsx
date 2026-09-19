@@ -40,27 +40,27 @@ interface StoryboardCardProps {
   setCurrentPanelIndex: (idx: number) => void;
   setActivePreviewTab: (tab: "video" | "timeline") => void;
   setPlaybackTime: (time: number) => void;
-  analyzingPanelId: number | null;
+  analyzingPanelId: number | string | null;
   isAnalyzingAll?: boolean;
   handleShiftPanel: (idx: number, dir: "left" | "right") => void;
   panelsLength: number;
-  handleModifySpeechText: (id: number, val: string) => void;
-  handleModifyMotion: (id: number, val: string) => void;
-  handleModifyDuration: (id: number, val: number) => void;
-  handleModifySFX: (id: number, val: string) => void;
-  handleModifyVisualDescription: (id: number, val: string) => void;
-  handleModifyNarrative?: (id: number, val: string) => void;
-  handleAnalyzePanel: (id: number, url: string) => void;
+  handleModifySpeechText: (id: any, val: string) => void;
+  handleModifyMotion: (id: any, val: string) => void;
+  handleModifyDuration: (id: any, val: number) => void;
+  handleModifySFX: (id: any, val: string) => void;
+  handleModifyVisualDescription: (id: any, val: string) => void;
+  handleModifyNarrative?: (id: any, val: string) => void;
+  handleAnalyzePanel: (id: any, url: string) => void;
   handleCancelAnalysis?: () => void;
   isSelected: boolean;
   onToggleSelect: () => void;
   onPanelClick?: (
     idx: number,
-    panelId: number,
+    panelId: any,
     shiftKey: boolean,
     ctrlOrMeta: boolean
   ) => void;
-  onPanelDoubleClick?: (idx: number, panelId: number) => void;
+  onPanelDoubleClick?: (idx: number, panelId: any) => void;
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   autoPlayAudio?: boolean;
   addNotification?: (message: string, type: any) => void;
@@ -853,31 +853,39 @@ const StoryboardCard = ({
     return "Portrait";
   }, [dimensions]);
 
+  const isThisPanelAnalyzing =
+    Boolean(panel.isAnalyzing) ||
+    (analyzingPanelId !== null && String(analyzingPanelId) === String(panel.id));
+
   const cardRef = React.useRef<HTMLDivElement>(null);
 
   return (
     <div
       ref={cardRef}
+      style={{
+        contentVisibility: "auto",
+        containIntrinsicSize: viewLayout === "grid" ? "320px 460px" : "300px 460px",
+      }}
       className={`${
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center"
-      } group relative rounded-2xl overflow-hidden border p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 transition-all duration-200 ease-out select-none outline-none backdrop-blur-md shadow-md ${
-        panel.isAnalyzing || analyzingPanelId === panel.id || isAnalyzingAll
-          ? "border-2 border-[#3B82F6] bg-[#2A2A2A] ring-1 ring-[#3B82F6]/50 scale-[1.02]"
+      } group relative rounded-2xl overflow-hidden border p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 transition-colors duration-150 select-none outline-none shadow-sm ${
+        isThisPanelAnalyzing
+          ? "border-2 border-[#3B82F6] bg-[#1a1a24] ring-1 ring-[#3B82F6]/50"
           : isCurrent && isSelected
-          ? "bg-[#2A2A2A] border-[#60A5FA] ring-2 ring-[#3B82F6]/50 scale-[1.02]"
+          ? "bg-[#1f1f2e] border-[#60A5FA] ring-1 ring-[#3B82F6]/50"
           : isCurrent
-          ? "bg-[#0c0d16]/90 border-[#3B82F6] shadow-md scale-[1.01]"
+          ? "bg-[#0c0d16] border-[#3B82F6]"
           : isSelected
-          ? "border-[#3B82F6] bg-[#2A2A2A] shadow-md ring-1 ring-[#3B82F6]/50 scale-[1.02]"
-          : "border-neutral-800/60 bg-neutral-950 hover:border-[#3B82F6]/50 hover:shadow-md hover:scale-[1.02]"
+          ? "border-[#3B82F6] bg-[#1a1a24]"
+          : "border-neutral-800 bg-neutral-950 hover:border-neutral-700"
       }`}
     >
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className="relative h-56 sm:h-64 rounded-xl overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb group-hover:border-[#3B82F6]/30 transition-all duration-300 ease-out"
+        className="relative h-56 sm:h-64 rounded-xl overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb hover:border-[#3B82F6]/40 transition-colors duration-150"
       >
         <img
           src={panel.image_url}
@@ -886,7 +894,7 @@ const StoryboardCard = ({
           decoding="async"
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
-          className="w-full h-full object-contain object-center group-hover/thumb:scale-[1.05] transition-transform duration-300 rounded-xl"
+          className="w-full h-full object-contain object-center rounded-xl"
           style={{ filter: getPanelFilterStyle(panel) }}
           onLoad={(e) => {
             const img = e.currentTarget;
@@ -916,9 +924,7 @@ const StoryboardCard = ({
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-        {(panel.isAnalyzing ||
-          analyzingPanelId === panel.id ||
-          isAnalyzingAll) && (
+        {isThisPanelAnalyzing && (
           <PanelAnalyzingOverlay isAnalyzingAll={isAnalyzingAll} />
         )}
 
@@ -1130,12 +1136,12 @@ const StoryboardCard = ({
             </div>
             <textarea
               rows={1}
-              disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
-              value={panel.speech_text}
+              disabled={isThisPanelAnalyzing}
+              value={panel.speech_text || ""}
               onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
               placeholder="Enter dialogue or subtitle text..."
               className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
-                panel.isAnalyzing || analyzingPanelId === panel.id
+                isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
                   : "hover:border-neutral-700"
               }`}
@@ -1189,14 +1195,14 @@ const StoryboardCard = ({
             </div>
             <textarea
               rows={1}
-              disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+              disabled={isThisPanelAnalyzing}
               value={panel.narrative || ""}
               onChange={(e) =>
                 handleModifyNarrative?.(panel.id, e.target.value)
               }
               placeholder="Enter narrative voiceover or scene description..."
               className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
-                panel.isAnalyzing || analyzingPanelId === panel.id
+                isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
                   : "hover:border-neutral-700"
               }`}
@@ -1213,12 +1219,12 @@ const StoryboardCard = ({
             </div>
             <input
               type="text"
-              disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+              disabled={isThisPanelAnalyzing}
               value={panel.sfx || ""}
               onChange={(e) => handleModifySFX(panel.id, e.target.value)}
               placeholder="e.g. door slam, footsteps..."
               className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all shadow-inner ${
-                panel.isAnalyzing || analyzingPanelId === panel.id
+                isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed text-[#60A5FA] border-[#2F2F2F]"
                   : "hover:border-neutral-700"
               }`}
@@ -1235,14 +1241,14 @@ const StoryboardCard = ({
             </div>
             <textarea
               rows={1}
-              disabled={panel.isAnalyzing || analyzingPanelId === panel.id}
+              disabled={isThisPanelAnalyzing}
               value={panel.visual_description || ""}
               onChange={(e) =>
                 handleModifyVisualDescription(panel.id, e.target.value)
               }
               placeholder="Describe visual scene for lighting..."
               className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
-                panel.isAnalyzing || analyzingPanelId === panel.id
+                isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed text-[#60A5FA] border-[#2F2F2F]"
                   : "hover:border-neutral-700"
               }`}
@@ -1324,7 +1330,7 @@ const StoryboardCard = ({
         {/* Unified 3-in-1 AI Action Toolbar */}
         <div className="grid grid-cols-3 gap-1 pt-0.5">
           {/* 1. Analyze Image */}
-          {analyzingPanelId === panel.id ? (
+          {isThisPanelAnalyzing ? (
             <button
               type="button"
               onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
@@ -1338,7 +1344,7 @@ const StoryboardCard = ({
             <button
               type="button"
               disabled={
-                analyzingPanelId !== null && analyzingPanelId !== panel.id
+                analyzingPanelId !== null && String(analyzingPanelId) !== String(panel.id)
               }
               onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
               className="py-1.5 px-1 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-[#3B82F6]/60 text-neutral-200 hover:text-[#93C5FD] text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-40"
@@ -1573,14 +1579,26 @@ const StoryboardCard = ({
 };
 
 export default React.memo(StoryboardCard, (prevProps, nextProps) => {
+  const prevIsCurrent = prevProps.currentPanelIndex === prevProps.idx;
+  const nextIsCurrent = nextProps.currentPanelIndex === nextProps.idx;
+  if (prevIsCurrent !== nextIsCurrent) return false;
+
+  const prevIsAnalyzing =
+    Boolean(prevProps.panel.isAnalyzing) ||
+    (prevProps.analyzingPanelId !== null &&
+      String(prevProps.analyzingPanelId) === String(prevProps.panel.id));
+  const nextIsAnalyzing =
+    Boolean(nextProps.panel.isAnalyzing) ||
+    (nextProps.analyzingPanelId !== null &&
+      String(nextProps.analyzingPanelId) === String(nextProps.panel.id));
+  if (prevIsAnalyzing !== nextIsAnalyzing) return false;
+
   return (
     prevProps.panel === nextProps.panel &&
     prevProps.idx === nextProps.idx &&
-    prevProps.currentPanelIndex === nextProps.currentPanelIndex &&
     prevProps.activePreviewTab === nextProps.activePreviewTab &&
-    prevProps.analyzingPanelId === nextProps.analyzingPanelId &&
-    prevProps.isAnalyzingAll === nextProps.isAnalyzingAll &&
     prevProps.isSelected === nextProps.isSelected &&
+    prevProps.viewLayout === nextProps.viewLayout &&
     prevProps.panelsLength === nextProps.panelsLength
   );
 });

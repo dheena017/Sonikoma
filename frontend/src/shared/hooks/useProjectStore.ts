@@ -22,6 +22,10 @@ export interface PanelItem {
   duration?: number;
   motion_type?: string;
   visual_description?: string | null;
+  audio_url?: string | null;
+  narrative_audio_url?: string | null;
+  speech_audio_url?: string | null;
+  bgm_track?: string | null;
   brightness?: number | null;
   contrast?: number | null;
   saturation?: number | null;
@@ -896,6 +900,32 @@ export const useProjectStore = create<ProjectStoreState>()(
           project: { ...activeProjectData.project, panels_count: reindexed.length },
           panels: reindexed,
         };
+
+        // Avoid pushing heavy undo/redo history snapshots if only transient flags (e.g. isAnalyzing) changed
+        const prevPanels = activeProjectData.panels || [];
+        const isOnlyTransient =
+          prevPanels.length === reindexed.length &&
+          prevPanels.every((p, i) => {
+            const nextP = reindexed[i];
+            return (
+              p.image_url === nextP.image_url &&
+              p.speech_text === nextP.speech_text &&
+              p.duration === nextP.duration &&
+              p.motion_type === nextP.motion_type &&
+              p.sfx === nextP.sfx &&
+              p.narrative === nextP.narrative &&
+              p.visual_description === nextP.visual_description &&
+              p.audio_url === nextP.audio_url &&
+              p.narrative_audio_url === nextP.narrative_audio_url
+            );
+          });
+
+        if (isOnlyTransient) {
+          set({
+            activeProjectData: updatedData,
+          });
+          return;
+        }
 
         const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
 

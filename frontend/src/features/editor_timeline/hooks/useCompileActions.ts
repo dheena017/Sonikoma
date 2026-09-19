@@ -42,8 +42,9 @@ export function useCompileActions({
   audioFeedback,
 }: UseCompileActionsProps) {
   const activeFetch = fetchWithInterceptor || fetch;
-  const [analyzingPanelId, setAnalyzingPanelId] = useState<number | null>(null);
+  const [analyzingPanelId, setAnalyzingPanelId] = useState<number | string | null>(null);
   const [isAnalyzingAll, setIsAnalyzingAll] = useState<boolean>(false);
+  const [isAnalyzingSelected, setIsAnalyzingSelected] = useState<boolean>(false);
   const [isZipping, setIsZipping] = useState<boolean>(false);
   const abortSignalRef = React.useRef({ aborted: false });
   const abortControllerRef = React.useRef<AbortController | null>(null);
@@ -125,13 +126,13 @@ export function useCompileActions({
     }
   };
 
-  const handleAnalyzePanel = async (panelId: number, imageUrl: string) => {
+  const handleAnalyzePanel = async (panelId: number | string, imageUrl: string) => {
     setAnalyzingPanelId(panelId);
     setPanels((prev) =>
-      prev.map((p) => (p.id === panelId ? { ...p, isAnalyzing: true } : p))
+      prev.map((p) => (String(p.id) === String(panelId) ? { ...p, isAnalyzing: true } : p))
     );
     const activeModel = selectedModel;
-    const originalPanel = panels.find((p) => p.id === panelId);
+    const originalPanel = panels.find((p) => String(p.id) === String(panelId));
     const originalText = originalPanel ? originalPanel.speech_text : "";
     const originalMotion = originalPanel ? originalPanel.motion_type : "";
 
@@ -142,7 +143,14 @@ export function useCompileActions({
     console.log(`  - Model used: ${activeModel}`);
     console.log(`  - Sent Image: ${imageUrl.substring(0, 60)}...`);
     console.log(`  - Sent Original Dialogue: "${originalText}"`);
-    console.log(`  - Sent Original Motion: "${originalMotion}"`);
+    console.log(`  - Sent Original Motion: "${originalPanel?.motion_type || ""}"`);
+
+    if (addNotification) {
+      addNotification(
+        `Starting AI Scanner for Panel #${panelId}...`,
+        "info"
+      );
+    }
 
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
@@ -165,40 +173,38 @@ export function useCompileActions({
         },
         { signal: abortControllerRef.current.signal }
       );
-      if (data.success && data.analysis) {
-        const aiDuration = Number(data.analysis.duration);
-        const aiMotion = String(data.analysis.motion_type || "").trim();
+
+      const analysis = data.analysis || data;
+      if (data.success && (data.analysis || analysis.speech_text !== undefined || analysis.visual_description !== undefined)) {
+        const aiDuration = Number(analysis.duration);
+        const aiMotion = String(analysis.motion_type || "").trim();
         const tierLabel = (data as any).tier_label || "Tier 1: Primary";
         const usedModel = (data as any).model || activeModel || "gemini-2.5-flash";
         const latMs = (data as any).latency_ms ? ` (${(data as any).latency_ms}ms)` : "";
+        const speech = analysis.speech_text !== undefined ? analysis.speech_text : originalPanel?.speech_text;
+        const sfx = analysis.sfx !== undefined ? analysis.sfx : originalPanel?.sfx;
+        const visual = analysis.visual_description !== undefined ? analysis.visual_description : originalPanel?.visual_description;
+        const narrative = data.narrative || data.narrativeText || analysis.narrative || analysis.narrativeText || originalPanel?.narrative;
+        const narrativeAudioUrl = data.narrative_audio_url || analysis.narrative_audio_url || originalPanel?.narrative_audio_url;
 
         setPanels((prev) =>
           prev.map((p) =>
-            p.id === panelId
+            String(p.id) === String(panelId)
               ? {
                   ...p,
-                  speech_text: data.analysis.speech_text || p.speech_text,
-                  dialogueSubtitleText:
-                    data.analysis.speech_text || p.speech_text,
-                  sfx: data.analysis.sfx || p.sfx,
-                  soundEffectSfx: data.analysis.sfx || p.sfx,
-                  // Always use System duration if it's a valid positive number
+                  speech_text: speech,
+                  dialogueSubtitleText: speech,
+                  sfx: sfx,
+                  soundEffectSfx: sfx,
                   duration: aiDuration > 0 ? aiDuration : p.duration,
                   timingSec: aiDuration > 0 ? aiDuration : p.duration,
-                  // Always use System motion if it returned a valid value
                   motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
                   camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                  visual_description:
-                    data.analysis.visual_description || p.visual_description,
-                  visual_scene_description:
-                    data.analysis.visual_description || p.visual_description,
+                  visual_description: visual,
+                  visual_scene_description: visual,
                   audio_url: data.audio_url || p.audio_url,
-                  narrative:
-                    data.narrative || data.analysis?.narrative || p.narrative,
-                  narrative_audio_url:
-                    data.narrative_audio_url ||
-                    data.analysis?.narrative_audio_url ||
-                    p.narrative_audio_url,
+                  narrative,
+                  narrative_audio_url: narrativeAudioUrl,
                   isAnalyzing: false,
                 }
               : p
@@ -212,8 +218,8 @@ export function useCompileActions({
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
             `[Smart Auto-Analysis] [SUCCESS] [${tierLabel}] Panel #${panelId} analyzed by ${usedModel}${latMs}!`,
-            `[Smart Auto-Analysis]   - Dialogue: "${data.analysis.speech_text}"`,
-            `[Smart Auto-Analysis]   - Motion: "${aiMotion}" | Duration: ${aiDuration}s | SFX: "${data.analysis.sfx}"`,
+            `[Smart Auto-Analysis]   - Dialogue: "${speech}"`,
+            `[Smart Auto-Analysis]   - Motion: "${aiMotion}" | Duration: ${aiDuration}s | SFX: "${sfx}"`,
             ...prev,
           ]);
         }
@@ -258,31 +264,41 @@ export function useCompileActions({
     } finally {
       setAnalyzingPanelId(null);
       setPanels((prev) =>
-        prev.map((p) => (p.id === panelId ? { ...p, isAnalyzing: false } : p))
+        prev.map((p) => (String(p.id) === String(panelId) ? { ...p, isAnalyzing: false } : p))
       );
     }
   };
 
-  const handleAnalyzeSelectedPanels = async (selectedIds: number[]) => {
+  const handleAnalyzeSelectedPanels = async (selectedIds: (number | string)[]) => {
     if (selectedIds.length === 0) return;
-    setIsAnalyzingAll(true);
+    setIsAnalyzingSelected(true);
+    const activeModel = selectedModel || undefined;
+    const modelDisplay = activeModel ? `Model: ${activeModel}` : "AI Core Routing (Dynamic)";
+    const selectedIdsSet = new Set(selectedIds.map(String));
+
     if (addNotification) {
       addNotification(
-        `Starting global Sequence Analysis for ${selectedIds.length} selected panel(s)...`,
+        `Starting Sequence Analysis for ${selectedIds.length} selected panel(s) (${modelDisplay})...`,
         "info"
       );
     }
 
-    // Set all selected panels to analyzing state
+    if (setConsoleLogs) {
+      setConsoleLogs((prev) => [
+        `[Sequence Analysis] Initiating analysis for ${selectedIds.length} selected panel(s) (${modelDisplay})`,
+        ...prev,
+      ]);
+    }
+
+    // Set ONLY selected panels to analyzing state
     setPanels((prev) =>
       prev.map((p) =>
-        selectedIds.includes(p.id) ? { ...p, isAnalyzing: true } : p
+        selectedIdsSet.has(String(p.id)) ? { ...p, isAnalyzing: true } : p
       )
     );
 
     try {
-      const activeModel = selectedModel;
-      const targetPanels = panels.filter((p) => selectedIds.includes(p.id));
+      const targetPanels = panels.filter((p) => selectedIdsSet.has(String(p.id)));
       abortControllerRef.current = new AbortController();
 
       const data = await api.analyzeSelectedPanels(
@@ -297,47 +313,62 @@ export function useCompileActions({
       );
 
       if (data.success && data.results) {
-        const resultsById = new Map<number, any>();
-        data.results.forEach((r: any) => {
-          if (typeof r.id === "number") {
-            resultsById.set(r.id, r);
+        const tierLabel = (data as any).tier_label || (data.results?.[0] as any)?.tier_label || "Tier 1: Primary";
+        const modelUsed = (data as any).model || (data.results?.[0] as any)?.model || activeModel || "Dynamic AI Model";
+        const attempt = (data as any).attempt || (data.results?.[0] as any)?.attempt || 1;
+        const totalCandidates = (data as any).total_candidates || (data.results?.[0] as any)?.total_candidates || 1;
+
+        const resultsById = new Map<string, any>();
+        data.results.forEach((r: any, index: number) => {
+          if (r.id !== undefined && r.id !== null) {
+            resultsById.set(String(r.id), r);
+          }
+          if (targetPanels[index]) {
+            resultsById.set(String(targetPanels[index].id), r);
           }
         });
 
         setPanels((prev) =>
           prev.map((p) => {
-            if (!selectedIds.includes(p.id)) return p;
+            if (!selectedIdsSet.has(String(p.id))) return p;
 
-            const result = resultsById.get(p.id);
-            if (result && result.analysis) {
-              const aiDuration = Number(result.analysis.duration);
-              const aiMotion = String(result.analysis.motion_type || "").trim();
+            const result =
+              resultsById.get(String(p.id)) ||
+              (data.results.length === 1 && selectedIds.length === 1 ? data.results[0] : undefined);
+            const analysis = result?.analysis || result;
+
+            if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
+              const aiDuration = Number(analysis.duration);
+              const aiMotion = String(analysis.motion_type || "").trim();
+              const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
+              const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
+              const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
+              const narrative =
+                result.narrative ||
+                result.narrativeText ||
+                result.analysis?.narrative ||
+                result.analysis?.narrativeText ||
+                p.narrative;
+              const narrativeAudioUrl =
+                result.narrative_audio_url ||
+                result.analysis?.narrative_audio_url ||
+                p.narrative_audio_url;
+
               return {
                 ...p,
-                speech_text: result.analysis.speech_text || p.speech_text,
-                dialogueSubtitleText:
-                  result.analysis.speech_text || p.speech_text,
-                sfx: result.analysis.sfx || p.sfx,
-                soundEffectSfx: result.analysis.sfx || p.sfx,
+                speech_text: speech,
+                dialogueSubtitleText: speech,
+                sfx: sfx,
+                soundEffectSfx: sfx,
                 duration: aiDuration > 0 ? aiDuration : p.duration,
                 timingSec: aiDuration > 0 ? aiDuration : p.duration,
                 motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
                 camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                visual_description:
-                  result.analysis.visual_description || p.visual_description,
-                visual_scene_description:
-                  result.analysis.visual_description || p.visual_description,
+                visual_description: visual,
+                visual_scene_description: visual,
                 audio_url: result.audio_url || p.audio_url,
-                narrative:
-                  result.narrative ||
-                  result.narrativeText ||
-                  result.analysis?.narrative ||
-                  result.analysis?.narrativeText ||
-                  p.narrative,
-                narrative_audio_url:
-                  result.narrative_audio_url ||
-                  result.analysis?.narrative_audio_url ||
-                  p.narrative_audio_url,
+                narrative,
+                narrative_audio_url: narrativeAudioUrl,
                 isAnalyzing: false,
               };
             }
@@ -347,22 +378,22 @@ export function useCompileActions({
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Sequence Analysis] Context-aware storyboard script generated for ${targetPanels.length} frames!`,
+            `[Sequence Analysis] [SUCCESS] [${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Context-aware storyboard script generated for ${targetPanels.length} frame(s)!`,
             ...prev,
           ]);
+        }
+
+        if (!abortSignalRef.current.aborted && addNotification) {
+          addNotification(
+            `[${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Sequence analysis completed for ${selectedIds.length} selected panel(s)!`,
+            "success"
+          );
+          audioFeedback?.playSuccess();
         }
       } else {
         throw new Error(
           data.error || "Sequence analysis returned unsuccessful status"
         );
-      }
-
-      if (!abortSignalRef.current.aborted && addNotification) {
-        addNotification(
-          `Smart Sequence Analysis completed for ${selectedIds.length} selected panel(s)!`,
-          "success"
-        );
-        audioFeedback?.playSuccess();
       }
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -384,11 +415,16 @@ export function useCompileActions({
       }
       setPanels((prev) =>
         prev.map((p) =>
-          selectedIds.includes(p.id) ? { ...p, isAnalyzing: false } : p
+          selectedIdsSet.has(String(p.id)) ? { ...p, isAnalyzing: false } : p
         )
       );
     } finally {
-      setIsAnalyzingAll(false);
+      setIsAnalyzingSelected(false);
+      setPanels((prev) =>
+        prev.map((p) =>
+          selectedIdsSet.has(String(p.id)) ? { ...p, isAnalyzing: false } : p
+        )
+      );
     }
   };
 
@@ -396,17 +432,19 @@ export function useCompileActions({
     if (panels.length === 0) return;
     setIsAnalyzingAll(true);
     abortSignalRef.current.aborted = false;
+    const activeModel = selectedModel || undefined;
+    const modelDisplay = activeModel ? `Model: ${activeModel}` : "AI Core Routing (Dynamic)";
 
     if (addNotification) {
       addNotification(
-        "Analyzing Sequence... (Phase 1: Character Dialogue, Sound Effects & Timing)",
+        `Analyzing Sequence... (Phase 1: Character Dialogue, Sound Effects & Timing | ${modelDisplay})`,
         "info"
       );
     }
 
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[Sequence Analysis] Initiating multimodal context-aware sequential analysis for all ${panels.length} panels...`,
+        `[Sequence Analysis] Initiating multimodal context-aware sequential analysis for all ${panels.length} panels (${modelDisplay})...`,
         ...prev,
       ]);
     }
@@ -415,7 +453,6 @@ export function useCompileActions({
     setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: true })));
 
     try {
-      const activeModel = selectedModel;
       abortControllerRef.current = new AbortController();
 
       const imageUrls = panels.map((p) => p.image_url);
@@ -435,42 +472,61 @@ export function useCompileActions({
       if (abortSignalRef.current.aborted) return;
 
       if (data.success && data.results) {
-        const resultsById = new Map<number, any>();
-        data.results.forEach((r: any) => {
-          if (typeof r.id === "number") {
-            resultsById.set(r.id, r);
+        const tierLabel = (data as any).tier_label || (data.results?.[0] as any)?.tier_label || "Tier 1: Primary";
+        const modelUsed = (data as any).model || (data.results?.[0] as any)?.model || activeModel;
+        const attempt = (data as any).attempt || (data.results?.[0] as any)?.attempt || 1;
+        const totalCandidates = (data as any).total_candidates || (data.results?.[0] as any)?.total_candidates || 1;
+
+        const resultsById = new Map<string, any>();
+        data.results.forEach((r: any, index: number) => {
+          if (r.id !== undefined && r.id !== null) {
+            resultsById.set(String(r.id), r);
+          }
+          if (panels[index]) {
+            resultsById.set(String(panels[index].id), r);
           }
         });
 
         // Map of results to panels state
         setPanels((prev) =>
-          prev.map((p) => {
-            const result = resultsById.get(p.id);
-            if (result && result.analysis) {
-              const aiDuration = Number(result.analysis.duration);
-              const aiMotion = String(result.analysis.motion_type || "").trim();
+          prev.map((p, idx) => {
+            const result =
+              resultsById.get(String(p.id)) ||
+              (data.results.length === prev.length ? data.results[idx] : undefined);
+            const analysis = result?.analysis || result;
+
+            if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
+              const aiDuration = Number(analysis.duration);
+              const aiMotion = String(analysis.motion_type || "").trim();
+              const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
+              const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
+              const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
+              const narrative =
+                result.narrative ||
+                result.narrativeText ||
+                result.analysis?.narrative ||
+                result.analysis?.narrativeText ||
+                p.narrative;
+              const narrativeAudioUrl =
+                result.narrative_audio_url ||
+                result.analysis?.narrative_audio_url ||
+                p.narrative_audio_url;
+
               return {
                 ...p,
-                speech_text: result.analysis.speech_text || p.speech_text,
-                dialogueSubtitleText:
-                  result.analysis.speech_text || p.speech_text,
-                sfx: result.analysis.sfx || p.sfx,
-                soundEffectSfx: result.analysis.sfx || p.sfx,
+                speech_text: speech,
+                dialogueSubtitleText: speech,
+                sfx: sfx,
+                soundEffectSfx: sfx,
                 duration: aiDuration > 0 ? aiDuration : p.duration,
                 timingSec: aiDuration > 0 ? aiDuration : p.duration,
                 motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
                 camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                visual_description:
-                  result.analysis.visual_description || p.visual_description,
-                visual_scene_description:
-                  result.analysis.visual_description || p.visual_description,
+                visual_description: visual,
+                visual_scene_description: visual,
                 audio_url: result.audio_url || p.audio_url,
-                narrative:
-                  result.narrative ||
-                  result.narrativeText ||
-                  result.analysis?.narrative ||
-                  result.analysis?.narrativeText ||
-                  p.narrative,
+                narrative,
+                narrative_audio_url: narrativeAudioUrl,
                 isAnalyzing: false,
               };
             }
@@ -480,29 +536,23 @@ export function useCompileActions({
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Sequence Analysis] Phase 1 completed! Created Dialogue, SFX, Motion and Timings for all ${imageUrls.length} frames.`,
+            `[Sequence Analysis] [SUCCESS] [${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Phase 1 completed! Created Dialogue, SFX, Motion and Timings for all ${imageUrls.length} frames.`,
+            `[Sequence Analysis] Narrative and TTS generation completed for all panels in a single request!`,
             ...prev,
           ]);
         }
 
-        if (setConsoleLogs) {
-          setConsoleLogs((prev) => [
-            `[Sequence Analysis] Narrative and TTS generation completed for all panels in a single request!`,
-            ...prev,
-          ]);
+        if (!abortSignalRef.current.aborted && addNotification) {
+          addNotification(
+            `[${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Smart Full Sequence Analysis completed for all ${panels.length} panels!`,
+            "success"
+          );
+          audioFeedback?.playSuccess();
         }
       } else {
         throw new Error(
           data.error || "Sequence analysis returned unsuccessful status"
         );
-      }
-
-      if (!abortSignalRef.current.aborted && addNotification) {
-        addNotification(
-          "Smart Full Sequence Analysis completed successfully for all panels!",
-          "success"
-        );
-        audioFeedback?.playSuccess();
       }
     } catch (err: any) {
       if (err.name === "AbortError" || abortSignalRef.current.aborted) {
@@ -528,6 +578,7 @@ export function useCompileActions({
   return {
     analyzingPanelId,
     isAnalyzingAll,
+    isAnalyzingSelected,
     isZipping,
     handleDownloadZip,
     handleAnalyzePanel,

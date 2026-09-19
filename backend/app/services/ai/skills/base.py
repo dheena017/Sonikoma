@@ -116,13 +116,12 @@ class BaseAISkill:
     ) -> Any:
         """Invokes AIOrchestrator (Central AI Core) for unified rate limiting, quota validation, and execution."""
         start_time = time.monotonic()
-        target_model = model or self.default_model
         prompt = self.build_prompt(**kwargs)
 
         res = await AIOrchestrator.execute_capability(
             capability=self.name,
             prompt=prompt,
-            model=target_model,
+            model=model,
             image_bytes=image_bytes,
             api_key=api_key,
             user_keys=user_keys,
@@ -142,5 +141,15 @@ class BaseAISkill:
             raw_output = str(parsed_data)
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
+        self.last_execution_meta = {
+            "provider": res.get("provider"),
+            "model": res.get("model") or model or getattr(self, "default_model", None) or "gemini-2.5-flash",
+            "tier": res.get("tier", "Tier 1"),
+            "tier_label": res.get("tier_label", "Tier 1: Primary"),
+            "attempt": res.get("attempt", 1),
+            "total_candidates": res.get("total_candidates", 1),
+            "latency_ms": res.get("latency_ms", elapsed_ms),
+            "success": res.get("success", False),
+        }
         self.logger.log_execution(self.name, elapsed_ms, res.get("success", False), kwargs, parsed_data if isinstance(parsed_data, dict) else {}, self.last_input_tokens, self.last_output_tokens)
         return raw_output

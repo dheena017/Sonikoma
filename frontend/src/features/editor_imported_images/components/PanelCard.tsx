@@ -263,16 +263,20 @@ function PanelCard({
       tabIndex={0}
       aria-label={`Panel ${idx + 1}${isSelected ? ", selected" : ""}`}
       aria-pressed={isSelected}
+      style={{
+        contentVisibility: "auto",
+        containIntrinsicSize: viewLayout === "grid" ? "320px 460px" : "300px 460px",
+      }}
       className={[
-        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-all duration-200 ease-out text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950/95 backdrop-blur-md",
+        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-colors duration-150 text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950",
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center",
         isProcessing
-          ? "border-2 border-blue-500 bg-neutral-900/90 shadow-[0_12px_36px_rgba(0,0,0,0.8),0_0_20px_rgba(59,130,246,0.3)] ring-1 ring-blue-400/60 scale-[1.01]"
+          ? "border-2 border-blue-500 bg-neutral-900 ring-1 ring-blue-400/60"
           : isSelected
-          ? "border-blue-500 bg-neutral-900/90 shadow-[0_12px_36px_rgba(0,0,0,0.8),0_0_20px_rgba(59,130,246,0.25)] ring-1 ring-blue-400/50 scale-[1.01]"
-          : "border-neutral-800/80 hover:border-neutral-700 hover:bg-neutral-900/60 hover:shadow-[0_12px_36px_rgba(0,0,0,0.7)] hover:scale-[1.01]",
+          ? "border-blue-500 bg-neutral-900 ring-1 ring-blue-400/50"
+          : "border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60",
         className || "",
       ].join(" ")}
     >
@@ -295,14 +299,14 @@ function PanelCard({
 
       {/* Dynamic Resolution & Aspect Ratio Badges */}
       {dimensions && (
-        <div className="flex items-center justify-between gap-2 px-1 text-[9px] font-mono select-none animate-in fade-in duration-300">
+        <div className="flex items-center justify-between gap-2 px-1 text-[9px] font-mono select-none">
           <span className="text-neutral-500 font-bold bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
             {dimensions.width} × {dimensions.height} px
           </span>
           {aspectRatioLabel && (
             <span
               className={[
-                "px-1.5 py-0.5 rounded font-bold border transition-all duration-300",
+                "px-1.5 py-0.5 rounded font-bold border transition-colors duration-150",
                 aspectRatioBadgeClass,
               ].join(" ")}
             >
@@ -335,4 +339,18 @@ function PanelCard({
   );
 }
 
-export default React.memo(PanelCard);
+export default React.memo(PanelCard, (prev, next) => {
+  return (
+    prev.imgUrl === next.imgUrl &&
+    prev.rawImgUrl === next.rawImgUrl &&
+    prev.idx === next.idx &&
+    prev.displayIdx === next.displayIdx &&
+    prev.isSelected === next.isSelected &&
+    prev.isBatchCropping === next.isBatchCropping &&
+    prev.croppingImgUrl === next.croppingImgUrl &&
+    prev.bubbleCroppingImgUrl === next.bubbleCroppingImgUrl &&
+    prev.isInTimeline === next.isInTimeline &&
+    prev.viewLayout === next.viewLayout &&
+    prev.mergingIndices === next.mergingIndices
+  );
+});

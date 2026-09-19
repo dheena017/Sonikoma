@@ -92,7 +92,16 @@ if __name__ == "__main__":
                 "filters": ["endpoint_filter"],
             },
         },
+        "root": {
+            "handlers": ["default"],
+            "level": log_level_name.upper(),
+        },
         "loggers": {
+            "sonikoma": {
+                "handlers": ["default"],
+                "level": log_level_name.upper(),
+                "propagate": False,
+            },
             "uvicorn": {
                 "handlers": ["default"],
                 "level": log_level_name.upper(),
@@ -106,6 +115,16 @@ if __name__ == "__main__":
             "uvicorn.access": {
                 "handlers": ["default"],
                 "level": log_level_name.upper(),
+                "propagate": False,
+            },
+            "PIL": {
+                "handlers": ["default"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "httpcore": {
+                "handlers": ["default"],
+                "level": "INFO",
                 "propagate": False,
             },
         },

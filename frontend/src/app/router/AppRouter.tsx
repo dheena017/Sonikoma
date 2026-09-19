@@ -126,6 +126,7 @@ const AICreditWalletPage = React.lazy(
 );
 
 import MainLayout from "@/components/layout/MainLayout";
+import { useProjectStore } from "@/shared/hooks";
 
 
 export interface AppRouterProps {
@@ -984,10 +985,23 @@ export default function AppRouter(props: AppRouterProps) {
         return;
       }
 
+      // Guard: Ensure store data is hydrated and actually matches the target project before normalising
+      const activeData = useProjectStore.getState().activeProjectData;
+      if (projId && activeData?.project?.project_id && activeData.project.project_id !== projId) {
+        return;
+      }
+
+      const activeSeriesSlug = activeData?.project?.series_slug || seriesSlugState;
+      const activeChapterSlug = activeData?.project?.chapter_slug || chapterSlugState;
+
+      if (!activeSeriesSlug || !activeChapterSlug) {
+        return;
+      }
+
       const humanPath = getHumanEditorPath({
         projectId: projId,
-        seriesSlug: seriesSlugState,
-        chapterSlug: chapterSlugState,
+        seriesSlug: activeSeriesSlug,
+        chapterSlug: activeChapterSlug,
         jobId: params.get("job_id"),
       });
 

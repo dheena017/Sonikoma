@@ -20,6 +20,7 @@ interface ProjectsPageResultViewProps {
   toggleSelection: (e: React.MouseEvent, projectId: string) => void;
   toggleSelectAll: () => void;
   onOpenSeries: (series: Series) => void;
+  onOpenProject?: (project: Project) => void;
   onOpenCreativeSuite: (e: React.MouseEvent, project: Project) => void;
   onOpenDetails: (e: React.MouseEvent, project: Project) => void;
   onRename: (e: React.MouseEvent, project: Project) => void;
@@ -45,6 +46,7 @@ export default function ProjectsPageResultView({
   toggleSelection,
   toggleSelectAll,
   onOpenSeries,
+  onOpenProject,
   onOpenCreativeSuite,
   onOpenDetails,
   onRename,
@@ -176,10 +178,14 @@ export default function ProjectsPageResultView({
           toggleSelectAll={toggleSelectAll}
           toggleSelection={toggleSelection}
           onOpenProject={(p) => {
-            const series = filteredSeries.find((s) =>
-              s.chapters.some((c) => c.project_id === p.project_id)
-            );
-            if (series) onOpenSeries(series);
+            if (onOpenProject) {
+              onOpenProject(p);
+            } else {
+              const series = filteredSeries.find((s) =>
+                s.chapters.some((c) => c.project_id === p.project_id)
+              );
+              if (series) onOpenSeries(series);
+            }
           }}
           onOpenDetails={onOpenDetails}
           onRename={onRename}

@@ -177,7 +177,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   });
 
   const handleOpenProject = (project: Project) => {
-    const targetPath = `/scraper?id=${project.project_id}`;
+    const targetPath = `/scraper/editor?id=${encodeURIComponent(project.project_id)}`;
     if (props.navigateTo) {
       props.navigateTo(targetPath);
     } else {
