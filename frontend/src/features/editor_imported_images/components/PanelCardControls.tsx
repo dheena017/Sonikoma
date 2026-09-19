@@ -76,7 +76,7 @@ export function PanelCardControls({
               ? "bg-neutral-900/30 border-neutral-800/40 text-neutral-600 cursor-not-allowed select-none opacity-40"
               : isMerging
               ? "bg-neutral-900 border-neutral-700 text-neutral-300 opacity-70 cursor-wait"
-              : "bg-neutral-900/90 hover:bg-neutral-800 border-neutral-750 hover:border-neutral-600 text-neutral-300 hover:text-white cursor-pointer active:scale-[0.98]",
+              : "bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white cursor-pointer active:scale-[0.98]",
           ].join(" ")}
         >
           {isMerging ? (

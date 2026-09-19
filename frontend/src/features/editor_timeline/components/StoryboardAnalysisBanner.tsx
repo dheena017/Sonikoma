@@ -36,7 +36,7 @@ const StoryboardAnalysisBanner = ({
         <button
           type="button"
           onClick={handleCancelAnalysis}
-          className="text-[10px] font-bold text-neutral-400 hover:text-white bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-750 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
+          className="text-[10px] font-bold text-neutral-400 hover:text-white bg-neutral-900/80 hover:bg-neutral-800 border border-neutral-800 px-3 py-1.5 rounded-lg transition-colors cursor-pointer shrink-0"
         >
           Cancel
         </button>

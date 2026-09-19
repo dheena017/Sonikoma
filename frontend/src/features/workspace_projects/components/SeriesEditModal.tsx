@@ -199,7 +199,7 @@ export default function SeriesEditModal({
                 className="flex-1 bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
               />
               {cover && (
-                <div className="w-10 h-10 rounded-xl overflow-hidden border border-neutral-750 shrink-0 bg-neutral-955">
+                <div className="w-10 h-10 rounded-xl overflow-hidden border border-neutral-800 shrink-0 bg-neutral-955">
                   <img
                     src={cover}
                     alt="Preview"
@@ -229,7 +229,7 @@ export default function SeriesEditModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-750/30"
+              className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-800"
             >
               Cancel
             </button>

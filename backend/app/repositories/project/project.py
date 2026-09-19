@@ -96,28 +96,32 @@ def insert_project(data: Dict[str, Any]) -> None:
         chapter_job_id = data.get('job_id')
         project_type = data.get('project_type') or 'permanent'
         episode_number = data.get('episode') or 'Chapter 1'
-        original_url = unwrap_proxy_url(data.get('url'))
+        original_url = unwrap_proxy_url(data.get('url') or data.get('source_url'))
         status = data.get('status') or 'pending'
-        panels_count = data.get('panels_count') or 0
+        panels_count = data.get('panels_count') or data.get('total_panels') or 0
         video_url = data.get('video_url')
+        audio_settings_val = data.get('audio_settings')
+        audio_settings_json = json.dumps(audio_settings_val) if isinstance(audio_settings_val, dict) else (audio_settings_val if isinstance(audio_settings_val, str) else None)
 
-        row_ch = conn.execute("SELECT id, total_tokens_used FROM chapters WHERE id = ? LIMIT 1", (chapter_id,)).fetchone()
+        row_ch = conn.execute("SELECT id, total_tokens_used, audio_settings, original_url FROM chapters WHERE id = ? LIMIT 1", (chapter_id,)).fetchone()
         if row_ch:
             tokens_to_add = data.get('total_tokens_used', 0)
             new_token_total = (row_ch['total_tokens_used'] or 0) + tokens_to_add if tokens_to_add else row_ch['total_tokens_used']
+            final_audio_settings = audio_settings_json or row_ch['audio_settings']
+            final_original_url = original_url or row_ch['original_url']
 
             conn.execute("""
                 UPDATE chapters
-                SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?, total_tokens_used = ?, job_id = COALESCE(?, job_id), project_type = COALESCE(?, project_type)
+                SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?, total_tokens_used = ?, job_id = COALESCE(?, job_id), project_type = COALESCE(?, project_type), audio_settings = ?
                 WHERE id = ?
-            """, (episode_number, original_url, status, panels_count, video_url, new_token_total, chapter_job_id, project_type, chapter_id))
+            """, (episode_number, final_original_url, status, panels_count, video_url, new_token_total, chapter_job_id, project_type, final_audio_settings, chapter_id))
         else:
             chapter_slug = generate_unique_slug(f"{title} {episode_number}", 'chapters', conn)
             initial_tokens = data.get('total_tokens_used', 0)
             conn.execute("""
-                INSERT INTO chapters (id, series_id, job_id, episode_number, slug, original_url, status, panels_count, video_url, total_tokens_used, project_type)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (chapter_id, series_id, chapter_job_id, episode_number, chapter_slug, original_url, status, panels_count, video_url, initial_tokens, project_type))
+                INSERT INTO chapters (id, series_id, job_id, episode_number, slug, original_url, status, panels_count, video_url, total_tokens_used, project_type, audio_settings)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (chapter_id, series_id, chapter_job_id, episode_number, chapter_slug, original_url, status, panels_count, video_url, initial_tokens, project_type, audio_settings_json))
         conn.commit()
     finally:
         conn.close()
@@ -137,22 +141,35 @@ def _enrich_project_item(item: Dict[str, Any], conn: Any) -> Dict[str, Any]:
         except Exception:
             item["panels_count"] = item.get("panels_count") or 0
 
-    # Check imported_assets_count from audio_settings or scrape_sessions
+    # Check imported_assets_count from audio_settings, scrape_sessions, or panels_count
     imported_count = 0
     audio_set = item.get("audio_settings")
     if isinstance(audio_set, dict) and audio_set.get("scraped_images") and isinstance(audio_set["scraped_images"], list):
         imported_count = len(audio_set["scraped_images"])
     
-    if not imported_count and item.get("url"):
+    target_url = item.get("url") or item.get("original_url")
+    if not imported_count and target_url:
         try:
             sess_row = conn.execute(
-                "SELECT panel_count FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
-                (item["url"],)
+                "SELECT panel_count, image_urls FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
+                (target_url,)
             ).fetchone()
-            if sess_row and sess_row[0]:
-                imported_count = sess_row[0]
+            if sess_row:
+                if sess_row["panel_count"]:
+                    imported_count = sess_row["panel_count"]
+                elif sess_row["image_urls"]:
+                    try:
+                        urls = json.loads(sess_row["image_urls"])
+                        if isinstance(urls, list):
+                            imported_count = len(urls)
+                    except Exception:
+                        pass
         except Exception:
             pass
+
+    # Graceful fallback: If imported_count is still 0, fallback to panels_count
+    if not imported_count and item.get("panels_count"):
+        imported_count = item["panels_count"]
 
     item["imported_assets_count"] = imported_count
     return item

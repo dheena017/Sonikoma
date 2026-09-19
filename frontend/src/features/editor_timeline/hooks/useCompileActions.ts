@@ -146,8 +146,8 @@ export function useCompileActions({
 
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[Smart Auto-Analysis] Initiated image analysis on Panel #${panelId} using model: ${activeModel}`,
-        `[Smart Auto-Analysis]   - Sent (Original Dialogue): "${originalText}"`,
+        `[Smart Auto-Analysis] [Tier 1: Primary] Initiated analysis on Panel #${panelId} (Model: ${activeModel || "gemini-2.5-flash"})`,
+        `[Smart Auto-Analysis]   - Sent Dialogue: "${originalText || "None"}"`,
         ...prev,
       ]);
     }
@@ -168,6 +168,10 @@ export function useCompileActions({
       if (data.success && data.analysis) {
         const aiDuration = Number(data.analysis.duration);
         const aiMotion = String(data.analysis.motion_type || "").trim();
+        const tierLabel = (data as any).tier_label || "Tier 1: Primary";
+        const usedModel = (data as any).model || activeModel || "gemini-2.5-flash";
+        const latMs = (data as any).latency_ms ? ` (${(data as any).latency_ms}ms)` : "";
+
         setPanels((prev) =>
           prev.map((p) =>
             p.id === panelId
@@ -202,16 +206,14 @@ export function useCompileActions({
         );
 
         console.log(
-          "[Timeline] Smart Scanner analysis completed successfully for panel",
-          panelId
+          `[Timeline] Smart Scanner completed for panel #${panelId} via [${tierLabel}] (${usedModel})`
         );
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Smart Auto-Analysis] [SUCCESS] Panel #${panelId} analysis completed by ${activeModel}!`,
-            `[Smart Auto-Analysis]   - System Set Dialogue: "${data.analysis.speech_text}"`,
-            `[Smart Auto-Analysis]   - System Set Motion: "${aiMotion}" | System Set Duration: ${aiDuration}s`,
-            `[Smart Auto-Analysis]   - System Set SFX: "${data.analysis.sfx}"`,
+            `[Smart Auto-Analysis] [SUCCESS] [${tierLabel}] Panel #${panelId} analyzed by ${usedModel}${latMs}!`,
+            `[Smart Auto-Analysis]   - Dialogue: "${data.analysis.speech_text}"`,
+            `[Smart Auto-Analysis]   - Motion: "${aiMotion}" | Duration: ${aiDuration}s | SFX: "${data.analysis.sfx}"`,
             ...prev,
           ]);
         }

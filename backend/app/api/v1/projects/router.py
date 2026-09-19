@@ -129,10 +129,11 @@ async def get_public_project_endpoint(project_id: str = Path(..., description="P
             scraped_images_raw = audio_set.get("scraped_images")
             if isinstance(scraped_images_raw, list):
                 scraped_images = [wrap_proxy_url(img) for img in scraped_images_raw if img]
-        elif project.get("url"):
+        if not scraped_images and (project.get("url") or project.get("original_url")):
             try:
                 from repositories.scraper import get_latest_scrape_session
-                sess = get_latest_scrape_session(project["url"])
+                target_url = project.get("url") or project.get("original_url")
+                sess = get_latest_scrape_session(target_url)
                 if sess and sess.get("image_urls"):
                     scraped_images = [wrap_proxy_url(img) for img in sess["image_urls"] if img]
             except Exception:
@@ -717,10 +718,11 @@ async def get_single_project_endpoint(
             scraped_images_raw = audio_set.get("scraped_images")
             if isinstance(scraped_images_raw, list):
                 scraped_images = [wrap_proxy_url(img) for img in scraped_images_raw if img]
-        elif project.get("url"):
+        if not scraped_images and (project.get("url") or project.get("original_url")):
             try:
                 from repositories.scraper import get_latest_scrape_session
-                sess = get_latest_scrape_session(project["url"])
+                target_url = project.get("url") or project.get("original_url")
+                sess = get_latest_scrape_session(target_url)
                 if sess and sess.get("image_urls"):
                     scraped_images = [wrap_proxy_url(img) for img in sess["image_urls"] if img]
             except Exception:

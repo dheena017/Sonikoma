@@ -174,22 +174,22 @@ class AIOrchestrator:
     """
 
     DEFAULT_CAPABILITY_ROUTING = {
-        "storyboard_narrative": "claude-3-5-sonnet-20241022",
-        "panel_analysis": "gemini-3.7-flash",
-        "scraper_blueprint": "gemini-3.7-flash",
-        "prompt_enhancement": "gemini-3.7-flash",
+        "storyboard_narrative": "gemini-2.5-flash",
+        "panel_analysis": "gemini-2.5-flash",
+        "scraper_blueprint": "gemini-2.5-flash",
+        "prompt_enhancement": "gemini-2.5-flash",
         "image_diffusion": "FLUX.1-schnell",
-        "speech_synthesis": "eleven_multilingual_v2",
+        "speech_synthesis": "edge-tts-neural",
         "speech_to_text": "whisper-1",
-        "translate": "deepl-pro",
-        "character_persona": "claude-3-5-sonnet-20241022",
-        "voice_cast": "claude-3-5-sonnet-20241022",
-        "seo_optimization": "gpt-4o-mini",
-        "sfx_audio": "gemini-3.7-flash",
-        "bgm_vibe": "gemini-3.7-flash",
-        "smart_crop": "gemini-3.7-flash",
-        "chat_completion": "gpt-4o",
-        "text": "gemini-3.7-flash",
+        "translate": "gemini-2.5-flash",
+        "character_persona": "gemini-2.5-flash",
+        "voice_cast": "gemini-2.5-flash",
+        "seo_optimization": "gemini-2.5-flash",
+        "sfx_audio": "gemini-2.5-flash",
+        "bgm_vibe": "gemini-2.5-flash",
+        "smart_crop": "gemini-2.5-flash",
+        "chat_completion": "gemini-2.5-flash",
+        "text": "gemini-2.5-flash",
     }
 
     # Capability-aware fallback policy
@@ -404,10 +404,17 @@ class AIOrchestrator:
         latency_ms: int,
         job_id: Optional[str] = None,
         project_id: Optional[str] = None,
-        error: Optional[AIExecutionError] = None
+        error: Optional[AIExecutionError] = None,
+        total_candidates: int = 3,
+        tokens_info: str = ""
     ):
-        """Unified structured observability log line."""
-        ctx = f"[AI Orchestrator] Cap: '{capability}' | Provider: {provider} | Model: {model} | Attempt: {attempt} | Status: {status} ({latency_ms}ms)"
+        """Unified structured observability log line with explicit Tier and Candidate accounting."""
+        tier_names = {1: "Tier 1: Primary", 2: "Tier 2: Fallback", 3: "Tier 3: Safety Net"}
+        tier_label = tier_names.get(attempt, f"Tier {attempt}")
+        
+        ctx = f"[AI Orchestrator] [{tier_label}] ({attempt}/{total_candidates} candidates) | Cap: '{capability}' | Provider: {provider} | Model: {model} | Status: {status.upper()} ({latency_ms}ms)"
+        if tokens_info:
+            ctx += f" | {tokens_info}"
         if job_id:
             ctx += f" | Job: {job_id}"
         if project_id:
@@ -455,40 +462,51 @@ class AIOrchestrator:
             cls.log_execution_attempt(cap_clean, "none", model or "none", 1, "rejected", 0, job_id, project_id, err)
             raise err
 
-        # 2. Build Candidate Execution Chain
+        # 2. Build Multi-Tier Candidate Execution Chain (Tier 1 -> Tier 2 -> Tier 3)
         primary_provider, target_model, intra_fallbacks = cls.resolve_execution_plan(cap_clean, mode="manual" if model else "system", requested_model=model)
         
         policy = cls.FALLBACK_POLICY.get(cap_clean, {"cross_provider": True, "deterministic": True})
         candidates: List[Tuple[str, str]] = [(primary_provider, target_model)]
         
-        # Only attach fallback chain if no specific model was requested (system auto-routing mode)
-        if not model:
-            for f_model in intra_fallbacks:
-                if f_model != target_model:
-                    candidates.append((primary_provider, f_model))
+        # Always attach fallback chain (Tier 2 & Tier 3) so 429 rate limits or 503 outages fall back seamlessly
+        for f_model in intra_fallbacks:
+            if f_model != target_model and (primary_provider, f_model) not in candidates:
+                candidates.append((primary_provider, f_model))
 
-            if policy.get("cross_provider", True):
-                cross_chain = ModelRegistry.get_cross_provider_fallback_chain(cap_clean)
-                for cp_provider, cp_model in cross_chain:
-                    if (cp_provider, cp_model) not in candidates:
-                        candidates.append((cp_provider, cp_model))
-
+        if policy.get("cross_provider", True):
+            cross_chain = ModelRegistry.get_cross_provider_fallback_chain(cap_clean)
+            for cp_provider, cp_model in cross_chain:
+                if (cp_provider, cp_model) not in candidates:
+                    candidates.append((cp_provider, cp_model))
 
         last_error = None
         attempt = 0
+        total_candidates = len(candidates)
         from services.ai.skills.coordinator import execute_provider_call, FallbackCoordinator
+
+        tier_names = {1: "Tier 1: Primary", 2: "Tier 2: Fallback", 3: "Tier 3: Safety Net"}
 
         # 3. Execution Loop across validated candidates
         for p_cand, m_cand in candidates:
             attempt += 1
+            tier_label = tier_names.get(attempt, f"Tier {attempt}")
+            # Only Tier 1 gets a retry (max_attempts = 2). Tier 2 & Tier 3 get 1 attempt (max_attempts = 1) for rapid failover.
+            tier_max_retries = 2 if attempt == 1 else 1
+
+            logger.info(
+                f"[AI Orchestrator] [{tier_label}] ({attempt}/{total_candidates} candidates) "
+                f">>> Executing capability '{cap_clean}' via Provider: {p_cand} | Model: {m_cand} | Max Retries: {tier_max_retries}"
+            )
+
             # Verify provider credentials
             if not cls.is_provider_configured(p_cand, user_keys):
+                logger.info(f"[AI Orchestrator] [{tier_label}] Provider '{p_cand}' unconfigured. Skipping to next candidate...")
                 continue
 
             # Verify rate limits
             rate_ok, rate_msg = cls.get_rate_limiter().check_limit(p_cand, m_cand, user_id)
             if not rate_ok:
-                logger.warning(f"[AI Orchestrator] Candidate '{m_cand}' throttled: {rate_msg}. Trying next fallback candidate...")
+                logger.warning(f"[AI Orchestrator] [{tier_label}] Candidate '{m_cand}' throttled: {rate_msg}. Advancing to next fallback...")
                 continue
 
             attempt_t0 = time.monotonic()
@@ -501,6 +519,7 @@ class AIOrchestrator:
                     image_bytes=image_bytes,
                     api_key=api_key,
                     user_keys=user_keys,
+                    max_retries=tier_max_retries,
                     **kwargs
                 )
                 attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
@@ -522,8 +541,11 @@ class AIOrchestrator:
                     status="SUCCESS",
                 )
                 cls.finalize_credits(user_id, cap_clean, credit_amount, True)
-                cls.log_execution_attempt(cap_clean, p_cand, m_cand, attempt, "success", attempt_lat, job_id, project_id)
-                logger.info(f"[AI Orchestrator] Capability '{cap_clean}' succeeded via {p_cand}:{m_cand} ({p_tokens}+{c_tokens} tokens, latency={attempt_lat}ms)")
+                cls.log_execution_attempt(
+                    cap_clean, p_cand, m_cand, attempt, "success", attempt_lat, job_id, project_id,
+                    total_candidates=total_candidates,
+                    tokens_info=f"Tokens: {p_tokens} prompt + {c_tokens} completion"
+                )
 
                 # Parse JSON if possible
                 try:
@@ -535,18 +557,31 @@ class AIOrchestrator:
                     "success": True,
                     "provider": p_cand,
                     "model": m_cand,
+                    "tier": f"Tier {attempt}",
+                    "tier_label": tier_label,
+                    "attempt": attempt,
+                    "total_candidates": total_candidates,
                     "result": parsed,
                     "input_tokens": p_tokens,
                     "output_tokens": c_tokens,
                     "latency_ms": attempt_lat,
-                    "attempt": attempt,
                 }
 
             except Exception as exc:
                 attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
                 classified = classify_error(exc, provider=p_cand, model=m_cand)
-                cls.log_execution_attempt(cap_clean, p_cand, m_cand, attempt, "failed", attempt_lat, job_id, project_id, classified)
+                cls.log_execution_attempt(
+                    cap_clean, p_cand, m_cand, attempt, "failed", attempt_lat, job_id, project_id, classified,
+                    total_candidates=total_candidates
+                )
                 last_error = classified
+                if attempt < total_candidates:
+                    next_p, next_m = candidates[attempt]
+                    next_tier = tier_names.get(attempt + 1, f"Tier {attempt + 1}")
+                    logger.warning(
+                        f"[AI Orchestrator] [{tier_label}] Failed on {m_cand} ({classified.error_code}). "
+                        f"Failing over to [{next_tier}] ({attempt + 1}/{total_candidates}: {next_m})..."
+                    )
                 continue
 
         # 4. If all candidates fail, handle capability fallback policy

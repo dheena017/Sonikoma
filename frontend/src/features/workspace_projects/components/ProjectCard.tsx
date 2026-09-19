@@ -414,11 +414,11 @@ export default function ProjectCard({
             {/* Imported Assets Count */}
             <div
               className="flex items-center gap-1 text-blue-400"
-              title={`${project.imported_assets_count ?? 0} Imported Assets`}
+              title={`${project.imported_assets_count || project.panels_count || 0} Imported Assets`}
             >
               <Layers className="h-3.5 w-3.5 shrink-0 text-blue-400" />
               <span className="font-bold text-neutral-200">
-                {project.imported_assets_count ?? 0}
+                {project.imported_assets_count || project.panels_count || 0}
               </span>
               <span className="text-[10px] text-neutral-400">assets</span>
             </div>

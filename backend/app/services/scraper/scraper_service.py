@@ -224,9 +224,14 @@ async def scrape_and_initialize_project(
         "author": final_author,
         "cover_image": final_cover,
         "synopsis": final_synopsis,
+        "url": normalized_url,
         "source_url": normalized_url,
+        "panels_count": len(final_images),
         "total_panels": len(final_images),
-        "user_id": user_id
+        "user_id": user_id,
+        "audio_settings": {
+            "scraped_images": final_images
+        }
     }
 
     try:

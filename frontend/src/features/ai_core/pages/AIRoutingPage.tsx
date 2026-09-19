@@ -63,8 +63,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Generates episodic comic script, panel breakdown, and emotional voice acting cues with deep narrative reasoning.",
     required_type: "text_reasoning",
-    default_primary: "claude-3-5-sonnet-20241022",
-    default_fallback: "gemini-3.7-flash",
+    default_primary: "gemini-2.5-flash",
+    default_fallback: "gemini-2.5-flash-lite",
     default_tertiary: "gpt-4o",
   },
   {
@@ -75,9 +75,9 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Detects speech bubble coordinates, panel boundaries, character presence, and visual manga reading direction.",
     required_type: "vision_multimodal",
-    default_primary: "gemini-3.7-flash",
-    default_fallback: "gpt-4o",
-    default_tertiary: "claude-3-5-sonnet-20241022",
+    default_primary: "gemini-2.5-flash",
+    default_fallback: "gemini-2.5-flash-lite",
+    default_tertiary: "gpt-4o",
   },
   {
     task: "scraper_blueprint",
@@ -87,8 +87,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Analyzes webtoon DOM structures, extracts chapter metadata, episode titles, and high-resolution comic pages.",
     required_type: "vision_multimodal",
-    default_primary: "gemini-3.7-flash",
-    default_fallback: "gpt-4o-mini",
+    default_primary: "gemini-2.5-flash",
+    default_fallback: "gemini-2.5-flash-lite",
     default_tertiary: "deepseek-chat",
   },
   {
@@ -99,7 +99,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Refines visual prompts for Stable Diffusion & FLUX with anime lighting, cinematic angles, and Japanese aesthetics.",
     required_type: "text_reasoning",
-    default_primary: "gemini-3.7-flash",
+    default_primary: "gemini-2.5-flash",
     default_fallback: "gpt-4o-mini",
     default_tertiary: "claude-3-5-haiku-20241022",
   },
@@ -123,9 +123,9 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Synthesizes expressive Japanese, English, and multilingual dialogue narration with emotion and pitch control.",
     required_type: "audio_tts",
-    default_primary: "eleven_multilingual_v2",
-    default_fallback: "tts-1-hd",
-    default_tertiary: "edge-tts-neural",
+    default_primary: "edge-tts-neural",
+    default_fallback: "eleven_multilingual_v2",
+    default_tertiary: "tts-1-hd",
   },
   {
     task: "translate",
@@ -135,8 +135,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Translates webtoon speech bubbles preserving Japanese onomatopoeia nuances across English, Korean, and Chinese.",
     required_type: "translation",
-    default_primary: "deepl-pro",
-    default_fallback: "gemini-3.7-flash",
+    default_primary: "gemini-2.5-flash",
+    default_fallback: "deepl-pro",
     default_tertiary: "gpt-4o-mini",
   },
   {

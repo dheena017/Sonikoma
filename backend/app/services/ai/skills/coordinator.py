@@ -151,6 +151,7 @@ async def execute_provider_call(
     image_bytes: Optional[bytes] = None,
     api_key: Optional[str] = None,
     user_keys: Optional[dict] = None,
+    max_retries: int = 2,
     **kwargs
 ) -> str:
     """Executes call to specific AI provider client API."""
@@ -194,7 +195,8 @@ async def execute_provider_call(
                 model=effective_model_id,
                 contents=contents,
                 config=config
-            )
+            ),
+            max_attempts=max_retries
         )
 
         if not response:

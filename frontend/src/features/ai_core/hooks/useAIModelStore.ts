@@ -12,33 +12,35 @@ export interface AIModelInfo {
   description?: string;
 }
 
-export const SYSTEM_DEFAULT_MODEL = "gemini-3.7-flash";
+export const SYSTEM_DEFAULT_MODEL = "gemini-2.5-flash";
 
 export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
+  {
+    id: "gemini-2.5-flash",
+    name: "Gemini 2.5 Flash",
+    provider: "gemini",
+    capabilities: ["Vision", "OCR", "JSON", "Multimodal", "Fast"],
+    speedRating: "ultra-fast",
+    badge: "Recommended (Free Tier: 1,500/day)",
+    description: "Google's most resilient high-throughput model with generous 1,500 free daily requests.",
+  },
+  {
+    id: "gemini-2.5-flash-lite",
+    name: "Gemini 2.5 Flash-Lite",
+    provider: "gemini",
+    capabilities: ["Vision", "Speed-Optimized", "Low-Cost"],
+    speedRating: "ultra-fast",
+    badge: "Fastest Sub-Second",
+    description: "Ultra low-latency lightweight vision and OCR model (<160ms).",
+  },
   {
     id: "gemini-3.7-flash",
     name: "Gemini 3.7 Flash",
     provider: "gemini",
     capabilities: ["Vision", "Coding", "Agentic", "Deep-Reasoning", "Fast"],
     speedRating: "ultra-fast",
-    badge: "Flagship / Recommended",
-    description: "Google's most capable Flash model for complex agentic workflows and coding.",
-  },
-  {
-    id: "gemini-3.6-flash",
-    name: "Gemini 3.6 Flash",
-    provider: "gemini",
-    capabilities: ["Vision", "JSON", "Multimodal", "Fast"],
-    speedRating: "ultra-fast",
-    description: "Balanced multimodal intelligence for general comic analysis.",
-  },
-  {
-    id: "gemini-3.5-flash",
-    name: "Gemini 3.5 Flash",
-    provider: "gemini",
-    capabilities: ["Vision", "JSON", "High-Throughput"],
-    speedRating: "ultra-fast",
-    description: "High-throughput foundational processing for bulk chapters.",
+    badge: "Advanced Reasoning (Paid / 20 Free)",
+    description: "Google's flagship reasoning model for complex agentic workflows.",
   },
   {
     id: "gemini-3.5-flash-lite",

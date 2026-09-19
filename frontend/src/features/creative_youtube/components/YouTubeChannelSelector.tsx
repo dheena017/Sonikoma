@@ -140,7 +140,7 @@ export default function YouTubeChannelSelector({
                 <img
                   src={activeChannel.thumbnail}
                   alt={activeChannel.title}
-                  className="w-8 h-8 rounded-full border border-neutral-750 object-cover shrink-0"
+                  className="w-8 h-8 rounded-full border border-neutral-800 object-cover shrink-0"
                 />
               ) : (
                 <div className="w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-400 shrink-0">
@@ -201,7 +201,7 @@ export default function YouTubeChannelSelector({
                           className="w-7 h-7 rounded-full border border-neutral-800 object-cover shrink-0"
                         />
                       ) : (
-                        <div className="w-7 h-7 rounded-full bg-neutral-850 border border-neutral-750 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-neutral-850 border border-neutral-800 flex items-center justify-center shrink-0">
                           <User className="h-3.5 w-3.5" />
                         </div>
                       )}

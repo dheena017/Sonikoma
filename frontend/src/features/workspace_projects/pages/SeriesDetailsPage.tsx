@@ -460,7 +460,7 @@ export default function SeriesDetailsPage({
                 <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold font-mono">
                   {series.genre || "Fantasy Action"}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-neutral-750 text-neutral-300 text-xs font-mono">
+                <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-neutral-800 text-neutral-300 text-xs font-mono">
                   By {series.author || "Unknown Author"}
                 </span>
               </div>
@@ -515,7 +515,7 @@ export default function SeriesDetailsPage({
 
               <button
                 onClick={() => setIsPublishModalOpen(true)}
-                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/40 hover:bg-neutral-850 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
               >
                 <Film className="h-4 w-4 text-[#3B82F6]" />
                 <span>Export Full Series</span>
@@ -523,7 +523,7 @@ export default function SeriesDetailsPage({
 
               <button
                 onClick={() => setIsReaderModalOpen(true)}
-                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-emerald-500/40 hover:bg-neutral-850 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
               >
                 <BookOpen className="h-4 w-4 text-emerald-400" />
                 <span>Read Series</span>
@@ -531,7 +531,7 @@ export default function SeriesDetailsPage({
 
               <button
                 onClick={() => navigateTo("/creative-suite/ai-voice")}
-                className="flex items-center gap-2 bg-neutral-955 border border-neutral-750 hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 hover:bg-neutral-850 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
               >
                 <Volume2 className="h-4 w-4 text-amber-400" />
                 <span>Audio Studio</span>
@@ -855,7 +855,7 @@ export default function SeriesDetailsPage({
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase font-mono border ${
                       chapter.status && chapter.status.toLowerCase() !== "draft"
                         ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                        : "bg-neutral-800 border-neutral-750 text-neutral-400"
+                        : "bg-neutral-800 border-neutral-800 text-neutral-400"
                     }`}
                   >
                     {chapter.status || "Draft"}

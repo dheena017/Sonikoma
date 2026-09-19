@@ -258,10 +258,13 @@ export function calculateAssetCounts(
   scrapedImages: string[] = []
 ): { panelsCount: number; importedCount: number } {
   const panelsCount = project?.panels_count ?? panels.length;
-  let importedCount = project?.imported_assets_count ?? scrapedImages.length;
+  let importedCount = project?.imported_assets_count ?? (scrapedImages.length > 0 ? scrapedImages.length : 0);
 
-  if (!importedCount && Array.isArray(project?.audio_settings?.scraped_images)) {
+  if (!importedCount && Array.isArray(project?.audio_settings?.scraped_images) && project.audio_settings.scraped_images.length > 0) {
     importedCount = project.audio_settings.scraped_images.length;
+  }
+  if (!importedCount && panelsCount > 0) {
+    importedCount = panelsCount;
   }
 
   return { panelsCount, importedCount };

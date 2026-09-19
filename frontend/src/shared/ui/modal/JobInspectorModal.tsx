@@ -135,7 +135,7 @@ export default function JobInspectorModal({
             <button
               type="button"
               onClick={() => copyToClipboard(JSON.stringify(job, null, 2))}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-850 hover:bg-neutral-800 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold transition-all border border-neutral-750/30 cursor-pointer active:scale-95"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-850 hover:bg-neutral-800 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold transition-all border border-neutral-800 cursor-pointer active:scale-95"
             >
               {copiedJson ? (
                 <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -306,7 +306,7 @@ export default function JobInspectorModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all border border-neutral-750/30 cursor-pointer active:scale-95"
+              className="px-5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all border border-neutral-800 cursor-pointer active:scale-95"
             >
               Close
             </button>

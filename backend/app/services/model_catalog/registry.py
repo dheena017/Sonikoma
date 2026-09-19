@@ -195,7 +195,7 @@ class ModelRegistry:
         """
         if not model_str:
             catalog = cls.get_catalog()
-            first = catalog[0] if catalog else {"provider": "gemini", "id": "gemini-3.7-flash"}
+            first = catalog[0] if catalog else {"provider": "gemini", "id": "gemini-2.5-flash"}
             return first["provider"], first["id"]
 
         m = model_str.strip()
@@ -266,20 +266,20 @@ class ModelRegistry:
         matching = [m["id"] for m in cls.get_catalog() if m.get("provider", "").lower() == p]
         if matching:
             return matching
-        return [m["id"] for m in cls.get_catalog() if m.get("provider") == "gemini"] or ["gemini-3.7-flash"]
+        return [m["id"] for m in cls.get_catalog() if m.get("provider") == "gemini"] or ["gemini-2.5-flash"]
 
     RECOMMENDED_CAPABILITY_CHAINS: Dict[str, List[tuple[str, str]]] = {
-        "storyboard_narrative": [("gemini", "gemini-3.7-flash"), ("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o")],
-        "panel_analysis": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o"), ("anthropic", "claude-3-5-sonnet-20241022")],
-        "scraper_blueprint": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o-mini"), ("deepseek", "deepseek-chat")],
-        "prompt_enhancement": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
+        "storyboard_narrative": [("gemini", "gemini-2.5-flash"), ("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o")],
+        "panel_analysis": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-2.5-flash-lite"), ("openai", "gpt-4o")],
+        "scraper_blueprint": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("deepseek", "deepseek-chat")],
+        "prompt_enhancement": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
         "image_diffusion": [("huggingface", "FLUX.1-schnell"), ("openai", "dall-e-3"), ("stablediffusion", "stable-diffusion-xl")],
         "speech_synthesis": [("elevenlabs", "eleven_multilingual_v2"), ("openai", "tts-1-hd"), ("edgetts", "edge-tts-neural")],
-        "translate": [("deepl", "deepl-pro"), ("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o-mini")],
-        "character_persona": [("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o"), ("gemini", "gemini-3.7-flash")],
-        "seo_optimization": [("openai", "gpt-4o-mini"), ("gemini", "gemini-3.7-flash"), ("deepseek", "deepseek-chat")],
-        "sfx_audio": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
-        "smart_crop": [("gemini", "gemini-3.7-flash"), ("openai", "gpt-4o"), ("gemini", "gemini-3.5-flash")],
+        "translate": [("deepl", "deepl-pro"), ("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini")],
+        "character_persona": [("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o"), ("gemini", "gemini-2.5-flash")],
+        "seo_optimization": [("openai", "gpt-4o-mini"), ("gemini", "gemini-2.5-flash"), ("deepseek", "deepseek-chat")],
+        "sfx_audio": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
+        "smart_crop": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-2.5-flash-lite"), ("openai", "gpt-4o")],
     }
 
     @classmethod
@@ -307,4 +307,4 @@ class ModelRegistry:
     def get_primary_model_for_capability(cls, capability: str) -> str:
         """Dynamically finds the best primary model for any capability."""
         chain = cls.get_cross_provider_fallback_chain(capability)
-        return chain[0][1] if chain else "gemini-3.7-flash"
+        return chain[0][1] if chain else "gemini-2.5-flash"
