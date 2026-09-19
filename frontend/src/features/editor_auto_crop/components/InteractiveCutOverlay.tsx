@@ -224,18 +224,40 @@ export function InteractiveCutOverlay({
     totalHeight,
   ]);
 
-  // Smooth scroll into view ONLY when selected programmatically, NOT on direct pointer click/drag
+  // Prevent zoom or other re-renders from triggering unwanted auto-scroll
+  const prevSelectedPanelRef = useRef<number | null>(null);
+  const prevZoomScaleRef = useRef<number>(zoomScale);
+
+  // Preserve center focal point when zooming canvas in/out without jumping
+  useEffect(() => {
+    if (!scrollViewportRef.current) return;
+    const el = scrollViewportRef.current;
+    const prevScale = prevZoomScaleRef.current;
+    if (prevScale !== zoomScale && prevScale > 0) {
+      const scaleFactor = zoomScale / prevScale;
+      const currentCenterY = el.scrollTop + el.clientHeight / 2;
+      const newCenterY = currentCenterY * scaleFactor;
+      el.scrollTop = Math.max(0, newCenterY - el.clientHeight / 2);
+    }
+    prevZoomScaleRef.current = zoomScale;
+  }, [zoomScale]);
+
+  // Smooth scroll into view ONLY when selected panel actually changes, NOT on zoom or re-renders
   useEffect(() => {
     if (
       selectedPanelIndex === null ||
       selectedPanelIndex < 0 ||
+      selectedPanelIndex === prevSelectedPanelRef.current ||
       dragAction !== null ||
       dragRef.current !== null ||
       Date.now() - lastDirectInteractionRef.current < 1000 ||
       !containerRef.current
     ) {
+      prevSelectedPanelRef.current = selectedPanelIndex;
       return;
     }
+    prevSelectedPanelRef.current = selectedPanelIndex;
+
     const targetBox = containerRef.current.querySelector(
       `[data-panel-idx="${selectedPanelIndex}"]`
     );
