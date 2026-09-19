@@ -85,6 +85,16 @@ export const HorizontalScrollContainer: React.FC<{
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [showShiftHint, setShowShiftHint] = useState(false);
+  const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const triggerShiftHint = useCallback(() => {
+    setShowShiftHint(true);
+    if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
+    hintTimeoutRef.current = setTimeout(() => {
+      setShowShiftHint(false);
+    }, 2400);
+  }, []);
 
   // Mouse drag-to-scroll refs
   const isMouseDownRef = useRef(false);
@@ -118,7 +128,7 @@ export const HorizontalScrollContainer: React.FC<{
     el.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", checkScroll, { passive: true });
 
-    // Wheel event handler: translates vertical mouse wheel to horizontal scroll when hovering over container
+    // Wheel event handler: allows normal page vertical scroll, and horizontal scroll on Shift+Scroll
     const handleNativeWheel = (e: WheelEvent) => {
       const maxScroll = el.scrollWidth - el.clientWidth;
       if (maxScroll <= 0) return;
@@ -128,24 +138,18 @@ export const HorizontalScrollContainer: React.FC<{
         return;
       }
 
-      // Shift or Ctrl + wheel -> always horizontal scroll
-      if (e.shiftKey || e.ctrlKey) {
-        if (e.deltaY !== 0) {
+      // Shift + wheel -> smoothly scroll horizontal container
+      if (e.shiftKey) {
+        if (e.deltaY !== 0 || e.deltaX !== 0) {
           e.preventDefault();
-          el.scrollLeft += e.deltaY * 1.2;
+          el.scrollLeft += (e.deltaY || e.deltaX) * 1.2;
         }
         return;
       }
 
-      // Vertical wheel: scroll container horizontally if it can scroll in that direction
-      const isScrollingDown = e.deltaY > 0;
-      const isScrollingUp = e.deltaY < 0;
-      const canScrollRightNow = el.scrollLeft < maxScroll - 1;
-      const canScrollLeftNow = el.scrollLeft > 1;
-
-      if ((isScrollingDown && canScrollRightNow) || (isScrollingUp && canScrollLeftNow)) {
-        e.preventDefault();
-        el.scrollLeft += e.deltaY * 1.2;
+      // Regular vertical mouse wheel: allow natural vertical page scrolling and show visual hint
+      if (Math.abs(e.deltaY) > 0) {
+        triggerShiftHint();
       }
     };
 
@@ -291,6 +295,14 @@ export const HorizontalScrollContainer: React.FC<{
       >
         <ChevronRight className="w-5 h-5 stroke-[2.5]" />
       </button>
+
+      {/* Floating Shift+Scroll Helper Hint Notification */}
+      {showShiftHint && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-40 bg-[#0c0d16]/95 text-[#93C5FD] border border-[#3B82F6]/50 text-[11px] font-mono font-medium px-3.5 py-1.5 rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.9)] backdrop-blur-xl flex items-center gap-2 pointer-events-none animate-in fade-in zoom-in-95 duration-200 select-none">
+          <span className="flex items-center justify-center w-4 h-4 rounded bg-[#3B82F6]/25 text-[#60A5FA] text-[10px] font-bold">⇧</span>
+          <span>Hold <kbd className="px-1.5 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[10px]">Shift</kbd> + Scroll to move horizontally</span>
+        </div>
+      )}
     </div>
   );
 };

@@ -280,6 +280,12 @@ export default function StoryboardHeader({
               : panelsLength}{" "}
             {panelsLength === 1 ? "Scene" : "Scenes"}
           </span>
+          {viewLayout === "scroll" && panelsLength > 1 && (
+            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-[#3B82F6]/30 text-[10px] text-[#93C5FD] font-mono shadow-sm">
+              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-[#3B82F6]/20 text-[#60A5FA] text-[9px] font-bold">⇧</span>
+              <span>Hold <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">Shift</kbd> + Scroll to move horizontally</span>
+            </span>
+          )}
         </div>
         <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
           Motion sequence timeline, speech transcript alignment & audio-sync
