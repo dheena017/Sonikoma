@@ -14,6 +14,7 @@ import {
   Radio,
   AudioWaveform,
   ChevronRight,
+  ChevronDown,
   Check,
   Search,
   Globe,
@@ -268,6 +269,7 @@ export default function AudioSettingsPage({
   const [loadingVoices, setLoadingVoices] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [voiceSearch, setVoiceSearch] = useState<string>("");
+  const [isVoiceDropdownOpen, setIsVoiceDropdownOpen] = useState<boolean>(false);
   const [localNarratorVoice, setLocalNarratorVoice] = useState<string>(
     () => localStorage.getItem("ai_comic_narrator_voice") || "en-US-GuyNeural"
   );
@@ -534,139 +536,148 @@ export default function AudioSettingsPage({
         {/* VOICE TAB */}
         {activeTab === "voice" && (
           <div className="space-y-4">
-            {/* Global Language Filter & Search Toolbar */}
+            {/* Unified AI Voice Actor Dropdown Card */}
             <div
-              className="rounded-2xl border p-4 space-y-3"
+              className="rounded-2xl border p-5 space-y-4"
               style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
             >
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-white">
-                  <Globe className="h-4 w-4 text-[#3B82F6]" />
-                  <span>Choose Voice Language & Dialect</span>
-                </div>
-                <div className="relative flex-1 sm:max-w-xs">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
-                  <input
-                    type="text"
-                    value={voiceSearch}
-                    onChange={(e) => setVoiceSearch(e.target.value)}
-                    placeholder="Search voice actor or dialect..."
-                    className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl pl-8.5 pr-3 py-1.5 text-white placeholder-neutral-500 focus:border-[#3B82F6] outline-none"
-                  />
-                  {voiceSearch && (
-                    <button
-                      onClick={() => setVoiceSearch("")}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 hover:text-white"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Language Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
-                {distinctLanguages.map((lang) => {
-                  const isSelected = selectedLanguage === lang;
-                  return (
-                    <button
-                      key={lang}
-                      onClick={() => setSelectedLanguage(lang)}
-                      className="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer"
-                      style={{
-                        backgroundColor: isSelected ? "#3b82f6" : "#141420",
-                        color: isSelected ? "#ffffff" : "#9ca3af",
-                        border: `1px solid ${isSelected ? "#3b82f6" : "#222233"}`,
-                      }}
-                    >
-                      {lang}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Voice Selector Card */}
-            <div
-              className="rounded-2xl border p-6 space-y-4"
-              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
-            >
-              <div className="flex items-center gap-3 pb-3 border-b border-neutral-800">
-                <div className="w-8 h-8 rounded-xl bg-[#2A2A2A] flex items-center justify-center">
-                  <Radio className="h-4 w-4 text-[#3B82F6]" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">AI Character Voice</h3>
-                  <p className="text-[11px] text-neutral-500 mt-0.5">
-                    {loadingVoices
-                      ? "Loading voices from server..."
-                      : `Showing ${filteredVoices.length} of ${displayVoices.length} voices`}
-                  </p>
+              <div className="flex items-center justify-between pb-3 border-b border-neutral-800/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#3B82F6]/30 to-indigo-600/30 border border-[#3B82F6]/40 flex items-center justify-center">
+                    <Mic className="h-4 w-4 text-[#60A5FA]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">AI Voice Actor</h3>
+                    <p className="text-[11px] text-neutral-400 mt-0.5">
+                      Unified neural voice model for character dialogues, speech & narration
+                    </p>
+                  </div>
                 </div>
                 {loadingVoices && (
-                  <div className="ml-auto h-4 w-4 rounded-full border-2 border-[#3B82F6] border-t-transparent animate-spin" />
+                  <div className="h-4 w-4 rounded-full border-2 border-[#3B82F6] border-t-transparent animate-spin" />
                 )}
               </div>
 
-              {/* Voice grid */}
-              {filteredVoices.length === 0 ? (
-                <div className="text-center py-6 text-xs text-neutral-500">
-                  No voice matches &quot;{voiceSearch}&quot; in {selectedLanguage}.
+              {/* Selected Voice Trigger Button */}
+              <button
+                type="button"
+                onClick={() => setIsVoiceDropdownOpen((prev) => !prev)}
+                className="w-full flex items-center justify-between p-3.5 rounded-xl border border-neutral-750 bg-neutral-900/90 hover:bg-neutral-850 hover:border-[#3B82F6]/60 transition-all cursor-pointer group shadow-sm text-left"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-[#3B82F6]/20 border border-[#3B82F6]/40 flex items-center justify-center text-[#60A5FA] shrink-0 font-mono font-bold text-xs">
+                    {displayVoices.find((v) => v.code === voiceActor)?.gender === "Female" ? "♀" : "♂"}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white truncate">
+                        {displayVoices.find((v) => v.code === voiceActor)?.label?.split("—")?.[1]?.trim() ||
+                          displayVoices.find((v) => v.code === voiceActor)?.label?.split("—")?.[0]?.trim() ||
+                          voiceActor}
+                      </span>
+                      {displayVoices.find((v) => v.code === voiceActor)?.lang && (
+                        <span className="text-[9.5px] px-1.5 py-0.5 rounded-md bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[#60A5FA] font-medium">
+                          {displayVoices.find((v) => v.code === voiceActor)?.lang}
+                        </span>
+                      )}
+                      {displayVoices.find((v) => v.code === voiceActor)?.gender && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
+                          {displayVoices.find((v) => v.code === voiceActor)?.gender}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[10px] font-mono text-neutral-400 truncate mt-0.5">
+                      {voiceActor}
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1"
-                  style={{ scrollbarWidth: "thin", scrollbarColor: "#4b2d7e transparent" }}
-                >
-                  {filteredVoices.map((voice) => (
-                    <VoiceCard
-                      key={voice.code}
-                      voice={voice}
-                      isSelected={voiceActor === voice.code}
-                      onSelect={() => setVoiceActor(voice.code)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
 
-            {/* Narrator Voice Card */}
-            <div
-              className="rounded-2xl border p-6 space-y-4"
-              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
-            >
-              <div className="flex items-center gap-3 pb-3 border-b border-neutral-800">
-                <div className="w-8 h-8 rounded-xl bg-indigo-600/20 flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-indigo-400" />
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <span className="text-[11px] font-medium text-neutral-400 group-hover:text-white transition-colors">
+                    {isVoiceDropdownOpen ? "Close" : "Select Voice"}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-neutral-400 group-hover:text-white transition-transform duration-200 ${
+                      isVoiceDropdownOpen ? "rotate-180 text-[#60A5FA]" : ""
+                    }`}
+                  />
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">Narrator Voice Profile</h3>
-                  <p className="text-[11px] text-neutral-500 mt-0.5">
-                    Dedicated voice actor for narrative dialogue and story transitions
-                  </p>
-                </div>
-              </div>
+              </button>
 
-              {filteredVoices.length === 0 ? (
-                <div className="text-center py-6 text-xs text-neutral-500">
-                  No voice matches &quot;{voiceSearch}&quot; in {selectedLanguage}.
-                </div>
-              ) : (
-                <div
-                  className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1"
-                  style={{ scrollbarWidth: "thin", scrollbarColor: "#3730a3 transparent" }}
-                >
-                  {filteredVoices.map((voice) => (
-                    <VoiceCard
-                      key={voice.code}
-                      voice={voice}
-                      isSelected={localNarratorVoice === voice.code}
-                      onSelect={() => {
-                        setLocalNarratorVoice(voice.code);
-                        localStorage.setItem("ai_comic_narrator_voice", voice.code);
-                      }}
-                    />
-                  ))}
+              {/* Expandable Dropdown Menu with Filter & Search */}
+              {isVoiceDropdownOpen && (
+                <div className="space-y-3 pt-3 border-t border-neutral-800/80 animate-in fade-in slide-in-from-top-2 duration-200">
+                  {/* Language Filter & Search Toolbar */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                    {/* Language Pills */}
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 flex-1" style={{ scrollbarWidth: "none" }}>
+                      {distinctLanguages.map((lang) => {
+                        const isSelected = selectedLanguage === lang;
+                        return (
+                          <button
+                            key={lang}
+                            type="button"
+                            onClick={() => setSelectedLanguage(lang)}
+                            className="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer"
+                            style={{
+                              backgroundColor: isSelected ? "#3b82f6" : "#141420",
+                              color: isSelected ? "#ffffff" : "#9ca3af",
+                              border: `1px solid ${isSelected ? "#3b82f6" : "#222233"}`,
+                            }}
+                          >
+                            {lang}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="relative w-full sm:w-56 shrink-0">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
+                      <input
+                        type="text"
+                        value={voiceSearch}
+                        onChange={(e) => setVoiceSearch(e.target.value)}
+                        placeholder="Search voice or dialect..."
+                        className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl pl-8.5 pr-3 py-1.5 text-white placeholder-neutral-500 focus:border-[#3B82F6] outline-none"
+                      />
+                      {voiceSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setVoiceSearch("")}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-neutral-400 hover:text-white cursor-pointer"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Scrollable Voice Grid List */}
+                  {filteredVoices.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-neutral-500 bg-neutral-950/60 rounded-xl border border-neutral-800">
+                      No voice matches &quot;{voiceSearch}&quot; in {selectedLanguage}.
+                    </div>
+                  ) : (
+                    <div
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1 bg-neutral-950/40 p-2 rounded-xl border border-neutral-800/80"
+                      style={{ scrollbarWidth: "thin", scrollbarColor: "#3b82f6 transparent" }}
+                    >
+                      {filteredVoices.map((voice) => (
+                        <VoiceCard
+                          key={voice.code}
+                          voice={voice}
+                          isSelected={voiceActor === voice.code}
+                          onSelect={() => {
+                            setVoiceActor(voice.code);
+                            setLocalNarratorVoice(voice.code);
+                            localStorage.setItem("ai_comic_narrator_voice", voice.code);
+                            setIsVoiceDropdownOpen(false);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
