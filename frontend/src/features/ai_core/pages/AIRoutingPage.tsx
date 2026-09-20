@@ -64,7 +64,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
       "Generates episodic comic script, panel breakdown, and emotional voice acting cues with deep narrative reasoning.",
     required_type: "text_reasoning",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "gemini-2.5-flash-lite",
+    default_fallback: "claude-3-5-sonnet-20241022",
     default_tertiary: "gpt-4o",
   },
   {
@@ -76,7 +76,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
       "Detects speech bubble coordinates, panel boundaries, character presence, and visual manga reading direction.",
     required_type: "vision_multimodal",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "gemini-2.5-flash-lite",
+    default_fallback: "gemini-3.5-flash-lite",
     default_tertiary: "gpt-4o",
   },
   {
@@ -88,7 +88,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
       "Analyzes webtoon DOM structures, extracts chapter metadata, episode titles, and high-resolution comic pages.",
     required_type: "vision_multimodal",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "gemini-2.5-flash-lite",
+    default_fallback: "gpt-4o-mini",
     default_tertiary: "deepseek-chat",
   },
   {
@@ -149,7 +149,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "text_reasoning",
     default_primary: "claude-3-5-sonnet-20241022",
     default_fallback: "gpt-4o",
-    default_tertiary: "gemini-3.7-flash",
+    default_tertiary: "gemini-2.5-flash",
   },
   {
     task: "seo_optimization",
@@ -160,7 +160,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
       "Generates high-CTR YouTube titles, timestamps, video descriptions, tags, and hashtag recommendations.",
     required_type: "text_reasoning",
     default_primary: "gpt-4o-mini",
-    default_fallback: "gemini-3.7-flash",
+    default_fallback: "gemini-2.5-flash",
     default_tertiary: "deepseek-chat",
   },
   {
@@ -171,7 +171,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Detects onomatopoeia action sounds (*BAM*, *WHOOSH*, *DOKI*) and recommends matched sound effects.",
     required_type: "text_reasoning",
-    default_primary: "gemini-3.7-flash",
+    default_primary: "gemini-2.5-flash",
     default_fallback: "gpt-4o-mini",
     default_tertiary: "claude-3-5-haiku-20241022",
   },
@@ -183,9 +183,9 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Calculates optimal 9:16 vertical Shorts and 16:9 widescreen panel focus bounding boxes with zero head clipping.",
     required_type: "vision_multimodal",
-    default_primary: "gemini-3.7-flash",
-    default_fallback: "gpt-4o",
-    default_tertiary: "gemini-3.5-flash",
+    default_primary: "gemini-2.5-flash",
+    default_fallback: "gemini-3.5-flash-lite",
+    default_tertiary: "gpt-4o",
   },
 ];
 
@@ -237,7 +237,6 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
 
-
   const handleResetSingleTask = (task: string) => {
     const def = CAPABILITY_DEFINITIONS.find((d) => d.task === task);
     if (!def) return;
@@ -264,71 +263,141 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [simRunning, setSimRunning] = useState<boolean>(false);
   const [simResult, setSimResult] = useState<any>(null);
 
-  // Filter suitable models by task capability
-  const getSuitableModels = (taskType: string): DynamicModelOption[] => {
-    if (!availableModels.length) return [];
-    switch (taskType) {
-      case "audio_tts":
-        return availableModels.filter(
-          (m) =>
-            m.provider === "edgetts" ||
-            m.provider === "elevenlabs" ||
-            m.capabilities?.some((c) =>
-              ["tts", "audio", "voice_cloning", "multilingual_audio"].includes(
-                c.toLowerCase()
-              )
-            ) ||
-            m.category?.toLowerCase().includes("speech")
-        );
-      case "image_diffusion":
-        return availableModels.filter(
-          (m) =>
-            m.provider === "huggingface" ||
-            m.provider === "stablediffusion" ||
-            m.id.toLowerCase().includes("dall-e") ||
-            m.capabilities?.some((c) =>
-              [
-                "image_generation",
-                "high_res_image",
-                "diffusion",
-                "image",
-              ].includes(c.toLowerCase())
-            ) ||
-            m.category?.toLowerCase().includes("diffusion") ||
-            m.category?.toLowerCase().includes("image")
-        );
-      case "vision_multimodal":
-        return availableModels.filter(
-          (m) =>
-            m.capabilities?.some((c) => c.toLowerCase() === "vision") ||
-            m.category?.toLowerCase().includes("multimodal") ||
-            m.category?.toLowerCase().includes("vision") ||
-            m.id.toLowerCase().includes("gemini") ||
-            m.id.toLowerCase().includes("gpt-4o") ||
-            m.id.toLowerCase().includes("claude-3-5-sonnet")
-        );
-      case "translation":
-        return availableModels.filter(
-          (m) =>
-            m.provider === "deepl" ||
-            m.capabilities?.some((c) =>
-              ["translation", "multilingual"].includes(c.toLowerCase())
-            ) ||
-            m.category?.toLowerCase().includes("translation") ||
-            ["gemini", "openai", "anthropic"].includes(m.provider)
-        );
-      case "text_reasoning":
-      default:
-        return availableModels.filter(
-          (m) =>
-            m.provider !== "edgetts" &&
-            m.provider !== "elevenlabs" &&
-            m.provider !== "stablediffusion" &&
-            !m.capabilities?.some((c) =>
-              ["image_generation", "tts"].includes(c.toLowerCase())
-            )
-        );
+  // Return all compatible models from the full catalog for this specific task
+  const getTierModelsForTask = (route: CapabilityRoute): DynamicModelOption[] => {
+    const taskCurrentIds = [
+      route.default_primary,
+      route.default_fallback,
+      route.default_tertiary,
+      route.primary_model,
+      route.fallback_model,
+      route.tertiary_model,
+    ].filter(Boolean);
+
+    if (!availableModels || availableModels.length === 0) {
+      const uniqueIds = Array.from(new Set(taskCurrentIds));
+      return uniqueIds.map((id) => ({
+        id,
+        name: id,
+        provider: "gemini",
+        provider_name: "Google Gemini",
+        category: route.category,
+        speed_rating: "Ultra Fast",
+        context_window: "1M Tokens",
+      }));
     }
+
+    const req = route.required_type;
+    let filtered = availableModels;
+
+    if (req === "audio_tts") {
+      filtered = availableModels.filter((m) => {
+        const caps = m.capabilities || [];
+        const cat = (m.category || "").toLowerCase();
+        const id = m.id.toLowerCase();
+        return (
+          caps.includes("tts") ||
+          caps.includes("audio") ||
+          caps.includes("voice_cloning") ||
+          cat.includes("speech") ||
+          cat.includes("audio") ||
+          cat.includes("voice") ||
+          id.includes("tts") ||
+          id.includes("eleven") ||
+          id.includes("edge")
+        );
+      });
+    } else if (req === "image_diffusion") {
+      filtered = availableModels.filter((m) => {
+        const caps = m.capabilities || [];
+        const cat = (m.category || "").toLowerCase();
+        const id = m.id.toLowerCase();
+        return (
+          caps.includes("image_generation") ||
+          caps.includes("high_res_image") ||
+          caps.includes("inpainting") ||
+          cat.includes("diffusion") ||
+          cat.includes("visual") ||
+          cat.includes("image") ||
+          id.includes("flux") ||
+          id.includes("dall") ||
+          id.includes("stable") ||
+          id.includes("image")
+        );
+      });
+    } else if (req === "vision_multimodal") {
+      filtered = availableModels.filter((m) => {
+        const caps = m.capabilities || [];
+        const cat = (m.category || "").toLowerCase();
+        const id = m.id.toLowerCase();
+        return (
+          caps.includes("vision") ||
+          caps.includes("multimodal") ||
+          cat.includes("vision") ||
+          cat.includes("multimodal") ||
+          cat.includes("ocr") ||
+          id.includes("gemini") ||
+          id.includes("gpt-4o") ||
+          id.includes("claude-3-5-sonnet")
+        );
+      });
+    } else if (req === "translation") {
+      filtered = availableModels.filter((m) => {
+        const caps = m.capabilities || [];
+        const cat = (m.category || "").toLowerCase();
+        const id = m.id.toLowerCase();
+        return (
+          caps.includes("translation") ||
+          caps.includes("text") ||
+          caps.includes("multilingual") ||
+          id.includes("deepl") ||
+          id.includes("gemini") ||
+          id.includes("gpt") ||
+          id.includes("claude") ||
+          id.includes("deepseek") ||
+          id.includes("llama")
+        );
+      });
+    } else {
+      // General LLM / text reasoning tasks - exclude pure audio/image models
+      filtered = availableModels.filter((m) => {
+        const id = m.id.toLowerCase();
+        const isPureAudioOrImage =
+          (id.includes("tts") && !id.includes("gemini")) ||
+          id.includes("eleven") ||
+          id.includes("flux") ||
+          id.includes("stable-diffusion") ||
+          id.includes("dall-e");
+        return !isPureAudioOrImage;
+      });
+    }
+
+    // Ensure currently selected/default models are always included in the dropdown options
+    const existingIds = new Set(filtered.map((m) => m.id.toLowerCase()));
+    const missingModels: DynamicModelOption[] = [];
+
+    for (const id of taskCurrentIds) {
+      if (!existingIds.has(id.toLowerCase())) {
+        const found = availableModels.find((m) => m.id.toLowerCase() === id.toLowerCase());
+        if (found) {
+          missingModels.push(found);
+          existingIds.add(id.toLowerCase());
+        } else {
+          missingModels.push({
+            id,
+            name: id,
+            provider: "gemini",
+            provider_name: "Google Gemini",
+            category: route.category,
+            speed_rating: "Ultra Fast",
+            context_window: "1M Tokens",
+          });
+          existingIds.add(id.toLowerCase());
+        }
+      }
+    }
+
+    return [...filtered, ...missingModels];
   };
 
   // Load Models and Routing Matrix on Mount
@@ -709,10 +778,10 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
             <Sparkles className="w-4 h-4 text-[#3B82F6]" />
           </div>
           <div className="text-xl font-bold text-[#E5E5E5] font-mono">
-            {availableModels.length} Engines
+            {new Set(routes.flatMap((r) => [r.primary_model, r.fallback_model, r.tertiary_model])).size || 12} Tier Engines
           </div>
           <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-            Loaded from providers directory
+            Active across 3-tier routing pipelines
           </div>
         </div>
 
@@ -814,7 +883,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
       {/* ── 4. PIPELINE TASK CARDS WITH 3-TIER CASCADE FLOW ───────────────── */}
       <div className="space-y-4">
         {filteredRoutes.map((route) => {
-          const suitable = getSuitableModels(route.required_type);
+          const tierModels = getTierModelsForTask(route);
           const catColor =
             CATEGORY_COLORS[route.category] || CATEGORY_COLORS["Creative Narration"];
 
@@ -859,10 +928,10 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                   </div>
                 </div>
 
-                {/* Header Action Badges: Suitable count, slug, and Simulator Button */}
+                {/* Header Action Badges: 3 Tier count, slug, and Simulator Button */}
                 <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
                   <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] text-[#9CA3AF]">
-                    {suitable.length} suitable models
+                    {tierModels.length} Tier Engines
                   </span>
 
                   <button
@@ -883,7 +952,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                 <TierModelCard
                   tierType="primary"
                   modelId={route.primary_model}
-                  availableModels={suitable}
+                  availableModels={tierModels}
                   onModelChange={(val) =>
                     handleModelChange(route.task, "primary_model", val)
                   }
@@ -893,7 +962,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                 <TierModelCard
                   tierType="fallback"
                   modelId={route.fallback_model}
-                  availableModels={suitable}
+                  availableModels={tierModels}
                   onModelChange={(val) =>
                     handleModelChange(route.task, "fallback_model", val)
                   }
@@ -903,7 +972,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                 <TierModelCard
                   tierType="tertiary"
                   modelId={route.tertiary_model}
-                  availableModels={suitable}
+                  availableModels={tierModels}
                   onModelChange={(val) =>
                     handleModelChange(route.task, "tertiary_model", val)
                   }

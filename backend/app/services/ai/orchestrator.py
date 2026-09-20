@@ -63,32 +63,76 @@ class AIExecutionError(Exception):
         }
 
 
+def _clean_error_message(exc: Exception, provider: Optional[str] = None, model: Optional[str] = None) -> Tuple[AIErrorCode, str]:
+    """Parses raw provider exceptions into canonical AIErrorCode and a clean, user-friendly message."""
+    import re
+    err_str = str(exc)
+    err_lower = err_str.lower()
+    prov_label = (provider or "AI Provider").capitalize()
+    model_label = model or "default model"
+
+    # 1. Quota & Rate Limit (429 / Resource Exhausted)
+    if "429" in err_lower or "quota" in err_lower or "rate limit" in err_lower or "resource_exhausted" in err_lower:
+        if "free_tier_requests" in err_lower or "freetier" in err_lower or "generaterequestsperday" in err_lower:
+            return (
+                AIErrorCode.RATE_LIMITED,
+                f"Google Gemini Free Tier daily quota exhausted (20 requests/day limit on {model_label}). "
+                "Please enable pay-as-you-go billing in Google AI Studio or switch models in AI settings."
+            )
+        
+        retry_match = re.search(r'retry in\s+([0-9\.]+)s', err_str, re.IGNORECASE)
+        if retry_match:
+            sec = max(1, int(float(retry_match.group(1))))
+            return (
+                AIErrorCode.RATE_LIMITED,
+                f"Rate limit exceeded on {prov_label} ({model_label}). Please wait {sec}s or upgrade your quota plan."
+            )
+        
+        return (
+            AIErrorCode.RATE_LIMITED,
+            f"Rate limit or request quota exceeded on {prov_label} for model '{model_label}'. Please retry shortly or switch models."
+        )
+
+    # 2. Insufficient Credits
+    if "insufficient credits" in err_lower or "low credit balance" in err_lower:
+        return (AIErrorCode.INSUFFICIENT_CREDITS, f"Insufficient credits to execute AI request with model '{model_label}'.")
+
+    # 3. Model Not Found (404)
+    if "404" in err_lower or "not found" in err_lower or "model not found" in err_lower:
+        return (AIErrorCode.MODEL_NOT_FOUND, f"Model '{model_label}' is not found or unsupported on {prov_label}.")
+
+    # 4. Authentication / API Key failure (401 / 403)
+    if "401" in err_lower or "403" in err_lower or "api key" in err_lower or "permission" in err_lower or "unauthorized" in err_lower or "forbidden" in err_lower:
+        return (AIErrorCode.AUTH_FAILURE, f"Invalid or unauthorized API key for {prov_label}. Please check your API key in settings.")
+
+    # 5. Service Unavailable / Connection (503)
+    if "503" in err_lower or "unavailable" in err_lower or "connection" in err_lower or "econnrefused" in err_lower or "dns" in err_lower or "getaddrinfo" in err_lower:
+        return (AIErrorCode.PROVIDER_UNAVAILABLE, f"{prov_label} service is temporarily unavailable or unreachable. Please try again later.")
+
+    # 6. Timeout
+    if "timeout" in err_lower or "timed out" in err_lower:
+        return (AIErrorCode.TIMEOUT, f"Request to {prov_label} timed out for model '{model_label}'.")
+
+    # 7. Invalid Request Payload (400 / 422)
+    if "400" in err_lower or "422" in err_lower or "validation" in err_lower or "invalid" in err_lower:
+        # Extract short message if available in json
+        msg_match = re.search(r"['\"]message['\"]\s*:\s*['\"]([^'\"]+)['\"]", err_str)
+        short_detail = msg_match.group(1) if msg_match else err_str[:120]
+        return (AIErrorCode.INVALID_REQUEST, f"Invalid request for {prov_label} ({model_label}): {short_detail}")
+
+    # 8. Fallback / Internal Error
+    msg_match = re.search(r"['\"]message['\"]\s*:\s*['\"]([^'\"]+)['\"]", err_str)
+    if msg_match:
+        return (AIErrorCode.INTERNAL_ERROR, f"{prov_label} error: {msg_match.group(1)}")
+    
+    clean_fallback = err_str[:150] if len(err_str) > 150 else err_str
+    return (AIErrorCode.INTERNAL_ERROR, f"{prov_label} error ({model_label}): {clean_fallback}")
+
+
 def classify_error(exc: Exception, provider: Optional[str] = None, model: Optional[str] = None) -> AIExecutionError:
-    """Classifies any raw Python/network/provider exception into canonical AIErrorCode."""
-    err_str = str(exc).lower()
-    
-    if "insufficient credits" in err_str or "low credit balance" in err_str:
-        return AIExecutionError(AIErrorCode.INSUFFICIENT_CREDITS, f"Insufficient credits: {exc}", provider, model, original_exception=exc)
-    
-    if "404" in err_str or "not found" in err_str or "model not found" in err_str:
-        return AIExecutionError(AIErrorCode.MODEL_NOT_FOUND, f"Model '{model}' not found for provider '{provider}': {exc}", provider, model, original_exception=exc)
-    
-    if "503" in err_str or "unavailable" in err_str or "connection" in err_str or "econnrefused" in err_str or "dns" in err_str or "getaddrinfo" in err_str:
-        return AIExecutionError(AIErrorCode.PROVIDER_UNAVAILABLE, f"Provider '{provider}' unavailable: {exc}", provider, model, original_exception=exc)
-    
-    if "429" in err_str or "quota" in err_str or "rate limit" in err_str or "resource_exhausted" in err_str:
-        return AIExecutionError(AIErrorCode.RATE_LIMITED, f"Rate limited on provider '{provider}': {exc}", provider, model, original_exception=exc)
-    
-    if "401" in err_str or "403" in err_str or "api key" in err_str or "permission" in err_str or "unauthorized" in err_str or "forbidden" in err_str:
-        return AIExecutionError(AIErrorCode.AUTH_FAILURE, f"Authentication failure for provider '{provider}': {exc}", provider, model, original_exception=exc)
-    
-    if "timeout" in err_str or "timed out" in err_str:
-        return AIExecutionError(AIErrorCode.TIMEOUT, f"Request to provider '{provider}' timed out: {exc}", provider, model, original_exception=exc)
-    
-    if "400" in err_str or "422" in err_str or "validation" in err_str or "invalid" in err_str:
-        return AIExecutionError(AIErrorCode.INVALID_REQUEST, f"Invalid request payload for capability/model '{model}': {exc}", provider, model, original_exception=exc)
-    
-    return AIExecutionError(AIErrorCode.INTERNAL_ERROR, f"AI execution error ({provider}/{model}): {exc}", provider, model, original_exception=exc)
+    """Classifies any raw Python/network/provider exception into canonical AIErrorCode with clean message."""
+    code, clean_msg = _clean_error_message(exc, provider=provider, model=model)
+    return AIExecutionError(code, clean_msg, provider, model, original_exception=exc)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -269,10 +313,10 @@ class AIOrchestrator:
         capability: str,
         mode: str = "system",
         requested_model: Optional[str] = None
-    ) -> Tuple[str, str, List[str]]:
+    ) -> Tuple[str, str]:
         """
-        Determines (provider, target_model, fallback_models) strictly honoring
-        System vs Manual selection semantics dynamically without hardcoded models.
+        Determines (provider, target_model) strictly honoring
+        System vs Manual selection semantics directly with no fallback routing.
         """
         if mode == "manual" and requested_model:
             provider, target_model = ModelRegistry.resolve_model_provider(requested_model)
@@ -280,9 +324,7 @@ class AIOrchestrator:
             candidate = requested_model or cls.get_default_model_for_capability(capability)
             provider, target_model = ModelRegistry.resolve_model_provider(candidate)
 
-        fallbacks = ModelRegistry.get_fallback_models_for_provider(provider)
-        candidate_models = [target_model] + [m for m in fallbacks if m != target_model]
-        return provider, target_model, candidate_models
+        return provider, target_model
 
 
 
@@ -350,37 +392,35 @@ class AIOrchestrator:
         feature: str,
         prompt_tokens: int,
         completion_tokens: int,
-        latency_ms: float = 0.0,
-        status: str = "SUCCESS",
-        chars: int = 0,
-        audio_seconds: float = 0.0,
-        images: int = 0,
+        latency_ms: int,
+        status: str,
     ) -> Dict[str, Any]:
-        """Atomically persists transaction to the ledger DB table and SQLAlchemy model."""
-        total_tokens = int(prompt_tokens) + int(completion_tokens)
-        cost_usd = ModelRegistry.calculate_cost(
-            model_name=model,
-            in_tokens=prompt_tokens,
-            out_tokens=completion_tokens,
-            chars=chars,
-            audio_seconds=audio_seconds,
-            images=images,
-        )
+        """Persists model invocation usage & token counts to database/ledger."""
+        total_tokens = prompt_tokens + completion_tokens
+        cost_usd = ModelRegistry.calculate_cost(model, prompt_tokens, completion_tokens)
+        rec_id = f"usage_{uuid.uuid4().hex[:12]}"
 
-        uid = user_id or "user_default"
-        rec_id = str(uuid.uuid4())
+        record = {
+            "id": rec_id,
+            "user_id": user_id,
+            "provider": provider,
+            "model": model,
+            "feature": feature,
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens,
+            "cost_usd": cost_usd,
+            "latency_ms": latency_ms,
+            "status": status,
+            "timestamp": time.time(),
+        }
 
         try:
-            from database.engine import get_db_connection
-            conn = get_db_connection()
-            conn.execute("""
-                INSERT INTO ai_token_usage_ledger 
-                (id, user_id, provider, model, feature, prompt_tokens, completion_tokens, total_tokens, latency_ms, cost_estimate_usd, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (rec_id, uid, provider, model, feature, prompt_tokens, completion_tokens, total_tokens, latency_ms, cost_usd, status))
-            conn.commit()
-            conn.close()
-        except Exception as e:
+            from database.config import get_supabase_client
+            client = get_supabase_client()
+            if client:
+                client.table("ai_usage_ledger").insert(record).execute()
+        except Exception:
             pass
 
         # Update in-memory rate limiter usage
@@ -399,20 +439,15 @@ class AIOrchestrator:
         capability: str,
         provider: str,
         model: str,
-        attempt: int,
         status: str,
         latency_ms: int,
         job_id: Optional[str] = None,
         project_id: Optional[str] = None,
         error: Optional[AIExecutionError] = None,
-        total_candidates: int = 3,
         tokens_info: str = ""
     ):
-        """Unified structured observability log line with explicit Tier and Candidate accounting."""
-        tier_names = {1: "Tier 1: Primary", 2: "Tier 2: Fallback", 3: "Tier 3: Safety Net"}
-        tier_label = tier_names.get(attempt, f"Tier {attempt}")
-        
-        ctx = f"[AI Orchestrator] [{tier_label}] ({attempt}/{total_candidates} candidates) | Cap: '{capability}' | Provider: {provider} | Model: {model} | Status: {status.upper()} ({latency_ms}ms)"
+        """Unified structured observability log line without fallback candidate noise."""
+        ctx = f"[AI Orchestrator] | Cap: '{capability}' | Provider: {provider} | Model: {model} | Status: {status.upper()} ({latency_ms}ms)"
         if tokens_info:
             ctx += f" | {tokens_info}"
         if job_id:
@@ -442,15 +477,15 @@ class AIOrchestrator:
         **kwargs
     ) -> Dict[str, Any]:
         """
-        The central execution pipeline of the AI Core.
+        Direct execution pipeline of the AI Core with NO fallbacks.
         Orchestrates:
           1. Quota & Credit pre-check
-          2. Multi-tier candidate generation (intra-provider + cross-provider)
+          2. Direct Model Resolution
           3. Rate limit & credential validation
-          4. Execution via coordinator.py
+          4. Direct execution via coordinator.py
           5. Usage & Cost tracking + Ledger persistence
           6. Credit finalization or refund
-          7. Semantic capability fallback
+          7. Direct error surfacing on failure
         """
         start_time = time.monotonic()
         cap_clean = capability.lower().strip()
@@ -459,165 +494,115 @@ class AIOrchestrator:
         quota_ok, credit_amount, quota_err = cls.check_and_reserve_quota(user_id, cap_clean)
         if not quota_ok:
             err = AIExecutionError(AIErrorCode.INSUFFICIENT_CREDITS, quota_err or "Insufficient credits", stage="quota_precheck")
-            cls.log_execution_attempt(cap_clean, "none", model or "none", 1, "rejected", 0, job_id, project_id, err)
+            cls.log_execution_attempt(cap_clean, "none", model or "none", "rejected", 0, job_id, project_id, err)
             raise err
 
-        # 2. Build Multi-Tier Candidate Execution Chain (Tier 1 -> Tier 2 -> Tier 3)
-        primary_provider, target_model, intra_fallbacks = cls.resolve_execution_plan(cap_clean, mode="manual" if model else "system", requested_model=model)
-        
-        policy = cls.FALLBACK_POLICY.get(cap_clean, {"cross_provider": True, "deterministic": True})
-        candidates: List[Tuple[str, str]] = [(primary_provider, target_model)]
-        
-        # Always attach fallback chain (Tier 2 & Tier 3) so 429 rate limits or 503 outages fall back seamlessly
-        for f_model in intra_fallbacks:
-            if f_model != target_model and (primary_provider, f_model) not in candidates:
-                candidates.append((primary_provider, f_model))
+        # 2. Resolve target model directly
+        provider, target_model = cls.resolve_execution_plan(cap_clean, mode="manual" if model else "system", requested_model=model)
 
-        if policy.get("cross_provider", True):
-            cross_chain = ModelRegistry.get_cross_provider_fallback_chain(cap_clean)
-            for cp_provider, cp_model in cross_chain:
-                if (cp_provider, cp_model) not in candidates:
-                    candidates.append((cp_provider, cp_model))
+        logger.info(
+            f"[AI Orchestrator] >>> Executing capability '{cap_clean}' via Provider: {provider} | Model: {target_model}"
+        )
 
-        last_error = None
-        attempt = 0
-        total_candidates = len(candidates)
-        from services.ai.skills.coordinator import execute_provider_call, FallbackCoordinator
-
-        tier_names = {1: "Tier 1: Primary", 2: "Tier 2: Fallback", 3: "Tier 3: Safety Net"}
-
-        # 3. Execution Loop across validated candidates
-        for p_cand, m_cand in candidates:
-            attempt += 1
-            tier_label = tier_names.get(attempt, f"Tier {attempt}")
-            # Only Tier 1 gets a retry (max_attempts = 2). Tier 2 & Tier 3 get 1 attempt (max_attempts = 1) for rapid failover.
-            tier_max_retries = 2 if attempt == 1 else 1
-
-            logger.info(
-                f"[AI Orchestrator] [{tier_label}] ({attempt}/{total_candidates} candidates) "
-                f">>> Executing capability '{cap_clean}' via Provider: {p_cand} | Model: {m_cand} | Max Retries: {tier_max_retries}"
+        # 3. Verify provider credentials
+        if not cls.is_provider_configured(provider, user_keys):
+            err = AIExecutionError(
+                AIErrorCode.AUTH_FAILURE,
+                f"API Key / Provider '{provider}' is not configured. Please provide a valid API key in Settings or .env.",
+                provider=provider,
+                model=target_model
             )
+            cls.log_execution_attempt(cap_clean, provider, target_model, "failed", 0, job_id, project_id, err)
+            cls.finalize_credits(user_id, cap_clean, credit_amount, False)
+            raise err
 
-            # Verify provider credentials
-            if not cls.is_provider_configured(p_cand, user_keys):
-                logger.info(f"[AI Orchestrator] [{tier_label}] Provider '{p_cand}' unconfigured. Skipping to next candidate...")
-                continue
+        # 4. Verify rate limits
+        rate_ok, rate_msg = cls.get_rate_limiter().check_limit(provider, target_model, user_id)
+        if not rate_ok:
+            err = AIExecutionError(
+                AIErrorCode.RATE_LIMITED,
+                rate_msg or f"Rate limit reached for '{target_model}'",
+                provider=provider,
+                model=target_model
+            )
+            cls.log_execution_attempt(cap_clean, provider, target_model, "failed", 0, job_id, project_id, err)
+            cls.finalize_credits(user_id, cap_clean, credit_amount, False)
+            raise err
 
-            # Verify rate limits
-            rate_ok, rate_msg = cls.get_rate_limiter().check_limit(p_cand, m_cand, user_id)
-            if not rate_ok:
-                logger.warning(f"[AI Orchestrator] [{tier_label}] Candidate '{m_cand}' throttled: {rate_msg}. Advancing to next fallback...")
-                continue
+        # 5. Direct Execution (No fallbacks)
+        from services.ai.skills.coordinator import execute_provider_call
 
-            attempt_t0 = time.monotonic()
-            try:
-                raw_result = await execute_provider_call(
-                    skill=skill_obj,
-                    provider=p_cand,
-                    clean_model_id=m_cand,
-                    prompt=prompt,
-                    image_bytes=image_bytes,
-                    api_key=api_key,
-                    user_keys=user_keys,
-                    max_retries=tier_max_retries,
-                    **kwargs
-                )
-                attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
+        attempt_t0 = time.monotonic()
+        try:
+            raw_result = await execute_provider_call(
+                skill=skill_obj,
+                provider=provider,
+                clean_model_id=target_model,
+                prompt=prompt,
+                image_bytes=image_bytes,
+                api_key=api_key,
+                user_keys=user_keys,
+                max_retries=1,
+                **kwargs
+            )
+            attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
 
-                # Collect usage tokens from skill_obj or estimation
-                p_tokens = getattr(skill_obj, "last_input_tokens", 0) or max(1, len(prompt) // 4)
-                c_tokens = getattr(skill_obj, "last_output_tokens", 0) or max(1, len(raw_result) // 4)
+            # Collect usage tokens from skill_obj or estimation
+            p_tokens = getattr(skill_obj, "last_input_tokens", 0) or max(1, len(prompt) // 4)
+            c_tokens = getattr(skill_obj, "last_output_tokens", 0) or max(1, len(raw_result) // 4)
 
-                # Persist to ledger & finalize credits
-                total_lat = int((time.monotonic() - start_time) * 1000)
-                cls.record_usage_to_ledger(
-                    user_id=user_id,
-                    provider=p_cand,
-                    model=m_cand,
-                    feature=cap_clean,
-                    prompt_tokens=p_tokens,
-                    completion_tokens=c_tokens,
-                    latency_ms=attempt_lat,
-                    status="SUCCESS",
-                )
-                cls.finalize_credits(user_id, cap_clean, credit_amount, True)
-                cls.log_execution_attempt(
-                    cap_clean, p_cand, m_cand, attempt, "success", attempt_lat, job_id, project_id,
-                    total_candidates=total_candidates,
-                    tokens_info=f"Tokens: {p_tokens} prompt + {c_tokens} completion"
-                )
-
-                # Parse JSON if possible
-                try:
-                    parsed = json.loads(raw_result) if isinstance(raw_result, str) else raw_result
-                except Exception:
-                    parsed = {"raw_output": raw_result}
-
-                return {
-                    "success": True,
-                    "provider": p_cand,
-                    "model": m_cand,
-                    "tier": f"Tier {attempt}",
-                    "tier_label": tier_label,
-                    "attempt": attempt,
-                    "total_candidates": total_candidates,
-                    "result": parsed,
-                    "input_tokens": p_tokens,
-                    "output_tokens": c_tokens,
-                    "latency_ms": attempt_lat,
-                }
-
-            except Exception as exc:
-                attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
-                classified = classify_error(exc, provider=p_cand, model=m_cand)
-                cls.log_execution_attempt(
-                    cap_clean, p_cand, m_cand, attempt, "failed", attempt_lat, job_id, project_id, classified,
-                    total_candidates=total_candidates
-                )
-                last_error = classified
-                if attempt < total_candidates:
-                    next_p, next_m = candidates[attempt]
-                    next_tier = tier_names.get(attempt + 1, f"Tier {attempt + 1}")
-                    logger.warning(
-                        f"[AI Orchestrator] [{tier_label}] Failed on {m_cand} ({classified.error_code}). "
-                        f"Failing over to [{next_tier}] ({attempt + 1}/{total_candidates}: {next_m})..."
-                    )
-                continue
-
-        # 4. If all candidates fail, handle capability fallback policy
-        total_lat = int((time.monotonic() - start_time) * 1000)
-        if policy.get("deterministic", False):
-            logger.warning(f"[AI Orchestrator] All candidates failed for capability '{cap_clean}'. Invoking safe programmatic fallback.")
-            fallback_data = FallbackCoordinator.get_programmatic_fallback(cap_clean, **kwargs)
-            fallback_data.setdefault("success", False)
-            fallback_data.setdefault("source", "fallback:error")
-            fallback_data["error"] = str(last_error or "All providers failed")
-
+            # Persist to ledger & finalize credits
             cls.record_usage_to_ledger(
                 user_id=user_id,
-                provider=primary_provider,
+                provider=provider,
+                model=target_model,
+                feature=cap_clean,
+                prompt_tokens=p_tokens,
+                completion_tokens=c_tokens,
+                latency_ms=attempt_lat,
+                status="SUCCESS",
+            )
+            cls.finalize_credits(user_id, cap_clean, credit_amount, True)
+            cls.log_execution_attempt(
+                cap_clean, provider, target_model, "success", attempt_lat, job_id, project_id,
+                tokens_info=f"Tokens: {p_tokens} prompt + {c_tokens} completion"
+            )
+
+            # Parse JSON if possible
+            try:
+                parsed = json.loads(raw_result) if isinstance(raw_result, str) else raw_result
+            except Exception:
+                parsed = {"raw_output": raw_result}
+
+            return {
+                "success": True,
+                "provider": provider,
+                "model": target_model,
+                "result": parsed,
+                "input_tokens": p_tokens,
+                "output_tokens": c_tokens,
+                "latency_ms": attempt_lat,
+            }
+
+        except Exception as exc:
+            attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
+            classified = classify_error(exc, provider=provider, model=target_model)
+            cls.log_execution_attempt(
+                cap_clean, provider, target_model, "failed", attempt_lat, job_id, project_id, classified
+            )
+            cls.record_usage_to_ledger(
+                user_id=user_id,
+                provider=provider,
                 model=target_model,
                 feature=cap_clean,
                 prompt_tokens=0,
                 completion_tokens=0,
-                latency_ms=total_lat,
-                status="FALLBACK_SERVED",
+                latency_ms=attempt_lat,
+                status="FAILED",
             )
-            cls.finalize_credits(user_id, cap_clean, credit_amount, False) # Don't charge on fallback
-
-            return {
-                "success": False,
-                "provider": primary_provider,
-                "model": target_model,
-                "result": fallback_data,
-                "error": str(last_error),
-                "is_fallback": True,
-                "latency_ms": total_lat,
-            }
-
-        # Raise clean error if deterministic fallback is not allowed (e.g. image diffusion)
-        cls.finalize_credits(user_id, cap_clean, credit_amount, False)
-        raise (last_error or AIExecutionError(AIErrorCode.PROVIDER_UNAVAILABLE, f"All candidate models failed for '{cap_clean}'"))
+            cls.finalize_credits(user_id, cap_clean, credit_amount, False)
+            # Raise the error directly so the caller and user get the exact error message
+            raise classified
 
     # Unified convenience methods
     @classmethod

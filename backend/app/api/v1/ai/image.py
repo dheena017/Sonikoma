@@ -120,10 +120,7 @@ async def analyze_image(
         result = (await _attach_narratives_to_results([result], body.model, body.voice, user_api_key))[0]
         record_credit_transaction(current_user["user_id"], -COST, "analyze_image")
         used_model = result.get("model", body.model or "gemini-2.5-flash")
-        used_tier_label = result.get("tier_label", "Tier 1: Primary")
-        used_attempt = result.get("attempt", 1)
-        total_candidates = result.get("total_candidates", 1)
-        logger.info(f"[AI Analysis] [{used_tier_label}] (Attempt {used_attempt}/{total_candidates}) | Model: {used_model} <<< Completed /api/analyze-single-image successfully")
+        logger.info(f"[AI Analysis] Model: {used_model} <<< Completed /api/analyze-single-image successfully")
         return result
     except Exception as e:
         logger.error(f"[AI Analysis] Error during analyze_image: {e}")
@@ -243,12 +240,17 @@ async def analyze_panels(
                 )
                 return {"id": panel.id, "url": panel.url, **res}
             except Exception as e:
-                logger.exception(f"[AI Analysis] Panel {panel.id} analysis failed: {e}")
+                from services.ai.orchestrator import AIExecutionError, AIErrorCode
+                clean_msg = e.message if isinstance(e, AIExecutionError) else str(e)
+                if isinstance(e, AIExecutionError) and e.error_code in (AIErrorCode.RATE_LIMITED, AIErrorCode.PROVIDER_UNAVAILABLE, AIErrorCode.AUTH_FAILURE, AIErrorCode.INSUFFICIENT_CREDITS):
+                    logger.warning(f"[AI Analysis] Panel {panel.id} analysis skipped/failed: {clean_msg}")
+                else:
+                    logger.exception(f"[AI Analysis] Panel {panel.id} analysis failed: {clean_msg}")
                 return {
                     "id": panel.id,
                     "url": panel.url,
                     "success": False,
-                    "error": str(e),
+                    "error": clean_msg,
                 }
 
     results = await asyncio.gather(*(analyze_panel(panel) for panel in body.panels))
@@ -259,27 +261,20 @@ async def analyze_panels(
     def _is_item_success(it: dict) -> bool:
         return bool(it.get("success") or it.get("analysis"))
 
+    success_count = sum(1 for item in results if _is_item_success(item))
     first_success = next((item for item in results if _is_item_success(item)), {})
     default_routed_model = AIOrchestrator.get_default_model_for_capability("panel_analysis")
     used_model = first_success.get("model") or body.model or default_routed_model
-    used_tier = first_success.get("tier", "Tier 1")
-    used_tier_label = first_success.get("tier_label", "Tier 1: Primary")
-    used_attempt = first_success.get("attempt", 1)
-    total_candidates = first_success.get("total_candidates", 1)
-    success_count = sum(1 for r in results if _is_item_success(r))
 
     logger.info(
-        f"[AI Analysis] [{used_tier_label}] (Attempt {used_attempt}/{total_candidates}) | "
-        f"Model: {used_model} <<< Completed /api/analyze-panels with {success_count}/{len(results)} success results"
+        f"[AI Analysis] Model: {used_model} <<< Completed /api/analyze-panels with {success_count}/{len(results)} success results"
     )
     return {
-        "success": True,
+        "success": success_count > 0,
         "results": results,
         "model": used_model,
-        "tier": used_tier,
-        "tier_label": used_tier_label,
-        "attempt": used_attempt,
-        "total_candidates": total_candidates,
+        "success_count": success_count,
+        "total_count": len(results),
     }
 
 

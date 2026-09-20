@@ -154,7 +154,7 @@ export function useCompileActions({
 
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[Smart Auto-Analysis] [Tier 1: Primary] Initiated analysis on Panel #${panelId} (Model: ${activeModel || "gemini-2.5-flash"})`,
+        `[Smart Auto-Analysis] Initiated analysis on Panel #${panelId} (Model: ${activeModel || "gemini-2.5-flash"})`,
         `[Smart Auto-Analysis]   - Sent Dialogue: "${originalText || "None"}"`,
         ...prev,
       ]);
@@ -178,7 +178,6 @@ export function useCompileActions({
       if (data.success && (data.analysis || analysis.speech_text !== undefined || analysis.visual_description !== undefined)) {
         const aiDuration = Number(analysis.duration);
         const aiMotion = String(analysis.motion_type || "").trim();
-        const tierLabel = (data as any).tier_label || "Tier 1: Primary";
         const usedModel = (data as any).model || activeModel || "gemini-2.5-flash";
         const latMs = (data as any).latency_ms ? ` (${(data as any).latency_ms}ms)` : "";
         const speech = analysis.speech_text !== undefined ? analysis.speech_text : originalPanel?.speech_text;
@@ -212,12 +211,12 @@ export function useCompileActions({
         );
 
         console.log(
-          `[Timeline] Smart Scanner completed for panel #${panelId} via [${tierLabel}] (${usedModel})`
+          `[Timeline] Smart Scanner completed for panel #${panelId} (${usedModel})`
         );
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Smart Auto-Analysis] [SUCCESS] [${tierLabel}] Panel #${panelId} analyzed by ${usedModel}${latMs}!`,
+            `[Smart Auto-Analysis] [SUCCESS] Panel #${panelId} analyzed by ${usedModel}${latMs}!`,
             `[Smart Auto-Analysis]   - Dialogue: "${speech}"`,
             `[Smart Auto-Analysis]   - Motion: "${aiMotion}" | Duration: ${aiDuration}s | SFX: "${sfx}"`,
             ...prev,
@@ -378,14 +377,14 @@ export function useCompileActions({
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Sequence Analysis] [SUCCESS] [${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Context-aware storyboard script generated for ${targetPanels.length} frame(s)!`,
+            `[Sequence Analysis] [SUCCESS] Model: ${modelUsed} | Storyboard script generated for ${targetPanels.length} frame(s)!`,
             ...prev,
           ]);
         }
 
         if (!abortSignalRef.current.aborted && addNotification) {
           addNotification(
-            `[${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Sequence analysis completed for ${selectedIds.length} selected panel(s)!`,
+            `Model: ${modelUsed} | Sequence analysis completed for ${selectedIds.length} selected panel(s)!`,
             "success"
           );
           audioFeedback?.playSuccess();
@@ -408,7 +407,7 @@ export function useCompileActions({
         );
         if (addNotification) {
           addNotification(
-            "Sequence analysis of selected panels encountered an error.",
+            `Sequence analysis failed: ${err.message || "Unknown error"}`,
             "error"
           );
         }

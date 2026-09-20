@@ -222,14 +222,14 @@ export default function TierModelCard({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isOpen]);
 
-  const [providerFilter, setProviderFilter] = useState<string>(providerKey);
+  const [providerFilter, setProviderFilter] = useState<string>("all");
 
-  // Sync provider filter with selected model provider when opened
+  // Show all tier models when dropdown is opened
   useEffect(() => {
     if (isOpen) {
-      setProviderFilter(providerKey);
+      setProviderFilter("all");
     }
-  }, [isOpen, providerKey]);
+  }, [isOpen]);
 
   // Extract unique providers in catalog
   const availableProviders = React.useMemo(() => {

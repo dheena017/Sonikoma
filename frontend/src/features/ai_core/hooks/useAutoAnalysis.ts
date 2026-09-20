@@ -49,10 +49,7 @@ export function useAutoAnalysis({
           data
         );
         if (data.success && data.analysis) {
-          const tierLabel = (data as any).tier_label || "Tier 1: Primary";
           const modelUsed = (data as any).model || selectedModel || "gemini-2.5-flash";
-          const attempt = (data as any).attempt || 1;
-          const totalCandidates = (data as any).total_candidates || 1;
 
           setPanels((prev) =>
             prev.map((p) =>
@@ -77,11 +74,11 @@ export function useAutoAnalysis({
             )
           );
           setConsoleLogs((prev) => [
-            `[Smart Auto-Analysis] [SUCCESS] [${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Panel #${panelId} transcribed & fully mapped!`,
+            `[Smart Auto-Analysis] [SUCCESS] Model: ${modelUsed} | Panel #${panelId} transcribed & fully mapped!`,
             ...prev,
           ]);
           addNotification(
-            `[${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Panel #${panelId} analysis completed!`,
+            `Model: ${modelUsed} | Panel #${panelId} analysis completed!`,
             "success"
           );
           audioFeedback?.playSuccess();

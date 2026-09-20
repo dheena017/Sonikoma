@@ -261,16 +261,20 @@ class ModelRegistry:
 
     @classmethod
     def get_fallback_models_for_provider(cls, provider: str) -> List[str]:
-        """Returns the safe fallback chain dynamically computed from the model catalog for the given provider."""
+        """Returns at most 2 fast, safe fallback models for the given provider."""
         p = provider.lower().replace("google", "gemini")
+        if p == "gemini":
+            return ["gemini-3.5-flash-lite", "gemini-3.5-flash"]
+        elif p == "openai":
+            return ["gpt-4o-mini", "gpt-4o"]
+        elif p == "anthropic":
+            return ["claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022"]
         matching = [m["id"] for m in cls.get_catalog() if m.get("provider", "").lower() == p]
-        if matching:
-            return matching
-        return [m["id"] for m in cls.get_catalog() if m.get("provider") == "gemini"] or ["gemini-2.5-flash"]
+        return matching[:2] if matching else ["gemini-3.5-flash-lite"]
 
     RECOMMENDED_CAPABILITY_CHAINS: Dict[str, List[tuple[str, str]]] = {
         "storyboard_narrative": [("gemini", "gemini-2.5-flash"), ("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o")],
-        "panel_analysis": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-2.5-flash-lite"), ("openai", "gpt-4o")],
+        "panel_analysis": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
         "scraper_blueprint": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("deepseek", "deepseek-chat")],
         "prompt_enhancement": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
         "image_diffusion": [("huggingface", "FLUX.1-schnell"), ("openai", "dall-e-3"), ("stablediffusion", "stable-diffusion-xl")],
@@ -279,7 +283,7 @@ class ModelRegistry:
         "character_persona": [("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o"), ("gemini", "gemini-2.5-flash")],
         "seo_optimization": [("openai", "gpt-4o-mini"), ("gemini", "gemini-2.5-flash"), ("deepseek", "deepseek-chat")],
         "sfx_audio": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
-        "smart_crop": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-2.5-flash-lite"), ("openai", "gpt-4o")],
+        "smart_crop": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
     }
 
     @classmethod

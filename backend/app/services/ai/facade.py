@@ -365,11 +365,7 @@ async def facade_analyze_image(
 
     elapsed = int((time.time() - start_time) * 1000)
     meta = getattr(skill, "last_execution_meta", {}) or {}
-    model_used = meta.get("model") or model or "dynamic-routing"
-    tier_label = meta.get("tier_label") or "Tier 1: Primary"
-    tier = meta.get("tier") or "Tier 1"
-    attempt = meta.get("attempt") or 1
-    total_candidates = meta.get("total_candidates") or 1
+    model_used = meta.get("model") or model or "gemini-2.5-flash"
 
     return {
         "success": True,
@@ -377,10 +373,6 @@ async def facade_analyze_image(
         "audio_url": audio_url,
         "source": meta.get("provider", "gemini"),
         "model": model_used,
-        "tier": tier,
-        "tier_label": tier_label,
-        "attempt": attempt,
-        "total_candidates": total_candidates,
         "latencyMs": meta.get("latency_ms", elapsed),
         "latency_ms": meta.get("latency_ms", elapsed),
         "inputTokens": getattr(skill, "last_input_tokens", 0),
