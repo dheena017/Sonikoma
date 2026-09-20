@@ -147,5 +147,4 @@ class BaseAISkill:
             "latency_ms": res.get("latency_ms", elapsed_ms),
             "success": res.get("success", False),
         }
-        self.logger.log_execution(self.name, elapsed_ms, res.get("success", False), kwargs, parsed_data if isinstance(parsed_data, dict) else {}, self.last_input_tokens, self.last_output_tokens)
         return raw_output

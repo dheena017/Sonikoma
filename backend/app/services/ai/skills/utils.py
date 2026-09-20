@@ -107,11 +107,10 @@ def get_provider_and_model(model_name: str) -> tuple[str, str]:
 
 
 class SkillLogger:
-    """Helper to stream structured terminal logs compatible with frontend outputs."""
+    """Helper for skill execution telemetry."""
     def __init__(self):
         self.logger = logging.getLogger("sonikoma.skills.execution")
 
     def log_execution(self, skill_name: str, latency_ms: int, success: bool, inputs: dict, outputs: dict, prompt_tokens: int = 0, candidates_tokens: int = 0):
-        status = "success" if success else "failed"
-        tokens_str = f" | Tok: {prompt_tokens} / {candidates_tokens}" if success and (prompt_tokens > 0 or candidates_tokens > 0) else ""
-        self.logger.debug(f"[AI Model] Executed skill: {skill_name} in {latency_ms}ms. Status: {status}{tokens_str}")
+        # Redundant logs removed; orchestrator.py is the single source of truth for execution logging.
+        pass

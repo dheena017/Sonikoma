@@ -221,8 +221,6 @@ async def execute_provider_call(
             if skill:
                 skill.last_input_tokens = 0
                 skill.last_output_tokens = 0
-                if getattr(skill, "logger", None):
-                    skill.logger.log_execution(skill_name, int((time.monotonic() - start_time) * 1000), False, kwargs, fallback_payload, 0, 0)
             return raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
@@ -240,8 +238,6 @@ async def execute_provider_call(
         if skill:
             skill.last_input_tokens = p_tokens
             skill.last_output_tokens = c_tokens
-            if getattr(skill, "logger", None):
-                skill.logger.log_execution(getattr(skill, "name", "ai_capability"), elapsed_ms, True, kwargs, parsed_json, p_tokens, c_tokens)
         return raw_text
 
 
@@ -333,8 +329,6 @@ async def execute_provider_call(
             cleaned_json_text = raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
-        if skill and getattr(skill, "logger", None):
-            skill.logger.log_execution(getattr(skill, "name", "ai_capability"), elapsed_ms, True, kwargs, parsed_json, getattr(skill, "last_input_tokens", 0), getattr(skill, "last_output_tokens", 0))
         return cleaned_json_text
 
     elif provider == "anthropic":
@@ -431,8 +425,6 @@ async def execute_provider_call(
             cleaned_json_text = raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
-        if skill and getattr(skill, "logger", None):
-            skill.logger.log_execution(getattr(skill, "name", "ai_capability"), elapsed_ms, True, kwargs, parsed_json, getattr(skill, "last_input_tokens", 0), getattr(skill, "last_output_tokens", 0))
         return cleaned_json_text
 
     elif provider == "huggingface":
@@ -487,8 +479,6 @@ async def execute_provider_call(
             cleaned_json_text = raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
-        if skill and getattr(skill, "logger", None):
-            skill.logger.log_execution(getattr(skill, "name", "ai_capability"), elapsed_ms, True, kwargs, parsed_json, getattr(skill, "last_input_tokens", 0), getattr(skill, "last_output_tokens", 0))
         return cleaned_json_text
 
     elif provider == "groq":
