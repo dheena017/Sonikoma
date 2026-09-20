@@ -287,9 +287,10 @@ const StoryboardCard = ({
   viewLayout = "scroll",
 }: StoryboardCardProps) => {
   const [activeTab, setActiveTab] = React.useState<
-    "speech" | "sfx" | "visual"
+    "speech" | "narrative" | "sfx" | "visual"
   >("speech");
   const [isGeneratingVoice, setIsGeneratingVoice] = React.useState(false);
+  const [generatingVoiceMode, setGeneratingVoiceMode] = React.useState<"speech" | "narrative" | null>(null);
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -347,6 +348,7 @@ const StoryboardCard = ({
   // Unified Playback state for Speech / Voice Audio
   const [isDialoguePlaying, setIsDialoguePlaying] = React.useState(false);
   const [isDialoguePaused, setIsDialoguePaused] = React.useState(false);
+  const [playingAudioType, setPlayingAudioType] = React.useState<"speech" | "narrative" | null>(null);
   const dialogueAudioRef = React.useRef<HTMLAudioElement | null>(null);
   const dialogueUtteranceRef = React.useRef<SpeechSynthesisUtterance | null>(
     null
@@ -356,6 +358,7 @@ const StoryboardCard = ({
   const [selectedVoiceModel, setSelectedVoiceModel] = React.useState<string>(
     () =>
       voiceActor ||
+      localStorage.getItem("ai_comic_voice") ||
       localStorage.getItem("ai_comic_voice_actor") ||
       localStorage.getItem("ai_comic_narrator_voice") ||
       "en-US-ChristopherNeural"
@@ -397,6 +400,7 @@ const StoryboardCard = ({
     dialogueUtteranceRef.current = null;
     setIsDialoguePlaying(false);
     setIsDialoguePaused(false);
+    setPlayingAudioType(null);
   }, []);
 
   React.useEffect(() => {
@@ -473,10 +477,12 @@ const StoryboardCard = ({
     stopDialogueAudio,
   ]);
 
-  // Toggle Dialogue Audio
-  const handleToggleDialogueAudio = () => {
-    // Scenario 1: Currently Playing -> Pause
-    if (isDialoguePlaying && !isDialoguePaused) {
+  // Toggle Dialogue / Narrator Audio
+  const handleToggleDialogueAudio = async (mode?: "speech" | "narrative") => {
+    const currentMode = mode || (activeTab === "narrative" ? "narrative" : "speech");
+
+    // Scenario 1: Currently Playing THIS specific audio -> Pause
+    if (isDialoguePlaying && !isDialoguePaused && playingAudioType === currentMode) {
       if (dialogueAudioRef.current) {
         dialogueAudioRef.current.pause();
       } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -486,12 +492,12 @@ const StoryboardCard = ({
       return;
     }
 
-    // Scenario 2: Currently Paused -> Resume
-    if (isDialoguePlaying && isDialoguePaused) {
+    // Scenario 2: Currently Paused on THIS specific audio -> Resume
+    if (isDialoguePlaying && isDialoguePaused && playingAudioType === currentMode) {
       if (dialogueAudioRef.current) {
         dialogueAudioRef.current
           .play()
-          .catch((err) => console.error("Dialogue audio resume failed:", err));
+          .catch((err) => console.error("Audio resume failed:", err));
       } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
         if (window.speechSynthesis.paused) {
           window.speechSynthesis.resume();
@@ -501,10 +507,14 @@ const StoryboardCard = ({
       return;
     }
 
-    // Scenario 3: Stopped -> Start Dialogue Playback
+    // Scenario 3: Stopped or playing the other track -> Start Fresh Playback for currentMode
     stopDialogueAudio();
 
-    const targetAudioUrl = panel.audio_url || panel.speech_audio_url;
+    // CRITICAL BUG FIX: Narrator audio is ONLY panel.narrative_audio_url. Never fall back to dialogue audio!
+    const targetAudioUrl =
+      currentMode === "narrative"
+        ? panel.narrative_audio_url
+        : (panel.speech_audio_url || panel.audio_url);
 
     if (targetAudioUrl) {
       const audio = new Audio(targetAudioUrl);
@@ -513,64 +523,90 @@ const StoryboardCard = ({
       audio.onended = () => stopDialogueAudio();
       audio.onerror = (e) => {
         console.warn(
-          "Dialogue audio URL failed to load, using Speech Synthesis fallback:",
+          `${currentMode} audio URL failed to load, synthesizing fresh neural voice:`,
           e
         );
         stopDialogueAudio();
-        speakDialogueFallback();
+        handleGenerateVoice(true, currentMode);
       };
-      audio
-        .play()
-        .then(() => {
-          setIsDialoguePlaying(true);
-          setIsDialoguePaused(false);
-        })
-        .catch((err) => {
-          console.warn(
-            "Dialogue audio play failed, using Speech Synthesis fallback:",
-            err
-          );
-          stopDialogueAudio();
-          speakDialogueFallback();
-        });
+      try {
+        await audio.play();
+        setIsDialoguePlaying(true);
+        setIsDialoguePaused(false);
+        setPlayingAudioType(currentMode);
+      } catch (err) {
+        console.warn(
+          `${currentMode} audio play failed, synthesizing fresh neural voice:`,
+          err
+        );
+        stopDialogueAudio();
+        handleGenerateVoice(true, currentMode);
+      }
     } else {
-      speakDialogueFallback();
+      const textToSpeak =
+        currentMode === "narrative"
+          ? (panel.narrative || "").trim()
+          : (panel.speech_text || "").trim();
+
+      if (textToSpeak) {
+        handleGenerateVoice(true, currentMode);
+      } else {
+        addNotification?.(
+          `Please enter ${currentMode === "narrative" ? "narrator" : "dialogue"} text first.`,
+          "info"
+        );
+      }
     }
   };
 
-  const handleGenerateVoice = async () => {
-    const textToSpeak = panel.speech_text || panel.narrative || "";
-    if (!textToSpeak.trim()) {
+  const handleGenerateVoice = async (
+    autoPlayAfterGenerate = false,
+    mode?: "speech" | "narrative"
+  ) => {
+    const currentMode = mode || (activeTab === "narrative" ? "narrative" : "speech");
+    const textToSpeak =
+      currentMode === "narrative"
+        ? (panel.narrative || "").trim()
+        : (panel.speech_text || "").trim();
+
+    if (!textToSpeak) {
       addNotification?.(
-        "Please enter dialogue or narration text first.",
+        `Please enter ${currentMode === "narrative" ? "narrator" : "dialogue"} text first.`,
         "warning"
       );
       return;
     }
     setIsGeneratingVoice(true);
+    setGeneratingVoiceMode(currentMode);
     try {
-      addNotification?.("Synthesizing voice audio...", "info");
+      addNotification?.(
+        `Synthesizing ${currentMode === "narrative" ? "narrator" : "dialogue"} voice...`,
+        "info"
+      );
+      const chosenVoice =
+        voiceActor ||
+        localStorage.getItem("ai_comic_voice") ||
+        localStorage.getItem("ai_comic_voice_actor") ||
+        (currentMode === "narrative" ? localStorage.getItem("ai_comic_narrator_voice") : null) ||
+        selectedVoiceModel ||
+        "en-US-ChristopherNeural";
+
       const ttsRes = await generateTts(fetchWithInterceptor, {
         panel_id: panel.id,
         text: textToSpeak,
         dialogue_list: [textToSpeak],
         target_duration:
           panel.duration && panel.duration > 0 ? panel.duration : undefined,
-        voice: voiceActor || selectedVoiceModel || undefined,
-        speech_rate: customSpeechRate || speechRate,
-        speech_pitch: customSpeechPitch || speechPitch,
+        voice: chosenVoice,
+        speech_rate: customSpeechRate || speechRate || 1.0,
+        speech_pitch: customSpeechPitch || speechPitch || 1.0,
       });
 
       let audioUrl = null;
       if (ttsRes && ttsRes.success && ttsRes.audio_url) {
         audioUrl = ttsRes.audio_url;
       } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
-        const binary = atob(ttsRes.audio_base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        audioUrl = URL.createObjectURL(
-          new Blob([bytes], { type: "audio/mpeg" })
-        );
+        audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${ttsRes.audio_base64}`;
       }
 
       const audioDuration: number =
@@ -585,16 +621,31 @@ const StoryboardCard = ({
               p.id === panel.id
                 ? {
                     ...p,
-                    audio_url: audioUrl,
-                    narrative_audio_url: audioUrl,
-                    speech_audio_url: audioUrl,
+                    narrative_audio_url: currentMode === "narrative" ? audioUrl : p.narrative_audio_url,
+                    speech_audio_url: currentMode === "speech" ? audioUrl : p.speech_audio_url,
+                    audio_url: currentMode === "speech" ? audioUrl : (p.audio_url || audioUrl),
                     duration: audioDuration > 0 ? audioDuration : p.duration,
                   }
                 : p
             )
           );
         }
-        addNotification?.("Voice audio generated successfully!", "success");
+        addNotification?.(
+          `${currentMode === "narrative" ? "Narrator" : "Dialogue"} voice generated successfully!`,
+          "success"
+        );
+
+        if (autoPlayAfterGenerate) {
+          stopDialogueAudio();
+          const audio = new Audio(audioUrl);
+          dialogueAudioRef.current = audio;
+          audio.volume = 1.0;
+          audio.onended = () => stopDialogueAudio();
+          await audio.play();
+          setIsDialoguePlaying(true);
+          setIsDialoguePaused(false);
+          setPlayingAudioType(currentMode);
+        }
       } else {
         addNotification?.(
           "Voice synthesis completed without audio output",
@@ -602,10 +653,11 @@ const StoryboardCard = ({
         );
       }
     } catch (err: any) {
-      console.error("Failed to generate voice:", err);
-      addNotification?.("Failed to generate voice audio", "error");
+      console.error("[Voice Gen] Failed:", err);
+      addNotification?.(`Voice synthesis failed: ${err.message}`, "error");
     } finally {
       setIsGeneratingVoice(false);
+      setGeneratingVoiceMode(null);
     }
   };
 
@@ -665,17 +717,10 @@ const StoryboardCard = ({
       });
 
       let audioUrl = null;
-      // Audio may come back as a cached URL or as base64
       if (ttsRes && ttsRes.success && ttsRes.audio_url) {
         audioUrl = ttsRes.audio_url;
       } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
-        // Convert base64 to a blob URL so the player can use it
-        const binary = atob(ttsRes.audio_base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        audioUrl = URL.createObjectURL(
-          new Blob([bytes], { type: "audio/mpeg" })
-        );
+        audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${ttsRes.audio_base64}`;
       }
 
       // Capture the actual audio duration from TTS (precise timing)
@@ -1097,127 +1142,146 @@ const StoryboardCard = ({
       </div>
 
       <div className="space-y-2 w-full">
-        {/* Full-Width Segmented Content Tabs: Voice (Merged Speech & Audio), SFX, Scene */}
-        <div className="grid grid-cols-3 gap-0.5 bg-neutral-900/90 p-0.5 rounded-lg border border-neutral-800/90 text-[9.5px] font-mono shadow-inner">
+        {/* Full-Width Segmented Content Tabs: Dialogue (Bubble Text), Narrator (Story Voice), SFX, Scene */}
+        <div className="grid grid-cols-4 gap-1 bg-neutral-900/90 p-1 rounded-lg border border-neutral-800 text-[9.5px] shadow-inner">
           <button
             type="button"
             onClick={() => setActiveTab("speech")}
-            title="Speech, Narration & Voice Audio"
-            className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+            title="Speech Bubble Dialogue (In-Image Text)"
+            className={`flex items-center justify-center gap-1 py-1 rounded-md transition-all duration-200 cursor-pointer ${
               activeTab === "speech"
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-[0_2px_10px_rgba(59,130,246,0.35)]"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
+                ? "bg-blue-600 text-white shadow-sm font-semibold"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80 font-medium"
             }`}
           >
-            <MessageSquare className="w-2.5 h-2.5 shrink-0" />
-            <span className="whitespace-nowrap font-medium text-[9px]">Voice</span>
+            <MessageSquare className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap">Dialogue</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("narrative")}
+            title="Voice Narrator (Explains Story & Actions)"
+            className={`flex items-center justify-center gap-1 py-1 rounded-md transition-all duration-200 cursor-pointer ${
+              activeTab === "narrative"
+                ? "bg-purple-600 text-white shadow-sm font-semibold"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80 font-medium"
+            }`}
+          >
+            <Mic className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap">Narrator</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("sfx")}
             title="Sound Effects (SFX)"
-            className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 py-1 rounded-md transition-all duration-200 cursor-pointer ${
               activeTab === "sfx"
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-[0_2px_10px_rgba(59,130,246,0.35)]"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
+                ? "bg-emerald-600 text-white shadow-sm font-semibold"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80 font-medium"
             }`}
           >
-            <Volume2 className="w-2.5 h-2.5 shrink-0" />
-            <span className="whitespace-nowrap font-medium text-[9px]">SFX</span>
+            <Volume2 className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap">SFX</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("visual")}
             title="Visual Scene Prompt"
-            className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 py-1 rounded-md transition-all duration-200 cursor-pointer ${
               activeTab === "visual"
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-[0_2px_10px_rgba(59,130,246,0.35)]"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
+                ? "bg-amber-600 text-white shadow-sm font-semibold"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80 font-medium"
             }`}
           >
-            <Palette className="w-2.5 h-2.5 shrink-0" />
-            <span className="whitespace-nowrap font-medium text-[9px]">Scene</span>
+            <Palette className="w-3 h-3 shrink-0" />
+            <span className="whitespace-nowrap">Scene</span>
           </button>
         </div>
 
-        {/* Tab 1: Merged Speech & Voice Narration */}
+        {/* Tab 1: Bubble Dialogue (Speech text from image) */}
         {activeTab === "speech" && (
-          <div className="space-y-1 animate-in fade-in duration-150">
-            <div className="flex items-center justify-between px-0.5">
-              <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
-                Speech & Voice
+          <div className="space-y-1.5 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between gap-1.5 px-0.5 min-w-0">
+              <span className="text-[10px] font-medium text-neutral-300 flex items-center gap-1 shrink-0 whitespace-nowrap">
+                <MessageSquare className="w-3 h-3 text-[#60A5FA] shrink-0" />
+                <span>Dialogue</span>
               </span>
-              <div className="flex items-center gap-1">
-                {/* Create / Regenerate Voice Button */}
+              <div className="flex items-center gap-1 shrink-0">
+                {/* Create Voice for Speech */}
                 <button
                   type="button"
-                  disabled={isGeneratingVoice || isThisPanelAnalyzing}
+                  disabled={Boolean(isGeneratingVoice && generatingVoiceMode === "speech") || isThisPanelAnalyzing}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleGenerateVoice();
+                    handleGenerateVoice(false, "speech");
                   }}
-                  className="px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold flex items-center gap-1 border border-neutral-700 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-sm"
-                  title="Synthesize / Regenerate Voice Audio with AI"
+                  className="h-6 px-2 rounded-md text-[9.5px] font-medium flex items-center gap-1 border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-sm whitespace-nowrap shrink-0"
+                  title="Synthesize dialogue voice"
                 >
-                  {isGeneratingVoice ? (
-                    <RefreshCw className="w-2 h-2 animate-spin text-[#3B82F6]" />
+                  {isGeneratingVoice && generatingVoiceMode === "speech" ? (
+                    <RefreshCw className="w-2.5 h-2.5 animate-spin text-[#3B82F6]" />
                   ) : (
-                    <Mic className="w-2 h-2 text-[#3B82F6]" />
+                    <Mic className="w-2.5 h-2.5 text-[#3B82F6]" />
                   )}
-                  <span>{isGeneratingVoice ? "Voicing..." : "Create Voice"}</span>
+                  <span>{isGeneratingVoice && generatingVoiceMode === "speech" ? "Voicing..." : "Create Voice"}</span>
                 </button>
 
-                {/* Play / Pause Audio */}
+                {/* Play Dialogue Audio */}
                 <button
                   type="button"
+                  disabled={Boolean(isGeneratingVoice && generatingVoiceMode === "speech") || isThisPanelAnalyzing}
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleToggleDialogueAudio();
+                    handleToggleDialogueAudio("speech");
                   }}
-                  className={`px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
-                    isDialoguePlaying && !isDialoguePaused
-                      ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
-                      : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA] hover:bg-[#2A2A2A] hover:text-white"
+                  className={`h-6 px-2 rounded-md text-[9.5px] font-medium flex items-center gap-1 border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                    isGeneratingVoice && generatingVoiceMode === "speech"
+                      ? "bg-blue-950/80 border-blue-500 text-blue-200 shadow-sm"
+                      : isDialoguePlaying && !isDialoguePaused && playingAudioType === "speech"
+                      ? "bg-amber-950/80 border-amber-500 text-amber-200 shadow-sm"
+                      : "bg-[#252525] border-neutral-700 text-[#60A5FA] hover:bg-neutral-700 hover:text-white"
                   }`}
-                  title="Play Audio Preview"
+                  title="Play Dialogue Preview"
                 >
-                  {isDialoguePlaying && !isDialoguePaused ? (
-                    <Pause className="w-2 h-2 fill-current" />
+                  {isGeneratingVoice && generatingVoiceMode === "speech" ? (
+                    <RefreshCw className="w-2.5 h-2.5 animate-spin text-[#3B82F6]" />
+                  ) : isDialoguePlaying && !isDialoguePaused && playingAudioType === "speech" ? (
+                    <Pause className="w-2.5 h-2.5 fill-current" />
                   ) : (
-                    <Play className="w-2 h-2 fill-current" />
+                    <Play className="w-2.5 h-2.5 fill-current" />
                   )}
                   <span>
-                    {isDialoguePlaying && !isDialoguePaused ? "Pause" : "Play Audio"}
+                    {isGeneratingVoice && generatingVoiceMode === "speech"
+                      ? "Creating..."
+                      : isDialoguePlaying && !isDialoguePaused && playingAudioType === "speech"
+                      ? "Pause"
+                      : "Play Audio"}
                   </span>
                 </button>
 
-                {(isDialoguePlaying || isDialoguePaused) && (
+                {(isDialoguePlaying || isDialoguePaused) && playingAudioType === "speech" && (
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       stopDialogueAudio();
                     }}
-                    className="p-0.5 rounded text-[8.5px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
+                    className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/40 text-rose-300 hover:bg-rose-900/80 cursor-pointer shrink-0"
                     title="Stop Audio"
                   >
-                    <Square className="w-2 h-2 fill-current" />
+                    <Square className="w-2.5 h-2.5 fill-current" />
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Unified Speech Textarea */}
+            {/* Bubble Dialogue Textarea */}
             <textarea
               rows={1}
               disabled={isThisPanelAnalyzing}
-              value={panel.speech_text || panel.narrative || ""}
-              onChange={(e) => {
-                const val = e.target.value;
-                handleModifySpeechText(panel.id, val);
-                handleModifyNarrative?.(panel.id, val);
-              }}
-              placeholder="Enter dialogue or narration text..."
+              value={panel.speech_text || ""}
+              onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
+              placeholder="Text from speech bubbles in image..."
               className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
                 isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
@@ -1227,11 +1291,105 @@ const StoryboardCard = ({
           </div>
         )}
 
+        {/* Tab 1.5: Voice Narrator (Story Narrative / Explains scene actions) */}
+        {activeTab === "narrative" && (
+          <div className="space-y-1.5 animate-in fade-in duration-150">
+            <div className="flex items-center justify-between gap-1.5 px-0.5 min-w-0">
+              <span className="text-[10px] font-medium text-neutral-300 flex items-center gap-1 shrink-0 whitespace-nowrap">
+                <Mic className="w-3 h-3 text-purple-400 shrink-0" />
+                <span>Narrator</span>
+              </span>
+              <div className="flex items-center gap-1 shrink-0">
+                {/* Create Voice for Narrator */}
+                <button
+                  type="button"
+                  disabled={Boolean(isGeneratingVoice && generatingVoiceMode === "narrative") || isThisPanelAnalyzing}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleGenerateVoice(false, "narrative");
+                  }}
+                  className="h-6 px-2 rounded-md text-[9.5px] font-medium flex items-center gap-1 border border-purple-800/60 bg-purple-950/50 hover:bg-purple-900/70 text-purple-200 hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-sm whitespace-nowrap shrink-0"
+                  title="Synthesize story narration voice"
+                >
+                  {isGeneratingVoice && generatingVoiceMode === "narrative" ? (
+                    <RefreshCw className="w-2.5 h-2.5 animate-spin text-purple-400" />
+                  ) : (
+                    <Mic className="w-2.5 h-2.5 text-purple-400" />
+                  )}
+                  <span>{isGeneratingVoice && generatingVoiceMode === "narrative" ? "Voicing..." : "Create Voice"}</span>
+                </button>
+
+                {/* Play Narrator Audio */}
+                <button
+                  type="button"
+                  disabled={Boolean(isGeneratingVoice && generatingVoiceMode === "narrative") || isThisPanelAnalyzing}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleDialogueAudio("narrative");
+                  }}
+                  className={`h-6 px-2 rounded-md text-[9.5px] font-medium flex items-center gap-1 border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                    isGeneratingVoice && generatingVoiceMode === "narrative"
+                      ? "bg-purple-950/90 border-purple-400 text-purple-200 shadow-sm"
+                      : isDialoguePlaying && !isDialoguePaused && playingAudioType === "narrative"
+                      ? "bg-purple-950/80 border-purple-500 text-purple-300 shadow-sm"
+                      : "bg-[#252525] border-neutral-700 text-purple-300 hover:bg-neutral-700 hover:text-white"
+                  }`}
+                  title="Play Narrator Preview"
+                >
+                  {isGeneratingVoice && generatingVoiceMode === "narrative" ? (
+                    <RefreshCw className="w-2.5 h-2.5 animate-spin text-purple-400" />
+                  ) : isDialoguePlaying && !isDialoguePaused && playingAudioType === "narrative" ? (
+                    <Pause className="w-2.5 h-2.5 fill-current" />
+                  ) : (
+                    <Play className="w-2.5 h-2.5 fill-current" />
+                  )}
+                  <span>
+                    {isGeneratingVoice && generatingVoiceMode === "narrative"
+                      ? "Creating..."
+                      : isDialoguePlaying && !isDialoguePaused && playingAudioType === "narrative"
+                      ? "Pause"
+                      : "Play Audio"}
+                  </span>
+                </button>
+
+                {(isDialoguePlaying || isDialoguePaused) && playingAudioType === "narrative" && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      stopDialogueAudio();
+                    }}
+                    className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/40 text-rose-300 hover:bg-rose-900/80 cursor-pointer shrink-0"
+                    title="Stop Audio"
+                  >
+                    <Square className="w-2.5 h-2.5 fill-current" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Narrator Textarea */}
+            <textarea
+              rows={1}
+              disabled={isThisPanelAnalyzing}
+              value={panel.narrative || ""}
+              onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
+              placeholder="Story narration explaining actions, atmosphere, and context..."
+              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 font-sans transition-all resize-none shadow-inner ${
+                isThisPanelAnalyzing
+                  ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-purple-400"
+                  : "hover:border-neutral-700"
+              }`}
+            />
+          </div>
+        )}
+
         {/* Tab 2: SFX */}
         {activeTab === "sfx" && (
-          <div className="space-y-1 animate-in fade-in duration-150">
-            <div className="px-0.5">
-              <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
+          <div className="space-y-1.5 animate-in fade-in duration-150">
+            <div className="flex items-center gap-1 px-0.5">
+              <Volume2 className="w-3 h-3 text-emerald-400 shrink-0" />
+              <span className="text-[10px] font-medium text-neutral-300">
                 Sound Effects (SFX Cue)
               </span>
             </div>
@@ -1240,10 +1398,10 @@ const StoryboardCard = ({
               disabled={isThisPanelAnalyzing}
               value={panel.sfx || ""}
               onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-              placeholder="e.g. door slam, footsteps..."
-              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all shadow-inner ${
+              placeholder="e.g. door slam, footsteps, explosion..."
+              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-sans transition-all shadow-inner ${
                 isThisPanelAnalyzing
-                  ? "opacity-60 cursor-not-allowed text-[#60A5FA] border-[#2F2F2F]"
+                  ? "opacity-60 cursor-not-allowed text-emerald-400 border-[#2F2F2F]"
                   : "hover:border-neutral-700"
               }`}
             />
@@ -1252,9 +1410,10 @@ const StoryboardCard = ({
 
         {/* Tab 3: Visual Scene Prompt */}
         {activeTab === "visual" && (
-          <div className="space-y-1 animate-in fade-in duration-150">
-            <div className="px-0.5">
-              <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
+          <div className="space-y-1.5 animate-in fade-in duration-150">
+            <div className="flex items-center gap-1 px-0.5">
+              <Palette className="w-3 h-3 text-amber-400 shrink-0" />
+              <span className="text-[10px] font-medium text-neutral-300">
                 Visual Scene Prompt
               </span>
             </div>
@@ -1266,9 +1425,9 @@ const StoryboardCard = ({
                 handleModifyVisualDescription(panel.id, e.target.value)
               }
               placeholder="Describe visual scene for lighting..."
-              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 font-sans transition-all resize-none shadow-inner ${
                 isThisPanelAnalyzing
-                  ? "opacity-60 cursor-not-allowed text-[#60A5FA] border-[#2F2F2F]"
+                  ? "opacity-60 cursor-not-allowed text-amber-400 border-[#2F2F2F]"
                   : "hover:border-neutral-700"
               }`}
             />

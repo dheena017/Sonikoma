@@ -42,6 +42,7 @@ export function useAutoAnalysis({
         const data = await api.analyzeImage(fetchWithInterceptor, {
           url: imageUrl,
           model: selectedModel,
+          voice: voiceActor || localStorage.getItem("ai_comic_voice") || undefined,
           narrationStyle,
         });
         console.log(
@@ -50,6 +51,7 @@ export function useAutoAnalysis({
         );
         if (data.success && data.analysis) {
           const modelUsed = (data as any).model || selectedModel || "gemini-2.5-flash";
+          const returnedAudioUrl = data.audio_url || data.analysis.audio_url || null;
 
           setPanels((prev) =>
             prev.map((p) =>
@@ -57,6 +59,7 @@ export function useAutoAnalysis({
                 ? {
                     ...p,
                     speech_text: data.analysis.speech_text || p.speech_text,
+                    narrative: data.narrative || data.analysis.narrative || p.narrative,
                     sfx: data.analysis.sfx || p.sfx,
                     duration:
                       data.analysis.duration !== undefined
@@ -68,6 +71,8 @@ export function useAutoAnalysis({
                         : p.motion_type,
                     visual_description:
                       data.analysis.visual_description || p.visual_description,
+                    audio_url: returnedAudioUrl || p.audio_url,
+                    speech_audio_url: returnedAudioUrl || p.speech_audio_url,
                     isAnalyzing: false,
                   }
                 : p

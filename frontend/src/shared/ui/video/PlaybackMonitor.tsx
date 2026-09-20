@@ -170,6 +170,7 @@ export default function VideoPreviewCinemaPlayer({
         return {
           voiceActor:
             p.voiceActor ||
+            localStorage.getItem("ai_comic_voice") ||
             localStorage.getItem("ai_comic_voice_actor") ||
             localStorage.getItem("ai_comic_narrator_voice") ||
             "en-US-ChristopherNeural",
@@ -201,6 +202,7 @@ export default function VideoPreviewCinemaPlayer({
     }
     return {
       voiceActor:
+        localStorage.getItem("ai_comic_voice") ||
         localStorage.getItem("ai_comic_voice_actor") ||
         localStorage.getItem("ai_comic_narrator_voice") ||
         "en-US-ChristopherNeural",

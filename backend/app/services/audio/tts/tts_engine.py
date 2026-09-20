@@ -69,10 +69,107 @@ VOICE_MAP = {
 
 _TTS_MIN_ALPHA_CHARS = 3
 
-def sanitize_text_for_tts(text: str) -> str:
+def to_natural_sentence_case(text: str) -> str:
+    """
+    Converts shouty manga ALL-CAPS text into natural conversational sentence case
+    while preserving standard acronyms (AI, RPG, NPC, OK, USA, etc.).
+    This drastically improves Neural TTS prosody and emotional cadence.
+    """
+    if not text or not text.isupper():
+        return text
+
+    acronyms = {"AI", "OK", "NPC", "RPG", "VIP", "USA", "UK", "DNA", "CEO", "CFO", "CTO", "ID", "XP", "HP", "MP"}
+    
+    sentences = re.split(r'([.!?]+\s*)', text)
+    processed = []
+    
+    for part in sentences:
+        if not part.strip():
+            processed.append(part)
+            continue
+        words = part.split(' ')
+        new_words = []
+        for i, w in enumerate(words):
+            clean_w = re.sub(r'[^\w]', '', w).upper()
+            if clean_w in acronyms:
+                new_words.append(w.upper())
+            elif i == 0:
+                new_words.append(w.capitalize())
+            elif w.upper() in ("I", "I'LL", "I'M", "I'VE", "I'D"):
+                new_words.append(w[0].upper() + w[1:].lower() if len(w) > 1 else "I")
+            else:
+                new_words.append(w.lower())
+        processed.append(" ".join(new_words))
+        
+    return "".join(processed)
+
+
+def normalize_comic_text_for_human_speech(text: str) -> str:
+    """
+    Cleans comic dialogue and OCR artifacts to produce ultra-realistic, human-like voice synthesis.
+    - Fixes broken OCR contractions (e.g. don ' t -> don't, I ' m -> I'm)
+    - Calms excessive letter repetition (e.g. NOOOO! -> No!, WHAAAT?! -> What?!)
+    - Removes visual SFX glyphs (~, ♪, ♥, ★) that confuse neural speech models
+    - Formats punctuation and ellipses for natural human breathing pauses
+    """
+    if not text:
+        return ""
+
+    # 1. Remove non-printable control characters
     text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", text)
+
+    # 2. Strip bracketed stage directions like [Boom], [Slash], (Laughs), *gasp*
+    text = re.sub(r"\[[^\]]*\]", "", text)
+    text = re.sub(r"\*[^*]*\*", "", text)
+    # Strip parenthesized action cues like (whispering), (sighs), (screams)
+    text = re.sub(r"\((?:whispering|whispers|sighs|sigh|gasp|gasps|laughs|laughter|screams|cries|panting|shouting|narrator|sfx)[^)]*\)", "", text, flags=re.IGNORECASE)
+
+    # 3. Strip decorative manga glyphs that cause TTS engines to read symbol names aloud
+    text = re.sub(r"[~∼～♪♫♬♥♡★☆⚡✨@#^|\\/«»<>]", " ", text)
+    text = text.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'").replace("`", "'")
+
+    # 4. Repair broken OCR contraction spacing: "don ' t" -> "don't", "I ' m" -> "I'm", "can ' t" -> "can't"
+    text = re.sub(r"\b([a-zA-Z]+)\s*[']\s*([a-zA-Z]+)\b", r"\1'\2", text)
+
+    # 5. Fix spaced punctuation: "hello , world ." -> "hello, world."
+    text = re.sub(r"\s+([,.:;!?])", r"\1", text)
+
+    # 6. Normalize shouty manga all-caps to conversational sentence case
+    if text.isupper() and len(text) > 3:
+        text = to_natural_sentence_case(text)
+
+    # 7. Compress exaggerated repeated characters (e.g. "Nooooo!" -> "No!", "Whaaaat" -> "What")
+    # Reduces 3+ identical consecutive letters down to 1 or 2 so Edge-TTS speaks words naturally
+    def _reduce_repetition(m: re.Match) -> str:
+        char = m.group(1)
+        # Keep double 'ee' or 'oo' (e.g., look, see), otherwise single char
+        if char.lower() in ('o', 'e') and len(m.group(0)) >= 3:
+            return char * 2
+        return char
+
+    text = re.sub(r'([a-zA-Z])\1{2,}', _reduce_repetition, text)
+
+    # 8. Punctuation cadence optimization for natural human breathing
+    # Multiple exclamation marks / question marks -> clean expressive punctuation
+    text = re.sub(r"\?{2,}", "?", text)
+    text = re.sub(r"!{2,}", "!", text)
+    text = re.sub(r"\?!|\!\?", "?", text)
+    text = re.sub(r",,+", ",", text)
+
+    # Ellipses formatting for dramatic pauses
+    text = re.sub(r"\.{2,}", "...", text)
+    text = re.sub(r"\.\.\.\s*", "... ", text)
+
+    # Em dashes for conversational hesitation
+    text = re.sub(r"—+|--+", " — ", text)
+
+    # 9. Clean up whitespace
     text = re.sub(r"[ \t]+", " ", text).strip()
     return text
+
+
+def sanitize_text_for_tts(text: str) -> str:
+    return normalize_comic_text_for_human_speech(text)
 
 
 async def generate_segment_with_retry(
@@ -172,17 +269,36 @@ async def generate_panel_audio(
                 silence_seg.export(temp_file_path, format="mp3")
 
         def process_audio_sync() -> float:
+            from pydub.effects import normalize, compress_dynamic_range, high_pass_filter, low_pass_filter
             combined_audio: AudioSegment = AudioSegment.empty()
             for idx, file_path in enumerate(temp_files):
                 if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
                     continue
 
                 segment = cast(AudioSegment, AudioSegment.from_file(file_path, format="mp3"))
-                normalized_seg: AudioSegment = segment.set_frame_rate(44100).set_channels(2)
+                try:
+                    # 1. Clean sub-bass mic rumble (< 75 Hz)
+                    mastered = high_pass_filter(segment, 75)
+                    # 2. Smooth digital harshness (> 14500 Hz)
+                    mastered = low_pass_filter(mastered, 14500)
+                    # 3. Dynamic compression (gives broadcast warmth & presence)
+                    mastered = compress_dynamic_range(mastered, threshold=-18.0, ratio=2.5, attack=5.0, release=50.0)
+                    # 4. Studio peak normalization
+                    mastered = normalize(mastered, headroom=0.3)
+                    # 5. Smooth micro-fades to eliminate click artifacts
+                    mastered = mastered.fade_in(15).fade_out(25)
+                except Exception as master_err:
+                    logger.debug(f"[Mastering Fallback] {master_err}")
+                    mastered = segment
 
-                combined_audio += normalized_seg
+                normalized_seg: AudioSegment = mastered.set_frame_rate(44100).set_channels(2)
+
+                # Add natural 20ms lead-in and 40ms lead-out padding for fluid speech delivery
+                padded_seg = AudioSegment.silent(duration=20) + normalized_seg + AudioSegment.silent(duration=40)
+                combined_audio += padded_seg
                 if idx < len(temp_files) - 1:
-                    combined_audio += AudioSegment.silent(duration=100)
+                    # Natural breathing gap between dialogue bubbles/sentences
+                    combined_audio += AudioSegment.silent(duration=180)
 
             current_duration_ms: int = len(combined_audio)
 

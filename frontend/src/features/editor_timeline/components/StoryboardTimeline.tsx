@@ -341,17 +341,10 @@ const StoryboardTimeline = React.memo(
                   speech_pitch: speechPitch,
                 });
                 let audioUrl = null;
-                // Audio may come back as a cached URL or as base64
                 if (ttsRes && ttsRes.success && ttsRes.audio_url) {
                   audioUrl = ttsRes.audio_url;
                 } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
-                  const binary = atob(ttsRes.audio_base64);
-                  const bytes = new Uint8Array(binary.length);
-                  for (let i = 0; i < binary.length; i++)
-                    bytes[i] = binary.charCodeAt(i);
-                  audioUrl = URL.createObjectURL(
-                    new Blob([bytes], { type: "audio/mpeg" })
-                  );
+                  audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${ttsRes.audio_base64}`;
                 }
 
                 // Capture actual audio duration for precise timing sync

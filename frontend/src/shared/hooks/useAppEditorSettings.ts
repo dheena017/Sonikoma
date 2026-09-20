@@ -5,9 +5,26 @@ import {
 } from "@/features/editor_studio/types/settings";
 
 export function useAppEditorSettings() {
-  const [voiceActor, setVoiceActor] = useState<string>(
-    () => localStorage.getItem("ai_comic_voice") || DEFAULT_AUDIO_SETTINGS.voiceActor || "en_narrator_1"
-  );
+  const [voiceActor, setVoiceActor] = useState<string>(() => {
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.voiceActor && parsed.voiceActor !== "en_narrator_1" && parsed.voiceActor !== "Epic Trailer Narrator") {
+          return parsed.voiceActor;
+        }
+      }
+    } catch {}
+    const direct =
+      localStorage.getItem("ai_comic_voice") ||
+      localStorage.getItem("ai_comic_voice_actor") ||
+      localStorage.getItem("ai_comic_narrator_voice");
+    if (direct && direct !== "en_narrator_1" && direct !== "Epic Trailer Narrator") {
+      return direct;
+    }
+    return DEFAULT_AUDIO_SETTINGS.voiceActor || "en-US-ChristopherNeural";
+  });
+
   const [musicTheme, setMusicTheme] = useState<string>(
     () => localStorage.getItem("ai_comic_music") || DEFAULT_AUDIO_SETTINGS.musicTheme || ""
   );
@@ -101,6 +118,113 @@ export function useAppEditorSettings() {
   const [smartSlice, setSmartSlice] = useState<boolean>(
     () => localStorage.getItem("ai_comic_smart_slice") !== "false"
   );
+
+  // Auto-persist audio & speech configuration
+  useEffect(() => {
+    if (voiceActor) {
+      localStorage.setItem("ai_comic_voice", voiceActor);
+      localStorage.setItem("ai_comic_voice_actor", voiceActor);
+      localStorage.setItem("ai_comic_narrator_voice", voiceActor);
+      try {
+        const raw = localStorage.getItem("global_audio_settings");
+        const parsed = raw ? JSON.parse(raw) : {};
+        parsed.voiceActor = voiceActor;
+        parsed.narratorVoice = voiceActor;
+        localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+      } catch {}
+    }
+  }, [voiceActor]);
+
+  useEffect(() => {
+    if (musicTheme) {
+      localStorage.setItem("ai_comic_music", musicTheme);
+      try {
+        const raw = localStorage.getItem("global_audio_settings");
+        const parsed = raw ? JSON.parse(raw) : {};
+        parsed.musicTheme = musicTheme;
+        localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+      } catch {}
+    }
+  }, [musicTheme]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_volume", String(volume));
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.volume = volume;
+      parsed.masterVolume = volume;
+      localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+    } catch {}
+  }, [volume]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_narration_volume", String(narrationVolume));
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.narrationVolume = narrationVolume;
+      localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+    } catch {}
+  }, [narrationVolume]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_bgm_volume", String(bgmVolume));
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.bgmVolume = bgmVolume;
+      localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+    } catch {}
+  }, [bgmVolume]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_sfx_volume", String(sfxVolume));
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.sfxVolume = sfxVolume;
+      localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+    } catch {}
+  }, [sfxVolume]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_speech_rate", String(speechRate));
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.speechRate = speechRate;
+      localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+    } catch {}
+  }, [speechRate]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_speech_pitch", String(speechPitch));
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.speechPitch = speechPitch;
+      localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+    } catch {}
+  }, [speechPitch]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_audio_ducking", String(audioDucking));
+    try {
+      const raw = localStorage.getItem("global_audio_settings");
+      const parsed = raw ? JSON.parse(raw) : {};
+      parsed.audioDucking = audioDucking;
+      localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+    } catch {}
+  }, [audioDucking]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_aspectRatio", aspectRatio);
+  }, [aspectRatio]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_fps", String(frameRate));
+  }, [frameRate]);
 
   return {
     voiceActor,

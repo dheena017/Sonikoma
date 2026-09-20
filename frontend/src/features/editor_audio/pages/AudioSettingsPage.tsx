@@ -336,37 +336,55 @@ export default function AudioSettingsPage({
   }, [displayVoices, selectedLanguage, voiceSearch]);
 
   const handleSave = useCallback(async () => {
-    if (onSave) { onSave(); return; }
-    localStorage.setItem("ai_comic_narrator_voice", localNarratorVoice);
+    localStorage.setItem("ai_comic_voice", voiceActor);
+    localStorage.setItem("ai_comic_voice_actor", voiceActor);
+    localStorage.setItem("ai_comic_narrator_voice", voiceActor);
+    localStorage.setItem(
+      "global_audio_settings",
+      JSON.stringify({
+        masterVolume: volume,
+        volume,
+        narrationVolume,
+        bgmVolume,
+        sfxVolume,
+        speechRate,
+        speechPitch,
+        voiceActor,
+        narratorVoice: voiceActor,
+        musicTheme,
+        audioDucking,
+      })
+    );
+
+    const activeProjectData = useProjectStore.getState().activeProjectData;
+    if (activeProjectData) {
+      useProjectStore.getState().setActiveProject({
+        ...activeProjectData,
+        project: {
+          ...activeProjectData.project,
+          audio_settings: {
+            volume,
+            narrationVolume,
+            bgmVolume,
+            sfxVolume,
+            speechRate,
+            speechPitch,
+            voiceActor,
+            narratorVoice: voiceActor,
+            musicTheme,
+            audioDucking,
+          },
+        },
+      });
+    }
+
+    if (onSave) {
+      onSave();
+    }
 
     const isTemp = !projectId || projectId.startsWith("temp_") || projectId.startsWith("draft_");
     if (isTemp) {
-      localStorage.setItem("global_audio_settings", JSON.stringify({
-        masterVolume: volume, narrationVolume, bgmVolume, sfxVolume,
-        speechRate, speechPitch, voiceActor, narratorVoice: localNarratorVoice, musicTheme, audioDucking,
-      }));
-      const activeProjectData = useProjectStore.getState().activeProjectData;
-      if (activeProjectData) {
-        useProjectStore.getState().setActiveProject({
-          ...activeProjectData,
-          project: {
-            ...activeProjectData.project,
-            audio_settings: {
-              volume,
-              narrationVolume,
-              bgmVolume,
-              sfxVolume,
-              speechRate,
-              speechPitch,
-              voiceActor,
-              narratorVoice: localNarratorVoice,
-              musicTheme,
-              audioDucking,
-            },
-          },
-        });
-      }
-      if (addNotification) addNotification("Audio profile saved for current workspace!", "success");
+      if (addNotification) addNotification("Audio settings saved to workspace!", "success");
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
       return;
@@ -387,7 +405,7 @@ export default function AudioSettingsPage({
             speechRate,
             speechPitch,
             voiceActor,
-            narratorVoice: localNarratorVoice,
+            narratorVoice: voiceActor,
             musicTheme,
             audioDucking,
           },
@@ -406,13 +424,48 @@ export default function AudioSettingsPage({
     } finally {
       setSaving(false);
     }
-  }, [onSave, localNarratorVoice, projectId, volume, narrationVolume, bgmVolume, sfxVolume, speechRate, speechPitch, voiceActor, musicTheme, audioDucking, addNotification, fetchWithInterceptor]);
+  }, [
+    onSave,
+    projectId,
+    volume,
+    narrationVolume,
+    bgmVolume,
+    sfxVolume,
+    speechRate,
+    speechPitch,
+    voiceActor,
+    musicTheme,
+    audioDucking,
+    addNotification,
+    fetchWithInterceptor,
+  ]);
 
   const tabs = [
     { id: "mixer", label: "Mixer", icon: Sliders },
     { id: "voice", label: "Voice & TTS", icon: Mic },
     { id: "music", label: "Soundtrack", icon: Music },
   ] as const;
+
+  const currentVoiceObj = useMemo(() => {
+    return (
+      displayVoices.find((v) => v.code === voiceActor) ||
+      displayVoices.find((v) => v.code.toLowerCase() === voiceActor?.toLowerCase()) ||
+      displayVoices.find((v) => v.code === "en-US-ChristopherNeural") ||
+      displayVoices[0]
+    );
+  }, [displayVoices, voiceActor]);
+
+  useEffect(() => {
+    if (voiceActor && voiceActor !== localNarratorVoice) {
+      setLocalNarratorVoice(voiceActor);
+    }
+  }, [voiceActor, localNarratorVoice]);
+
+  useEffect(() => {
+    if (!voiceActor && currentVoiceObj?.code) {
+      setVoiceActor(currentVoiceObj.code);
+    }
+  }, [voiceActor, currentVoiceObj, setVoiceActor]);
 
   return (
     <div className={isEmbed ? "w-full" : "w-full max-w-4xl mx-auto py-4"}>
@@ -566,28 +619,29 @@ export default function AudioSettingsPage({
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-lg bg-[#3B82F6]/20 border border-[#3B82F6]/40 flex items-center justify-center text-[#60A5FA] shrink-0 font-mono font-bold text-xs">
-                    {displayVoices.find((v) => v.code === voiceActor)?.gender === "Female" ? "♀" : "♂"}
+                    {currentVoiceObj?.gender === "Female" ? "♀" : "♂"}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-white truncate">
-                        {displayVoices.find((v) => v.code === voiceActor)?.label?.split("—")?.[1]?.trim() ||
-                          displayVoices.find((v) => v.code === voiceActor)?.label?.split("—")?.[0]?.trim() ||
-                          voiceActor}
+                        {currentVoiceObj?.label?.split("—")?.[1]?.trim() ||
+                          currentVoiceObj?.label?.split("—")?.[0]?.trim() ||
+                          voiceActor ||
+                          "Select a voice"}
                       </span>
-                      {displayVoices.find((v) => v.code === voiceActor)?.lang && (
+                      {currentVoiceObj?.lang && (
                         <span className="text-[9.5px] px-1.5 py-0.5 rounded-md bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[#60A5FA] font-medium">
-                          {displayVoices.find((v) => v.code === voiceActor)?.lang}
+                          {currentVoiceObj?.lang}
                         </span>
                       )}
-                      {displayVoices.find((v) => v.code === voiceActor)?.gender && (
+                      {currentVoiceObj?.gender && (
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
-                          {displayVoices.find((v) => v.code === voiceActor)?.gender}
+                          {currentVoiceObj?.gender}
                         </span>
                       )}
                     </div>
                     <div className="text-[10px] font-mono text-neutral-400 truncate mt-0.5">
-                      {voiceActor}
+                      {voiceActor || currentVoiceObj?.code}
                     </div>
                   </div>
                 </div>
@@ -667,12 +721,47 @@ export default function AudioSettingsPage({
                         <VoiceCard
                           key={voice.code}
                           voice={voice}
-                          isSelected={voiceActor === voice.code}
+                          isSelected={voiceActor === voice.code || (!voiceActor && currentVoiceObj?.code === voice.code)}
                           onSelect={() => {
                             setVoiceActor(voice.code);
                             setLocalNarratorVoice(voice.code);
+                            localStorage.setItem("ai_comic_voice", voice.code);
+                            localStorage.setItem("ai_comic_voice_actor", voice.code);
                             localStorage.setItem("ai_comic_narrator_voice", voice.code);
+                            try {
+                              const raw = localStorage.getItem("global_audio_settings");
+                              const parsed = raw ? JSON.parse(raw) : {};
+                              parsed.voiceActor = voice.code;
+                              parsed.narratorVoice = voice.code;
+                              localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+                            } catch {}
+
+                            const activeProjectData = useProjectStore.getState().activeProjectData;
+                            if (activeProjectData) {
+                              useProjectStore.getState().setActiveProject({
+                                ...activeProjectData,
+                                project: {
+                                  ...activeProjectData.project,
+                                  audio_settings: {
+                                    ...(activeProjectData.project.audio_settings || {}),
+                                    volume,
+                                    narrationVolume,
+                                    bgmVolume,
+                                    sfxVolume,
+                                    speechRate,
+                                    speechPitch,
+                                    voiceActor: voice.code,
+                                    narratorVoice: voice.code,
+                                    musicTheme,
+                                    audioDucking,
+                                  },
+                                },
+                              });
+                            }
                             setIsVoiceDropdownOpen(false);
+                            if (addNotification) {
+                              addNotification(`Selected voice: ${voice.label || voice.code}`, "info");
+                            }
                           }}
                         />
                       ))}

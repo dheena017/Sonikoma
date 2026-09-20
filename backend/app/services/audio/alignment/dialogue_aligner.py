@@ -136,28 +136,59 @@ async def align_dialogue_and_extract_peaks(
 
 
 async def align_dialogue_service(panel_id: str, audio_url: str, ocr_texts: List[str]) -> Dict[str, Any]:
-    resolved = await img_utils.resolve_url_to_buffer(audio_url)
-
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_in:
-        tmp_in.write(resolved["data"])
-        tmp_audio_path = tmp_in.name
-
     try:
-        result = await align_dialogue_and_extract_peaks(
-            audio_path=tmp_audio_path,
-            ocr_texts=ocr_texts
-        )
+        resolved = await img_utils.resolve_url_to_buffer(audio_url)
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_in:
+            tmp_in.write(resolved["data"])
+            tmp_audio_path = tmp_in.name
+
+        try:
+            result = await align_dialogue_and_extract_peaks(
+                audio_path=tmp_audio_path,
+                ocr_texts=ocr_texts
+            )
+            return {
+                "success": True,
+                "panel_id": panel_id,
+                **result
+            }
+        finally:
+            try:
+                if os.path.exists(tmp_audio_path):
+                    os.remove(tmp_audio_path)
+            except OSError:
+                pass
+    except Exception as err:
+        logger.warning(f"[Alignment] Could not resolve audio buffer for panel '{panel_id}' ({err}). Using algorithmic text pacing fallback.")
+        dialogue_map = []
+        cur_t = 0.5
+        for i, text in enumerate(ocr_texts or []):
+            words = text.split()
+            dur = max(1.0, len(words) * 0.35)
+            dialogue_map.append({
+                "ocr_index": i,
+                "text": text,
+                "start_time": round(cur_t, 2),
+                "end_time": round(cur_t + dur, 2),
+                "words": [
+                    {
+                        "word": w,
+                        "start": round(cur_t + j * 0.35, 2),
+                        "end": round(cur_t + (j + 1) * 0.35, 2),
+                    }
+                    for j, w in enumerate(words)
+                ],
+            })
+            cur_t += dur + 0.25
+
         return {
             "success": True,
             "panel_id": panel_id,
-            **result
+            "dialogue_map": dialogue_map,
+            "audio_peaks": [],
+            "peaks_fps": 30.0,
+            "warning": f"Audio timing generated via algorithmic text pacing: {str(err)}",
         }
-    finally:
-        try:
-            if os.path.exists(tmp_audio_path):
-                os.remove(tmp_audio_path)
-        except OSError:
-            pass
 
 
 # Human-readable alias
