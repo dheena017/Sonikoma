@@ -45,6 +45,9 @@ async def run_md_skill(skill_name: str, model: Optional[str], api_key: Any = Non
     """Runs a markdown-templated AI skill and returns structured output."""
     try:
         skill = registry.get(skill_name)
+        if not skill:
+            raise HTTPException(status_code=404, detail=f"AI Skill '{skill_name}' is not registered.")
+
         user_keys = api_key if isinstance(api_key, dict) else None
         single_key = api_key if isinstance(api_key, str) else None
         raw_text = await skill.execute(model=model, api_key=single_key, user_keys=user_keys, **kwargs)
@@ -60,6 +63,21 @@ async def run_md_skill(skill_name: str, model: Optional[str], api_key: Any = Non
             "inputTokens": getattr(skill, "last_input_tokens", 0),
             "outputTokens": getattr(skill, "last_output_tokens", 0)
         }
+    except HTTPException:
+        raise
     except Exception as e:
+        from services.ai.orchestrator import AIExecutionError, AIErrorCode
         logger.error(f"[run_md_skill Error] skill '{skill_name}' failed: {e}", exc_info=True)
+        if isinstance(e, AIExecutionError):
+            status_map = {
+                AIErrorCode.AUTH_FAILURE: 401,
+                AIErrorCode.INSUFFICIENT_CREDITS: 402,
+                AIErrorCode.MODEL_NOT_FOUND: 404,
+                AIErrorCode.RATE_LIMITED: 429,
+                AIErrorCode.PROVIDER_UNAVAILABLE: 503,
+                AIErrorCode.TIMEOUT: 504,
+                AIErrorCode.INVALID_REQUEST: 400,
+            }
+            status_code = status_map.get(e.error_code, 500)
+            raise HTTPException(status_code=status_code, detail=e.message)
         raise HTTPException(status_code=500, detail=str(e))

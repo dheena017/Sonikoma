@@ -160,7 +160,10 @@ async def execute_provider_call(
     if provider == "gemini":
         key_to_use = resolve_api_key("gemini", api_key, user_keys)
         if not ai_initialized and not key_to_use:
-            raise RuntimeError("Gemini is not initialized and no API key was provided.")
+            raise RuntimeError(
+                "Missing Gemini API Key. Please enter your Gemini API Key in the website AI Settings / Vault "
+                "or set GEMINI_API_KEY in your backend .env file."
+            )
 
         config_args = {}
         schema = getattr(skill, "response_schema", None) if skill else None
@@ -168,10 +171,10 @@ async def execute_provider_call(
             config_args["response_mime_type"] = "application/json"
             config_args["response_schema"] = schema
 
-        config = types.GenerateContentConfig(**config_args)
+        config = types.GenerateContentConfig(**config_args) if types else None
 
         contents = []
-        if image_bytes:
+        if image_bytes and types:
             contents.append(types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"))
         contents.append(prompt)
 
@@ -179,7 +182,10 @@ async def execute_provider_call(
         client_to_use = genai.Client(api_key=key_to_use) if key_to_use else genai_client
 
         if not client_to_use:
-            raise RuntimeError("Gemini client is not initialized and no API key was provided.")
+            raise RuntimeError(
+                "Gemini client could not be initialized. Please check that a valid Gemini API key is configured "
+                "in your website settings or .env file."
+            )
 
         # Normalize and alias deprecated or renamed model identifiers
         gemini_model_aliases = {
@@ -190,21 +196,25 @@ async def execute_provider_call(
         }
         effective_model_id = gemini_model_aliases.get(clean_model_id, clean_model_id)
 
-        response = await call_gemini_with_retry(
-            lambda: client_to_use.models.generate_content(
-                model=effective_model_id,
-                contents=contents,
-                config=config
-            ),
-            max_attempts=max_retries
-        )
+        try:
+            response = await call_gemini_with_retry(
+                lambda: client_to_use.models.generate_content(
+                    model=effective_model_id,
+                    contents=contents,
+                    config=config
+                ),
+                max_attempts=max_retries
+            )
+        except Exception as gemini_err:
+            logger.error(f"[Gemini Error] Generation failed on model '{effective_model_id}': {gemini_err}")
+            raise RuntimeError(f"Gemini API request failed for model '{effective_model_id}': {gemini_err}")
 
         if not response:
             skill_name = getattr(skill, "name", "ai_capability") if skill else "ai_capability"
             fallback_payload = FallbackCoordinator.get_programmatic_fallback(skill_name, **kwargs)
             fallback_payload.setdefault("success", False)
             fallback_payload.setdefault("source", "fallback:error")
-            fallback_payload["error"] = str(last_exc or RuntimeError(f"All Gemini fallback models failed for skill '{skill_name}'."))
+            fallback_payload["error"] = f"Gemini returned an empty response for model '{effective_model_id}'."
             raw_text = json.dumps(fallback_payload)
             if skill:
                 skill.last_input_tokens = 0
@@ -239,7 +249,10 @@ async def execute_provider_call(
 
         key_to_use = resolve_api_key("openai", api_key, user_keys)
         if not key_to_use:
-            raise RuntimeError("Missing OpenAI API Key.")
+            raise RuntimeError(
+                "Missing OpenAI API Key. Please enter your OpenAI API Key in the website AI Settings / Vault "
+                "or set OPENAI_API_KEY in your backend .env file."
+            )
 
         headers = {
             "Authorization": f"Bearer {key_to_use}",
@@ -328,7 +341,10 @@ async def execute_provider_call(
 
         key_to_use = resolve_api_key("anthropic", api_key, user_keys)
         if not key_to_use:
-            raise RuntimeError("Missing Anthropic API Key.")
+            raise RuntimeError(
+                "Missing Anthropic API Key. Please enter your Anthropic API Key in the website AI Settings / Vault "
+                "or set ANTHROPIC_API_KEY in your backend .env file."
+            )
 
         headers = {
             "x-api-key": key_to_use,
@@ -390,7 +406,12 @@ async def execute_provider_call(
         response = await loop.run_in_executor(None, make_request)
 
         if response.status_code != 200:
-            raise RuntimeError(f"Anthropic API request failed (HTTP {response.status_code}): {response.text}")
+            err_detail = response.text
+            try:
+                err_detail = response.json().get("error", {}).get("message", response.text)
+            except Exception:
+                pass
+            raise RuntimeError(f"Anthropic API request failed (HTTP {response.status_code}): {err_detail}")
 
         res_data = response.json()
         raw_text = res_data["content"][0]["text"]
@@ -418,7 +439,10 @@ async def execute_provider_call(
 
         key_to_use = resolve_api_key("huggingface", api_key, user_keys)
         if not key_to_use:
-            raise RuntimeError("Missing Hugging Face Token.")
+            raise RuntimeError(
+                "Missing Hugging Face Token. Please enter your Hugging Face Token in the website AI Settings / Vault "
+                "or set HUGGINGFACE_API_KEY in your backend .env file."
+            )
 
         headers = {
             "Authorization": f"Bearer {key_to_use}",
@@ -471,7 +495,10 @@ async def execute_provider_call(
 
         key_to_use = resolve_api_key("groq", api_key, user_keys)
         if not key_to_use:
-            raise RuntimeError("Missing Groq API Key.")
+            raise RuntimeError(
+                "Missing Groq API Key. Please enter your Groq API Key in the website AI Settings / Vault "
+                "or set GROQ_API_KEY in your backend .env file."
+            )
 
         headers = {
             "Authorization": f"Bearer {key_to_use}",
@@ -497,7 +524,12 @@ async def execute_provider_call(
 
         response = await loop.run_in_executor(None, make_groq_request)
         if response.status_code != 200:
-            raise RuntimeError(f"Groq API request failed (HTTP {response.status_code}): {response.text}")
+            err_detail = response.text
+            try:
+                err_detail = response.json().get("error", {}).get("message", response.text)
+            except Exception:
+                pass
+            raise RuntimeError(f"Groq API request failed (HTTP {response.status_code}): {err_detail}")
 
         res_data = response.json()
         raw_text = res_data["choices"][0]["message"]["content"]
@@ -515,7 +547,10 @@ async def execute_provider_call(
 
         key_to_use = resolve_api_key("deepseek", api_key, user_keys)
         if not key_to_use:
-            raise RuntimeError("Missing DeepSeek API Key.")
+            raise RuntimeError(
+                "Missing DeepSeek API Key. Please enter your DeepSeek API Key in the website AI Settings / Vault "
+                "or set DEEPSEEK_API_KEY in your backend .env file."
+            )
 
         headers = {
             "Authorization": f"Bearer {key_to_use}",
@@ -536,7 +571,12 @@ async def execute_provider_call(
 
         response = await loop.run_in_executor(None, make_deepseek_request)
         if response.status_code != 200:
-            raise RuntimeError(f"DeepSeek API request failed (HTTP {response.status_code}): {response.text}")
+            err_detail = response.text
+            try:
+                err_detail = response.json().get("error", {}).get("message", response.text)
+            except Exception:
+                pass
+            raise RuntimeError(f"DeepSeek API request failed (HTTP {response.status_code}): {err_detail}")
 
         res_data = response.json()
         raw_text = res_data["choices"][0]["message"]["content"]
@@ -553,7 +593,10 @@ async def execute_provider_call(
 
         key_to_use = resolve_api_key("deepl", api_key, user_keys)
         if not key_to_use:
-            raise RuntimeError("Missing DeepL API Key.")
+            raise RuntimeError(
+                "Missing DeepL API Key. Please enter your DeepL API Key in the website AI Settings / Vault "
+                "or set DEEPL_API_KEY in your backend .env file."
+            )
 
         text_to_translate = kwargs.get("text", prompt)
         target_lang = kwargs.get("target_lang", "EN-US").upper()
@@ -608,7 +651,10 @@ async def execute_provider_call(
         import requests
         key_to_use = resolve_api_key("elevenlabs", api_key, user_keys)
         if not key_to_use:
-            raise RuntimeError("Missing ElevenLabs API Key.")
+            raise RuntimeError(
+                "Missing ElevenLabs API Key. Please enter your ElevenLabs API Key in the website AI Settings / Vault "
+                "or set ELEVENLABS_API_KEY in your backend .env file."
+            )
 
         voice_id = kwargs.get("voice_id", "21m00Tcm4TlvDq8ikWAM")
         url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"

@@ -71,13 +71,17 @@ def _clean_error_message(exc: Exception, provider: Optional[str] = None, model: 
     prov_label = (provider or "AI Provider").capitalize()
     model_label = model or "default model"
 
+    # 0. Explicit Missing API Key Guidance
+    if "missing" in err_lower and ("key" in err_lower or "token" in err_lower):
+        return (AIErrorCode.AUTH_FAILURE, err_str)
+
     # 1. Quota & Rate Limit (429 / Resource Exhausted)
     if "429" in err_lower or "quota" in err_lower or "rate limit" in err_lower or "resource_exhausted" in err_lower:
         if "free_tier_requests" in err_lower or "freetier" in err_lower or "generaterequestsperday" in err_lower:
             return (
                 AIErrorCode.RATE_LIMITED,
-                f"Google Gemini Free Tier daily quota exhausted (20 requests/day limit on {model_label}). "
-                "Please enable pay-as-you-go billing in Google AI Studio or switch models in AI settings."
+                f"Google Gemini Free Tier daily quota exhausted (limit reached on {model_label}). "
+                "Please enable pay-as-you-go billing in Google AI Studio or switch to another model in AI Settings."
             )
         
         retry_match = re.search(r'retry in\s+([0-9\.]+)s', err_str, re.IGNORECASE)
@@ -90,34 +94,34 @@ def _clean_error_message(exc: Exception, provider: Optional[str] = None, model: 
         
         return (
             AIErrorCode.RATE_LIMITED,
-            f"Rate limit or request quota exceeded on {prov_label} for model '{model_label}'. Please retry shortly or switch models."
+            f"Rate limit or request quota exceeded on {prov_label} for model '{model_label}'. Please retry shortly or switch models in AI Routing."
         )
 
     # 2. Insufficient Credits
     if "insufficient credits" in err_lower or "low credit balance" in err_lower:
-        return (AIErrorCode.INSUFFICIENT_CREDITS, f"Insufficient credits to execute AI request with model '{model_label}'.")
+        return (AIErrorCode.INSUFFICIENT_CREDITS, f"Insufficient credits to execute AI request with model '{model_label}'. Please add credits to continue.")
 
     # 3. Model Not Found (404)
     if "404" in err_lower or "not found" in err_lower or "model not found" in err_lower:
-        return (AIErrorCode.MODEL_NOT_FOUND, f"Model '{model_label}' is not found or unsupported on {prov_label}.")
+        return (AIErrorCode.MODEL_NOT_FOUND, f"Model '{model_label}' was not found or is unsupported on {prov_label}. Please select a different model.")
 
     # 4. Authentication / API Key failure (401 / 403)
     if "401" in err_lower or "403" in err_lower or "api key" in err_lower or "permission" in err_lower or "unauthorized" in err_lower or "forbidden" in err_lower:
-        return (AIErrorCode.AUTH_FAILURE, f"Invalid or unauthorized API key for {prov_label}. Please check your API key in settings.")
+        return (AIErrorCode.AUTH_FAILURE, f"Invalid or unauthorized API key for {prov_label}. Please check your API key in website settings (AI Vault) or .env file.")
 
     # 5. Service Unavailable / Connection (503)
     if "503" in err_lower or "unavailable" in err_lower or "connection" in err_lower or "econnrefused" in err_lower or "dns" in err_lower or "getaddrinfo" in err_lower:
-        return (AIErrorCode.PROVIDER_UNAVAILABLE, f"{prov_label} service is temporarily unavailable or unreachable. Please try again later.")
+        return (AIErrorCode.PROVIDER_UNAVAILABLE, f"{prov_label} service is temporarily unavailable or unreachable. Please try again in a few moments.")
 
     # 6. Timeout
     if "timeout" in err_lower or "timed out" in err_lower:
-        return (AIErrorCode.TIMEOUT, f"Request to {prov_label} timed out for model '{model_label}'.")
+        return (AIErrorCode.TIMEOUT, f"Request to {prov_label} timed out for model '{model_label}'. The provider took too long to respond.")
 
     # 7. Invalid Request Payload (400 / 422)
     if "400" in err_lower or "422" in err_lower or "validation" in err_lower or "invalid" in err_lower:
         # Extract short message if available in json
         msg_match = re.search(r"['\"]message['\"]\s*:\s*['\"]([^'\"]+)['\"]", err_str)
-        short_detail = msg_match.group(1) if msg_match else err_str[:120]
+        short_detail = msg_match.group(1) if msg_match else err_str[:160]
         return (AIErrorCode.INVALID_REQUEST, f"Invalid request for {prov_label} ({model_label}): {short_detail}")
 
     # 8. Fallback / Internal Error
@@ -125,7 +129,7 @@ def _clean_error_message(exc: Exception, provider: Optional[str] = None, model: 
     if msg_match:
         return (AIErrorCode.INTERNAL_ERROR, f"{prov_label} error: {msg_match.group(1)}")
     
-    clean_fallback = err_str[:150] if len(err_str) > 150 else err_str
+    clean_fallback = err_str[:200] if len(err_str) > 200 else err_str
     return (AIErrorCode.INTERNAL_ERROR, f"{prov_label} error ({model_label}): {clean_fallback}")
 
 
