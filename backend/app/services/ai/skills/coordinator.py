@@ -21,8 +21,6 @@ except Exception:
     types = None
 from services.ai.skills.utils import resolve_api_key
 
-from app.core.config import GEMINI_FALLBACK_MODELS
-
 logger = logging.getLogger("sonikoma.skills.coordinator")
 
 
@@ -191,6 +189,11 @@ async def execute_provider_call(
         gemini_model_aliases = {
             "gemini-2.5-pro": "gemini-2.5-flash",
             "gemini-2.5-pro-preview-tts": "gemini-2.5-flash",
+            "gemini-3.6-flash": "gemini-2.5-flash",
+            "gemini-2.0-flash": "gemini-2.5-flash",
+            "gemini-2.0-flash-lite": "gemini-3.5-flash-lite",
+            "gemini-1.5-flash": "gemini-2.5-flash",
+            "gemini-1.5-pro": "gemini-2.5-flash",
             "gemini-1.0-pro": "gemini-2.5-flash",
             "gemini-pro": "gemini-2.5-flash",
         }
@@ -206,7 +209,6 @@ async def execute_provider_call(
                 max_attempts=max_retries
             )
         except Exception as gemini_err:
-            logger.error(f"[Gemini Error] Generation failed on model '{effective_model_id}': {gemini_err}")
             raise RuntimeError(f"Gemini API request failed for model '{effective_model_id}': {gemini_err}")
 
         if not response:

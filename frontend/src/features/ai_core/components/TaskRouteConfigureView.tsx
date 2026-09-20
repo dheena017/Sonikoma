@@ -17,8 +17,9 @@ import {
   ChevronRight,
   RefreshCw,
   SlidersHorizontal,
+  Key,
 } from "lucide-react";
-import TierModelCard, { DynamicModelOption } from "./TierModelCard";
+import TierModelCard, { DynamicModelOption, isProviderKeyConfiguredInVault } from "./TierModelCard";
 
 export interface CapabilityDefinition {
   task: string;
@@ -111,6 +112,27 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
         return availableModels.filter((m) => m.provider !== "edgetts");
     }
   }, [availableModels, taskRoute.required_type]);
+
+  const hasUserKey = useMemo(() => {
+    return Boolean(
+      localStorage.getItem("user_gemini_key") ||
+      localStorage.getItem("sonikoma_key_gemini") ||
+      localStorage.getItem("user_openai_key") ||
+      localStorage.getItem("sonikoma_key_openai") ||
+      localStorage.getItem("user_anthropic_key") ||
+      localStorage.getItem("sonikoma_key_anthropic") ||
+      localStorage.getItem("user_groq_key") ||
+      localStorage.getItem("sonikoma_key_groq") ||
+      localStorage.getItem("user_deepseek_key") ||
+      localStorage.getItem("sonikoma_key_deepseek") ||
+      localStorage.getItem("user_elevenlabs_key") ||
+      localStorage.getItem("sonikoma_key_elevenlabs") ||
+      localStorage.getItem("user_deepl_key") ||
+      localStorage.getItem("sonikoma_key_deepl") ||
+      localStorage.getItem("user_huggingface_key") ||
+      localStorage.getItem("sonikoma_key_huggingface")
+    );
+  }, []);
 
   const handleSimulate = async () => {
     setIsSimulating(true);
@@ -229,6 +251,38 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
           </button>
         </div>
       </div>
+
+      {/* ── MISSING API KEYS WARNING BANNER ── */}
+      {!hasUserKey && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in shadow-lg">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white font-sans">
+                  No API Keys Configured in Website
+                </h3>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300 uppercase">
+                  Setup Required
+                </span>
+              </div>
+              <p className="text-xs text-neutral-300 leading-relaxed max-w-3xl">
+                You need to enter your API key in the website (AI Vault) to activate and configure models for this pipeline.
+              </p>
+            </div>
+          </div>
+
+          <a
+            href="/ai-core/api-keys"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer self-start sm:self-center active:scale-95"
+          >
+            <Key className="w-3.5 h-3.5" />
+            <span>Enter API Key in AI Vault</span>
+          </a>
+        </div>
+      )}
 
       {/* ── 2. TASK HERO BANNER CARD ── */}
       <div className="rounded-3xl border border-white/[0.08] bg-gradient-to-r from-[#12121A] via-[#14141E] to-[#0E0E14] p-6 sm:p-8 shadow-xl relative overflow-hidden">

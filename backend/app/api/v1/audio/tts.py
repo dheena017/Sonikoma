@@ -24,11 +24,18 @@ router = APIRouter()
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
 @router.post("/tts", summary="Generate TTS panel audio")
+@router.post("/generate", summary="Generate TTS panel audio (alias)")
 async def generate_tts_endpoint(body: AudioGenerateRequest):
-    """Synthesizes speech from a list of dialogue strings using Edge-TTS."""
+    """Synthesizes speech from a list of dialogue strings or text using Edge-TTS."""
     try:
+        dialogues = body.dialogue_list
+        if not dialogues:
+            fallback_text = body.text or body.script or body.prompt or ""
+            if fallback_text.strip():
+                dialogues = [fallback_text.strip()]
+
         result = await generate_tts_audio(
-            dialogue_list=body.dialogue_list,
+            dialogue_list=dialogues,
             target_duration=body.target_duration,
             voice=body.voice,
             speech_rate=body.speech_rate if body.speech_rate is not None else 1.0,

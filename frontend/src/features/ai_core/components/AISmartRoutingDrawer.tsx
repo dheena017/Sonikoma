@@ -15,6 +15,8 @@ import {
   CheckCircle2,
   ShieldCheck,
   Bot,
+  AlertCircle,
+  Key,
 } from "lucide-react";
 import { useAIModelStore, AIModelInfo } from "@/features/ai_core/hooks/useAIModelStore";
 
@@ -149,6 +151,27 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
       return ["storyboard_narrative", "panel_analysis", "speech_synthesis"];
     }
   });
+
+  const hasUserKey = useMemo(() => {
+    return Boolean(
+      localStorage.getItem("user_gemini_key") ||
+      localStorage.getItem("sonikoma_key_gemini") ||
+      localStorage.getItem("user_openai_key") ||
+      localStorage.getItem("sonikoma_key_openai") ||
+      localStorage.getItem("user_anthropic_key") ||
+      localStorage.getItem("sonikoma_key_anthropic") ||
+      localStorage.getItem("user_groq_key") ||
+      localStorage.getItem("sonikoma_key_groq") ||
+      localStorage.getItem("user_deepseek_key") ||
+      localStorage.getItem("sonikoma_key_deepseek") ||
+      localStorage.getItem("user_elevenlabs_key") ||
+      localStorage.getItem("sonikoma_key_elevenlabs") ||
+      localStorage.getItem("user_deepl_key") ||
+      localStorage.getItem("sonikoma_key_deepl") ||
+      localStorage.getItem("user_huggingface_key") ||
+      localStorage.getItem("sonikoma_key_huggingface")
+    );
+  }, []);
 
   // Load live routing map directly from /api/v1/ai/routing
   const fetchRoutingConfig = async () => {
@@ -347,25 +370,46 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                 </span>
               </div>
 
-              {/* 3. Hero Feature Card */}
+              {/* 3. Hero Feature / Missing Key Card */}
               <div className="p-4 sm:p-5 border-b border-[#2F2F2F] bg-[#121212] shrink-0">
-                <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] flex items-center justify-between gap-4 shadow-sm">
-                  <div>
-                    <h4 className="text-sm font-bold text-white tracking-tight">
-                      Automatic Model Cascades Active
-                    </h4>
-                    <p className="text-xs text-neutral-400 mt-1 leading-relaxed max-w-xs">
-                      Tasks route to Tier 1 engines with instant Tier 2 fallback protection.
-                    </p>
+                {!hasUserKey ? (
+                  <div className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-center justify-between gap-4 shadow-sm">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-amber-300 tracking-tight flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-amber-400" />
+                        API Keys Required in Website
+                      </h4>
+                      <p className="text-xs text-neutral-300 leading-relaxed max-w-xs">
+                        Enter your API key in AI Vault to activate models and configure pipelines.
+                      </p>
+                    </div>
+                    <a
+                      href="/ai-core?tab=api-keys"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all cursor-pointer shrink-0 shadow-sm"
+                    >
+                      <Key className="w-3.5 h-3.5" />
+                      <span>AI Vault</span>
+                    </a>
                   </div>
-                  <a
-                    href="/ai-core?tab=api-keys"
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-white text-xs font-bold transition-all cursor-pointer shrink-0"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
-                    <span>API Vault</span>
-                  </a>
-                </div>
+                ) : (
+                  <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] flex items-center justify-between gap-4 shadow-sm">
+                    <div>
+                      <h4 className="text-sm font-bold text-white tracking-tight">
+                        Automatic Model Cascades Active
+                      </h4>
+                      <p className="text-xs text-neutral-400 mt-1 leading-relaxed max-w-xs">
+                        Tasks route to Tier 1 engines with instant Tier 2 fallback protection.
+                      </p>
+                    </div>
+                    <a
+                      href="/ai-core?tab=api-keys"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-white text-xs font-bold transition-all cursor-pointer shrink-0"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
+                      <span>API Vault</span>
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* 4. Search & Sort Controls */}

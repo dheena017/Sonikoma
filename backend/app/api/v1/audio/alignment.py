@@ -17,9 +17,8 @@ logger = logging.getLogger("sonikoma.api.audio.alignment")
 router = APIRouter()
 
 
-# ─── Endpoints ────────────────────────────────────────────────────────────────
-
 @router.post("/align/{panel_id}", summary="Align OCR text to Whisper transcript and extract audio peaks")
+@router.post("/align-dialogue/{panel_id}", summary="Align OCR text to Whisper transcript and extract audio peaks (alias)")
 async def align_dialogue_endpoint(panel_id: str, body: AlignDialogueRequest):
     """
     Aligns speech bubble OCR text strings against a Whisper speech-recognition

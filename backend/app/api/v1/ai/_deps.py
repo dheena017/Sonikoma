@@ -16,11 +16,7 @@ from fastapi import Header, HTTPException
 from api.dependencies.auth import clean_api_key
 from services.ai.skills.registry import registry
 
-from app.core.config import GEMINI_FALLBACK_MODELS
-
 logger = logging.getLogger("sonikoma.api.ai")
-
-MODEL_FALLBACKS = GEMINI_FALLBACK_MODELS
 
 
 def get_user_gemini_key(
@@ -67,7 +63,6 @@ async def run_md_skill(skill_name: str, model: Optional[str], api_key: Any = Non
         raise
     except Exception as e:
         from services.ai.orchestrator import AIExecutionError, AIErrorCode
-        logger.error(f"[run_md_skill Error] skill '{skill_name}' failed: {e}", exc_info=True)
         if isinstance(e, AIExecutionError):
             status_map = {
                 AIErrorCode.AUTH_FAILURE: 401,
@@ -80,4 +75,5 @@ async def run_md_skill(skill_name: str, model: Optional[str], api_key: Any = Non
             }
             status_code = status_map.get(e.error_code, 500)
             raise HTTPException(status_code=status_code, detail=e.message)
+        logger.error(f"[AI Skill Error] Skill '{skill_name}' execution failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -60,42 +60,28 @@ def _get_sd_engine():
     return stable_diffusion
 
 
-async def _attach_narratives_to_results(
-    results: list,
-    model: Optional[str],
-    voice: Optional[str],
-    user_keys: dict,
-):
+def _attach_narratives_to_results(results: list) -> list:
     if not results:
         return results
-
-    visual_descriptions = [
-        (item.get("analysis", {}) or {}).get("visual_description") or "An illustration panel."
-        for item in results
-    ]
-
-    try:
-        narrative_result = await facade_analyze_narrative_sequence(
-            visual_descriptions=visual_descriptions,
-            model=model,
-            voice=voice,
-            user_keys=user_keys,
+    for item in results:
+        if not isinstance(item, dict):
+            continue
+        analysis = item.get("analysis") or {}
+        narrative = (
+            item.get("narrative")
+            or item.get("narrativeText")
+            or analysis.get("narrative")
+            or analysis.get("narrativeText")
+            or analysis.get("visual_description")
+            or analysis.get("speech_text")
+            or ""
         )
-        if narrative_result.get("success") and narrative_result.get("results"):
-            for idx, narrative_item in enumerate(narrative_result["results"]):
-                if idx >= len(results):
-                    break
-                narrative_text = narrative_item.get("narrative")
-                results[idx]["narrative"] = narrative_text
-                results[idx]["narrativeText"] = narrative_text
-                results[idx]["narrative_audio_url"] = narrative_item.get("narrative_audio_url")
-                if results[idx].get("analysis") is not None:
-                    results[idx]["analysis"]["narrativeText"] = narrative_text
-    except Exception as e:
-        logger.exception("[AI Analysis] Narrative generation failed. Returning panel analysis without narrative.")
-
+        item["narrative"] = narrative
+        item["narrativeText"] = narrative
+        if isinstance(item.get("analysis"), dict):
+            item["analysis"]["narrative"] = narrative
+            item["analysis"]["narrativeText"] = narrative
     return results
-
 
 
 @router.post("/analyze-image", summary="Analyze a single storyboard panel and generate dialogue, SFX, scene description, motion, timing, and narrative")
@@ -105,7 +91,6 @@ async def analyze_image(
     user_api_key: dict = Depends(get_user_gemini_key),
     current_user: dict = Depends(get_current_user)
 ):
-    logger.info(f"[AI Analysis] >>> Hit endpoint /api/analyze-single-image (Model: {body.model or 'default'}, URL: {body.url[:50]}...)")
     COST = 8
     if get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
@@ -117,13 +102,26 @@ async def analyze_image(
             narration_style=body.narrationStyle,
             user_keys=user_api_key,
         )
-        result = (await _attach_narratives_to_results([result], body.model, body.voice, user_api_key))[0]
+        result = _attach_narratives_to_results([result])[0]
         record_credit_transaction(current_user["user_id"], -COST, "analyze_image")
-        used_model = result.get("model", body.model or "gemini-2.5-flash")
-        logger.info(f"[AI Analysis] Model: {used_model} <<< Completed /api/analyze-single-image successfully")
         return result
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[AI Analysis] Error during analyze_image: {e}")
+        from services.ai.orchestrator import AIExecutionError, AIErrorCode
+        if isinstance(e, AIExecutionError):
+            status_map = {
+                AIErrorCode.AUTH_FAILURE: 401,
+                AIErrorCode.INSUFFICIENT_CREDITS: 402,
+                AIErrorCode.MODEL_NOT_FOUND: 404,
+                AIErrorCode.RATE_LIMITED: 429,
+                AIErrorCode.PROVIDER_UNAVAILABLE: 503,
+                AIErrorCode.TIMEOUT: 504,
+                AIErrorCode.INVALID_REQUEST: 400,
+            }
+            status_code = status_map.get(e.error_code, 500)
+            raise HTTPException(status_code=status_code, detail=e.message)
+        logger.error(f"[AI Analysis Error] analyze_image failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -132,7 +130,6 @@ async def analyze_batch(
     body: AnalyzeBatchRequest,
     user_api_key: dict = Depends(get_user_gemini_key)
 ):
-    logger.info(f"[AI Analysis] >>> Hit endpoint /api/analyze-batch with {len(body.urls)} panels")
     if not body.urls:
         raise HTTPException(status_code=400, detail="Field 'urls' must be a non-empty list.")
     if len(body.urls) > 20:
@@ -204,7 +201,7 @@ async def analyze_sequence(
                 return {"url": url, "success": False, "error": str(e)}
 
     results = await asyncio.gather(*(analyze_url(url) for url in body.urls))
-    results = await _attach_narratives_to_results(results, body.model, body.voice, user_api_key)
+    results = _attach_narratives_to_results(results)
     if any(item.get("success") for item in results):
         record_credit_transaction(current_user["user_id"], -COST, "analyze_sequence")
     return {"success": True, "results": results}
@@ -218,7 +215,6 @@ async def analyze_panels(
     user_api_key: dict = Depends(get_user_gemini_key),
     current_user: dict = Depends(get_current_user)
 ):
-    logger.info(f"[AI Analysis] >>> Hit endpoint /api/analyze-panels with {len(body.panels or [])} panels (Model: {body.model or 'default'})")
     if not body.panels:
         raise HTTPException(status_code=400, detail="Panels list cannot be empty")
 
@@ -240,12 +236,9 @@ async def analyze_panels(
                 )
                 return {"id": panel.id, "url": panel.url, **res}
             except Exception as e:
-                from services.ai.orchestrator import AIExecutionError, AIErrorCode
+                from services.ai.orchestrator import AIExecutionError
                 clean_msg = e.message if isinstance(e, AIExecutionError) else str(e)
-                if isinstance(e, AIExecutionError) and e.error_code in (AIErrorCode.RATE_LIMITED, AIErrorCode.PROVIDER_UNAVAILABLE, AIErrorCode.AUTH_FAILURE, AIErrorCode.INSUFFICIENT_CREDITS):
-                    logger.warning(f"[AI Analysis] Panel {panel.id} analysis skipped/failed: {clean_msg}")
-                else:
-                    logger.exception(f"[AI Analysis] Panel {panel.id} analysis failed: {clean_msg}")
+                logger.warning(f"[AI Analysis] Panel {panel.id} analysis failed: {clean_msg}")
                 return {
                     "id": panel.id,
                     "url": panel.url,
@@ -254,7 +247,7 @@ async def analyze_panels(
                 }
 
     results = await asyncio.gather(*(analyze_panel(panel) for panel in body.panels))
-    results = await _attach_narratives_to_results(results, body.model, body.voice, user_api_key)
+    results = _attach_narratives_to_results(results)
     if any(item.get("success") for item in results):
         record_credit_transaction(current_user["user_id"], -COST, "analyze_panels")
 

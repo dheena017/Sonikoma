@@ -348,7 +348,7 @@ async def scrape_series_chapters(
         }
 
     except Exception as e:
-        logger.error(f"[scrape_series_episodes] Error discovering chapters for {raw_input}: {e}", exc_info=True)
+        logger.warning(f"[Scraper] Error discovering chapters for {raw_input}: {e}")
         return {
             "success": False,
             "error": str(e),

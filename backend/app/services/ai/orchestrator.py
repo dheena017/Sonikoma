@@ -34,6 +34,28 @@ class AIErrorCode(str, Enum):
     INTERNAL_ERROR = "INTERNAL_ERROR"
 
 
+CAPABILITY_HUMAN_NAMES: Dict[str, str] = {
+    "panel_analysis": "Panel Vision Analysis",
+    "storyboard_narrative": "Story Narrative",
+    "smart_crop": "AI Smart Crop",
+    "speech_synthesis": "Voice Generation",
+    "tts": "Voice Generation",
+    "translate": "Dialogue Translation",
+    "character_persona": "Character Casting",
+    "seo_optimization": "SEO Optimization",
+    "sfx_audio": "SFX Generation",
+    "bgm_vibe": "BGM Match",
+    "prompt_enhancement": "Prompt Optimization",
+    "script_dramatization": "Script Dramatization",
+    "voice_casting": "Voice Casting",
+    "copyright_scrubber": "Copyright Scrubbing",
+    "thumbnail_concept": "Thumbnail Concept",
+    "thumbnail_layout": "Thumbnail Layout",
+    "thumbnail_visual_comp": "Thumbnail Visual",
+    "video_seo_metadata": "Video SEO",
+}
+
+
 class AIExecutionError(Exception):
     """Structured error raised during AI capability execution."""
     def __init__(
@@ -281,6 +303,23 @@ class AIOrchestrator:
 
     # Custom user/admin override routing
     _custom_capability_routing: Dict[str, Dict[str, Any]] = {}
+    _routing_file_path: str = os.path.join(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")),
+        "data", "ai_routing_config.json"
+    )
+
+    @classmethod
+    def load_custom_routing(cls):
+        """Loads persistent custom routing from disk if available."""
+        try:
+            if os.path.exists(cls._routing_file_path):
+                with open(cls._routing_file_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        cls._custom_capability_routing = data
+                        logger.debug(f"[AI Engine] Loaded {len(data)} custom routing configurations from disk.")
+        except Exception as e:
+            logger.debug(f"[AI Engine] Could not load custom routing from disk: {e}")
 
     @classmethod
     def get_rate_limiter(cls) -> RateLimiter:
@@ -288,7 +327,7 @@ class AIOrchestrator:
 
     @classmethod
     def set_custom_routing(cls, routes: Any):
-        """Allows dynamic runtime updates to task-to-model routing."""
+        """Allows dynamic runtime updates to task-to-model routing and persists to disk."""
         if isinstance(routes, list):
             for r in routes:
                 task = r.get("task")
@@ -299,11 +338,29 @@ class AIOrchestrator:
                         "tertiary": r.get("tertiary_model"),
                     }
         elif isinstance(routes, dict):
-            cls._custom_capability_routing.update(routes)
+            for k, v in routes.items():
+                if isinstance(v, dict):
+                    cls._custom_capability_routing[k] = {
+                        "primary": v.get("primary") or v.get("primary_model"),
+                        "fallback": v.get("fallback") or v.get("fallback_model"),
+                        "tertiary": v.get("tertiary") or v.get("tertiary_model"),
+                    }
+                elif isinstance(v, str):
+                    cls._custom_capability_routing[k] = {"primary": v}
+
+        try:
+            os.makedirs(os.path.dirname(cls._routing_file_path), exist_ok=True)
+            with open(cls._routing_file_path, "w", encoding="utf-8") as f:
+                json.dump(cls._custom_capability_routing, f, indent=2)
+            logger.info(f"[AI Orchestrator] Persisted {len(cls._custom_capability_routing)} routing rules to disk.")
+        except Exception as e:
+            logger.warning(f"[AI Orchestrator] Failed to persist routing to disk: {e}")
 
     @classmethod
     def get_default_model_for_capability(cls, capability: str) -> str:
         """Dynamically resolves primary engine from custom overrides or the ModelRegistry catalog."""
+        if not cls._custom_capability_routing:
+            cls.load_custom_routing()
         custom_entry = cls._custom_capability_routing.get(capability, {})
         if isinstance(custom_entry, dict) and custom_entry.get("primary"):
             return custom_entry["primary"]
@@ -312,23 +369,58 @@ class AIOrchestrator:
         return ModelRegistry.get_primary_model_for_capability(capability)
 
     @classmethod
+    def resolve_execution_candidates(
+        cls,
+        capability: str,
+        mode: str = "system",
+        requested_model: Optional[str] = None
+    ) -> List[Tuple[str, str]]:
+        """
+        Determines the ordered 3-Tier execution cascade:
+        Tier 1 (Primary) -> Tier 2 (Fallback) -> Tier 3 (Tertiary) + Provider-level Resilient Fallbacks.
+        Prioritizes user-selected Smart Routing matrix configurations.
+        """
+        if not cls._custom_capability_routing:
+            cls.load_custom_routing()
+
+        candidates: List[Tuple[str, str]] = []
+        seen = set()
+
+        custom_entry = cls._custom_capability_routing.get(capability, {})
+        custom_primary = (
+            custom_entry.get("primary") if isinstance(custom_entry, dict)
+            else (custom_entry if isinstance(custom_entry, str) else None)
+        )
+
+        # The model configured in AI Smart Routing takes priority
+        primary = requested_model or custom_primary or cls.get_default_model_for_capability(capability)
+        fallback = (custom_entry.get("fallback") if isinstance(custom_entry, dict) else None)
+        tertiary = (custom_entry.get("tertiary") if isinstance(custom_entry, dict) else None)
+
+        # Strictly only evaluate user-configured routing tiers (no hardcoded fallback injection)
+        ordered_models: List[Optional[str]] = [primary, fallback, tertiary]
+
+        for m in ordered_models:
+            if m and isinstance(m, str) and m.strip():
+                prov, resolved_m = ModelRegistry.resolve_model_provider(m.strip())
+                key = (prov.lower(), resolved_m.lower())
+                if key not in seen:
+                    seen.add(key)
+                    candidates.append((prov, resolved_m))
+
+        return candidates
+
+    @classmethod
     def resolve_execution_plan(
         cls,
         capability: str,
         mode: str = "system",
         requested_model: Optional[str] = None
     ) -> Tuple[str, str]:
-        """
-        Determines (provider, target_model) strictly honoring
-        System vs Manual selection semantics directly with no fallback routing.
-        """
-        if mode == "manual" and requested_model:
-            provider, target_model = ModelRegistry.resolve_model_provider(requested_model)
-        else:
-            candidate = requested_model or cls.get_default_model_for_capability(capability)
-            provider, target_model = ModelRegistry.resolve_model_provider(candidate)
-
-        return provider, target_model
+        candidates = cls.resolve_execution_candidates(capability, mode=mode, requested_model=requested_model)
+        if candidates:
+            return candidates[0]
+        return "gemini", "gemini-2.0-flash"
 
 
 
@@ -450,19 +542,18 @@ class AIOrchestrator:
         error: Optional[AIExecutionError] = None,
         tokens_info: str = ""
     ):
-        """Unified structured observability log line without fallback candidate noise."""
-        ctx = f"[AI Orchestrator] | Cap: '{capability}' | Provider: {provider} | Model: {model} | Status: {status.upper()} ({latency_ms}ms)"
-        if tokens_info:
-            ctx += f" | {tokens_info}"
-        if job_id:
-            ctx += f" | Job: {job_id}"
-        if project_id:
-            ctx += f" | Project: {project_id}"
-        if error:
-            ctx += f" | Error [{error.error_code}]: {error.message}"
-            logger.warning(ctx)
+        """Unified clean human-readable structured log line."""
+        human_cap = CAPABILITY_HUMAN_NAMES.get(capability.lower(), capability.replace("_", " ").title())
+        dur_sec = round(latency_ms / 1000.0, 1) if latency_ms >= 1000 else None
+        time_str = f"{dur_sec}s" if dur_sec else f"{latency_ms}ms"
+        stat_upper = status.upper()
+
+        if stat_upper == "SUCCESS":
+            tier_part = f" ({tokens_info})" if tokens_info else ""
+            logger.info(f"[AI Core] [OK] {human_cap} completed via {model} in {time_str}{tier_part}")
         else:
-            logger.info(ctx)
+            err_msg = f": {error.message}" if error else ""
+            logger.warning(f"[AI Core] [WARN] {human_cap} failed via {model} in {time_str}{err_msg}")
 
     @classmethod
     async def execute_capability(
@@ -481,18 +572,19 @@ class AIOrchestrator:
         **kwargs
     ) -> Dict[str, Any]:
         """
-        Direct execution pipeline of the AI Core with NO fallbacks.
+        Multi-tier execution pipeline of the AI Core.
         Orchestrates:
           1. Quota & Credit pre-check
-          2. Direct Model Resolution
-          3. Rate limit & credential validation
-          4. Direct execution via coordinator.py
+          2. Ordered 3-Tier Candidate Resolution (Primary -> Fallback -> Tertiary)
+          3. Rate limit & credential validation per tier
+          4. Resilient failover cascade execution
           5. Usage & Cost tracking + Ledger persistence
           6. Credit finalization or refund
-          7. Direct error surfacing on failure
+          7. Actionable error surfacing if all tiers are exhausted
         """
         start_time = time.monotonic()
         cap_clean = capability.lower().strip()
+        human_cap = CAPABILITY_HUMAN_NAMES.get(cap_clean, cap_clean.replace("_", " ").title())
 
         # 1. Quota Pre-check
         quota_ok, credit_amount, quota_err = cls.check_and_reserve_quota(user_id, cap_clean)
@@ -501,112 +593,128 @@ class AIOrchestrator:
             cls.log_execution_attempt(cap_clean, "none", model or "none", "rejected", 0, job_id, project_id, err)
             raise err
 
-        # 2. Resolve target model directly
-        provider, target_model = cls.resolve_execution_plan(cap_clean, mode="manual" if model else "system", requested_model=model)
+        # 2. Resolve ordered execution candidates (Tier 1 -> Tier 2 -> Tier 3)
+        candidates = cls.resolve_execution_candidates(cap_clean, mode="manual" if model else "system", requested_model=model)
 
-        logger.info(
-            f"[AI Orchestrator] >>> Executing capability '{cap_clean}' via Provider: {provider} | Model: {target_model}"
-        )
-
-        # 3. Verify provider credentials
-        if not cls.is_provider_configured(provider, user_keys):
-            err = AIExecutionError(
-                AIErrorCode.AUTH_FAILURE,
-                f"API Key / Provider '{provider}' is not configured. Please provide a valid API key in Settings or .env.",
-                provider=provider,
-                model=target_model
-            )
-            cls.log_execution_attempt(cap_clean, provider, target_model, "failed", 0, job_id, project_id, err)
-            cls.finalize_credits(user_id, cap_clean, credit_amount, False)
-            raise err
-
-        # 4. Verify rate limits
-        rate_ok, rate_msg = cls.get_rate_limiter().check_limit(provider, target_model, user_id)
-        if not rate_ok:
-            err = AIExecutionError(
-                AIErrorCode.RATE_LIMITED,
-                rate_msg or f"Rate limit reached for '{target_model}'",
-                provider=provider,
-                model=target_model
-            )
-            cls.log_execution_attempt(cap_clean, provider, target_model, "failed", 0, job_id, project_id, err)
-            cls.finalize_credits(user_id, cap_clean, credit_amount, False)
-            raise err
-
-        # 5. Direct Execution (No fallbacks)
         from services.ai.skills.coordinator import execute_provider_call
 
-        attempt_t0 = time.monotonic()
-        try:
-            raw_result = await execute_provider_call(
-                skill=skill_obj,
-                provider=provider,
-                clean_model_id=target_model,
-                prompt=prompt,
-                image_bytes=image_bytes,
-                api_key=api_key,
-                user_keys=user_keys,
-                max_retries=1,
-                **kwargs
-            )
-            attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
+        last_error: Optional[AIExecutionError] = None
+        attempted_tiers: List[str] = []
 
-            # Collect usage tokens from skill_obj or estimation
-            p_tokens = getattr(skill_obj, "last_input_tokens", 0) or max(1, len(prompt) // 4)
-            c_tokens = getattr(skill_obj, "last_output_tokens", 0) or max(1, len(raw_result) // 4)
+        for tier_idx, (provider, target_model) in enumerate(candidates, start=1):
+            tier_label = f"Tier {tier_idx}" if tier_idx <= 3 else f"Resilient Tier {tier_idx}"
+            attempted_tiers.append(f"{tier_label}: {provider}/{target_model}")
 
-            # Persist to ledger & finalize credits
-            cls.record_usage_to_ledger(
-                user_id=user_id,
-                provider=provider,
-                model=target_model,
-                feature=cap_clean,
-                prompt_tokens=p_tokens,
-                completion_tokens=c_tokens,
-                latency_ms=attempt_lat,
-                status="SUCCESS",
-            )
-            cls.finalize_credits(user_id, cap_clean, credit_amount, True)
-            cls.log_execution_attempt(
-                cap_clean, provider, target_model, "success", attempt_lat, job_id, project_id,
-                tokens_info=f"Tokens: {p_tokens} prompt + {c_tokens} completion"
+            # 3. Verify provider credentials for candidate
+            if not cls.is_provider_configured(provider, user_keys):
+                logger.debug(f"[AI Core] Skipping {tier_label} ({provider}/{target_model}): provider not configured.")
+                continue
+
+            # 4. Verify rate limits for candidate
+            rate_ok, rate_msg = cls.get_rate_limiter().check_limit(provider, target_model, user_id)
+            if not rate_ok:
+                logger.warning(
+                    f"[AI Core] {human_cap} {tier_label} ({target_model}) hit local rate limit ({rate_msg}). "
+                    "Auto-switching to next tier..."
+                )
+                continue
+
+            logger.debug(
+                f"[AI Core] >>> Executing '{human_cap}' via {tier_label} -> Provider: {provider} | Model: {target_model}"
             )
 
-            # Parse JSON if possible
+            attempt_t0 = time.monotonic()
             try:
-                parsed = json.loads(raw_result) if isinstance(raw_result, str) else raw_result
-            except Exception:
-                parsed = {"raw_output": raw_result}
+                raw_result = await execute_provider_call(
+                    skill=skill_obj,
+                    provider=provider,
+                    clean_model_id=target_model,
+                    prompt=prompt,
+                    image_bytes=image_bytes,
+                    api_key=api_key,
+                    user_keys=user_keys,
+                    max_retries=1,
+                    **kwargs
+                )
+                attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
 
-            return {
-                "success": True,
-                "provider": provider,
-                "model": target_model,
-                "result": parsed,
-                "input_tokens": p_tokens,
-                "output_tokens": c_tokens,
-                "latency_ms": attempt_lat,
-            }
+                # Collect usage tokens
+                p_tokens = getattr(skill_obj, "last_input_tokens", 0) or max(1, len(prompt) // 4)
+                c_tokens = getattr(skill_obj, "last_output_tokens", 0) or max(1, len(raw_result) // 4)
 
-        except Exception as exc:
-            attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
-            classified = classify_error(exc, provider=provider, model=target_model)
-            cls.log_execution_attempt(
-                cap_clean, provider, target_model, "failed", attempt_lat, job_id, project_id, classified
-            )
-            cls.record_usage_to_ledger(
-                user_id=user_id,
-                provider=provider,
-                model=target_model,
-                feature=cap_clean,
-                prompt_tokens=0,
-                completion_tokens=0,
-                latency_ms=attempt_lat,
-                status="FAILED",
-            )
-            cls.finalize_credits(user_id, cap_clean, credit_amount, False)
-            # Raise the error directly so the caller and user get the exact error message
-            raise classified
+                # Persist to ledger & finalize credits
+                cls.record_usage_to_ledger(
+                    user_id=user_id,
+                    provider=provider,
+                    model=target_model,
+                    feature=cap_clean,
+                    prompt_tokens=p_tokens,
+                    completion_tokens=c_tokens,
+                    latency_ms=attempt_lat,
+                    status="SUCCESS",
+                )
+                cls.finalize_credits(user_id, cap_clean, credit_amount, True)
+                cls.log_execution_attempt(
+                    cap_clean, provider, target_model, "success", attempt_lat, job_id, project_id,
+                    tokens_info=f"{tier_label} | {p_tokens:,} prompt + {c_tokens:,} completion tokens"
+                )
+
+                # Parse JSON if possible
+                try:
+                    parsed = json.loads(raw_result) if isinstance(raw_result, str) else raw_result
+                except Exception:
+                    parsed = {"raw_output": raw_result}
+
+                return {
+                    "success": True,
+                    "provider": provider,
+                    "model": target_model,
+                    "tier_used": tier_label,
+                    "result": parsed,
+                    "input_tokens": p_tokens,
+                    "output_tokens": c_tokens,
+                    "latency_ms": attempt_lat,
+                }
+
+            except Exception as exc:
+                attempt_lat = int((time.monotonic() - attempt_t0) * 1000)
+                classified = classify_error(exc, provider=provider, model=target_model)
+                last_error = classified
+
+                # Concise status for clean human terminal log
+                if classified.error_code == AIErrorCode.RATE_LIMITED:
+                    short_reason = "Free Tier rate limit reached"
+                elif classified.error_code == AIErrorCode.MODEL_NOT_FOUND:
+                    short_reason = "Model not available"
+                elif classified.error_code == AIErrorCode.AUTH_FAILURE:
+                    short_reason = "API key missing or invalid"
+                elif classified.error_code == AIErrorCode.PROVIDER_UNAVAILABLE:
+                    short_reason = "Provider temporarily unavailable"
+                elif classified.error_code == AIErrorCode.TIMEOUT:
+                    short_reason = "Request timed out"
+                else:
+                    short_reason = str(classified.message)[:45]
+
+                next_idx = tier_idx + 1
+                next_label = f"Tier {next_idx}" if next_idx <= len(candidates) else "next model"
+                logger.warning(
+                    f"[AI Core] {human_cap} {tier_label} ({target_model}) paused ({short_reason}). "
+                    f"Auto-switching to {next_label}..."
+                )
+                continue
+
+        # If all candidates failed or no candidates could execute:
+        cls.finalize_credits(user_id, cap_clean, credit_amount, False)
+        if last_error:
+            raise last_error
+        
+        fallback_err = AIExecutionError(
+            AIErrorCode.PROVIDER_UNAVAILABLE,
+            f"All configured model tiers ({', '.join(attempted_tiers[:3])}) failed or are unavailable. Please check your API keys or switch models in AI Routing.",
+            stage="cascade_exhausted"
+        )
+        cls.log_execution_attempt(cap_clean, "all", model or "none", "failed", 0, job_id, project_id, fallback_err)
+        raise fallback_err
 
     # Unified convenience methods
     @classmethod

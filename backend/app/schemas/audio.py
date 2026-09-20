@@ -26,6 +26,18 @@ class AudioGenerateRequest(BaseModel):
         default_factory=list,
         description="Ordered list of dialogue strings to synthesize"
     )
+    text: Optional[str] = Field(
+        default=None,
+        description="Single text string to synthesize (convenience alias for dialogue_list)"
+    )
+    script: Optional[str] = Field(
+        default=None,
+        description="Script string to synthesize (convenience alias)"
+    )
+    prompt: Optional[str] = Field(
+        default=None,
+        description="Prompt string to synthesize (convenience alias)"
+    )
     target_duration: float = Field(
         default=4.5, ge=0.1, le=600.0,
         description="Target duration of output audio in seconds"
@@ -46,6 +58,7 @@ class AudioGenerateRequest(BaseModel):
         default=1.0,
         description="Pitch of generated TTS audio"
     )
+    model_config = ConfigDict(extra="ignore")
 
 
 # =============================================================================

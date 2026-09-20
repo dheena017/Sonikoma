@@ -98,7 +98,7 @@ async def generate_dynamic_panels(
         "narrative_length_hint": narrative_length_hint
     }
 
-    provider, target_model, models_to_try = AIOrchestrator.resolve_execution_plan(
+    provider, target_model = AIOrchestrator.resolve_execution_plan(
         "storyboard_narrative",
         mode="manual" if model else "system",
         requested_model=model

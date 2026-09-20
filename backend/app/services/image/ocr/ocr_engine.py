@@ -12,13 +12,9 @@ from typing import List, Dict, Any, Optional, Tuple, TypedDict
 
 logger = logging.getLogger("sonikoma.services.image.ocr.ocr_engine")
 
-easyocr: Any = None
-np: Any = None
-Image: Any = None
 try:
     import numpy as np
     from PIL import Image
-    # easyocr is lazily imported later
     _HAS_EASYOCR = True
 except ImportError:
     _HAS_EASYOCR = False
@@ -40,22 +36,34 @@ class OcrSegment(TypedDict):
     box_pct: List[List[float]]
 
 
-_ocr_reader: Optional[Any] = None
+_ocr_readers: Dict[str, Any] = {}
 
 
-def _load_ocr_reader(langs: List[str] = ["en"]) -> Optional[Any]:
-    global _ocr_reader
-    if _ocr_reader is None and _HAS_EASYOCR:
-        logger.info(f"[OCR] Initialising EasyOCR reader — languages: {langs}")
+def _get_default_ocr_langs() -> List[str]:
+    env_langs = os.getenv("OCR_LANGUAGES", "en").strip()
+    return [lang.strip() for lang in env_langs.split(",") if lang.strip()] or ["en"]
+
+
+def _load_ocr_reader(langs: Optional[List[str]] = None) -> Optional[Any]:
+    global _ocr_readers
+    if langs is None:
+        langs = _get_default_ocr_langs()
+
+    cache_key = ",".join(sorted(langs))
+    if cache_key not in _ocr_readers and _HAS_EASYOCR:
+        logger.info(f"[OCR Engine] Initialising EasyOCR reader — languages: {langs}")
         try:
             import easyocr
             import torch
             use_gpu = torch.cuda.is_available()
-            _ocr_reader = easyocr.Reader(langs, gpu=use_gpu, verbose=False)
+            _ocr_readers[cache_key] = easyocr.Reader(langs, gpu=use_gpu, verbose=False)
         except ImportError:
-            logger.warning("[OCR] EasyOCR is not actually installed.")
+            logger.warning("[OCR Engine] EasyOCR is not installed.")
             return None
-    return _ocr_reader
+        except Exception as err:
+            logger.warning(f"[OCR Engine] Failed to load EasyOCR with languages {langs}: {err}")
+            return None
+    return _ocr_readers.get(cache_key)
 
 
 def _convert_to_rgb_array(pil_image: Any) -> Any:
@@ -161,7 +169,7 @@ def _deduplicate_ocr_boxes(
 
 async def extract_full_ocr_data(
     image_path: str,
-    langs: List[str] = ["en"],
+    langs: Optional[List[str]] = None,
     confidence_threshold: float = _DEFAULT_CONFIDENCE_THRESHOLD,
 ) -> List[OcrSegment]:
     if not os.path.exists(image_path):
@@ -220,18 +228,17 @@ async def extract_full_ocr_data(
                 ))
 
         segments = _deduplicate_ocr_boxes(raw_segments)
-        mode = "tile" if is_tall_strip else "single-pass"
-        logger.info(f"[OCR] {len(segments)} segment(s) found ({mode}) — {image_path}")
+        logger.info(f"[OCR Engine] Detected {len(segments)} text dialogue segment{'s' if len(segments) != 1 else ''} in image")
         return segments
 
     except Exception as exc:
-        logger.error(f"[OCR] Extraction failed for {image_path}: {exc}", exc_info=True)
+        logger.error(f"[OCR Engine] Text extraction failed: {exc}")
         return []
 
 
 async def extract_text_lines_from_panel(
     image_path: str,
-    langs: List[str] = ["en"],
+    langs: Optional[List[str]] = None,
 ) -> List[str]:
     segments = await extract_full_ocr_data(image_path, langs)
     return [seg["text"] for seg in segments]

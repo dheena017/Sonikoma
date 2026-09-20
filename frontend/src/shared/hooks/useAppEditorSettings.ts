@@ -17,9 +17,31 @@ export function useAppEditorSettings() {
       (DEFAULT_VIDEO_SETTINGS.aspectRatio as any) ||
       "16:9"
   );
-  const [selectedModel, setSelectedModel] = useState<string>(
-    () => localStorage.getItem("ai_comic_model") || "gemini-2.5-flash"
-  );
+  const [selectedModel, setSelectedModel] = useState<string>(() => {
+    const direct = localStorage.getItem("ai_comic_model");
+    if (direct) return direct;
+    try {
+      const customRouting = localStorage.getItem("sonikoma_ai_routing_custom");
+      if (customRouting) {
+        const parsed = JSON.parse(customRouting);
+        if (Array.isArray(parsed)) {
+          const panelRoute = parsed.find((r: any) => r.task === "panel_analysis" || r.task === "storyboard_narrative");
+          if (panelRoute?.primary_model) return panelRoute.primary_model;
+        }
+      }
+    } catch {}
+    return "gemini-2.0-flash";
+  });
+
+  useEffect(() => {
+    const handleModelChanged = (e: any) => {
+      if (e.detail?.model) {
+        setSelectedModel(e.detail.model);
+      }
+    };
+    window.addEventListener("ai-model-changed", handleModelChanged);
+    return () => window.removeEventListener("ai-model-changed", handleModelChanged);
+  }, []);
   const [selectedSource, setSelectedSource] = useState<string>(
     () => localStorage.getItem("ai_comic_source") || "webtoons"
   );

@@ -149,6 +149,38 @@ const PROVIDER_THEMES: Record<
   },
 };
 
+export const isProviderKeyConfiguredInVault = (providerKey: string = "") => {
+  const p = providerKey.toLowerCase();
+  if (p === "edgetts" || p === "edge_tts" || p === "stable_diffusion" || p === "stablediffusion" || p === "whisper") {
+    return true;
+  }
+  if (p === "gemini" || p === "google") {
+    return Boolean(localStorage.getItem("user_gemini_key") || localStorage.getItem("sonikoma_key_gemini"));
+  }
+  if (p === "openai") {
+    return Boolean(localStorage.getItem("user_openai_key") || localStorage.getItem("sonikoma_key_openai"));
+  }
+  if (p === "anthropic") {
+    return Boolean(localStorage.getItem("user_anthropic_key") || localStorage.getItem("sonikoma_key_anthropic"));
+  }
+  if (p === "groq") {
+    return Boolean(localStorage.getItem("user_groq_key") || localStorage.getItem("sonikoma_key_groq"));
+  }
+  if (p === "deepseek") {
+    return Boolean(localStorage.getItem("user_deepseek_key") || localStorage.getItem("sonikoma_key_deepseek"));
+  }
+  if (p === "elevenlabs") {
+    return Boolean(localStorage.getItem("user_elevenlabs_key") || localStorage.getItem("sonikoma_key_elevenlabs"));
+  }
+  if (p === "deepl") {
+    return Boolean(localStorage.getItem("user_deepl_key") || localStorage.getItem("sonikoma_key_deepl"));
+  }
+  if (p === "huggingface" || p === "flux") {
+    return Boolean(localStorage.getItem("user_huggingface_key") || localStorage.getItem("sonikoma_key_huggingface"));
+  }
+  return false;
+};
+
 export default function TierModelCard({
   tierType,
   modelId,
@@ -163,9 +195,10 @@ export default function TierModelCard({
   const cfg = TIER_CONFIG[tierType];
   const TierIcon = cfg.icon;
 
-  // Infer provider key directly from modelId if selectedModel is missing or incomplete
+  // Infer provider key directly from modelId
   const inferProvider = (id: string = "") => {
     const lower = id.toLowerCase();
+    if (!id || lower === "") return "none";
     if (lower.includes("claude") || lower.includes("anthropic")) return "anthropic";
     if (
       lower.includes("gpt") ||
@@ -190,21 +223,26 @@ export default function TierModelCard({
     if (lower.includes("deepseek")) return "deepseek";
     if (lower.includes("eleven")) return "elevenlabs";
     if (lower.includes("deepl")) return "deepl";
+    if (lower.includes("edgetts") || lower.includes("edge_tts")) return "edgetts";
+    if (lower.includes("stable") || lower.includes("sdxl")) return "stablediffusion";
+    if (lower.includes("whisper")) return "whisper";
+    if (lower.includes("flux") || lower.includes("huggingface")) return "huggingface";
     return "gemini";
   };
 
   // Selected model details
   const selectedModel = availableModels.find((m) => m.id === modelId);
-  const providerKey =
-    selectedModel?.provider?.toLowerCase() || inferProvider(modelId);
+  const hasModel = Boolean(modelId && modelId.trim() !== "");
+  const providerKey = hasModel
+    ? (selectedModel?.provider?.toLowerCase() || inferProvider(modelId))
+    : "none";
   const provTheme = PROVIDER_THEMES[providerKey] || {
-    name:
-      selectedModel?.provider_name?.toUpperCase() ||
-      providerKey.toUpperCase(),
-    bg: "rgba(139, 92, 246, 0.15)",
-    text: "#a78bfa",
-    border: "rgba(139, 92, 246, 0.35)",
+    name: "NO KEY / EMPTY",
+    bg: "rgba(245, 158, 11, 0.12)",
+    text: "#f59e0b",
+    border: "rgba(245, 158, 11, 0.35)",
   };
+  const isKeyConfigured = hasModel ? isProviderKeyConfiguredInVault(providerKey) : false;
 
   // Close dropdown when clicked outside
   useEffect(() => {
@@ -333,7 +371,7 @@ export default function TierModelCard({
           </span>
         </div>
         <span className="text-[10px] text-[#9CA3AF] font-sans truncate font-medium">
-          {selectedModel?.category || "Specialized Engine"}
+          {hasModel ? (selectedModel?.category || "Specialized Engine") : "Unassigned"}
         </span>
       </div>
 
@@ -344,24 +382,43 @@ export default function TierModelCard({
           type="button"
           disabled={disabled}
           onClick={() => setIsOpen((prev) => !prev)}
-          className="w-full text-left p-2.5 rounded-xl border bg-neutral-950/70 hover:bg-neutral-900 transition-all duration-150 cursor-pointer shadow-inner group"
+          className={`w-full text-left p-2.5 rounded-xl border transition-all duration-150 cursor-pointer shadow-inner group ${
+            !hasModel
+              ? "bg-amber-950/20 border-amber-500/30 hover:border-amber-500/50"
+              : !isKeyConfigured
+              ? "bg-amber-950/20 border-amber-500/30 hover:border-amber-500/50"
+              : "bg-neutral-950/70 hover:bg-neutral-900 border-[#2F2F2F]"
+          }`}
           style={{
-            borderColor: isOpen ? cfg.color : "#2F2F2F",
+            borderColor: isOpen ? cfg.color : undefined,
             boxShadow: isOpen ? `0 0 14px ${cfg.color}33` : "none",
           }}
         >
           <div className="flex items-center justify-between gap-2 mb-1">
             {/* 1. PROVIDER BADGE */}
-            <span
-              className="text-[8.5px] font-black font-mono tracking-wider px-1.5 py-0.5 rounded border uppercase shrink-0"
-              style={{
-                backgroundColor: provTheme.bg,
-                color: provTheme.text,
-                borderColor: provTheme.border,
-              }}
-            >
-              {provTheme.name}
-            </span>
+            {hasModel ? (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span
+                  className="text-[8.5px] font-black font-mono tracking-wider px-1.5 py-0.5 rounded border uppercase shrink-0"
+                  style={{
+                    backgroundColor: provTheme.bg,
+                    color: provTheme.text,
+                    borderColor: provTheme.border,
+                  }}
+                >
+                  {provTheme.name}
+                </span>
+                {!isKeyConfigured && (
+                  <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300">
+                    KEY REQUIRED
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span className="text-[8.5px] font-black font-mono tracking-wider px-1.5 py-0.5 rounded border bg-amber-500/15 border-amber-500/30 text-amber-400 uppercase shrink-0">
+                EMPTY · NO MODEL
+              </span>
+            )}
 
             {/* Dropdown Chevron indicator */}
             <ChevronDown
@@ -374,8 +431,8 @@ export default function TierModelCard({
           </div>
 
           {/* 2. SELECTED MODEL NAME */}
-          <div className="text-xs sm:text-sm font-bold text-white truncate tracking-tight">
-            {selectedModel?.name || modelId || "Select Model"}
+          <div className={`text-xs sm:text-sm font-bold truncate tracking-tight ${hasModel ? "text-white" : "text-neutral-400 italic"}`}>
+            {hasModel ? (selectedModel?.name || modelId) : "No Model Selected (Click to choose)"}
           </div>
         </button>
 
@@ -384,11 +441,11 @@ export default function TierModelCard({
           {/* Speed */}
           <div
             className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
-            title={selectedModel?.speed_rating || "Fast inference"}
+            title={hasModel ? (selectedModel?.speed_rating || "Fast inference") : "No active model"}
           >
             <Gauge className="w-3 h-3 text-[#F59E0B] shrink-0" />
             <span className="text-[#E5E5E5] truncate">
-              {getSpeedLabel(selectedModel)}
+              {hasModel ? getSpeedLabel(selectedModel) : "—"}
             </span>
           </div>
 
@@ -399,7 +456,7 @@ export default function TierModelCard({
           >
             <DollarSign className="w-3 h-3 text-[#10B981] shrink-0" />
             <span className="text-[#E5E5E5] truncate">
-              {getPricingLabel(selectedModel)}
+              {hasModel ? getPricingLabel(selectedModel) : "—"}
             </span>
           </div>
 
@@ -410,7 +467,7 @@ export default function TierModelCard({
           >
             <Cpu className="w-3 h-3 text-[#3B82F6] shrink-0" />
             <span className="text-[#E5E5E5] truncate">
-              {getContextLabel(selectedModel)}
+              {hasModel ? getContextLabel(selectedModel) : "—"}
             </span>
           </div>
         </div>
@@ -469,12 +526,24 @@ export default function TierModelCard({
             className="flex items-center gap-1.5 px-3 py-2 border-b overflow-x-auto no-scrollbar"
             style={{ backgroundColor: "rgba(10, 10, 10, 0.7)", borderColor: "#2F2F2F" }}
           >
+            <button
+              type="button"
+              onClick={() => setProviderFilter("all")}
+              className={`px-2.5 py-1 rounded-lg text-[9.5px] font-mono font-bold uppercase transition-all cursor-pointer shrink-0 ${
+                providerFilter === "all"
+                  ? "bg-[#3B82F6] text-white"
+                  : "bg-white/5 text-neutral-400 hover:text-white"
+              }`}
+            >
+              All ({availableModels.length})
+            </button>
             {availableProviders.map((p) => {
               const pTheme = PROVIDER_THEMES[p] || PROVIDER_THEMES.gemini;
               const count = availableModels.filter(
                 (m) => (m.provider?.toLowerCase() || inferProvider(m.id)) === p
               ).length;
               const isActive = providerFilter === p;
+              const hasKey = isProviderKeyConfiguredInVault(p);
 
               return (
                 <button
@@ -490,6 +559,11 @@ export default function TierModelCard({
                 >
                   <span>{pTheme.name}</span>
                   <span className="opacity-60 text-[8.5px]">({count})</span>
+                  {hasKey ? (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Key Configured in Vault" />
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="API Key Required" />
+                  )}
                 </button>
               );
             })}
@@ -503,6 +577,25 @@ export default function TierModelCard({
               scrollbarColor: `${cfg.color}44 transparent`,
             }}
           >
+            {/* Top Option: None / Empty Selection */}
+            <button
+              type="button"
+              onClick={() => {
+                onModelChange("");
+                setIsOpen(false);
+                setSearch("");
+              }}
+              className={`w-full flex items-center justify-between gap-3 px-3.5 py-2 text-left transition-all duration-100 cursor-pointer border-b border-white/5 ${
+                !hasModel ? "bg-amber-500/10 text-amber-400" : "text-neutral-400 hover:bg-white/5"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <X className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-xs font-mono font-bold">None / Keep Empty (No Model)</span>
+              </div>
+              {!hasModel && <Check className="w-3.5 h-3.5 stroke-[3] text-amber-400" />}
+            </button>
+
             {filteredModels.length === 0 ? (
               <div className="px-4 py-6 text-center text-xs text-neutral-500">
                 No matching models found
@@ -510,6 +603,8 @@ export default function TierModelCard({
             ) : (
               filteredModels.map((m) => {
                 const isSelected = m.id === modelId;
+                const mProvider = m.provider?.toLowerCase() || inferProvider(m.id);
+                const hasKey = isProviderKeyConfiguredInVault(mProvider);
 
                 return (
                   <button
@@ -549,6 +644,16 @@ export default function TierModelCard({
                         >
                           {m.name}
                         </span>
+                        {!hasKey && (
+                          <span className="text-[8px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">
+                            Key Required
+                          </span>
+                        )}
+                        {hasKey && (
+                          <span className="text-[8px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shrink-0">
+                            Ready
+                          </span>
+                        )}
                       </div>
 
                       <div className="text-[10px] text-neutral-400 flex items-center gap-2 font-mono">
@@ -566,7 +671,7 @@ export default function TierModelCard({
 
                     {isSelected && (
                       <span
-                        className="flex items-center justify-center w-5 h-5 rounded-full"
+                        className="flex items-center justify-center w-5 h-5 rounded-full shrink-0"
                         style={{
                           backgroundColor: cfg.color,
                           color: "#000000",

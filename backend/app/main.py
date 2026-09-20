@@ -119,32 +119,47 @@ if __name__ == "__main__":
             },
             "PIL": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": "WARNING",
                 "propagate": False,
             },
             "pydub": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": "WARNING",
                 "propagate": False,
             },
             "pydub.logging_utils": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": "WARNING",
                 "propagate": False,
             },
             "httpcore": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": "WARNING",
                 "propagate": False,
             },
             "httpx": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": "WARNING",
                 "propagate": False,
             },
             "urllib3": {
                 "handlers": ["default"],
-                "level": "INFO",
+                "level": "WARNING",
+                "propagate": False,
+            },
+            "google": {
+                "handlers": ["default"],
+                "level": "WARNING",
+                "propagate": False,
+            },
+            "google.genai": {
+                "handlers": ["default"],
+                "level": "WARNING",
+                "propagate": False,
+            },
+            "h11": {
+                "handlers": ["default"],
+                "level": "WARNING",
                 "propagate": False,
             },
         },

@@ -103,10 +103,12 @@ def setup_logging():
         "watchfiles",
         "multipart",
         "google",
+        "google.genai",
         "absl",
+        "h11",
     ):
         n_log = logging.getLogger(noisy)
-        n_log.setLevel(logging.INFO)
+        n_log.setLevel(logging.WARNING)
         n_log.addFilter(endpoint_filter)
 
 

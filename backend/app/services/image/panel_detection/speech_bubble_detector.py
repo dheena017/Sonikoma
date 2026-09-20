@@ -77,7 +77,7 @@ def get_yolo_speech_bubble_model():
         _yolo_model = YOLO(model_path)
         return _yolo_model
     except Exception as e:
-        logger.warning(f"[YOLO Detector] kitsumed model unavailable: {e}. Trying ogkalu fallback...")
+        logger.debug(f"[Vision Engine] kitsumed model unavailable: {e}. Trying ogkalu fallback...")
 
     # Priority 2: ogkalu YOLOv8m
     try:
@@ -87,10 +87,10 @@ def get_yolo_speech_bubble_model():
             token=hf_token
         )
         _yolo_model = YOLO(model_path)
-        logger.info("[YOLO Detector] ogkalu fallback model loaded successfully.")
+        logger.info("[Vision Engine] Bubble Detection model loaded successfully")
         return _yolo_model
     except Exception as e:
-        logger.warning(f"[YOLO Detector] ogkalu model unavailable: {e}. Trying generic YOLOv8n-seg...")
+        logger.debug(f"[Vision Engine] ogkalu model unavailable: {e}. Trying generic YOLOv8n-seg...")
 
     # Priority 3: Generic YOLOv8n-seg
     try:
@@ -100,10 +100,10 @@ def get_yolo_speech_bubble_model():
             _yolo_model = YOLO(project_model_path)
         else:
             _yolo_model = YOLO("yolov8n-seg.pt")
-        logger.info("[YOLO Detector] Generic YOLOv8n-seg loaded.")
+        logger.info("[Vision Engine] YOLOv8 segmentation model ready")
         return _yolo_model
     except Exception as e:
-        logger.error(f"[YOLO Detector] All YOLO model loading failed: {e}", exc_info=True)
+        logger.warning(f"[Vision Engine] Bubble Detection model loading failed ({e}). Using OpenCV detection.")
         _yolo_model = None
         return None
 
@@ -153,7 +153,7 @@ def detect_yolo_entities(
         try:
             results = model.predict(source=pil_img, conf=conf_threshold, verbose=False)
         except Exception as e:
-            logger.error(f"[YOLO Detector] Inference error: {e}", exc_info=True)
+            logger.warning(f"[Vision Engine] Bubble inference error: {e}")
             results = []
     else:
         results = []
@@ -355,7 +355,7 @@ def segment_speech_bubbles_and_text_balloons(
             return np.zeros((height, width), dtype=np.uint8)
 
     except Exception as e:
-        logger.error(f"[YOLO Detector] Error running YOLO balloon segmentation: {e}", exc_info=True)
+        logger.warning(f"[Vision Engine] Balloon segmentation error: {e}")
         return None
 
 
@@ -378,7 +378,7 @@ def get_yolo_character_segmentation_model():
             _yolo_char_model = YOLO("yolov8n-seg.pt")
         return _yolo_char_model
     except Exception as e:
-        logger.error(f"[YOLO Detector] Failed to load character model: {e}", exc_info=True)
+        logger.warning(f"[Vision Engine] Character segmentation model unavailable: {e}")
         return None
 
 
@@ -440,5 +440,5 @@ def segment_character_foreground(
         return combined_mask
 
     except Exception as e:
-        logger.error(f"[YOLO Detector] Error running character segmentation: {e}", exc_info=True)
+        logger.warning(f"[Vision Engine] Character segmentation failed: {e}")
         return None

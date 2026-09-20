@@ -23,11 +23,11 @@ from .scraper_constants import SCRAPER_VERSION
 
 import services.image.utils.image_utils as img_utils
 try:
-    from core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+    from core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY
     from core.cache import stitched_cache, edit_history
     from core.utils.id_utils import generate_project_id
 except ImportError:
-    from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+    from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY
     from app.core.cache import stitched_cache, edit_history
     from app.core.utils.id_utils import generate_project_id
 from services.ai.pipelines.storyboard_ai import generate_dynamic_panels
@@ -402,7 +402,7 @@ async def generate_storyboard_only_service(
 
         return result_payload
     except Exception as e:
-        logger.error(f"[Storyboard Only Service] Execution failed: {e}", exc_info=True)
+        logger.warning(f"[Storyboard Service] Execution failed: {e}")
         from services.ai.orchestrator import classify_error
         classified = classify_error(e, model=model)
         err_dict = classified.to_dict()

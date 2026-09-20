@@ -11,11 +11,8 @@ import {
   Play,
   Pause,
   Square,
-  Sliders,
-  Music,
   Mic,
   MessageSquare,
-  BookOpen,
   Volume2,
   Palette,
   Video,
@@ -23,6 +20,9 @@ import {
   Wand2,
   Bot,
   Check,
+  MoreVertical,
+  Copy,
+  Trash2,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
@@ -287,19 +287,64 @@ const StoryboardCard = ({
   viewLayout = "scroll",
 }: StoryboardCardProps) => {
   const [activeTab, setActiveTab] = React.useState<
-    "dialogue" | "narrative" | "sfx" | "visual"
-  >("dialogue");
+    "speech" | "sfx" | "visual"
+  >("speech");
+  const [isGeneratingVoice, setIsGeneratingVoice] = React.useState(false);
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
-  // Playback state for Narrative
-  const [isNarrativePlaying, setIsNarrativePlaying] = React.useState(false);
-  const [isNarrativePaused, setIsNarrativePaused] = React.useState(false);
-  const narrativeAudioRef = React.useRef<HTMLAudioElement | null>(null);
-  const narrativeUtteranceRef = React.useRef<SpeechSynthesisUtterance | null>(
-    null
-  );
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  // Playback state for Dialogue
+  React.useEffect(() => {
+    if (!isMenuOpen) return;
+    const close = () => setIsMenuOpen(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [isMenuOpen]);
+
+  const handleDuplicatePanel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    if (!setPanels) return;
+    const duplicated: GeneratedPanel = {
+      ...panel,
+      id: Date.now(),
+    };
+    setPanels((prev) => {
+      const next = [...prev];
+      next.splice(idx + 1, 0, duplicated);
+      return next;
+    });
+    addNotification?.(`Panel #${idx + 1} duplicated!`, "success");
+  };
+
+  const handleDeletePanel = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    if (!setPanels) return;
+    setPanels((prev) => prev.filter((p) => p.id !== panel.id));
+    addNotification?.(`Panel #${idx + 1} deleted!`, "info");
+  };
+
+  const handleOpenAssistant = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    window.history.pushState({}, "", `/creative-suite/panel-assistant?idx=${idx}`);
+    window.dispatchEvent(new Event("popstate"));
+  };
+
+  const handleCopyText = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    const txt = panel.speech_text || panel.narrative || "";
+    if (txt) {
+      navigator.clipboard.writeText(txt);
+      addNotification?.("Copied dialogue text to clipboard!", "success");
+    } else {
+      addNotification?.("No text to copy", "info");
+    }
+  };
+
+  // Unified Playback state for Speech / Voice Audio
   const [isDialoguePlaying, setIsDialoguePlaying] = React.useState(false);
   const [isDialoguePaused, setIsDialoguePaused] = React.useState(false);
   const dialogueAudioRef = React.useRef<HTMLAudioElement | null>(null);
@@ -340,20 +385,6 @@ const StoryboardCard = ({
     if (speechPitch !== undefined) setCustomSpeechPitch(speechPitch);
   }, [speechPitch]);
 
-  const stopNarrativeAudio = React.useCallback(() => {
-    if (narrativeAudioRef.current) {
-      narrativeAudioRef.current.pause();
-      narrativeAudioRef.current.currentTime = 0;
-      narrativeAudioRef.current = null;
-    }
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-    }
-    narrativeUtteranceRef.current = null;
-    setIsNarrativePlaying(false);
-    setIsNarrativePaused(false);
-  }, []);
-
   const stopDialogueAudio = React.useCallback(() => {
     if (dialogueAudioRef.current) {
       dialogueAudioRef.current.pause();
@@ -368,91 +399,19 @@ const StoryboardCard = ({
     setIsDialoguePaused(false);
   }, []);
 
-  const stopAllAudio = React.useCallback(() => {
-    stopNarrativeAudio();
-    stopDialogueAudio();
-  }, [stopNarrativeAudio, stopDialogueAudio]);
-
   React.useEffect(() => {
-    stopAllAudio();
+    stopDialogueAudio();
     return () => {
-      stopAllAudio();
+      stopDialogueAudio();
     };
-  }, [panel.id, stopAllAudio]);
+  }, [panel.id, stopDialogueAudio]);
 
-  // Speech Synthesis fallback for Narrative Text
-  const speakNarrativeFallback = React.useCallback(() => {
-    const textToRead = panel.narrative || panel.speech_text || "";
-    if (!textToRead.trim()) {
-      addNotification?.(
-        "Please enter text in Narrative Text to hear audio preview.",
-        "info"
-      );
-      return;
-    }
-
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-      }
-      window.speechSynthesis.cancel();
-
-      const utt = new SpeechSynthesisUtterance(textToRead);
-      utt.volume = 1.0;
-      utt.rate = customSpeechRate;
-      utt.pitch = customSpeechPitch;
-
-      const voices = window.speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        const selectedVoice =
-          voices.find(
-            (v) =>
-              v.name.includes(selectedVoiceModel) ||
-              v.lang.startsWith("en") ||
-              v.default
-          ) || voices[0];
-        if (selectedVoice) {
-          utt.voice = selectedVoice;
-          utt.lang = selectedVoice.lang;
-        }
-      }
-
-      utt.onstart = () => {
-        setIsNarrativePlaying(true);
-        setIsNarrativePaused(false);
-      };
-      utt.onend = () => stopNarrativeAudio();
-      utt.onerror = (err) => {
-        console.error("[SpeechSynthesis Narrative] error:", err);
-        stopNarrativeAudio();
-      };
-
-      narrativeUtteranceRef.current = utt;
-      window.speechSynthesis.speak(utt);
-      setIsNarrativePlaying(true);
-      setIsNarrativePaused(false);
-    } else {
-      addNotification?.(
-        "Speech synthesis is not supported in this browser.",
-        "error"
-      );
-    }
-  }, [
-    panel.narrative,
-    panel.speech_text,
-    addNotification,
-    customSpeechRate,
-    customSpeechPitch,
-    selectedVoiceModel,
-    stopNarrativeAudio,
-  ]);
-
-  // Speech Synthesis fallback for Dialogue Text
+  // Speech Synthesis browser fallback
   const speakDialogueFallback = React.useCallback(() => {
     const textToRead = panel.speech_text || panel.narrative || "";
     if (!textToRead.trim()) {
       addNotification?.(
-        "Please enter dialogue text to hear audio preview.",
+        "Please enter dialogue or narration text to hear audio preview.",
         "info"
       );
       return;
@@ -490,7 +449,7 @@ const StoryboardCard = ({
       };
       utt.onend = () => stopDialogueAudio();
       utt.onerror = (err) => {
-        console.error("[SpeechSynthesis Dialogue] error:", err);
+        console.error("[SpeechSynthesis] error:", err);
         stopDialogueAudio();
       };
 
@@ -513,71 +472,6 @@ const StoryboardCard = ({
     selectedVoiceModel,
     stopDialogueAudio,
   ]);
-
-  // Toggle Narrative Audio
-  const handleToggleNarrativeAudio = () => {
-    // Scenario 1: Currently Playing -> Pause
-    if (isNarrativePlaying && !isNarrativePaused) {
-      if (narrativeAudioRef.current) {
-        narrativeAudioRef.current.pause();
-      } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.pause();
-      }
-      setIsNarrativePaused(true);
-      return;
-    }
-
-    // Scenario 2: Currently Paused -> Resume
-    if (isNarrativePlaying && isNarrativePaused) {
-      if (narrativeAudioRef.current) {
-        narrativeAudioRef.current
-          .play()
-          .catch((err) => console.error("Narrative audio resume failed:", err));
-      } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
-        }
-      }
-      setIsNarrativePaused(false);
-      return;
-    }
-
-    // Scenario 3: Stopped -> Stop Dialogue audio first and start Narrative Playback
-    stopAllAudio();
-
-    const targetAudioUrl = panel.narrative_audio_url || panel.audio_url;
-
-    if (targetAudioUrl) {
-      const audio = new Audio(targetAudioUrl);
-      narrativeAudioRef.current = audio;
-      audio.volume = 1.0;
-      audio.onended = () => stopNarrativeAudio();
-      audio.onerror = (e) => {
-        console.warn(
-          "Narrative audio URL failed to load, using Speech Synthesis fallback:",
-          e
-        );
-        stopNarrativeAudio();
-        speakNarrativeFallback();
-      };
-      audio
-        .play()
-        .then(() => {
-          setIsNarrativePlaying(true);
-          setIsNarrativePaused(false);
-        })
-        .catch((err) => {
-          console.warn(
-            "Narrative audio play failed, using Speech Synthesis fallback:",
-            err
-          );
-          stopNarrativeAudio();
-          speakNarrativeFallback();
-        });
-    } else {
-      speakNarrativeFallback();
-    }
-  };
 
   // Toggle Dialogue Audio
   const handleToggleDialogueAudio = () => {
@@ -607,8 +501,8 @@ const StoryboardCard = ({
       return;
     }
 
-    // Scenario 3: Stopped -> Stop Narrative audio first and start Dialogue Playback
-    stopAllAudio();
+    // Scenario 3: Stopped -> Start Dialogue Playback
+    stopDialogueAudio();
 
     const targetAudioUrl = panel.audio_url || panel.speech_audio_url;
 
@@ -641,6 +535,77 @@ const StoryboardCard = ({
         });
     } else {
       speakDialogueFallback();
+    }
+  };
+
+  const handleGenerateVoice = async () => {
+    const textToSpeak = panel.speech_text || panel.narrative || "";
+    if (!textToSpeak.trim()) {
+      addNotification?.(
+        "Please enter dialogue or narration text first.",
+        "warning"
+      );
+      return;
+    }
+    setIsGeneratingVoice(true);
+    try {
+      addNotification?.("Synthesizing voice audio...", "info");
+      const ttsRes = await generateTts(fetchWithInterceptor, {
+        panel_id: panel.id,
+        text: textToSpeak,
+        dialogue_list: [textToSpeak],
+        target_duration:
+          panel.duration && panel.duration > 0 ? panel.duration : undefined,
+        voice: voiceActor || selectedVoiceModel || undefined,
+        speech_rate: customSpeechRate || speechRate,
+        speech_pitch: customSpeechPitch || speechPitch,
+      });
+
+      let audioUrl = null;
+      if (ttsRes && ttsRes.success && ttsRes.audio_url) {
+        audioUrl = ttsRes.audio_url;
+      } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
+        const binary = atob(ttsRes.audio_base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        audioUrl = URL.createObjectURL(
+          new Blob([bytes], { type: "audio/mpeg" })
+        );
+      }
+
+      const audioDuration: number =
+        ttsRes && ttsRes.duration_actual_s && ttsRes.duration_actual_s > 0
+          ? Math.round(ttsRes.duration_actual_s * 10) / 10
+          : 0;
+
+      if (audioUrl) {
+        if (setPanels) {
+          setPanels((prev) =>
+            prev.map((p) =>
+              p.id === panel.id
+                ? {
+                    ...p,
+                    audio_url: audioUrl,
+                    narrative_audio_url: audioUrl,
+                    speech_audio_url: audioUrl,
+                    duration: audioDuration > 0 ? audioDuration : p.duration,
+                  }
+                : p
+            )
+          );
+        }
+        addNotification?.("Voice audio generated successfully!", "success");
+      } else {
+        addNotification?.(
+          "Voice synthesis completed without audio output",
+          "warning"
+        );
+      }
+    } catch (err: any) {
+      console.error("Failed to generate voice:", err);
+      addNotification?.("Failed to generate voice audio", "error");
+    } finally {
+      setIsGeneratingVoice(false);
     }
   };
 
@@ -870,7 +835,9 @@ const StoryboardCard = ({
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center"
-      } group relative rounded-2xl overflow-hidden border p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 transition-colors duration-150 select-none outline-none shadow-sm ${
+      } group relative rounded-2xl border p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 transition-colors duration-150 select-none outline-none shadow-sm ${
+        isMenuOpen ? "z-50" : "z-0"
+      } ${
         isThisPanelAnalyzing
           ? "border-2 border-[#3B82F6] bg-[#1a1a24] ring-1 ring-[#3B82F6]/50"
           : isCurrent && isSelected
@@ -885,44 +852,46 @@ const StoryboardCard = ({
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className="relative h-56 sm:h-64 rounded-xl overflow-hidden cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb hover:border-[#3B82F6]/40 transition-colors duration-150"
+        className="relative h-56 sm:h-64 rounded-xl cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb hover:border-[#3B82F6]/40 transition-colors duration-150"
       >
-        <img
-          src={panel.image_url}
-          alt={`Panel #${idx + 1}`}
-          loading="lazy"
-          decoding="async"
-          draggable={false}
-          onDragStart={(e) => e.preventDefault()}
-          className="w-full h-full object-contain object-center rounded-xl"
-          style={{ filter: getPanelFilterStyle(panel) }}
-          onLoad={(e) => {
-            const img = e.currentTarget;
-            if (img.naturalWidth && img.naturalHeight) {
-              setDimensions({
-                width: img.naturalWidth,
-                height: img.naturalHeight,
-              });
-            }
-          }}
-          onError={(e) => {
-            const img = e.currentTarget;
-            if (img.dataset.retried) return;
-            img.dataset.retried = "1";
-            const src = img.src;
-            if (
-              !src.includes("/api/proxy-image") &&
-              !src.includes("/api/image/") &&
-              !src.includes("/media/") &&
-              !src.includes("/videos/")
-            ) {
-              img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
-            } else {
-              img.style.display = "none";
-            }
-          }}
-        />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="w-full h-full rounded-xl overflow-hidden flex items-center justify-center relative">
+          <img
+            src={panel.image_url}
+            alt={`Panel #${idx + 1}`}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+            className="w-full h-full object-contain object-center rounded-xl"
+            style={{ filter: getPanelFilterStyle(panel) }}
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) {
+                setDimensions({
+                  width: img.naturalWidth,
+                  height: img.naturalHeight,
+                });
+              }
+            }}
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (img.dataset.retried) return;
+              img.dataset.retried = "1";
+              const src = img.src;
+              if (
+                !src.includes("/api/proxy-image") &&
+                !src.includes("/api/image/") &&
+                !src.includes("/media/") &&
+                !src.includes("/videos/")
+              ) {
+                img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+              } else {
+                img.style.display = "none";
+              }
+            }}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        </div>
 
         {isThisPanelAnalyzing && (
           <PanelAnalyzingOverlay isAnalyzingAll={isAnalyzingAll} />
@@ -983,31 +952,140 @@ const StoryboardCard = ({
           </div>
         </div>
 
-        {/* Selection checkbox circle with animated pulse ring at Top-Right */}
-        <div className="absolute top-2 right-2 z-20">
-          {(isSelected || isCurrent) && (
-            <div className="absolute inset-0 rounded-full bg-[#2A2A2A] animate-ping" />
-          )}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleSelect();
-            }}
-            className={`relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90 ${
-              isSelected || isCurrent
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] border-[#60A5FA] shadow-[0_4px_12px_rgba(59,130,246,0.4)] scale-110 opacity-100"
-                : "bg-neutral-900/60 border-neutral-600/70 hover:border-neutral-400 opacity-0 group-hover/thumb:opacity-100"
-            }`}
-            title={isSelected ? "Deselect panel" : "Select panel"}
-          >
-            <Check
-              className={`h-2.5 w-2.5 ${
-                isSelected || isCurrent ? "text-white" : "text-neutral-400"
+        {/* Top-Right: 3-Dots Action Menu & Selection Button */}
+        <div className="absolute top-2 right-2 flex items-center gap-1.5 z-30">
+          {/* 3-Dots More Options Menu */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen((prev) => !prev);
+              }}
+              className="p-1 rounded-md bg-black/80 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-700/80 backdrop-blur-md transition-all cursor-pointer shadow-sm flex items-center justify-center opacity-0 group-hover/thumb:opacity-100"
+              title="Panel Options & Actions"
+            >
+              <MoreVertical className="h-3 w-3" />
+            </button>
+
+            {/* Dropdown Menu */}
+            {isMenuOpen && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 top-7 w-52 bg-neutral-900/98 backdrop-blur-2xl border border-neutral-700/80 rounded-xl p-1.5 shadow-[0_12px_32px_rgba(0,0,0,0.85)] z-50 animate-in fade-in zoom-in-95 duration-100 font-sans space-y-1 ring-1 ring-black/40"
+              >
+                {/* Panel Resolution & Aspect Ratio Info */}
+                {dimensions && (
+                  <div className="px-2 py-1 bg-neutral-950/90 rounded-lg border border-neutral-800 flex items-center justify-between text-[9.5px] font-mono text-neutral-400 select-none mb-1">
+                    <span className="font-semibold text-neutral-300">{dimensions.width} × {dimensions.height} px</span>
+                    {aspectRatioLabel && (
+                      <span className="text-[#60A5FA] bg-[#3B82F6]/10 px-1.5 py-0.5 rounded border border-[#3B82F6]/20 font-medium">
+                        {aspectRatioLabel}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* 1. Magic Motion */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMenuOpen(false);
+                    handleMagicMotion();
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-neutral-200 hover:text-white hover:bg-neutral-800/80 transition-colors cursor-pointer text-left"
+                >
+                  <Wand2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  <span>Magic Motion</span>
+                </button>
+
+                {/* 2. Open Assistant */}
+                <button
+                  type="button"
+                  onClick={handleOpenAssistant}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-neutral-200 hover:text-white hover:bg-neutral-800/80 transition-colors cursor-pointer text-left"
+                >
+                  <Bot className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Panel Assistant</span>
+                </button>
+
+                {/* 3. Generate Audio */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMenuOpen(false);
+                    handleGenerateVoice();
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-neutral-200 hover:text-white hover:bg-neutral-800/80 transition-colors cursor-pointer text-left"
+                >
+                  <Mic className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Create Voice Audio</span>
+                </button>
+
+                {/* 4. Copy Dialogue */}
+                <button
+                  type="button"
+                  onClick={handleCopyText}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-neutral-200 hover:text-white hover:bg-neutral-800/80 transition-colors cursor-pointer text-left"
+                >
+                  <Copy className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Copy Dialogue</span>
+                </button>
+
+                {/* 5. Duplicate Panel */}
+                <button
+                  type="button"
+                  onClick={handleDuplicatePanel}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-neutral-200 hover:text-white hover:bg-neutral-800/80 transition-colors cursor-pointer text-left"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Duplicate Panel</span>
+                </button>
+
+                {/* Divider */}
+                <div className="h-[1px] bg-neutral-800 my-1" />
+
+                {/* 6. Delete Panel */}
+                <button
+                  type="button"
+                  onClick={handleDeletePanel}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 transition-colors cursor-pointer text-left"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Delete Panel</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Selection checkbox circle */}
+          <div className="relative">
+            {(isSelected || isCurrent) && (
+              <div className="absolute inset-0 rounded-full bg-[#2A2A2A] animate-ping" />
+            )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSelect();
+              }}
+              className={`relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90 ${
+                isSelected || isCurrent
+                  ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] border-[#60A5FA] shadow-[0_4px_12px_rgba(59,130,246,0.4)] scale-110 opacity-100"
+                  : "bg-neutral-900/60 border-neutral-600/70 hover:border-neutral-400 opacity-0 group-hover/thumb:opacity-100"
               }`}
-              strokeWidth={3.5}
-            />
-          </button>
+              title={isSelected ? "Deselect panel" : "Select panel"}
+            >
+              <Check
+                className={`h-2.5 w-2.5 ${
+                  isSelected || isCurrent ? "text-white" : "text-neutral-400"
+                }`}
+                strokeWidth={3.5}
+              />
+            </button>
+          </div>
         </div>
 
         {/* Motion overlay text */}
@@ -1018,47 +1096,20 @@ const StoryboardCard = ({
         )}
       </div>
 
-      {/* Dynamic Resolution & Aspect Ratio Badges */}
-      {dimensions && (
-        <div className="flex items-center justify-between gap-2 px-1 text-[9px] font-mono select-none animate-in fade-in duration-300">
-          <span className="text-neutral-500 font-bold bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
-            {dimensions.width} × {dimensions.height} px
-          </span>
-          {aspectRatioLabel && (
-            <span className="bg-neutral-900 border border-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded">
-              {aspectRatioLabel}
-            </span>
-          )}
-        </div>
-      )}
-
       <div className="space-y-2 w-full">
-        {/* Full-Width Segmented Content Inspector Tabs */}
-        <div className="grid grid-cols-4 gap-0.5 bg-neutral-900/90 p-0.5 rounded-lg border border-neutral-800/90 text-[9.5px] font-mono shadow-inner">
+        {/* Full-Width Segmented Content Tabs: Voice (Merged Speech & Audio), SFX, Scene */}
+        <div className="grid grid-cols-3 gap-0.5 bg-neutral-900/90 p-0.5 rounded-lg border border-neutral-800/90 text-[9.5px] font-mono shadow-inner">
           <button
             type="button"
-            onClick={() => setActiveTab("dialogue")}
-            title="Dialogue & Subtitles"
+            onClick={() => setActiveTab("speech")}
+            title="Speech, Narration & Voice Audio"
             className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
-              activeTab === "dialogue"
+              activeTab === "speech"
                 ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-[0_2px_10px_rgba(59,130,246,0.35)]"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
             }`}
           >
             <MessageSquare className="w-2.5 h-2.5 shrink-0" />
-            <span className="whitespace-nowrap font-medium text-[9px]">Text</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("narrative")}
-            title="Narrative Voiceover"
-            className={`flex items-center justify-center gap-1 px-1 py-0.5 rounded-md font-bold transition-all duration-200 cursor-pointer ${
-              activeTab === "narrative"
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-[0_2px_10px_rgba(59,130,246,0.35)]"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60"
-            }`}
-          >
-            <BookOpen className="w-2.5 h-2.5 shrink-0" />
             <span className="whitespace-nowrap font-medium text-[9px]">Voice</span>
           </button>
           <button
@@ -1089,14 +1140,34 @@ const StoryboardCard = ({
           </button>
         </div>
 
-        {/* Tab Content Panels with Integrated Audio Preview Header */}
-        {activeTab === "dialogue" && (
+        {/* Tab 1: Merged Speech & Voice Narration */}
+        {activeTab === "speech" && (
           <div className="space-y-1 animate-in fade-in duration-150">
             <div className="flex items-center justify-between px-0.5">
               <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
-                Dialogue Speech
+                Speech & Voice
               </span>
               <div className="flex items-center gap-1">
+                {/* Create / Regenerate Voice Button */}
+                <button
+                  type="button"
+                  disabled={isGeneratingVoice || isThisPanelAnalyzing}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleGenerateVoice();
+                  }}
+                  className="px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold flex items-center gap-1 border border-neutral-700 bg-neutral-800 hover:bg-neutral-750 text-neutral-200 hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-sm"
+                  title="Synthesize / Regenerate Voice Audio with AI"
+                >
+                  {isGeneratingVoice ? (
+                    <RefreshCw className="w-2 h-2 animate-spin text-[#3B82F6]" />
+                  ) : (
+                    <Mic className="w-2 h-2 text-[#3B82F6]" />
+                  )}
+                  <span>{isGeneratingVoice ? "Voicing..." : "Create Voice"}</span>
+                </button>
+
+                {/* Play / Pause Audio */}
                 <button
                   type="button"
                   onClick={(e) => {
@@ -1108,7 +1179,7 @@ const StoryboardCard = ({
                       ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
                       : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA] hover:bg-[#2A2A2A] hover:text-white"
                   }`}
-                  title="Play Dialogue Preview"
+                  title="Play Audio Preview"
                 >
                   {isDialoguePlaying && !isDialoguePaused ? (
                     <Pause className="w-2 h-2 fill-current" />
@@ -1119,6 +1190,7 @@ const StoryboardCard = ({
                     {isDialoguePlaying && !isDialoguePaused ? "Pause" : "Play Audio"}
                   </span>
                 </button>
+
                 {(isDialoguePlaying || isDialoguePaused) && (
                   <button
                     type="button"
@@ -1127,19 +1199,25 @@ const StoryboardCard = ({
                       stopDialogueAudio();
                     }}
                     className="p-0.5 rounded text-[8.5px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
-                    title="Stop Dialogue"
+                    title="Stop Audio"
                   >
                     <Square className="w-2 h-2 fill-current" />
                   </button>
                 )}
               </div>
             </div>
+
+            {/* Unified Speech Textarea */}
             <textarea
               rows={1}
               disabled={isThisPanelAnalyzing}
-              value={panel.speech_text || ""}
-              onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
-              placeholder="Enter dialogue or subtitle text..."
+              value={panel.speech_text || panel.narrative || ""}
+              onChange={(e) => {
+                const val = e.target.value;
+                handleModifySpeechText(panel.id, val);
+                handleModifyNarrative?.(panel.id, val);
+              }}
+              placeholder="Enter dialogue or narration text..."
               className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
                 isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
@@ -1149,67 +1227,7 @@ const StoryboardCard = ({
           </div>
         )}
 
-        {activeTab === "narrative" && (
-          <div className="space-y-1 animate-in fade-in duration-150">
-            <div className="flex items-center justify-between px-0.5">
-              <span className="text-[9.5px] font-mono font-semibold text-neutral-400">
-                Narrative Voiceover
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleToggleNarrativeAudio();
-                  }}
-                  className={`px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold flex items-center gap-1 border transition-all cursor-pointer ${
-                    isNarrativePlaying && !isNarrativePaused
-                      ? "bg-amber-950/60 border-amber-500/50 text-amber-300 shadow-sm"
-                      : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA] hover:bg-[#2A2A2A] hover:text-white"
-                  }`}
-                  title="Play Narration Preview"
-                >
-                  {isNarrativePlaying && !isNarrativePaused ? (
-                    <Pause className="w-2 h-2 fill-current" />
-                  ) : (
-                    <Play className="w-2 h-2 fill-current" />
-                  )}
-                  <span>
-                    {isNarrativePlaying && !isNarrativePaused ? "Pause" : "Play Audio"}
-                  </span>
-                </button>
-                {(isNarrativePlaying || isNarrativePaused) && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      stopNarrativeAudio();
-                    }}
-                    className="p-0.5 rounded text-[8.5px] bg-rose-950/40 border border-rose-500/30 text-rose-300 hover:bg-rose-900/70 cursor-pointer"
-                    title="Stop Narration"
-                  >
-                    <Square className="w-2 h-2 fill-current" />
-                  </button>
-                )}
-              </div>
-            </div>
-            <textarea
-              rows={1}
-              disabled={isThisPanelAnalyzing}
-              value={panel.narrative || ""}
-              onChange={(e) =>
-                handleModifyNarrative?.(panel.id, e.target.value)
-              }
-              placeholder="Enter narrative voiceover or scene description..."
-              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
-                isThisPanelAnalyzing
-                  ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
-                  : "hover:border-neutral-700"
-              }`}
-            />
-          </div>
-        )}
-
+        {/* Tab 2: SFX */}
         {activeTab === "sfx" && (
           <div className="space-y-1 animate-in fade-in duration-150">
             <div className="px-0.5">
@@ -1232,6 +1250,7 @@ const StoryboardCard = ({
           </div>
         )}
 
+        {/* Tab 3: Visual Scene Prompt */}
         {activeTab === "visual" && (
           <div className="space-y-1 animate-in fade-in duration-150">
             <div className="px-0.5">
@@ -1566,13 +1585,6 @@ const StoryboardCard = ({
             )}
           </div>
         )}
-
-        <div className="flex items-center justify-between text-[9px] text-neutral-500 pt-1 font-mono">
-          <span>{panel.layers ? "Motion Comic" : "Standard Panel"}</span>
-          <span>
-            {idx + 1} / {panelsLength}
-          </span>
-        </div>
       </div>
     </div>
   );

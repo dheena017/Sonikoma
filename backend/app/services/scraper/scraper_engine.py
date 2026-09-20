@@ -140,7 +140,7 @@ class AdaptiveScraperEngine:
             logger.info(f"[AdaptiveScraperEngine] Adapter {adapter.__class__.__name__} returned success={res.success} ({len(res.images) if res.images else 0} images)")
             return res
         except Exception as e:
-            logger.error(f"[AdaptiveScraperEngine] Unexpected scraper execution failure: {e}", exc_info=True)
+            logger.warning(f"[Scraper Engine] Unexpected execution failure: {e}")
             context.error = ScrapeError(
                 code=ScrapeErrorCode.INTERNAL_ERROR,
                 message=f"Internal scraper engine error: {str(e)}"

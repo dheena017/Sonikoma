@@ -16,7 +16,7 @@ from typing import Any, Optional, Type
 from pydantic import BaseModel
 
 from app.core.config import ai_initialized, call_gemini_with_retry, genai_client
-from app.core.config import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+from app.core.config import GEMINI_MODEL_PRIMARY
 try:
     from google.genai import types
 except Exception:

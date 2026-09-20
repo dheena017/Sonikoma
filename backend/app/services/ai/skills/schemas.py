@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 class GeminiAnalysisModel(BaseModel):
     speech_text: str = Field(description="Captions or character dialogues")
+    narrative: str = Field(default="", description="Cinematic story narration and atmospheric scene recap")
     sfx: str = Field(description="Bracketed sound effect text")
     duration: float = Field(description="Suggested scene duration in seconds")
     motion_type: str = Field(description="Camera movement motion tag")

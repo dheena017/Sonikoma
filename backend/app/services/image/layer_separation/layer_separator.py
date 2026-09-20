@@ -49,7 +49,7 @@ async def extract_panel_layers_service(panel_id: str, url: str) -> Dict[str, Any
                 layers = await process_layers(tmp_in_path, panel_id)
                 warnings = []
             except Exception as ex:
-                logger.error(f"[Layers Service] Sliceless processing failed: {ex}", exc_info=True)
+                logger.warning(f"[Layer Separation] Full-page layer separation failed: {ex}")
                 layers = {
                     "background_url": url,
                     "character_url": f"data:image/webp;base64,{base64.b64encode(create_blank_webp(100, 100)).decode('utf-8')}",
@@ -81,22 +81,52 @@ async def extract_panel_layers_service(panel_id: str, url: str) -> Dict[str, Any
 
         async def process_one_panel(idx: int, box: dict):
             async with panel_semaphore:
-                top_px = int(round((box["cropTop"] / 100) * h))
-                bot_px = int(round((box["cropBottom"] / 100) * h))
-                left_px = int(round((box["cropLeft"] / 100) * w))
-                right_px = int(round((box["cropRight"] / 100) * w))
+                # 1. Percentage crop bounds (0 - 100%)
+                if "cropTop" in box or "cropBottom" in box or "cropLeft" in box or "cropRight" in box:
+                    top_px = int(round((float(box.get("cropTop", 0.0)) / 100.0) * h))
+                    bot_px = int(round((float(box.get("cropBottom", 0.0)) / 100.0) * h))
+                    left_px = int(round((float(box.get("cropLeft", 0.0)) / 100.0) * w))
+                    right_px = int(round((float(box.get("cropRight", 0.0)) / 100.0) * w))
+                    crop_w = w - left_px - right_px
+                    crop_h = h - top_px - bot_px
+                # 2. Absolute x, y, width, height bounds
+                elif "x" in box or "y" in box or "w" in box or "h" in box:
+                    left_px = int(round(float(box.get("x", 0))))
+                    top_px = int(round(float(box.get("y", 0))))
+                    crop_w = int(round(float(box.get("w", box.get("width", w - left_px)))))
+                    crop_h = int(round(float(box.get("h", box.get("height", h - top_px)))))
+                # 3. Absolute top, bottom, left, right bounds
+                elif "bottom" in box or "right" in box:
+                    left_px = int(round(float(box.get("left", 0))))
+                    top_px = int(round(float(box.get("top", 0))))
+                    right_bound = int(round(float(box.get("right", w))))
+                    bottom_bound = int(round(float(box.get("bottom", h))))
+                    crop_w = max(0, right_bound - left_px)
+                    crop_h = max(0, bottom_bound - top_px)
+                # 4. Fallback: full canvas
+                else:
+                    left_px, top_px = 0, 0
+                    crop_w, crop_h = w, h
 
-                crop_w = w - left_px - right_px
-                crop_h = h - top_px - bot_px
-
-                if left_px < 0 or top_px < 0 or crop_w <= 0 or crop_h <= 0 or (left_px + crop_w) > w or (top_px + crop_h) > h:
-                    return None
+                left_px = max(0, min(left_px, w - 1))
+                top_px = max(0, min(top_px, h - 1))
+                crop_w = max(0, min(crop_w, w - left_px))
+                crop_h = max(0, min(crop_h, h - top_px))
 
                 if crop_w <= 10 or crop_h <= 10:
                     return None
 
                 img_cropped = img.crop((left_px, top_px, left_px + crop_w, top_px + crop_h))
                 tmp_panel_path = None
+
+                normalized_box = dict(box)
+                normalized_box.setdefault("cropTop", round((top_px / h) * 100, 2) if h > 0 else 0.0)
+                normalized_box.setdefault("cropBottom", round(((h - (top_px + crop_h)) / h) * 100, 2) if h > 0 else 0.0)
+                normalized_box.setdefault("cropLeft", round((left_px / w) * 100, 2) if w > 0 else 0.0)
+                normalized_box.setdefault("cropRight", round(((w - (left_px + crop_w)) / w) * 100, 2) if w > 0 else 0.0)
+                normalized_box.setdefault("width", crop_w)
+                normalized_box.setdefault("height", crop_h)
+
                 try:
                     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_panel:
                         img_cropped.save(tmp_panel, format="PNG")
@@ -105,11 +135,11 @@ async def extract_panel_layers_service(panel_id: str, url: str) -> Dict[str, Any
                     panel_layers = await process_layers(tmp_panel_path, f"{panel_id}_{idx}")
                     return {
                         "panel_index": idx,
-                        "box": box,
+                        "box": normalized_box,
                         "layers": panel_layers
                     }
                 except Exception as panel_err:
-                    logger.error(f"[Layers Service] Panel {idx} failed: {panel_err}", exc_info=True)
+                    logger.warning(f"[Layer Separation] Panel {idx+1} layer separation failed: {panel_err}")
                     fallback_bg_url = box.get("url") or url
                     fallback_layers = {
                         "background_url": fallback_bg_url,
@@ -118,7 +148,7 @@ async def extract_panel_layers_service(panel_id: str, url: str) -> Dict[str, Any
                     }
                     return {
                         "panel_index": idx,
-                        "box": box,
+                        "box": normalized_box,
                         "layers": fallback_layers,
                         "warning": f"Panel #{idx + 1} fallback: AI Separation failed: {str(panel_err)}"
                     }

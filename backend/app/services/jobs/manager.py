@@ -509,7 +509,7 @@ class UnifiedJobManager:
             except asyncio.CancelledError:
                 self.cancel_job(job_id)
             except Exception as e:
-                logger.error(f"[JobManager] Background task error on {job_id}: {e}", exc_info=True)
+                logger.warning(f"[Job Manager] Background task error on {job_id}: {e}")
                 self.fail_job(job_id, error_message=str(e))
             finally:
                 self._tasks.pop(job_id, None)

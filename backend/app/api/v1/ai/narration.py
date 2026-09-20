@@ -71,8 +71,10 @@ async def generate_sequence_narrative(
             for p in body.panels
         ]
         return {"success": True, "results": results}
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[Sequence Narrative Error]: {e}", exc_info=True)
+        logger.error(f"[Sequence Narrative Error]: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to generate sequence narrative: {e}")
 
 
@@ -111,8 +113,10 @@ async def get_sfx_audio(body: SFXAudioRequest, user_api_key: dict = Depends(get_
         res = await run_md_skill("sfx_audio_prompt", body.model, api_key=user_api_key,
                                  visual_description=desc, sfx_tag=sfx)
         return {"success": True, "result": res}
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[SFX Audio Skill Error]: {e}", exc_info=True)
+        logger.error(f"[SFX Audio Skill Error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -124,8 +128,10 @@ async def get_bgm_vibe(body: BGMVibeRequest, user_api_key: dict = Depends(get_us
         logger.info(f"[BGM Vibe Skill] Recommending music for mood='{mood}', scale='{scale}'...")
         return await run_md_skill("bgm_vibe_selector", body.model, api_key=user_api_key,
                                   narrative_mood=mood, action_scale=scale)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[BGM Vibe Skill Error]: {e}", exc_info=True)
+        logger.error(f"[BGM Vibe Skill Error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -138,8 +144,10 @@ async def get_sfx_mix(body: SFXOverlayRequest, user_api_key: dict = Depends(get_
         logger.info(f"[SFX Mix Skill] Scheduling audio overlay...")
         return await run_md_skill("sfx_overlay_scheduler", body.model, api_key=user_api_key,
                                   visual_description=desc, speech_text=speech, sfx=sfx)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[SFX Mix Skill Error]: {e}", exc_info=True)
+        logger.error(f"[SFX Mix Skill Error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -150,8 +158,10 @@ async def get_shorts_script(body: ShortsScriptRequest, user_api_key: dict = Depe
         logger.info(f"[Shorts Script Skill] Adapting script for short-form video...")
         return await run_md_skill("shorts_script_adapter", body.model, api_key=user_api_key,
                                   storyboard_summary=summary)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[Shorts Script Skill Error]: {e}", exc_info=True)
+        logger.error(f"[Shorts Script Skill Error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -163,8 +173,10 @@ async def get_shorts_hook(body: ShortsHookRequest, user_api_key: dict = Depends(
         logger.info(f"[Shorts Hook Skill] Generating hook for title='{title}'...")
         return await run_md_skill("shorts_retention_hook", body.model, api_key=user_api_key,
                                   title=title, key_event=event)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[Shorts Hook Skill Error]: {e}", exc_info=True)
+        logger.error(f"[Shorts Hook Skill Error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -176,7 +188,9 @@ async def get_midrolls(body: MidrollPlacementRequest, user_api_key: dict = Depen
         logger.info(f"[Midroll Placement Skill] Calculating ad slots (max={max_ads})...")
         return await run_md_skill("midroll_placement_ref", body.model, api_key=user_api_key,
                                   compiled_script=script, max_ads=max_ads)
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"[Midroll Placement Skill Error]: {e}", exc_info=True)
+        logger.error(f"[Midroll Placement Skill Error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 

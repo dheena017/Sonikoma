@@ -40,6 +40,12 @@ VOICE_MAP = {
     "Chinese (Mandarin) — Xiaoxiao (Female)": "zh-CN-XiaoxiaoNeural",
     "Tamil (India) — Pallavi (Female)": "ta-IN-PallaviNeural",
     "Tamil (India) — Valluvar (Male)": "ta-IN-ValluvarNeural",
+    "Tamil (Sri Lanka) — Saranya (Female)": "ta-LK-SaranyaNeural",
+    "Tamil (Sri Lanka) — Kumar (Male)": "ta-LK-KumarNeural",
+    "Tamil (Singapore) — Venba (Female)": "ta-SG-VenbaNeural",
+    "Tamil (Singapore) — Anbu (Male)": "ta-SG-AnbuNeural",
+    "Tamil (Malaysia) — Kani (Female)": "ta-MY-KaniNeural",
+    "Tamil (Malaysia) — Surya (Male)": "ta-MY-SuryaNeural",
 
     "English (US) - Guy (Male)": "en-US-GuyNeural",
     "English (US) - Jenny (Female)": "en-US-JennyNeural",
@@ -52,7 +58,13 @@ VOICE_MAP = {
     "Japanese - Nanami (Female)": "ja-JP-NanamiNeural",
     "Chinese (Mandarin) - Xiaoxiao (Female)": "zh-CN-XiaoxiaoNeural",
     "Tamil (India) - Pallavi (Female)": "ta-IN-PallaviNeural",
-    "Tamil (India) - Valluvar (Male)": "ta-IN-ValluvarNeural"
+    "Tamil (India) - Valluvar (Male)": "ta-IN-ValluvarNeural",
+    "Tamil (Sri Lanka) - Saranya (Female)": "ta-LK-SaranyaNeural",
+    "Tamil (Sri Lanka) - Kumar (Male)": "ta-LK-KumarNeural",
+    "Tamil (Singapore) - Venba (Female)": "ta-SG-VenbaNeural",
+    "Tamil (Singapore) - Anbu (Male)": "ta-SG-AnbuNeural",
+    "Tamil (Malaysia) - Kani (Female)": "ta-MY-KaniNeural",
+    "Tamil (Malaysia) - Surya (Male)": "ta-MY-SuryaNeural"
 }
 
 _TTS_MIN_ALPHA_CHARS = 3
@@ -204,11 +216,11 @@ async def generate_panel_audio(
             return final_duration_ms / 1000.0
 
         actual_duration = await asyncio.to_thread(process_audio_sync)
-        logger.info(f"[TTS Engine] Synthesized {len(parsed_dialogues)} dialogue segment(s) to '{output_path}' ({actual_duration:.2f}s, voice={actual_voice})")
+        logger.info(f"[Audio Engine] Voice generated: {actual_voice} ({actual_duration:.1f}s audio for {len(parsed_dialogues)} dialogue segment{'s' if len(parsed_dialogues) != 1 else ''})")
         return output_path, actual_duration
 
     except Exception as general_err:
-        logger.error(f"Audio Engine pipeline failure: {str(general_err)}", exc_info=True)
+        logger.error(f"[Audio Engine] Voice generation failed: {general_err}")
         try:
             if os.path.dirname(output_path):
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)

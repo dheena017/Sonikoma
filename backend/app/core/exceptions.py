@@ -96,7 +96,7 @@ async def sonikoma_exception_handler(request: Request, exc: SonikomaException):
 
 async def global_exception_handler(request: Request, exc: Exception):
     """Fallback handler for unhandled server exceptions."""
-    logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}", exc_info=True)
+    logger.error(f"Unhandled exception on {request.method} {request.url.path}: {exc}")
     return PrettyJSONResponse(
         status_code=500,
         content={

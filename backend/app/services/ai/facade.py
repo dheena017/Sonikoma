@@ -19,7 +19,7 @@ from typing import List, Optional, Dict, Any
 from PIL import Image
 
 from app.core.config import call_gemini_with_retry
-from app.core.config import GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+from app.core.config import GEMINI_MODEL_PRIMARY
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
 from services.ai.orchestrator import AIOrchestrator, AIErrorCode
@@ -46,6 +46,7 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     sfx = raw.get("sfx", "")
     vis = raw.get("visual_description", "")
     motion = raw.get("motion_type", "")
+    narrative = raw.get("narrative") or raw.get("narrativeText") or vis or speech
 
     raw_duration = raw.get("duration")
     try:
@@ -64,12 +65,16 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     else:
         final_duration = 0.0
 
+    narrative_val = narrative.strip()[:1000] if isinstance(narrative, str) and narrative.strip() else ""
+
     return {
         "speech_text": speech_val,
         "sfx": sfx.strip()[:50] if isinstance(sfx, str) and sfx.strip() else "",
         "duration": final_duration,
         "motion_type": motion if motion in VALID_MOTIONS else "zoom_in",
         "visual_description": vis.strip()[:400] if isinstance(vis, str) and vis.strip() else "",
+        "narrative": narrative_val,
+        "narrativeText": narrative_val,
     }
 
 
@@ -322,7 +327,7 @@ async def facade_analyze_image(
 
     analysis = validate_analysis(json.loads(raw_text))
 
-    if not has_dialogue:
+    if not has_dialogue and not analysis.get("speech_text"):
         try:
             storyteller_skill = registry.get("panel_storyteller")
             narration = await storyteller_skill.execute(
@@ -366,10 +371,13 @@ async def facade_analyze_image(
     elapsed = int((time.time() - start_time) * 1000)
     meta = getattr(skill, "last_execution_meta", {}) or {}
     model_used = meta.get("model") or model or "gemini-2.5-flash"
+    narrative_val = analysis.get("narrative") or analysis.get("visual_description") or analysis.get("speech_text") or ""
 
     return {
         "success": True,
         "analysis": analysis,
+        "narrative": narrative_val,
+        "narrativeText": narrative_val,
         "audio_url": audio_url,
         "source": meta.get("provider", "gemini"),
         "model": model_used,
@@ -549,13 +557,13 @@ async def facade_smart_crop(
                     pass
 
     # 2. Otherwise execute AI detection with skill (with automatic provider/model fallback)
-    provider, target_model, models_to_try = AIOrchestrator.resolve_execution_plan("smart_crop", requested_model=model)
+    candidates = AIOrchestrator.resolve_execution_candidates("smart_crop", requested_model=model)
 
     panels_raw = []
     last_exc = None
     successful_model = None
 
-    for m in models_to_try:
+    for provider, m in candidates:
         try:
             skill = registry.get("smart_crop")
             raw_text = await skill.execute(

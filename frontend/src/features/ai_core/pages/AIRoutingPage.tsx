@@ -17,9 +17,11 @@ import {
   Activity,
   ArrowRight,
   X,
+  Key,
 } from "lucide-react";
 import TierModelCard, {
   DynamicModelOption,
+  isProviderKeyConfiguredInVault,
 } from "../components/TierModelCard";
 
 interface AIRoutingPageProps {
@@ -225,6 +227,41 @@ const CATEGORY_COLORS: Record<
   },
 };
 
+export const inferModelProviderInfo = (modelId: string = "") => {
+  const id = modelId.toLowerCase();
+  if (id.includes("claude") || id.includes("anthropic")) {
+    return { provider: "anthropic", provider_name: "Anthropic Claude" };
+  }
+  if (id.includes("gpt") || id.includes("o1") || id.includes("o3") || id.includes("dall") || id.includes("openai")) {
+    return { provider: "openai", provider_name: "OpenAI" };
+  }
+  if (id.includes("gemini") || id.includes("imagen") || id.includes("google")) {
+    return { provider: "gemini", provider_name: "Google Gemini" };
+  }
+  if (id.includes("deepseek")) {
+    return { provider: "deepseek", provider_name: "DeepSeek" };
+  }
+  if (id.includes("groq") || id.includes("llama") || id.includes("mixtral")) {
+    return { provider: "groq", provider_name: "Groq LPU" };
+  }
+  if (id.includes("eleven")) {
+    return { provider: "elevenlabs", provider_name: "ElevenLabs" };
+  }
+  if (id.includes("deepl")) {
+    return { provider: "deepl", provider_name: "DeepL Pro" };
+  }
+  if (id.includes("edgetts") || id.includes("edge_tts")) {
+    return { provider: "edgetts", provider_name: "Microsoft Edge TTS" };
+  }
+  if (id.includes("stable") || id.includes("sdxl")) {
+    return { provider: "stablediffusion", provider_name: "Stable Diffusion" };
+  }
+  if (id.includes("whisper")) {
+    return { provider: "whisper", provider_name: "Whisper" };
+  }
+  return { provider: "gemini", provider_name: "Google Gemini" };
+};
+
 export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [routes, setRoutes] = useState<CapabilityRoute[]>([]);
   const [originalRoutes, setOriginalRoutes] = useState<CapabilityRoute[]>([]);
@@ -237,6 +274,48 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(false);
 
+  const [keyUpdateTick, setKeyUpdateTick] = useState(0);
+
+  const hasUserKey = useMemo(() => {
+    return Boolean(
+      localStorage.getItem("user_gemini_key") ||
+      localStorage.getItem("sonikoma_key_gemini") ||
+      localStorage.getItem("user_openai_key") ||
+      localStorage.getItem("sonikoma_key_openai") ||
+      localStorage.getItem("user_anthropic_key") ||
+      localStorage.getItem("sonikoma_key_anthropic") ||
+      localStorage.getItem("user_groq_key") ||
+      localStorage.getItem("sonikoma_key_groq") ||
+      localStorage.getItem("user_deepseek_key") ||
+      localStorage.getItem("sonikoma_key_deepseek") ||
+      localStorage.getItem("user_elevenlabs_key") ||
+      localStorage.getItem("sonikoma_key_elevenlabs") ||
+      localStorage.getItem("user_deepl_key") ||
+      localStorage.getItem("sonikoma_key_deepl") ||
+      localStorage.getItem("user_huggingface_key") ||
+      localStorage.getItem("sonikoma_key_huggingface")
+    );
+  }, [keyUpdateTick]);
+
+  // Helper to check if a specific model's provider is configured with an API key in website
+  const isModelConfiguredInWebsite = (modelId: string = "") => {
+    if (!modelId) return false;
+    const info = inferModelProviderInfo(modelId);
+    return isProviderKeyConfiguredInVault(info.provider);
+  };
+
+  useEffect(() => {
+    const handleKeyChange = () => setKeyUpdateTick((t) => t + 1);
+    window.addEventListener("sonikoma-keys-updated", handleKeyChange);
+    window.addEventListener("api-key-updated", handleKeyChange);
+    window.addEventListener("storage", handleKeyChange);
+    return () => {
+      window.removeEventListener("sonikoma-keys-updated", handleKeyChange);
+      window.removeEventListener("api-key-updated", handleKeyChange);
+      window.removeEventListener("storage", handleKeyChange);
+    };
+  }, []);
+
   const handleResetSingleTask = (task: string) => {
     const def = CAPABILITY_DEFINITIONS.find((d) => d.task === task);
     if (!def) return;
@@ -245,15 +324,15 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
         r.task === task
           ? {
               ...r,
-              primary_model: def.default_primary,
-              fallback_model: def.default_fallback,
-              tertiary_model: def.default_tertiary,
+              primary_model: isModelConfiguredInWebsite(def.default_primary) ? def.default_primary : "",
+              fallback_model: isModelConfiguredInWebsite(def.default_fallback) ? def.default_fallback : "",
+              tertiary_model: isModelConfiguredInWebsite(def.default_tertiary) ? def.default_tertiary : "",
             }
           : r
       )
     );
     if (addNotification) {
-      addNotification(`Reset ${def.name} configuration to default models.`, "info");
+      addNotification(`Reset ${def.name} configuration.`, "info");
     }
   };
 
@@ -276,15 +355,18 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
 
     if (!availableModels || availableModels.length === 0) {
       const uniqueIds = Array.from(new Set(taskCurrentIds));
-      return uniqueIds.map((id) => ({
-        id,
-        name: id,
-        provider: "gemini",
-        provider_name: "Google Gemini",
-        category: route.category,
-        speed_rating: "Ultra Fast",
-        context_window: "1M Tokens",
-      }));
+      return uniqueIds.map((id) => {
+        const info = inferModelProviderInfo(id);
+        return {
+          id,
+          name: id,
+          provider: info.provider,
+          provider_name: info.provider_name,
+          category: route.category,
+          speed_rating: "Ultra Fast",
+          context_window: "1M Tokens",
+        };
+      });
     }
 
     const req = route.required_type;
@@ -383,11 +465,12 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           missingModels.push(found);
           existingIds.add(id.toLowerCase());
         } else {
+          const info = inferModelProviderInfo(id);
           missingModels.push({
             id,
             name: id,
-            provider: "gemini",
-            provider_name: "Google Gemini",
+            provider: info.provider,
+            provider_name: info.provider_name,
             category: route.category,
             speed_rating: "Ultra Fast",
             context_window: "1M Tokens",
@@ -435,22 +518,46 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           }
         }
 
+        let customLocalRouting: CapabilityRoute[] | null = null;
+        try {
+          const stored = localStorage.getItem("sonikoma_ai_routing_custom");
+          if (stored) {
+            customLocalRouting = JSON.parse(stored);
+          }
+        } catch {}
+
         let serverRoutingMap: Record<string, any> = {};
         if (resRouting.ok) {
           const rData = await resRouting.json();
           if (rData.success && rData.routing) serverRoutingMap = rData.routing;
         }
 
-        // Initialize routes using server configuration or proper specialized defaults
+        // Initialize routes:
+        // If user has NOT entered an API key in website, default AI models remain EMPTY ("")
+        // unless custom configured or provider is local / key is present in website vault!
         const initialRoutes: CapabilityRoute[] = CAPABILITY_DEFINITIONS.map(
           (def) => {
+            const localSaved = customLocalRouting?.find((r) => r.task === def.task);
+            if (localSaved) {
+              return {
+                ...def,
+                primary_model: localSaved.primary_model || "",
+                fallback_model: localSaved.fallback_model || "",
+                tertiary_model: localSaved.tertiary_model || "",
+              };
+            }
+
             const serverRoute = serverRoutingMap[def.task];
-            const p1 =
+            const p1Candidate =
               serverRoute?.primary ||
               (typeof serverRoute === "string" ? serverRoute : null) ||
               def.default_primary;
-            const p2 = serverRoute?.fallback || def.default_fallback;
-            const p3 = serverRoute?.tertiary || def.default_tertiary;
+            const p2Candidate = serverRoute?.fallback || def.default_fallback;
+            const p3Candidate = serverRoute?.tertiary || def.default_tertiary;
+
+            const p1 = isModelConfiguredInWebsite(p1Candidate) ? p1Candidate : "";
+            const p2 = isModelConfiguredInWebsite(p2Candidate) ? p2Candidate : "";
+            const p3 = isModelConfiguredInWebsite(p3Candidate) ? p3Candidate : "";
 
             return {
               ...def,
@@ -471,7 +578,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     };
 
     loadRoutingData();
-  }, []);
+  }, [keyUpdateTick]);
 
   // Update specific tier model for a task
   const handleModelChange = (
@@ -484,16 +591,16 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     );
   };
 
-  // Reset to default specialized configurations
+  // Reset to default specialized configurations (only for configured providers, else empty)
   const handleResetDefaults = () => {
     const defaults: CapabilityRoute[] = CAPABILITY_DEFINITIONS.map((def) => ({
       ...def,
-      primary_model: def.default_primary,
-      fallback_model: def.default_fallback,
-      tertiary_model: def.default_tertiary,
+      primary_model: isModelConfiguredInWebsite(def.default_primary) ? def.default_primary : "",
+      fallback_model: isModelConfiguredInWebsite(def.default_fallback) ? def.default_fallback : "",
+      tertiary_model: isModelConfiguredInWebsite(def.default_tertiary) ? def.default_tertiary : "",
     }));
     setRoutes(defaults);
-    addNotification?.("Reset routing rules to specialized production defaults", "info");
+    addNotification?.("Reset routing rules to configured provider defaults", "info");
   };
 
   // Check if routes have unsaved edits
@@ -505,6 +612,14 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const handleSave = async () => {
     setIsSaving(true);
     localStorage.setItem("sonikoma_ai_routing_custom", JSON.stringify(routes));
+
+    // Synchronize active studio/editor model with panel_analysis or storyboard_narrative primary choice
+    const panelRoute = routes.find((r) => r.task === "panel_analysis" || r.task === "storyboard_narrative");
+    if (panelRoute?.primary_model) {
+      localStorage.setItem("ai_comic_model", panelRoute.primary_model);
+      window.dispatchEvent(new CustomEvent("ai-model-changed", { detail: { model: panelRoute.primary_model } }));
+    }
+
     try {
       const res = await fetch("/api/v1/ai/routing", {
         method: "PUT",
@@ -513,11 +628,20 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
       });
       if (res.ok) {
         setOriginalRoutes(routes);
-        addNotification?.("All AI model routing cascades saved successfully!", "success");
+        addNotification?.("All AI model routing cascades saved and synchronized successfully!", "success");
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
       } else {
-        addNotification?.("Saved routing matrix to local session cache.", "info");
+        // Fallback POST
+        await fetch("/api/v1/ai/models/routing", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ routing: routes }),
+        });
+        setOriginalRoutes(routes);
+        addNotification?.("All AI model routing cascades saved successfully!", "success");
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
       }
     } catch {
       addNotification?.("Saved routing matrix to local session cache.", "info");
@@ -734,6 +858,38 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           </button>
         </div>
       </div>
+
+      {/* ── 1.1 MISSING API KEYS WARNING BANNER ────────────────────────────── */}
+      {!hasUserKey && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in shadow-lg">
+          <div className="flex items-start gap-3.5">
+            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+              <AlertCircle className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white font-sans">
+                  No API Keys Configured in Website
+                </h3>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300 uppercase">
+                  Setup Required
+                </span>
+              </div>
+              <p className="text-xs text-neutral-300 leading-relaxed max-w-3xl">
+                You need to enter your API key in the website (AI Vault) to activate and select AI models. All default AI models remain empty until an API key is entered in your browser vault.
+              </p>
+            </div>
+          </div>
+
+          <a
+            href="/ai-core/api-keys"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer self-start sm:self-center active:scale-95"
+          >
+            <Key className="w-3.5 h-3.5" />
+            <span>Enter API Key in AI Vault</span>
+          </a>
+        </div>
+      )}
 
       {/* ── 2. TELEMETRY KPI METRICS GRID ──────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">

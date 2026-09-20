@@ -296,7 +296,7 @@ async def get_providers_status(current_user: Optional[dict] = Depends(get_option
         "total_providers": len(status_list),
         "active_count": sum(1 for s in status_list if s["is_configured"]),
         "primary_model": GEMINI_MODEL_PRIMARY,
-        "fallback_chain": GEMINI_FALLBACK_MODELS,
+        "fallback_chain": [],
     }
 
 
@@ -1033,15 +1033,10 @@ async def get_model_routing():
 
     dynamic_routing = {}
     for cap in capabilities:
-        chain = ModelRegistry.get_cross_provider_fallback_chain(cap)
-        p1 = chain[0][1] if len(chain) > 0 else "gemini-3.7-flash"
-        p2 = chain[1][1] if len(chain) > 1 else p1
-        p3 = chain[2][1] if len(chain) > 2 else p2
-
         dynamic_routing[cap] = {
-            "primary": p1,
-            "fallback": p2,
-            "tertiary": p3,
+            "primary": "",
+            "fallback": "",
+            "tertiary": "",
         }
 
     # Merge custom user/admin overrides

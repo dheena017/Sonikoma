@@ -73,5 +73,5 @@ async def execute_youtube_upload_workflow(
     except (ResourceNotFoundException, ProcessingException):
         raise
     except Exception as e:
-        logger.error(f"YouTube export failed: {e}", exc_info=True)
+        logger.error(f"[YouTube Export] Publishing failed: {e}")
         raise ProcessingException(str(e))

@@ -592,7 +592,9 @@ class YouTubeService:
 
         # 1. Try real Gemini AI generation if available
         if ai_initialized and genai_client:
-            models_to_try = [GEMINI_MODEL_PRIMARY] + [m for m in GEMINI_FALLBACK_MODELS if m != GEMINI_MODEL_PRIMARY]
+            from services.ai.orchestrator import AIOrchestrator
+            candidates = AIOrchestrator.resolve_execution_candidates("seo_optimization")
+            models_to_try = [m for _, m in candidates] if candidates else [GEMINI_MODEL_PRIMARY]
             for model_name in models_to_try:
                 try:
                     logger.info(f"[YouTube AI Playlist] Invoking Gemini model '{model_name}' for playlist generation...")
@@ -745,7 +747,9 @@ class YouTubeService:
         )
 
         if ai_initialized and genai_client:
-            models_to_try = [GEMINI_MODEL_PRIMARY] + [m for m in GEMINI_FALLBACK_MODELS if m != GEMINI_MODEL_PRIMARY]
+            from services.ai.orchestrator import AIOrchestrator
+            candidates = AIOrchestrator.resolve_execution_candidates("thumbnail_concept")
+            models_to_try = [m for _, m in candidates] if candidates else [GEMINI_MODEL_PRIMARY]
             for model_name in models_to_try:
                 try:
                     async def _call():
