@@ -287,6 +287,17 @@ export function useAppState() {
         }
       }
 
+      const hasToken = Boolean(
+        typeof window !== "undefined" &&
+        (localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token"))
+      );
+
+      if (!hasToken) {
+        setUser(null);
+        setIsAuthenticated(false);
+        return;
+      }
+
       const res = await api.getCurrentUser(fetchWithInterceptor);
       const user =
         (res as any)?.user ||
@@ -297,38 +308,10 @@ export function useAppState() {
         setUser(user);
         setIsAuthenticated(true);
       } else {
-        try {
-          const sessionRes = await fetch("/api/auth/google/session");
-          if (sessionRes.ok) {
-            const sessionData = await sessionRes.json();
-            if (sessionData.access_token) {
-              handleLoginSuccess(sessionData.access_token, sessionData.user);
-              return;
-            }
-          }
-        } catch {}
-
-        const hasLocalToken = Boolean(
-          typeof window !== "undefined" &&
-          (localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token"))
-        );
-        if (!hasLocalToken) {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+        setUser(null);
+        setIsAuthenticated(false);
       }
     } catch {
-      try {
-        const sessionRes = await fetch("/api/auth/google/session");
-        if (sessionRes.ok) {
-          const sessionData = await sessionRes.json();
-          if (sessionData.access_token) {
-            handleLoginSuccess(sessionData.access_token, sessionData.user);
-            return;
-          }
-        }
-      } catch {}
-
       const hasLocalToken = Boolean(
         typeof window !== "undefined" &&
         (localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token"))
@@ -346,7 +329,6 @@ export function useAppState() {
     setIsAuthenticated,
     setAuthLoading,
     setIsInitializing,
-    handleLoginSuccess,
     fetchWithInterceptor,
   ]);
 

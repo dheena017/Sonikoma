@@ -53,22 +53,7 @@ export function useAppAuth() {
 
   const [authLoading, setAuthLoading] = useState<boolean>(false);
 
-  const [isInitializing, setIsInitializing] = useState<boolean>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get("mock_auth") === "true") {
-          return false;
-        }
-        const token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token") ||
-          params.get("token");
-        return Boolean(token);
-      }
-    } catch (e) {}
-    return false;
-  });
+  const [isInitializing, setIsInitializing] = useState<boolean>(false);
 
   const handleLogout = useCallback(() => {
     if (typeof window !== "undefined") {

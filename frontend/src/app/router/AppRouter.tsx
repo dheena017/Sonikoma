@@ -11,22 +11,12 @@ import PageNotFound from "@/components/feedback/PageNotFound";
 import LoadingPage from "@/components/feedback/LoadingPage";
 import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
 
-// --- Authentication & Landing Views (Lazy Loaded) ---
-const LandingPage = React.lazy(
-  () => import("@/features/app_landing/pages/LandingPage")
-);
-const LoginPage = React.lazy(
-  () => import("@/features/app_auth/pages/LoginPage")
-);
-const RegisterPage = React.lazy(
-  () => import("@/features/app_auth/pages/RegisterPage")
-);
-const ForgotPasswordPage = React.lazy(
-  () => import("@/features/app_auth/pages/ForgotPasswordPage")
-);
-const AuthCallbackPage = React.lazy(
-  () => import("@/features/app_auth/pages/AuthCallbackPage")
-);
+// --- Authentication & Landing Views (Direct Imports for Instant Rendering) ---
+import LandingPage from "@/features/app_landing/pages/LandingPage";
+import LoginPage from "@/features/app_auth/pages/LoginPage";
+import RegisterPage from "@/features/app_auth/pages/RegisterPage";
+import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
+import AuthCallbackPage from "@/features/app_auth/pages/AuthCallbackPage";
 
 // --- Lazy Loaded Feature Pages & Modals ---
 const ScraperPage = React.lazy(
@@ -583,14 +573,7 @@ export default function AppRouter(props: AppRouterProps) {
     currentPath === "/register" ||
     currentPath === "/forgot-password";
 
-  // --- Guard: Session Initialization loading state ---
-  // Only show full-screen initializing loader if we are on a protected route while session initializes
-  if (!isPublicAuthRoute && (isInitializing || (authLoading && !isAuthenticated))) {
-    const loadingStatus = isInitializing
-      ? "Initializing App..."
-      : "Checking Authentication...";
-    return <LoadingPage status={loadingStatus} themeMode={themeMode} />;
-  }
+
 
   // --- Guard: Public Landing Page ---
   if (
@@ -600,70 +583,46 @@ export default function AppRouter(props: AppRouterProps) {
     currentPath === "/index.html"
   ) {
     return (
-      <React.Suspense
-        fallback={
-          <LoadingPage status="Loading Sonikoma..." themeMode={themeMode} />
-        }
-      >
-        <LandingPage
-          onGetStarted={() => navigateTo("/register")}
-          onLogin={() => navigateTo("/login")}
-          themeMode={themeMode}
-          toggleThemeMode={toggleThemeMode}
-        />
-      </React.Suspense>
+      <LandingPage
+        onGetStarted={() => navigateTo("/register")}
+        onLogin={() => navigateTo("/login")}
+        themeMode={themeMode}
+        toggleThemeMode={toggleThemeMode}
+      />
     );
   }
 
   // --- Guard: Login Screen ---
   if (currentPath === "/login") {
     return (
-      <React.Suspense
-        fallback={
-          <LoadingPage status="Loading Login..." themeMode={themeMode} />
-        }
-      >
-        <LoginPage
-          onLogin={login}
-          onNavigateToRegister={() => navigateTo("/register")}
-          onNavigateToForgotPassword={() => navigateTo("/forgot-password")}
-          onNavigateHome={() => navigateTo("/")}
-        />
-      </React.Suspense>
+      <LoginPage
+        onLogin={login}
+        onNavigateToRegister={() => navigateTo("/register")}
+        onNavigateToForgotPassword={() => navigateTo("/forgot-password")}
+        onNavigateHome={() => navigateTo("/")}
+      />
     );
   }
 
   // --- Guard: Registration Screen ---
   if (currentPath === "/register") {
     return (
-      <React.Suspense
-        fallback={
-          <LoadingPage status="Loading Registration..." themeMode={themeMode} />
-        }
-      >
-        <RegisterPage
-          onRegister={register}
-          onNavigateToLogin={() => navigateTo("/login")}
-          onNavigateHome={() => navigateTo("/")}
-        />
-      </React.Suspense>
+      <RegisterPage
+        onRegister={register}
+        onNavigateToLogin={() => navigateTo("/login")}
+        onNavigateHome={() => navigateTo("/")}
+      />
     );
   }
 
   // --- Guard: Password Recovery Screen ---
   if (currentPath === "/forgot-password") {
     return (
-      <React.Suspense
-        fallback={
-          <LoadingPage status="Loading Recovery..." themeMode={themeMode} />
-        }
-      >
-        <ForgotPasswordPage
-          onForgotPassword={forgotPassword}
-          onNavigateToLogin={() => navigateTo("/login")}
-          onNavigateHome={() => navigateTo("/")}
-        />
-      </React.Suspense>
+      <ForgotPasswordPage
+        onForgotPassword={forgotPassword}
+        onNavigateToLogin={() => navigateTo("/login")}
+        onNavigateHome={() => navigateTo("/")}
+      />
     );
   }
 
@@ -674,15 +633,7 @@ export default function AppRouter(props: AppRouterProps) {
     currentPath.startsWith("/auth/google/callback") ||
     currentPath.startsWith("/auth/launch")
   ) {
-    return (
-      <React.Suspense
-        fallback={
-          <LoadingPage status="Launching Sonikoma..." themeMode={themeMode} />
-        }
-      >
-        <AuthCallbackPage navigateTo={navigateTo} checkAuth={checkAuth} />
-      </React.Suspense>
-    );
+    return <AuthCallbackPage navigateTo={navigateTo} checkAuth={checkAuth} />;
   }
 
   // --- Guard: Protected Route Redirect ---
@@ -693,7 +644,7 @@ export default function AppRouter(props: AppRouterProps) {
     !currentPath.startsWith("/scraper/editor")
   ) {
     setTimeout(() => navigateTo("/"), 0);
-    return <LoadingPage status="Redirecting to Landing Page..." />;
+    return null;
   }
 
   // --------------------------------------------------------------------------
