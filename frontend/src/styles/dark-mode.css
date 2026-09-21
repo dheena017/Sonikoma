@@ -62,9 +62,9 @@ aside {
 /* ── Universal Inputs / Selects / Textareas Hover & Focus ──── */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
     [type="color"]
-  ),
-select,
-textarea {
+  ):not(.border-0):not(.border-none):not(.seamless-input):not(.bg-transparent),
+select:not(.border-0):not(.border-none):not(.seamless-select):not(.bg-transparent),
+textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transparent) {
   background-color: #1E1E1E !important;
   color: #E5E5E5 !important;
   border: 1px solid #2F2F2F !important;
@@ -73,19 +73,18 @@ textarea {
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
     [type="color"]
-  ):hover,
-select:hover,
-textarea:hover {
+  ):not(.border-0):not(.border-none):not(.seamless-input):not(.bg-transparent):hover,
+select:not(.border-0):not(.border-none):not(.seamless-select):not(.bg-transparent):hover,
+textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transparent):hover {
   background-color: #242424 !important;
   border-color: rgba(59, 130, 246, 0.6) !important;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
+input:not(.border-0):not(.border-none):not(.seamless-input):not(.bg-transparent):focus,
+select:not(.border-0):not(.border-none):not(.seamless-select):not(.bg-transparent):focus,
+textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transparent):focus {
   background-color: #262626 !important;
   border-color: #3B82F6 !important; /* Electric Blue */
-  
   outline: none !important;
 }
 

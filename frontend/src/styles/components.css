@@ -73,12 +73,53 @@ button.bg-neutral-800.rounded-xl {
     color 150ms ease, transform 150ms ease;
 }
 
-select,
-input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
-    [type="color"]
-  ),
-textarea {
-  border-color: #27272a;
+/* Seamless input and select reset — guarantees zero borders, zero focus rings, zero browser boxes */
+select.border-0,
+select.border-none,
+select.bg-transparent,
+select.seamless-select,
+input.border-0,
+input.border-none,
+input.bg-transparent,
+input.seamless-input,
+.seamless-input,
+.seamless-select {
+  border: 0 !important;
+  border-style: none !important;
+  border-width: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+select.border-0:focus,
+select.border-0:focus-visible,
+select.border-none:focus,
+select.border-none:focus-visible,
+select.bg-transparent:focus,
+select.bg-transparent:focus-visible,
+select.seamless-select:focus,
+select.seamless-select:focus-visible,
+input.border-0:focus,
+input.border-0:focus-visible,
+input.border-none:focus,
+input.border-none:focus-visible,
+input.bg-transparent:focus,
+input.bg-transparent:focus-visible,
+input.seamless-input:focus,
+input.seamless-input:focus-visible,
+.seamless-input:focus,
+.seamless-input:focus-visible,
+.seamless-select:focus,
+.seamless-select:focus-visible {
+  border: 0 !important;
+  border-style: none !important;
+  border-width: 0 !important;
+  outline: none !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
+  box-shadow: none !important;
 }
 
 .nav-scroll-ribbon {

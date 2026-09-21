@@ -1142,16 +1142,16 @@ const StoryboardCard = ({
       </div>
 
       <div className="space-y-2 w-full">
-        {/* Full-Width Segmented Content Tabs: Dialogue (Bubble Text), Narrator (Story Voice), SFX, Scene */}
-        <div className="grid grid-cols-4 gap-1 bg-neutral-900/90 p-1 rounded-lg border border-neutral-800 text-[9.5px] shadow-inner">
+        {/* Category Tabs: Dialogue, Narrator, SFX, Scene */}
+        <div className="grid grid-cols-4 gap-1 p-0.5 rounded-xl bg-[#0e1017] border border-neutral-800/80 select-none">
           <button
             type="button"
             onClick={() => setActiveTab("speech")}
             title="Speech Bubble Dialogue (In-Image Text)"
-            className={`flex items-center justify-center gap-1 py-1 rounded-md transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] transition-all duration-200 cursor-pointer ${
               activeTab === "speech"
-                ? "bg-blue-600 text-white shadow-sm font-semibold"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80 font-medium"
+                ? "bg-blue-600 text-white shadow-sm font-bold"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60 font-medium"
             }`}
           >
             <MessageSquare className="w-3 h-3 shrink-0" />
@@ -1161,10 +1161,10 @@ const StoryboardCard = ({
             type="button"
             onClick={() => setActiveTab("narrative")}
             title="Voice Narrator (Explains Story & Actions)"
-            className={`flex items-center justify-center gap-1 py-1 rounded-md transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] transition-all duration-200 cursor-pointer ${
               activeTab === "narrative"
-                ? "bg-purple-600 text-white shadow-sm font-semibold"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80 font-medium"
+                ? "bg-purple-600 text-white shadow-sm font-bold"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60 font-medium"
             }`}
           >
             <Mic className="w-3 h-3 shrink-0" />
@@ -1174,10 +1174,10 @@ const StoryboardCard = ({
             type="button"
             onClick={() => setActiveTab("sfx")}
             title="Sound Effects (SFX)"
-            className={`flex items-center justify-center gap-1 py-1 rounded-md transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] transition-all duration-200 cursor-pointer ${
               activeTab === "sfx"
-                ? "bg-emerald-600 text-white shadow-sm font-semibold"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80 font-medium"
+                ? "bg-emerald-600 text-white shadow-sm font-bold"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60 font-medium"
             }`}
           >
             <Volume2 className="w-3 h-3 shrink-0" />
@@ -1187,10 +1187,10 @@ const StoryboardCard = ({
             type="button"
             onClick={() => setActiveTab("visual")}
             title="Visual Scene Prompt"
-            className={`flex items-center justify-center gap-1 py-1 rounded-md transition-all duration-200 cursor-pointer ${
+            className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] transition-all duration-200 cursor-pointer ${
               activeTab === "visual"
-                ? "bg-amber-600 text-white shadow-sm font-semibold"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80 font-medium"
+                ? "bg-amber-600 text-white shadow-sm font-bold"
+                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60 font-medium"
             }`}
           >
             <Palette className="w-3 h-3 shrink-0" />
@@ -1215,7 +1215,7 @@ const StoryboardCard = ({
                     e.stopPropagation();
                     handleGenerateVoice(false, "speech");
                   }}
-                  className="h-6 px-2 rounded-md text-[9.5px] font-medium flex items-center gap-1 border border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-sm whitespace-nowrap shrink-0"
+                  className="h-6 px-2 rounded-lg text-[9.5px] font-medium flex items-center gap-1 border border-neutral-700/80 bg-neutral-800/90 hover:bg-neutral-750 text-neutral-200 hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-sm whitespace-nowrap shrink-0 active:scale-95"
                   title="Synthesize dialogue voice"
                 >
                   {isGeneratingVoice && generatingVoiceMode === "speech" ? (
@@ -1234,12 +1234,12 @@ const StoryboardCard = ({
                     e.stopPropagation();
                     handleToggleDialogueAudio("speech");
                   }}
-                  className={`h-6 px-2 rounded-md text-[9.5px] font-medium flex items-center gap-1 border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  className={`h-6 px-2 rounded-lg text-[9.5px] font-medium flex items-center gap-1 border transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95 ${
                     isGeneratingVoice && generatingVoiceMode === "speech"
                       ? "bg-blue-950/80 border-blue-500 text-blue-200 shadow-sm"
                       : isDialoguePlaying && !isDialoguePaused && playingAudioType === "speech"
                       ? "bg-amber-950/80 border-amber-500 text-amber-200 shadow-sm"
-                      : "bg-[#252525] border-neutral-700 text-[#60A5FA] hover:bg-neutral-700 hover:text-white"
+                      : "bg-[#181a22] border-neutral-750 text-[#60A5FA] hover:bg-neutral-800 hover:text-white"
                   }`}
                   title="Play Dialogue Preview"
                 >
@@ -1266,7 +1266,7 @@ const StoryboardCard = ({
                       e.stopPropagation();
                       stopDialogueAudio();
                     }}
-                    className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/40 text-rose-300 hover:bg-rose-900/80 cursor-pointer shrink-0"
+                    className="h-6 w-6 rounded-lg flex items-center justify-center bg-rose-950/60 border border-rose-500/40 text-rose-300 hover:bg-rose-900/80 cursor-pointer shrink-0 active:scale-95"
                     title="Stop Audio"
                   >
                     <Square className="w-2.5 h-2.5 fill-current" />
@@ -1282,7 +1282,7 @@ const StoryboardCard = ({
               value={panel.speech_text || ""}
               onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
               placeholder="Text from speech bubbles in image..."
-              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/50 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#090b10] border border-neutral-800/90 text-[11px] rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6]/80 focus:ring-1 focus:ring-[#3B82F6]/30 font-sans transition-all resize-none shadow-inner ${
                 isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
                   : "hover:border-neutral-700"
@@ -1308,7 +1308,7 @@ const StoryboardCard = ({
                     e.stopPropagation();
                     handleGenerateVoice(false, "narrative");
                   }}
-                  className="h-6 px-2 rounded-md text-[9.5px] font-medium flex items-center gap-1 border border-purple-800/60 bg-purple-950/50 hover:bg-purple-900/70 text-purple-200 hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-sm whitespace-nowrap shrink-0"
+                  className="h-6 px-2 rounded-lg text-[9.5px] font-medium flex items-center gap-1 border border-purple-800/60 bg-purple-950/50 hover:bg-purple-900/70 text-purple-200 hover:text-white transition-all cursor-pointer disabled:opacity-50 shadow-sm whitespace-nowrap shrink-0 active:scale-95"
                   title="Synthesize story narration voice"
                 >
                   {isGeneratingVoice && generatingVoiceMode === "narrative" ? (
@@ -1327,12 +1327,12 @@ const StoryboardCard = ({
                     e.stopPropagation();
                     handleToggleDialogueAudio("narrative");
                   }}
-                  className={`h-6 px-2 rounded-md text-[9.5px] font-medium flex items-center gap-1 border transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  className={`h-6 px-2 rounded-lg text-[9.5px] font-medium flex items-center gap-1 border transition-all cursor-pointer whitespace-nowrap shrink-0 active:scale-95 ${
                     isGeneratingVoice && generatingVoiceMode === "narrative"
                       ? "bg-purple-950/90 border-purple-400 text-purple-200 shadow-sm"
                       : isDialoguePlaying && !isDialoguePaused && playingAudioType === "narrative"
                       ? "bg-purple-950/80 border-purple-500 text-purple-300 shadow-sm"
-                      : "bg-[#252525] border-neutral-700 text-purple-300 hover:bg-neutral-700 hover:text-white"
+                      : "bg-[#181a22] border-neutral-750 text-purple-300 hover:bg-neutral-800 hover:text-white"
                   }`}
                   title="Play Narrator Preview"
                 >
@@ -1359,7 +1359,7 @@ const StoryboardCard = ({
                       e.stopPropagation();
                       stopDialogueAudio();
                     }}
-                    className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/40 text-rose-300 hover:bg-rose-900/80 cursor-pointer shrink-0"
+                    className="h-6 w-6 rounded-lg flex items-center justify-center bg-rose-950/60 border border-rose-500/40 text-rose-300 hover:bg-rose-900/80 cursor-pointer shrink-0 active:scale-95"
                     title="Stop Audio"
                   >
                     <Square className="w-2.5 h-2.5 fill-current" />
@@ -1375,7 +1375,7 @@ const StoryboardCard = ({
               value={panel.narrative || ""}
               onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
               placeholder="Story narration explaining actions, atmosphere, and context..."
-              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#090b10] border border-neutral-800/90 text-[11px] rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-purple-500/80 focus:ring-1 focus:ring-purple-500/30 font-sans transition-all resize-none shadow-inner ${
                 isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-purple-400"
                   : "hover:border-neutral-700"
@@ -1399,7 +1399,7 @@ const StoryboardCard = ({
               value={panel.sfx || ""}
               onChange={(e) => handleModifySFX(panel.id, e.target.value)}
               placeholder="e.g. door slam, footsteps, explosion..."
-              className={`w-full bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 font-sans transition-all shadow-inner ${
+              className={`w-full bg-[#090b10] border border-neutral-800/90 text-[11px] rounded-xl px-3 py-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-emerald-500/80 focus:ring-1 focus:ring-emerald-500/30 font-sans transition-all shadow-inner ${
                 isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed text-emerald-400 border-[#2F2F2F]"
                   : "hover:border-neutral-700"
@@ -1425,7 +1425,7 @@ const StoryboardCard = ({
                 handleModifyVisualDescription(panel.id, e.target.value)
               }
               placeholder="Describe visual scene for lighting..."
-              className={`w-full min-h-[36px] bg-[#0a0814]/90 border border-neutral-800 text-[11px] rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[36px] bg-[#090b10] border border-neutral-800/90 text-[11px] rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-amber-500/80 focus:ring-1 focus:ring-amber-500/30 font-sans transition-all resize-none shadow-inner ${
                 isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed text-amber-400 border-[#2F2F2F]"
                   : "hover:border-neutral-700"
@@ -1435,13 +1435,15 @@ const StoryboardCard = ({
         )}
 
         {/* Motion & Timing Row */}
-        <div className="grid grid-cols-2 gap-1.5 pt-0.5 border-t border-neutral-850">
-          <div className="flex items-center gap-1 bg-neutral-900/90 border border-neutral-800 hover:border-[#3B82F6]/40 rounded-lg px-2 py-1 transition-all">
-            <Video className="w-3 h-3 text-[#3B82F6] shrink-0" />
+        <div className="grid grid-cols-2 gap-1.5 pt-0.5 select-none">
+          {/* Motion Selector */}
+          <div className="relative flex items-center gap-1.5 bg-[#0a0c12] border border-neutral-800/90 hover:border-neutral-700/90 focus-within:border-blue-500/70 focus-within:ring-1 focus-within:ring-blue-500/20 rounded-xl px-2.5 py-1.5 h-8 transition-all group cursor-pointer">
+            <Video className="w-3 h-3 text-[#3B82F6] shrink-0 pointer-events-none group-hover:scale-105 transition-transform" />
             <select
               value={panel.motion_type ?? ""}
               onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
-              className="appearance-none bg-transparent text-[10px] font-mono text-neutral-200 w-full outline-none cursor-pointer"
+              style={{ outline: "none", border: "none", boxShadow: "none", background: "transparent" }}
+              className="appearance-none bg-transparent border-0 border-none p-0 pr-3.5 text-[10px] font-mono font-medium text-neutral-200 w-full outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-0 focus:shadow-none shadow-none cursor-pointer truncate seamless-select"
             >
               <option value="" className="bg-neutral-950 text-neutral-200">
                 Motion: None
@@ -1474,45 +1476,79 @@ const StoryboardCard = ({
                 Pan Down
               </option>
             </select>
+            <ChevronDown className="w-2.5 h-2.5 text-neutral-500 group-hover:text-neutral-300 pointer-events-none absolute right-2 shrink-0 transition-colors" />
           </div>
 
-          <div className="flex items-center gap-1 bg-neutral-900/90 border border-neutral-800 hover:border-[#3B82F6]/40 rounded-lg px-2 py-1 transition-all">
-            <Clock className="w-3 h-3 text-[#3B82F6] shrink-0" />
-            <input
-              type="number"
-              min={0.5}
-              step={0.5}
-              value={panel.duration === 0 ? "" : panel.duration}
-              onChange={(e) => {
-                const num = parseFloat(e.target.value);
-                if (!isNaN(num) && num >= 0) {
-                  handleModifyDuration(panel.id, num);
-                } else if (e.target.value === "") {
-                  handleModifyDuration(panel.id, 0);
-                }
-              }}
-              onBlur={(e) => {
-                if (e.target.value === "" || parseFloat(e.target.value) <= 0) {
-                  handleModifyDuration(panel.id, 0);
-                }
-              }}
-              placeholder="3.0"
-              className="bg-transparent text-[10px] font-mono font-bold text-neutral-200 w-full outline-none text-left"
-            />
-            <span className="text-[9.5px] font-mono text-neutral-450 shrink-0 font-semibold">
-              sec
-            </span>
+          {/* Duration Counter with Stepper */}
+          <div className="flex items-center justify-between gap-1 bg-[#0a0c12] border border-neutral-800/90 hover:border-neutral-700/90 focus-within:border-blue-500/70 focus-within:ring-1 focus-within:ring-blue-500/20 rounded-xl px-2 py-1.5 h-8 transition-all group">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <Clock className="w-3 h-3 text-[#3B82F6] shrink-0 pointer-events-none group-hover:scale-105 transition-transform" />
+              <input
+                type="number"
+                min={0.5}
+                step={0.5}
+                value={panel.duration === 0 ? "" : panel.duration}
+                onChange={(e) => {
+                  const num = parseFloat(e.target.value);
+                  if (!isNaN(num) && num >= 0) {
+                    handleModifyDuration(panel.id, num);
+                  } else if (e.target.value === "") {
+                    handleModifyDuration(panel.id, 0);
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e.target.value === "" || parseFloat(e.target.value) <= 0) {
+                    handleModifyDuration(panel.id, 0);
+                  }
+                }}
+                style={{ outline: "none", border: "none", boxShadow: "none", background: "transparent" }}
+                placeholder="3.0"
+                className="bg-transparent border-0 border-none p-0 text-[10px] font-mono font-bold text-neutral-100 w-full outline-none focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0 focus:border-0 focus:shadow-none shadow-none text-left seamless-input [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="text-[9px] font-mono text-neutral-400 shrink-0 font-semibold select-none">
+                sec
+              </span>
+            </div>
+            {/* Quick Micro Steppers */}
+            <div className="flex items-center gap-0.5 pl-1 border-l border-neutral-800/80 shrink-0">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const current = Number(panel.duration) || 0;
+                  const next = Math.max(0.5, Math.round((current - 0.5) * 10) / 10);
+                  handleModifyDuration(panel.id, next);
+                }}
+                className="h-4 w-4 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-[11px] leading-none font-bold select-none active:scale-90"
+                title="Decrease duration (0.5s)"
+              >
+                -
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const current = Number(panel.duration) || 0;
+                  const next = Math.round((current + 0.5) * 10) / 10;
+                  handleModifyDuration(panel.id, next);
+                }}
+                className="h-4 w-4 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-[11px] leading-none font-bold select-none active:scale-90"
+                title="Increase duration (0.5s)"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Unified 3-in-1 AI Action Toolbar */}
-        <div className="grid grid-cols-3 gap-1 pt-0.5">
+        <div className="grid grid-cols-3 gap-1 pt-0.5 select-none">
           {/* 1. Analyze Image */}
           {isThisPanelAnalyzing ? (
             <button
               type="button"
               onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
-              className="py-1.5 rounded-lg border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 text-rose-300 shadow-sm"
+              className="py-1.5 rounded-xl border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 text-rose-300 shadow-sm active:scale-95"
               title="Stop Analyzing"
             >
               <X className="h-3 w-3 text-rose-400" />
@@ -1525,7 +1561,7 @@ const StoryboardCard = ({
                 analyzingPanelId !== null && String(analyzingPanelId) !== String(panel.id)
               }
               onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
-              className="py-1.5 px-1 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-[#3B82F6]/60 text-neutral-200 hover:text-[#93C5FD] text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-40"
+              className="py-1.5 px-1 rounded-xl border border-neutral-800 bg-[#0e1017] hover:bg-neutral-850 hover:border-[#3B82F6]/60 text-neutral-200 hover:text-[#93C5FD] text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95 disabled:opacity-40"
               title="Analyze Scene with AI"
             >
               <Sparkles className="h-3 w-3 text-[#3B82F6]" />
@@ -1539,7 +1575,7 @@ const StoryboardCard = ({
               type="button"
               disabled={isMagicProcessing}
               onClick={handleMagicMotion}
-              className="py-1.5 px-1 rounded-lg border border-[#3B82F6]/50 bg-gradient-to-r from-[#2A2A2A] to-indigo-950/60 hover:from-[#2A2A2A] hover:to-indigo-900/60 text-[#3B82F6] hover:text-white text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm disabled:opacity-40 active:scale-95"
+              className="py-1.5 px-1 rounded-xl border border-[#3B82F6]/40 bg-gradient-to-r from-[#181a24] to-indigo-950/70 hover:from-[#1e2230] hover:to-indigo-900/70 text-[#60A5FA] hover:text-white text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm disabled:opacity-40 active:scale-95"
               title="Apply Magic Motion"
             >
               {isMagicProcessing ? (
@@ -1557,17 +1593,14 @@ const StoryboardCard = ({
           <button
             type="button"
             onClick={() => {
-              window.history.pushState(
-                {},
-                "",
-                `/creative-suite/panel-assistant?idx=${idx}`
-              );
-              window.dispatchEvent(new Event("popstate"));
+              if (typeof (window as any).navigateTo === "function") {
+                (window as any).navigateTo(`/creative-suite/panel-assistant?panel_id=${panel.id}`);
+              }
             }}
-            className="py-1.5 px-1 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-[#3B82F6]/60 text-neutral-200 hover:text-[#93C5FD] text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95"
+            className="py-1.5 px-1 rounded-xl border border-neutral-800 bg-[#0e1017] hover:bg-neutral-850 hover:border-purple-500/50 text-neutral-200 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95"
             title="Open Panel Assistant"
           >
-            <Bot className="h-3 w-3 text-[#3B82F6]" />
+            <Bot className="h-3 w-3 text-purple-400" />
             <span>Assistant</span>
           </button>
         </div>
