@@ -150,33 +150,47 @@ export default function useLoginForm(props: LoginFormProps) {
   };
 
   const parseErrorMessage = (rawError: any): { message: string; type: AuthErrorType } => {
-    const rawMsg = (rawError?.message || String(rawError || "")).toLowerCase();
+    let rawMsg = "";
+    if (typeof rawError === "string") {
+      rawMsg = rawError;
+    } else if (rawError?.detail) {
+      rawMsg = Array.isArray(rawError.detail)
+        ? rawError.detail.map((d: any) => d.msg || d.message).join(", ")
+        : String(rawError.detail);
+    } else if (rawError?.message) {
+      rawMsg = String(rawError.message);
+    } else if (rawError?.error) {
+      rawMsg = String(rawError.error);
+    } else {
+      rawMsg = String(rawError || "");
+    }
+    const lower = rawMsg.toLowerCase();
 
-    if (!navigator.onLine || rawMsg.includes("network") || rawMsg.includes("failed to fetch") || rawMsg.includes("econnrefused")) {
+    if (!navigator.onLine || lower.includes("network") || lower.includes("failed to fetch") || lower.includes("econnrefused")) {
       return {
-        message: "Unable to connect to the authentication server. Please check your internet connection.",
+        message: "Unable to connect to the authentication server. Please check your internet connection or verify the backend is running.",
         type: "network",
       };
     }
-    if (rawMsg.includes("rate") || rawMsg.includes("too many") || rawMsg.includes("429")) {
+    if (lower.includes("rate") || lower.includes("too many") || lower.includes("429")) {
       return {
         message: "Too many login attempts. Please wait 60 seconds before trying again.",
         type: "rate_limited",
       };
     }
-    if (rawMsg.includes("not found") || rawMsg.includes("no user") || rawMsg.includes("user does not exist")) {
+    if (lower.includes("not found") || lower.includes("no user") || lower.includes("user does not exist") || lower.includes("account not found")) {
       return {
-        message: "No account found with this email. Would you like to create one?",
+        message: "No account found with this email. Would you like to create a free account?",
         type: "user_not_found",
       };
     }
-    if (rawMsg.includes("unverified") || rawMsg.includes("verify email") || rawMsg.includes("not confirmed")) {
+    if (lower.includes("unverified") || lower.includes("verify email") || lower.includes("not confirmed")) {
       return {
         message: "Your email address is not verified yet. Please check your inbox for the confirmation link.",
         type: "unverified",
       };
     }
-    if (rawMsg.includes("invalid") || rawMsg.includes("password") || rawMsg.includes("credentials") || rawMsg.includes("401")) {
+    if (lower.includes("invalid") || lower.includes("password") || lower.includes("credentials") || lower.includes("401") || lower.includes("unauthorized") || lower.includes("incorrect")) {
       return {
         message: "Incorrect email or password. Please verify your credentials or reset your password.",
         type: "invalid_credentials",
@@ -184,7 +198,7 @@ export default function useLoginForm(props: LoginFormProps) {
     }
 
     return {
-      message: rawError?.message || "Sign in failed. Please check your credentials and try again.",
+      message: rawMsg.trim() || "Sign in failed. Please check your credentials and try again.",
       type: "general",
     };
   };

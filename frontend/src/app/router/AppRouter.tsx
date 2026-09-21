@@ -584,11 +584,8 @@ export default function AppRouter(props: AppRouterProps) {
     currentPath === "/forgot-password";
 
   // --- Guard: Session Initialization loading state ---
-  // Only show full-screen initializing loader if we are on a protected route or have a saved token being validated
-  if (
-    (isInitializing || authLoading) &&
-    (!isPublicAuthRoute || hasSavedToken)
-  ) {
+  // Only show full-screen initializing loader if we are on a protected route while session initializes
+  if (!isPublicAuthRoute && (isInitializing || (authLoading && !isAuthenticated))) {
     const loadingStatus = isInitializing
       ? "Initializing App..."
       : "Checking Authentication...";
