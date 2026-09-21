@@ -550,11 +550,12 @@ export class CinemaPlayer {
             ⠿
           </div>
 
-          <!-- Brand Badge -->
-          <div class="sonikoma-cinema-brand" title="Sonikoma Immersive Cinema Engine v3.0">
+          <!-- Brand Badge (Click Logo to Open / Close Cinema) -->
+          <div class="sonikoma-cinema-brand" id="sonikoma-hud-brand-toggle" title="Click Logo to Close / Minimize Cinema">
             <span class="sonikoma-cinema-glow-dot"></span>
             <span class="sonikoma-cinema-badge">CINEMA</span>
             <span id="sonikoma-cinema-series" class="sonikoma-cinema-series">Sonikoma Reader</span>
+            <span class="sonikoma-brand-close-hint" title="Click to Close Cinema">✕</span>
           </div>
 
           <div class="sonikoma-cinema-divider"></div>
@@ -1222,9 +1223,10 @@ export class CinemaPlayer {
 
     if (isHudVisible) {
       this.stop();
-      this.showToast("Cinema Minimized • Click Logo to Re-open");
+      this.showToast("Cinema Closed • Click Floating Logo to Open");
     } else {
       this.start();
+      this.showToast("🎬 Cinema Mode Active • Auto-Scrolling");
     }
   }
 
@@ -1234,13 +1236,15 @@ export class CinemaPlayer {
     const textEl = badge.querySelector(".sonikoma-badge-text");
     const logoEl = badge.querySelector(".sonikoma-badge-logo");
     if (textEl) {
-      textEl.textContent = isOpen ? "Close Cinema" : "Sonikoma Cinema";
+      textEl.textContent = isOpen ? "✕ Close Cinema" : "Sonikoma Cinema";
     }
     if (logoEl) {
       if (isOpen) {
         logoEl.classList.add("sonikoma-logo-active");
+        badge.classList.add("sonikoma-badge-opened");
       } else {
         logoEl.classList.remove("sonikoma-logo-active");
+        badge.classList.remove("sonikoma-badge-opened");
       }
     }
   }
