@@ -116,8 +116,17 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/v1/export/youtube/",
     "/api/v1/system/logs/",   # SSE real-time log stream (/api/v1/system/logs/stream)
     "/api/system/logs/",      # Legacy SSE alias
-    "/api/v1/scraper/reader-chapter",
-    "/api/scraper/reader-chapter",
+    "/api/v1/scraper/",
+    "/api/scraper/",
+    "/api/v1/audio/",
+    "/api/audio/",
+    "/api/py/audio/",
+    "/api/v1/ocr/",
+    "/api/ocr/",
+    "/api/v1/panels/",
+    "/api/panels/",
+    "/api/v1/video/",
+    "/api/video/",
 )
 
 # Admin-only endpoints (require creator_role/admin)
@@ -286,21 +295,22 @@ async def add_process_time_header(request: Request, call_next):
 # MIDDLEWARE SETUP WIRING
 # ─────────────────────────────────────────────────────────────────────────────
 def setup_middleware(app: FastAPI):
-    # 1. CORS middleware
+    # 1. Request tracing & timing middleware (BaseHTTPMiddleware)
+    app.add_middleware(BaseHTTPMiddleware, dispatch=add_process_time_header)
+
+    # 2. Rate limiting middleware (BaseHTTPMiddleware)
+    app.add_middleware(BaseHTTPMiddleware, dispatch=rate_limiting_middleware)
+
+    # 3. Authorization middleware
+    app.add_middleware(AuthorizationMiddleware)
+
+    # 4. CORS middleware (Added last so it wraps the entire middleware stack and ensures CORS headers on all responses)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=ALLOWED_ORIGINS,
+        allow_origin_regex=r"^chrome-extension://.*$|^http://(localhost|127\.0\.0\.1)(:\d+)?$",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
         expose_headers=["X-Request-ID", "X-Process-Time", "X-API-Version"],
     )
-
-    # 2. Authorization middleware
-    app.add_middleware(AuthorizationMiddleware)
-
-    # 3. Rate limiting middleware (BaseHTTPMiddleware)
-    app.add_middleware(BaseHTTPMiddleware, dispatch=rate_limiting_middleware)
-
-    # 4. Request tracing & timing middleware (BaseHTTPMiddleware)
-    app.add_middleware(BaseHTTPMiddleware, dispatch=add_process_time_header)

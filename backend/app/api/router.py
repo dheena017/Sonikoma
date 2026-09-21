@@ -105,50 +105,55 @@ def register_routers(app: FastAPI):
     if os.path.exists(data_dir):
         app.mount("/data", StaticFiles(directory=data_dir), name="trace_data")
 
-    # Static Frontend Serving (Production Only)
-    dist_path = os.path.join(PROJECT_ROOT, "dist")
-    repo_root = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
-    frontend_dist_path = os.path.join(repo_root, "frontend", "dist")
-    if IS_PRODUCTION:
-        if os.path.exists(dist_path):
-            logger.info(f"Mounting static files directory: {dist_path}")
-            app.mount("/", StaticFiles(directory=dist_path, html=True), name="static")
-        elif os.path.exists(frontend_dist_path):
-            logger.info(f"Mounting static files directory from frontend build: {frontend_dist_path}")
-            app.mount("/", StaticFiles(directory=frontend_dist_path, html=True), name="static")
-        else:
-            logger.warning(
-                "Production mode active but no frontend build folder was found. "
-                f"Checked: {dist_path} and {frontend_dist_path}"
-            )
+    # Static Frontend Serving & SPA Support
+    frontend_dist_path = os.path.abspath(os.path.join(PROJECT_ROOT, "frontend", "dist"))
+    dist_path = os.path.abspath(os.path.join(PROJECT_ROOT, "dist"))
 
-    # Root redirect
+    active_dist = None
+    if os.path.exists(frontend_dist_path):
+        active_dist = frontend_dist_path
+        logger.info(f"Frontend SPA dist located: {frontend_dist_path}")
+    elif os.path.exists(dist_path):
+        active_dist = dist_path
+        logger.info(f"Root dist located: {dist_path}")
+
+    if active_dist:
+        assets_dir = os.path.join(active_dist, "assets")
+        if os.path.exists(assets_dir):
+            app.mount("/assets", StaticFiles(directory=assets_dir), name="spa_assets")
+
+    # Root route - serve SPA frontend if available
     @app.get("/", include_in_schema=False)
     async def root_redirect(request: Request):
+        if active_dist:
+            index_file = os.path.join(active_dist, "index.html")
+            if os.path.exists(index_file):
+                return FileResponse(index_file)
         accept_header = request.headers.get("accept", "")
         if "text/html" in accept_header:
             return RedirectResponse(url="/api/docs")
         return RedirectResponse(url="/api/health")
 
-    # SPA Fallback Route for client-side routing & browser navigation
+    # SPA Fallback Route for client-side routing & browser navigation (/workspace/*, /editor/*, etc.)
     @app.get("/{fallback_path:path}", include_in_schema=False)
     async def spa_fallback(request: Request, fallback_path: str):
-        # 1. If static production build exists, serve index.html
-        index_file = None
-        if os.path.exists(os.path.join(dist_path, "index.html")):
-            index_file = os.path.join(dist_path, "index.html")
-        elif os.path.exists(os.path.join(frontend_dist_path, "index.html")):
-            index_file = os.path.join(frontend_dist_path, "index.html")
+        if active_dist:
+            # 1. Direct static file check
+            target_file = os.path.join(active_dist, fallback_path)
+            if os.path.isfile(target_file):
+                return FileResponse(target_file)
+            
+            # 2. SPA client-side route fallback to index.html
+            index_file = os.path.join(active_dist, "index.html")
+            if os.path.isfile(index_file):
+                return FileResponse(index_file)
 
-        if index_file:
-            return FileResponse(index_file)
-
-        # 2. If accessed from a web browser (HTML accept header), redirect to interactive Swagger docs
+        # 3. If accessed from a browser (HTML accept header), redirect to interactive Swagger docs
         accept_header = request.headers.get("accept", "")
         if "text/html" in accept_header:
             return RedirectResponse(url="/api/docs")
 
-        # 3. Return structured JSON with documentation hints
+        # 4. Return structured JSON with documentation hints
         clean_path = fallback_path.lstrip("/")
         return JSONResponse(
             status_code=404,

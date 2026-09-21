@@ -239,8 +239,19 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     // Auto-discover if initialSeriesName or ?url= query is present
     const searchParams = new URLSearchParams(window.location.search);
     const queryUrl = searchParams.get("url") || searchParams.get("target");
+    const queryTitle = searchParams.get("title") || searchParams.get("series");
     if (queryUrl) {
       setUrlInput(queryUrl);
+      if (queryTitle) {
+        setSeriesMetadata({
+          title: queryTitle.replace(/\s*\|\s*.*$/, "").trim() || queryTitle,
+          author: "",
+          genre: "",
+          cover_image: "",
+          description: "",
+          url: queryUrl,
+        });
+      }
       triggerScrape(queryUrl, undefined, false);
       return;
     }
