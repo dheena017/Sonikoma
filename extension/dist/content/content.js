@@ -667,12 +667,11 @@ class CinemaPlayer {
             ⠿
           </div>
 
-          <!-- Brand Badge (Click Logo to Open / Close Cinema) -->
-          <div class="sonikoma-cinema-brand" id="sonikoma-hud-brand-toggle" title="Click Logo to Close / Minimize Cinema">
+          <!-- Brand Badge -->
+          <div class="sonikoma-cinema-brand" title="Sonikoma Immersive Cinema Engine v3.0">
             <span class="sonikoma-cinema-glow-dot"></span>
             <span class="sonikoma-cinema-badge">CINEMA</span>
             <span id="sonikoma-cinema-series" class="sonikoma-cinema-series">Sonikoma Reader</span>
-            <span class="sonikoma-brand-close-hint" title="Click to Close Cinema">✕</span>
           </div>
 
           <div class="sonikoma-cinema-divider"></div>
@@ -821,11 +820,6 @@ class CinemaPlayer {
       hud.querySelector("#sonikoma-btn-cinema-toggle")?.addEventListener("click", () => {
         if (this.isPlaying) this.pause();
         else this.play();
-      });
-
-      // Brand Logo Click Toggles / Closes Cinema
-      hud.querySelector(".sonikoma-cinema-brand")?.addEventListener("click", () => {
-        this.toggleCinema();
       });
 
       hud.querySelector("#sonikoma-btn-cinema-close")?.addEventListener("click", () => this.stop());
@@ -1314,40 +1308,6 @@ class CinemaPlayer {
     }
   }
 
-  toggleCinema() {
-    const isHudVisible =
-      this.hudElement &&
-      !this.hudElement.classList.contains("sonikoma-hidden") &&
-      this.hudElement.style.display !== "none";
-
-    if (isHudVisible) {
-      this.stop();
-      this.showToast("Cinema Closed • Click Floating Logo to Open");
-    } else {
-      this.start();
-      this.showToast("🎬 Cinema Mode Active • Auto-Scrolling");
-    }
-  }
-
-  updateFloatingBadge(isOpen) {
-    const badge = document.getElementById("sonikoma-floating-badge");
-    if (!badge) return;
-    const textEl = badge.querySelector(".sonikoma-badge-text");
-    const logoEl = badge.querySelector(".sonikoma-badge-logo");
-    if (textEl) {
-      textEl.textContent = isOpen ? "✕ Close Cinema" : "Sonikoma Cinema";
-    }
-    if (logoEl) {
-      if (isOpen) {
-        logoEl.classList.add("sonikoma-logo-active");
-        badge.classList.add("sonikoma-badge-opened");
-      } else {
-        logoEl.classList.remove("sonikoma-logo-active");
-        badge.classList.remove("sonikoma-badge-opened");
-      }
-    }
-  }
-
   start() {
     this.createCinemaHUD();
     this.createDimmerOverlay();
@@ -1362,7 +1322,6 @@ class CinemaPlayer {
       this.hudElement.style.setProperty("z-index", "2147483647", "important");
     }
 
-    this.updateFloatingBadge(true);
     this.refreshPanels();
     this.updatePanelReadout();
 
@@ -1427,8 +1386,6 @@ class CinemaPlayer {
       this.subtitleElement.classList.add("sonikoma-hidden");
       this.subtitleElement.style.setProperty("display", "none", "important");
     }
-
-    this.updateFloatingBadge(false);
   }
 
   loop(timestamp) {
@@ -1633,68 +1590,20 @@ function getSnipper() {
   return snipperInstance;
 }
 
-// Render floating quick-action badge with 1-Click Open/Close & Drag Support
+// Render floating quick-action badge
 function renderFloatingBadge() {
   if (document.getElementById("sonikoma-floating-badge")) return;
   const badge = document.createElement("div");
   badge.id = "sonikoma-floating-badge";
   badge.className = "sonikoma-floating-badge";
-  badge.setAttribute("title", "Click to Open / Close Sonikoma Cinema Reader");
   badge.innerHTML = `
-    <div class="sonikoma-badge-logo">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-      </svg>
-    </div>
+    <div class="sonikoma-badge-logo">S</div>
     <span class="sonikoma-badge-text">Sonikoma Cinema</span>
   `;
-
-  // Enable dragging on floating badge with click threshold protection
-  let isBadgeDragging = false;
-  let dragDistance = 0;
-  let bStartX = 0, bStartY = 0, bInitLeft = 0, bInitTop = 0;
-  badge.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return;
-    isBadgeDragging = false;
-    dragDistance = 0;
-    bStartX = e.clientX;
-    bStartY = e.clientY;
-    const r = badge.getBoundingClientRect();
-    bInitLeft = r.left;
-    bInitTop = r.top;
-
-    const onMove = (me) => {
-      const dx = me.clientX - bStartX;
-      const dy = me.clientY - bStartY;
-      dragDistance = Math.hypot(dx, dy);
-      if (dragDistance > 4) {
-        isBadgeDragging = true;
-        badge.style.setProperty("right", "auto", "important");
-        badge.style.setProperty("bottom", "auto", "important");
-        badge.style.setProperty("left", `${Math.max(10, Math.min(window.innerWidth - badge.offsetWidth - 10, bInitLeft + dx))}px`, "important");
-        badge.style.setProperty("top", `${Math.max(10, Math.min(window.innerHeight - badge.offsetHeight - 10, bInitTop + dy))}px`, "important");
-      }
-    };
-
-    const onUp = () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  });
-
-  badge.addEventListener("click", (e) => {
-    if (dragDistance > 4) {
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
+  badge.addEventListener("click", () => {
     const player = getCinemaPlayer();
-    player.toggleCinema();
+    player.start();
   });
-
   (document.body || document.documentElement).appendChild(badge);
 }
 
@@ -1716,7 +1625,7 @@ if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage)
       sendResponse({ meta, panels });
     } else if (msg.type === "TOGGLE_CINEMA" || msg.type === "START_CINEMA" || msg.type === "TRIGGER_CINEMA_MODE") {
       const player = getCinemaPlayer();
-      player.toggleCinema();
+      player.start();
       sendResponse({ success: true, isPlaying: true });
     } else if (msg.type === "STOP_CINEMA") {
       if (cinemaInstance) {
@@ -1730,12 +1639,6 @@ if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage)
     }
     return true;
   });
-}
-
-if (typeof window !== "undefined") {
-  window.DomMangaScanner = DomMangaScanner;
-  window.CinemaPlayer = CinemaPlayer;
-  window.PageSnipper = PageSnipper;
 }
 
 if (typeof window !== "undefined") {

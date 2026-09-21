@@ -550,12 +550,11 @@ export class CinemaPlayer {
             ⠿
           </div>
 
-          <!-- Brand Badge (Click Logo to Open / Close Cinema) -->
-          <div class="sonikoma-cinema-brand" id="sonikoma-hud-brand-toggle" title="Click Logo to Close / Minimize Cinema">
+          <!-- Brand Badge -->
+          <div class="sonikoma-cinema-brand" title="Sonikoma Immersive Cinema Engine v3.0">
             <span class="sonikoma-cinema-glow-dot"></span>
             <span class="sonikoma-cinema-badge">CINEMA</span>
             <span id="sonikoma-cinema-series" class="sonikoma-cinema-series">Sonikoma Reader</span>
-            <span class="sonikoma-brand-close-hint" title="Click to Close Cinema">✕</span>
           </div>
 
           <div class="sonikoma-cinema-divider"></div>
@@ -716,11 +715,6 @@ export class CinemaPlayer {
       hud.querySelector("#sonikoma-btn-cinema-toggle")?.addEventListener("click", () => {
         if (this.isPlaying) this.pause();
         else this.play();
-      });
-
-      // Clicking Brand Logo closes/minimizes Cinema
-      hud.querySelector(".sonikoma-cinema-brand")?.addEventListener("click", () => {
-        this.toggleCinema();
       });
 
       hud.querySelector("#sonikoma-btn-cinema-close")?.addEventListener("click", () => this.stop());
@@ -1215,40 +1209,6 @@ export class CinemaPlayer {
     }
   }
 
-  toggleCinema() {
-    const isHudVisible =
-      this.hudElement &&
-      !this.hudElement.classList.contains("sonikoma-hidden") &&
-      this.hudElement.style.display !== "none";
-
-    if (isHudVisible) {
-      this.stop();
-      this.showToast("Cinema Closed • Click Floating Logo to Open");
-    } else {
-      this.start();
-      this.showToast("🎬 Cinema Mode Active • Auto-Scrolling");
-    }
-  }
-
-  private updateFloatingBadge(isOpen: boolean) {
-    const badge = document.getElementById("sonikoma-floating-badge");
-    if (!badge) return;
-    const textEl = badge.querySelector(".sonikoma-badge-text");
-    const logoEl = badge.querySelector(".sonikoma-badge-logo");
-    if (textEl) {
-      textEl.textContent = isOpen ? "✕ Close Cinema" : "Sonikoma Cinema";
-    }
-    if (logoEl) {
-      if (isOpen) {
-        logoEl.classList.add("sonikoma-logo-active");
-        badge.classList.add("sonikoma-badge-opened");
-      } else {
-        logoEl.classList.remove("sonikoma-logo-active");
-        badge.classList.remove("sonikoma-badge-opened");
-      }
-    }
-  }
-
   start() {
     this.createCinemaHUD();
     this.createDimmerOverlay();
@@ -1263,7 +1223,6 @@ export class CinemaPlayer {
       this.hudElement.style.setProperty("z-index", "2147483647", "important");
     }
 
-    this.updateFloatingBadge(true);
     this.refreshPanels();
     this.updatePanelReadout();
 
@@ -1329,8 +1288,6 @@ export class CinemaPlayer {
       this.subtitleElement.classList.add("sonikoma-hidden");
       this.subtitleElement.style.setProperty("display", "none", "important");
     }
-
-    this.updateFloatingBadge(false);
   }
 
   private loop(timestamp: number) {

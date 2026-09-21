@@ -20,8 +20,6 @@ out/
 .next/
 .nuxt/
 *.tsbuildinfo
-!extension/dist/
-!extension/dist/**
 
 # ── Environment & Secret Credentials ─────────────────────────────────────────
 .env
