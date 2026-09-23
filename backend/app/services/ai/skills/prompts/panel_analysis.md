@@ -9,12 +9,16 @@ Analyze this comic/manhwa illustration panel with extreme precision and generate
 
 Follow these strict field specifications:
 
-### 1. `speech_text` (Dialogue / Speech Bubbles)
-- Transcribe ONLY the actual written words inside visible speech bubbles, whisper clouds, shout boxes, or thought bubbles clearly present in the image.
-- Preserve natural punctuation, capitalization, and emotional phrasing (e.g., question marks, exclamation marks, ellipses).
-- If multiple speech bubbles exist, transcribe them in natural reading order (top-to-bottom, left-to-right), separated by a space.
-- CRITICAL RULE: If the panel contains NO speech bubbles (e.g. title cards, silent portraits, scenery, sound effect text, or action shots without character dialogue), you MUST return an empty string `""`.
-- NEVER invent, extrapolate, or hallucinate fictional dialogue (such as greeting phrases, character banter, or monologues) when no speech bubbles are drawn in the illustration.
+### 1. `speech_text` (Dialogue / Speech / Visible Text)
+- Transcribe all visible text words clearly present in the image.
+- This includes:
+  1. Character dialogue inside speech bubbles, whisper clouds, shout boxes, or thought bubbles.
+  2. Story narration or caption boxes drawn in the panel.
+  3. Visible onomatopoeia words, sound effect lettering, or action words drawn directly on the art (e.g. "Whoooosh", "BOOM", "SWOOSH", "CRASH", "RUMBLE", "CLANG", "GASP", "HUH?").
+- If multiple speech bubbles or text blocks exist, transcribe them in natural reading order (top-to-bottom, left-to-right), separated by a space.
+- If there are no speech bubbles, but there are visible onomatopoeia words or sound effect lettering in the art (e.g. "Whoooosh"), you MUST transcribe those visible words into `speech_text`.
+- CRITICAL RULE: If the panel contains ABSOLUTELY NO written words, letters, or sound text (pure silent art with zero text), return an empty string `""`.
+- ANTI-HALLUCINATION RULE: Transcribe ONLY words that are actually drawn or written in the illustration. NEVER invent imaginary dialogue, greeting phrases, or conversational lines that do not appear anywhere in the image.
 
 ### 2. `narrative` (Cinematic Story Narration)
 - Write an evocative, cinematic story narration script describing what is taking place in the scene ({narrative_length_hint}).

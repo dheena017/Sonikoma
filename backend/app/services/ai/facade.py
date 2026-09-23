@@ -302,7 +302,7 @@ async def facade_analyze_image(
         else "30-65 words, highly engaging and detailed for YouTube story narration."
     )
 
-    has_dialogue = True
+    ocr_text = ""
     try:
         from services.image.ocr.ocr_engine import extract_dialogue_from_panel
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_ocr:
@@ -311,8 +311,8 @@ async def facade_analyze_image(
         ocr_dialogue = await extract_dialogue_from_panel(tmp_ocr_path, langs=['en'])
         if os.path.exists(tmp_ocr_path):
             os.remove(tmp_ocr_path)
-        if not "".join(ocr_dialogue).strip():
-            has_dialogue = False
+        if ocr_dialogue:
+            ocr_text = " ".join([t.strip() for t in ocr_dialogue if t.strip()]).strip()
     except Exception:
         pass
 
@@ -327,9 +327,9 @@ async def facade_analyze_image(
 
     analysis = validate_analysis(json.loads(raw_text))
 
-    # If no speech bubbles were detected, ensure speech_text is empty (do not invent fake dialogue)
-    if not has_dialogue:
-        analysis["speech_text"] = ""
+    # If Gemini didn't return speech_text but OCR found visible dialogue, use OCR as fallback
+    if not analysis.get("speech_text") and ocr_text:
+        analysis["speech_text"] = ocr_text
 
     audio_url = None
     try:

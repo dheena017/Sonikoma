@@ -367,7 +367,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
 
         if (resultData) {
           const analysis = resultData.analysis || resultData;
-          const detectedText =
+          let detectedText =
             analysis.speech_text ||
             analysis.speechText ||
             analysis.dialogue ||
@@ -378,6 +378,14 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
               ? resultData.segments.map((s: any) => s.text).filter(Boolean).join(" ")
               : "") ||
             "";
+
+          // If speech_text is empty, check if sfx contains visible onomatopoeia words like "[Whoooosh]"
+          if (!detectedText && (analysis.sfx || resultData.sfx)) {
+            const rawSfx = String(analysis.sfx || resultData.sfx).replace(/^\[|\]$/g, "").trim();
+            if (rawSfx && rawSfx.length <= 40 && !rawSfx.toLowerCase().includes("ambient")) {
+              detectedText = rawSfx;
+            }
+          }
 
           // Format audio URL if relative path
           let audioUrl = resultData.audio_url || analysis.audio_url || null;
@@ -404,12 +412,8 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
         }
 
         return {
-          success: true,
-          speech_text: "",
-          motion_type: payload.panelIndex % 2 === 0 ? "zoom_in" : "pan_up",
-          duration: 3.5,
-          visual_description: `Scene #${payload.panelIndex || 1}`,
-          warning: fetchError,
+          success: false,
+          error: fetchError || "AI Analysis request failed to return data from backend.",
         };
       } catch (err: any) {
         return {
@@ -451,6 +455,14 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
         const data = await res.json();
         if (data && Array.isArray(data.results)) {
           data.results.forEach((r: any) => {
+            const analysis = r.analysis || r;
+            if (!analysis.speech_text && (analysis.sfx || r.sfx)) {
+              const rawSfx = String(analysis.sfx || r.sfx).replace(/^\[|\]$/g, "").trim();
+              if (rawSfx && rawSfx.length <= 40 && !rawSfx.toLowerCase().includes("ambient")) {
+                analysis.speech_text = rawSfx;
+                r.speech_text = rawSfx;
+              }
+            }
             if (r.audio_url && typeof r.audio_url === "string" && r.audio_url.startsWith("/")) {
               r.audio_url = `${apiBase}${r.audio_url}`;
             }
