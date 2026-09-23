@@ -1,24 +1,103 @@
 {
-  "name": "Sonikoma - Webtoon-to-Video & Content Automation",
-  "description": "The Ultimate AI-powered Backend Automation Suite for Webtoon Video Compilation, Content Creation, and AI Workflows. Automate Webtoon scraping, AI-powered panel detection and narration, video rendering, and multi-platform social media posting.",
+  "name": "Sonikoma — AI Webtoon Motion Comic & Video Automation Studio",
+  "shortName": "Sonikoma",
+  "version": "1.0.0",
+  "tagline": "Transform static Webtoons & Manga into cinematic motion comics, AI-dubbed shorts, and viral videos in seconds.",
+  "description": "An end-to-end AI-powered creative engine and automated production suite for webtoon & manga creators. Automates multi-source comic scraping, dual-core OpenCV + YOLOv8 spatial panel segmentation, AI speech bubble OCR, neural text-to-speech dialogue dubbing, and multi-track Remotion video rendering with automated social media publishing presets.",
+  "category": "Multimedia / AI Video Creation / Automation",
+  "keywords": [
+    "webtoon-to-video",
+    "motion-comics",
+    "ai-video-editor",
+    "remotion",
+    "fastapi",
+    "react-19",
+    "three-js",
+    "fabric-js",
+    "yolov8-segmentation",
+    "opencv",
+    "speech-bubble-detection",
+    "gemini-ai",
+    "edge-tts",
+    "elevenlabs",
+    "browser-extension"
+  ],
   "requestFramePermissions": [
     "camera",
     "microphone",
     "clipboard-read",
     "clipboard-write",
-    "notifications"
+    "notifications",
+    "display-capture"
   ],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API",
     "MAJOR_CAPABILITY_OPENAI_API",
     "MAJOR_CAPABILITY_ANTHROPIC_API",
-    "MAJOR_CAPABILITY_GROQ_API"
+    "MAJOR_CAPABILITY_GROQ_API",
+    "MAJOR_CAPABILITY_LOCAL_YOLO_INFERENCE",
+    "MAJOR_CAPABILITY_FFMPEG_VIDEO_ENCODING",
+    "MAJOR_CAPABILITY_EDGE_TTS_SYNTHESIS",
+    "MAJOR_CAPABILITY_BROWSER_AUTOMATION"
   ],
+  "features": [
+    {
+      "name": "Universal Comic & Webtoon Scraper",
+      "description": "Headless and dynamic chapter scraping across major webtoon portals with automatic image decryption and caching."
+    },
+    {
+      "name": "Dual-Core Spatial Vision Engine",
+      "description": "Hybrid OpenCV contour clustering + YOLOv8 neural segmentation for automated panel slicing and speech bubble isolation."
+    },
+    {
+      "name": "AI Neural Dialogue & Voice Dubber",
+      "description": "Multi-engine OCR with character voice assignment and multilingual TTS (Edge-TTS, ElevenLabs, Gemini Audio)."
+    },
+    {
+      "name": "Pro Multi-Track Timeline Video Editor",
+      "description": "Full-featured web studio powered by Remotion, Fabric.js, and Three.js supporting keyframes, transitions, and audio mixing."
+    },
+    {
+      "name": "Chrome Manifest V3 Companion Extension",
+      "description": "SidePanel mini-studio, live in-browser speech bubble reader, 1-click chapter archiver, and 9:16 Shorts panel snipper."
+    },
+    {
+      "name": "Multi-Format Export & Social Publishing",
+      "description": "One-click 9:16 vertical exports for YouTube Shorts, TikTok, and Instagram Reels, as well as 16:9 cinematic landscape."
+    }
+  ],
+  "techStack": {
+    "backend": {
+      "framework": "FastAPI (Python 3.12+)",
+      "server": "Uvicorn (ASGI)",
+      "orm": "SQLAlchemy 2.0 (Async/Sync)",
+      "database": "SQLite / PostgreSQL",
+      "computerVision": ["OpenCV (cv2)", "Ultralytics YOLOv8", "NumPy", "Pillow"],
+      "mediaProcessing": ["MoviePy", "FFmpeg", "Edge-TTS"]
+    },
+    "frontend": {
+      "framework": "React 19 + TypeScript + Vite",
+      "styling": "Tailwind CSS v4",
+      "canvasAnd3D": ["Fabric.js 7", "Three.js", "@react-three/fiber"],
+      "videoEngine": "Remotion Player 4.0",
+      "stateManagement": "Zustand 5"
+    },
+    "browserExtension": {
+      "manifestVersion": 3,
+      "tooling": "Vite + TypeScript + Tailwind CSS",
+      "targets": ["Google Chrome", "Microsoft Edge", "Brave", "Opera"]
+    }
+  },
   "customProperties": {
     "creatorName": "Dheenadayalan R",
     "creatorId": "user_cacfbef1",
+    "adminUser": "Dheenadayalan_R",
+    "adminEmail": "dheenadayalan017@gmail.com",
     "website": "https://sonikoma.dheensoft.dev",
     "repo": "https://github.com/dhinar02/Sonikoma",
-    "dockerImage": "gcr.io/sonikoma/backend"
+    "dockerImage": "gcr.io/sonikoma/backend",
+    "apiDocsUrl": "http://localhost:8000/docs",
+    "environment": "production-ready",
+    "storageCanonicalPath": "Sonikoma/data/"
   }
 }
