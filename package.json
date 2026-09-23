@@ -12,7 +12,7 @@
     "python:prod": "cd backend/app && cross-env NODE_ENV=production ..\\..\\.venv\\Scripts\\python.exe main.py",
     "frontend": "node scripts/run-frontend.js --only-frontend",
     "build:frontend": "cd frontend && npm install && npm run build",
-    "build:extension": "npm run build --prefix extension",
+    "build:extension": "npm run build --prefix browser-extension",
     "build": "npm run build:frontend && npm run build:extension",
     "preview": "cd frontend && npm run preview",
     "typecheck": "node scripts/frontend/lint.cjs",

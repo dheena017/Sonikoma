@@ -10,9 +10,9 @@
 2. Navigate to `chrome://extensions` in your address bar.
 3. Toggle on **"Developer mode"** in the top-right corner.
 4. Click the **"Load unpacked"** button in the top-left corner.
-5. Select this `extension/` folder:
+5. Select this `browser-extension/` folder:
    ```
-   c:\Users\dheen\project\Sonikoma\extension
+   c:\Users\dheen\project\Sonikoma\browser-extension
    ```
 6. The **Sonikoma AI Studio** extension icon will now appear in your browser toolbar!
 

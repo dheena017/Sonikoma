@@ -1,6 +1,24 @@
 {
-  "name": "Webtoon-to-Video Backend",
-  "description": "A modular Python FastAPI backend service that scrapes Webtoon images, extracts panel structures and text using Vision AI placeholders, and renders high-quality cinematic MP4 compilations using MoviePy.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "name": "Sonikoma - Webtoon-to-Video & Content Automation",
+  "description": "The Ultimate AI-powered Backend Automation Suite for Webtoon Video Compilation, Content Creation, and AI Workflows. Automate Webtoon scraping, AI-powered panel detection and narration, video rendering, and multi-platform social media posting.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "clipboard-read",
+    "clipboard-write",
+    "notifications"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API",
+    "MAJOR_CAPABILITY_OPENAI_API",
+    "MAJOR_CAPABILITY_ANTHROPIC_API",
+    "MAJOR_CAPABILITY_GROQ_API"
+  ],
+  "customProperties": {
+    "creatorName": "Dheenadayalan R",
+    "creatorId": "user_cacfbef1",
+    "website": "https://sonikoma.dheensoft.dev",
+    "repo": "https://github.com/dhinar02/Sonikoma",
+    "dockerImage": "gcr.io/sonikoma/backend"
+  }
 }
