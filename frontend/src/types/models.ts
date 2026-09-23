@@ -209,6 +209,39 @@ export interface GeneratedPanel {
   episode_label?: string;
   character_name?: string;
   speaker_name?: string;
+  speaker_gender?: 'male' | 'female' | 'child' | 'neutral' | string;
+  emotion?: string;
+  scene_context?: string;
+  is_scene_transition?: boolean;
+  is_internal_thought?: boolean;
+}
+
+export interface CharacterMemory {
+  gender: 'male' | 'female' | 'child' | 'neutral' | string;
+  voice: string;
+  is_user_locked?: boolean;
+  panels_seen?: number[];
+}
+
+export interface DialogueMemoryTurn {
+  panel_index: number;
+  speaker: string;
+  gender: string;
+  emotion: string;
+  text: string;
+}
+
+export interface SceneMemoryItem {
+  scene: string;
+  end_panel: number;
+}
+
+export interface StoryMemoryState {
+  current_scene: string;
+  characters: Record<string, CharacterMemory>;
+  dialogue_history: DialogueMemoryTurn[];
+  scene_history: SceneMemoryItem[];
+  last_updated_at?: string;
 }
 
 export interface CharacterBio {

@@ -15,7 +15,8 @@ import logging
 import asyncio
 import tempfile
 import json
-from typing import List, Optional, Dict, Any
+import re
+from typing import List, Optional, Dict, Any, Union
 from PIL import Image
 
 from app.core.config import call_gemini_with_retry
@@ -41,12 +42,119 @@ def estimate_duration_from_speech(speech: str) -> float:
     return round(estimated, 1)
 
 
+class StoryMemoryTracker:
+    """Maintains cognitive narrative continuity, character rosters, and dialogue turns across comic panels."""
+    def __init__(self, initial_state: Optional[Union[str, Dict[str, Any]]] = None):
+        if isinstance(initial_state, str):
+            self.current_scene = initial_state[:300]
+            self.characters: Dict[str, Dict[str, Any]] = {}
+            self.dialogue_history: List[Dict[str, Any]] = []
+            self.scene_history: List[Dict[str, Any]] = []
+        elif isinstance(initial_state, dict):
+            self.current_scene = str(initial_state.get("current_scene", ""))[:300]
+            self.characters = initial_state.get("characters", {}) if isinstance(initial_state.get("characters"), dict) else {}
+            self.dialogue_history = list(initial_state.get("dialogue_history", [])) if isinstance(initial_state.get("dialogue_history"), list) else []
+            self.scene_history = list(initial_state.get("scene_history", [])) if isinstance(initial_state.get("scene_history"), list) else []
+        else:
+            self.current_scene = ""
+            self.characters = {}
+            self.dialogue_history = []
+            self.scene_history = []
+
+    def format_for_prompt(self) -> str:
+        parts = []
+        if self.current_scene:
+            parts.append(f"Ongoing Scene: {self.current_scene}")
+        if self.characters:
+            char_list = [f"{name} ({info.get('gender', 'unknown')})" for name, info in list(self.characters.items())[:8]]
+            parts.append(f"Active Characters: {', '.join(char_list)}")
+        if self.dialogue_history:
+            last = self.dialogue_history[-1]
+            speaker = f"{last.get('speaker')}: " if last.get('speaker') else ""
+            emotion = f"[{last.get('emotion')}] " if last.get('emotion') and last.get('emotion') != 'neutral' else ""
+            parts.append(f"Preceding Dialogue: {speaker}{emotion}\"{last.get('text', '')}\"")
+        return " | ".join(parts)
+
+    def update_from_analysis(self, analysis: Dict[str, Any], panel_index: int = 0):
+        # 1. Handle Scene Transitions
+        if analysis.get("is_scene_transition"):
+            if self.current_scene:
+                self.scene_history.append({"scene": self.current_scene, "end_panel": max(0, panel_index - 1)})
+            self.dialogue_history.clear()
+            scene = analysis.get("scene_context") or analysis.get("visual_description")
+            self.current_scene = scene[:250] if scene else "New Scene"
+        else:
+            scene = analysis.get("scene_context") or analysis.get("visual_description")
+            if scene:
+                self.current_scene = scene[:250]
+
+        # 2. Update Character Roster
+        speaker = (analysis.get("speaker_name") or "").strip()
+        gender = (analysis.get("speaker_gender") or "neutral").strip().lower()
+        if gender not in ("male", "female", "child", "neutral"):
+            gender = "neutral"
+
+        if speaker and speaker.lower() not in ("narrator", "none", "unknown", "off-screen voice", ""):
+            default_voice = "en-US-JennyNeural" if gender == "female" else ("en-US-AnaNeural" if gender == "child" else "en-US-GuyNeural")
+            if speaker not in self.characters:
+                self.characters[speaker] = {
+                    "gender": gender,
+                    "voice": default_voice,
+                    "is_user_locked": False,
+                    "panels_seen": [panel_index]
+                }
+            else:
+                if not self.characters[speaker].get("is_user_locked"):
+                    if gender != "neutral":
+                        self.characters[speaker]["gender"] = gender
+                if panel_index not in self.characters[speaker].get("panels_seen", []):
+                    self.characters[speaker].setdefault("panels_seen", []).append(panel_index)
+
+        # 3. Sliding Working Dialogue Buffer (keep last 4 turns)
+        speech = (analysis.get("speech_text") or "").strip()
+        emotion = (analysis.get("emotion") or "neutral").strip()
+        if speech:
+            self.dialogue_history.append({
+                "panel_index": panel_index,
+                "speaker": speaker,
+                "gender": gender,
+                "emotion": emotion,
+                "text": speech[:300]
+            })
+            if len(self.dialogue_history) > 4:
+                self.dialogue_history.pop(0)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "current_scene": self.current_scene,
+            "characters": self.characters,
+            "dialogue_history": self.dialogue_history,
+            "scene_history": self.scene_history,
+            "last_updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        }
+
+
 def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(raw, dict):
+        raw = {}
     speech = raw.get("speech_text", "")
     sfx = raw.get("sfx", "")
     vis = raw.get("visual_description", "")
     motion = raw.get("motion_type", "")
     narrative = raw.get("narrative") or raw.get("narrativeText") or ""
+    speaker_name = (raw.get("speaker_name") or "").strip()[:100]
+    speaker_gender = (raw.get("speaker_gender") or "neutral").strip().lower()
+    if speaker_gender not in ("male", "female", "child", "neutral"):
+        speaker_gender = "neutral"
+    emotion = (raw.get("emotion") or "neutral").strip().lower()
+    if emotion not in ("neutral", "tender", "whisper", "shouting", "panicked"):
+        emotion = "neutral"
+    scene_context = (raw.get("scene_context") or "").strip()[:400]
+    is_scene_transition = bool(raw.get("is_scene_transition", False))
+    is_internal_thought = bool(raw.get("is_internal_thought", False))
+    dialogue_turns = raw.get("dialogue_turns", [])
+    if not isinstance(dialogue_turns, list):
+        dialogue_turns = []
 
     raw_duration = raw.get("duration")
     try:
@@ -69,6 +177,13 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "speech_text": speech_val,
+        "dialogue_turns": dialogue_turns,
+        "speaker_name": speaker_name,
+        "speaker_gender": speaker_gender,
+        "emotion": emotion,
+        "scene_context": scene_context,
+        "is_scene_transition": is_scene_transition,
+        "is_internal_thought": is_internal_thought,
         "sfx": sfx.strip()[:50] if isinstance(sfx, str) and sfx.strip() else "",
         "duration": final_duration,
         "motion_type": motion if motion in VALID_MOTIONS else "zoom_in",
@@ -271,15 +386,32 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
 
 async def facade_analyze_image(
     url: str,
-    model: Optional[str],
-    voice: Optional[str],
-    narration_style: Optional[str],
-    user_keys: Dict[str, str]
+    model: Optional[str] = None,
+    voice: Optional[str] = None,
+    narration_style: Optional[str] = None,
+    user_keys: Optional[Dict[str, str]] = None,
+    story_context: Optional[Union[str, Dict[str, Any]]] = None,
+    story_memory: Optional[Dict[str, Any]] = None,
+    panel_index: int = 0
 ) -> Dict[str, Any]:
-    """Generates narration script and SFX for a single panel."""
+    """Generates narration script, SFX, voice audio, and cognitive memory continuity for a single panel."""
     start_time = time.time()
-    resolved = await img_utils.resolve_image_to_buffer(url)
-    img_buffer = resolved["data"]
+    try:
+        resolved = await img_utils.resolve_image_to_buffer(url)
+        img_buffer = resolved["data"]
+    except Exception as exc:
+        logger.warning(f"[facade_analyze_image] Failed to download or resolve image: {exc}")
+        mem_obj = StoryMemoryTracker(story_memory or story_context)
+        return {
+            "success": False,
+            "error": f"Failed to resolve image buffer: {str(exc)}",
+            "analysis": {},
+            "audio_url": None,
+            "story_memory": mem_obj.to_dict()
+        }
+
+    memory_tracker = StoryMemoryTracker(story_memory or story_context)
+    story_context_section = memory_tracker.format_for_prompt()
 
     brightness = None
     try:
@@ -296,11 +428,12 @@ async def facade_analyze_image(
             tone_hint = " The panel appears bright and vibrant — favour action or triumphant SFX."
 
     style_val = (narration_style or "long").lower()
-    narrative_length_hint = (
-        "max 25 words, impactful and dramatic for quick subtitles."
-        if style_val == "short"
-        else "30-65 words, highly engaging and detailed for YouTube story narration."
-    )
+    if style_val == "short":
+        narrative_length_hint = "35-55 words, punchy, impactful, and dramatic for quick subtitles or shorts."
+    elif style_val == "medium":
+        narrative_length_hint = "65-95 words, vivid, balanced, and immersive for standard manga episodes."
+    else:
+        narrative_length_hint = "85-150 words, rich, cinematic, and deeply engaging YouTube manga/manhwa recap storytelling that brings the atmosphere, character psychology, and high stakes fully to life."
 
     ocr_text = ""
     try:
@@ -317,36 +450,78 @@ async def facade_analyze_image(
         pass
 
     skill = registry.get("panel_analysis")
-    raw_text = await skill.execute(
-        model=model,
-        image_bytes=img_buffer,
-        user_keys=user_keys,
-        tone_hint=tone_hint,
-        narrative_length_hint=narrative_length_hint
-    )
-
-    analysis = validate_analysis(json.loads(raw_text))
+    formatted_context = f"STORY CONTEXT & PRECEDING MEMORY:\n{story_context_section}\n" if story_context_section else ""
+    try:
+        raw_text = await skill.execute(
+            model=model,
+            image_bytes=img_buffer,
+            user_keys=user_keys or {},
+            tone_hint=tone_hint,
+            narrative_length_hint=narrative_length_hint,
+            story_context_section=formatted_context
+        )
+        parsed_json = json.loads(raw_text) if isinstance(raw_text, str) else raw_text
+        analysis = validate_analysis(parsed_json)
+    except Exception as exc:
+        logger.warning(f"[facade_analyze_image] Panel analysis vision execution failed: {exc}. Falling back to OCR.")
+        analysis = validate_analysis({
+            "speech_text": ocr_text,
+            "visual_description": "Comic panel scene (vision unavailable).",
+            "motion_type": "zoom_in",
+            "duration": 3.5,
+            "sfx": "",
+            "narrative": ocr_text or "Scene progression.",
+            "scene_context": memory_tracker.current_scene or ""
+        })
 
     # If Gemini didn't return speech_text but OCR found visible dialogue, use OCR as fallback
     if not analysis.get("speech_text") and ocr_text:
         analysis["speech_text"] = ocr_text
 
-    audio_url = None
-    try:
-        audio_text = (analysis.get("speech_text") or analysis.get("narrative") or "").strip()
-        if audio_text:
-            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
-                temp_audio_path = tmp_audio.name
+    # Update working memory state
+    memory_tracker.update_from_analysis(analysis, panel_index)
 
-            voice_code = voice or "en-US-GuyNeural"
-            _, actual_dur = await generate_panel_audio(
-                dialogue_list=[audio_text],
-                target_duration=analysis["duration"],
-                output_path=temp_audio_path,
-                voice=voice_code,
-                force_duration=False
-            )
-            analysis["duration"] = actual_dur
+    # Dynamic Voice Resolution
+    speaker_name = (analysis.get("speaker_name") or "").strip()
+    speaker_gender = (analysis.get("speaker_gender") or "neutral").strip().lower()
+
+    if voice and voice.strip() and voice.strip().lower() not in ("undefined", "null", "default"):
+        target_voice = voice
+    elif speaker_name and speaker_name in memory_tracker.characters and memory_tracker.characters[speaker_name].get("voice"):
+        target_voice = memory_tracker.characters[speaker_name]["voice"]
+    elif speaker_gender == "female":
+        target_voice = "en-US-JennyNeural"
+    elif speaker_gender == "child":
+        target_voice = "en-US-AnaNeural"
+    else:
+        target_voice = "en-US-GuyNeural"
+
+    audio_url = None
+    audio_text = (analysis.get("speech_text") or analysis.get("narrative") or "").strip()
+    if audio_text:
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+            temp_audio_path = tmp_audio.name
+        try:
+            # Try primary resolved voice
+            try:
+                _, actual_dur = await generate_panel_audio(
+                    dialogue_list=[audio_text],
+                    target_duration=analysis["duration"],
+                    output_path=temp_audio_path,
+                    voice=target_voice,
+                    force_duration=False
+                )
+                analysis["duration"] = actual_dur
+            except Exception as voice_err:
+                logger.warning(f"[facade_analyze_image] TTS with {target_voice} failed: {voice_err}. Retrying with en-US-GuyNeural.")
+                _, actual_dur = await generate_panel_audio(
+                    dialogue_list=[audio_text],
+                    target_duration=analysis["duration"],
+                    output_path=temp_audio_path,
+                    voice="en-US-GuyNeural",
+                    force_duration=False
+                )
+                analysis["duration"] = actual_dur
 
             if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
                 with open(temp_audio_path, "rb") as f:
@@ -354,11 +529,15 @@ async def facade_analyze_image(
                 unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}" if 'uuid' in globals() else f"audio_{os.urandom(4).hex()}"
                 stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
                 audio_url = f"/api/image/cached/{unique_audio_id}"
-
+        except Exception as tts_err:
+            logger.warning(f"[facade_analyze_image] All TTS attempts failed: {tts_err}. Estimating duration.")
+            analysis["duration"] = estimate_duration_from_speech(audio_text)
+        finally:
             if os.path.exists(temp_audio_path):
-                os.remove(temp_audio_path)
-    except Exception:
-        pass
+                try:
+                    os.remove(temp_audio_path)
+                except Exception:
+                    pass
 
     elapsed = int((time.time() - start_time) * 1000)
     meta = getattr(skill, "last_execution_meta", {}) or {}
@@ -371,6 +550,11 @@ async def facade_analyze_image(
         "narrative": narrative_val,
         "narrativeText": narrative_val,
         "audio_url": audio_url,
+        "speaker_name": analysis.get("speaker_name"),
+        "speaker_gender": analysis.get("speaker_gender"),
+        "emotion": analysis.get("emotion"),
+        "scene_context": analysis.get("scene_context"),
+        "story_memory": memory_tracker.to_dict(),
         "source": meta.get("provider", "gemini"),
         "model": model_used,
         "latencyMs": meta.get("latency_ms", elapsed),
@@ -378,6 +562,7 @@ async def facade_analyze_image(
         "inputTokens": getattr(skill, "last_input_tokens", 0),
         "outputTokens": getattr(skill, "last_output_tokens", 0)
     }
+
 def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], source_url: Optional[str] = None) -> None:
     """
     Crop each detected panel from the image buffer directly in memory (server-side).

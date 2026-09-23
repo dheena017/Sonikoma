@@ -18,9 +18,11 @@ class AnalyzeImageRequest(BaseModel):
     url: str
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"  # 'long' = detailed YouTube recap, 'short' = quick subtitles
-    voice: Optional[str] = "en-US-GuyNeural"
+    voice: Optional[str] = None
     project_id: Optional[str] = None
     job_id: Optional[str] = None
+    story_context: Optional[str] = None
+    story_memory: Optional[Dict[str, Any]] = None
 
 
 class AnalyzeBatchRequest(BaseModel):
@@ -54,6 +56,8 @@ class AnalyzePanelItem(BaseModel):
     """Individual panel item containing an ID and image URL."""
     id: Any
     url: str
+    story_context: Optional[str] = None
+    speaker_name: Optional[str] = None
 
 
 class AnalyzePanelSequenceRequest(BaseModel):
@@ -61,9 +65,11 @@ class AnalyzePanelSequenceRequest(BaseModel):
     panels: List[AnalyzePanelItem]
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
-    voice: Optional[str] = "en-US-GuyNeural"
+    voice: Optional[str] = None
     project_id: Optional[str] = None
     job_id: Optional[str] = None
+    story_context: Optional[str] = None
+    story_memory: Optional[Dict[str, Any]] = None
 
 
 class AnalyzeNarrativeSequenceRequest(BaseModel):

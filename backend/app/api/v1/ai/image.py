@@ -99,6 +99,8 @@ async def analyze_image(
             voice=body.voice,
             narration_style=body.narrationStyle,
             user_keys=user_api_key,
+            story_context=body.story_context,
+            story_memory=body.story_memory,
         )
         result = _attach_narratives_to_results([result])[0]
         if current_user:
@@ -221,31 +223,39 @@ async def analyze_panels(
     if current_user and get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
 
-    semaphore = asyncio.Semaphore(4)
+    results = []
+    # Seed rolling memory from request body if available
+    rolling_memory = body.story_memory or ({"current_scene": body.story_context} if body.story_context else None)
 
-    async def analyze_panel(panel):
-        async with semaphore:
-            try:
-                res = await facade_analyze_image(
-                    url=panel.url,
-                    model=body.model,
-                    voice=body.voice,
-                    narration_style=body.narrationStyle,
-                    user_keys=user_api_key,
-                )
-                return {"id": panel.id, "url": panel.url, **res}
-            except Exception as e:
-                from services.ai.orchestrator import AIExecutionError
-                clean_msg = e.message if isinstance(e, AIExecutionError) else str(e)
-                logger.warning(f"[AI Analysis] Panel {panel.id} analysis failed: {clean_msg}")
-                return {
-                    "id": panel.id,
-                    "url": panel.url,
-                    "success": False,
-                    "error": clean_msg,
-                }
+    for idx, panel in enumerate(body.panels):
+        panel_voice = getattr(panel, "voice", None) or body.voice
+        panel_context = getattr(panel, "story_context", None)
+        try:
+            res = await facade_analyze_image(
+                url=panel.url,
+                model=body.model,
+                voice=panel_voice,
+                narration_style=body.narrationStyle,
+                user_keys=user_api_key,
+                story_context=panel_context,
+                story_memory=rolling_memory,
+                panel_index=idx,
+            )
+            # Update rolling memory from panel's result
+            if res.get("story_memory"):
+                rolling_memory = res["story_memory"]
+            results.append({"id": panel.id, "url": panel.url, **res})
+        except Exception as e:
+            from services.ai.orchestrator import AIExecutionError
+            clean_msg = e.message if isinstance(e, AIExecutionError) else str(e)
+            logger.warning(f"[AI Analysis] Panel {panel.id} (index {idx}) analysis failed: {clean_msg}")
+            results.append({
+                "id": panel.id,
+                "url": panel.url,
+                "success": False,
+                "error": clean_msg,
+            })
 
-    results = await asyncio.gather(*(analyze_panel(panel) for panel in body.panels))
     results = _attach_narratives_to_results(results)
     if current_user and any(item.get("success") for item in results):
         record_credit_transaction(current_user["user_id"], -COST, "analyze_panels")
@@ -267,6 +277,7 @@ async def analyze_panels(
         "model": used_model,
         "success_count": success_count,
         "total_count": len(results),
+        "story_memory": rolling_memory,
     }
 
 

@@ -9,13 +9,27 @@ from typing import List, Dict, Type, Optional
 from pydantic import BaseModel, Field
 
 
+class DialogueTurnItem(BaseModel):
+    speaker_name: str = Field(default="", description="Name of speaker for this bubble")
+    speaker_gender: str = Field(default="neutral", description="'male', 'female', 'child', or 'neutral'")
+    text: str = Field(default="", description="Spoken dialogue text")
+    emotion: str = Field(default="neutral", description="'neutral', 'tender', 'whisper', 'shouting', 'panicked'")
+
+
 class GeminiAnalysisModel(BaseModel):
-    speech_text: str = Field(description="Spoken character dialogue from speech bubbles, thought clouds, or visible lettering")
+    speech_text: str = Field(default="", description="Spoken character dialogue from speech bubbles, whisper clouds, or visible lettering")
+    dialogue_turns: List[DialogueTurnItem] = Field(default=[], description="Chronological dialogue turns if multiple speech bubbles exist in the panel")
     narrative: str = Field(default="", description="Story narration caption box text drawn on the panel, or empty string if no narrator box exists. NEVER visual descriptions.")
-    sfx: str = Field(description="Bracketed sound effect text")
-    duration: float = Field(description="Suggested scene duration in seconds")
-    motion_type: str = Field(description="Camera movement motion tag")
-    visual_description: str = Field(description="Visual description of the scene composition for camera animation (not for voiceover audio)")
+    speaker_name: str = Field(default="", description="Primary speaking character (e.g., 'Father', 'Mother', 'Doctor', or empty if silent)")
+    speaker_gender: str = Field(default="neutral", description="Gender of primary speaker: 'male', 'female', 'child', or 'neutral'")
+    emotion: str = Field(default="neutral", description="Emotional vocal delivery: 'neutral', 'tender', 'whisper', 'shouting', 'panicked'")
+    scene_context: str = Field(default="", description="Concise 1-sentence summary of ongoing scene location, mood, and character activity")
+    is_scene_transition: bool = Field(default=False, description="True if this panel begins a new location or time-jump scene")
+    is_internal_thought: bool = Field(default=False, description="True if the text bubble is an internal thought cloud")
+    sfx: str = Field(default="[Atmosphere]", description="Bracketed sound effect text")
+    duration: float = Field(default=4.0, description="Suggested scene duration in seconds")
+    motion_type: str = Field(default="zoom_in", description="Camera movement motion tag")
+    visual_description: str = Field(default="", description="Visual description of the scene composition for camera animation (not for voiceover audio)")
 
 
 class StoryboardPanelModel(BaseModel):

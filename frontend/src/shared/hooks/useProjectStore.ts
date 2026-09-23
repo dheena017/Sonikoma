@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import type { StoryMemoryState } from "../../types/models";
 
 // =============================================================================
 // 1. Strongly Typed Interfaces
@@ -38,6 +39,12 @@ export interface PanelItem {
   detection_style?: string | null;
   smart_crop?: boolean;
   crop_padding?: number | null;
+  speaker_name?: string;
+  speaker_gender?: 'male' | 'female' | 'child' | 'neutral' | string;
+  emotion?: string;
+  scene_context?: string;
+  is_scene_transition?: boolean;
+  is_internal_thought?: boolean;
   [key: string]: any;
 }
 
@@ -201,6 +208,11 @@ export interface ProjectStoreState {
   updateVideoSettings: (videoSettings: VideoSettings, fetchClient?: any) => Promise<boolean>;
   updateAudioSettings: (audioSettings: AudioSettings, fetchClient?: any) => Promise<boolean>;
   updateAutoCropSettings: (autoCropSettings: AutoCropSettings, fetchClient?: any) => Promise<boolean>;
+
+  // ── Cognitive Story Memory ───────────────────────────────────────────────
+  storyMemory: StoryMemoryState | null;
+  updateStoryMemory: (memory: Partial<StoryMemoryState>) => void;
+  resetStoryMemory: () => void;
 
   // ── UI States ─────────────────────────────────────────────────────────────
   setDrawerOpen: (open: boolean) => void;
@@ -471,6 +483,7 @@ export const useProjectStore = create<ProjectStoreState>()(
       selectedPanelIndex: 0,
       projectState: "idle",
       missingProjectInfo: null,
+      storyMemory: null,
       isDrawerOpen: false,
       isDirty: false,
       isHydrating: false,
@@ -891,7 +904,7 @@ export const useProjectStore = create<ProjectStoreState>()(
       setSelectedPanelIndex: (index) => set({ selectedPanelIndex: index }),
 
       updatePanel: (index, updates) => {
-        const { activeProjectData, history, historyIndex } = get();
+        const { activeProjectData, history, historyIndex, storyMemory } = get();
         if (!activeProjectData || !activeProjectData.panels[index]) return;
 
         const updatedPanels = [...activeProjectData.panels];
@@ -904,8 +917,32 @@ export const useProjectStore = create<ProjectStoreState>()(
 
         const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
 
+        let newStoryMemory = storyMemory;
+        if (updates.speaker_name && typeof updates.speaker_name === "string" && updates.speaker_name.trim()) {
+          const sName = updates.speaker_name.trim();
+          const curChar = storyMemory?.characters?.[sName] || {
+            gender: updates.speaker_gender || "neutral",
+            voice: (updates.voice || updates.voiceActor || (updates.speaker_gender === "female" ? "en-US-JennyNeural" : updates.speaker_gender === "child" ? "en-US-AnaNeural" : "en-US-GuyNeural")),
+          };
+          newStoryMemory = {
+            current_scene: storyMemory?.current_scene || "",
+            characters: {
+              ...(storyMemory?.characters || {}),
+              [sName]: {
+                ...curChar,
+                ...(updates.speaker_gender ? { gender: updates.speaker_gender } : {}),
+                ...(updates.voice || updates.voiceActor ? { voice: updates.voice || updates.voiceActor, is_user_locked: true } : {}),
+              },
+            },
+            dialogue_history: storyMemory?.dialogue_history || [],
+            scene_history: storyMemory?.scene_history || [],
+            last_updated_at: new Date().toISOString(),
+          };
+        }
+
         set({
           activeProjectData: updatedData,
+          storyMemory: newStoryMemory,
           isDirty: true,
           ...snapshot,
         });
@@ -1229,6 +1266,32 @@ export const useProjectStore = create<ProjectStoreState>()(
         return true;
       },
 
+      // ── Story Memory Actions ──────────────────────────────────────────────
+      updateStoryMemory: (memoryUpdates) =>
+        set((state) => ({
+          storyMemory: state.storyMemory
+            ? {
+                ...state.storyMemory,
+                ...memoryUpdates,
+                characters: {
+                  ...state.storyMemory.characters,
+                  ...(memoryUpdates.characters || {}),
+                },
+                dialogue_history: memoryUpdates.dialogue_history ?? state.storyMemory.dialogue_history,
+                scene_history: memoryUpdates.scene_history ?? state.storyMemory.scene_history,
+              }
+            : ({
+                current_scene: "",
+                characters: {},
+                dialogue_history: [],
+                scene_history: [],
+                ...memoryUpdates,
+              } as StoryMemoryState),
+          isDirty: true,
+        })),
+
+      resetStoryMemory: () => set({ storyMemory: null, isDirty: true }),
+
       // ── Reset Active Project ──────────────────────────────────────────────
       clearActiveProject: () => {
         clearStoredProjectSession();
@@ -1247,6 +1310,7 @@ export const useProjectStore = create<ProjectStoreState>()(
           historyIndex: -1,
           canUndo: false,
           canRedo: false,
+          storyMemory: null,
         });
       },
 
@@ -1263,6 +1327,7 @@ export const useProjectStore = create<ProjectStoreState>()(
         activeProjectData: state.activeProjectData,
         selectedPanelIndex: state.selectedPanelIndex,
         projectState: state.activeProjectData ? "active" : "idle",
+        storyMemory: state.storyMemory,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.activeProjectData && state.activeProjectId) {

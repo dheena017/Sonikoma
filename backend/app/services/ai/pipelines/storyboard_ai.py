@@ -85,9 +85,11 @@ async def generate_dynamic_panels(
 
     # Map narration style to a length hint for the AI skill
     if narration_style == "short":
-        narrative_length_hint = "An engaging, atmospheric description (under 20 words)."
+        narrative_length_hint = "An engaging, punchy recap narration (35 to 55 words)."
+    elif narration_style == "medium":
+        narrative_length_hint = "A balanced, vivid story narration (65 to 95 words)."
     else:
-        narrative_length_hint = "An engaging, atmospheric description, dialogue, or narrative storytelling (35 to 70 words, detailed for YouTube story narrations)."
+        narrative_length_hint = "A rich, deeply atmospheric, and dramatic YouTube manga/manhwa recap storytelling narration (85 to 150 words, immersive and detailed)."
 
     # Construct the prompt arguments
     prompt_args = {
