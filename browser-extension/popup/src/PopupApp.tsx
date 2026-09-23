@@ -19,7 +19,11 @@ import {
   Radio,
   Scissors,
   Smartphone,
+  AlertCircle,
+  AlertTriangle,
+  Info,
 } from "lucide-react";
+import { ErrorModal, ErrorModalData } from "../../shared/ErrorModal";
 
 interface DetectedImage {
   index: number;
@@ -34,6 +38,11 @@ interface ReadingHistoryItem {
   chapterUrl: string;
   siteDomain?: string;
   timestamp: number;
+}
+
+export interface PopupToastInfo {
+  message: string;
+  type: "info" | "success" | "error" | "warning";
 }
 
 export const PopupApp: React.FC = () => {
@@ -54,7 +63,38 @@ export const PopupApp: React.FC = () => {
   });
   const [panels, setPanels] = useState<DetectedImage[]>([]);
   const [history, setHistory] = useState<ReadingHistoryItem[]>([]);
-  const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [toast, setToast] = useState<PopupToastInfo | null>(null);
+  const [errorModal, setErrorModal] = useState<ErrorModalData | null>(null);
+
+  const showToast = useCallback(
+    (msg: string, type: "info" | "success" | "error" | "warning" = "info") => {
+      setToast({ message: msg, type });
+      const duration = type === "error" ? 5000 : 2500;
+      setTimeout(() => {
+        setToast((current) => (current?.message === msg ? null : current));
+      }, duration);
+    },
+    []
+  );
+
+  const showErrorModal = useCallback(
+    (
+      title: string,
+      message: string,
+      technicalDetails?: string,
+      suggestion?: string,
+      onRetry?: () => void
+    ) => {
+      setErrorModal({
+        title,
+        message,
+        technicalDetails,
+        suggestion,
+        onRetry,
+      });
+    },
+    []
+  );
 
   // 1. Health check
   const checkHealth = useCallback(() => {
@@ -84,7 +124,15 @@ export const PopupApp: React.FC = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
         setIsScanning(false);
-        showToast(`Tab query error: ${chrome.runtime.lastError.message}`);
+        const errMsg = chrome.runtime.lastError.message || "Failed to query active tab";
+        showToast(errMsg, "error");
+        showErrorModal(
+          "Scanner Query Failed",
+          errMsg,
+          undefined,
+          "Verify browser permissions for the Sonikoma extension.",
+          () => scanActiveTab()
+        );
         return;
       }
 
@@ -116,7 +164,13 @@ export const PopupApp: React.FC = () => {
         });
         setPanels([]);
         setIsScanning(false);
-        showToast("⚠️ Cannot scan internal browser pages");
+        showToast("Cannot scan internal browser pages", "warning");
+        showErrorModal(
+          "Cannot Scan Internal Browser Page",
+          "Browser security policies prevent extensions from inspecting internal URLs (e.g. chrome://, edge://, about:).",
+          `Current URL: ${tab.url}`,
+          "Please open a manga reader website (like MangaDex, Webtoons, or Bilibili Comics) and click scan again."
+        );
         return;
       }
 
@@ -249,22 +303,23 @@ export const PopupApp: React.FC = () => {
     loadHistory();
   }, [checkHealth, scanActiveTab, loadHistory]);
 
-  const showToast = (msg: string) => {
-    setActionNotice(msg);
-    setTimeout(() => setActionNotice(null), 2500);
-  };
-
   const dispatchToTab = (messageType: string, label: string) => {
     if (typeof chrome === "undefined" || !chrome.tabs) return;
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const tab = tabs[0];
       if (!tab || !tab.id || !tab.url || !tab.url.startsWith("http")) {
-        alert("Please open any comic or webtoon chapter page to use this action.");
+        showToast("Open a comic or webtoon page first", "warning");
+        showErrorModal(
+          "Manga Tab Required",
+          "This action requires an active web tab running a comic, manga, or webtoon chapter.",
+          undefined,
+          "Open any manga chapter on sites like MangaDex, Webtoons, or Bilibili Comics, then try again."
+        );
         return;
       }
 
-      showToast(`Launching ${label}...`);
+      showToast(`Launching ${label}...`, "info");
       chrome.tabs.sendMessage(tab.id, { type: messageType }, (res) => {
         if (chrome.runtime.lastError || !res) {
           if (chrome.scripting && chrome.scripting.insertCSS) {
@@ -281,8 +336,21 @@ export const PopupApp: React.FC = () => {
               },
               () => {
                 setTimeout(() => {
-                  chrome.tabs.sendMessage(tab.id!, { type: messageType }, () => {
-                    window.close();
+                  chrome.tabs.sendMessage(tab.id!, { type: messageType }, (finalRes) => {
+                    if (chrome.runtime.lastError) {
+                      const errMsg =
+                        chrome.runtime.lastError.message ||
+                        `Failed to inject reader script for ${label}`;
+                      showToast(errMsg, "error");
+                      showErrorModal(
+                        `Failed to Launch ${label}`,
+                        errMsg,
+                        `Message: ${messageType}\nTab ID: ${tab.id}`,
+                        "Refresh the manga tab and try again."
+                      );
+                    } else {
+                      window.close();
+                    }
                   });
                 }, 150);
               }
@@ -316,10 +384,31 @@ export const PopupApp: React.FC = () => {
     if (typeof chrome !== "undefined" && chrome.sidePanel && chrome.sidePanel.open) {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]?.id) {
-          chrome.sidePanel.open({ tabId: tabs[0].id });
-          window.close();
+          chrome.sidePanel
+            .open({ tabId: tabs[0].id })
+            .then(() => {
+              window.close();
+            })
+            .catch((err: any) => {
+              const errMsg = err?.message || "Chrome side panel could not be opened automatically.";
+              showToast("Failed to open side panel", "error");
+              showErrorModal(
+                "Side Panel Launch Failed",
+                errMsg,
+                String(err),
+                "Right-click the Sonikoma extension icon in your browser toolbar and click 'Open side panel'."
+              );
+            });
         }
       });
+    } else {
+      showToast("Side panel not supported in this browser", "warning");
+      showErrorModal(
+        "Side Panel Unsupported",
+        "Your browser does not support the Chrome SidePanel API.",
+        navigator.userAgent,
+        "Update to Google Chrome 114+ or open the full Web Studio."
+      );
     }
   };
 
@@ -392,6 +481,23 @@ export const PopupApp: React.FC = () => {
         </button>
       </header>
 
+      {/* Offline Status Warning */}
+      {!isOnline && !isCheckingHealth && (
+        <div className="bg-amber-950/80 border border-amber-800/80 rounded-xl px-2.5 py-1.5 flex items-center justify-between text-[11px] text-amber-200 shadow-md">
+          <div className="flex items-center gap-1.5 truncate">
+            <AlertTriangle size={13} className="text-amber-400 shrink-0" />
+            <span className="truncate">Backend server offline (5173).</span>
+          </div>
+          <button
+            type="button"
+            onClick={checkHealth}
+            className="ml-2 text-[10px] underline text-amber-300 hover:text-white shrink-0 cursor-pointer font-medium"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* ── 2. Segmented Navigation Tabs ── */}
       <nav className="flex bg-[#0e1422] border border-[#1e293b] rounded-xl p-1 gap-1 shadow-inner">
         <button
@@ -448,10 +554,32 @@ export const PopupApp: React.FC = () => {
       </nav>
 
       {/* Toast Notice */}
-      {actionNotice && (
-        <div className="flex items-center gap-2 bg-gradient-to-r from-sky-950 to-blue-950 border border-sky-500 text-sky-200 px-3 py-1.5 rounded-lg text-xs font-medium animate-in fade-in shadow-lg">
-          <CheckCircle2 size={14} className="text-sky-400 shrink-0 animate-pulse" />
-          <span>{actionNotice}</span>
+      {toast && (
+        <div
+          className={`flex items-center justify-between gap-2 border px-3 py-1.5 rounded-xl text-xs font-medium animate-in fade-in shadow-lg ${
+            toast.type === "error"
+              ? "bg-rose-950/90 border-rose-600/80 text-rose-200"
+              : toast.type === "warning"
+              ? "bg-amber-950/90 border-amber-600/80 text-amber-200"
+              : toast.type === "success"
+              ? "bg-emerald-950/90 border-emerald-600/80 text-emerald-200"
+              : "bg-gradient-to-r from-sky-950 to-blue-950 border-sky-500 text-sky-200"
+          }`}
+        >
+          <div className="flex items-center gap-2 truncate">
+            {toast.type === "error" && <AlertCircle size={14} className="text-rose-400 shrink-0" />}
+            {toast.type === "warning" && <AlertTriangle size={14} className="text-amber-400 shrink-0" />}
+            {toast.type === "success" && <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />}
+            {toast.type === "info" && <Info size={14} className="text-sky-400 shrink-0" />}
+            <span className="truncate">{toast.message}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer"
+          >
+            <X size={12} />
+          </button>
         </div>
       )}
 
@@ -770,6 +898,12 @@ export const PopupApp: React.FC = () => {
           </div>
         </main>
       )}
+
+      {/* ── Full Dedicated Error Modal ── */}
+      <ErrorModal
+        error={errorModal}
+        onClose={() => setErrorModal(null)}
+      />
     </div>
   );
 };
