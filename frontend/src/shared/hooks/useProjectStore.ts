@@ -606,9 +606,15 @@ export const useProjectStore = create<ProjectStoreState>()(
           return;
         }
 
-        // 🌟 Temp projects exist only in localStorage -> Keep active immediately!
+        // 🌟 Temp projects exist only in localStorage or backend transfer -> Keep active immediately!
         if (isTempProject(idToHydrate)) {
-          if (currentData && currentData.project && (currentData.project.project_id === idToHydrate || isTempProject(currentData.project.project_id))) {
+          // If current in-memory project matches this exact id, keep it
+          if (
+            currentData &&
+            currentData.project &&
+            currentData.project.project_id === idToHydrate &&
+            (currentData.panels?.length > 0 || (currentData.scrapedImages && currentData.scrapedImages.length > 0))
+          ) {
             set({
               activeProjectId: idToHydrate,
               projectState: "active",
@@ -618,14 +624,122 @@ export const useProjectStore = create<ProjectStoreState>()(
             return;
           }
 
+          // 1. Check if this temp project has transferred storyboard panels/images from backend
+          try {
+            const transferRes = await fetch(`/api/v1/projects/transfer/${encodeURIComponent(idToHydrate)}`);
+            if (transferRes.ok) {
+              const transferData = await transferRes.json();
+              if (transferData && transferData.success && Array.isArray(transferData.panels) && transferData.panels.length > 0) {
+                const transferredPanels: PanelItem[] = transferData.panels.map((p: any, idx: number) => ({
+                  id: p.id || idx + 1,
+                  panel_index: p.panel_index ?? idx,
+                  prompt: p.prompt || p.visual_description || p.speech_text || `Scene ${idx + 1}`,
+                  image_url: p.image_url || p.imageUrl || "",
+                  original_url: p.original_url || p.imageUrl || p.image_url || "",
+                  speech_text: p.speech_text || p.dialogueText || "",
+                  narrative: p.narrative || p.narrativeText || "",
+                  sfx: p.sfx || "",
+                  duration: p.duration || 3.0,
+                  motion_type: p.motion_type || p.motionPreset || "zoom_in",
+                  visual_description: p.visual_description || p.visualDescription || "",
+                  audio_url: p.audio_url || p.audioUrl || "",
+                  narrative_audio_url: p.narrative_audio_url || p.narrativeAudioUrl || "",
+                  speech_audio_url: p.speech_audio_url || p.audioUrl || "",
+                }));
+
+                const transferredImages: string[] =
+                  Array.isArray(transferData.scraped_images) && transferData.scraped_images.length > 0
+                    ? transferData.scraped_images
+                    : transferredPanels.map((p) => p.image_url).filter(Boolean);
+
+                const title = transferData.title || transferData.series_title || "Imported Comic";
+
+                const newActiveData: ActiveProjectData = {
+                  project: {
+                    project_id: idToHydrate,
+                    title: title,
+                    url: transferData.url || "",
+                    chapter_title: transferData.chapter_title || "",
+                    cover_image: transferredImages[0] || "",
+                  },
+                  panels: transferredPanels,
+                  scrapedImages: transferredImages,
+                };
+
+                set({
+                  activeProjectId: idToHydrate,
+                  activeProjectData: newActiveData,
+                  projectState: "active",
+                  missingProjectInfo: null,
+                  isHydrating: false,
+                });
+                return;
+              }
+            }
+          } catch (e) {
+            console.warn("[useProjectStore] Error checking transfer project:", e);
+          }
+
+          // 2. Check localStorage for sonikoma_import_project
+          try {
+            const importRaw = localStorage.getItem("sonikoma_import_project");
+            if (importRaw) {
+              const parsed = JSON.parse(importRaw);
+              if (parsed && (parsed.project_id === idToHydrate || !parsed.project_id) && Array.isArray(parsed.panels) && parsed.panels.length > 0) {
+                const transferredPanels: PanelItem[] = parsed.panels.map((p: any, idx: number) => ({
+                  id: p.id || idx + 1,
+                  panel_index: p.panel_index ?? idx,
+                  prompt: p.prompt || p.visual_description || p.speech_text || `Scene ${idx + 1}`,
+                  image_url: p.image_url || p.imageUrl || "",
+                  original_url: p.original_url || p.imageUrl || p.image_url || "",
+                  speech_text: p.speech_text || p.dialogueText || "",
+                  narrative: p.narrative || p.narrativeText || "",
+                  sfx: p.sfx || "",
+                  duration: p.duration || 3.0,
+                  motion_type: p.motion_type || p.motionPreset || "zoom_in",
+                  visual_description: p.visual_description || p.visualDescription || "",
+                }));
+
+                const transferredImages: string[] =
+                  Array.isArray(parsed.scraped_images) && parsed.scraped_images.length > 0
+                    ? parsed.scraped_images
+                    : transferredPanels.map((p) => p.image_url).filter(Boolean);
+
+                const newActiveData: ActiveProjectData = {
+                  project: {
+                    project_id: idToHydrate,
+                    title: parsed.title || parsed.series_title || "Imported Comic",
+                    url: parsed.url || "",
+                    chapter_title: parsed.chapter_title || "",
+                    cover_image: transferredImages[0] || "",
+                  },
+                  panels: transferredPanels,
+                  scrapedImages: transferredImages,
+                };
+
+                set({
+                  activeProjectId: idToHydrate,
+                  activeProjectData: newActiveData,
+                  projectState: "active",
+                  missingProjectInfo: null,
+                  isHydrating: false,
+                });
+                return;
+              }
+            }
+          } catch (e) {
+            console.error("Error reading import project from local storage:", e);
+          }
+
+          // 3. Check localStorage active-project-store ONLY for this specific project_id
           try {
             const raw = localStorage.getItem("sonikoma-active-project-store");
             if (raw) {
               const parsed = JSON.parse(raw);
               const storeData = parsed?.state?.activeProjectData;
-              if (storeData?.project) {
+              if (storeData?.project && storeData.project.project_id === idToHydrate) {
                 set({
-                  activeProjectId: storeData.project.project_id || idToHydrate,
+                  activeProjectId: idToHydrate,
                   activeProjectData: storeData,
                   projectState: "active",
                   missingProjectInfo: null,
@@ -638,7 +752,7 @@ export const useProjectStore = create<ProjectStoreState>()(
             console.error("Error reading temp project from local storage:", e);
           }
 
-          // Initialize local draft if not present
+          // 4. Initialize fresh local draft if not present (never keep previous project's assets)
           const draftData: ActiveProjectData = {
             project: {
               project_id: idToHydrate,

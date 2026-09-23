@@ -23,118 +23,20 @@ export class DomMangaScanner {
     if (this.snifferInjected || typeof document === "undefined") return;
     this.snifferInjected = true;
 
-    // Listen for custom events dispatched by the page-level interceptor
-    window.addEventListener("sonikoma:network_images", (e: any) => {
-      if (e && e.detail && Array.isArray(e.detail.images)) {
-        for (const url of e.detail.images) {
-          if (typeof url === "string" && url.startsWith("http")) {
-            this.capturedNetworkImages.add(url);
+    // Safely extract static script content (e.g. Next.js __NEXT_DATA__ or inline JSON)
+    // without injecting inline script tags that violate host site Content Security Policies (CSP).
+    try {
+      const nextDataEl = document.getElementById("__NEXT_DATA__");
+      if (nextDataEl && nextDataEl.textContent) {
+        const matches = nextDataEl.textContent.match(
+          /https?:\/\/[^"'\s]+\.(?:jpg|jpeg|png|webp|avif)(?:\?[^"'\s]*)?/gi
+        );
+        if (matches) {
+          for (const u of matches) {
+            this.capturedNetworkImages.add(u.replace(/\\\//g, "/"));
           }
         }
       }
-    });
-
-    // Inject interceptor into the page context to sniff fetch/XHR & global variables
-    try {
-      const script = document.createElement("script");
-      script.setAttribute("type", "text/javascript");
-      script.textContent = `
-        (function() {
-          if (window.__sonikoma_sniffer_active) return;
-          window.__sonikoma_sniffer_active = true;
-          window.__SONIKOMA_CAPTURED_IMAGES__ = window.__SONIKOMA_CAPTURED_IMAGES__ || [];
-
-          function pushUrls(urls) {
-            if (!Array.isArray(urls) || urls.length === 0) return;
-            const valid = [];
-            for (const u of urls) {
-              if (typeof u === 'string' && u.length > 8 && (u.startsWith('http') || u.startsWith('//') || u.startsWith('/'))) {
-                let full = u;
-                if (full.startsWith('//')) full = 'https:' + full;
-                else if (full.startsWith('/')) full = window.location.origin + full;
-                if (!window.__SONIKOMA_CAPTURED_IMAGES__.includes(full)) {
-                  window.__SONIKOMA_CAPTURED_IMAGES__.push(full);
-                  valid.push(full);
-                }
-              }
-            }
-            if (valid.length > 0) {
-              window.dispatchEvent(new CustomEvent('sonikoma:network_images', { detail: { images: valid } }));
-            }
-          }
-
-          // 1. Inspect window global variables
-          function inspectGlobals() {
-            try {
-              if (window.__NEXT_DATA__ && window.__NEXT_DATA__.props) {
-                const s = JSON.stringify(window.__NEXT_DATA__.props);
-                const matches = s.match(/https?:\\/\\/[^"'\s]+\\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'\s]*)?/gi);
-                if (matches) pushUrls(matches);
-              }
-              if (window.chapter_data && Array.isArray(window.chapter_data.images)) {
-                pushUrls(window.chapter_data.images.map(i => typeof i === 'string' ? i : i.url || i.src));
-              }
-              if (window.pages && Array.isArray(window.pages)) {
-                pushUrls(window.pages.map(i => typeof i === 'string' ? i : i.url || i.src));
-              }
-              if (window.chapImages && Array.isArray(window.chapImages)) {
-                pushUrls(window.chapImages);
-              }
-              if (window.pData && window.pData.img) {
-                pushUrls(Array.isArray(window.pData.img) ? window.pData.img : [window.pData.img]);
-              }
-              if (window.ts_reader && window.ts_reader.params && window.ts_reader.params.sources) {
-                for (const src of window.ts_reader.params.sources) {
-                  if (src && Array.isArray(src.images)) pushUrls(src.images);
-                }
-              }
-            } catch (_) {}
-          }
-          inspectGlobals();
-          setTimeout(inspectGlobals, 1500);
-
-          // 2. Intercept window.fetch
-          const origFetch = window.fetch;
-          if (origFetch) {
-            window.fetch = async function(...args) {
-              const res = await origFetch.apply(this, args);
-              try {
-                const clone = res.clone();
-                const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
-                if (url.includes('chapter') || url.includes('api') || url.includes('at-home') || url.includes('pages')) {
-                  clone.json().then(data => {
-                    const str = JSON.stringify(data);
-                    const matches = str.match(/https?:\\/\\/[^"'\s]+\\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'\s]*)?/gi);
-                    if (matches) pushUrls(matches);
-                  }).catch(() => {});
-                }
-              } catch (_) {}
-              return res;
-            };
-          }
-
-          // 3. Intercept XMLHttpRequest
-          const origOpen = XMLHttpRequest.prototype.open;
-          const origSend = XMLHttpRequest.prototype.send;
-          XMLHttpRequest.prototype.open = function(method, url) {
-            this.__sonikoma_req_url = url;
-            return origOpen.apply(this, arguments);
-          };
-          XMLHttpRequest.prototype.send = function() {
-            this.addEventListener('load', function() {
-              try {
-                if (this.responseText && this.responseText.length > 50) {
-                  const matches = this.responseText.match(/https?:\\/\\/[^"'\s]+\\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'\s]*)?/gi);
-                  if (matches && matches.length >= 2) pushUrls(matches);
-                }
-              } catch (_) {}
-            });
-            return origSend.apply(this, arguments);
-          };
-        })();
-      `;
-      (document.head || document.documentElement).appendChild(script);
-      script.remove();
     } catch (_) {}
   }
 

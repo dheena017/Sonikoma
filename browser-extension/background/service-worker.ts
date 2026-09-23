@@ -12,7 +12,7 @@ export interface ExtensionConfig {
 }
 
 const DEFAULT_CONFIG: ExtensionConfig = {
-  apiBaseUrl: "http://localhost:5173",
+  apiBaseUrl: "http://127.0.0.1:5173",
   webBaseUrl: "http://localhost:3000",
   isProduction: false,
 };
@@ -23,8 +23,8 @@ async function getApiBaseUrl(): Promise<string> {
       chrome.storage.sync.get(["sonikoma_config"], (result) => {
         const stored = result && result.sonikoma_config ? result.sonikoma_config : {};
         let base = stored.apiBaseUrl || DEFAULT_CONFIG.apiBaseUrl;
-        if (!base || base.includes("sonikoma.com") || base.includes("8000")) {
-          base = "http://localhost:5173";
+        if (!base || base.includes("sonikoma.com") || base.includes("8000") || base.includes("localhost:5173")) {
+          base = "http://127.0.0.1:5173";
         }
         resolve(base);
       });
@@ -49,6 +49,40 @@ async function getWebBaseUrl(): Promise<string> {
       resolve(DEFAULT_CONFIG.webBaseUrl);
     }
   });
+}
+
+/**
+ * Resilient API fetcher: tries direct FastAPI (127.0.0.1:5173), Vite web proxy (localhost:3000),
+ * and localhost:5173, preventing IPv6 connection failures on Windows.
+ */
+async function fetchWithFallback(
+  path: string,
+  init?: RequestInit
+): Promise<{ res: Response; baseUrl: string }> {
+  const base = await getApiBaseUrl();
+  const webBase = await getWebBaseUrl();
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+
+  const candidateBases = Array.from(
+    new Set([
+      base ? base.replace(/\/+$/, "") : "http://127.0.0.1:5173",
+      "http://127.0.0.1:5173",
+      webBase ? webBase.replace(/\/+$/, "") : "http://localhost:3000",
+      "http://localhost:5173",
+    ])
+  ).filter(Boolean);
+
+  let lastError: any = null;
+  for (const candidate of candidateBases) {
+    try {
+      const url = `${candidate}${cleanPath}`;
+      const res = await fetch(url, init);
+      return { res, baseUrl: candidate };
+    } catch (err: any) {
+      lastError = err;
+    }
+  }
+  throw lastError || new Error("Failed to fetch");
 }
 
 // Dynamic Referer & Hotlink Rules for Manga CDNs (Webtoons pstatic.net, MangaDex, etc.)
@@ -188,8 +222,12 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       }
     } else if (info.menuItemId === "sonikoma-animate-chapter") {
       const base = await getWebBaseUrl();
-      const url = new URL(`${base.replace(/\/+$/, "")}/scraper`);
+      const webBase = base.replace(/\/+$/, "");
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const url = new URL(`${webBase}/editor`);
+      url.searchParams.set("id", tempId);
       url.searchParams.set("url", tab.url);
+      url.searchParams.set("importUrl", tab.url);
       chrome.tabs.create({ url: url.toString() }, () => {
         if (chrome.runtime.lastError) {}
       });
@@ -251,6 +289,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   return true;
 });
+
+// In-flight scrape request deduplication cache to prevent concurrent identical backend calls
+const inFlightScrapes = new Map<string, Promise<any>>();
 
 async function handleIncomingMessage(message: any, _sender: chrome.runtime.MessageSender) {
   const { type, payload } = message || {};
@@ -487,144 +528,255 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     case "API_RENDER_VIDEO": {
       try {
         const base = await getApiBaseUrl();
-        const res = await fetch(`${base.replace(/\/+$/, "")}/api/v1/video/render`, {
+        const cleanBase = base.replace(/\/+$/, "");
+
+        const rawPanels = Array.isArray(payload?.panels) ? payload.panels : [];
+        const normalizedPanels = rawPanels.map((p: any, idx: number) => {
+          let panelId = typeof p.id === "number" ? p.id : parseInt(String(p.id).replace(/\D/g, ""), 10);
+          if (isNaN(panelId)) panelId = idx + 1;
+          return {
+            id: panelId,
+            image_url: p.image_url || p.imageUrl || "",
+            duration: typeof p.duration === "number" ? p.duration : 3.0,
+            speech_text: p.speech_text || p.dialogueText || p.narrativeText || "",
+            sfx: p.sfx || "",
+            audio_url: p.audio_url || p.audioUrl || p.narrativeAudioUrl || "",
+            motion_type: p.motion_type || p.motionPreset || "",
+          };
+        });
+
+        const renderPayload = {
+          project_id: payload?.project_id || ("ext-" + Date.now()),
+          panels: normalizedPanels,
+          voice: payload?.voice || "en-US-GuyNeural",
+          music_theme: payload?.music_theme || payload?.bgm_mood || "none",
+          aspect_ratio: payload?.aspect_ratio || "16:9",
+          frame_rate: payload?.frame_rate || 24,
+          video_format: payload?.video_format || "mp4",
+          background_style: payload?.background_style || "black",
+          subtitles_style: payload?.subtitles_style || (payload?.show_subtitles ? "burn-in" : "none"),
+          master_volume: payload?.master_volume ?? 1.0,
+          narration_volume: payload?.narration_volume ?? 1.0,
+          bgm_volume: typeof payload?.bgm_volume === "number" ? (payload.bgm_volume > 1 ? payload.bgm_volume / 100 : payload.bgm_volume) : 0.65,
+          speech_rate: payload?.speech_rate ?? 1.0,
+          speech_pitch: payload?.speech_pitch ?? 1.0,
+        };
+
+        const res = await fetch(`${cleanBase}/api/v1/video/render`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(renderPayload),
         });
-        if (!res.ok) return { success: false, isOffline: true };
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          let errDetail = errText;
+          try {
+            const errJson = JSON.parse(errText);
+            errDetail = errJson.detail || errJson.error || errText;
+          } catch {}
+          return { success: false, error: errDetail || `Backend HTTP ${res.status}` };
+        }
         const data = await res.json();
         return { success: true, ...data };
       } catch (err: any) {
-        return { success: false, isOffline: true, error: err.message };
+        return { success: false, isOffline: true, error: err.message || "Failed to contact backend render engine" };
+      }
+    }
+
+    case "API_GET_JOB_STATUS": {
+      try {
+        const jobId = payload?.job_id;
+        if (!jobId) {
+          return { success: false, error: "job_id is required" };
+        }
+        const base = await getApiBaseUrl();
+        const cleanBase = base.replace(/\/+$/, "");
+        const res = await fetch(`${cleanBase}/api/v1/jobs/${encodeURIComponent(jobId)}`, {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+        });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          return { success: false, error: errText || `HTTP ${res.status}` };
+        }
+        const data = await res.json();
+        if (data.result?.video_url && data.result.video_url.startsWith("/")) {
+          data.result.video_url = `${cleanBase}${data.result.video_url}`;
+        }
+        if (data.url && data.url.startsWith("/")) {
+          data.url = `${cleanBase}${data.url}`;
+        }
+        return { success: true, ...data };
+      } catch (err: any) {
+        return { success: false, error: err.message };
       }
     }
 
     case "API_SCRAPE_CHAPTER": {
       try {
-        const base = await getApiBaseUrl();
-        const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
         const targetUrl = payload?.url?.trim();
         if (!targetUrl) {
           return { success: false, error: "Target URL is required." };
         }
 
-        const forceRefresh = Boolean(payload?.force_refresh);
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 60000);
-
-        // 1. Try dedicated reader-chapter endpoint used by the website reader
-        const readerEndpoint = `${apiBase}/api/v1/scraper/reader-chapter`;
-        let data: any = null;
-        let fetchError: string | null = null;
-
+        // 1. Guard: Never attempt to scrape internal, localhost, or studio URLs
         try {
-          const res = await fetch(readerEndpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Accept: "application/json" },
-            body: JSON.stringify({
-              url: targetUrl,
-              force_refresh: forceRefresh,
-            }),
-            signal: controller.signal,
-          });
-
-          if (res.ok) {
-            data = await res.json();
-          } else {
-            console.warn(`[API_SCRAPE_CHAPTER] /reader-chapter returned ${res.status}, attempting /chapter/sync fallback`);
+          const u = new URL(targetUrl);
+          const host = u.hostname.toLowerCase();
+          if (
+            host === "localhost" ||
+            host === "127.0.0.1" ||
+            host === "0.0.0.0" ||
+            host.endsWith(".local") ||
+            targetUrl.startsWith("chrome://") ||
+            targetUrl.startsWith("edge://") ||
+            targetUrl.startsWith("about:") ||
+            targetUrl.startsWith("chrome-extension://") ||
+            targetUrl.startsWith("file://")
+          ) {
+            return {
+              success: false,
+              isInternal: true,
+              error: "Cannot scrape internal, localhost, or studio pages.",
+            };
           }
-        } catch (rErr: any) {
-          console.warn("[API_SCRAPE_CHAPTER] /reader-chapter fetch error:", rErr?.message || rErr);
+        } catch {
+          return { success: false, error: "Invalid target URL." };
         }
 
-        // 2. If reader-chapter didn't succeed, fallback to synchronous chapter scrape endpoint
-        if (!data || !data.success) {
+        const forceRefresh = Boolean(payload?.force_refresh);
+        const cacheKey = `${targetUrl}__${forceRefresh}`;
+
+        // 2. In-flight request deduplication: reuse pending promise for identical URL
+        if (inFlightScrapes.has(cacheKey)) {
+          return await inFlightScrapes.get(cacheKey)!;
+        }
+
+        const scrapePromise = (async () => {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 60000);
+
+          let data: any = null;
+          let fetchError: string | null = null;
+          let effectiveBaseUrl = "http://127.0.0.1:5173";
+
           try {
-            const syncEndpoint = `${apiBase}/api/v1/scraper/chapter/sync`;
-            const syncRes = await fetch(syncEndpoint, {
+            const { res, baseUrl } = await fetchWithFallback("/api/v1/scraper/reader-chapter", {
               method: "POST",
               headers: { "Content-Type": "application/json", Accept: "application/json" },
               body: JSON.stringify({
                 url: targetUrl,
                 force_refresh: forceRefresh,
-                bypass_cache: forceRefresh,
-                proxy_images: true,
-                filter_banners: true,
               }),
               signal: controller.signal,
             });
+            effectiveBaseUrl = baseUrl;
 
-            if (syncRes.ok) {
-              const syncData = await syncRes.json();
-              if (syncData && syncData.success) {
-                data = {
-                  success: true,
-                  url: syncData.url || targetUrl,
-                  series_title: syncData.series?.title || "",
-                  chapter_title: syncData.chapter?.title || (syncData.chapter?.number ? `Chapter ${syncData.chapter.number}` : ""),
-                  chapter_number: syncData.chapter?.number || null,
-                  total_panels: syncData.total_images || (syncData.images ? syncData.images.length : 0),
-                  panels: (syncData.images || []).map((img: any, idx: number) => ({
-                    index: idx,
-                    url: img.url || (typeof img === "string" ? img : ""),
-                    proxied_url: img.proxied_url || img.url || "",
-                    width: img.width || 800,
-                    height: img.height || 1200,
-                  })),
-                  images: (syncData.images || []).map((img: any) => img.proxied_url || img.url || (typeof img === "string" ? img : "")),
-                  raw_images: (syncData.images || []).map((img: any) => img.url || (typeof img === "string" ? img : "")),
-                };
-              }
+            if (res.ok) {
+              data = await res.json();
             } else {
-              const errJson = await syncRes.json().catch(() => null);
-              fetchError = errJson?.detail || `HTTP ${syncRes.status}`;
+              console.warn(`[API_SCRAPE_CHAPTER] /reader-chapter returned ${res.status}, attempting /chapter/sync fallback`);
             }
-          } catch (sErr: any) {
-            fetchError = sErr?.message || String(sErr);
+          } catch (rErr: any) {
+            console.warn("[API_SCRAPE_CHAPTER] /reader-chapter fetch error:", rErr?.message || rErr);
+            fetchError = rErr?.message || String(rErr);
           }
-        }
-        clearTimeout(timeout);
 
-        if (data && data.success && Array.isArray(data.panels) && data.panels.length > 0) {
-          // Normalize all image URLs: prefix relative proxy URLs with apiBase
-          const normalizeUrl = (u: string) => {
-            if (!u) return "";
-            if (u.startsWith("/")) return `${apiBase}${u}`;
-            return u;
-          };
+          // If reader-chapter didn't succeed, fallback to synchronous chapter scrape endpoint
+          if (!data || !data.success) {
+            try {
+              const { res: syncRes, baseUrl: syncBase } = await fetchWithFallback("/api/v1/scraper/chapter/sync", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify({
+                  url: targetUrl,
+                  force_refresh: forceRefresh,
+                  bypass_cache: forceRefresh,
+                  proxy_images: true,
+                  filter_banners: true,
+                }),
+                signal: controller.signal,
+              });
+              effectiveBaseUrl = syncBase;
 
-          const normalizedPanels = data.panels.map((p: any, idx: number) => {
-            const raw = p.url || "";
-            const proxied = normalizeUrl(p.proxied_url || p.url || "");
-            return {
-              index: idx + 1,
-              src: proxied || raw,
-              url: raw,
-              proxied_url: proxied,
-              width: p.width || 800,
-              height: p.height || 1200,
+              if (syncRes.ok) {
+                const syncData = await syncRes.json();
+                if (syncData && syncData.success) {
+                  data = {
+                    success: true,
+                    url: syncData.url || targetUrl,
+                    series_title: syncData.series?.title || "",
+                    chapter_title: syncData.chapter?.title || (syncData.chapter?.number ? `Chapter ${syncData.chapter.number}` : ""),
+                    chapter_number: syncData.chapter?.number || null,
+                    total_panels: syncData.total_images || (syncData.images ? syncData.images.length : 0),
+                    panels: (syncData.images || []).map((img: any, idx: number) => ({
+                      index: idx,
+                      url: img.url || (typeof img === "string" ? img : ""),
+                      proxied_url: img.proxied_url || img.url || "",
+                      width: img.width || 800,
+                      height: img.height || 1200,
+                    })),
+                    images: (syncData.images || []).map((img: any) => img.proxied_url || img.url || (typeof img === "string" ? img : "")),
+                    raw_images: (syncData.images || []).map((img: any) => img.url || (typeof img === "string" ? img : "")),
+                  };
+                }
+              } else {
+                const errJson = await syncRes.json().catch(() => null);
+                fetchError = errJson?.detail || `HTTP ${syncRes.status}`;
+              }
+            } catch (sErr: any) {
+              fetchError = sErr?.message || String(sErr);
+            }
+          }
+          clearTimeout(timeout);
+
+          if (data && data.success && Array.isArray(data.panels) && data.panels.length > 0) {
+            // Normalize all image URLs: prefix relative proxy URLs with effectiveBaseUrl
+            const normalizeUrl = (u: string) => {
+              if (!u) return "";
+              if (u.startsWith("/")) return `${effectiveBaseUrl}${u}`;
+              return u;
             };
-          });
 
-          const normalizedImages = (data.images || []).map((u: string) => normalizeUrl(u));
+            const normalizedPanels = data.panels.map((p: any, idx: number) => {
+              const raw = p.url || "";
+              const proxied = normalizeUrl(p.proxied_url || p.url || "");
+              return {
+                index: idx + 1,
+                src: proxied || raw,
+                url: raw,
+                proxied_url: proxied,
+                width: p.width || 800,
+                height: p.height || 1200,
+              };
+            });
+
+            const normalizedImages = (data.images || []).map((u: string) => normalizeUrl(u));
+
+            return {
+              success: true,
+              seriesTitle: data.series_title || "",
+              chapterTitle: data.chapter_title || "",
+              chapterNumber: data.chapter_number,
+              totalPanels: normalizedPanels.length,
+              panels: normalizedPanels,
+              images: normalizedPanels,
+              imageUrls: normalizedImages,
+            };
+          }
 
           return {
-            success: true,
-            seriesTitle: data.series_title || "",
-            chapterTitle: data.chapter_title || "",
-            chapterNumber: data.chapter_number,
-            totalPanels: normalizedPanels.length,
-            panels: normalizedPanels,
-            images: normalizedPanels,
-            imageUrls: normalizedImages,
+            success: false,
+            error: fetchError || "Backend scraper did not return any panels for this URL.",
           };
-        }
+        })();
 
-        return {
-          success: false,
-          error: fetchError || "Backend scraper did not return any panels for this URL.",
-        };
+        inFlightScrapes.set(cacheKey, scrapePromise);
+        try {
+          return await scrapePromise;
+        } finally {
+          inFlightScrapes.delete(cacheKey);
+        }
       } catch (err: any) {
         return {
           success: false,
@@ -635,9 +787,64 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
 
     case "OPEN_WEB_STUDIO": {
       const base = await getWebBaseUrl();
-      const url = new URL(`${base.replace(/\/+$/, "")}/scraper`);
-      if (payload?.url) url.searchParams.set("url", payload.url);
-      if (payload?.title) url.searchParams.set("title", payload.title);
+      const webBase = base.replace(/\/+$/, "");
+      const apiBase = await getApiBaseUrl();
+      const cleanApi = apiBase.replace(/\/+$/, "");
+
+      const tabUrl = payload?.url?.trim();
+      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const panels = Array.isArray(payload?.panels) ? payload.panels : [];
+      const scrapedImages = Array.isArray(payload?.scrapedImages) ? payload.scrapedImages : [];
+
+      if (panels.length > 0) {
+        const transferBody = JSON.stringify({
+          project_id: tempId,
+          url: tabUrl,
+          title: payload?.title || "Imported Comic",
+          series_title: payload?.title || "Imported Comic",
+          chapter_title: payload?.chapterTitle || "",
+          panels: panels,
+          scraped_images: scrapedImages,
+          voice: payload?.voice || "en-US-GuyNeural",
+          music_theme: payload?.musicTheme || "none",
+          aspect_ratio: payload?.aspectRatio || "16:9",
+        });
+
+        let saved = false;
+        try {
+          const res = await fetch(`${cleanApi}/api/v1/projects/transfer`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: transferBody,
+          });
+          if (res.ok) saved = true;
+        } catch (e) {
+          console.warn("[Service Worker] Direct API transfer failed, will try web base:", e);
+        }
+
+        if (!saved && webBase && webBase !== cleanApi) {
+          try {
+            await fetch(`${webBase}/api/v1/projects/transfer`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: transferBody,
+            });
+          } catch (e2) {
+            console.warn("[Service Worker] Web proxy transfer failed:", e2);
+          }
+        }
+      }
+
+      const url = new URL(`${webBase}/editor`);
+      url.searchParams.set("id", tempId);
+      url.searchParams.set("transfer", "1");
+      if (tabUrl && tabUrl.startsWith("http")) {
+        url.searchParams.set("url", tabUrl);
+        url.searchParams.set("importUrl", tabUrl);
+      }
+      if (payload?.title) {
+        url.searchParams.set("title", payload.title);
+      }
       chrome.tabs.create({ url: url.toString() });
       return { success: true, url: url.toString() };
     }

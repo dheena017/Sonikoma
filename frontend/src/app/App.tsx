@@ -498,54 +498,156 @@ export default function App() {
     chapterSlug: chapterSlugState,
   });
 
-  // Trigger automatic scraping if ?importUrl=... is present in the URL on mount or path change, or if auto_import_url/auto_import_batch exists in localStorage
+  // Trigger automatic scraping or direct storyboard transfer if ?importUrl=... or ?transfer=1 is present
   React.useEffect(() => {
-    if (!isAuthenticated || authLoading || isInitializing) return;
-
     const params = new URLSearchParams(window.location.search);
     const importBatchRaw = localStorage.getItem("auto_import_batch");
     const importUrl =
-      params.get("importUrl") || localStorage.getItem("auto_import_url");
-    const projId = params.get("id") || params.get("project_id");
+      params.get("importUrl") || params.get("url") || localStorage.getItem("auto_import_url");
+    let projId = params.get("id") || params.get("project_id");
+    const isTransfer = params.get("transfer") === "1";
+
+    const isTempOrImport = Boolean(projId && projId.startsWith("temp_")) || Boolean(importUrl) || isTransfer;
+    if (!isTempOrImport && (!isAuthenticated || authLoading || isInitializing)) return;
+
+    if (!projId && importUrl) {
+      projId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    }
 
     if (projId && projId.startsWith("temp_")) {
       // Clean up the URL parameters so it doesn't trigger again on reload/navigation
       const newParams = new URLSearchParams(window.location.search);
       newParams.delete("importUrl");
+      newParams.delete("url");
+      newParams.delete("transfer");
       const newSearch = newParams.toString();
       const newUrl =
         window.location.pathname + (newSearch ? "?" + newSearch : "");
       window.history.replaceState(null, "", newUrl);
 
-      if (importBatchRaw) {
-        localStorage.removeItem("auto_import_batch");
-        localStorage.removeItem("auto_import_url");
-        try {
-          const episodesList = JSON.parse(importBatchRaw);
-          if (Array.isArray(episodesList) && episodesList.length > 0) {
-            console.log(
-              `[Auto Scrape] Triggering batch import for ${episodesList.length} episodes on project: ${projId}`
-            );
-            if (scrapeBatchEpisodes) {
-              scrapeBatchEpisodes(episodesList, projId);
-            }
-            return;
-          }
-        } catch (e) {
-          console.error("[Auto Scrape] Error parsing auto_import_batch:", e);
-        }
-      }
+      // Check if complete storyboard panels, images, and texts were transferred from extension
+      const checkAndLoadTransfer = async () => {
+        let transferData: any = null;
 
-      if (importUrl) {
-        console.log(
-          `[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`
-        );
-        localStorage.removeItem("auto_import_url");
-        setTargetUrl(importUrl);
-        scrapeImages(importUrl, projId).catch((err) => {
-          console.error("[Auto Scrape] Failed to scrape images:", err);
-        });
-      }
+        // 1. Try local storage first if set
+        const localRaw = localStorage.getItem("sonikoma_import_project");
+        if (localRaw) {
+          try {
+            const parsed = JSON.parse(localRaw);
+            if (parsed && (parsed.project_id === projId || !parsed.project_id)) {
+              transferData = parsed;
+              localStorage.removeItem("sonikoma_import_project");
+            }
+          } catch (_) {}
+        }
+
+        // 2. Fetch from backend transfer endpoint
+        if (!transferData && (isTransfer || projId)) {
+          try {
+            const res = await fetch(`/api/v1/projects/transfer/${encodeURIComponent(projId)}`);
+            if (res.ok) {
+              const resData = await res.json();
+              if (resData && resData.success && Array.isArray(resData.panels) && resData.panels.length > 0) {
+                transferData = resData;
+              }
+            }
+          } catch (_) {}
+        }
+
+        // 3. If transfer data exists, populate the entire workspace immediately!
+        if (transferData && Array.isArray(transferData.panels) && transferData.panels.length > 0) {
+          console.log(
+            `[Storyboard Transfer] Loading ${transferData.panels.length} panels into workspace:`,
+            transferData
+          );
+
+          const transferredPanels = transferData.panels.map((p: any, idx: number) => ({
+            id: p.id || idx + 1,
+            prompt: p.prompt || p.visual_description || p.speech_text || `Scene ${idx + 1}`,
+            image_url: p.image_url || p.imageUrl || "",
+            original_url: p.original_url || p.imageUrl || p.image_url || "",
+            speech_text: p.speech_text || p.dialogueText || "",
+            narrative: p.narrative || p.narrativeText || "",
+            sfx: p.sfx || "",
+            duration: p.duration || 3.0,
+            motion_type: p.motion_type || p.motionPreset || "zoom_in",
+            visual_description: p.visual_description || p.visualDescription || "",
+            audio_url: p.audio_url || p.audioUrl || "",
+            narrative_audio_url: p.narrative_audio_url || p.narrativeAudioUrl || "",
+            speech_audio_url: p.speech_audio_url || p.audioUrl || "",
+          }));
+
+          const transferredImages =
+            Array.isArray(transferData.scraped_images) && transferData.scraped_images.length > 0
+              ? transferData.scraped_images
+              : transferredPanels.map((p: any) => p.image_url).filter(Boolean);
+
+          const title = transferData.title || transferData.series_title || "Imported Comic";
+
+          useProjectStore.getState().setActiveProject({
+            project: {
+              project_id: projId,
+              title: title,
+              url: transferData.url || importUrl || "",
+              cover_image: transferredImages[0] || "",
+            },
+            panels: transferredPanels,
+            scrapedImages: transferredImages,
+          });
+
+          setPanels(transferredPanels);
+          setScrapedImages(transferredImages);
+          setProjectId(projId);
+          if (transferData.url || importUrl) setTargetUrl(transferData.url || importUrl);
+          if (title) setSeriesTitle(title);
+          if (transferData.chapter_title) setChapterTitle(transferData.chapter_title);
+          if (transferData.voice) setVoiceActor(transferData.voice);
+          if (transferData.music_theme) setMusicTheme(transferData.music_theme);
+          if (transferData.aspect_ratio) setAspectRatio(transferData.aspect_ratio);
+
+          addNotification(
+            `Loaded storyboard with ${transferredPanels.length} scenes, dialogue & motion!`,
+            "success"
+          );
+          return true;
+        }
+
+        return false;
+      };
+
+      checkAndLoadTransfer().then((loaded) => {
+        if (loaded) return;
+
+        if (importBatchRaw) {
+          localStorage.removeItem("auto_import_batch");
+          localStorage.removeItem("auto_import_url");
+          try {
+            const episodesList = JSON.parse(importBatchRaw);
+            if (Array.isArray(episodesList) && episodesList.length > 0) {
+              console.log(
+                `[Auto Scrape] Triggering batch import for ${episodesList.length} episodes on project: ${projId}`
+              );
+              if (scrapeBatchEpisodes) {
+                scrapeBatchEpisodes(episodesList, projId);
+              }
+              return;
+            }
+          } catch (e) {
+            console.error("[Auto Scrape] Error parsing auto_import_batch:", e);
+          }
+        }
+
+        if (importUrl) {
+          console.log(
+            `[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`
+          );
+          localStorage.removeItem("auto_import_url");
+          setTargetUrl(importUrl);
+          scrapeImages(importUrl, projId).catch((err) => {
+            console.error("[Auto Scrape] Failed to scrape images:", err);
+          });
+        }
+      });
     }
   }, [
     isAuthenticated,
@@ -554,6 +656,15 @@ export default function App() {
     scrapeImages,
     scrapeBatchEpisodes,
     setTargetUrl,
+    setPanels,
+    setScrapedImages,
+    setProjectId,
+    setSeriesTitle,
+    setChapterTitle,
+    setVoiceActor,
+    setMusicTheme,
+    setAspectRatio,
+    addNotification,
     currentPath,
   ]);
 

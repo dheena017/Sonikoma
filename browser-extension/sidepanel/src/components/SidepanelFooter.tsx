@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Download, RefreshCw } from "lucide-react";
+import { Video, Download, RefreshCw } from "lucide-react";
 
 export interface SidepanelFooterProps {
   hasPanels: boolean;
@@ -49,14 +49,15 @@ export const SidepanelFooter: React.FC<SidepanelFooterProps> = ({
             onClick={onRender}
             disabled={isRendering || enabledCount === 0}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-lg shadow-blue-950/60 transition-all cursor-pointer"
+            title="Export and render final motion video via backend engine"
           >
-            <Sparkles size={14} className={isRendering ? "animate-spin" : ""} />
+            <Video size={14} className={isRendering ? "animate-spin" : ""} />
             <span>
               {isRendering
-                ? "Rendering Motion Video..."
+                ? "Rendering Video..."
                 : totalDuration > 0
-                ? `Render Video (${enabledCount} Scenes • ~${Math.round(totalDuration)}s)`
-                : `Render Video (${enabledCount} Scenes)`}
+                ? `Export Video (${enabledCount} Scenes • ~${Math.round(totalDuration)}s)`
+                : `Export Video (${enabledCount} Scenes)`}
             </span>
           </button>
 

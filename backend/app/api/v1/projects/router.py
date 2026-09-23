@@ -11,6 +11,7 @@ both the mount prefix and the route path are empty.
 import logging
 
 from typing import Optional
+from pydantic import BaseModel
 from fastapi import APIRouter, HTTPException, Path, Body, Depends, Request, UploadFile, File, Form, Query
 from fastapi.responses import JSONResponse
 
@@ -146,6 +147,43 @@ async def get_public_project_endpoint(project_id: str = Path(..., description="P
     except Exception as e:
         logger.error(f"Failed to fetch public project: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to fetch public project: {e}")
+
+
+# ── Temporary Storyboard Project Transfers (Extension -> Web Studio) ──────────
+
+_TEMPORARY_PROJECT_TRANSFERS: dict = {}
+
+class ProjectTransferPayload(BaseModel):
+    project_id: str
+    url: Optional[str] = None
+    title: Optional[str] = None
+    chapter_title: Optional[str] = None
+    series_title: Optional[str] = None
+    panels: list = []
+    scraped_images: list = []
+    voice: Optional[str] = None
+    music_theme: Optional[str] = None
+    aspect_ratio: Optional[str] = None
+
+@project_router.post("/transfer", summary="Store temporary storyboard project transferred from extension")
+async def save_project_transfer(payload: ProjectTransferPayload):
+    try:
+        _TEMPORARY_PROJECT_TRANSFERS[payload.project_id] = payload.model_dump()
+        if len(_TEMPORARY_PROJECT_TRANSFERS) > 100:
+            oldest_key = next(iter(_TEMPORARY_PROJECT_TRANSFERS))
+            _TEMPORARY_PROJECT_TRANSFERS.pop(oldest_key, None)
+        logger.info(f"[Project Transfer] Stored transfer project {payload.project_id} with {len(payload.panels)} panels")
+        return {"success": True, "project_id": payload.project_id}
+    except Exception as e:
+        logger.error(f"[Project Transfer] Error saving transfer: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@project_router.get("/transfer/{project_id}", summary="Retrieve temporary storyboard project transferred from extension")
+async def get_project_transfer(project_id: str = Path(..., description="Project ID")):
+    data = _TEMPORARY_PROJECT_TRANSFERS.get(project_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Transfer not found or expired")
+    return {"success": True, **data}
 
 
 @project_router.get("/analytics/tokens", summary="Get token usage history with pagination")

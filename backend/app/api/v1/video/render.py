@@ -9,7 +9,8 @@ import logging
 import uuid
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 
-from api.dependencies.auth import get_current_user
+from typing import Optional
+from api.dependencies.auth import get_current_user, get_optional_current_user
 from services.user.credit_service import get_available_credits, record_credit_transaction
 from database.config import LOW_BALANCE_THRESHOLD
 from schemas.video import RenderRequest
@@ -26,27 +27,33 @@ router = APIRouter()
 async def render_video_endpoint(
     request: RenderRequest,
     background_tasks: BackgroundTasks,
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     if not request.panels:
         raise HTTPException(status_code=400, detail="Panel list is empty.")
 
-    if request.project_id and not (request.project_id.startswith("temp_") or request.project_id.startswith("draft_")):
+    user_id = (current_user.get("user_id") or current_user.get("id")) if current_user else "anonymous"
+
+    if request.project_id and not (
+        request.project_id.startswith("temp_") 
+        or request.project_id.startswith("draft_") 
+        or request.project_id.startswith("ext-")
+    ):
         project = get_project(request.project_id) or get_project_by_slug(request.project_id)
         if not project:
             raise HTTPException(status_code=404, detail=f"Project '{request.project_id}' not found.")
-        if project.get("user_id") and project.get("user_id") != current_user.get("user_id"):
+        if project.get("user_id") and project.get("user_id") != user_id:
             raise HTTPException(status_code=403, detail=f"Access denied for project '{request.project_id}'.")
         if project.get("job_id") and request.job_id and project.get("job_id") != request.job_id:
             raise HTTPException(status_code=400, detail=f"Job ID mismatch for project '{request.project_id}'.")
 
     COST = 20
-    if get_available_credits(current_user["user_id"]) < COST:
+    if current_user and get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST} for video render.")
 
     job = job_manager.create_job(
         job_type=JobType.RENDER_VIDEO,
-        user_id=current_user["user_id"],
+        user_id=user_id,
         project_id=request.project_id,
     )
     
@@ -55,7 +62,9 @@ async def render_video_endpoint(
     )
 
     # Deduct credits
-    new_balance = record_credit_transaction(current_user["user_id"], -COST, "video_render")
+    new_balance = 999
+    if current_user:
+        new_balance = record_credit_transaction(current_user["user_id"], -COST, "video_render")
 
     async def process_render_wrapper(report_progress):
         return await process_render_job(

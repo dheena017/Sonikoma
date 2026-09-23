@@ -9,7 +9,7 @@ import logging
 from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Query, Depends
 
-from api.dependencies.auth import get_current_user
+from api.dependencies.auth import get_current_user, get_optional_current_user
 from services.jobs import job_manager, JobRecord, JobStatusResponse, JobListResponse
 
 logger = logging.getLogger("sonikoma.api.jobs")
@@ -22,14 +22,14 @@ jobs_router = APIRouter()
     summary="Get job status, progress, stage, execution, and result",
     description="Returns the full execution state of a specific job including provider, model, attempt, stage, progress, project_id, and chapter_id."
 )
-async def get_job_status_endpoint(job_id: str, current_user: dict = Depends(get_current_user)):
+async def get_job_status_endpoint(job_id: str, current_user: Optional[dict] = Depends(get_optional_current_user)):
     """Canonical job status retrieval endpoint."""
     job = job_manager.get_job(job_id)
     if not job:
         logger.warning(f"[Jobs API] Job '{job_id}' not found")
         raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
-    user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
-    if job.user_id != user_id and current_user.get("role") != "admin":
+    user_id = (current_user.get("user_id") or current_user.get("id")) if current_user else "anonymous"
+    if job.user_id != user_id and (not current_user or current_user.get("role") != "admin") and job.user_id != "anonymous":
         logger.warning(f"[Jobs API] User '{user_id}' unauthorized for job '{job_id}'")
         raise HTTPException(status_code=403, detail="Not authorized to access this job.")
     return job.to_status_response()

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { StoryboardPanel, VoiceOption, SAMPLE_PANELS } from "./types";
 import { SidepanelHeader } from "./components/SidepanelHeader";
 import { StoryboardView } from "./components/StoryboardView";
@@ -59,6 +59,13 @@ export const SidepanelApp: React.FC = () => {
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">("16:9");
   const [showSubtitles, setShowSubtitles] = useState<boolean>(true);
   const [globalMotion, setGlobalMotion] = useState<string>("");
+  const globalMotionRef = useRef(globalMotion);
+  useEffect(() => {
+    globalMotionRef.current = globalMotion;
+  }, [globalMotion]);
+
+  const isScanningRef = useRef(false);
+  const lastScannedUrlRef = useRef<{ url: string; time: number } | null>(null);
 
   // Audio Audition State
   const [activeAuditioningId, setActiveAuditioningId] = useState<string | null>(null);
@@ -122,11 +129,11 @@ export const SidepanelApp: React.FC = () => {
   // 3. Authoritative Chapter Scanner: Uses Website Backend Scraper Endpoint First, DOM Script Fallback
   const scanChapter = useCallback((forceRefresh = false) => {
     if (typeof chrome === "undefined" || !chrome.tabs) return;
-    setIsScanning(true);
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
         setIsScanning(false);
+        isScanningRef.current = false;
         showToast(`Tab query error: ${chrome.runtime.lastError.message}`);
         return;
       }
@@ -140,28 +147,65 @@ export const SidepanelApp: React.FC = () => {
         });
         setPanels([]);
         setIsScanning(false);
+        isScanningRef.current = false;
         return;
       }
 
-      if (
-        tab.url.startsWith("chrome://") ||
-        tab.url.startsWith("edge://") ||
-        tab.url.startsWith("about:") ||
-        tab.url.startsWith("chrome-extension://")
-      ) {
+      // Check for internal, local, or studio URLs
+      let isLocalOrInternal = false;
+      try {
+        const u = new URL(tab.url);
+        const host = u.hostname.toLowerCase();
+        if (
+          tab.url.startsWith("chrome://") ||
+          tab.url.startsWith("edge://") ||
+          tab.url.startsWith("about:") ||
+          tab.url.startsWith("chrome-extension://") ||
+          tab.url.startsWith("file://") ||
+          host === "localhost" ||
+          host === "127.0.0.1" ||
+          host === "0.0.0.0" ||
+          host.endsWith(".local")
+        ) {
+          isLocalOrInternal = true;
+        }
+      } catch {
+        isLocalOrInternal = true;
+      }
+
+      if (isLocalOrInternal) {
         setIsScanning(false);
+        isScanningRef.current = false;
         setChapterInfo({
-          title: "Internal Browser Page",
-          chapterName: "Please open a manga/webtoon chapter tab",
+          title: "Sonikoma Studio / Browser Page",
+          chapterName: "Open or switch to a manga/webtoon chapter tab to scan",
           hasDetectedChapter: false,
         });
-        setPanels([]);
-        showToast("⚠️ Cannot scan browser internal pages. Please open a manga reader.");
         return;
       }
+
+      // Deduplication: prevent duplicate scans for the same URL within 4 seconds unless forceRefresh
+      const now = Date.now();
+      if (
+        !forceRefresh &&
+        lastScannedUrlRef.current &&
+        lastScannedUrlRef.current.url === tab.url &&
+        now - lastScannedUrlRef.current.time < 4000
+      ) {
+        return;
+      }
+
+      if (isScanningRef.current && !forceRefresh) {
+        return;
+      }
+
+      isScanningRef.current = true;
+      lastScannedUrlRef.current = { url: tab.url, time: now };
+      setIsScanning(true);
 
       const processResults = (res: any, sourceLabel = "endpoint") => {
         setIsScanning(false);
+        isScanningRef.current = false;
         if (!res || !res.images || res.images.length === 0) {
           setChapterInfo({
             title: tab.title || "Web Page",
@@ -185,7 +229,7 @@ export const SidepanelApp: React.FC = () => {
           id: `panel-${idx + 1}-${Date.now()}`,
           index: idx + 1,
           imageUrl: typeof img === "string" ? img : (img.proxied_url || img.src || img.url),
-          motionPreset: globalMotion || "",
+          motionPreset: globalMotionRef.current || "",
           dialogueText: "",
           duration: 0,
           enabled: true,
@@ -298,6 +342,12 @@ export const SidepanelApp: React.FC = () => {
               return;
             }
 
+            if (apiRes?.isInternal) {
+              setIsScanning(false);
+              isScanningRef.current = false;
+              return;
+            }
+
             console.warn(
               "[Sonikoma Sidebar] Website scraper endpoint returned no panels or was unreachable, falling back to in-tab DOM scanner.",
               apiRes?.error || chrome.runtime.lastError?.message
@@ -310,7 +360,7 @@ export const SidepanelApp: React.FC = () => {
         runDomFallbackScan();
       }
     });
-  }, [globalMotion]);
+  }, []);
 
   useEffect(() => {
     checkHealth();
@@ -725,17 +775,64 @@ export const SidepanelApp: React.FC = () => {
     }
   };
 
-  // Open Full Web Studio
+  // Open Full Web Studio Editor with Active Tab Link & Complete Storyboard State
   const handleOpenWebStudio = () => {
-    if (typeof chrome !== "undefined" && chrome.runtime) {
+    const buildPayload = (activeTab?: chrome.tabs.Tab) => {
+      const tabUrl =
+        chapterInfo.url ||
+        (activeTab && activeTab.url && activeTab.url.startsWith("http") ? activeTab.url : "");
+      const tabTitle = chapterInfo.title || activeTab?.title || "Imported Comic";
+      const chapterTitle = chapterInfo.chapterName || "";
+
+      const enabledPanels = panels.filter((p) => p.enabled);
+      const panelsToTransfer = (enabledPanels.length > 0 ? enabledPanels : panels).map((p, idx) => ({
+        id: idx + 1,
+        prompt: p.visualDescription || p.dialogueText || `Scene ${idx + 1}`,
+        image_url: p.imageUrl,
+        original_url: p.imageUrl,
+        speech_text: p.dialogueText || "",
+        narrative: p.narrativeText || "",
+        sfx: p.sfx || "",
+        duration: p.duration || 3.0,
+        motion_type: p.motionPreset || "zoom_in",
+        visual_description: p.visualDescription || "",
+        audio_url: p.audioUrl || "",
+        narrative_audio_url: p.narrativeAudioUrl || "",
+        speech_audio_url: p.audioUrl || "",
+      }));
+
+      const scrapedImages = panelsToTransfer.map((p) => p.image_url).filter(Boolean);
+
+      return {
+        url: tabUrl,
+        title: tabTitle,
+        chapterTitle: chapterTitle,
+        panels: panelsToTransfer,
+        scrapedImages: scrapedImages,
+        voice: selectedVoice,
+        musicTheme: bgmMood,
+        aspectRatio: aspectRatio,
+      };
+    };
+
+    if (typeof chrome !== "undefined" && chrome.tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const payload = buildPayload(tabs?.[0]);
+        chrome.runtime.sendMessage({
+          type: "OPEN_WEB_STUDIO",
+          payload,
+        });
+      });
+    } else if (typeof chrome !== "undefined" && chrome.runtime) {
+      const payload = buildPayload();
       chrome.runtime.sendMessage({
         type: "OPEN_WEB_STUDIO",
-        payload: { url: chapterInfo.url || "", title: chapterInfo.title },
+        payload,
       });
     }
   };
 
-  // Render Video Pipeline
+  // Render Video Pipeline (uses canonical backend /api/v1/video/render and polls /api/v1/jobs/{job_id})
   const handleRenderVideo = () => {
     const enabledPanels = panels.filter((p) => p.enabled);
     if (enabledPanels.length === 0) {
@@ -744,17 +841,7 @@ export const SidepanelApp: React.FC = () => {
     }
 
     setIsRendering(true);
-    setRenderProgress(10);
-
-    const timer = setInterval(() => {
-      setRenderProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(timer);
-          return 90;
-        }
-        return prev + 15;
-      });
-    }, 400);
+    setRenderProgress(5);
 
     if (typeof chrome !== "undefined" && chrome.runtime) {
       chrome.runtime.sendMessage(
@@ -762,44 +849,106 @@ export const SidepanelApp: React.FC = () => {
           type: "API_RENDER_VIDEO",
           payload: {
             project_id: "ext-" + Date.now(),
-            panels: enabledPanels,
+            panels: enabledPanels.map((p, idx) => ({
+              id: idx + 1,
+              image_url: p.imageUrl,
+              duration: p.duration || 3.0,
+              speech_text: p.dialogueText || p.narrativeText || "",
+              motion_type: p.motionPreset || "",
+              audio_url: p.audioUrl || p.narrativeAudioUrl || "",
+              sfx: p.sfx || "",
+            })),
             voice: selectedVoice,
-            bgm_mood: bgmMood,
+            music_theme: bgmMood,
             aspect_ratio: aspectRatio,
-            show_subtitles: showSubtitles,
+            subtitles_style: showSubtitles ? "burn-in" : "none",
+            bgm_volume: bgmVolume / 100,
+            speech_rate: speechRate,
+            speech_pitch: speechPitch,
           },
         },
         (res) => {
-          clearInterval(timer);
-          if (chrome.runtime.lastError || (res && !res.success)) {
+          if (chrome.runtime.lastError || !res || !res.success || !res.job_id) {
             setIsRendering(false);
             setRenderProgress(0);
             const errMsg =
               chrome.runtime.lastError?.message ||
               res?.error ||
-              "Video rendering failed on backend";
+              res?.detail ||
+              "Video rendering failed to start on backend";
             showToast(`Render failed: ${errMsg}`, "error");
             showErrorModal(
               "Video Render Error",
               errMsg,
               typeof res === "object" ? JSON.stringify(res, null, 2) : String(errMsg),
-              "Ensure ffmpeg is installed and the backend has write permissions.",
+              "Ensure the backend server is running and FFmpeg is available.",
               () => handleRenderVideo()
             );
             return;
           }
 
-          setRenderProgress(100);
-          setTimeout(() => {
-            setIsRendering(false);
-            setRenderProgress(0);
-            showToast("Render complete! Transferring to Studio...", "success");
-            handleOpenWebStudio();
-          }, 600);
+          const jobId = res.job_id;
+          showToast("Export job queued. Rendering motion video...", "info");
+
+          // Start polling backend job status (same as website's useViewportGeneration)
+          const pollInterval = setInterval(() => {
+            chrome.runtime.sendMessage(
+              {
+                type: "API_GET_JOB_STATUS",
+                payload: { job_id: jobId },
+              },
+              (statusRes) => {
+                if (chrome.runtime.lastError || !statusRes || !statusRes.success) {
+                  return;
+                }
+
+                if (typeof statusRes.progress === "number") {
+                  setRenderProgress(Math.max(5, Math.min(99, Math.round(statusRes.progress))));
+                }
+
+                const status = (statusRes.status || "").toUpperCase();
+                if (status === "COMPLETED") {
+                  clearInterval(pollInterval);
+                  setRenderProgress(100);
+                  setTimeout(() => {
+                    setIsRendering(false);
+                    setRenderProgress(0);
+                  }, 800);
+
+                  const videoUrl =
+                    statusRes.result?.video_url ||
+                    statusRes.url ||
+                    "";
+
+                  showToast("Video rendered successfully!", "success");
+
+                  if (videoUrl) {
+                    // Open rendered video directly in a new tab for playback/download
+                    chrome.tabs.create({ url: videoUrl });
+                  }
+                } else if (status === "FAILED" || status === "CANCELLED") {
+                  clearInterval(pollInterval);
+                  setIsRendering(false);
+                  setRenderProgress(0);
+                  const failMsg =
+                    statusRes.error ||
+                    statusRes.result?.error ||
+                    "Video compilation failed on backend";
+                  showToast(`Render failed: ${failMsg}`, "error");
+                  showErrorModal(
+                    "Video Render Failed",
+                    failMsg,
+                    typeof statusRes === "object" ? JSON.stringify(statusRes, null, 2) : String(failMsg),
+                    "Check server terminal logs for FFmpeg compilation details.",
+                    () => handleRenderVideo()
+                  );
+                }
+              }
+            );
+          }, 1500);
         }
       );
     } else {
-      clearInterval(timer);
       setIsRendering(false);
       setRenderProgress(0);
       showToast("Extension runtime not available", "error");

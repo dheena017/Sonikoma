@@ -111,6 +111,8 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/v1/openapi/",
     "/api/projects/public/",
     "/api/v1/projects/public/",
+    "/api/projects/transfer",
+    "/api/v1/projects/transfer",
     "/static/",        # Swagger UI local CSS/JS assets
     "/api/docs/",      # Swagger sub-paths (e.g. /api/docs/projects, /api/docs/jobs, etc.)
     "/api/image/cached/",
@@ -137,6 +139,8 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/panels/",
     "/api/v1/video/",
     "/api/video/",
+    "/api/v1/jobs/",
+    "/api/jobs/",
     "/api/v1/ai/",
     "/api/ai/",
 )
