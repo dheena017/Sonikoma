@@ -752,7 +752,7 @@ export default function AppRouter(props: AppRouterProps) {
 
   // --- Guard: Route Not Found (404) for Public / Unauthenticated Visitors ---
   if (!isKnownRoute(currentPath)) {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && !authLoading && !isInitializing) {
       return (
         <div className="min-h-screen w-full flex items-center justify-center bg-[#07090e] p-4">
           <PageNotFound onNavigateHome={() => navigateTo("/")} />
@@ -761,9 +761,17 @@ export default function AppRouter(props: AppRouterProps) {
     }
   }
 
-  // --- Guard: Protected Route Redirect (Only for valid authenticated routes) ---
+  // --- Guard: Wait for Auth Resolution if loading or token present ---
+  if ((authLoading || isInitializing) && hasSavedToken) {
+    return <RouteLoadingFallback />;
+  }
+
+  // --- Guard: Protected Route Redirect (Only for valid authenticated routes once fully resolved) ---
   if (
     !isAuthenticated &&
+    !authLoading &&
+    !isInitializing &&
+    !hasSavedToken &&
     currentPath !== "/scraper" &&
     !currentPath.startsWith("/editor") &&
     !currentPath.startsWith("/scraper/editor")
@@ -1015,12 +1023,22 @@ export default function AppRouter(props: AppRouterProps) {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = React.useState(false);
 
-  // Cleanly redirect legacy /workspace URLs to /scraper
+  // Cleanly redirect legacy /workspace or duplicate /scraper/scraper URLs to canonical routes
   React.useEffect(() => {
     if (currentPath.startsWith("/workspace")) {
-      const newPath = currentPath.replace(/^\/workspace/, "/scraper");
+      const newPath = currentPath.startsWith("/workspace/scraper")
+        ? currentPath.replace(/^\/workspace\/scraper/, "/scraper")
+        : currentPath.replace(/^\/workspace/, "/scraper");
       const search = window.location.search;
       navigateTo(`${newPath}${search}`);
+      return;
+    }
+
+    if (currentPath === "/scraper/scraper" || currentPath.startsWith("/scraper/scraper/")) {
+      const newPath = currentPath.replace(/^\/scraper\/scraper/, "/scraper");
+      const search = window.location.search;
+      navigateTo(`${newPath}${search}`);
+      return;
     }
   }, [currentPath, navigateTo]);
 

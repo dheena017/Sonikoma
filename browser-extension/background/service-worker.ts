@@ -188,7 +188,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       }
     } else if (info.menuItemId === "sonikoma-animate-chapter") {
       const base = await getWebBaseUrl();
-      const url = new URL(`${base.replace(/\/+$/, "")}/workspace/scraper`);
+      const url = new URL(`${base.replace(/\/+$/, "")}/scraper`);
       url.searchParams.set("url", tab.url);
       chrome.tabs.create({ url: url.toString() }, () => {
         if (chrome.runtime.lastError) {}
@@ -413,7 +413,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
 
     case "OPEN_WEB_STUDIO": {
       const base = await getWebBaseUrl();
-      const url = new URL(`${base.replace(/\/+$/, "")}/workspace/scraper`);
+      const url = new URL(`${base.replace(/\/+$/, "")}/scraper`);
       if (payload?.url) url.searchParams.set("url", payload.url);
       if (payload?.title) url.searchParams.set("title", payload.title);
       chrome.tabs.create({ url: url.toString() });

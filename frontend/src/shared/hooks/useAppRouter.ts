@@ -113,13 +113,28 @@ export function useAppRouter(props?: UseAppRouterProps) {
     if (sourceParam && propsRef.current?.setSelectedSource) propsRef.current.setSelectedSource(sourceParam);
   }, []);
 
-  // Popstate and navigation listener (attached once on mount)
+  // Popstate, pushState, replaceState and navigation listener to ensure 100% sync between browser URL and visual state
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const originalPush = window.history.pushState;
+    const originalReplace = window.history.replaceState;
+
+    window.history.pushState = function (...args) {
+      const result = originalPush.apply(this, args);
+      window.dispatchEvent(new Event("locationchange"));
+      return result;
+    };
+
+    window.history.replaceState = function (...args) {
+      const result = originalReplace.apply(this, args);
+      window.dispatchEvent(new Event("locationchange"));
+      return result;
+    };
+
     const handleLocationChange = () => {
       const path = window.location.pathname;
-      setCurrentPath(path);
+      setCurrentPath((prev) => (prev !== path ? path : prev));
 
       if (path.includes("/editor")) {
         setLastEditorPath(path + window.location.search);
@@ -133,7 +148,14 @@ export function useAppRouter(props?: UseAppRouterProps) {
     };
 
     window.addEventListener("popstate", handleLocationChange);
-    return () => window.removeEventListener("popstate", handleLocationChange);
+    window.addEventListener("locationchange", handleLocationChange);
+
+    return () => {
+      window.history.pushState = originalPush;
+      window.history.replaceState = originalReplace;
+      window.removeEventListener("popstate", handleLocationChange);
+      window.removeEventListener("locationchange", handleLocationChange);
+    };
   }, []);
 
   const navigateTo = useCallback(

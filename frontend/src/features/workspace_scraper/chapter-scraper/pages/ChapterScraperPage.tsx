@@ -78,7 +78,24 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
             localStorage.removeItem("active_chapter_views");
           }
 
-          navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
+          const sSlug = seriesNameParam
+            ? seriesNameParam
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "")
+            : "";
+          const cSlug = (chapter.title || `chapter-${chapter.number}`)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "");
+
+          if (sSlug && cSlug) {
+            navigateTo(
+              `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
+            );
+          } else {
+            navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
+          }
         }}
         onMultipleChaptersSelect={(chapters) => {
           if (chapters.length > 0) {
@@ -117,7 +134,24 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
               localStorage.removeItem("active_chapter_views");
             }
 
-            navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
+            const sSlug = seriesNameParam
+              ? seriesNameParam
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .replace(/^-+|-+$/g, "")
+              : "";
+            const cSlug = (chapter.title || `chapter-${chapter.number}`)
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "");
+
+            if (sSlug && cSlug) {
+              navigateTo(
+                `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
+              );
+            } else {
+              navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
+            }
           }
         }}
         />

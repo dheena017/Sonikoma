@@ -257,6 +257,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     }
 
     const isReservedRoute =
+      initialSeriesName === "scraper" ||
       initialSeriesName === "chapters" ||
       initialSeriesName === "chapter-scraper" ||
       initialSeriesName === "episode-scraper" ||
@@ -583,7 +584,21 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
     );
     localStorage.setItem("auto_import_url", chapter.url);
-    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+
+    const sSlug = (seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const cSlug = (chapter.title || `chapter-${chapter.number}`)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const targetPath =
+      sSlug && cSlug
+        ? `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
+        : `/scraper/editor?id=${temporaryProjectId}`;
+
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
       nav(targetPath);
@@ -653,7 +668,21 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     );
     localStorage.setItem("auto_import_batch", JSON.stringify(selected));
     localStorage.setItem("auto_import_url", selected[0]?.url || "");
-    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+
+    const sSlug = (seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    const cSlug = (selected[0]?.title || `chapter-${selected[0]?.number}`)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const targetPath =
+      sSlug && cSlug
+        ? `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
+        : `/scraper/editor?id=${temporaryProjectId}`;
+
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
       nav(targetPath);
