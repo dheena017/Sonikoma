@@ -15,14 +15,14 @@
     "build:extension": "npm run build --prefix extension",
     "build": "npm run build:frontend && npm run build:extension",
     "preview": "cd frontend && npm run preview",
-    "typecheck": "cd frontend && npm run typecheck",
+    "typecheck": "node scripts/frontend/lint.cjs",
     "test": "playwright test",
     "test:report": "node e2e/generate-report.js && playwright show-report e2e/playwright-report",
     "test:trace": "playwright show-trace e2e/test-results",
     "test:functions": "playwright test e2e/functions",
     "test:endpoints": "playwright test e2e/endpoints",
     "test:buttons": "playwright test e2e/button_triggers",
-    "test:crop": "python backend/scripts/test_crop_pipeline.py",
+    "test:crop": "python scripts/vision/test_crop_pipeline.py",
     "format": "prettier --write .",
     "start:prod": "npm run python:prod",
     "start:server": "npm run start:prod",
@@ -31,7 +31,7 @@
     "clean": "rimraf frontend/dist",
     "docker:build": "docker build -t sonikoma .",
     "docker:run": "docker run -p ${FRONTEND_PORT:-3000}:${FRONTEND_PORT:-3000} sonikoma",
-    "lint": "cd frontend && npm run lint"
+    "lint": "node scripts/frontend/lint.cjs"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

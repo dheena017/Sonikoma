@@ -46,8 +46,9 @@ if sys.platform == "win32":
         pass
 
 # Add backend/app directory to python path to resolve service imports
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "backend"))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "backend", "app"))
 
 from services.model_catalog.registry import ModelRegistry
 from services.model_catalog.validator import ModelValidator

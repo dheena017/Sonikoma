@@ -7,8 +7,9 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("print_all_data")
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-REPO_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+SCRIPTS_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPTS_DIR, ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(REPO_ROOT, "backend"))
 
 POSSIBLE_DB_PATHS = [
     os.path.join(REPO_ROOT, "data", "webtoon_local.db"),

@@ -371,7 +371,8 @@ def get_yolo_character_segmentation_model():
     try:
         from ultralytics import YOLO
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        local_path = os.path.join(base_dir, "yolov8n-seg.pt")
+        model_candidate = os.path.join(base_dir, "data", "models", "yolov8n-seg.pt")
+        local_path = model_candidate if os.path.exists(model_candidate) else os.path.join(base_dir, "yolov8n-seg.pt")
         if os.path.exists(local_path):
             _yolo_char_model = YOLO(local_path)
         else:

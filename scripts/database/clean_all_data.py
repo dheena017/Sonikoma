@@ -8,8 +8,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("clean_all_data")
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-REPO_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+SCRIPTS_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPTS_DIR, ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(REPO_ROOT, "backend"))
 
 # Database paths to inspect and clean
 DB_PATHS = [

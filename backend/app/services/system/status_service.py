@@ -415,9 +415,11 @@ def get_comprehensive_backend_status(
         "temp_workspace": os.path.join(root_path, "data", "temp"),
         "exports": os.path.join(root_path, "public", "exports"),
         "database": DB_PATH if os.path.exists(DB_PATH) else os.path.join(root_path, "data", "sonikoma.db"),
-        "yolo_model": os.path.join(root_path, "yolov8n-seg.pt"),
     }
 
+    yolo_candidate = os.path.join(root_path, "data", "models", "yolov8n-seg.pt")
+    yolo_model_path = yolo_candidate if os.path.exists(yolo_candidate) else os.path.join(root_path, "yolov8n-seg.pt")
+    dirs_to_inspect["yolo_model"] = yolo_model_path
     dir_stats = {name: _get_dir_stats(p) for name, p in dirs_to_inspect.items()}
     total_app_storage = sum(d.size_bytes for d in dir_stats.values()) + db_file_size
 
@@ -431,7 +433,6 @@ def get_comprehensive_backend_status(
     )
 
     # 6. Engine & Processing Capabilities
-    yolo_model_path = os.path.join(root_path, "yolov8n-seg.pt")
     models_info = {
         "yolov8n_seg": {
             "path": yolo_model_path,

@@ -8,8 +8,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("seed_test_data")
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-REPO_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+SCRIPTS_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPTS_DIR, ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(REPO_ROOT, "backend"))
 
 DATA_DIR = os.path.join(REPO_ROOT, "data")
 DB_PATH = os.path.join(DATA_DIR, "webtoon_local.db")
@@ -829,5 +830,4 @@ def seed_training_data():
 if __name__ == "__main__":
     logger.info("=== Sonikoma Seed Script Started ===")
     seed_data()
-    seed_training_data()
     logger.info("=== Seeding Completed Successfully ===")

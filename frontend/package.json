@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit --project tsconfig.json && vite build --config vite.config.ts",
     "preview": "vite preview --config vite.config.ts",
-    "typecheck": "node scripts/lint.cjs",
-    "lint": "node scripts/lint.cjs"
+    "typecheck": "node ../scripts/frontend/lint.cjs",
+    "lint": "node ../scripts/frontend/lint.cjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

@@ -35,8 +35,10 @@ if sys.platform == "win32":
         pass
 
 # Add backend and backend/app to Python path
-ROOT_DIR = Path(__file__).resolve().parent.parent
-APP_DIR = ROOT_DIR / "app"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+BACKEND_DIR = PROJECT_ROOT / "backend"
+APP_DIR = BACKEND_DIR / "app"
+ROOT_DIR = BACKEND_DIR
 
 for p in (str(ROOT_DIR), str(APP_DIR)):
     if p not in sys.path:

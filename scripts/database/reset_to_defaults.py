@@ -21,8 +21,9 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("reset_to_defaults")
 
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
-PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-REPO_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
+SCRIPTS_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+REPO_ROOT = os.path.abspath(os.path.join(SCRIPTS_DIR, ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(REPO_ROOT, "backend"))
 
 DATA_DIR = os.path.join(REPO_ROOT, "data")
 DB_PATH = os.path.join(DATA_DIR, "webtoon_local.db")
@@ -96,7 +97,6 @@ def run_database_seed():
 
     # First run the seed data
     seed_test_data.seed_data()
-    seed_test_data.seed_training_data()
 
     # Clear remaining execution history tables
     conn = sqlite3.connect(DB_PATH)

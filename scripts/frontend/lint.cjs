@@ -42,7 +42,8 @@ function getFilesInfo(dir) {
   return { count, modules: Array.from(modules) };
 }
 
-const srcDir = path.resolve(__dirname, "../src");
+const frontendDir = path.resolve(__dirname, "../../frontend");
+const srcDir = path.join(frontendDir, "src");
 const { count: totalTsFiles, modules: topModules } = getFilesInfo(srcDir);
 
 const startTime = Date.now();
@@ -111,16 +112,13 @@ const interval = setInterval(() => {
   }
 }, 1200);
 
-const tscJs = path.resolve(
-  __dirname,
-  "../node_modules/typescript/bin/tsc"
-);
+const tscJs = path.join(frontendDir, "node_modules/typescript/bin/tsc");
 
 const child = spawn(
   process.execPath,
   [tscJs, "--noEmit", "--project", "tsconfig.json", "--pretty"],
   {
-    cwd: path.resolve(__dirname, ".."),
+    cwd: frontendDir,
     stdio: ["inherit", "pipe", "pipe"],
     shell: false,
   }
