@@ -46,7 +46,7 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
     sfx = raw.get("sfx", "")
     vis = raw.get("visual_description", "")
     motion = raw.get("motion_type", "")
-    narrative = raw.get("narrative") or raw.get("narrativeText") or vis or speech
+    narrative = raw.get("narrative") or raw.get("narrativeText") or ""
 
     raw_duration = raw.get("duration")
     try:
@@ -333,7 +333,7 @@ async def facade_analyze_image(
 
     audio_url = None
     try:
-        audio_text = analysis.get("speech_text", "").strip()
+        audio_text = (analysis.get("speech_text") or analysis.get("narrative") or "").strip()
         if audio_text:
             with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
                 temp_audio_path = tmp_audio.name
@@ -363,7 +363,7 @@ async def facade_analyze_image(
     elapsed = int((time.time() - start_time) * 1000)
     meta = getattr(skill, "last_execution_meta", {}) or {}
     model_used = meta.get("model") or model or "gemini-2.5-flash"
-    narrative_val = analysis.get("narrative") or analysis.get("visual_description") or analysis.get("speech_text") or ""
+    narrative_val = analysis.get("narrative") or ""
 
     return {
         "success": True,

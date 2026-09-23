@@ -9,21 +9,22 @@ Analyze this comic/manhwa illustration panel with extreme precision and generate
 
 Follow these strict field specifications:
 
-### 1. `speech_text` (Dialogue / Speech / Visible Text)
-- Transcribe all visible text words clearly present in the image.
-- This includes:
-  1. Character dialogue inside speech bubbles, whisper clouds, shout boxes, or thought bubbles.
-  2. Story narration or caption boxes drawn in the panel.
-  3. Visible onomatopoeia words, sound effect lettering, or action words drawn directly on the art (e.g. "Whoooosh", "BOOM", "SWOOSH", "CRASH", "RUMBLE", "CLANG", "GASP", "HUH?").
-- If multiple speech bubbles or text blocks exist, transcribe them in natural reading order (top-to-bottom, left-to-right), separated by a space.
-- If there are no speech bubbles, but there are visible onomatopoeia words or sound effect lettering in the art (e.g. "Whoooosh"), you MUST transcribe those visible words into `speech_text`.
-- CRITICAL RULE: If the panel contains ABSOLUTELY NO written words, letters, or sound text (pure silent art with zero text), return an empty string `""`.
-- ANTI-HALLUCINATION RULE: Transcribe ONLY words that are actually drawn or written in the illustration. NEVER invent imaginary dialogue, greeting phrases, or conversational lines that do not appear anywhere in the image.
+### 1. `speech_text` (Character Dialogue / Speech Bubbles)
+- Transcribe all character dialogue or spoken words clearly present inside speech bubbles, whisper clouds, shout boxes, or thought bubbles.
+- If there are visible sound effects or onomatopoeia lettering drawn directly on the art (e.g. "Whoooosh", "BOOM", "SWOOSH", "CRASH", "RUMBLE", "CLANG", "GASP", "HUH?"), and no speech bubbles exist, transcribe those sound effect words into `speech_text`.
+- If multiple speech bubbles exist, transcribe them in natural reading order (top-to-bottom, left-to-right), separated by a space.
+- CRITICAL: This field is strictly for spoken character dialogue or audible words drawn on the page. If the panel has characters speaking, their lines MUST go here so the text-to-speech engine speaks the characters' actual dialogue.
+- If the panel has ABSOLUTELY NO character dialogue or written words, return an empty string `""`.
+- ANTI-HALLUCINATION RULE: Transcribe ONLY words that are actually drawn or written in the illustration. NEVER invent imaginary dialogue.
 
-### 2. `narrative` (Cinematic Story Narration)
-- Write an evocative, cinematic story narration script describing what is taking place in the scene ({narrative_length_hint}).
-- Focus on emotional undertones, character stakes, atmospheric lighting, and unfolding drama.
-- Write in present tense, polished and immersive prose designed for high-quality voiceover / text-to-speech.
+### 2. `narrative` (Explicit Story Narration Box Only)
+- If the comic panel contains explicit rectangular story narration or caption boxes drawn on the page (e.g., third-person storytelling exposition like "Meanwhile, in the capital..."):
+  - Transcribe or localize the narration caption text faithfully ({narrative_length_hint}).
+- If there are NO rectangular story narration or voiceover caption boxes drawn on the page:
+  - Return an empty string `""`.
+- ABSOLUTE NEGATIVE RULE: DO NOT write visual scene descriptions, character positioning summaries, or image analysis (e.g., "Sitting gently in a hospital room, a caring partner feeds a tired mother holding their newborn baby...", "Characters looking at each other...", etc.) into `narrative`.
+- Visual scene descriptions belong exclusively in `visual_description`, NEVER in `narrative`.
+- If the panel only has speech bubbles and no narrator box, `narrative` MUST be `""`.
 
 ### 3. `sfx` (Sound Effect Cue)
 - Return an evocative bracketed sound effect cue representing the primary auditory sensation of the panel.
@@ -46,6 +47,7 @@ Follow these strict field specifications:
   - `"pan_right"`: For forward horizontal movement, characters advancing, running rightward, or panoramic reveals.
   - `"pan_left"`: For retreats, dodging backward, tracking leftward motion, or counter-attacks.
 
-### 6. `visual_description` (Scene Prompt & Context)
+### 6. `visual_description` (Scene Composition & Camera Context)
 - A vivid, descriptive 1-to-2 sentence summary of the visual composition, including characters, attire, color palette, lighting, and action.
+- Note: This field is strictly for camera framing, visual styling, and motion guidance. It is NEVER used as spoken voiceover audio.
 

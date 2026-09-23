@@ -72,8 +72,6 @@ def _attach_narratives_to_results(results: list) -> list:
             or item.get("narrativeText")
             or analysis.get("narrative")
             or analysis.get("narrativeText")
-            or analysis.get("visual_description")
-            or analysis.get("speech_text")
             or ""
         )
         item["narrative"] = narrative

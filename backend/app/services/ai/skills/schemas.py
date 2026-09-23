@@ -10,12 +10,12 @@ from pydantic import BaseModel, Field
 
 
 class GeminiAnalysisModel(BaseModel):
-    speech_text: str = Field(description="Captions or character dialogues")
-    narrative: str = Field(default="", description="Cinematic story narration and atmospheric scene recap")
+    speech_text: str = Field(description="Spoken character dialogue from speech bubbles, thought clouds, or visible lettering")
+    narrative: str = Field(default="", description="Story narration caption box text drawn on the panel, or empty string if no narrator box exists. NEVER visual descriptions.")
     sfx: str = Field(description="Bracketed sound effect text")
     duration: float = Field(description="Suggested scene duration in seconds")
     motion_type: str = Field(description="Camera movement motion tag")
-    visual_description: str = Field(description="Single sentence describing what is happening in the panel")
+    visual_description: str = Field(description="Visual description of the scene composition for camera animation (not for voiceover audio)")
 
 
 class StoryboardPanelModel(BaseModel):

@@ -65,7 +65,7 @@ async def generate_sequence_narrative(
         results = [
             {
                 "id": p.id,
-                "narrative": narrative_map.get(p.id, p.visual_description or "Motion comic scene narration."),
+                "narrative": narrative_map.get(p.id, "") or "",
                 "narrative_audio_url": None
             }
             for p in body.panels
