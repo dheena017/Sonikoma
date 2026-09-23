@@ -54,7 +54,9 @@ export const SidepanelFooter: React.FC<SidepanelFooterProps> = ({
             <span>
               {isRendering
                 ? "Rendering Motion Video..."
-                : `Render Video (${enabledCount} Scenes • ~${Math.round(totalDuration)}s)`}
+                : totalDuration > 0
+                ? `Render Video (${enabledCount} Scenes • ~${Math.round(totalDuration)}s)`
+                : `Render Video (${enabledCount} Scenes)`}
             </span>
           </button>
 

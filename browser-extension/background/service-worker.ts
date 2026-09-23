@@ -402,7 +402,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
             success: true,
             speech_text: detectedText,
             motion_type: analysis.motion_type || analysis.motionPreset || resultData.motion_type || "zoom_in",
-            duration: Number(analysis.duration) || 3.5,
+            duration: Number(analysis.duration) || Number(resultData.duration) || 0,
             visual_description: analysis.visual_description || resultData.visual_description || "",
             narrative: resultData.narrative || resultData.narrativeText || analysis.narrative || analysis.narrativeText || "",
             sfx: analysis.sfx || resultData.sfx || "",

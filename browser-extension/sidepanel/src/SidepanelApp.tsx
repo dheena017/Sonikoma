@@ -58,7 +58,7 @@ export const SidepanelApp: React.FC = () => {
   const [bgmVolume, setBgmVolume] = useState<number>(65);
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">("16:9");
   const [showSubtitles, setShowSubtitles] = useState<boolean>(true);
-  const [globalMotion, setGlobalMotion] = useState<string>("pan_up");
+  const [globalMotion, setGlobalMotion] = useState<string>("");
 
   // Audio Audition State
   const [activeAuditioningId, setActiveAuditioningId] = useState<string | null>(null);
@@ -185,9 +185,9 @@ export const SidepanelApp: React.FC = () => {
           id: `panel-${idx + 1}-${Date.now()}`,
           index: idx + 1,
           imageUrl: img.src,
-          motionPreset: globalMotion,
+          motionPreset: globalMotion || "",
           dialogueText: "",
-          duration: 3.5,
+          duration: 0,
           enabled: true,
         }));
         setPanels(mapped);
@@ -395,7 +395,7 @@ export const SidepanelApp: React.FC = () => {
                 isAnalyzing: false,
                 dialogueText: res.speech_text ? res.speech_text : (target?.dialogueText || ""),
                 motionPreset: res.motion_type || target?.motionPreset || "zoom_in",
-                duration: res.duration ? Number(res.duration) : (target?.duration || 3.5),
+                duration: res.duration ? Number(res.duration) : (target?.duration || 0),
                 visualDescription: res.visual_description || target?.visualDescription || "",
                 narrativeText: res.narrative || target?.narrativeText || "",
                 sfx: res.sfx || target?.sfx || "",
@@ -500,8 +500,8 @@ export const SidepanelApp: React.FC = () => {
                     ...p,
                     isAnalyzing: false,
                     dialogueText: analysis.speech_text ? analysis.speech_text : p.dialogueText,
-                    motionPreset: analysis.motion_type || p.motionPreset,
-                    duration: analysis.duration ? Number(analysis.duration) : p.duration,
+                    motionPreset: analysis.motion_type || p.motionPreset || "zoom_in",
+                    duration: analysis.duration ? Number(analysis.duration) : (p.duration || 0),
                     visualDescription: analysis.visual_description || p.visualDescription,
                     narrativeText:
                       result.narrative ||
@@ -792,14 +792,14 @@ export const SidepanelApp: React.FC = () => {
       (p) =>
         p.index.toString().includes(q) ||
         p.dialogueText.toLowerCase().includes(q) ||
-        p.motionPreset.toLowerCase().includes(q)
+        (p.motionPreset ? p.motionPreset.toLowerCase().includes(q) : false)
     );
   }, [panels, searchQuery]);
 
   const enabledCount = panels.filter((p) => p.enabled).length;
   const totalDuration = panels
     .filter((p) => p.enabled)
-    .reduce((acc, p) => acc + (p.duration || 3.5), 0);
+    .reduce((acc, p) => acc + (p.duration || 0), 0);
 
   return (
     <div className="flex flex-col h-full w-full bg-[#0b0f19] text-[#f8fafc] text-xs font-sans select-none overflow-hidden">

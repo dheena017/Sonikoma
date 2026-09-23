@@ -88,9 +88,11 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
           <span className="font-mono text-[10px] font-bold text-sky-300 bg-sky-950/80 border border-sky-800/60 px-2 py-0.5 rounded-md shrink-0">
             #{panel.index}
           </span>
-          <span className="text-[9px] text-slate-400 font-mono shrink-0">
-            {panel.duration}s
-          </span>
+          {panel.duration && panel.duration > 0 ? (
+            <span className="text-[9px] text-slate-400 font-mono shrink-0">
+              {panel.duration.toFixed(1)}s
+            </span>
+          ) : null}
         </div>
 
         {/* Ordering & Delete Actions */}
@@ -150,10 +152,15 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
           #{panel.index}
         </div>
 
-        {/* Motion preset badge bottom-right */}
-        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/85 text-[9px] font-mono font-bold uppercase tracking-wider text-slate-300 border border-slate-700/60 shadow-sm pointer-events-none">
-          {panel.motionPreset.toUpperCase()}
-        </div>
+        {/* Motion preset badge bottom-right (only shown when set and not auto/none) */}
+        {panel.motionPreset &&
+          panel.motionPreset !== "" &&
+          panel.motionPreset !== "auto" &&
+          panel.motionPreset !== "none" && (
+            <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/85 text-[9px] font-mono font-bold uppercase tracking-wider text-slate-300 border border-slate-700/60 shadow-sm pointer-events-none">
+              {panel.motionPreset.toUpperCase()}
+            </div>
+          )}
 
         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
           <Maximize2 size={16} className="text-white drop-shadow-md" />
@@ -384,7 +391,7 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
         <div className="flex items-center bg-[#0a0e18] border border-[#1e293b] rounded-xl px-2 py-1.5 h-8">
           <select
             disabled={panel.isAnalyzing}
-            value={panel.motionPreset}
+            value={panel.motionPreset || ""}
             onChange={(e) => onUpdate(panel.id, { motionPreset: e.target.value })}
             className="w-full bg-transparent text-[10px] font-semibold text-slate-200 outline-none cursor-pointer truncate disabled:opacity-50"
           >
@@ -400,19 +407,36 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
         <div className="flex items-center justify-between bg-[#0a0e18] border border-[#1e293b] rounded-xl px-2 py-1.5 h-8">
           <div className="flex items-center gap-1 flex-1 min-w-0">
             <Clock size={11} className="text-sky-400 shrink-0" />
-            <span className="text-[10px] font-mono font-bold text-slate-100">
-              {panel.duration.toFixed(1)}
-            </span>
-            <span className="text-[9px] font-mono text-slate-400">sec</span>
+            <input
+              type="number"
+              min={0.5}
+              max={60}
+              step={0.1}
+              disabled={panel.isAnalyzing}
+              value={panel.duration && panel.duration > 0 ? panel.duration : ""}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && val >= 0) {
+                  onUpdate(panel.id, { duration: Math.round(val * 10) / 10 });
+                } else if (e.target.value === "") {
+                  onUpdate(panel.id, { duration: 0 });
+                }
+              }}
+              placeholder="Auto"
+              className="bg-transparent border-none p-0 text-[10px] font-mono font-bold text-slate-100 w-full outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder-slate-500"
+            />
+            <span className="text-[9px] font-mono text-slate-400 shrink-0">sec</span>
           </div>
 
           <div className="flex items-center gap-0.5 border-l border-[#1e293b] pl-1 shrink-0">
             <button
               type="button"
               disabled={panel.isAnalyzing}
-              onClick={() =>
-                onUpdate(panel.id, { duration: Math.max(1.0, Math.round((panel.duration - 0.5) * 10) / 10) })
-              }
+              onClick={() => {
+                const current = panel.duration && panel.duration > 0 ? panel.duration : 3.0;
+                const next = Math.max(0.5, Math.round((current - 0.5) * 10) / 10);
+                onUpdate(panel.id, { duration: next });
+              }}
               className="w-4 h-4 rounded hover:bg-[#1e293b] text-slate-400 hover:text-white flex items-center justify-center text-[11px] font-bold cursor-pointer transition-colors active:scale-90 disabled:opacity-30"
               title="Decrease duration"
             >
@@ -421,9 +445,11 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
             <button
               type="button"
               disabled={panel.isAnalyzing}
-              onClick={() =>
-                onUpdate(panel.id, { duration: Math.min(15.0, Math.round((panel.duration + 0.5) * 10) / 10) })
-              }
+              onClick={() => {
+                const current = panel.duration && panel.duration > 0 ? panel.duration : 3.0;
+                const next = Math.min(60.0, Math.round((current + 0.5) * 10) / 10);
+                onUpdate(panel.id, { duration: next });
+              }}
               className="w-4 h-4 rounded hover:bg-[#1e293b] text-slate-400 hover:text-white flex items-center justify-center text-[11px] font-bold cursor-pointer transition-colors active:scale-90 disabled:opacity-30"
               title="Increase duration"
             >

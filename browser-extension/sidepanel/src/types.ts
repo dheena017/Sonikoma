@@ -2,11 +2,11 @@ export interface StoryboardPanel {
   id: string;
   index: number;
   imageUrl: string;
-  motionPreset: string;
+  motionPreset?: string;
   dialogueText: string;
   narrativeText?: string;
   sfx?: string;
-  duration: number; // in seconds
+  duration?: number; // in seconds
   voiceOverride?: string;
   enabled: boolean;
   isAnalyzing?: boolean;
@@ -36,15 +36,15 @@ export interface BgmMoodOption {
 }
 
 export const MOTION_PRESETS: MotionPresetOption[] = [
-  { id: "auto_cinematic", label: "🤖 Auto Cinematic Sequence" },
-  { id: "pan_up", label: "Pan Up (Bottom to Top)" },
-  { id: "pan_down", label: "Pan Down (Top to Bottom)" },
+  { id: "", label: "Auto (AI Director)" },
   { id: "zoom_in", label: "Dynamic Zoom In" },
   { id: "zoom_out", label: "Wide Zoom Out" },
-  { id: "ken_burns", label: "Ken Burns (Pan & Zoom)" },
-  { id: "dolly_shake", label: "Action Dolly Shake" },
+  { id: "pan_up", label: "Pan Up (Bottom to Top)" },
+  { id: "pan_down", label: "Pan Down (Top to Bottom)" },
   { id: "pan_left", label: "Pan Left" },
   { id: "pan_right", label: "Pan Right" },
+  { id: "ken_burns", label: "Ken Burns (Pan & Zoom)" },
+  { id: "dolly_shake", label: "Action Dolly Shake" },
   { id: "static", label: "Static Shot" },
 ];
 
