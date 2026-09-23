@@ -61,6 +61,19 @@
 })();
 
 window.addEventListener('DOMContentLoaded', function() {
+    // 0. Isolate sidebar scrolling from main documentation page
+    var sidebar = document.querySelector('.sonikoma-sidebar');
+    if (sidebar) {
+        var sidebarBody = sidebar.querySelector('.sidebar-body');
+        sidebar.addEventListener('wheel', function(e) {
+            if (sidebarBody) {
+                sidebarBody.scrollTop += e.deltaY;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+        }, { passive: false });
+    }
+
     // 1. Keyboard shortcuts: Ctrl+K or / to search
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey && e.key.toLowerCase() === 'k') || (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA')) {

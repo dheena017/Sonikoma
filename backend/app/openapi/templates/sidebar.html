@@ -27,15 +27,6 @@
         <a href="/tests" class="sidebar-nav-item">
           <span>🧪 Test Portal & E2E</span>
         </a>
-        <a href="/api/docs/system" class="sidebar-nav-item">
-          <span>🛡️ Admin & System</span>
-        </a>
-        <a href="/api/docs/jobs" class="sidebar-nav-item">
-          <span>⚡ Background Jobs</span>
-        </a>
-        <a href="/api/docs/ai" class="sidebar-nav-item">
-          <span>🧠 AI Models</span>
-        </a>
         <a href="/api/health" target="_blank" class="sidebar-nav-item">
           <span>💚 Health Check</span>
         </a>
@@ -56,6 +47,29 @@
     </div>
   </div>
 </aside>
+
+<script>
+(function() {
+  function initSidebarScrollIsolation() {
+    var sidebar = document.querySelector('.sonikoma-sidebar');
+    if (!sidebar) return;
+    var sidebarBody = sidebar.querySelector('.sidebar-body');
+    if (!sidebarBody) return;
+
+    sidebar.addEventListener('wheel', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      sidebarBody.scrollTop += e.deltaY;
+    }, { passive: false });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSidebarScrollIsolation);
+  } else {
+    initSidebarScrollIsolation();
+  }
+})();
+</script>
 
 <!-- Sticky Top Header Bar -->
 <header class="sonikoma-top-bar">

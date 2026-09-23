@@ -69,7 +69,7 @@ def _load_google_secrets() -> tuple[str, str | None]:
     env_client_id = os.getenv("GOOGLE_CLIENT_ID")
     env_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
     if env_client_id:
-        return env_client_id, env_client_secret
+        return env_client_id.strip(), (env_client_secret.strip() if env_client_secret else None)
 
     base_dir = os.path.dirname(__file__)
     project_root = os.path.abspath(os.path.join(base_dir, "..", "..", "..", "..", ".."))
@@ -123,6 +123,17 @@ def _get_redirect_uri(request: Request) -> str:
     return f"{scheme}://localhost:3000/api/auth/google/callback"
 
 
+def _get_base_target(request: Request) -> str:
+    """Determine base web client URL for OAuth redirect landing."""
+    origin_header = request.headers.get("origin") or request.headers.get("referer")
+    if origin_header and any(domain in origin_header for domain in ("localhost", "127.0.0.1", "sonikoma", "dheensoft")):
+        parsed_origin = urllib.parse.urlparse(origin_header)
+        return f"{parsed_origin.scheme}://{parsed_origin.netloc}"
+    if APP_URL:
+        return APP_URL.rstrip("/")
+    return "http://localhost:3000"
+
+
 @router.get("/login", summary="Initiate Google OAuth2 authentication flow")
 async def google_login(request: Request):
     try:
@@ -138,6 +149,8 @@ async def google_login(request: Request):
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/youtube.upload",
+        "https://www.googleapis.com/auth/youtube.readonly",
     ]
 
     state = _generate_oauth_state()
@@ -164,20 +177,19 @@ async def google_callback(
     state: Optional[str] = Query(None, description="Google OAuth state token for CSRF protection"),
     code: Optional[str] = Query(None, description="Google OAuth authorization code"),
 ):
+    base_target = _get_base_target(request)
+
     state = state or request.query_params.get("state")
     if not state:
-        raise HTTPException(status_code=400, detail="Missing OAuth state parameter")
+        return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Missing OAuth state parameter.')}")
 
     cookie_state = _get_oauth_state(request)
-    if not cookie_state:
-        raise HTTPException(status_code=400, detail="Missing OAuth state cookie. Please retry login.")
-
-    if not hmac.compare_digest(state, cookie_state):
-        raise HTTPException(status_code=400, detail="Invalid OAuth state parameter")
+    if not cookie_state or not hmac.compare_digest(state, cookie_state):
+        return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Invalid or expired OAuth state. Please retry logging in.')}")
 
     code = code or request.query_params.get("code")
     if not code:
-        raise HTTPException(status_code=400, detail="Missing authorization code")
+        return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Missing Google authorization code. Please retry logging in.')}")
 
     client_id, client_secret = _load_google_secrets()
     redirect_uri = _get_redirect_uri(request)
@@ -193,21 +205,26 @@ async def google_callback(
     try:
         token_resp = requests.post("https://oauth2.googleapis.com/token", data=token_payload)
         if token_resp.status_code != 200:
-            raise HTTPException(status_code=400, detail=f"Google token exchange failed: {token_resp.text}")
+            logger.error("Google token exchange failed (%s): %s", token_resp.status_code, token_resp.text)
+            if "invalid_client" in token_resp.text:
+                error_msg = "Google Client Secret in .env is invalid. Please copy the matching Client Secret from Google Cloud Console."
+            else:
+                error_msg = f"Google token exchange failed: {token_resp.text[:120]}"
+            return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote(error_msg)}")
 
         try:
             token_data = token_resp.json()
         except ValueError:
             logger.error("Google token response is not valid JSON: %s", token_resp.text)
-            raise HTTPException(status_code=400, detail="Google token response invalid")
+            return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Google token response was not valid JSON.')}")
 
         if not isinstance(token_data, dict):
             logger.error("Google token response unexpected type: %r", token_data)
-            raise HTTPException(status_code=400, detail="Google token response invalid")
+            return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Google token response unexpected format.')}")
 
         google_access_token = token_data.get("access_token")
         if not google_access_token:
-            raise HTTPException(status_code=400, detail="Google response did not return an access token")
+            return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Google response did not return an access token.')}")
 
         resp = requests.get(
             "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -314,16 +331,6 @@ async def google_callback(
                 logger.exception("Failed to update existing user with google/youtube info: %s", user.get("user_id"))
 
         access_token = create_access_token(data={"sub": user["user_id"]})
-
-        # Redirect to frontend OAuth launch page with token and is_new parameters
-        origin_header = request.headers.get("origin") or request.headers.get("referer")
-        if origin_header and any(domain in origin_header for domain in ("localhost", "127.0.0.1", "sonikoma", "dheensoft")):
-            parsed_origin = urllib.parse.urlparse(origin_header)
-            base_target = f"{parsed_origin.scheme}://{parsed_origin.netloc}"
-        elif APP_URL:
-            base_target = APP_URL.rstrip("/")
-        else:
-            base_target = "http://localhost:3000"
 
         redirect_url = f"{base_target}/auth/callback?token={access_token}&is_new={'1' if is_new_user else '0'}"
         resp = RedirectResponse(redirect_url)

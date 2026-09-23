@@ -1,4 +1,8 @@
 /* ── Modern Obsidian Neon Theme for Sonikoma Swagger UI ── */
+:root, html, body {
+    color-scheme: dark !important;
+}
+
 :root {
     --bg-base: #080c15;
     --bg-card: #0f172a;
@@ -20,14 +24,18 @@
     --neon-rose: #f43f5e;
 }
 
-/* ── Ultra-Slim Custom Obsidian Scrollbars (All Browsers & Elements) ── */
+/* ── Ultra-Slim Custom Obsidian Dark Scrollbars (All Browsers & Elements) ── */
+html,
+body,
 * {
     scrollbar-width: thin !important;
-    scrollbar-color: #283548 #050811 !important;
+    scrollbar-color: #283548 #080c16 !important;
 }
 
 ::-webkit-scrollbar-button,
 *::-webkit-scrollbar-button,
+html::-webkit-scrollbar-button,
+body::-webkit-scrollbar-button,
 .swagger-ui *::-webkit-scrollbar-button {
     display: none !important;
     width: 0 !important;
@@ -36,36 +44,49 @@
 
 ::-webkit-scrollbar,
 *::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
 .swagger-ui *::-webkit-scrollbar {
-    width: 6px !important;
-    height: 6px !important;
+    width: 8px !important;
+    height: 8px !important;
+    background: #080c16 !important;
 }
 ::-webkit-scrollbar-track,
 *::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
 .swagger-ui *::-webkit-scrollbar-track {
-    background: #050811 !important;
+    background: #080c16 !important;
 }
 ::-webkit-scrollbar-thumb,
 *::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
 .swagger-ui *::-webkit-scrollbar-thumb {
     background: #283548 !important;
-    border-radius: 4px !important;
+    border-radius: 6px !important;
+    border: 2px solid #080c16 !important;
 }
 ::-webkit-scrollbar-thumb:hover,
 *::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
 .swagger-ui *::-webkit-scrollbar-thumb:hover {
-    background: var(--neon-primary) !important;
+    background: #6366f1 !important;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.6) !important;
 }
 ::-webkit-scrollbar-corner,
 *::-webkit-scrollbar-corner,
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner,
 .swagger-ui *::-webkit-scrollbar-corner {
-    background: #050811 !important;
+    background: #080c16 !important;
 }
 
 /* ── Base Theme Setup & Collapsible Sidebar Mechanics ── */
 html, body {
     scrollbar-width: thin !important;
-    scrollbar-color: #334155 #080c16 !important;
+    scrollbar-color: #283548 #080c16 !important;
 }
 
 body {
@@ -120,6 +141,14 @@ body.sidebar-collapsed {
     flex-shrink: 0 !important;
 }
 
+.sonikoma-top-bar .top-bar-center {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    min-width: 0 !important;
+    padding: 0 10px !important;
+}
+
 .header-sidebar-toggle-btn {
     display: inline-flex !important;
     align-items: center !important;
@@ -134,6 +163,7 @@ body.sidebar-collapsed {
     font-size: 16px !important;
     margin-right: 12px !important;
     transition: all 0.2s ease !important;
+    flex-shrink: 0 !important;
 }
 .header-sidebar-toggle-btn:hover {
     background: #1e293b !important;
@@ -149,6 +179,8 @@ body.sidebar-collapsed {
     gap: 8px !important;
     font-size: 13.5px !important;
     font-weight: 600 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
 }
 .sonikoma-top-bar .breadcrumb-root {
     color: #818cf8 !important;
@@ -164,16 +196,19 @@ body.sidebar-collapsed {
 
 .sonikoma-top-bar .top-search-wrapper {
     position: relative !important;
-    min-width: 320px !important;
+    width: 100% !important;
+    max-width: 320px !important;
+    min-width: 140px !important;
 }
 .sonikoma-top-bar .top-header-search-input {
     width: 100% !important;
+    height: 34px !important;
     background: #0f172a !important;
     border: 1px solid #334155 !important;
     border-radius: 8px !important;
-    padding: 8px 16px !important;
+    padding: 0 14px !important;
     color: #f8fafc !important;
-    font-size: 13px !important;
+    font-size: 12.5px !important;
     outline: none !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
@@ -190,58 +225,100 @@ body.sidebar-collapsed {
 .sonikoma-top-bar .top-bar-right {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-}
-.sonikoma-top-bar .top-bar-link {
-    display: inline-flex !important;
-    align-items: center !important;
     gap: 6px !important;
-    padding: 6px 12px !important;
-    border-radius: 7px !important;
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
-    color: #cbd5e1 !important;
-    text-decoration: none !important;
-    background: #0f172a !important;
-    border: 1px solid #1e293b !important;
-    transition: all 0.2s ease !important;
-}
-.sonikoma-top-bar .top-bar-link:hover {
-    background: #1e293b !important;
-    color: #f8fafc !important;
-    border-color: #475569 !important;
-    transform: translateY(-1px) !important;
-}
-.sonikoma-top-bar .top-bar-link.outline {
-    background: transparent !important;
-    color: #818cf8 !important;
-    border-color: rgba(99, 102, 241, 0.35) !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
 }
 
 .sonikoma-top-bar .top-bar-btn.authorize-btn {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 7px !important;
-    padding: 7px 18px !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 34px !important;
+    padding: 0 16px !important;
     border-radius: 8px !important;
-    font-size: 13px !important;
+    font-size: 12.5px !important;
     font-weight: 700 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
     color: #ffffff !important;
     background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
     border: 1px solid #6366f1 !important;
-    box-shadow: 0 0 16px rgba(99, 102, 241, 0.45) !important;
+    box-shadow: 0 0 14px rgba(99, 102, 241, 0.45) !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
-    margin-right: 4px !important;
+    box-sizing: border-box !important;
+    margin-right: 2px !important;
 }
 .sonikoma-top-bar .top-bar-btn.authorize-btn:hover {
-    box-shadow: 0 0 24px rgba(99, 102, 241, 0.75) !important;
+    box-shadow: 0 0 22px rgba(99, 102, 241, 0.75) !important;
     transform: translateY(-1px) !important;
 }
 .sonikoma-top-bar .top-bar-btn.authorize-btn.authorized {
     background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
     border-color: #34d399 !important;
     box-shadow: 0 0 16px rgba(16, 185, 129, 0.45) !important;
+}
+
+.sonikoma-top-bar .top-bar-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    height: 34px !important;
+    padding: 0 11px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    color: #cbd5e1 !important;
+    text-decoration: none !important;
+    background: #0f172a !important;
+    border: 1px solid #1e293b !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+.sonikoma-top-bar .top-bar-link:hover {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #6366f1 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+}
+.sonikoma-top-bar .top-bar-link.outline {
+    background: transparent !important;
+    color: #818cf8 !important;
+    border-color: rgba(99, 102, 241, 0.4) !important;
+}
+.sonikoma-top-bar .top-bar-link.outline:hover {
+    background: rgba(99, 102, 241, 0.12) !important;
+    border-color: #6366f1 !important;
+    color: #a5b4fc !important;
+}
+
+@media (max-width: 1400px) {
+    .sonikoma-top-bar {
+        padding: 0 14px !important;
+        gap: 8px !important;
+    }
+    .sonikoma-top-bar .top-search-wrapper {
+        max-width: 220px !important;
+        min-width: 120px !important;
+    }
+    .sonikoma-top-bar .top-bar-link {
+        padding: 0 8px !important;
+        font-size: 11.5px !important;
+    }
+}
+@media (max-width: 1100px) {
+    .sonikoma-top-bar .breadcrumb-sep,
+    .sonikoma-top-bar .breadcrumb-current {
+        display: none !important;
+    }
 }
 
 /* ── Sidebar Layout (Fixed Header & Footer, Scrollable Middle Body) ── */
@@ -260,6 +337,8 @@ body.sidebar-collapsed {
     overflow: hidden !important;
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    overscroll-behavior: contain !important;
+    overscroll-behavior-y: contain !important;
 }
 
 body.sidebar-collapsed .sonikoma-sidebar {
@@ -340,22 +419,33 @@ body.sidebar-collapsed .sonikoma-sidebar {
 .sonikoma-sidebar .sidebar-body {
     flex: 1 1 auto !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     min-height: 0 !important;
-    scrollbar-color: #1e293b #080c16 !important;
+    overscroll-behavior: contain !important;
+    overscroll-behavior-y: contain !important;
+    scrollbar-color: #283548 #080c16 !important;
     scrollbar-width: thin !important;
 }
+.sonikoma-sidebar .sidebar-body::-webkit-scrollbar-button {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    background: transparent !important;
+}
 .sonikoma-sidebar .sidebar-body::-webkit-scrollbar {
-    width: 5px;
+    width: 6px !important;
+    background: #080c16 !important;
 }
 .sonikoma-sidebar .sidebar-body::-webkit-scrollbar-track {
-    background: #080c16;
+    background: #080c16 !important;
 }
 .sonikoma-sidebar .sidebar-body::-webkit-scrollbar-thumb {
-    background: #1e293b;
-    border-radius: 4px;
+    background: #283548 !important;
+    border-radius: 4px !important;
+    border: 1px solid #080c16 !important;
 }
 .sonikoma-sidebar .sidebar-body::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+    background: #6366f1 !important;
 }
 
 .sonikoma-sidebar .sidebar-nav-section {
@@ -1948,20 +2038,6 @@ html, body, * {
     background: #080c16 !important;
 }
 
-/* Sidebar Specific Scrollbar */
-.sonikoma-sidebar .sidebar-body::-webkit-scrollbar {
-    width: 4px !important;
-}
-.sonikoma-sidebar .sidebar-body::-webkit-scrollbar-track {
-    background: transparent !important;
-}
-.sonikoma-sidebar .sidebar-body::-webkit-scrollbar-thumb {
-    background: #1e293b !important;
-    border-radius: 9999px !important;
-}
-.sonikoma-sidebar .sidebar-body::-webkit-scrollbar-thumb:hover {
-    background: #6366f1 !important;
-}
 
 /* ── Custom Built-In OAuth2 Modal ── */
 .sonikoma-auth-overlay {

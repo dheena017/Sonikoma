@@ -2,6 +2,10 @@
    SONIKOMA ULTRA-PREMIUM REDOC OBSIDIAN DESIGN SYSTEM (Pro Edition)
    ═══════════════════════════════════════════════════════════════════════════ */
 
+:root, html, body {
+    color-scheme: dark !important;
+}
+
 :root {
     /* ── Dark Obsidian Surfaces & Elevation ── */
     --bg-main: #040711;
@@ -98,26 +102,31 @@ body.redoc-page {
 }
 
 /* Sleek global scrollbars */
-html, body, .menu-content {
+html, body, .menu-content, * {
     scrollbar-width: thin !important;
     scrollbar-color: #283548 #070b16 !important;
 }
 
-::-webkit-scrollbar {
+::-webkit-scrollbar,
+*::-webkit-scrollbar {
     width: 6px !important;
     height: 6px !important;
 }
-::-webkit-scrollbar-track {
+::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
     background: #070b16 !important;
 }
-::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
     background: #283548 !important;
     border-radius: 4px !important;
 }
-::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
     background: var(--accent-primary) !important;
 }
-::-webkit-scrollbar-corner {
+::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
     background: #070b16 !important;
 }
 
@@ -243,18 +252,24 @@ body.redoc-page .top-bar-right {
 }
 
 body.redoc-page .top-bar-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    border-radius: 7px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-decoration: none;
-    background: rgba(15, 23, 42, 0.7);
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    height: 34px !important;
+    padding: 0 11px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    color: var(--text-muted) !important;
+    text-decoration: none !important;
+    background: rgba(15, 23, 42, 0.7) !important;
+    border: 1px solid var(--border-color) !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
 }
 
 body.redoc-page .top-bar-link:hover {
