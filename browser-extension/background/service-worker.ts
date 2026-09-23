@@ -334,6 +334,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
         const endpoint = `${apiBase}/api/analyze-single-image`;
 
         let resultData: any = null;
+        let fetchError: string | null = null;
         try {
           const controller = new AbortController();
           // Allow up to 90s for deep AI Vision (YOLO OCR + Gemini 2.5 Flash) to complete
@@ -344,7 +345,9 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
             body: JSON.stringify({
               url: payload.imageUrl,
               image_url: payload.imageUrl,
-              model: "gemini-2.5-flash",
+              model: payload.model || "gemini-2.5-flash",
+              voice: payload.voice || "en-US-ChristopherNeural",
+              narrationStyle: payload.narrationStyle || "long",
               languages: ["en"],
             }),
             signal: controller.signal,
@@ -352,8 +355,15 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
           clearTimeout(timeout);
           if (res.ok) {
             resultData = await res.json();
+          } else {
+            const errBody = await res.json().catch(() => null);
+            fetchError = errBody?.detail || errBody?.error || `HTTP ${res.status}`;
+            console.warn("[API_ANALYZE_PANEL] Server returned error:", res.status, errBody);
           }
-        } catch (_) {}
+        } catch (fErr: any) {
+          fetchError = fErr?.message || String(fErr);
+          console.warn("[API_ANALYZE_PANEL] Fetch exception:", fErr);
+        }
 
         if (resultData) {
           const analysis = resultData.analysis || resultData;
@@ -369,6 +379,17 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
               : "") ||
             "";
 
+          // Format audio URL if relative path
+          let audioUrl = resultData.audio_url || analysis.audio_url || null;
+          if (audioUrl && typeof audioUrl === "string" && audioUrl.startsWith("/")) {
+            audioUrl = `${apiBase}${audioUrl}`;
+          }
+
+          let narrativeAudioUrl = resultData.narrative_audio_url || analysis.narrative_audio_url || null;
+          if (narrativeAudioUrl && typeof narrativeAudioUrl === "string" && narrativeAudioUrl.startsWith("/")) {
+            narrativeAudioUrl = `${apiBase}${narrativeAudioUrl}`;
+          }
+
           return {
             success: true,
             speech_text: detectedText,
@@ -377,6 +398,8 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
             visual_description: analysis.visual_description || resultData.visual_description || "",
             narrative: resultData.narrative || resultData.narrativeText || analysis.narrative || analysis.narrativeText || "",
             sfx: analysis.sfx || resultData.sfx || "",
+            audio_url: audioUrl,
+            narrative_audio_url: narrativeAudioUrl,
           };
         }
 
@@ -386,6 +409,60 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
           motion_type: payload.panelIndex % 2 === 0 ? "zoom_in" : "pan_up",
           duration: 3.5,
           visual_description: `Scene #${payload.panelIndex || 1}`,
+          warning: fetchError,
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          error: err?.message || String(err),
+        };
+      }
+    }
+
+    case "API_ANALYZE_ALL_PANELS": {
+      try {
+        const base = await getApiBaseUrl();
+        const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
+        const endpoint = `${apiBase}/api/analyze-all-panels`;
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 180000);
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            panels: payload.panels,
+            model: payload.model || "gemini-2.5-flash",
+            voice: payload.voice || "en-US-ChristopherNeural",
+            narrationStyle: payload.narrationStyle || "long",
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => null);
+          return {
+            success: false,
+            error: errBody?.detail || errBody?.error || `HTTP ${res.status}`,
+          };
+        }
+
+        const data = await res.json();
+        if (data && Array.isArray(data.results)) {
+          data.results.forEach((r: any) => {
+            if (r.audio_url && typeof r.audio_url === "string" && r.audio_url.startsWith("/")) {
+              r.audio_url = `${apiBase}${r.audio_url}`;
+            }
+            if (r.narrative_audio_url && typeof r.narrative_audio_url === "string" && r.narrative_audio_url.startsWith("/")) {
+              r.narrative_audio_url = `${apiBase}${r.narrative_audio_url}`;
+            }
+          });
+        }
+
+        return {
+          success: true,
+          ...data,
         };
       } catch (err: any) {
         return {

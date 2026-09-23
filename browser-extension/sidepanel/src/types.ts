@@ -11,6 +11,8 @@ export interface StoryboardPanel {
   enabled: boolean;
   isAnalyzing?: boolean;
   visualDescription?: string;
+  audioUrl?: string;
+  narrativeAudioUrl?: string;
 }
 
 export interface VoiceOption {

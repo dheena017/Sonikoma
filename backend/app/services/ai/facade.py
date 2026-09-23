@@ -327,44 +327,36 @@ async def facade_analyze_image(
 
     analysis = validate_analysis(json.loads(raw_text))
 
-    if not has_dialogue and not analysis.get("speech_text"):
-        try:
-            storyteller_skill = registry.get("panel_storyteller")
-            narration = await storyteller_skill.execute(
-                model=model,
-                image_bytes=img_buffer,
-                user_keys=user_keys,
-                visual_scene_description=analysis.get("visual_description", ""),
-                sound_effect=analysis.get("sfx", "")
-            )
-            analysis["speech_text"] = narration.strip().strip('"').strip("'")
-        except Exception:
-            pass
+    # If no speech bubbles were detected, ensure speech_text is empty (do not invent fake dialogue)
+    if not has_dialogue:
+        analysis["speech_text"] = ""
 
     audio_url = None
     try:
-        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
-            temp_audio_path = tmp_audio.name
+        audio_text = analysis.get("speech_text", "").strip()
+        if audio_text:
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+                temp_audio_path = tmp_audio.name
 
-        voice_code = voice or "en-US-GuyNeural"
-        _, actual_dur = await generate_panel_audio(
-            dialogue_list=[analysis["speech_text"]],
-            target_duration=analysis["duration"],
-            output_path=temp_audio_path,
-            voice=voice_code,
-            force_duration=False
-        )
-        analysis["duration"] = actual_dur
+            voice_code = voice or "en-US-GuyNeural"
+            _, actual_dur = await generate_panel_audio(
+                dialogue_list=[audio_text],
+                target_duration=analysis["duration"],
+                output_path=temp_audio_path,
+                voice=voice_code,
+                force_duration=False
+            )
+            analysis["duration"] = actual_dur
 
-        if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
-            with open(temp_audio_path, "rb") as f:
-                audio_bytes = f.read()
-            unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}" if 'uuid' in globals() else f"audio_{os.urandom(4).hex()}"
-            stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
-            audio_url = f"/api/image/cached/{unique_audio_id}"
+            if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
+                with open(temp_audio_path, "rb") as f:
+                    audio_bytes = f.read()
+                unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}" if 'uuid' in globals() else f"audio_{os.urandom(4).hex()}"
+                stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
+                audio_url = f"/api/image/cached/{unique_audio_id}"
 
-        if os.path.exists(temp_audio_path):
-            os.remove(temp_audio_path)
+            if os.path.exists(temp_audio_path):
+                os.remove(temp_audio_path)
     except Exception:
         pass
 

@@ -47,4 +47,4 @@ The extension connects directly to Sonikoma's FastAPI backend:
 - TTS Synthesis: `POST /api/v1/audio/tts`
 - Vision AI & Panel OCR: `POST /api/analyze-single-image`
 - Video Rendering: `POST /api/v1/video/render`
-- Web Studio Bridge: `/workspace/scraper?url=...`
+- Web Studio Bridge: `/scraper?url=...`

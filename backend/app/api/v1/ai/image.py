@@ -214,13 +214,13 @@ async def analyze_sequence(
 async def analyze_panels(
     body: AnalyzePanelSequenceRequest,
     user_api_key: dict = Depends(get_user_gemini_key),
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     if not body.panels:
         raise HTTPException(status_code=400, detail="Panels list cannot be empty")
 
     COST = min(50, len(body.panels) * 8)
-    if get_available_credits(current_user["user_id"]) < COST:
+    if current_user and get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
 
     semaphore = asyncio.Semaphore(4)
@@ -249,7 +249,7 @@ async def analyze_panels(
 
     results = await asyncio.gather(*(analyze_panel(panel) for panel in body.panels))
     results = _attach_narratives_to_results(results)
-    if any(item.get("success") for item in results):
+    if current_user and any(item.get("success") for item in results):
         record_credit_transaction(current_user["user_id"], -COST, "analyze_panels")
 
     def _is_item_success(it: dict) -> bool:

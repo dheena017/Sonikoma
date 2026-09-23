@@ -27,7 +27,7 @@ export interface StoryboardViewProps {
   onMovePanel: (index: number, direction: "up" | "down") => void;
   onDuplicatePanel: (panel: StoryboardPanel, index: number) => void;
   onDeletePanel: (id: string) => void;
-  onAuditionPanel: (panelId: string, text: string, voice?: string) => void;
+  onAuditionPanel: (panelId: string, text: string, voice?: string, audioUrl?: string) => void;
   onAnalyzePanel?: (panelId: string, imageUrl: string) => void;
   onAnalyzeAllPanels?: () => void;
   onPreviewImage: (imageUrl: string) => void;

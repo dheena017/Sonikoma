@@ -317,14 +317,20 @@ export const SidepanelApp: React.FC = () => {
   // AI Storyboard Analysis for Single Panel
   const handleAnalyzePanel = (panelId: string, imageUrl: string) => {
     handleUpdatePanel(panelId, { isAnalyzing: true });
-    showToast("AI analyzing panel dialogue & motions...");
+    showToast("AI analyzing panel dialogue, motions & audio...");
 
     try {
       if (typeof chrome !== "undefined" && chrome.runtime) {
         chrome.runtime.sendMessage(
           {
             type: "API_ANALYZE_PANEL",
-            payload: { imageUrl, panelId },
+            payload: {
+              imageUrl,
+              panelId,
+              voice: selectedVoice,
+              model: "gemini-2.5-flash",
+              narrationStyle: "long",
+            },
           },
           (res) => {
             if (chrome.runtime.lastError) {
@@ -334,19 +340,22 @@ export const SidepanelApp: React.FC = () => {
             }
 
             if (res && res.success) {
+              const target = panels.find((p) => p.id === panelId);
               handleUpdatePanel(panelId, {
                 isAnalyzing: false,
-                dialogueText: res.speech_text !== undefined && res.speech_text !== "" ? res.speech_text : undefined,
-                motionPreset: res.motion_type || "zoom_in",
-                duration: res.duration || 3.5,
-                visualDescription: res.visual_description,
-                narrativeText: res.narrative,
-                sfx: res.sfx,
+                dialogueText: res.speech_text ? res.speech_text : (target?.dialogueText || ""),
+                motionPreset: res.motion_type || target?.motionPreset || "zoom_in",
+                duration: res.duration ? Number(res.duration) : (target?.duration || 3.5),
+                visualDescription: res.visual_description || target?.visualDescription || "",
+                narrativeText: res.narrative || target?.narrativeText || "",
+                sfx: res.sfx || target?.sfx || "",
+                audioUrl: res.audio_url || target?.audioUrl,
+                narrativeAudioUrl: res.narrative_audio_url || target?.narrativeAudioUrl,
               });
-              showToast("Panel analysis complete!");
+              showToast("✨ Smart Scanner analysis completed!");
             } else {
               handleUpdatePanel(panelId, { isAnalyzing: false });
-              showToast(res?.error ? `Analysis note: ${res.error}` : "Analysis fallback applied");
+              showToast(res?.error ? `Analysis note: ${res.error}` : "Analysis completed with defaults");
             }
           }
         );
@@ -360,7 +369,7 @@ export const SidepanelApp: React.FC = () => {
     }
   };
 
-  // AI Storyboard Analysis for All Panels
+  // AI Storyboard Analysis for All Panels (Sequence Analysis matching website)
   const handleAnalyzeAllPanels = async () => {
     const activePanels = panels.filter((p) => p.enabled);
     if (activePanels.length === 0) {
@@ -369,107 +378,161 @@ export const SidepanelApp: React.FC = () => {
     }
 
     setIsAnalyzingAll(true);
-    showToast(`AI analyzing ${activePanels.length} storyboard panels...`);
+    // Visually mark all active panels as analyzing (shows scanning overlay on all cards)
+    setPanels((prev) =>
+      prev.map((p) => (p.enabled ? { ...p, isAnalyzing: true } : p))
+    );
+    showToast(`AI analyzing sequence for all ${activePanels.length} panels...`);
 
-    let successCount = 0;
-    let failCount = 0;
+    try {
+      if (typeof chrome !== "undefined" && chrome.runtime) {
+        chrome.runtime.sendMessage(
+          {
+            type: "API_ANALYZE_ALL_PANELS",
+            payload: {
+              panels: activePanels.map((p) => ({ id: p.id, url: p.imageUrl })),
+              voice: selectedVoice,
+              model: "gemini-2.5-flash",
+              narrationStyle: "long",
+            },
+          },
+          (res) => {
+            setIsAnalyzingAll(false);
+            if (chrome.runtime.lastError) {
+              setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
+              showToast(`Sequence communication error: ${chrome.runtime.lastError.message}`);
+              return;
+            }
 
-    for (let i = 0; i < panels.length; i++) {
-      const panel = panels[i];
-      if (!panel.enabled) continue;
-
-      handleUpdatePanel(panel.id, { isAnalyzing: true });
-      await new Promise<void>((resolve) => {
-        try {
-          if (typeof chrome !== "undefined" && chrome.runtime) {
-            chrome.runtime.sendMessage(
-              {
-                type: "API_ANALYZE_PANEL",
-                payload: { imageUrl: panel.imageUrl, panelId: panel.id, panelIndex: panel.index },
-              },
-              (res) => {
-                if (!chrome.runtime.lastError && res && res.success) {
-                  successCount++;
-                  handleUpdatePanel(panel.id, {
-                    isAnalyzing: false,
-                    dialogueText: res.speech_text !== undefined && res.speech_text !== "" ? res.speech_text : panel.dialogueText,
-                    motionPreset: res.motion_type || panel.motionPreset,
-                    duration: res.duration || panel.duration,
-                    visualDescription: res.visual_description,
-                  });
-                } else {
-                  failCount++;
-                  handleUpdatePanel(panel.id, { isAnalyzing: false });
+            if (res && res.success && Array.isArray(res.results)) {
+              const resultsById = new Map<string, any>();
+              res.results.forEach((r: any, idx: number) => {
+                if (r.id !== undefined && r.id !== null) {
+                  resultsById.set(String(r.id), r);
                 }
-                resolve();
-              }
-            );
-          } else {
-            handleUpdatePanel(panel.id, { isAnalyzing: false });
-            failCount++;
-            resolve();
-          }
-        } catch (_) {
-          handleUpdatePanel(panel.id, { isAnalyzing: false });
-          failCount++;
-          resolve();
-        }
-      });
-    }
+                if (activePanels[idx]) {
+                  resultsById.set(String(activePanels[idx].id), r);
+                }
+              });
 
-    setIsAnalyzingAll(false);
-    if (failCount > 0 && successCount === 0) {
-      showToast(`Analysis completed with heuristics (${failCount} scenes)`);
-    } else {
-      showToast(`✨ Analyzed ${successCount} panels successfully!`);
+              setPanels((prev) =>
+                prev.map((p) => {
+                  if (!p.enabled) return p;
+                  const result = resultsById.get(String(p.id));
+                  if (!result) return { ...p, isAnalyzing: false };
+                  const analysis = result.analysis || result;
+
+                  return {
+                    ...p,
+                    isAnalyzing: false,
+                    dialogueText: analysis.speech_text ? analysis.speech_text : p.dialogueText,
+                    motionPreset: analysis.motion_type || p.motionPreset,
+                    duration: analysis.duration ? Number(analysis.duration) : p.duration,
+                    visualDescription: analysis.visual_description || p.visualDescription,
+                    narrativeText:
+                      result.narrative ||
+                      result.narrativeText ||
+                      analysis.narrative ||
+                      analysis.narrativeText ||
+                      p.narrativeText,
+                    sfx: analysis.sfx || p.sfx,
+                    audioUrl: result.audio_url || analysis.audio_url || p.audioUrl,
+                    narrativeAudioUrl:
+                      result.narrative_audio_url ||
+                      analysis.narrative_audio_url ||
+                      p.narrativeAudioUrl,
+                  };
+                })
+              );
+              showToast(`✨ Smart Full Sequence Analysis completed for all ${activePanels.length} panels!`);
+            } else {
+              setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
+              showToast(res?.error ? `Sequence analysis: ${res.error}` : "Sequence analysis completed with defaults");
+            }
+          }
+        );
+      } else {
+        setIsAnalyzingAll(false);
+        setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
+        showToast("Extension runtime not available");
+      }
+    } catch (err: any) {
+      setIsAnalyzingAll(false);
+      setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
+      showToast(`Sequence analysis error: ${err?.message || String(err)}`);
     }
   };
 
   // Audio Auditioning
-  const handleAuditionPanel = (panelId: string, text: string, voice?: string) => {
-    if (!text.trim()) {
+  const handleAuditionPanel = (panelId: string, text: string, voice?: string, audioUrl?: string) => {
+    if (!text.trim() && !audioUrl) {
       showToast("Please enter dialogue to audition");
       return;
     }
     setActiveAuditioningId(panelId);
     const voiceToUse = voice || selectedVoice;
 
-    try {
-      if (typeof chrome !== "undefined" && chrome.runtime) {
-        chrome.runtime.sendMessage(
-          {
-            type: "API_GENERATE_TTS",
-            payload: {
-              dialogue_list: [text],
-              voice: voiceToUse,
-              speech_rate: speechRate,
-              speech_pitch: speechPitch,
-              return_base64: true,
+    // If pre-generated audio is already available (from Analyze or TTS), play directly
+    if (audioUrl) {
+      try {
+        const audio = new Audio(audioUrl);
+        audio.onended = () => setActiveAuditioningId(null);
+        audio.onerror = () => {
+          synthesizeAudioFallback();
+        };
+        audio.play().then(() => {
+          showToast("Playing generated scene audio...");
+        }).catch((err) => {
+          console.warn("[Sonikoma] Audio play failed, falling back to TTS:", err);
+          synthesizeAudioFallback();
+        });
+        return;
+      } catch (_) {
+        synthesizeAudioFallback();
+        return;
+      }
+    }
+
+    synthesizeAudioFallback();
+
+    function synthesizeAudioFallback() {
+      try {
+        if (typeof chrome !== "undefined" && chrome.runtime) {
+          chrome.runtime.sendMessage(
+            {
+              type: "API_GENERATE_TTS",
+              payload: {
+                dialogue_list: [text],
+                voice: voiceToUse,
+                speech_rate: speechRate,
+                speech_pitch: speechPitch,
+                return_base64: true,
+              },
             },
-          },
-          (res) => {
-            setActiveAuditioningId(null);
-            if (!chrome.runtime.lastError && res && res.success && res.data && res.data.audio_base64) {
-              try {
-                const audio = new Audio(`data:audio/mp3;base64,${res.data.audio_base64}`);
-                audio.play().catch((playErr) => {
-                  console.warn("[Sonikoma] Audio play failed:", playErr);
+            (res) => {
+              setActiveAuditioningId(null);
+              if (!chrome.runtime.lastError && res && res.success && res.data && res.data.audio_base64) {
+                try {
+                  const audio = new Audio(`data:audio/mp3;base64,${res.data.audio_base64}`);
+                  audio.play().catch((playErr) => {
+                    console.warn("[Sonikoma] Audio play failed:", playErr);
+                    fallbackLocalSpeech(text);
+                  });
+                  showToast("Playing neural voice preview...");
+                } catch (_) {
                   fallbackLocalSpeech(text);
-                });
-                showToast("Playing neural voice preview...");
-              } catch (_) {
+                }
+              } else {
                 fallbackLocalSpeech(text);
               }
-            } else {
-              fallbackLocalSpeech(text);
             }
-          }
-        );
-      } else {
+          );
+        } else {
+          fallbackLocalSpeech(text);
+        }
+      } catch (_) {
         fallbackLocalSpeech(text);
       }
-    } catch (_) {
-      fallbackLocalSpeech(text);
     }
   };
 
