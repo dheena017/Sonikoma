@@ -10,9 +10,9 @@
 2. Navigate to `chrome://extensions` in your address bar.
 3. Toggle on **"Developer mode"** in the top-right corner.
 4. Click the **"Load unpacked"** button in the top-left corner.
-5. Select this `browser-extension/` folder:
+5. Select the compiled **`browser-extension/dist`** folder:
    ```
-   c:\Users\dheen\project\Sonikoma\browser-extension
+   c:\Users\dheen\project\Sonikoma\browser-extension\dist
    ```
 6. The **Sonikoma AI Studio** extension icon will now appear in your browser toolbar!
 
@@ -45,6 +45,6 @@
 The extension connects directly to Sonikoma's FastAPI backend:
 - Neural Voices: `GET /api/v1/audio/voices`
 - TTS Synthesis: `POST /api/v1/audio/tts`
-- Speech Bubble OCR: `POST /api/v1/ocr/bubble-dialogue`
+- Vision AI & Panel OCR: `POST /api/analyze-single-image`
 - Video Rendering: `POST /api/v1/video/render`
 - Web Studio Bridge: `/workspace/scraper?url=...`

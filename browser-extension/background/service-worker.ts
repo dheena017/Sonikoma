@@ -13,7 +13,7 @@ export interface ExtensionConfig {
 
 const DEFAULT_CONFIG: ExtensionConfig = {
   apiBaseUrl: "http://localhost:5173",
-  webBaseUrl: "http://localhost:5173",
+  webBaseUrl: "http://localhost:3000",
   isProduction: false,
 };
 
@@ -40,8 +40,8 @@ async function getWebBaseUrl(): Promise<string> {
       chrome.storage.sync.get(["sonikoma_config"], (result) => {
         const stored = result && result.sonikoma_config ? result.sonikoma_config : {};
         let base = stored.webBaseUrl || DEFAULT_CONFIG.webBaseUrl;
-        if (!base || base.includes("sonikoma.com")) {
-          base = "http://localhost:5173";
+        if (!base || base.includes("sonikoma.com") || base.includes("5173")) {
+          base = "http://localhost:3000";
         }
         resolve(base);
       });
@@ -331,38 +331,29 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
       try {
         const base = await getApiBaseUrl();
         const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
-        const candidateEndpoints = [
-          `${apiBase}/api/analyze-single-image`,
-          `${apiBase}/api/v1/ocr/bubble-dialogue`,
-        ];
+        const endpoint = `${apiBase}/api/analyze-single-image`;
 
         let resultData: any = null;
-        for (const ep of candidateEndpoints) {
-          try {
-            const controller = new AbortController();
-            // Allow up to 90s for deep AI Vision (YOLO OCR + Gemini 2.5 Flash) to complete
-            const timeout = setTimeout(() => controller.abort(), 90000);
-            const res = await fetch(ep, {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Accept: "application/json" },
-              body: JSON.stringify({
-                url: payload.imageUrl,
-                image_url: payload.imageUrl,
-                model: "gemini-2.5-flash",
-                languages: ["en"],
-              }),
-              signal: controller.signal,
-            });
-            clearTimeout(timeout);
-            if (res.ok) {
-              const data = await res.json();
-              if (data) {
-                resultData = data;
-                break;
-              }
-            }
-          } catch (_) {}
-        }
+        try {
+          const controller = new AbortController();
+          // Allow up to 90s for deep AI Vision (YOLO OCR + Gemini 2.5 Flash) to complete
+          const timeout = setTimeout(() => controller.abort(), 90000);
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({
+              url: payload.imageUrl,
+              image_url: payload.imageUrl,
+              model: "gemini-2.5-flash",
+              languages: ["en"],
+            }),
+            signal: controller.signal,
+          });
+          clearTimeout(timeout);
+          if (res.ok) {
+            resultData = await res.json();
+          }
+        } catch (_) {}
 
         if (resultData) {
           const analysis = resultData.analysis || resultData;

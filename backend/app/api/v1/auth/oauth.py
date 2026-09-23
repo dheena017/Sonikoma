@@ -120,7 +120,7 @@ def _get_redirect_uri(request: Request) -> str:
     if host:
         return f"{scheme}://{host}/api/auth/google/callback"
 
-    return f"{scheme}://localhost:5173/api/auth/google/callback"
+    return f"{scheme}://localhost:3000/api/auth/google/callback"
 
 
 @router.get("/login", summary="Initiate Google OAuth2 authentication flow")
@@ -315,8 +315,16 @@ async def google_callback(
 
         access_token = create_access_token(data={"sub": user["user_id"]})
 
-        # Redirect to frontend OAuth launch page with token and is_new parameters for animated landing & modal trigger
-        base_target = (APP_URL or "http://localhost:5173").rstrip("/")
+        # Redirect to frontend OAuth launch page with token and is_new parameters
+        origin_header = request.headers.get("origin") or request.headers.get("referer")
+        if origin_header and any(domain in origin_header for domain in ("localhost", "127.0.0.1", "sonikoma", "dheensoft")):
+            parsed_origin = urllib.parse.urlparse(origin_header)
+            base_target = f"{parsed_origin.scheme}://{parsed_origin.netloc}"
+        elif APP_URL:
+            base_target = APP_URL.rstrip("/")
+        else:
+            base_target = "http://localhost:3000"
+
         redirect_url = f"{base_target}/auth/callback?token={access_token}&is_new={'1' if is_new_user else '0'}"
         resp = RedirectResponse(redirect_url)
 

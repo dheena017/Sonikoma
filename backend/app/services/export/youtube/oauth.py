@@ -127,17 +127,13 @@ async def get_authenticated_service(user_id: Optional[str] = None, allow_interac
         # Canonical data location: data/client_secrets.json
         client_secrets_file = os.path.join(PROJECT_ROOT, "data", "client_secrets.json")
         if not os.path.exists(client_secrets_file):
-            backend_secrets = os.path.join(PROJECT_ROOT, "backend", "data", "client_secrets.json")
-            if os.path.exists(backend_secrets):
-                client_secrets_file = backend_secrets
-            else:
-                root_secrets = os.path.join(PROJECT_ROOT, "client_secrets.json")
-                if os.path.exists(root_secrets):
-                    client_secrets_file = root_secrets
-            else:
-                cwd_secrets = os.path.join(os.getcwd(), "client_secrets.json")
-                if os.path.exists(cwd_secrets):
-                    client_secrets_file = cwd_secrets
+            for candidate in [
+                os.path.join(PROJECT_ROOT, "client_secrets.json"),
+                os.path.join(os.getcwd(), "client_secrets.json"),
+            ]:
+                if os.path.exists(candidate):
+                    client_secrets_file = candidate
+                    break
 
         env_secrets_raw = os.environ.get("YOUTUBE_CLIENT_SECRETS_JSON")
         env_secrets_raw = env_secrets_raw.strip() if isinstance(env_secrets_raw, str) else env_secrets_raw
