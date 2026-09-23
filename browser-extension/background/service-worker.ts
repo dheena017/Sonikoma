@@ -500,6 +500,139 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
       }
     }
 
+    case "API_SCRAPE_CHAPTER": {
+      try {
+        const base = await getApiBaseUrl();
+        const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
+        const targetUrl = payload?.url?.trim();
+        if (!targetUrl) {
+          return { success: false, error: "Target URL is required." };
+        }
+
+        const forceRefresh = Boolean(payload?.force_refresh);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000);
+
+        // 1. Try dedicated reader-chapter endpoint used by the website reader
+        const readerEndpoint = `${apiBase}/api/v1/scraper/reader-chapter`;
+        let data: any = null;
+        let fetchError: string | null = null;
+
+        try {
+          const res = await fetch(readerEndpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            body: JSON.stringify({
+              url: targetUrl,
+              force_refresh: forceRefresh,
+            }),
+            signal: controller.signal,
+          });
+
+          if (res.ok) {
+            data = await res.json();
+          } else {
+            console.warn(`[API_SCRAPE_CHAPTER] /reader-chapter returned ${res.status}, attempting /chapter/sync fallback`);
+          }
+        } catch (rErr: any) {
+          console.warn("[API_SCRAPE_CHAPTER] /reader-chapter fetch error:", rErr?.message || rErr);
+        }
+
+        // 2. If reader-chapter didn't succeed, fallback to synchronous chapter scrape endpoint
+        if (!data || !data.success) {
+          try {
+            const syncEndpoint = `${apiBase}/api/v1/scraper/chapter/sync`;
+            const syncRes = await fetch(syncEndpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              body: JSON.stringify({
+                url: targetUrl,
+                force_refresh: forceRefresh,
+                bypass_cache: forceRefresh,
+                proxy_images: true,
+                filter_banners: true,
+              }),
+              signal: controller.signal,
+            });
+
+            if (syncRes.ok) {
+              const syncData = await syncRes.json();
+              if (syncData && syncData.success) {
+                data = {
+                  success: true,
+                  url: syncData.url || targetUrl,
+                  series_title: syncData.series?.title || "",
+                  chapter_title: syncData.chapter?.title || (syncData.chapter?.number ? `Chapter ${syncData.chapter.number}` : ""),
+                  chapter_number: syncData.chapter?.number || null,
+                  total_panels: syncData.total_images || (syncData.images ? syncData.images.length : 0),
+                  panels: (syncData.images || []).map((img: any, idx: number) => ({
+                    index: idx,
+                    url: img.url || (typeof img === "string" ? img : ""),
+                    proxied_url: img.proxied_url || img.url || "",
+                    width: img.width || 800,
+                    height: img.height || 1200,
+                  })),
+                  images: (syncData.images || []).map((img: any) => img.proxied_url || img.url || (typeof img === "string" ? img : "")),
+                  raw_images: (syncData.images || []).map((img: any) => img.url || (typeof img === "string" ? img : "")),
+                };
+              }
+            } else {
+              const errJson = await syncRes.json().catch(() => null);
+              fetchError = errJson?.detail || `HTTP ${syncRes.status}`;
+            }
+          } catch (sErr: any) {
+            fetchError = sErr?.message || String(sErr);
+          }
+        }
+        clearTimeout(timeout);
+
+        if (data && data.success && Array.isArray(data.panels) && data.panels.length > 0) {
+          // Normalize all image URLs: prefix relative proxy URLs with apiBase
+          const normalizeUrl = (u: string) => {
+            if (!u) return "";
+            if (u.startsWith("/")) return `${apiBase}${u}`;
+            return u;
+          };
+
+          const normalizedPanels = data.panels.map((p: any, idx: number) => {
+            const raw = p.url || "";
+            const proxied = normalizeUrl(p.proxied_url || p.url || "");
+            return {
+              index: idx + 1,
+              src: proxied || raw,
+              url: raw,
+              proxied_url: proxied,
+              width: p.width || 800,
+              height: p.height || 1200,
+            };
+          });
+
+          const normalizedImages = (data.images || []).map((u: string) => normalizeUrl(u));
+
+          return {
+            success: true,
+            seriesTitle: data.series_title || "",
+            chapterTitle: data.chapter_title || "",
+            chapterNumber: data.chapter_number,
+            totalPanels: normalizedPanels.length,
+            panels: normalizedPanels,
+            images: normalizedPanels,
+            imageUrls: normalizedImages,
+          };
+        }
+
+        return {
+          success: false,
+          error: fetchError || "Backend scraper did not return any panels for this URL.",
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          error: err?.message || String(err),
+        };
+      }
+    }
+
     case "OPEN_WEB_STUDIO": {
       const base = await getWebBaseUrl();
       const url = new URL(`${base.replace(/\/+$/, "")}/scraper`);

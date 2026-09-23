@@ -174,7 +174,7 @@ export const PopupApp: React.FC = () => {
         return;
       }
 
-      const processResults = (res: any) => {
+      const processResults = (res: any, sourceLabel = "endpoint") => {
         setIsScanning(false);
         if (!res || !res.images || res.images.length === 0) {
           setActivePageInfo({
@@ -196,93 +196,123 @@ export const PopupApp: React.FC = () => {
           hasDetectedChapter: true,
         });
 
-        setPanels(res.images);
-        showToast(`Detected ${res.images.length} scenes!`);
+        const mapped = res.images.map((img: any, idx: number) => ({
+          index: idx + 1,
+          src: typeof img === "string" ? img : (img.proxied_url || img.src || img.url),
+          width: img.width || 800,
+          height: img.height || 1200,
+        }));
+        setPanels(mapped);
+        showToast(
+          sourceLabel === "endpoint"
+            ? `✨ Scraped ${mapped.length} panels via website engine!`
+            : `Detected ${mapped.length} scenes!`
+        );
       };
 
-      // Try sending message to existing content script
-      chrome.tabs.sendMessage(tab.id, { type: "GET_READER_STATS" }, (res) => {
-        if (!chrome.runtime.lastError && res && res.images && res.images.length > 0) {
-          processResults(res);
-          return;
-        }
+      const runDomFallbackScan = () => {
+        chrome.tabs.sendMessage(tab.id, { type: "GET_READER_STATS" }, (res) => {
+          if (!chrome.runtime.lastError && res && res.images && res.images.length > 0) {
+            processResults(res, "dom");
+            return;
+          }
 
-        // Script not injected or needs refresh: inject content scripts on-demand
-        if (chrome.scripting && chrome.scripting.executeScript) {
-          chrome.scripting.executeScript(
-            {
-              target: { tabId: tab.id! },
-              files: ["content/content.js"],
-            },
-            () => {
-              if (chrome.runtime.lastError) {
-                // Inline DOM fallback extraction
-                chrome.scripting.executeScript(
-                  {
-                    target: { tabId: tab.id! },
-                    func: () => {
-                      const imgs = Array.from(
-                        document.querySelectorAll<HTMLImageElement>("img, picture source, [style*='background-image']")
-                      );
-                      const collected: { index: number; src: string; width: number; height: number }[] = [];
-                      const seen = new Set<string>();
+          if (chrome.scripting && chrome.scripting.executeScript) {
+            chrome.scripting.executeScript(
+              {
+                target: { tabId: tab.id! },
+                files: ["content/content.js"],
+              },
+              () => {
+                if (chrome.runtime.lastError) {
+                  // Inline DOM fallback extraction
+                  chrome.scripting.executeScript(
+                    {
+                      target: { tabId: tab.id! },
+                      func: () => {
+                        const imgs = Array.from(
+                          document.querySelectorAll<HTMLImageElement>("img, picture source, [style*='background-image']")
+                        );
+                        const collected: { index: number; src: string; width: number; height: number }[] = [];
+                        const seen = new Set<string>();
 
-                      imgs.forEach((el) => {
-                        let src =
-                          el.getAttribute("data-src") ||
-                          el.getAttribute("data-original") ||
-                          el.getAttribute("data-url") ||
-                          el.getAttribute("data-lazy-src") ||
-                          (el as HTMLImageElement).src ||
-                          "";
+                        imgs.forEach((el) => {
+                          let src =
+                            el.getAttribute("data-src") ||
+                            el.getAttribute("data-original") ||
+                            el.getAttribute("data-url") ||
+                            el.getAttribute("data-lazy-src") ||
+                            (el as HTMLImageElement).src ||
+                            "";
 
-                        if (!src && (el as HTMLElement).style?.backgroundImage) {
-                          const m = (el as HTMLElement).style.backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
-                          if (m) src = m[1];
-                        }
-
-                        if (src && src.length > 5 && !src.startsWith("data:image/svg") && !src.startsWith("data:image/gif")) {
-                          if (src.startsWith("//")) src = `https:${src}`;
-                          if (!seen.has(src)) {
-                            seen.add(src);
-                            collected.push({
-                              index: collected.length + 1,
-                              src,
-                              width: (el as HTMLElement).clientWidth || 800,
-                              height: (el as HTMLElement).clientHeight || 1200,
-                            });
+                          if (!src && (el as HTMLElement).style?.backgroundImage) {
+                            const m = (el as HTMLElement).style.backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
+                            if (m) src = m[1];
                           }
-                        }
-                      });
 
-                      return {
-                        seriesTitle: document.title,
-                        chapterTitle: window.location.hostname,
-                        images: collected,
-                        panelCount: collected.length,
-                      };
+                          if (src && src.length > 5 && !src.startsWith("data:image/svg") && !src.startsWith("data:image/gif")) {
+                            if (src.startsWith("//")) src = `https:${src}`;
+                            if (!seen.has(src)) {
+                              seen.add(src);
+                              collected.push({
+                                index: collected.length + 1,
+                                src,
+                                width: (el as HTMLElement).clientWidth || 800,
+                                height: (el as HTMLElement).clientHeight || 1200,
+                              });
+                            }
+                          }
+                        });
+
+                        return {
+                          seriesTitle: document.title,
+                          chapterTitle: window.location.hostname,
+                          images: collected,
+                          panelCount: collected.length,
+                        };
+                      },
                     },
-                  },
-                  (results) => {
-                    const fallbackData = results?.[0]?.result;
-                    processResults(fallbackData);
-                  }
-                );
-                return;
-              }
+                    (results) => {
+                      const fallbackData = results?.[0]?.result;
+                      processResults(fallbackData, "dom");
+                    }
+                  );
+                  return;
+                }
 
-              // After injecting files, message content script again
-              setTimeout(() => {
-                chrome.tabs.sendMessage(tab.id!, { type: "GET_READER_STATS" }, (secondRes) => {
-                  processResults(secondRes);
-                });
-              }, 120);
+                setTimeout(() => {
+                  chrome.tabs.sendMessage(tab.id!, { type: "GET_READER_STATS" }, (secondRes) => {
+                    processResults(secondRes, "dom");
+                  });
+                }, 120);
+              }
+            );
+          } else {
+            processResults(null);
+          }
+        });
+      };
+
+      // Query website backend scraper endpoint first
+      try {
+        chrome.runtime.sendMessage(
+          {
+            type: "API_SCRAPE_CHAPTER",
+            payload: {
+              url: tab.url,
+            },
+          },
+          (apiRes) => {
+            if (!chrome.runtime.lastError && apiRes && apiRes.success && Array.isArray(apiRes.panels) && apiRes.panels.length > 0) {
+              processResults(apiRes, "endpoint");
+              return;
             }
-          );
-        } else {
-          processResults(null);
-        }
-      });
+            runDomFallbackScan();
+          }
+        );
+      } catch (err) {
+        runDomFallbackScan();
+      }
     });
   }, []);
 

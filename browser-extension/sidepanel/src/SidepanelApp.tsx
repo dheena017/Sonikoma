@@ -119,8 +119,8 @@ export const SidepanelApp: React.FC = () => {
     }
   }, []);
 
-  // 3. Robust Chapter Scanner with On-Demand Content Script Injection
-  const scanChapter = useCallback(() => {
+  // 3. Authoritative Chapter Scanner: Uses Website Backend Scraper Endpoint First, DOM Script Fallback
+  const scanChapter = useCallback((forceRefresh = false) => {
     if (typeof chrome === "undefined" || !chrome.tabs) return;
     setIsScanning(true);
 
@@ -160,7 +160,7 @@ export const SidepanelApp: React.FC = () => {
         return;
       }
 
-      const processResults = (res: any) => {
+      const processResults = (res: any, sourceLabel = "endpoint") => {
         setIsScanning(false);
         if (!res || !res.images || res.images.length === 0) {
           setChapterInfo({
@@ -184,96 +184,131 @@ export const SidepanelApp: React.FC = () => {
         const mapped: StoryboardPanel[] = res.images.map((img: any, idx: number) => ({
           id: `panel-${idx + 1}-${Date.now()}`,
           index: idx + 1,
-          imageUrl: img.src,
+          imageUrl: typeof img === "string" ? img : (img.proxied_url || img.src || img.url),
           motionPreset: globalMotion || "",
           dialogueText: "",
           duration: 0,
           enabled: true,
         }));
         setPanels(mapped);
-        showToast(`Detected ${mapped.length} panels!`);
+        showToast(
+          sourceLabel === "endpoint"
+            ? `✨ Scraped ${mapped.length} panels via website engine!`
+            : `Detected ${mapped.length} panels from page DOM`
+        );
       };
 
-      chrome.tabs.sendMessage(tab.id, { type: "GET_READER_STATS" }, (res) => {
-        if (!chrome.runtime.lastError && res && res.images && res.images.length > 0) {
-          processResults(res);
-          return;
-        }
+      // Fallback: in-tab DOM extraction via content script or inline DOM script
+      const runDomFallbackScan = () => {
+        chrome.tabs.sendMessage(tab.id!, { type: "GET_READER_STATS" }, (res) => {
+          if (!chrome.runtime.lastError && res && res.images && res.images.length > 0) {
+            processResults(res, "dom");
+            return;
+          }
 
-        if (chrome.scripting && chrome.scripting.executeScript) {
-          chrome.scripting.executeScript(
-            {
-              target: { tabId: tab.id! },
-              files: ["content/content.js"],
-            },
-            () => {
-              if (chrome.runtime.lastError) {
-                // Inline DOM fallback extraction
-                chrome.scripting.executeScript(
-                  {
-                    target: { tabId: tab.id! },
-                    func: () => {
-                      const imgs = Array.from(
-                        document.querySelectorAll<HTMLImageElement>("img, picture source, [style*='background-image']")
-                      );
-                      const collected: { index: number; src: string; width: number; height: number }[] = [];
-                      const seen = new Set<string>();
+          if (chrome.scripting && chrome.scripting.executeScript) {
+            chrome.scripting.executeScript(
+              {
+                target: { tabId: tab.id! },
+                files: ["content/content.js"],
+              },
+              () => {
+                if (chrome.runtime.lastError) {
+                  // Inline DOM fallback extraction
+                  chrome.scripting.executeScript(
+                    {
+                      target: { tabId: tab.id! },
+                      func: () => {
+                        const imgs = Array.from(
+                          document.querySelectorAll<HTMLImageElement>("img, picture source, [style*='background-image']")
+                        );
+                        const collected: { index: number; src: string; width: number; height: number }[] = [];
+                        const seen = new Set<string>();
 
-                      imgs.forEach((el) => {
-                        let src =
-                          el.getAttribute("data-src") ||
-                          el.getAttribute("data-original") ||
-                          el.getAttribute("data-url") ||
-                          el.getAttribute("data-lazy-src") ||
-                          (el as HTMLImageElement).src ||
-                          "";
+                        imgs.forEach((el) => {
+                          let src =
+                            el.getAttribute("data-src") ||
+                            el.getAttribute("data-original") ||
+                            el.getAttribute("data-url") ||
+                            el.getAttribute("data-lazy-src") ||
+                            (el as HTMLImageElement).src ||
+                            "";
 
-                        if (!src && (el as HTMLElement).style?.backgroundImage) {
-                          const m = (el as HTMLElement).style.backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
-                          if (m) src = m[1];
-                        }
-
-                        if (src && src.length > 5 && !src.startsWith("data:image/svg") && !src.startsWith("data:image/gif")) {
-                          if (src.startsWith("//")) src = `https:${src}`;
-                          if (!seen.has(src)) {
-                            seen.add(src);
-                            collected.push({
-                              index: collected.length + 1,
-                              src,
-                              width: (el as HTMLElement).clientWidth || 800,
-                              height: (el as HTMLElement).clientHeight || 1200,
-                            });
+                          if (!src && (el as HTMLElement).style?.backgroundImage) {
+                            const m = (el as HTMLElement).style.backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
+                            if (m) src = m[1];
                           }
-                        }
-                      });
 
-                      return {
-                        seriesTitle: document.title,
-                        chapterTitle: window.location.hostname,
-                        images: collected,
-                        panelCount: collected.length,
-                      };
+                          if (src && src.length > 5 && !src.startsWith("data:image/svg") && !src.startsWith("data:image/gif")) {
+                            if (src.startsWith("//")) src = `https:${src}`;
+                            if (!seen.has(src)) {
+                              seen.add(src);
+                              collected.push({
+                                index: collected.length + 1,
+                                src,
+                                width: (el as HTMLElement).clientWidth || 800,
+                                height: (el as HTMLElement).clientHeight || 1200,
+                              });
+                            }
+                          }
+                        });
+
+                        return {
+                          seriesTitle: document.title,
+                          chapterTitle: window.location.hostname,
+                          images: collected,
+                          panelCount: collected.length,
+                        };
+                      },
                     },
-                  },
-                  (results) => {
-                    const fallbackData = results?.[0]?.result;
-                    processResults(fallbackData);
-                  }
-                );
-                return;
-              }
+                    (results) => {
+                      const fallbackData = results?.[0]?.result;
+                      processResults(fallbackData, "dom");
+                    }
+                  );
+                  return;
+                }
 
-              setTimeout(() => {
-                chrome.tabs.sendMessage(tab.id!, { type: "GET_READER_STATS" }, (secondRes) => {
-                  processResults(secondRes);
-                });
-              }, 120);
+                setTimeout(() => {
+                  chrome.tabs.sendMessage(tab.id!, { type: "GET_READER_STATS" }, (secondRes) => {
+                    processResults(secondRes, "dom");
+                  });
+                }, 120);
+              }
+            );
+          } else {
+            processResults(null);
+          }
+        });
+      };
+
+      // ── Step 1: Use Website Scraper Endpoint First ──
+      try {
+        chrome.runtime.sendMessage(
+          {
+            type: "API_SCRAPE_CHAPTER",
+            payload: {
+              url: tab.url,
+              force_refresh: forceRefresh,
+            },
+          },
+          (apiRes) => {
+            if (!chrome.runtime.lastError && apiRes && apiRes.success && Array.isArray(apiRes.panels) && apiRes.panels.length > 0) {
+              processResults(apiRes, "endpoint");
+              return;
             }
-          );
-        } else {
-          processResults(null);
-        }
-      });
+
+            console.warn(
+              "[Sonikoma Sidebar] Website scraper endpoint returned no panels or was unreachable, falling back to in-tab DOM scanner.",
+              apiRes?.error || chrome.runtime.lastError?.message
+            );
+            runDomFallbackScan();
+          }
+        );
+      } catch (err) {
+        console.warn("[Sonikoma Sidebar] Error invoking API_SCRAPE_CHAPTER, falling back to DOM scanner:", err);
+        runDomFallbackScan();
+      }
     });
   }, [globalMotion]);
 
@@ -928,7 +963,7 @@ export const SidepanelApp: React.FC = () => {
             onSearchChange={setSearchQuery}
             onGlobalMotionChange={handleApplyGlobalMotion}
             onToggleSelectAll={handleToggleSelectAll}
-            onScan={scanChapter}
+            onScan={() => scanChapter(true)}
             onLoadSample={handleLoadSampleDemo}
             onUpdatePanel={handleUpdatePanel}
             onMovePanel={handleMovePanel}

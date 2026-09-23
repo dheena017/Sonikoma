@@ -94,7 +94,7 @@ async def scrape_chapter_async_endpoint(
 )
 async def scrape_chapter_sync_post(
     body: ScrapeChapterRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     if not body.url or not body.url.strip():
         raise HTTPException(status_code=400, detail="Target Chapter URL is required.")
@@ -133,7 +133,7 @@ async def scrape_chapter_sync_get(
     url: str = Query(..., description="Target chapter URL"),
     filter_banners: bool = Query(True, description="Filter out ad banners & tracking pixels"),
     proxy_images: bool = Query(True, description="Proxy image URLs for hotlink bypass"),
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     if not url or not url.strip():
         logger.warning("[ScraperAPI] GET /chapter/sync received empty URL")
