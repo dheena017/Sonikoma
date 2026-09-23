@@ -91,7 +91,7 @@ def setup_logging():
         for h in u_log.handlers:
             h.addFilter(endpoint_filter)
 
-    # Silence noisy low-level third-party debug logs (e.g. pydub subprocess byte dumps, socket frames)
+    # Silence noisy low-level third-party debug logs (e.g. pydub subprocess byte dumps, numba ssa passes, math solvers)
     for noisy in (
         "pydub",
         "pydub.logging_utils",
@@ -106,6 +106,23 @@ def setup_logging():
         "google.genai",
         "absl",
         "h11",
+        "numba",
+        "numba.core",
+        "numba.core.ssa",
+        "numba.core.byteflow",
+        "numba.core.interpreter",
+        "numba.core.transforms",
+        "numba.core.typeinfer",
+        "librosa",
+        "matplotlib",
+        "matplotlib.font_manager",
+        "scipy",
+        "scipy.spatial",
+        "pymatting",
+        "pymatting.util",
+        "moviepy",
+        "torch",
+        "transformers",
     ):
         n_log = logging.getLogger(noisy)
         n_log.setLevel(logging.WARNING)

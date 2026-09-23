@@ -47,6 +47,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Initialize global logging early
+setup_logging()
+
 # Setup middlewares
 setup_middleware(app)
 
