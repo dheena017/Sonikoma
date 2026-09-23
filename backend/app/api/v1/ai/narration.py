@@ -14,7 +14,6 @@ from api.dependencies.auth import get_current_user
 
 from services.user.credit_service import get_available_credits, record_credit_transaction
 from schemas.ai import (
-    GenerateSequenceNarrativeRequest,
     SFXAudioRequest,
     BGMVibeRequest,
     ShortsScriptRequest,
@@ -25,57 +24,6 @@ from schemas.ai import (
 
 logger = logging.getLogger("sonikoma.api.ai.narration")
 router = APIRouter()
-
-
-@router.post("/generate-sequence-narrative", summary="Generate narrative texts and audios from visual descriptions")
-async def generate_sequence_narrative(
-    body: GenerateSequenceNarrativeRequest,
-    user_api_key: dict = Depends(get_user_gemini_key),
-    current_user: dict = Depends(get_current_user)
-):
-    if not body.panels:
-        raise HTTPException(status_code=400, detail="Panels list cannot be empty")
-    COST = min(50, len(body.panels) * 5)
-    if get_available_credits(current_user["user_id"]) < COST:
-        raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
-    try:
-        panels_data = [
-            {
-                "id": p.id,
-                "visual_description": p.visual_description or "Comic panel scene",
-                "speech_text": getattr(p, "speech_text", "") or ""
-            }
-            for p in body.panels
-        ]
-        panels_json = json.dumps(panels_data)
-        
-        logger.info(f"[Narrative Sequence] Executing skill for {len(body.panels)} panels...")
-        skill_res = await run_md_skill("sequence_narrative", body.model, api_key=user_api_key, panels_json=panels_json)
-        
-        record_credit_transaction(current_user["user_id"], -COST, "generate_sequence_narrative")
-        
-        narrative_map = {}
-        if skill_res.get("success") and skill_res.get("result"):
-            res_data = skill_res["result"]
-            items = res_data.get("panels", []) if isinstance(res_data, dict) else (res_data if isinstance(res_data, list) else [])
-            for item in items:
-                if isinstance(item, dict) and "id" in item:
-                    narrative_map[item["id"]] = item.get("narrative", "")
-                    
-        results = [
-            {
-                "id": p.id,
-                "narrative": narrative_map.get(p.id, "") or "",
-                "narrative_audio_url": None
-            }
-            for p in body.panels
-        ]
-        return {"success": True, "results": results}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[Sequence Narrative Error]: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to generate sequence narrative: {e}")
 
 
 @router.post("/skills/sfx-audio", summary="Generate SFX audio prompt")

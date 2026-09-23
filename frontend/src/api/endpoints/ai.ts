@@ -148,25 +148,3 @@ export const executeSkill = async (
     ...options,
   });
 };
-
-export const generateSequenceNarrative = async (
-  fetchWithInterceptor: FetchClient,
-  data: {
-    panels: { id: number; visual_description: string }[];
-    model?: string;
-    voice?: string;
-  },
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  const res = await fetchWithInterceptor("/api/generate-sequence-narrative", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-  const json = await res.json();
-  if (!res.ok) {
-    throw new Error(json?.detail || `Request failed with status ${res.status}`);
-  }
-  return json as ApiResponse<any>;
-};

@@ -22,7 +22,6 @@ from .ai import (
     AnalyzePanelSequenceRequest,
     AnalyzeNarrativeSequenceRequest,
     PanelDescriptionItem,
-    GenerateSequenceNarrativeRequest,
     # AI Skills & Creative Generators
     DramatizeRequest,
     ShortsScriptRequest,
@@ -249,7 +248,6 @@ __all__ = [
     "AnalyzePanelSequenceRequest",
     "AnalyzeNarrativeSequenceRequest",
     "PanelDescriptionItem",
-    "GenerateSequenceNarrativeRequest",
     "DramatizeRequest",
     "ShortsScriptRequest",
     "ShortsHookRequest",

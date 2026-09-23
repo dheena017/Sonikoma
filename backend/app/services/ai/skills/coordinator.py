@@ -46,12 +46,6 @@ class FallbackCoordinator:
                     for _ in range(kwargs.get("active_slices_count", 5))
                 ]
             }
-        elif skill_name == "character_emotion_class":
-            return {
-                "emotional_state": "analytical",
-                "voice_stability": 0.9,
-                "expression_reasoning": "Determined posture with centered focal gaze."
-            }
         elif skill_name == "copyright_scrubber":
             return {
                 "contains_violation": False,
@@ -86,18 +80,6 @@ class FallbackCoordinator:
                 "tags": [genre.lower(), "webtoon recap", "op mc", "manhwa recap", "anime recap"],
                 "timestamps": ["00:00 - Introduction & Awakening", "01:30 - The Climax Battle", "03:45 - Ending Hook"]
             }
-        elif skill_name == "thumbnail_auto_composition":
-            title = kwargs.get("title", "Webtoon Hero")
-            return {
-                "overlay_text": f"HE UNLOCKED THIS?!",
-                "layout_archetype": "split_contrast",
-                "background_type": "dark_radial_burst",
-                "text_color": "#FFD700",
-                "focal_assets": [
-                    {"panel_index": 0, "description": f"Protagonist from {title}", "style_effect": "glow_outline"}
-                ],
-                "background_panel_index": 0
-            }
         elif skill_name == "shorts_script_adapter":
             return {
                 "voiceover_script": "He thought he was just another F-rank hunter... until the system chose HIM!",
@@ -131,13 +113,6 @@ class FallbackCoordinator:
                     "I am the sovereign of the dark realm, and your time has expired."
                 ]
             }
-        elif skill_name == "sequence_narrative":
-            return {
-                "panels": [
-                    {"id": 1, "narrative": "The hero stands alone at the edge of the abyss, feeling the surge of ancient power."}
-                ]
-            }
-
         return {"success": False, "source": "fallback:error"}
 
 

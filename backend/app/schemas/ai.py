@@ -81,15 +81,6 @@ class PanelDescriptionItem(BaseModel):
     visual_description: str
 
 
-class GenerateSequenceNarrativeRequest(BaseModel):
-    """Generates a narrative script from panel descriptions."""
-    panels: List[PanelDescriptionItem]
-    model: Optional[str] = None
-    voice: Optional[str] = "en-US-GuyNeural"
-    project_id: Optional[str] = None
-    job_id: Optional[str] = None
-
-
 # =============================================================================
 # 2. AI Skills & Creative Generators
 # =============================================================================
