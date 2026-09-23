@@ -5,7 +5,23 @@ import { StoryboardView } from "./components/StoryboardView";
 import { AudioMixerView } from "./components/AudioMixerView";
 import { ExportView } from "./components/ExportView";
 import { SidepanelFooter } from "./components/SidepanelFooter";
-import { Layers, Sliders, Settings, Sparkle } from "lucide-react";
+import { ErrorModal, ErrorModalData } from "./components/ErrorModal";
+import {
+  Layers,
+  Sliders,
+  Settings,
+  Sparkle,
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  X,
+} from "lucide-react";
+
+export interface ToastInfo {
+  message: string;
+  type: "info" | "success" | "error" | "warning";
+}
 
 export const SidepanelApp: React.FC = () => {
   // Navigation tabs: "storyboard" | "mixer" | "export"
@@ -16,7 +32,8 @@ export const SidepanelApp: React.FC = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [renderProgress, setRenderProgress] = useState<number>(0);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastInfo | null>(null);
+  const [errorModal, setErrorModal] = useState<ErrorModalData | null>(null);
 
   // Chapter & Panels Data
   const [chapterInfo, setChapterInfo] = useState<{
@@ -47,12 +64,35 @@ export const SidepanelApp: React.FC = () => {
   const [activeAuditioningId, setActiveAuditioningId] = useState<string | null>(null);
   const [previewImageModal, setPreviewImageModal] = useState<string | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage((current) => (current === msg ? null : current));
-    }, 2800);
-  };
+  const showToast = useCallback(
+    (msg: string, type: "info" | "success" | "error" | "warning" = "info") => {
+      setToast({ message: msg, type });
+      const duration = type === "error" ? 6000 : 3500;
+      setTimeout(() => {
+        setToast((current) => (current?.message === msg ? null : current));
+      }, duration);
+    },
+    []
+  );
+
+  const showErrorModal = useCallback(
+    (
+      title: string,
+      message: string,
+      technicalDetails?: string,
+      suggestion?: string,
+      onRetry?: () => void
+    ) => {
+      setErrorModal({
+        title,
+        message,
+        technicalDetails,
+        suggestion,
+        onRetry,
+      });
+    },
+    []
+  );
 
   // 1. Health check
   const checkHealth = useCallback(() => {
@@ -317,7 +357,7 @@ export const SidepanelApp: React.FC = () => {
   // AI Storyboard Analysis for Single Panel
   const handleAnalyzePanel = (panelId: string, imageUrl: string) => {
     handleUpdatePanel(panelId, { isAnalyzing: true });
-    showToast("AI analyzing panel dialogue, motions & audio...");
+    showToast("AI analyzing panel dialogue, motions & audio...", "info");
 
     try {
       if (typeof chrome !== "undefined" && chrome.runtime) {
@@ -334,8 +374,18 @@ export const SidepanelApp: React.FC = () => {
           },
           (res) => {
             if (chrome.runtime.lastError) {
+              const errMsg =
+                chrome.runtime.lastError.message ||
+                "Failed to communicate with extension background worker";
               handleUpdatePanel(panelId, { isAnalyzing: false });
-              showToast(`Analysis communication error: ${chrome.runtime.lastError.message}`);
+              showToast(`Analysis communication error: ${errMsg}`, "error");
+              showErrorModal(
+                "Communication Error",
+                errMsg,
+                `Panel ID: ${panelId}`,
+                "Ensure extension permissions and background service workers are active.",
+                () => handleAnalyzePanel(panelId, imageUrl)
+              );
               return;
             }
 
@@ -352,20 +402,32 @@ export const SidepanelApp: React.FC = () => {
                 audioUrl: res.audio_url || target?.audioUrl,
                 narrativeAudioUrl: res.narrative_audio_url || target?.narrativeAudioUrl,
               });
-              showToast("✨ Smart Scanner analysis completed!");
+              showToast("✨ Smart Scanner analysis completed!", "success");
             } else {
+              const errMsg = res?.error || "AI analysis failed to extract storyboard data";
               handleUpdatePanel(panelId, { isAnalyzing: false });
-              showToast(res?.error ? `Analysis note: ${res.error}` : "Analysis completed with defaults");
+              showToast(`Analysis error: ${errMsg}`, "error");
+              showErrorModal(
+                "Scene Analysis Failed",
+                errMsg,
+                typeof res === "object" ? JSON.stringify(res, null, 2) : String(errMsg),
+                "Verify your backend server is running on http://localhost:5173 with valid Gemini AI credentials.",
+                () => handleAnalyzePanel(panelId, imageUrl)
+              );
             }
           }
         );
       } else {
+        const errMsg = "Extension runtime not available";
         handleUpdatePanel(panelId, { isAnalyzing: false });
-        showToast("Extension runtime not available");
+        showToast(errMsg, "error");
+        showErrorModal("Runtime Error", errMsg);
       }
     } catch (err: any) {
+      const errMsg = err?.message || String(err);
       handleUpdatePanel(panelId, { isAnalyzing: false });
-      showToast(`Analysis error: ${err?.message || String(err)}`);
+      showToast(`Analysis error: ${errMsg}`, "error");
+      showErrorModal("Unexpected Exception", errMsg, err?.stack);
     }
   };
 
@@ -373,16 +435,16 @@ export const SidepanelApp: React.FC = () => {
   const handleAnalyzeAllPanels = async () => {
     const activePanels = panels.filter((p) => p.enabled);
     if (activePanels.length === 0) {
-      showToast("No enabled scenes to analyze");
+      showToast("No enabled scenes to analyze", "warning");
       return;
     }
 
     setIsAnalyzingAll(true);
-    // Visually mark all active panels as analyzing (shows scanning overlay on all cards)
+    // Visually mark all active panels as analyzing
     setPanels((prev) =>
       prev.map((p) => (p.enabled ? { ...p, isAnalyzing: true } : p))
     );
-    showToast(`AI analyzing sequence for all ${activePanels.length} panels...`);
+    showToast(`AI analyzing sequence for all ${activePanels.length} panels...`, "info");
 
     try {
       if (typeof chrome !== "undefined" && chrome.runtime) {
@@ -399,8 +461,20 @@ export const SidepanelApp: React.FC = () => {
           (res) => {
             setIsAnalyzingAll(false);
             if (chrome.runtime.lastError) {
-              setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
-              showToast(`Sequence communication error: ${chrome.runtime.lastError.message}`);
+              const errMsg =
+                chrome.runtime.lastError.message ||
+                "Failed to communicate with extension background worker";
+              setPanels((prev) =>
+                prev.map((p) => (p.enabled ? { ...p, isAnalyzing: false } : p))
+              );
+              showToast(`Sequence communication error: ${errMsg}`, "error");
+              showErrorModal(
+                "Sequence Analysis Communication Error",
+                errMsg,
+                undefined,
+                "Check that the extension service worker is enabled and responsive.",
+                () => handleAnalyzeAllPanels()
+              );
               return;
             }
 
@@ -444,22 +518,43 @@ export const SidepanelApp: React.FC = () => {
                   };
                 })
               );
-              showToast(`✨ Smart Full Sequence Analysis completed for all ${activePanels.length} panels!`);
+              showToast(
+                `✨ Smart Full Sequence Analysis completed for all ${activePanels.length} panels!`,
+                "success"
+              );
             } else {
-              setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
-              showToast(res?.error ? `Sequence analysis: ${res.error}` : "Sequence analysis completed with defaults");
+              const errMsg = res?.error || "Sequence analysis failed";
+              setPanels((prev) =>
+                prev.map((p) => (p.enabled ? { ...p, isAnalyzing: false } : p))
+              );
+              showToast(`Sequence analysis error: ${errMsg}`, "error");
+              showErrorModal(
+                "Full Sequence Analysis Failed",
+                errMsg,
+                typeof res === "object" ? JSON.stringify(res, null, 2) : String(errMsg),
+                "Verify your backend server is online at http://localhost:5173 with access to the manga images.",
+                () => handleAnalyzeAllPanels()
+              );
             }
           }
         );
       } else {
         setIsAnalyzingAll(false);
-        setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
-        showToast("Extension runtime not available");
+        const errMsg = "Extension runtime not available";
+        setPanels((prev) =>
+          prev.map((p) => (p.enabled ? { ...p, isAnalyzing: false } : p))
+        );
+        showToast(errMsg, "error");
+        showErrorModal("Runtime Error", errMsg);
       }
     } catch (err: any) {
       setIsAnalyzingAll(false);
-      setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
-      showToast(`Sequence analysis error: ${err?.message || String(err)}`);
+      const errMsg = err?.message || String(err);
+      setPanels((prev) =>
+        prev.map((p) => (p.enabled ? { ...p, isAnalyzing: false } : p))
+      );
+      showToast(`Sequence analysis error: ${errMsg}`, "error");
+      showErrorModal("Sequence Analysis Error", errMsg, err?.stack);
     }
   };
 
@@ -609,7 +704,7 @@ export const SidepanelApp: React.FC = () => {
   const handleRenderVideo = () => {
     const enabledPanels = panels.filter((p) => p.enabled);
     if (enabledPanels.length === 0) {
-      showToast("Select at least 1 scene to render");
+      showToast("Select at least 1 scene to render", "warning");
       return;
     }
 
@@ -639,17 +734,40 @@ export const SidepanelApp: React.FC = () => {
             show_subtitles: showSubtitles,
           },
         },
-        () => {
+        (res) => {
           clearInterval(timer);
+          if (chrome.runtime.lastError || (res && !res.success)) {
+            setIsRendering(false);
+            setRenderProgress(0);
+            const errMsg =
+              chrome.runtime.lastError?.message ||
+              res?.error ||
+              "Video rendering failed on backend";
+            showToast(`Render failed: ${errMsg}`, "error");
+            showErrorModal(
+              "Video Render Error",
+              errMsg,
+              typeof res === "object" ? JSON.stringify(res, null, 2) : String(errMsg),
+              "Ensure ffmpeg is installed and the backend has write permissions.",
+              () => handleRenderVideo()
+            );
+            return;
+          }
+
           setRenderProgress(100);
           setTimeout(() => {
             setIsRendering(false);
             setRenderProgress(0);
-            showToast("Render complete! Transferring to Studio...");
+            showToast("Render complete! Transferring to Studio...", "success");
             handleOpenWebStudio();
           }, 600);
         }
       );
+    } else {
+      clearInterval(timer);
+      setIsRendering(false);
+      setRenderProgress(0);
+      showToast("Extension runtime not available", "error");
     }
   };
 
@@ -659,7 +777,7 @@ export const SidepanelApp: React.FC = () => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]?.id) {
           chrome.tabs.sendMessage(tabs[0].id, { type: "TRIGGER_CHAPTER_DOWNLOAD" }, () => {
-            showToast("Downloading clean ZIP archive...");
+            showToast("Downloading clean ZIP archive...", "info");
           });
         }
       });
@@ -692,6 +810,23 @@ export const SidepanelApp: React.FC = () => {
         onToggleCinema={handleToggleCinemaMode}
         onOpenWebStudio={handleOpenWebStudio}
       />
+
+      {/* ── Offline Warning Alert ── */}
+      {!isBackendOnline && (
+        <div className="bg-amber-950/80 border-b border-amber-800/80 px-3 py-1.5 flex items-center justify-between text-[11px] text-amber-200">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <AlertTriangle size={13} className="text-amber-400 shrink-0" />
+            <span className="truncate">Backend offline (localhost:5173). Some AI features unavailable.</span>
+          </div>
+          <button
+            type="button"
+            onClick={checkHealth}
+            className="ml-2 text-[10px] underline text-amber-300 hover:text-white shrink-0 cursor-pointer font-medium"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {/* ── 2. Segmented Navigation Tabs ── */}
       <nav className="flex items-center bg-[#0d1322] border-b border-[#1e293b] p-1.5 gap-1 shrink-0">
@@ -736,10 +871,44 @@ export const SidepanelApp: React.FC = () => {
       </nav>
 
       {/* Floating Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-14 left-1/2 -translate-x-1/2 z-50 bg-[#0f172a]/95 border border-sky-500/50 text-sky-200 text-[11px] font-medium px-3.5 py-1.5 rounded-full shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 pointer-events-none">
-          <Sparkle size={12} className="shrink-0 text-sky-400" />
-          <span className="truncate max-w-[240px]">{toastMessage}</span>
+      {toast && (
+        <div
+          className={`fixed top-12 left-3 right-3 z-50 p-2.5 rounded-xl border shadow-2xl flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 backdrop-blur-md ${
+            toast.type === "error"
+              ? "bg-rose-950/95 border-rose-700/90 text-rose-100 shadow-rose-950/60"
+              : toast.type === "success"
+              ? "bg-emerald-950/95 border-emerald-700/90 text-emerald-100 shadow-emerald-950/60"
+              : toast.type === "warning"
+              ? "bg-amber-950/95 border-amber-700/90 text-amber-100 shadow-amber-950/60"
+              : "bg-[#0f172a]/95 border-sky-600/80 text-sky-100 shadow-sky-950/60"
+          }`}
+        >
+          {toast.type === "error" && <AlertCircle size={15} className="text-rose-400 shrink-0 mt-0.5" />}
+          {toast.type === "success" && <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />}
+          {toast.type === "warning" && <AlertTriangle size={15} className="text-amber-400 shrink-0 mt-0.5" />}
+          {toast.type === "info" && <Info size={15} className="text-sky-400 shrink-0 mt-0.5" />}
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-semibold leading-tight">
+              {toast.type === "error"
+                ? "Error"
+                : toast.type === "success"
+                ? "Success"
+                : toast.type === "warning"
+                ? "Notice"
+                : "Info"}
+            </p>
+            <p className="text-[11px] leading-snug opacity-90 break-words mt-0.5">
+              {toast.message}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-slate-400 hover:text-white p-0.5 rounded cursor-pointer transition-colors shrink-0"
+            title="Dismiss notification"
+          >
+            <X size={13} />
+          </button>
         </div>
       )}
 
@@ -838,6 +1007,12 @@ export const SidepanelApp: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ── 6. Full Dedicated System & Pipeline Error Modal ── */}
+      <ErrorModal
+        error={errorModal}
+        onClose={() => setErrorModal(null)}
+      />
     </div>
   );
 };
