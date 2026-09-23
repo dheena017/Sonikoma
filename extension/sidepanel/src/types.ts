@@ -4,9 +4,13 @@ export interface StoryboardPanel {
   imageUrl: string;
   motionPreset: string;
   dialogueText: string;
+  narrativeText?: string;
+  sfx?: string;
   duration: number; // in seconds
   voiceOverride?: string;
   enabled: boolean;
+  isAnalyzing?: boolean;
+  visualDescription?: string;
 }
 
 export interface VoiceOption {
@@ -56,7 +60,7 @@ export const SAMPLE_PANELS: StoryboardPanel[] = [
     index: 1,
     imageUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80",
     motionPreset: "zoom_in",
-    dialogueText: "The shadows over Neo-Tokyo are finally shifting tonight...",
+    dialogueText: "",
     duration: 3.5,
     enabled: true,
   },
@@ -65,7 +69,7 @@ export const SAMPLE_PANELS: StoryboardPanel[] = [
     index: 2,
     imageUrl: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
     motionPreset: "dolly_shake",
-    dialogueText: "Stand back! Their energy readings are going completely off the charts!",
+    dialogueText: "",
     duration: 3.0,
     enabled: true,
   },

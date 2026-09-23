@@ -40,7 +40,7 @@ class DetectTextRequest(BaseModel):
     """Direct synchronous OCR request payload."""
     url: Optional[str] = Field(None, description="Image URL")
     image_base64: Optional[str] = Field(None, description="Base64 encoded image data")
-    languages: List[str] = Field(default_factory=lambda: ["en", "ko", "ja"], description="Target OCR languages")
+    languages: List[str] = Field(default_factory=lambda: ["en"], description="Target OCR languages")
     bubble_guided: bool = Field(True, description="Filter OCR inside detected speech bubbles for maximum accuracy")
     filter_sfx: bool = Field(False, description="Filter out floating sound effects")
     engine: Literal["auto", "easyocr", "tesseract", "ai_vision"] = Field("auto", description="OCR engine selection")

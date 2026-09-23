@@ -49,20 +49,43 @@ def _load_ocr_reader(langs: Optional[List[str]] = None) -> Optional[Any]:
     if langs is None:
         langs = _get_default_ocr_langs()
 
-    cache_key = ",".join(sorted(langs))
+    # EasyOCR language compatibility normalization:
+    # Japanese is only compatible with English.
+    # Korean is only compatible with English.
+    safe_langs = [l for l in langs if l]
+    if "ja" in safe_langs and "ko" in safe_langs:
+        # Cannot mix ja and ko in EasyOCR; prioritize ja+en or default to en
+        safe_langs = ["en", "ja"]
+    elif "ja" in safe_langs:
+        safe_langs = ["en", "ja"]
+    elif "ko" in safe_langs:
+        safe_langs = ["en", "ko"]
+    elif not safe_langs:
+        safe_langs = ["en"]
+
+    cache_key = ",".join(sorted(safe_langs))
     if cache_key not in _ocr_readers and _HAS_EASYOCR:
-        logger.info(f"[OCR Engine] Initialising EasyOCR reader — languages: {langs}")
+        logger.info(f"[OCR Engine] Initialising EasyOCR reader — languages: {safe_langs}")
         try:
             import easyocr
             import torch
             use_gpu = torch.cuda.is_available()
-            _ocr_readers[cache_key] = easyocr.Reader(langs, gpu=use_gpu, verbose=False)
+            _ocr_readers[cache_key] = easyocr.Reader(safe_langs, gpu=use_gpu, verbose=False)
         except ImportError:
             logger.warning("[OCR Engine] EasyOCR is not installed.")
             return None
         except Exception as err:
-            logger.warning(f"[OCR Engine] Failed to load EasyOCR with languages {langs}: {err}")
-            return None
+            logger.warning(f"[OCR Engine] Failed to load EasyOCR with languages {safe_langs}: {err}")
+            # Graceful fallback to English-only reader
+            try:
+                import easyocr
+                import torch
+                use_gpu = torch.cuda.is_available()
+                logger.info("[OCR Engine] Falling back to English EasyOCR reader")
+                _ocr_readers[cache_key] = easyocr.Reader(["en"], gpu=use_gpu, verbose=False)
+            except Exception as fallback_err:
+                logger.error(f"[OCR Engine] English EasyOCR fallback also failed: {fallback_err}")
+                return None
     return _ocr_readers.get(cache_key)
 
 

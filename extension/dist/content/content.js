@@ -1,666 +1,102 @@
-/**
- * Sonikoma Cinema Reader & DOM Scanner Content Script Bundle v3.1
- * Fully self-contained IIFE for in-browser injection with draggable HUD & Moveable Settings Flyout.
- */
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+var F=Object.defineProperty;var O=(g,t,e)=>t in g?F(g,t,{enumerable:!0,configurable:!0,writable:!0,value:e}):g[t]=e;var l=(g,t,e)=>O(g,typeof t!="symbol"?t+"":t,e);class v{static initPageSniffer(){if(!(this.snifferInjected||typeof document>"u")){this.snifferInjected=!0,window.addEventListener("sonikoma:network_images",t=>{if(t&&t.detail&&Array.isArray(t.detail.images))for(const e of t.detail.images)typeof e=="string"&&e.startsWith("http")&&this.capturedNetworkImages.add(e)});try{const t=document.createElement("script");t.setAttribute("type","text/javascript"),t.textContent=`
+        (function() {
+          if (window.__sonikoma_sniffer_active) return;
+          window.__sonikoma_sniffer_active = true;
+          window.__SONIKOMA_CAPTURED_IMAGES__ = window.__SONIKOMA_CAPTURED_IMAGES__ || [];
 
-// ─── 1. DOM Manga Scanner ─────────────────────────────────────────────────────
-class DomMangaScanner {
-  static getRealImageSrc(el) {
-    if (!el) return "";
-    const attrs = [
-      "data-url", "data-src", "data-original", "data-lazy-src",
-      "data-echo", "data-real-src", "data-cdn", "data-full-url",
-      "data-srcset", "srcset", "src"
-    ];
-    for (const attr of attrs) {
-      const val = el.getAttribute(attr);
-      if (val && typeof val === "string") {
-        const trimmed = val.trim();
-        if (
-          trimmed.length > 5 &&
-          !trimmed.startsWith("data:image/gif") &&
-          !trimmed.startsWith("data:image/svg") &&
-          !trimmed.includes("blank.gif") &&
-          !trimmed.includes("spacer.gif") &&
-          !trimmed.includes("placeholder")
-        ) {
-          const first = trimmed.split(",")[0].trim().split(" ")[0].trim();
-          if (first.startsWith("//")) return `https:${first}`;
-          if (first.startsWith("http://") || first.startsWith("https://")) return first;
-          if (first.startsWith("/")) return `${window.location.origin}${first}`;
-          return first;
-        }
-      }
-    }
-    const bg = el.style?.backgroundImage || window.getComputedStyle(el).backgroundImage;
-    if (bg && bg.includes("url(")) {
-      const match = bg.match(/url\(['"]?([^'"]+)['"]?\)/);
-      if (match && match[1]) {
-        let clean = match[1].trim();
-        if (clean.startsWith("//")) clean = `https:${clean}`;
-        if (clean.startsWith("/")) clean = `${window.location.origin}${clean}`;
-        if (!clean.startsWith("data:image/gif") && !clean.startsWith("data:image/svg") && !clean.includes("blank.gif")) {
-          return clean;
-        }
-      }
-    }
-    return "";
-  }
-
-  static scanChapterImages() {
-    const list = [];
-    const seen = new Set();
-    const selectors = [
-      "#_imageList img", "#_imageList img._images", "img._images", "#_viewerBox img",
-      ".viewer_lst img", ".viewer_img img", ".viewer_lst .viewer_img img", ".wt_viewer img",
-      "#comic_view_area img", ".view_area img", ".reader-area img", ".comic-page img",
-      ".chapter-content img", ".reading-content img", ".entry-content img", ".page-break img",
-      ".container-chapter-reader img", ".v-reader img", "#reader img", "#viewer img",
-      "#chapter-images img", "div[class*='viewer'] img", "div[class*='reader'] img",
-      "div[id*='viewer'] img", "div[id*='reader'] img", "img[data-url]", "img[data-src]",
-      "img[data-original]", "article img", "main img", "img"
-    ];
-
-    let foundElements = [];
-    for (const sel of selectors) {
-      try {
-        const query = Array.from(document.querySelectorAll(sel));
-        if (query.length >= 2 && query.some((i) => !!this.getRealImageSrc(i))) {
-          foundElements = query;
-          break;
-        }
-      } catch (_) {}
-    }
-
-    if (foundElements.length === 0) {
-      foundElements = Array.from(document.querySelectorAll("img, picture source, [style*='background-image']"));
-    }
-
-    for (const el of foundElements) {
-      const src = this.getRealImageSrc(el);
-      if (!src || seen.has(src)) continue;
-
-      const rect = el.getBoundingClientRect();
-      const img = el;
-      const w = img.naturalWidth || rect.width || 0;
-      const h = img.naturalHeight || rect.height || 0;
-
-      const isDataHeavy = !!(
-        el.getAttribute("data-url") || el.getAttribute("data-src") ||
-        el.getAttribute("data-original") || el.getAttribute("data-lazy-src") ||
-        el.getAttribute("data-real-src") || el.getAttribute("data-echo") ||
-        el.getAttribute("data-cdn") || el.getAttribute("data-full-url")
-      );
-
-      if (!isDataHeavy && w > 0 && w < 80 && h > 0 && h < 80) continue;
-
-      const lower = src.toLowerCase();
-      const isAdOrIcon =
-        lower.includes("favicon") || lower.includes("avatar") ||
-        lower.includes("logo") || lower.includes("banner") ||
-        lower.includes("share_") || lower.includes("btn_") ||
-        lower.includes("tracking") || lower.includes("analytics");
-
-      if (isAdOrIcon) continue;
-
-      seen.add(src);
-      const absTop = window.scrollY + rect.top;
-      list.push({
-        index: list.length,
-        src,
-        top: Math.round(absTop),
-        height: Math.round(rect.height || h || 800),
-        width: Math.round(rect.width || w || 600)
-      });
-    }
-
-    list.sort((a, b) => a.top - b.top);
-    return list;
-  }
-
-  static extractPageMetadata() {
-    let seriesTitle = "";
-    let chapterTitle = "";
-
-    const titleEl = document.querySelector(
-      "h1, .subj, .title, .manga-title, .comic-title, .chapter-title, .entry-title"
-    );
-    if (titleEl && titleEl.textContent) {
-      seriesTitle = titleEl.textContent.trim().split("\n")[0].substring(0, 50);
-    }
-
-    const chapEl = document.querySelector(
-      ".chapter-name, .episode_title, .chap-title, .c-breadcrumb li:last-child"
-    );
-    if (chapEl && chapEl.textContent) {
-      chapterTitle = chapEl.textContent.trim().split("\n")[0].substring(0, 40);
-    }
-
-    if (!seriesTitle) {
-      const docTitle = document.title || "";
-      const parts = docTitle.split(/[-|•»]/);
-      seriesTitle = (parts[0] || "Unknown Manga").trim();
-      if (parts.length > 1) {
-        chapterTitle = parts[1].trim();
-      }
-    }
-
-    return {
-      seriesTitle: seriesTitle || "Sonikoma Manga",
-      chapterTitle: chapterTitle || "Chapter 1",
-      pageUrl: window.location.href,
-      totalPanels: 0,
-      timestamp: Date.now()
-    };
-  }
-}
-
-// ─── 2. Web Audio Ambient Soundscapes ────────────────────────────────────────
-const SOUNDSCAPE_MOODS = [
-  { id: "off", name: "Mute", icon: "🔇", desc: "No background audio" },
-  { id: "lofi", name: "Lo-Fi Chords", icon: "🎵", desc: "Calm warm cinematic chords" },
-  { id: "rain", name: "Rain Waves", icon: "🌧️", desc: "Organic rain & ocean swell" },
-  { id: "space", name: "Cyber Drone", icon: "🌌", desc: "432Hz ethereal ambient drone" },
-  { id: "pulse", name: "Action Pulse", icon: "⚡", desc: "Tense rhythmic sub-bass pulse" },
-  { id: "zen", name: "Zen Harmony", icon: "🎋", desc: "Peaceful acoustic resonant harmonics" },
-];
-
-class AmbientSoundscapeEngine {
-  constructor() {
-    this.ctx = null;
-    this.currentMood = "off";
-    this.masterGain = null;
-    this.activeNodes = [];
-    this.volume = 0.65;
-  }
-
-  cycleMood() {
-    const idx = SOUNDSCAPE_MOODS.findIndex((m) => m.id === this.currentMood);
-    const nextIdx = (idx + 1) % SOUNDSCAPE_MOODS.length;
-    this.setMood(SOUNDSCAPE_MOODS[nextIdx].id);
-    return SOUNDSCAPE_MOODS[nextIdx];
-  }
-
-  setMood(mood) {
-    this.currentMood = mood;
-    if (mood === "off") {
-      this.stop();
-    } else {
-      this.startMood(mood);
-    }
-  }
-
-  setVolume(val) {
-    this.volume = Math.max(0, Math.min(1, val));
-    if (this.masterGain && this.ctx) {
-      try {
-        this.masterGain.gain.setValueAtTime(0.08 * this.volume, this.ctx.currentTime);
-      } catch (_) {}
-    }
-  }
-
-  initCtx() {
-    if (!this.ctx) {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AudioCtx();
-    }
-    if (this.ctx.state === "suspended") {
-      this.ctx.resume();
-    }
-  }
-
-  startMood(mood) {
-    try {
-      this.initCtx();
-      this.stop();
-
-      this.masterGain = this.ctx.createGain();
-      this.masterGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
-      const targetGain = 0.08 * this.volume;
-      this.masterGain.gain.exponentialRampToValueAtTime(targetGain, this.ctx.currentTime + 2.0);
-      this.masterGain.connect(this.ctx.destination);
-
-      if (mood === "lofi") {
-        const freqs = [65.41, 130.81, 196.0, 311.13, 392.0];
-        freqs.forEach((f, i) => {
-          const osc = this.ctx.createOscillator();
-          osc.type = i === 0 ? "sine" : i % 2 === 0 ? "triangle" : "sine";
-          osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-
-          const lfo = this.ctx.createOscillator();
-          const lfoGain = this.ctx.createGain();
-          lfo.frequency.setValueAtTime(0.08 + i * 0.03, this.ctx.currentTime);
-          lfoGain.gain.setValueAtTime(1.5, this.ctx.currentTime);
-          lfo.connect(lfoGain);
-          lfoGain.connect(osc.frequency);
-          lfo.start();
-
-          osc.connect(this.masterGain);
-          osc.start();
-          this.activeNodes.push(osc, lfo, lfoGain);
-        });
-      } else if (mood === "rain") {
-        const bufferSize = this.ctx.sampleRate * 2;
-        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-        for (let i = 0; i < bufferSize; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.99886 * b0 + white * 0.0555179;
-          b1 = 0.99332 * b1 + white * 0.0750759;
-          b2 = 0.96900 * b2 + white * 0.1538520;
-          b3 = 0.86650 * b3 + white * 0.3104856;
-          b4 = 0.55000 * b4 + white * 0.5329522;
-          b5 = -0.7616 * b5 - white * 0.0168980;
-          output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.08;
-          b6 = white * 0.115926;
-        }
-
-        const whiteNoise = this.ctx.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-        whiteNoise.loop = true;
-
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(800, this.ctx.currentTime);
-
-        const lfo = this.ctx.createOscillator();
-        lfo.frequency.setValueAtTime(0.15, this.ctx.currentTime);
-        const lfoGain = this.ctx.createGain();
-        lfoGain.gain.setValueAtTime(300, this.ctx.currentTime);
-        lfo.connect(lfoGain);
-        lfoGain.connect(filter.frequency);
-        lfo.start();
-
-        whiteNoise.connect(filter);
-        filter.connect(this.masterGain);
-        whiteNoise.start();
-        this.activeNodes.push(whiteNoise, filter, lfo, lfoGain);
-      } else if (mood === "space") {
-        const freqs = [108, 216, 432, 648];
-        freqs.forEach((f, i) => {
-          const osc = this.ctx.createOscillator();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-
-          const pan = this.ctx.createStereoPanner ? this.ctx.createStereoPanner() : null;
-          if (pan) {
-            pan.pan.setValueAtTime(i % 2 === 0 ? -0.4 : 0.4, this.ctx.currentTime);
-            osc.connect(pan);
-            pan.connect(this.masterGain);
-            this.activeNodes.push(pan);
-          } else {
-            osc.connect(this.masterGain);
+          function pushUrls(urls) {
+            if (!Array.isArray(urls) || urls.length === 0) return;
+            const valid = [];
+            for (const u of urls) {
+              if (typeof u === 'string' && u.length > 8 && (u.startsWith('http') || u.startsWith('//') || u.startsWith('/'))) {
+                let full = u;
+                if (full.startsWith('//')) full = 'https:' + full;
+                else if (full.startsWith('/')) full = window.location.origin + full;
+                if (!window.__SONIKOMA_CAPTURED_IMAGES__.includes(full)) {
+                  window.__SONIKOMA_CAPTURED_IMAGES__.push(full);
+                  valid.push(full);
+                }
+              }
+            }
+            if (valid.length > 0) {
+              window.dispatchEvent(new CustomEvent('sonikoma:network_images', { detail: { images: valid } }));
+            }
           }
-          osc.start();
-          this.activeNodes.push(osc);
-        });
-      } else if (mood === "pulse") {
-        const osc = this.ctx.createOscillator();
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(55, this.ctx.currentTime);
 
-        const filter = this.ctx.createBiquadFilter();
-        filter.type = "lowpass";
-        filter.frequency.setValueAtTime(220, this.ctx.currentTime);
-        filter.Q.setValueAtTime(4, this.ctx.currentTime);
-
-        const lfo = this.ctx.createOscillator();
-        lfo.type = "square";
-        lfo.frequency.setValueAtTime(2.0, this.ctx.currentTime);
-        const lfoGain = this.ctx.createGain();
-        lfoGain.gain.setValueAtTime(140, this.ctx.currentTime);
-        lfo.connect(lfoGain);
-        lfoGain.connect(filter.frequency);
-        lfo.start();
-
-        osc.connect(filter);
-        filter.connect(this.masterGain);
-        osc.start();
-        this.activeNodes.push(osc, filter, lfo, lfoGain);
-      } else if (mood === "zen") {
-        const harmonics = [144, 288, 432, 576, 864];
-        harmonics.forEach((f, i) => {
-          const osc = this.ctx.createOscillator();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(f, this.ctx.currentTime);
-
-          const subGain = this.ctx.createGain();
-          subGain.gain.setValueAtTime(1 / (i + 1.5), this.ctx.currentTime);
-
-          const lfo = this.ctx.createOscillator();
-          lfo.frequency.setValueAtTime(0.05 + i * 0.02, this.ctx.currentTime);
-          const lfoGain = this.ctx.createGain();
-          lfoGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-          lfo.connect(lfoGain);
-          lfoGain.connect(subGain.gain);
-          lfo.start();
-
-          osc.connect(subGain);
-          subGain.connect(this.masterGain);
-          osc.start();
-          this.activeNodes.push(osc, subGain, lfo, lfoGain);
-        });
-      }
-    } catch (_) {}
-  }
-
-  stop() {
-    if (this.masterGain && this.ctx) {
-      try {
-        this.masterGain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
-      } catch (_) {}
-    }
-    setTimeout(() => {
-      this.activeNodes.forEach((node) => {
-        try {
-          if (typeof node.stop === "function") node.stop();
-        } catch (_) {}
-      });
-      this.activeNodes = [];
-    }, 350);
-  }
-}
-
-// ─── 3. Visual Shaders & AI Voice Engines ────────────────────────────────────
-const CINEMA_SHADERS = [
-  { id: "normal", name: "Natural", icon: "🖼️", filterCss: "none" },
-  { id: "oled", name: "OLED Dark", icon: "🕶️", filterCss: "contrast(1.18) brightness(0.92) saturate(1.08)" },
-  { id: "sepia", name: "Warm Sepia", icon: "📜", filterCss: "sepia(0.38) contrast(1.08) brightness(0.96) hue-rotate(-12deg)" },
-  { id: "cyber", name: "Cyber Neon", icon: "🎆", filterCss: "saturate(1.45) contrast(1.15) hue-rotate(8deg)" },
-  { id: "noir", name: "Noir Ink", icon: "🖤", filterCss: "grayscale(1) contrast(1.3) brightness(0.95)" },
-  { id: "warm", name: "Night Amber", icon: "🕯️", filterCss: "sepia(0.55) brightness(0.92) hue-rotate(-25deg)" },
-];
-
-class AIVoiceNarratorEngine {
-  constructor() {
-    this.isVoiceActive = false;
-    this.onSubtitleCallback = null;
-  }
-
-  setSubtitleCallback(cb) {
-    this.onSubtitleCallback = cb;
-  }
-
-  toggle() {
-    this.isVoiceActive = !this.isVoiceActive;
-    if (!this.isVoiceActive) this.stop();
-    return this.isVoiceActive;
-  }
-
-  get isActive() {
-    return this.isVoiceActive;
-  }
-
-  speak(text) {
-    if (!this.isVoiceActive || !("speechSynthesis" in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.rate = 1.05;
-      utt.pitch = 1.0;
-      const voices = window.speechSynthesis.getVoices();
-      const preferred = voices.find(
-        (v) => v.lang.startsWith("en") && (v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Samantha"))
-      );
-      if (preferred) utt.voice = preferred;
-
-      if (this.onSubtitleCallback) this.onSubtitleCallback(text);
-      utt.onend = () => {
-        if (this.onSubtitleCallback) this.onSubtitleCallback("");
-      };
-      window.speechSynthesis.speak(utt);
-    } catch (_) {}
-  }
-
-  stop() {
-    if ("speechSynthesis" in window) {
-      try {
-        window.speechSynthesis.cancel();
-      } catch (_) {}
-    }
-    if (this.onSubtitleCallback) this.onSubtitleCallback("");
-  }
-}
-
-// ─── 4. Main Cinema Player v3.1 with Moveable HUD & Flyout ───────────────────
-class CinemaPlayer {
-  constructor(scanner) {
-    this.scanner = scanner || DomMangaScanner;
-    this.isPlaying = false;
-    this.scrollSpeed = 1.0;
-    this.baseSpeedPxPerSec = 65;
-    this.animationFrameId = null;
-    this.lastTimestamp = null;
-    this.subpixelAccumulator = 0;
-
-    // DOM Elements
-    this.hudElement = null;
-    this.dimmerElement = null;
-    this.spotlightElement = null;
-    this.toastElement = null;
-    this.subtitleElement = null;
-    this.scrubberTooltipElement = null;
-    this.nextChapterBanner = null;
-
-    // Feature States
-    this.isDimmed = false;
-    this.isSpotlight = false;
-    this.isAdaptivePacing = true;
-    this.isAutoDimHud = true;
-    this.isDockTop = true;
-    this.isSettingsOpen = false;
-    this.isTemporarilyPausedForUser = false;
-    this.manualScrollTimeout = null;
-    this.hudDimTimer = null;
-    this.currentShader = "normal";
-
-    // Panel & Timing Data
-    this.detectedPanels = [];
-    this.currentPanelIndex = 0;
-    this.panelPauseTimer = 0;
-    this.lastPausedPanelIdx = -1;
-    this.lastNarratedPanelIdx = -1;
-    this.nextChapterCountdown = 0;
-    this.nextChapterTimerId = null;
-
-    this.soundscape = new AmbientSoundscapeEngine();
-    this.voiceNarrator = new AIVoiceNarratorEngine();
-
-    this.init();
-  }
-
-  init() {
-    this.createCinemaHUD();
-    this.createDimmerOverlay();
-    this.createSpotlightOverlay();
-    this.createSubtitleOverlay();
-    this.bindGlobalShortcuts();
-    this.bindUserScrollInterceptors();
-    this.bindMouseActivityInterceptors();
-
-    this.voiceNarrator.setSubtitleCallback((text) => {
-      this.updateSubtitle(text);
-    });
-  }
-
-  bindGlobalShortcuts() {
-    window.addEventListener("keydown", (e) => {
-      const target = e.target;
-      if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable) {
-        return;
-      }
-
-      const isHudVisible = this.hudElement && !this.hudElement.classList.contains("sonikoma-hidden");
-      if (!isHudVisible) return;
-
-      if (e.code === "Space") {
-        e.preventDefault();
-        if (this.isPlaying) this.pause();
-        else this.play();
-      } else if (e.code === "ArrowUp") {
-        e.preventDefault();
-        this.adjustSpeed(0.25);
-      } else if (e.code === "ArrowDown") {
-        e.preventDefault();
-        this.adjustSpeed(-0.25);
-      } else if (e.code === "ArrowRight") {
-        e.preventDefault();
-        this.jumpToNextPanel();
-      } else if (e.code === "ArrowLeft") {
-        e.preventDefault();
-        this.jumpToPrevPanel();
-      } else if (e.key === "m" || e.key === "M") {
-        e.preventDefault();
-        this.cycleSoundscape();
-      } else if (e.key === "c" || e.key === "C") {
-        e.preventDefault();
-        this.cycleShader();
-      } else if (e.key === "v" || e.key === "V") {
-        e.preventDefault();
-        this.toggleVoiceNarrator();
-      } else if (e.key === "d" || e.key === "D") {
-        e.preventDefault();
-        this.toggleTheaterDimmer();
-      } else if (e.key === "l" || e.key === "L") {
-        e.preventDefault();
-        this.toggleSpotlight();
-      } else if (e.key === "f" || e.key === "F") {
-        e.preventDefault();
-        this.toggleFullscreen();
-      } else if (e.key === "s" || e.key === "S") {
-        e.preventDefault();
-        this.snipActiveScene();
-      } else if (e.key === "b" || e.key === "B") {
-        e.preventDefault();
-        this.bookmarkActiveScene();
-      } else if (e.code === "Escape") {
-        if (this.nextChapterBanner) {
-          this.cancelNextChapterCountdown();
-        } else if (this.isSettingsOpen) {
-          this.toggleSettingsFlyout(false);
-        } else {
-          this.stop();
-        }
-      }
-    });
-  }
-
-  bindUserScrollInterceptors() {
-    const handleUserScroll = () => {
-      if (!this.isPlaying || this.isTemporarilyPausedForUser) return;
-      this.isTemporarilyPausedForUser = true;
-      this.updateStatusBadge("Paused", "⏸");
-
-      if (this.manualScrollTimeout) clearTimeout(this.manualScrollTimeout);
-      this.manualScrollTimeout = setTimeout(() => {
-        this.isTemporarilyPausedForUser = false;
-        if (this.isPlaying) {
-          this.updateStatusBadge("Playing", "▶");
-          this.lastTimestamp = performance.now();
-        }
-      }, 1300);
-    };
-
-    window.addEventListener("wheel", handleUserScroll, { passive: true });
-    window.addEventListener("touchmove", handleUserScroll, { passive: true });
-  }
-
-  bindMouseActivityInterceptors() {
-    const handleMouseMove = () => {
-      if (this.hudElement) {
-        this.hudElement.style.opacity = "1";
-      }
-      if (this.hudDimTimer) clearTimeout(this.hudDimTimer);
-      if (this.isPlaying && this.isAutoDimHud) {
-        this.hudDimTimer = setTimeout(() => {
-          if (this.isPlaying && this.hudElement && !this.isSettingsOpen) {
-            this.hudElement.style.opacity = "0.22";
+          // 1. Inspect window global variables
+          function inspectGlobals() {
+            try {
+              if (window.__NEXT_DATA__ && window.__NEXT_DATA__.props) {
+                const s = JSON.stringify(window.__NEXT_DATA__.props);
+                const matches = s.match(/https?:\\/\\/[^"'s]+\\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'s]*)?/gi);
+                if (matches) pushUrls(matches);
+              }
+              if (window.chapter_data && Array.isArray(window.chapter_data.images)) {
+                pushUrls(window.chapter_data.images.map(i => typeof i === 'string' ? i : i.url || i.src));
+              }
+              if (window.pages && Array.isArray(window.pages)) {
+                pushUrls(window.pages.map(i => typeof i === 'string' ? i : i.url || i.src));
+              }
+              if (window.chapImages && Array.isArray(window.chapImages)) {
+                pushUrls(window.chapImages);
+              }
+              if (window.pData && window.pData.img) {
+                pushUrls(Array.isArray(window.pData.img) ? window.pData.img : [window.pData.img]);
+              }
+              if (window.ts_reader && window.ts_reader.params && window.ts_reader.params.sources) {
+                for (const src of window.ts_reader.params.sources) {
+                  if (src && Array.isArray(src.images)) pushUrls(src.images);
+                }
+              }
+            } catch (_) {}
           }
-        }, 2800);
-      }
-    };
+          inspectGlobals();
+          setTimeout(inspectGlobals, 1500);
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-  }
+          // 2. Intercept window.fetch
+          const origFetch = window.fetch;
+          if (origFetch) {
+            window.fetch = async function(...args) {
+              const res = await origFetch.apply(this, args);
+              try {
+                const clone = res.clone();
+                const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || '';
+                if (url.includes('chapter') || url.includes('api') || url.includes('at-home') || url.includes('pages')) {
+                  clone.json().then(data => {
+                    const str = JSON.stringify(data);
+                    const matches = str.match(/https?:\\/\\/[^"'s]+\\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'s]*)?/gi);
+                    if (matches) pushUrls(matches);
+                  }).catch(() => {});
+                }
+              } catch (_) {}
+              return res;
+            };
+          }
 
-  createDimmerOverlay() {
-    let dimmer = document.getElementById("sonikoma-theater-dimmer");
-    if (!dimmer) {
-      dimmer = document.createElement("div");
-      dimmer.id = "sonikoma-theater-dimmer";
-      dimmer.className = "sonikoma-theater-dimmer sonikoma-hidden";
-      (document.body || document.documentElement).appendChild(dimmer);
-    }
-    this.dimmerElement = dimmer;
-  }
-
-  createSpotlightOverlay() {
-    let spot = document.getElementById("sonikoma-cinema-spotlight");
-    if (!spot) {
-      spot = document.createElement("div");
-      spot.id = "sonikoma-cinema-spotlight";
-      spot.className = "sonikoma-cinema-spotlight sonikoma-hidden";
-      (document.body || document.documentElement).appendChild(spot);
-    }
-    this.spotlightElement = spot;
-  }
-
-  createSubtitleOverlay() {
-    let sub = document.getElementById("sonikoma-cinema-subtitles");
-    if (!sub) {
-      sub = document.createElement("div");
-      sub.id = "sonikoma-cinema-subtitles";
-      sub.className = "sonikoma-cinema-subtitles sonikoma-hidden";
-      (document.body || document.documentElement).appendChild(sub);
-    }
-    this.subtitleElement = sub;
-  }
-
-  updateSubtitle(text) {
-    if (!this.subtitleElement) return;
-    if (!text) {
-      this.subtitleElement.classList.add("sonikoma-hidden");
-      this.subtitleElement.style.setProperty("display", "none", "important");
-      return;
-    }
-    this.subtitleElement.innerHTML = `
+          // 3. Intercept XMLHttpRequest
+          const origOpen = XMLHttpRequest.prototype.open;
+          const origSend = XMLHttpRequest.prototype.send;
+          XMLHttpRequest.prototype.open = function(method, url) {
+            this.__sonikoma_req_url = url;
+            return origOpen.apply(this, arguments);
+          };
+          XMLHttpRequest.prototype.send = function() {
+            this.addEventListener('load', function() {
+              try {
+                if (this.responseText && this.responseText.length > 50) {
+                  const matches = this.responseText.match(/https?:\\/\\/[^"'s]+\\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'s]*)?/gi);
+                  if (matches && matches.length >= 2) pushUrls(matches);
+                }
+              } catch (_) {}
+            });
+            return origSend.apply(this, arguments);
+          };
+        })();
+      `,(document.head||document.documentElement).appendChild(t),t.remove()}catch{}}}static async fetchDirectSiteApi(){var s,o,n,i;const t=window.location.href,e=window.location.hostname;if(e.includes("mangadex.org")){const a=t.match(/\/chapter\/([a-f0-9\-]+)/i);if(a&&a[1]){const c=a[1];try{const r=await fetch(`https://api.mangadex.org/at-home/server/${c}`);if(r.ok){const m=await r.json(),u=m.baseUrl,d=(s=m.chapter)==null?void 0:s.hash,p=((o=m.chapter)==null?void 0:o.data)||((n=m.chapter)==null?void 0:n.dataSaver)||[];if(u&&d&&p.length>0)return p.map(h=>`${u}/data/${d}/${h}`)}}catch{}}}if(e.includes("comick.")){const a=t.match(/\/comic\/[^/]+\/([^/?#]+)/i);if(a&&a[1]){const c=a[1];try{const r=await fetch(`https://api.comick.fun/chapter/${c}`);if(r.ok){const u=((i=(await r.json()).chapter)==null?void 0:i.images)||[];if(u.length>0)return u.map(d=>d.url||`https://meo.comick.pictures/${d.bkey}`)}}catch{}}}try{const a=Array.from(document.querySelectorAll("script:not([src])"));for(const c of a){const r=c.textContent||"";if(r.includes("chapter_data")||r.includes("ts_reader")||r.includes("pData")||r.includes("images")||r.includes("img_data")){const m=r.match(/https?:\\?\/\\?\/[^"'\s\\]+\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'\s\\]*)?/gi);if(m&&m.length>=3){const u=m.map(d=>d.replace(/\\\//g,"/"));return Array.from(new Set(u))}}}}catch{}return[]}static getRealImageSrc(t){var n;if(!t)return"";const e=["data-url","data-src","data-original","data-lazy-src","data-echo","data-real-src","data-cdn","data-full-url","data-srcset","data-img-src","data-lazy","data-splide-lazy","data-deferred","data-hi-res-src","data-origin-src","data-zoom-src","data-cfsrc","data-src-zoom","data-orig-src","data-img","data-image","data-highres","data-fallback","data-path","data-raw","srcset","src"];for(const i of e){const a=t.getAttribute(i);if(a&&typeof a=="string"){const c=a.trim();if(c.length>5&&!c.startsWith("data:image/gif")&&!c.startsWith("data:image/svg")&&!c.includes("blank.gif")&&!c.includes("spacer.gif")&&!c.includes("placeholder")){const r=c.split(",")[0].trim().split(" ")[0].trim();if(r.startsWith("//"))return`https:${r}`;if(r.startsWith("http://")||r.startsWith("https://"))return r;if(r.startsWith("/"))return`${window.location.origin}${r}`;if(r.startsWith("./")||r.startsWith("../"))try{return new URL(r,window.location.href).href}catch{return r}return r}}}const s=t;if(s.currentSrc&&typeof s.currentSrc=="string"&&s.currentSrc.startsWith("http")){const i=s.currentSrc.toLowerCase();if(!i.includes("blank.gif")&&!i.includes("spacer.gif")&&!i.includes("placeholder"))return s.currentSrc}if(s.src&&typeof s.src=="string"&&s.src.startsWith("http")){const i=s.src.toLowerCase();if(!i.includes("blank.gif")&&!i.includes("spacer.gif")&&!i.includes("placeholder"))return s.src}const o=((n=t.style)==null?void 0:n.backgroundImage)||window.getComputedStyle(t).backgroundImage;if(o&&o.includes("url(")){const i=o.match(/url\(['"]?([^'"]+)['"]?\)/);if(i&&i[1]){let a=i[1].trim();if(a.startsWith("//")&&(a=`https:${a}`),a.startsWith("/")&&(a=`${window.location.origin}${a}`),!a.startsWith("data:image/gif")&&!a.startsWith("data:image/svg")&&!a.includes("blank.gif")&&!a.includes("spacer.gif"))return a}}if(t.tagName==="CANVAS")try{const i=t;if(i.width>200&&i.height>200)return i.toDataURL("image/png")}catch{}return""}static scanChapterImages(){this.initPageSniffer();const t=[],e=new Set,s=["#_imageList img","#_imageList img._images","img._images","#_viewerBox img",".viewer_lst img",".viewer_img img",".viewer_lst .viewer_img img",".wt_viewer img","#comic_view_area img",".view_area img",".reader--container img",".page--container img",".reader-area img",".comic-page img",".chapter-content img",".reading-content img",".reading-content picture img",".entry-content img",".page-break img","#readerarea img",".readerarea img",".post-content img","#chapter-video-frame img",".container-chapter-reader img",".panel-chapter-info img",".image-horizontal img",".image-vertical img",".v-reader img","#reader img","#viewer img","#chapter-images img","div[class*='viewer'] img","div[class*='reader'] img","div[id*='viewer'] img","div[id*='reader'] img","img[data-url]","img[data-src]","img[data-original]","img[data-lazy-src]","article img","main img","canvas","img"];let o=[];for(const n of s)try{const i=Array.from(document.querySelectorAll(n));if(i.length>=2&&i.some(c=>!!this.getRealImageSrc(c))){o=i;break}}catch{}o.length===0&&(o=Array.from(document.querySelectorAll("img, picture source, [style*='background-image'], canvas")));for(const n of o){const i=this.getRealImageSrc(n);if(!i||e.has(i))continue;const a=n.getBoundingClientRect(),c=n,r=c.naturalWidth||a.width||0,m=c.naturalHeight||a.height||0,u=!!(n.getAttribute("data-url")||n.getAttribute("data-src")||n.getAttribute("data-original")||n.getAttribute("data-lazy-src")||n.getAttribute("data-real-src")||n.getAttribute("data-echo")||n.getAttribute("data-cdn")||n.getAttribute("data-full-url")||n.getAttribute("data-lazy")||n.getAttribute("data-img-src"));if(!u&&r>0&&r<70&&m>0&&m<70)continue;const d=i.toLowerCase();(d.includes("favicon")||d.includes("avatar")||d.includes("logo")||d.includes("pixel")||d.includes("advert")||d.includes("share_")||d.includes("icon_")||d.includes("btn_")||d.includes("button_")||d.includes("blank.gif")||d.includes("spacer.gif")||d.includes("tracking")||d.includes("analytics"))&&(!u||r>0&&r<100&&m>0&&m<100)||(e.add(i),t.push({index:t.length+1,src:i,width:r>100?r:800,height:m>100?m:1200,top:Math.round(a.top+window.scrollY)}))}if(this.capturedNetworkImages.size>0){let n=t.length>0?t[t.length-1].top+1e3:0;for(const i of this.capturedNetworkImages)e.has(i)||(e.add(i),t.push({index:t.length+1,src:i,width:800,height:1200,top:n}),n+=1e3)}return t.sort((n,i)=>n.top-i.top),t.forEach((n,i)=>{n.index=i+1}),t}static async scanChapterImagesAsync(){this.initPageSniffer();const t=await this.fetchDirectSiteApi();return t&&t.length>=2?t.map((e,s)=>({index:s+1,src:e,width:800,height:1200,top:s*1100})):this.scanChapterImages()}static extractPageMetadata(){var i;let t="",e="";const o=((i=document.querySelector('meta[property="og:title"]'))==null?void 0:i.getAttribute("content"))||document.title||"";if(o){const a=o.split(/[-|–—»•:]/);a.length>=2?(t=a[0].trim(),e=a.slice(1).join(" - ").trim()):t=o.trim()}const n=document.querySelector("h1, h2, .subj, .chapter-title, .episode-title, .subj_episode, .chapter-name, .c-breadcrumb li:last-child");return n&&n.textContent&&(e=n.textContent.trim().split(`
+`)[0].substring(0,50)),{seriesTitle:t||document.title||window.location.hostname,chapterTitle:e||"Active Chapter",url:window.location.href,domain:window.location.hostname}}}l(v,"capturedNetworkImages",new Set),l(v,"snifferInjected",!1);typeof window<"u"&&(window.DomMangaScanner=v,v.initPageSniffer());const P=[{id:"off",name:"Mute",icon:"🔇",desc:"No background audio"},{id:"lofi",name:"Lo-Fi Chords",icon:"🎵",desc:"Calm warm cinematic chords"},{id:"rain",name:"Rain Waves",icon:"🌧️",desc:"Organic rain & ocean swell"},{id:"space",name:"Cyber Drone",icon:"🌌",desc:"432Hz ethereal ambient drone"},{id:"pulse",name:"Action Pulse",icon:"⚡",desc:"Tense rhythmic sub-bass pulse"},{id:"zen",name:"Zen Harmony",icon:"🎋",desc:"Peaceful acoustic resonant harmonics"}],C=[{id:"normal",name:"Natural",icon:"🖼️",filterCss:"none"},{id:"oled",name:"OLED Dark",icon:"🕶️",filterCss:"contrast(1.18) brightness(0.92) saturate(1.08)"},{id:"sepia",name:"Warm Sepia",icon:"📜",filterCss:"sepia(0.38) contrast(1.08) brightness(0.96) hue-rotate(-12deg)"},{id:"cyber",name:"Cyber Neon",icon:"🎆",filterCss:"saturate(1.45) contrast(1.15) hue-rotate(8deg)"},{id:"noir",name:"Noir Ink",icon:"🖤",filterCss:"grayscale(1) contrast(1.3) brightness(0.95)"},{id:"warm",name:"Night Amber",icon:"🕯️",filterCss:"sepia(0.55) brightness(0.92) hue-rotate(-25deg)"}];class q{constructor(){l(this,"ctx",null);l(this,"currentMood","off");l(this,"masterGain",null);l(this,"activeNodes",[]);l(this,"volume",.65)}cycleMood(){const e=(P.findIndex(s=>s.id===this.currentMood)+1)%P.length;return this.setMood(P[e].id),P[e]}setMood(t){this.currentMood=t,t==="off"?this.stop():this.startMood(t)}setVolume(t){if(this.volume=Math.max(0,Math.min(1,t)),this.masterGain&&this.ctx)try{this.masterGain.gain.setValueAtTime(.08*this.volume,this.ctx.currentTime)}catch{}}initCtx(){if(!this.ctx){const t=window.AudioContext||window.webkitAudioContext;this.ctx=new t}this.ctx.state==="suspended"&&this.ctx.resume()}startMood(t){try{this.initCtx(),this.stop(),this.masterGain=this.ctx.createGain(),this.masterGain.gain.setValueAtTime(.001,this.ctx.currentTime);const e=.08*this.volume;if(this.masterGain.gain.exponentialRampToValueAtTime(e,this.ctx.currentTime+2),this.masterGain.connect(this.ctx.destination),t==="lofi")[65.41,130.81,196,311.13,392].forEach((o,n)=>{const i=this.ctx.createOscillator();i.type=n===0?"sine":n%2===0?"triangle":"sine",i.frequency.setValueAtTime(o,this.ctx.currentTime);const a=this.ctx.createOscillator(),c=this.ctx.createGain();a.frequency.setValueAtTime(.08+n*.03,this.ctx.currentTime),c.gain.setValueAtTime(1.5,this.ctx.currentTime),a.connect(c),c.connect(i.frequency),a.start(),i.connect(this.masterGain),i.start(),this.activeNodes.push(i,a,c)});else if(t==="rain"){const s=this.ctx.sampleRate*2,o=this.ctx.createBuffer(1,s,this.ctx.sampleRate),n=o.getChannelData(0);let i=0,a=0,c=0,r=0,m=0,u=0,d=0;for(let w=0;w<s;w++){const y=Math.random()*2-1;i=.99886*i+y*.0555179,a=.99332*a+y*.0750759,c=.969*c+y*.153852,r=.8665*r+y*.3104856,m=.55*m+y*.5329522,u=-.7616*u-y*.016898,n[w]=(i+a+c+r+m+u+d+y*.5362)*.08,d=y*.115926}const p=this.ctx.createBufferSource();p.buffer=o,p.loop=!0;const h=this.ctx.createBiquadFilter();h.type="lowpass",h.frequency.setValueAtTime(800,this.ctx.currentTime);const f=this.ctx.createOscillator();f.frequency.setValueAtTime(.15,this.ctx.currentTime);const b=this.ctx.createGain();b.gain.setValueAtTime(300,this.ctx.currentTime),f.connect(b),b.connect(h.frequency),f.start(),p.connect(h),h.connect(this.masterGain),p.start(),this.activeNodes.push(p,h,f,b)}else if(t==="space")[108,216,432,648].forEach((o,n)=>{const i=this.ctx.createOscillator();i.type="sine",i.frequency.setValueAtTime(o,this.ctx.currentTime);const a=this.ctx.createStereoPanner?this.ctx.createStereoPanner():null;a?(a.pan.setValueAtTime(n%2===0?-.4:.4,this.ctx.currentTime),i.connect(a),a.connect(this.masterGain),this.activeNodes.push(a)):i.connect(this.masterGain),i.start(),this.activeNodes.push(i)});else if(t==="pulse"){const s=this.ctx.createOscillator();s.type="sawtooth",s.frequency.setValueAtTime(55,this.ctx.currentTime);const o=this.ctx.createBiquadFilter();o.type="lowpass",o.frequency.setValueAtTime(220,this.ctx.currentTime),o.Q.setValueAtTime(4,this.ctx.currentTime);const n=this.ctx.createOscillator();n.type="square",n.frequency.setValueAtTime(2,this.ctx.currentTime);const i=this.ctx.createGain();i.gain.setValueAtTime(140,this.ctx.currentTime),n.connect(i),i.connect(o.frequency),n.start(),s.connect(o),o.connect(this.masterGain),s.start(),this.activeNodes.push(s,o,n,i)}else t==="zen"&&[144,288,432,576,864].forEach((o,n)=>{const i=this.ctx.createOscillator();i.type="sine",i.frequency.setValueAtTime(o,this.ctx.currentTime);const a=this.ctx.createGain();a.gain.setValueAtTime(1/(n+1.5),this.ctx.currentTime);const c=this.ctx.createOscillator();c.frequency.setValueAtTime(.05+n*.02,this.ctx.currentTime);const r=this.ctx.createGain();r.gain.setValueAtTime(.3,this.ctx.currentTime),c.connect(r),r.connect(a.gain),c.start(),i.connect(a),a.connect(this.masterGain),i.start(),this.activeNodes.push(i,a,c,r)})}catch{}}stop(){if(this.masterGain&&this.ctx)try{this.masterGain.gain.linearRampToValueAtTime(.001,this.ctx.currentTime+.3)}catch{}setTimeout(()=>{this.activeNodes.forEach(t=>{try{typeof t.stop=="function"&&t.stop()}catch{}}),this.activeNodes=[]},350)}}class V{constructor(){l(this,"isVoiceActive",!1);l(this,"currentUtterance",null);l(this,"onSubtitleCallback",null)}setSubtitleCallback(t){this.onSubtitleCallback=t}toggle(){return this.isVoiceActive=!this.isVoiceActive,this.isVoiceActive||this.stop(),this.isVoiceActive}get isActive(){return this.isVoiceActive}speak(t){if(!(!this.isVoiceActive||!("speechSynthesis"in window)))try{window.speechSynthesis.cancel();const e=new SpeechSynthesisUtterance(t);e.rate=1.05,e.pitch=1;const o=window.speechSynthesis.getVoices().find(n=>n.lang.startsWith("en")&&(n.name.includes("Natural")||n.name.includes("Google")||n.name.includes("Samantha")));o&&(e.voice=o),this.onSubtitleCallback&&this.onSubtitleCallback(t),e.onend=()=>{this.onSubtitleCallback&&this.onSubtitleCallback("")},e.onerror=()=>{this.onSubtitleCallback&&this.onSubtitleCallback("")},this.currentUtterance=e,window.speechSynthesis.speak(e)}catch{}}stop(){if("speechSynthesis"in window)try{window.speechSynthesis.cancel()}catch{}this.onSubtitleCallback&&this.onSubtitleCallback("")}}class L{constructor(t){l(this,"scanner");l(this,"isPlaying",!1);l(this,"scrollSpeed",1);l(this,"baseSpeedPxPerSec",65);l(this,"animationFrameId",null);l(this,"lastTimestamp",null);l(this,"subpixelAccumulator",0);l(this,"hudElement",null);l(this,"dimmerElement",null);l(this,"spotlightElement",null);l(this,"toastElement",null);l(this,"subtitleElement",null);l(this,"scrubberTooltipElement",null);l(this,"nextChapterBanner",null);l(this,"isDimmed",!1);l(this,"isSpotlight",!1);l(this,"isAdaptivePacing",!0);l(this,"isAutoDimHud",!0);l(this,"isDockTop",!0);l(this,"isSettingsOpen",!1);l(this,"isTemporarilyPausedForUser",!1);l(this,"manualScrollTimeout",null);l(this,"hudDimTimer",null);l(this,"currentShader","normal");l(this,"detectedPanels",[]);l(this,"currentPanelIndex",0);l(this,"panelPauseTimer",0);l(this,"lastPausedPanelIdx",-1);l(this,"lastNarratedPanelIdx",-1);l(this,"nextChapterCountdown",0);l(this,"nextChapterTimerId",null);l(this,"soundscape",new q);l(this,"voiceNarrator",new V);this.scanner=t||window.DomMangaScanner,this.init()}init(){this.createCinemaHUD(),this.createDimmerOverlay(),this.createSpotlightOverlay(),this.createSubtitleOverlay(),this.bindGlobalShortcuts(),this.bindUserScrollInterceptors(),this.bindMouseActivityInterceptors(),this.voiceNarrator.setSubtitleCallback(t=>{this.updateSubtitle(t)})}bindGlobalShortcuts(){window.addEventListener("keydown",t=>{const e=t.target;(e==null?void 0:e.tagName)==="INPUT"||(e==null?void 0:e.tagName)==="TEXTAREA"||e!=null&&e.isContentEditable||!(this.hudElement&&!this.hudElement.classList.contains("sonikoma-hidden"))||(t.code==="Space"?(t.preventDefault(),this.isPlaying?this.pause():this.play()):t.code==="ArrowUp"?(t.preventDefault(),this.adjustSpeed(.25)):t.code==="ArrowDown"?(t.preventDefault(),this.adjustSpeed(-.25)):t.code==="ArrowRight"?(t.preventDefault(),this.jumpToNextPanel()):t.code==="ArrowLeft"?(t.preventDefault(),this.jumpToPrevPanel()):t.key==="m"||t.key==="M"?(t.preventDefault(),this.cycleSoundscape()):t.key==="c"||t.key==="C"?(t.preventDefault(),this.cycleShader()):t.key==="v"||t.key==="V"?(t.preventDefault(),this.toggleVoiceNarrator()):t.key==="d"||t.key==="D"?(t.preventDefault(),this.toggleTheaterDimmer()):t.key==="l"||t.key==="L"?(t.preventDefault(),this.toggleSpotlight()):t.key==="f"||t.key==="F"?(t.preventDefault(),this.toggleFullscreen()):t.key==="s"||t.key==="S"?(t.preventDefault(),this.snipActiveScene()):t.key==="b"||t.key==="B"?(t.preventDefault(),this.bookmarkActiveScene()):t.code==="Escape"&&(this.nextChapterBanner?this.cancelNextChapterCountdown():this.isSettingsOpen?this.toggleSettingsFlyout(!1):this.stop()))})}bindUserScrollInterceptors(){const t=()=>{!this.isPlaying||this.isTemporarilyPausedForUser||(this.isTemporarilyPausedForUser=!0,this.updateStatusBadge("Paused","⏸"),this.manualScrollTimeout&&clearTimeout(this.manualScrollTimeout),this.manualScrollTimeout=setTimeout(()=>{this.isTemporarilyPausedForUser=!1,this.isPlaying&&(this.updateStatusBadge("Playing","▶"),this.lastTimestamp=performance.now())},1300))};window.addEventListener("wheel",t,{passive:!0}),window.addEventListener("touchmove",t,{passive:!0})}bindMouseActivityInterceptors(){const t=()=>{this.hudElement&&(this.hudElement.style.opacity="1"),this.hudDimTimer&&clearTimeout(this.hudDimTimer),this.isPlaying&&this.isAutoDimHud&&(this.hudDimTimer=setTimeout(()=>{this.isPlaying&&this.hudElement&&!this.isSettingsOpen&&(this.hudElement.style.opacity="0.22")},2800))};window.addEventListener("mousemove",t,{passive:!0})}createDimmerOverlay(){let t=document.getElementById("sonikoma-theater-dimmer");t||(t=document.createElement("div"),t.id="sonikoma-theater-dimmer",t.className="sonikoma-theater-dimmer sonikoma-hidden",(document.body||document.documentElement).appendChild(t)),this.dimmerElement=t}createSpotlightOverlay(){let t=document.getElementById("sonikoma-cinema-spotlight");t||(t=document.createElement("div"),t.id="sonikoma-cinema-spotlight",t.className="sonikoma-cinema-spotlight sonikoma-hidden",(document.body||document.documentElement).appendChild(t)),this.spotlightElement=t}createSubtitleOverlay(){let t=document.getElementById("sonikoma-cinema-subtitles");t||(t=document.createElement("div"),t.id="sonikoma-cinema-subtitles",t.className="sonikoma-cinema-subtitles sonikoma-hidden",(document.body||document.documentElement).appendChild(t)),this.subtitleElement=t}updateSubtitle(t){if(this.subtitleElement){if(!t){this.subtitleElement.classList.add("sonikoma-hidden"),this.subtitleElement.style.setProperty("display","none","important");return}this.subtitleElement.innerHTML=`
       <span class="sonikoma-sub-icon">🎙️</span>
-      <span class="sonikoma-sub-text">${text}</span>
-    `;
-    this.subtitleElement.classList.remove("sonikoma-hidden");
-    this.subtitleElement.style.setProperty("display", "flex", "important");
-  }
-
-  showToast(msg) {
-    if (!this.toastElement) {
-      const toast = document.createElement("div");
-      toast.id = "sonikoma-cinema-toast";
-      toast.className = "sonikoma-cinema-toast sonikoma-hidden";
-      (document.body || document.documentElement).appendChild(toast);
-      this.toastElement = toast;
-    }
-    this.toastElement.textContent = msg;
-    this.toastElement.classList.remove("sonikoma-hidden");
-    this.toastElement.style.setProperty("display", "flex", "important");
-    setTimeout(() => {
-      if (this.toastElement) {
-        this.toastElement.classList.add("sonikoma-hidden");
-        this.toastElement.style.setProperty("display", "none", "important");
-      }
-    }, 2200);
-  }
-
-  createCinemaHUD() {
-    let hud = document.getElementById("sonikoma-cinema-hud");
-    if (!hud) {
-      hud = document.createElement("div");
-      hud.id = "sonikoma-cinema-hud";
-      hud.className = "sonikoma-cinema-hud sonikoma-dock-top sonikoma-hidden";
-      hud.innerHTML = `
+      <span class="sonikoma-sub-text">${t}</span>
+    `,this.subtitleElement.classList.remove("sonikoma-hidden"),this.subtitleElement.style.setProperty("display","flex","important")}}showToast(t){if(!this.toastElement){const e=document.createElement("div");e.id="sonikoma-cinema-toast",e.className="sonikoma-cinema-toast sonikoma-hidden",(document.body||document.documentElement).appendChild(e),this.toastElement=e}this.toastElement.textContent=t,this.toastElement.classList.remove("sonikoma-hidden"),this.toastElement.style.setProperty("display","flex","important"),setTimeout(()=>{this.toastElement&&(this.toastElement.classList.add("sonikoma-hidden"),this.toastElement.style.setProperty("display","none","important"))},2200)}createCinemaHUD(){var e,s,o,n,i,a,c,r,m,u,d,p,h,f,b,w,y,I,_;let t=document.getElementById("sonikoma-cinema-hud");if(!t){t=document.createElement("div"),t.id="sonikoma-cinema-hud",t.className="sonikoma-cinema-hud sonikoma-dock-top sonikoma-hidden",t.innerHTML=`
         <div class="sonikoma-cinema-bar">
           <!-- Drag Handle -->
           <div id="sonikoma-hud-drag-handle" class="sonikoma-drag-handle" title="Drag to move Cinema Bar anywhere">
@@ -703,46 +139,57 @@ class CinemaPlayer {
           <div class="sonikoma-cinema-divider"></div>
 
           <!-- Quick Action Buttons -->
+          <!-- Ambient Soundscape Mood Button -->
           <button type="button" id="sonikoma-btn-cinema-bgm" class="sonikoma-hud-icon-btn" title="Ambient Soundscape (M) • Lo-Fi, Rain, Drone, Pulse, Zen">
             <span id="sonikoma-bgm-icon">🎵</span>
           </button>
 
+          <!-- Cinematic Visual Shader -->
           <button type="button" id="sonikoma-btn-cinema-shader" class="sonikoma-hud-icon-btn" title="Cinematic Visual Shaders (C) • OLED, Sepia, Neon, Noir, Amber">
             <span id="sonikoma-shader-icon">🎨</span>
           </button>
 
+          <!-- AI Voice Narrator -->
           <button type="button" id="sonikoma-btn-cinema-voice" class="sonikoma-hud-icon-btn" title="AI Voice Narrator (V) • Hands-Free Speech Reading">
             🎙️
           </button>
 
+          <!-- Spotlight Focus -->
           <button type="button" id="sonikoma-btn-cinema-spotlight" class="sonikoma-hud-icon-btn" title="Toggle Reading Spotlight Focus (L)">
             🔦
           </button>
 
+          <!-- Theater Dimmer -->
           <button type="button" id="sonikoma-btn-cinema-dimmer" class="sonikoma-hud-icon-btn" title="Toggle Theater Dimmer (D)">
             🌑
           </button>
 
+          <!-- Snip Active Scene -->
           <button type="button" id="sonikoma-btn-cinema-snip" class="sonikoma-hud-icon-btn" title="Instant Capture Active Scene (S)">
             ✂️
           </button>
 
+          <!-- Bookmark Active Scene -->
           <button type="button" id="sonikoma-btn-cinema-bookmark" class="sonikoma-hud-icon-btn" title="Bookmark Chapter Position (B)">
             📌
           </button>
 
+          <!-- Fullscreen Toggle -->
           <button type="button" id="sonikoma-btn-cinema-fs" class="sonikoma-hud-icon-btn" title="Toggle Fullscreen Immersion (F)">
             ⛶
           </button>
 
+          <!-- Settings Flyout Toggle -->
           <button type="button" id="sonikoma-btn-cinema-settings" class="sonikoma-hud-icon-btn" title="Cinema Settings & AI Director (⚙️)">
             ⚙️
           </button>
 
+          <!-- Dock Position Flip (Top/Bottom) -->
           <button type="button" id="sonikoma-btn-cinema-dock" class="sonikoma-hud-icon-btn" title="Flip Dock Position (Top / Bottom)">
             ⇅
           </button>
 
+          <!-- Exit Cinema -->
           <button type="button" id="sonikoma-btn-cinema-close" class="sonikoma-hud-btn-danger" title="Exit Cinema Mode (Esc)">
             ✕ Exit
           </button>
@@ -813,836 +260,15 @@ class CinemaPlayer {
             <span class="sonikoma-shortcut-tag"><kbd>F</kbd> Fullscreen</span>
           </div>
         </div>
-      `;
-
-      (document.body || document.documentElement).appendChild(hud);
-
-      hud.querySelector("#sonikoma-btn-cinema-toggle")?.addEventListener("click", () => {
-        if (this.isPlaying) this.pause();
-        else this.play();
-      });
-
-      hud.querySelector("#sonikoma-btn-cinema-close")?.addEventListener("click", () => this.stop());
-      hud.querySelector("#sonikoma-btn-speed-minus")?.addEventListener("click", () => this.adjustSpeed(-0.25));
-      hud.querySelector("#sonikoma-btn-speed-plus")?.addEventListener("click", () => this.adjustSpeed(0.25));
-      hud.querySelector("#sonikoma-btn-prev-panel")?.addEventListener("click", () => this.jumpToPrevPanel());
-      hud.querySelector("#sonikoma-btn-next-panel")?.addEventListener("click", () => this.jumpToNextPanel());
-      hud.querySelector("#sonikoma-btn-cinema-bgm")?.addEventListener("click", () => this.cycleSoundscape());
-      hud.querySelector("#sonikoma-btn-cinema-shader")?.addEventListener("click", () => this.cycleShader());
-      hud.querySelector("#sonikoma-btn-cinema-voice")?.addEventListener("click", () => this.toggleVoiceNarrator());
-      hud.querySelector("#sonikoma-btn-cinema-dimmer")?.addEventListener("click", () => this.toggleTheaterDimmer());
-      hud.querySelector("#sonikoma-btn-cinema-spotlight")?.addEventListener("click", () => this.toggleSpotlight());
-      hud.querySelector("#sonikoma-btn-cinema-fs")?.addEventListener("click", () => this.toggleFullscreen());
-      hud.querySelector("#sonikoma-btn-cinema-snip")?.addEventListener("click", () => this.snipActiveScene());
-      hud.querySelector("#sonikoma-btn-cinema-bookmark")?.addEventListener("click", () => this.bookmarkActiveScene());
-      hud.querySelector("#sonikoma-btn-cinema-settings")?.addEventListener("click", () => this.toggleSettingsFlyout());
-      hud.querySelector("#sonikoma-btn-close-flyout")?.addEventListener("click", () => this.toggleSettingsFlyout(false));
-      hud.querySelector("#sonikoma-btn-cinema-dock")?.addEventListener("click", () => this.toggleDockPosition());
-
-      hud.querySelector("#sonikoma-volume-slider")?.addEventListener("input", (e) => {
-        const val = parseInt(e.target.value, 10) / 100;
-        this.soundscape.setVolume(val);
-      });
-
-      const timelineTrack = hud.querySelector("#sonikoma-hud-timeline");
-      const tooltip = hud.querySelector("#sonikoma-scrubber-tooltip");
-      this.scrubberTooltipElement = tooltip;
-
-      if (timelineTrack && tooltip) {
-        timelineTrack.addEventListener("mousemove", (e) => {
-          const rect = timelineTrack.getBoundingClientRect();
-          const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-          const pct = Math.round(ratio * 100);
-          tooltip.textContent = `Jump to ${pct}%`;
-          tooltip.style.left = `${e.clientX - rect.left}px`;
-          tooltip.classList.remove("sonikoma-hidden");
-        });
-
-        timelineTrack.addEventListener("mouseleave", () => {
-          tooltip.classList.add("sonikoma-hidden");
-        });
-
-        timelineTrack.addEventListener("click", (e) => {
-          const rect = timelineTrack.getBoundingClientRect();
-          const clickRatio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-          const maxScroll = Math.max(
-            1,
-            (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight
-          );
-          window.scrollTo({ top: clickRatio * maxScroll, behavior: "smooth" });
-          this.showToast(`Jumped to ${Math.round(clickRatio * 100)}%`);
-        });
-      }
-
-      hud.querySelector("#sonikoma-btn-toggle-pacing")?.addEventListener("click", (e) => {
-        this.isAdaptivePacing = !this.isAdaptivePacing;
-        e.target.textContent = this.isAdaptivePacing ? "ON" : "OFF";
-        if (this.isAdaptivePacing) e.target.classList.add("sonikoma-active");
-        else e.target.classList.remove("sonikoma-active");
-        this.showToast(this.isAdaptivePacing ? "AI Director Pacing ON" : "AI Director Pacing OFF");
-      });
-
-      // Make both Cinema HUD and Settings Flyout Draggable & Moveable
-      const hudDragHandle = hud.querySelector("#sonikoma-hud-drag-handle");
-      const cinemaBar = hud.querySelector(".sonikoma-cinema-bar");
-      this.enableDraggable(hud, hudDragHandle || cinemaBar);
-
-      const flyout = hud.querySelector("#sonikoma-cinema-flyout");
-      const flyoutHeader = hud.querySelector("#sonikoma-flyout-drag-header");
-      if (flyout && flyoutHeader) {
-        this.enableDraggable(flyout, flyoutHeader);
-      }
-    }
-
-    this.hudElement = hud;
-  }
-
-  enableDraggable(target, handle) {
-    handle.style.cursor = "grab";
-
-    handle.addEventListener("mousedown", (e) => {
-      const clickTarget = e.target;
-      if (
-        clickTarget &&
-        (clickTarget.tagName === "BUTTON" ||
-          clickTarget.tagName === "INPUT" ||
-          clickTarget.closest("button") ||
-          clickTarget.classList.contains("sonikoma-flyout-close"))
-      ) {
-        return;
-      }
-
-      e.preventDefault();
-      let isDragging = true;
-      const startX = e.clientX;
-      const startY = e.clientY;
-
-      const rect = target.getBoundingClientRect();
-      const initialLeft = rect.left;
-      const initialTop = rect.top;
-
-      target.style.setProperty("position", "fixed", "important");
-      target.style.setProperty("margin", "0", "important");
-      target.style.setProperty("transform", "none", "important");
-      target.style.setProperty("left", `${initialLeft}px`, "important");
-      target.style.setProperty("top", `${initialTop}px`, "important");
-      target.style.setProperty("right", "auto", "important");
-      target.style.setProperty("bottom", "auto", "important");
-      target.classList.remove("sonikoma-dock-top", "sonikoma-dock-bottom");
-
-      handle.style.cursor = "grabbing";
-      target.classList.add("sonikoma-dragging");
-      document.body.style.userSelect = "none";
-
-      const onMouseMove = (me) => {
-        if (!isDragging) return;
-        const dx = me.clientX - startX;
-        const dy = me.clientY - startY;
-        const newLeft = Math.max(10, Math.min(window.innerWidth - target.offsetWidth - 10, initialLeft + dx));
-        const newTop = Math.max(10, Math.min(window.innerHeight - target.offsetHeight - 10, initialTop + dy));
-        target.style.setProperty("left", `${newLeft}px`, "important");
-        target.style.setProperty("top", `${newTop}px`, "important");
-      };
-
-      const onMouseUp = () => {
-        isDragging = false;
-        handle.style.cursor = "grab";
-        target.classList.remove("sonikoma-dragging");
-        document.body.style.userSelect = "";
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
-      };
-
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
-    });
-  }
-
-  adjustSpeed(delta) {
-    const speeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0];
-    let currentIndex = speeds.findIndex((s) => Math.abs(s - this.scrollSpeed) < 0.01);
-    if (currentIndex === -1) currentIndex = 3;
-
-    if (delta > 0) currentIndex = Math.min(speeds.length - 1, currentIndex + 1);
-    else currentIndex = Math.max(0, currentIndex - 1);
-
-    this.scrollSpeed = speeds[currentIndex];
-    const readout = document.getElementById("sonikoma-speed-readout");
-    if (readout) readout.textContent = `${this.scrollSpeed}x`;
-    this.showToast(`Speed: ${this.scrollSpeed}x`);
-  }
-
-  cycleSoundscape() {
-    const mood = this.soundscape.cycleMood();
-    const btn = document.getElementById("sonikoma-btn-cinema-bgm");
-    const icon = document.getElementById("sonikoma-bgm-icon");
-    const flyoutName = document.getElementById("sonikoma-flyout-soundscape-name");
-
-    if (icon) icon.textContent = mood.icon;
-    if (flyoutName) flyoutName.textContent = mood.name;
-
-    if (btn) {
-      if (mood.id !== "off") btn.classList.add("sonikoma-active");
-      else btn.classList.remove("sonikoma-active");
-    }
-    this.showToast(`Soundscape: ${mood.icon} ${mood.name}`);
-  }
-
-  cycleShader() {
-    const idx = CINEMA_SHADERS.findIndex((s) => s.id === this.currentShader);
-    const nextIdx = (idx + 1) % CINEMA_SHADERS.length;
-    const shader = CINEMA_SHADERS[nextIdx];
-    this.currentShader = shader.id;
-
-    const filterTarget = document.documentElement;
-    if (shader.id === "normal") {
-      filterTarget.style.filter = "";
-    } else {
-      filterTarget.style.filter = shader.filterCss;
-    }
-
-    const btn = document.getElementById("sonikoma-btn-cinema-shader");
-    const flyoutName = document.getElementById("sonikoma-flyout-shader-name");
-    if (flyoutName) flyoutName.textContent = shader.name;
-
-    if (btn) {
-      if (shader.id !== "normal") btn.classList.add("sonikoma-active");
-      else btn.classList.remove("sonikoma-active");
-    }
-    this.showToast(`Shader: ${shader.icon} ${shader.name}`);
-  }
-
-  toggleVoiceNarrator() {
-    const active = this.voiceNarrator.toggle();
-    const btn = document.getElementById("sonikoma-btn-cinema-voice");
-    const flyoutStatus = document.getElementById("sonikoma-flyout-voice-status");
-
-    if (btn) {
-      if (active) btn.classList.add("sonikoma-active");
-      else btn.classList.remove("sonikoma-active");
-    }
-    if (flyoutStatus) {
-      flyoutStatus.textContent = active ? "ON" : "OFF";
-    }
-
-    this.showToast(active ? "🎙️ Voice Narrator Active" : "🎙️ Voice Narrator Off");
-    if (active) {
-      this.narrateCurrentScene();
-    }
-  }
-
-  narrateCurrentScene() {
-    if (!this.voiceNarrator.isActive) return;
-    const curIdx = this.currentPanelIndex + 1;
-    const total = this.detectedPanels.length || 1;
-    this.voiceNarrator.speak(`Entering Scene ${curIdx} of ${total}`);
-  }
-
-  toggleTheaterDimmer() {
-    this.isDimmed = !this.isDimmed;
-    const btn = document.getElementById("sonikoma-btn-cinema-dimmer");
-    if (this.dimmerElement) {
-      if (this.isDimmed) {
-        this.dimmerElement.classList.remove("sonikoma-hidden");
-        this.dimmerElement.style.setProperty("display", "block", "important");
-      } else {
-        this.dimmerElement.classList.add("sonikoma-hidden");
-        this.dimmerElement.style.setProperty("display", "none", "important");
-      }
-    }
-    if (btn) {
-      if (this.isDimmed) btn.classList.add("sonikoma-active");
-      else btn.classList.remove("sonikoma-active");
-    }
-    this.showToast(this.isDimmed ? "Theater Dimmer ON" : "Theater Dimmer OFF");
-  }
-
-  toggleSpotlight() {
-    this.isSpotlight = !this.isSpotlight;
-    const btn = document.getElementById("sonikoma-btn-cinema-spotlight");
-    if (this.spotlightElement) {
-      if (this.isSpotlight) {
-        this.spotlightElement.classList.remove("sonikoma-hidden");
-        this.spotlightElement.style.setProperty("display", "block", "important");
-      } else {
-        this.spotlightElement.classList.add("sonikoma-hidden");
-        this.spotlightElement.style.setProperty("display", "none", "important");
-      }
-    }
-    if (btn) {
-      if (this.isSpotlight) btn.classList.add("sonikoma-active");
-      else btn.classList.remove("sonikoma-active");
-    }
-    this.showToast(this.isSpotlight ? "Spotlight Focus ON" : "Spotlight Focus OFF");
-  }
-
-  toggleFullscreen() {
-    try {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-        this.showToast("Fullscreen Immersion ON");
-      } else {
-        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        this.showToast("Fullscreen OFF");
-      }
-    } catch (_) {}
-  }
-
-  snipActiveScene() {
-    const curIdx = this.currentPanelIndex;
-    const currentPanel = this.detectedPanels[curIdx];
-    this.showToast(`📸 Captured Scene #${curIdx + 1}!`);
-
-    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
-      chrome.runtime.sendMessage({
-        type: "TRIGGER_ACTIVE_SCENE_SNIP",
-        payload: {
-          panelIndex: curIdx + 1,
-          src: currentPanel?.src || "",
-          url: window.location.href,
-        },
-      });
-    }
-  }
-
-  bookmarkActiveScene() {
-    const curIdx = this.currentPanelIndex + 1;
-    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-    const maxScroll = Math.max(
-      1,
-      (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight
-    );
-    const progress = Math.round((scrollY / maxScroll) * 100);
-
-    const bookmark = {
-      url: window.location.href,
-      title: document.title,
-      scene: curIdx,
-      progress,
-      timestamp: Date.now(),
-    };
-
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.get("sonikoma_bookmarks", (data) => {
-        const list = Array.isArray(data?.sonikoma_bookmarks) ? data.sonikoma_bookmarks : [];
-        list.unshift(bookmark);
-        chrome.storage.local.set({ sonikoma_bookmarks: list.slice(0, 50) }, () => {
-          this.showToast(`📌 Bookmark saved at Scene ${curIdx} (${progress}%)`);
-        });
-      });
-    } else {
-      this.showToast(`📌 Bookmark saved at Scene ${curIdx} (${progress}%)`);
-    }
-  }
-
-  toggleSettingsFlyout(force) {
-    const flyout = document.getElementById("sonikoma-cinema-flyout");
-    if (!flyout) return;
-    this.isSettingsOpen = typeof force === "boolean" ? force : !this.isSettingsOpen;
-    if (this.isSettingsOpen) {
-      flyout.classList.remove("sonikoma-hidden");
-      flyout.style.setProperty("display", "flex", "important");
-    } else {
-      flyout.classList.add("sonikoma-hidden");
-      flyout.style.setProperty("display", "none", "important");
-    }
-  }
-
-  toggleDockPosition() {
-    this.isDockTop = !this.isDockTop;
-    if (this.hudElement) {
-      this.hudElement.style.removeProperty("left");
-      this.hudElement.style.removeProperty("top");
-      this.hudElement.style.removeProperty("right");
-      this.hudElement.style.removeProperty("bottom");
-      this.hudElement.style.removeProperty("transform");
-      this.hudElement.style.removeProperty("margin");
-
-      if (this.isDockTop) {
-        this.hudElement.classList.remove("sonikoma-dock-bottom");
-        this.hudElement.classList.add("sonikoma-dock-top");
-      } else {
-        this.hudElement.classList.remove("sonikoma-dock-top");
-        this.hudElement.classList.add("sonikoma-dock-bottom");
-      }
-    }
-    this.showToast(this.isDockTop ? "Docked to Top" : "Docked to Bottom");
-  }
-
-  jumpToNextPanel() {
-    if (!this.detectedPanels || this.detectedPanels.length === 0) {
-      this.refreshPanels();
-    }
-    const currentY = window.scrollY + 120;
-    const nextIdx = this.detectedPanels.findIndex((p) => p.top > currentY);
-    if (nextIdx !== -1) {
-      this.currentPanelIndex = nextIdx;
-      window.scrollTo({ top: this.detectedPanels[nextIdx].top - 80, behavior: "smooth" });
-      this.updatePanelReadout();
-      if (this.voiceNarrator.isActive) {
-        this.voiceNarrator.speak(`Scene ${nextIdx + 1}`);
-      }
-    }
-  }
-
-  jumpToPrevPanel() {
-    if (!this.detectedPanels || this.detectedPanels.length === 0) {
-      this.refreshPanels();
-    }
-    const currentY = window.scrollY - 100;
-    let prevIdx = -1;
-    for (let i = this.detectedPanels.length - 1; i >= 0; i--) {
-      if (this.detectedPanels[i].top < currentY) {
-        prevIdx = i;
-        break;
-      }
-    }
-    if (prevIdx !== -1) {
-      this.currentPanelIndex = prevIdx;
-      window.scrollTo({ top: Math.max(0, this.detectedPanels[prevIdx].top - 80), behavior: "smooth" });
-      this.updatePanelReadout();
-      if (this.voiceNarrator.isActive) {
-        this.voiceNarrator.speak(`Scene ${prevIdx + 1}`);
-      }
-    } else {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }
-
-  refreshPanels() {
-    if (this.scanner?.scanChapterImages) {
-      this.detectedPanels = this.scanner.scanChapterImages();
-    }
-  }
-
-  updatePanelReadout() {
-    const readout = document.getElementById("sonikoma-panel-readout");
-    if (readout) {
-      const total = this.detectedPanels.length || 1;
-      const cur = Math.min(total, this.currentPanelIndex + 1);
-      readout.textContent = `Scene ${cur}/${total}`;
-    }
-  }
-
-  updateStatusBadge(text, icon) {
-    const statusText = document.getElementById("sonikoma-cinema-status");
-    const iconElem = document.getElementById("sonikoma-cinema-icon");
-    if (statusText) statusText.textContent = text;
-    if (iconElem) iconElem.textContent = icon;
-  }
-
-  triggerNextChapterPrompt() {
-    if (this.nextChapterBanner) return;
-
-    const banner = document.createElement("div");
-    banner.id = "sonikoma-next-chapter-banner";
-    banner.className = "sonikoma-next-chapter-banner";
-    this.nextChapterCountdown = 6;
-
-    const findNextUrl = () => {
-      const links = Array.from(document.querySelectorAll("a"));
-      for (const a of links) {
-        const text = (a.textContent || "").toLowerCase();
-        const href = a.getAttribute("href") || "";
-        if (
-          (text.includes("next chapter") || text.includes("next episode") || text.includes("next >") || a.className.includes("next")) &&
-          href &&
-          !href.startsWith("#") &&
-          !href.startsWith("javascript")
-        ) {
-          return a.href;
-        }
-      }
-      const match = window.location.href.match(/(chapter|ep|episode)[-_/](\d+)/i);
-      if (match) {
-        const nextNum = parseInt(match[2], 10) + 1;
-        return window.location.href.replace(match[0], `${match[1]}-${nextNum}`);
-      }
-      return "";
-    };
-
-    const nextUrl = findNextUrl();
-
-    banner.innerHTML = `
+      `,(document.body||document.documentElement).appendChild(t),(e=t.querySelector("#sonikoma-btn-cinema-toggle"))==null||e.addEventListener("click",()=>{this.isPlaying?this.pause():this.play()}),(s=t.querySelector("#sonikoma-btn-cinema-close"))==null||s.addEventListener("click",()=>this.stop()),(o=t.querySelector("#sonikoma-btn-speed-minus"))==null||o.addEventListener("click",()=>this.adjustSpeed(-.25)),(n=t.querySelector("#sonikoma-btn-speed-plus"))==null||n.addEventListener("click",()=>this.adjustSpeed(.25)),(i=t.querySelector("#sonikoma-btn-prev-panel"))==null||i.addEventListener("click",()=>this.jumpToPrevPanel()),(a=t.querySelector("#sonikoma-btn-next-panel"))==null||a.addEventListener("click",()=>this.jumpToNextPanel()),(c=t.querySelector("#sonikoma-btn-cinema-bgm"))==null||c.addEventListener("click",()=>this.cycleSoundscape()),(r=t.querySelector("#sonikoma-btn-cinema-shader"))==null||r.addEventListener("click",()=>this.cycleShader()),(m=t.querySelector("#sonikoma-btn-cinema-voice"))==null||m.addEventListener("click",()=>this.toggleVoiceNarrator()),(u=t.querySelector("#sonikoma-btn-cinema-dimmer"))==null||u.addEventListener("click",()=>this.toggleTheaterDimmer()),(d=t.querySelector("#sonikoma-btn-cinema-spotlight"))==null||d.addEventListener("click",()=>this.toggleSpotlight()),(p=t.querySelector("#sonikoma-btn-cinema-fs"))==null||p.addEventListener("click",()=>this.toggleFullscreen()),(h=t.querySelector("#sonikoma-btn-cinema-snip"))==null||h.addEventListener("click",()=>this.snipActiveScene()),(f=t.querySelector("#sonikoma-btn-cinema-bookmark"))==null||f.addEventListener("click",()=>this.bookmarkActiveScene()),(b=t.querySelector("#sonikoma-btn-cinema-settings"))==null||b.addEventListener("click",()=>this.toggleSettingsFlyout()),(w=t.querySelector("#sonikoma-btn-close-flyout"))==null||w.addEventListener("click",()=>this.toggleSettingsFlyout(!1)),(y=t.querySelector("#sonikoma-btn-cinema-dock"))==null||y.addEventListener("click",()=>this.toggleDockPosition()),(I=t.querySelector("#sonikoma-volume-slider"))==null||I.addEventListener("input",k=>{const S=parseInt(k.target.value,10)/100;this.soundscape.setVolume(S)});const x=t.querySelector("#sonikoma-hud-timeline"),E=t.querySelector("#sonikoma-scrubber-tooltip");this.scrubberTooltipElement=E,x&&E&&(x.addEventListener("mousemove",k=>{const S=x.getBoundingClientRect(),T=Math.max(0,Math.min(1,(k.clientX-S.left)/S.width)),A=Math.round(T*100);E.textContent=`Jump to ${A}%`,E.style.left=`${k.clientX-S.left}px`,E.classList.remove("sonikoma-hidden")}),x.addEventListener("mouseleave",()=>{E.classList.add("sonikoma-hidden")}),x.addEventListener("click",k=>{const S=x.getBoundingClientRect(),T=Math.max(0,Math.min(1,(k.clientX-S.left)/S.width)),A=Math.max(1,(document.documentElement.scrollHeight||document.body.scrollHeight)-window.innerHeight);window.scrollTo({top:T*A,behavior:"smooth"}),this.showToast(`Jumped to ${Math.round(T*100)}%`)})),(_=t.querySelector("#sonikoma-btn-toggle-pacing"))==null||_.addEventListener("click",k=>{this.isAdaptivePacing=!this.isAdaptivePacing,k.target.textContent=this.isAdaptivePacing?"ON":"OFF",this.isAdaptivePacing?k.target.classList.add("sonikoma-active"):k.target.classList.remove("sonikoma-active"),this.showToast(this.isAdaptivePacing?"AI Director Pacing ON":"AI Director Pacing OFF")});const M=t.querySelector("#sonikoma-hud-drag-handle"),B=t.querySelector(".sonikoma-cinema-bar");this.enableDraggable(t,M||B);const N=t.querySelector("#sonikoma-cinema-flyout"),D=t.querySelector("#sonikoma-flyout-drag-header");N&&D&&this.enableDraggable(N,D)}this.hudElement=t}enableDraggable(t,e){e.style.cursor="grab",e.addEventListener("mousedown",s=>{const o=s.target;if(o&&(o.tagName==="BUTTON"||o.tagName==="INPUT"||o.closest("button")||o.classList.contains("sonikoma-flyout-close")))return;s.preventDefault();let n=!0;const i=s.clientX,a=s.clientY,c=t.getBoundingClientRect(),r=c.left,m=c.top;t.style.setProperty("position","fixed","important"),t.style.setProperty("margin","0","important"),t.style.setProperty("transform","none","important"),t.style.setProperty("left",`${r}px`,"important"),t.style.setProperty("top",`${m}px`,"important"),t.style.setProperty("right","auto","important"),t.style.setProperty("bottom","auto","important"),t.classList.remove("sonikoma-dock-top","sonikoma-dock-bottom"),e.style.cursor="grabbing",t.classList.add("sonikoma-dragging"),document.body.style.userSelect="none";const u=p=>{if(!n)return;const h=p.clientX-i,f=p.clientY-a,b=Math.max(10,Math.min(window.innerWidth-t.offsetWidth-10,r+h)),w=Math.max(10,Math.min(window.innerHeight-t.offsetHeight-10,m+f));t.style.setProperty("left",`${b}px`,"important"),t.style.setProperty("top",`${w}px`,"important")},d=()=>{n=!1,e.style.cursor="grab",t.classList.remove("sonikoma-dragging"),document.body.style.userSelect="",window.removeEventListener("mousemove",u),window.removeEventListener("mouseup",d)};window.addEventListener("mousemove",u),window.addEventListener("mouseup",d)})}adjustSpeed(t){const e=[.25,.5,.75,1,1.25,1.5,2,2.5,3];let s=e.findIndex(n=>Math.abs(n-this.scrollSpeed)<.01);s===-1&&(s=3),t>0?s=Math.min(e.length-1,s+1):s=Math.max(0,s-1),this.scrollSpeed=e[s];const o=document.getElementById("sonikoma-speed-readout");o&&(o.textContent=`${this.scrollSpeed}x`),this.showToast(`Speed: ${this.scrollSpeed}x`)}cycleSoundscape(){const t=this.soundscape.cycleMood(),e=document.getElementById("sonikoma-btn-cinema-bgm"),s=document.getElementById("sonikoma-bgm-icon"),o=document.getElementById("sonikoma-flyout-soundscape-name");s&&(s.textContent=t.icon),o&&(o.textContent=t.name),e&&(t.id!=="off"?e.classList.add("sonikoma-active"):e.classList.remove("sonikoma-active")),this.showToast(`Soundscape: ${t.icon} ${t.name}`)}cycleShader(){const e=(C.findIndex(a=>a.id===this.currentShader)+1)%C.length,s=C[e];this.currentShader=s.id;const o=document.documentElement;s.id==="normal"?o.style.filter="":o.style.filter=s.filterCss;const n=document.getElementById("sonikoma-btn-cinema-shader"),i=document.getElementById("sonikoma-flyout-shader-name");i&&(i.textContent=s.name),n&&(s.id!=="normal"?n.classList.add("sonikoma-active"):n.classList.remove("sonikoma-active")),this.showToast(`Shader: ${s.icon} ${s.name}`)}toggleVoiceNarrator(){const t=this.voiceNarrator.toggle(),e=document.getElementById("sonikoma-btn-cinema-voice"),s=document.getElementById("sonikoma-flyout-voice-status");e&&(t?e.classList.add("sonikoma-active"):e.classList.remove("sonikoma-active")),s&&(s.textContent=t?"ON":"OFF"),this.showToast(t?"🎙️ Voice Narrator Active":"🎙️ Voice Narrator Off"),t&&this.narrateCurrentScene()}narrateCurrentScene(){if(!this.voiceNarrator.isActive)return;const t=this.currentPanelIndex+1,e=this.detectedPanels.length||1;this.voiceNarrator.speak(`Entering Scene ${t} of ${e}`)}toggleTheaterDimmer(){this.isDimmed=!this.isDimmed;const t=document.getElementById("sonikoma-btn-cinema-dimmer");this.dimmerElement&&(this.isDimmed?(this.dimmerElement.classList.remove("sonikoma-hidden"),this.dimmerElement.style.setProperty("display","block","important")):(this.dimmerElement.classList.add("sonikoma-hidden"),this.dimmerElement.style.setProperty("display","none","important"))),t&&(this.isDimmed?t.classList.add("sonikoma-active"):t.classList.remove("sonikoma-active")),this.showToast(this.isDimmed?"Theater Dimmer ON":"Theater Dimmer OFF")}toggleSpotlight(){this.isSpotlight=!this.isSpotlight;const t=document.getElementById("sonikoma-btn-cinema-spotlight");this.spotlightElement&&(this.isSpotlight?(this.spotlightElement.classList.remove("sonikoma-hidden"),this.spotlightElement.style.setProperty("display","block","important")):(this.spotlightElement.classList.add("sonikoma-hidden"),this.spotlightElement.style.setProperty("display","none","important"))),t&&(this.isSpotlight?t.classList.add("sonikoma-active"):t.classList.remove("sonikoma-active")),this.showToast(this.isSpotlight?"Spotlight Focus ON":"Spotlight Focus OFF")}toggleFullscreen(){try{document.fullscreenElement?(document.exitFullscreen&&document.exitFullscreen().catch(()=>{}),this.showToast("Fullscreen OFF")):(document.documentElement.requestFullscreen().catch(()=>{}),this.showToast("Fullscreen Immersion ON"))}catch{}}snipActiveScene(){const t=this.currentPanelIndex,e=this.detectedPanels[t];this.showToast(`📸 Captured Scene #${t+1}!`),typeof chrome<"u"&&chrome.runtime&&chrome.runtime.sendMessage&&chrome.runtime.sendMessage({type:"TRIGGER_ACTIVE_SCENE_SNIP",payload:{panelIndex:t+1,src:(e==null?void 0:e.src)||"",url:window.location.href}})}bookmarkActiveScene(){const t=this.currentPanelIndex+1,e=window.scrollY||document.documentElement.scrollTop||0,s=Math.max(1,(document.documentElement.scrollHeight||document.body.scrollHeight)-window.innerHeight),o=Math.round(e/s*100),n={url:window.location.href,title:document.title,scene:t,progress:o,timestamp:Date.now()};typeof chrome<"u"&&chrome.storage&&chrome.storage.local?chrome.storage.local.get("sonikoma_bookmarks",i=>{const a=Array.isArray(i==null?void 0:i.sonikoma_bookmarks)?i.sonikoma_bookmarks:[];a.unshift(n),chrome.storage.local.set({sonikoma_bookmarks:a.slice(0,50)},()=>{this.showToast(`📌 Bookmark saved at Scene ${t} (${o}%)`)})}):this.showToast(`📌 Bookmark saved at Scene ${t} (${o}%)`)}toggleSettingsFlyout(t){const e=document.getElementById("sonikoma-cinema-flyout");e&&(this.isSettingsOpen=typeof t=="boolean"?t:!this.isSettingsOpen,this.isSettingsOpen?(e.classList.remove("sonikoma-hidden"),e.style.setProperty("display","flex","important")):(e.classList.add("sonikoma-hidden"),e.style.setProperty("display","none","important")))}toggleDockPosition(){this.isDockTop=!this.isDockTop,this.hudElement&&(this.hudElement.style.removeProperty("left"),this.hudElement.style.removeProperty("top"),this.hudElement.style.removeProperty("right"),this.hudElement.style.removeProperty("bottom"),this.hudElement.style.removeProperty("transform"),this.hudElement.style.removeProperty("margin"),this.isDockTop?(this.hudElement.classList.remove("sonikoma-dock-bottom"),this.hudElement.classList.add("sonikoma-dock-top")):(this.hudElement.classList.remove("sonikoma-dock-top"),this.hudElement.classList.add("sonikoma-dock-bottom"))),this.showToast(this.isDockTop?"Docked to Top":"Docked to Bottom")}jumpToNextPanel(){(!this.detectedPanels||this.detectedPanels.length===0)&&this.refreshPanels();const t=window.scrollY+120,e=this.detectedPanels.findIndex(s=>s.top>t);e!==-1&&(this.currentPanelIndex=e,window.scrollTo({top:this.detectedPanels[e].top-80,behavior:"smooth"}),this.updatePanelReadout(),this.voiceNarrator.isActive&&this.voiceNarrator.speak(`Scene ${e+1}`))}jumpToPrevPanel(){(!this.detectedPanels||this.detectedPanels.length===0)&&this.refreshPanels();const t=window.scrollY-100;let e=-1;for(let s=this.detectedPanels.length-1;s>=0;s--)if(this.detectedPanels[s].top<t){e=s;break}e!==-1?(this.currentPanelIndex=e,window.scrollTo({top:Math.max(0,this.detectedPanels[e].top-80),behavior:"smooth"}),this.updatePanelReadout(),this.voiceNarrator.isActive&&this.voiceNarrator.speak(`Scene ${e+1}`)):window.scrollTo({top:0,behavior:"smooth"})}refreshPanels(){var t,e;(t=this.scanner)!=null&&t.scanChapterImages&&(this.detectedPanels=this.scanner.scanChapterImages()),(e=this.scanner)!=null&&e.scanChapterImagesAsync&&this.scanner.scanChapterImagesAsync().then(s=>{s&&s.length>0&&(this.detectedPanels=s,this.updatePanelReadout())}).catch(()=>{})}updatePanelReadout(){const t=document.getElementById("sonikoma-panel-readout");if(t){const e=this.detectedPanels.length||1,s=Math.min(e,this.currentPanelIndex+1);t.textContent=`Scene ${s}/${e}`}}updateStatusBadge(t,e){const s=document.getElementById("sonikoma-cinema-status"),o=document.getElementById("sonikoma-cinema-icon");s&&(s.textContent=t),o&&(o.textContent=e)}triggerNextChapterPrompt(){var o;if(this.nextChapterBanner)return;const t=document.createElement("div");t.id="sonikoma-next-chapter-banner",t.className="sonikoma-next-chapter-banner",this.nextChapterCountdown=6;const s=(()=>{const n=Array.from(document.querySelectorAll("a"));for(const a of n){const c=(a.textContent||"").toLowerCase(),r=a.getAttribute("href")||"";if((c.includes("next chapter")||c.includes("next episode")||c.includes("next >")||a.className.includes("next"))&&r&&!r.startsWith("#")&&!r.startsWith("javascript"))return a.href}const i=window.location.href.match(/(chapter|ep|episode)[-_/](\d+)/i);if(i){const a=parseInt(i[2],10)+1;return window.location.href.replace(i[0],`${i[1]}-${a}`)}return""})();t.innerHTML=`
       <div class="sonikoma-next-content">
         <span class="sonikoma-next-title">🎉 Chapter Finished!</span>
         <span id="sonikoma-next-timer" class="sonikoma-next-subtitle">
-          ${nextUrl ? `Auto-advancing to Next Chapter in <strong id="sk-countdown">6</strong>s...` : "You have reached the end of this chapter."}
+          ${s?'Auto-advancing to Next Chapter in <strong id="sk-countdown">6</strong>s...':"You have reached the end of this chapter."}
         </span>
       </div>
       <div class="sonikoma-next-actions">
-        ${nextUrl ? `<a href="${nextUrl}" id="sonikoma-btn-read-next" class="sonikoma-btn-next-act">Next Chapter ➔</a>` : ""}
+        ${s?`<a href="${s}" id="sonikoma-btn-read-next" class="sonikoma-btn-next-act">Next Chapter ➔</a>`:""}
         <button type="button" id="sonikoma-btn-cancel-next" class="sonikoma-btn-cancel-act">Stay Here</button>
       </div>
-    `;
-
-    (document.body || document.documentElement).appendChild(banner);
-    this.nextChapterBanner = banner;
-
-    banner.querySelector("#sonikoma-btn-cancel-next")?.addEventListener("click", () => {
-      this.cancelNextChapterCountdown();
-    });
-
-    if (nextUrl) {
-      this.nextChapterTimerId = setInterval(() => {
-        this.nextChapterCountdown--;
-        const countSpan = document.getElementById("sk-countdown");
-        if (countSpan) countSpan.textContent = `${this.nextChapterCountdown}`;
-
-        if (this.nextChapterCountdown <= 0) {
-          clearInterval(this.nextChapterTimerId);
-          window.location.href = nextUrl;
-        }
-      }, 1000);
-    }
-  }
-
-  cancelNextChapterCountdown() {
-    if (this.nextChapterTimerId) {
-      clearInterval(this.nextChapterTimerId);
-      this.nextChapterTimerId = null;
-    }
-    if (this.nextChapterBanner) {
-      this.nextChapterBanner.remove();
-      this.nextChapterBanner = null;
-    }
-  }
-
-  start() {
-    this.createCinemaHUD();
-    this.createDimmerOverlay();
-    this.createSpotlightOverlay();
-    this.createSubtitleOverlay();
-
-    if (this.hudElement) {
-      this.hudElement.classList.remove("sonikoma-hidden");
-      this.hudElement.style.setProperty("display", "block", "important");
-      this.hudElement.style.setProperty("visibility", "visible", "important");
-      this.hudElement.style.setProperty("opacity", "1", "important");
-      this.hudElement.style.setProperty("z-index", "2147483647", "important");
-    }
-
-    this.refreshPanels();
-    this.updatePanelReadout();
-
-    if (this.scanner?.extractPageMetadata) {
-      const meta = this.scanner.extractPageMetadata();
-      const seriesElem = document.getElementById("sonikoma-cinema-series");
-      if (seriesElem) seriesElem.textContent = meta.seriesTitle || "Sonikoma Reader";
-    }
-
-    if (this.soundscape.currentMood === "off") {
-      this.cycleSoundscape();
-    }
-
-    this.isPlaying = true;
-    this.updateStatusBadge("Pause", "⏸");
-    this.lastTimestamp = performance.now();
-    this.subpixelAccumulator = 0;
-    this.loop(this.lastTimestamp);
-  }
-
-  play() {
-    this.isPlaying = true;
-    this.isTemporarilyPausedForUser = false;
-    this.updateStatusBadge("Pause", "⏸");
-    this.lastTimestamp = performance.now();
-    this.loop(this.lastTimestamp);
-  }
-
-  pause() {
-    this.isPlaying = false;
-    this.updateStatusBadge("Play", "▶");
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
-  }
-
-  stop() {
-    this.pause();
-    this.soundscape.stop();
-    this.voiceNarrator.stop();
-    this.toggleSettingsFlyout(false);
-    this.cancelNextChapterCountdown();
-
-    document.documentElement.style.filter = "";
-
-    if (this.hudElement) {
-      this.hudElement.classList.add("sonikoma-hidden");
-      this.hudElement.style.setProperty("display", "none", "important");
-    }
-    if (this.dimmerElement) {
-      this.dimmerElement.classList.add("sonikoma-hidden");
-      this.dimmerElement.style.setProperty("display", "none", "important");
-      this.isDimmed = false;
-    }
-    if (this.spotlightElement) {
-      this.spotlightElement.classList.add("sonikoma-hidden");
-      this.spotlightElement.style.setProperty("display", "none", "important");
-      this.isSpotlight = false;
-    }
-    if (this.subtitleElement) {
-      this.subtitleElement.classList.add("sonikoma-hidden");
-      this.subtitleElement.style.setProperty("display", "none", "important");
-    }
-  }
-
-  loop(timestamp) {
-    if (!this.isPlaying) return;
-
-    if (!this.lastTimestamp) this.lastTimestamp = timestamp;
-    const deltaTimeSec = Math.min(0.1, (timestamp - this.lastTimestamp) / 1000);
-    this.lastTimestamp = timestamp;
-
-    if (!this.isTemporarilyPausedForUser) {
-      let effectiveSpeed = this.scrollSpeed;
-
-      const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-      const maxScroll = Math.max(
-        1,
-        (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight
-      );
-
-      if (this.isAdaptivePacing && this.detectedPanels.length > 0) {
-        const nextPanelIdx = this.detectedPanels.findIndex(
-          (p) => Math.abs(p.top - (scrollY + 100)) < 70
-        );
-        if (nextPanelIdx !== -1 && nextPanelIdx !== this.lastPausedPanelIdx) {
-          if (this.panelPauseTimer < 1.2) {
-            this.panelPauseTimer += deltaTimeSec;
-            effectiveSpeed = this.scrollSpeed * 0.35;
-          } else {
-            this.lastPausedPanelIdx = nextPanelIdx;
-            this.panelPauseTimer = 0;
-            if (this.voiceNarrator.isActive && this.lastNarratedPanelIdx !== nextPanelIdx) {
-              this.lastNarratedPanelIdx = nextPanelIdx;
-              this.voiceNarrator.speak(`Scene ${nextPanelIdx + 1}`);
-            }
-          }
-        } else {
-          this.panelPauseTimer = 0;
-        }
-      }
-
-      const scrollPixels = this.baseSpeedPxPerSec * effectiveSpeed * deltaTimeSec;
-      this.subpixelAccumulator += scrollPixels;
-
-      const wholePixels = Math.floor(this.subpixelAccumulator);
-      if (wholePixels >= 1) {
-        this.subpixelAccumulator -= wholePixels;
-        window.scrollBy(0, wholePixels);
-      }
-
-      const progressPercent = Math.min(100, Math.max(0, Math.round((scrollY / maxScroll) * 100)));
-      const fill = document.getElementById("sonikoma-hud-progress-fill");
-      if (fill) fill.style.width = `${progressPercent}%`;
-
-      const remainingPixels = Math.max(0, maxScroll - scrollY);
-      const remainingSeconds = Math.round(
-        remainingPixels / Math.max(1, this.baseSpeedPxPerSec * this.scrollSpeed)
-      );
-      const remainingMinutes = Math.ceil(remainingSeconds / 60);
-      const etaElem = document.getElementById("sonikoma-flyout-eta");
-      if (etaElem) {
-        etaElem.textContent =
-          remainingMinutes > 1 ? `~${remainingMinutes} min left (${progressPercent}%)` : `< 1 min left (${progressPercent}%)`;
-      }
-
-      if (this.detectedPanels.length > 0) {
-        const activeIdx = this.detectedPanels.findIndex((p) => p.top > scrollY + 150);
-        if (activeIdx !== -1 && activeIdx !== this.currentPanelIndex) {
-          this.currentPanelIndex = Math.max(0, activeIdx - 1);
-          this.updatePanelReadout();
-        }
-      }
-
-      if (scrollY >= maxScroll - 20) {
-        this.pause();
-        this.updateStatusBadge("Finished", "✓");
-        this.showToast("🎉 Chapter Completed!");
-        this.triggerNextChapterPrompt();
-        return;
-      }
-    }
-
-    this.animationFrameId = requestAnimationFrame((ts) => this.loop(ts));
-  }
-}
-
-// ─── 5. Drag-to-Select Snipper & Speech Inspector ────────────────────────────
-class PageSnipper {
-  constructor() {
-    this.isSnipping = false;
-    this.startX = 0;
-    this.startY = 0;
-    this.overlay = null;
-    this.rect = null;
-  }
-
-  start() {
-    if (this.isSnipping) return;
-    this.isSnipping = true;
-
-    const overlay = document.createElement("div");
-    overlay.className = "sonikoma-snipper-overlay";
-    overlay.innerHTML = `
-      <div class="sonikoma-snipper-hint">Drag over manga panel or speech bubble to snip (Esc to Cancel)</div>
-      <div class="sonikoma-selection-rect sonikoma-hidden" id="sonikoma-selection-rect"></div>
-    `;
-    (document.body || document.documentElement).appendChild(overlay);
-    this.overlay = overlay;
-    this.rect = overlay.querySelector("#sonikoma-selection-rect");
-
-    const onMouseDown = (e) => {
-      if (e.button !== 0) return;
-      this.startX = e.clientX;
-      this.startY = e.clientY;
-      if (this.rect) {
-        this.rect.style.left = `${this.startX}px`;
-        this.rect.style.top = `${this.startY}px`;
-        this.rect.style.width = "0px";
-        this.rect.style.height = "0px";
-        this.rect.classList.remove("sonikoma-hidden");
-      }
-
-      const onMouseMove = (me) => {
-        const x = Math.min(this.startX, me.clientX);
-        const y = Math.min(this.startY, me.clientY);
-        const w = Math.abs(me.clientX - this.startX);
-        const h = Math.abs(me.clientY - this.startY);
-        if (this.rect) {
-          this.rect.style.left = `${x}px`;
-          this.rect.style.top = `${y}px`;
-          this.rect.style.width = `${w}px`;
-          this.rect.style.height = `${h}px`;
-        }
-      };
-
-      const onMouseUp = (ue) => {
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
-        const x = Math.min(this.startX, ue.clientX);
-        const y = Math.min(this.startY, ue.clientY);
-        const w = Math.abs(ue.clientX - this.startX);
-        const h = Math.abs(ue.clientY - this.startY);
-
-        if (w > 20 && h > 20) {
-          this.finishSnip({ x, y, width: w, height: h });
-        } else {
-          this.cancel();
-        }
-      };
-
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
-    };
-
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") {
-        this.cancel();
-        window.removeEventListener("keydown", onKeyDown);
-      }
-    };
-
-    overlay.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("keydown", onKeyDown);
-  }
-
-  finishSnip(box) {
-    this.cancel();
-    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
-      chrome.runtime.sendMessage({
-        type: "TRIGGER_ACTIVE_SCENE_SNIP",
-        payload: {
-          bounds: box,
-          url: window.location.href,
-          timestamp: Date.now()
-        }
-      });
-    }
-  }
-
-  cancel() {
-    this.isSnipping = false;
-    if (this.overlay) {
-      this.overlay.remove();
-      this.overlay = null;
-    }
-  }
-}
-
-// ─── 6. Global Instance & Communication Bus ──────────────────────────────────
-let cinemaInstance = null;
-let snipperInstance = null;
-
-function getCinemaPlayer() {
-  if (!cinemaInstance) {
-    cinemaInstance = new CinemaPlayer(DomMangaScanner);
-  }
-  return cinemaInstance;
-}
-
-function getSnipper() {
-  if (!snipperInstance) {
-    snipperInstance = new PageSnipper();
-  }
-  return snipperInstance;
-}
-
-// Render floating quick-action badge
-function renderFloatingBadge() {
-  if (document.getElementById("sonikoma-floating-badge")) return;
-  const badge = document.createElement("div");
-  badge.id = "sonikoma-floating-badge";
-  badge.className = "sonikoma-floating-badge";
-  badge.innerHTML = `
-    <div class="sonikoma-badge-logo">S</div>
-    <span class="sonikoma-badge-text">Sonikoma Cinema</span>
-  `;
-  badge.addEventListener("click", () => {
-    const player = getCinemaPlayer();
-    player.start();
-  });
-  (document.body || document.documentElement).appendChild(badge);
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => renderFloatingBadge());
-} else {
-  renderFloatingBadge();
-}
-
-// Listen for messages from background/popup
-if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
-  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-    if (msg.type === "PING") {
-      sendResponse({ status: "PONG" });
-    } else if (msg.type === "GET_CHAPTER_DATA") {
-      const meta = DomMangaScanner.extractPageMetadata();
-      const panels = DomMangaScanner.scanChapterImages();
-      meta.totalPanels = panels.length;
-      sendResponse({ meta, panels });
-    } else if (msg.type === "TOGGLE_CINEMA" || msg.type === "START_CINEMA" || msg.type === "TRIGGER_CINEMA_MODE") {
-      const player = getCinemaPlayer();
-      player.start();
-      sendResponse({ success: true, isPlaying: true });
-    } else if (msg.type === "STOP_CINEMA") {
-      if (cinemaInstance) {
-        cinemaInstance.stop();
-      }
-      sendResponse({ success: true });
-    } else if (msg.type === "START_SNIP" || msg.type === "TRIGGER_PANEL_SNIPPER") {
-      const snipper = getSnipper();
-      snipper.start();
-      sendResponse({ success: true });
-    }
-    return true;
-  });
-}
-
-if (typeof window !== "undefined") {
-  window.DomMangaScanner = DomMangaScanner;
-  window.CinemaPlayer = CinemaPlayer;
-  window.PageSnipper = PageSnipper;
-}
+    `,(document.body||document.documentElement).appendChild(t),this.nextChapterBanner=t,(o=t.querySelector("#sonikoma-btn-cancel-next"))==null||o.addEventListener("click",()=>{this.cancelNextChapterCountdown()}),s&&(this.nextChapterTimerId=setInterval(()=>{this.nextChapterCountdown--;const n=document.getElementById("sk-countdown");n&&(n.textContent=`${this.nextChapterCountdown}`),this.nextChapterCountdown<=0&&(clearInterval(this.nextChapterTimerId),window.location.href=s)},1e3))}cancelNextChapterCountdown(){this.nextChapterTimerId&&(clearInterval(this.nextChapterTimerId),this.nextChapterTimerId=null),this.nextChapterBanner&&(this.nextChapterBanner.remove(),this.nextChapterBanner=null)}start(){var t;if(this.createCinemaHUD(),this.createDimmerOverlay(),this.createSpotlightOverlay(),this.createSubtitleOverlay(),this.hudElement&&(this.hudElement.classList.remove("sonikoma-hidden"),this.hudElement.style.setProperty("display","block","important"),this.hudElement.style.setProperty("visibility","visible","important"),this.hudElement.style.setProperty("opacity","1","important"),this.hudElement.style.setProperty("z-index","2147483647","important")),this.refreshPanels(),this.updatePanelReadout(),(t=this.scanner)!=null&&t.extractPageMetadata){const e=this.scanner.extractPageMetadata(),s=document.getElementById("sonikoma-cinema-series");s&&(s.textContent=e.seriesTitle||"Sonikoma Reader")}this.soundscape.currentMood==="off"&&this.cycleSoundscape(),this.isPlaying=!0,this.updateStatusBadge("Pause","⏸"),this.lastTimestamp=performance.now(),this.subpixelAccumulator=0,this.loop(this.lastTimestamp)}play(){this.isPlaying=!0,this.isTemporarilyPausedForUser=!1,this.updateStatusBadge("Pause","⏸"),this.lastTimestamp=performance.now(),this.loop(this.lastTimestamp)}pause(){this.isPlaying=!1,this.updateStatusBadge("Play","▶"),this.animationFrameId&&(cancelAnimationFrame(this.animationFrameId),this.animationFrameId=null)}stop(){this.pause(),this.soundscape.stop(),this.voiceNarrator.stop(),this.toggleSettingsFlyout(!1),this.cancelNextChapterCountdown(),document.documentElement.style.filter="",this.hudElement&&(this.hudElement.classList.add("sonikoma-hidden"),this.hudElement.style.setProperty("display","none","important")),this.dimmerElement&&(this.dimmerElement.classList.add("sonikoma-hidden"),this.dimmerElement.style.setProperty("display","none","important"),this.isDimmed=!1),this.spotlightElement&&(this.spotlightElement.classList.add("sonikoma-hidden"),this.spotlightElement.style.setProperty("display","none","important"),this.isSpotlight=!1),this.subtitleElement&&(this.subtitleElement.classList.add("sonikoma-hidden"),this.subtitleElement.style.setProperty("display","none","important"))}loop(t){if(!this.isPlaying)return;this.lastTimestamp||(this.lastTimestamp=t);const e=Math.min(.1,(t-this.lastTimestamp)/1e3);if(this.lastTimestamp=t,!this.isTemporarilyPausedForUser){let s=this.scrollSpeed;const o=window.scrollY||document.documentElement.scrollTop||0,n=Math.max(1,(document.documentElement.scrollHeight||document.body.scrollHeight)-window.innerHeight);if(this.isAdaptivePacing&&this.detectedPanels.length>0){const h=this.detectedPanels.findIndex(f=>Math.abs(f.top-(o+100))<70);h!==-1&&h!==this.lastPausedPanelIdx?this.panelPauseTimer<1.2?(this.panelPauseTimer+=e,s=this.scrollSpeed*.35):(this.lastPausedPanelIdx=h,this.panelPauseTimer=0,this.voiceNarrator.isActive&&this.lastNarratedPanelIdx!==h&&(this.lastNarratedPanelIdx=h,this.voiceNarrator.speak(`Scene ${h+1}`))):this.panelPauseTimer=0}const i=this.baseSpeedPxPerSec*s*e;this.subpixelAccumulator+=i;const a=Math.floor(this.subpixelAccumulator);a>=1&&(this.subpixelAccumulator-=a,window.scrollBy(0,a));const c=Math.min(100,Math.max(0,Math.round(o/n*100))),r=document.getElementById("sonikoma-hud-progress-fill");r&&(r.style.width=`${c}%`);const m=Math.max(0,n-o),u=Math.round(m/Math.max(1,this.baseSpeedPxPerSec*this.scrollSpeed)),d=Math.ceil(u/60),p=document.getElementById("sonikoma-flyout-eta");if(p&&(p.textContent=d>1?`~${d} min left (${c}%)`:`< 1 min left (${c}%)`),this.detectedPanels.length>0){const h=this.detectedPanels.findIndex(f=>f.top>o+150);h!==-1&&h!==this.currentPanelIndex&&(this.currentPanelIndex=Math.max(0,h-1),this.updatePanelReadout())}if(o>=n-20){this.pause(),this.updateStatusBadge("Finished","✓"),this.showToast("🎉 Chapter Completed!"),this.triggerNextChapterPrompt();return}}this.animationFrameId=requestAnimationFrame(s=>this.loop(s))}}typeof window<"u"&&(window.CinemaPlayer=L);(()=>{if(window.__sonikoma_content_orchestrator_loaded)return;window.__sonikoma_content_orchestrator_loaded=!0;let g=null;function t(){return g||(g=new L(v)),g}setTimeout(()=>{try{const e=v.scanChapterImages(),s=v.extractPageMetadata();e&&e.length>=2&&chrome.runtime.sendMessage({type:"TRACK_CHAPTER_READ",payload:{seriesName:s.seriesTitle,chapterTitle:s.chapterTitle,chapterUrl:window.location.href,siteDomain:window.location.hostname}})}catch{}},1200),chrome.runtime.onMessage.addListener((e,s,o)=>{const{type:n}=e||{};if(n==="PING")return o({status:"PONG"}),!0;if(n==="TRIGGER_CINEMA_MODE"||n==="START_CINEMA"||n==="TOGGLE_CINEMA"){try{t().start(),o({success:!0,isPlaying:!0})}catch(i){o({success:!1,error:(i==null?void 0:i.message)||String(i)})}return!0}if(n==="STOP_CINEMA")return g&&g.stop(),o({success:!0}),!0;if(n==="GET_READER_STATS"||n==="GET_CHAPTER_DATA"||n==="GET_IMAGES"||n==="SCAN_CHAPTER")return(async()=>{try{const i=await v.scanChapterImagesAsync(),a=v.extractPageMetadata();o({success:!0,panelCount:i.length,seriesTitle:a.seriesTitle,chapterTitle:a.chapterTitle,url:window.location.href,domain:window.location.hostname,images:i.map((c,r)=>({index:r+1,src:c.src,width:c.width,height:c.height,top:c.top})),panels:i,meta:a})}catch(i){o({success:!1,error:(i==null?void 0:i.message)||String(i),images:[],panels:[],panelCount:0})}})(),!0})})();

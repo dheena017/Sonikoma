@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   CheckSquare,
   Square,
@@ -8,6 +8,17 @@ import {
   Copy,
   Volume2,
   Maximize2,
+  Sparkles,
+  MessageSquare,
+  Mic,
+  Palette,
+  Clock,
+  Wand2,
+  Bot,
+  Play,
+  Pause,
+  RefreshCw,
+  X,
 } from "lucide-react";
 import { StoryboardPanel, MOTION_PRESETS } from "../types";
 
@@ -20,7 +31,9 @@ export interface StoryboardCardProps {
   onDuplicate: (panel: StoryboardPanel, index: number) => void;
   onDelete: (id: string) => void;
   onAudition: (panelId: string, text: string, voice?: string) => void;
+  onAnalyze?: (panelId: string, imageUrl: string) => void;
   onPreviewImage: (imageUrl: string) => void;
+  onOpenAssistant?: (panelIndex: number, imageUrl: string) => void;
 }
 
 export const StoryboardCard: React.FC<StoryboardCardProps> = ({
@@ -32,9 +45,13 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
   onDuplicate,
   onDelete,
   onAudition,
+  onAnalyze,
   onPreviewImage,
+  onOpenAssistant,
 }) => {
-  // Auto-calculate suggested duration based on dialogue length (words / standard reading speed)
+  const [activeTab, setActiveTab] = useState<"speech" | "narrative" | "sfx" | "scene">("speech");
+
+  // Auto-calculate suggested duration based on dialogue length
   const getSuggestedDuration = (text: string) => {
     if (!text || text.trim().length === 0) return 3.0;
     const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
@@ -44,15 +61,23 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
 
   const suggestedDuration = getSuggestedDuration(panel.dialogueText);
 
+  // Magic Motion handler (Smart director pacing)
+  const handleMagicMotion = () => {
+    const sequence = ["zoom_in", "pan_up", "ken_burns", "pan_down", "zoom_out", "dolly_shake"];
+    const currentIndex = sequence.indexOf(panel.motionPreset);
+    const nextMotion = sequence[(currentIndex + 1) % sequence.length];
+    onUpdate(panel.id, { motionPreset: nextMotion });
+  };
+
   return (
     <div
-      className={`flex flex-col gap-2 rounded-xl border p-2.5 transition-all w-full min-w-0 box-border ${
+      className={`flex flex-col gap-2.5 rounded-2xl border p-3 transition-all w-full min-w-0 box-border ${
         panel.enabled
-          ? "bg-[#121827] border-[#1e293b] hover:border-sky-500/50 shadow-sm"
-          : "bg-[#0d121e]/60 border-[#182030] opacity-60"
+          ? "bg-[#101420] border-[#1e293b] hover:border-sky-500/50 shadow-md"
+          : "bg-[#0b0e17]/70 border-[#151d2a] opacity-60"
       }`}
     >
-      {/* ── Top Bar: Checkbox, Scene Tag, Move Up/Down, Duplicate, Delete ── */}
+      {/* ── Top Bar: Selection, Scene #, Duration & Ordering Controls ── */}
       <div className="flex items-center justify-between min-w-0">
         <div className="flex items-center gap-2 min-w-0 truncate">
           <button
@@ -68,14 +93,14 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
             )}
           </button>
           <span className="font-mono text-[10px] font-bold text-sky-300 bg-sky-950/80 border border-sky-800/60 px-2 py-0.5 rounded-md shrink-0">
-            Scene #{panel.index}
+            #{panel.index}
           </span>
           <span className="text-[9px] text-slate-400 font-mono shrink-0">
             {panel.duration}s
           </span>
         </div>
 
-        {/* Action Buttons */}
+        {/* Ordering & Delete Actions */}
         <div className="flex items-center gap-0.5 shrink-0">
           <button
             type="button"
@@ -114,104 +139,289 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
         </div>
       </div>
 
-      {/* ── Middle: Image Thumbnail & Dialogue Editor ── */}
-      <div className="flex gap-2.5 items-start min-w-0">
-        {/* Panel Thumbnail */}
-        <div
-          onClick={() => onPreviewImage(panel.imageUrl)}
-          className="relative w-16 h-20 bg-[#090d16] rounded-lg overflow-hidden shrink-0 border border-[#1e293b] group cursor-pointer shadow-sm"
-          title="Click to view panel full resolution"
-        >
-          <img
-            src={panel.imageUrl}
-            alt={`Scene ${panel.index}`}
-            className="w-full h-full object-cover object-top transition-transform group-hover:scale-105"
-            loading="lazy"
-          />
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-            <Maximize2 size={12} className="text-white" />
-          </div>
+      {/* ── Visual Panel Preview with Motion Overlay ── */}
+      <div
+        onClick={() => onPreviewImage(panel.imageUrl)}
+        className="relative w-full h-36 bg-[#070a12] rounded-xl overflow-hidden border border-[#1e293b] group cursor-pointer shadow-inner"
+        title="Click to view panel full resolution"
+      >
+        <img
+          src={panel.imageUrl}
+          alt={`Scene ${panel.index}`}
+          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
+
+        {/* Scene # tag top-left */}
+        <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-black/80 text-[9px] font-mono font-bold text-sky-300 border border-sky-900/60 shadow-sm pointer-events-none">
+          #{panel.index}
         </div>
 
-        {/* Script & Motion Controls */}
-        <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+        {/* Motion preset badge bottom-right */}
+        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/85 text-[9px] font-mono font-bold uppercase tracking-wider text-slate-300 border border-slate-700/60 shadow-sm pointer-events-none">
+          {panel.motionPreset.toUpperCase()}
+        </div>
+
+        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+          <Maximize2 size={16} className="text-white drop-shadow-md" />
+        </div>
+      </div>
+
+      {/* ── Category Tabs: Dialogue, Narrator, SFX, Scene ── */}
+      <div className="grid grid-cols-4 gap-1 p-0.5 rounded-xl bg-[#0a0e18] border border-[#1e293b] select-none">
+        <button
+          type="button"
+          onClick={() => setActiveTab("speech")}
+          className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] transition-all cursor-pointer ${
+            activeTab === "speech"
+              ? "bg-blue-600 text-white shadow font-bold"
+              : "text-slate-400 hover:text-slate-200 hover:bg-[#141d2f]"
+          }`}
+        >
+          <MessageSquare size={11} className="shrink-0" />
+          <span>Dialogue</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("narrative")}
+          className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] transition-all cursor-pointer ${
+            activeTab === "narrative"
+              ? "bg-purple-600 text-white shadow font-bold"
+              : "text-slate-400 hover:text-slate-200 hover:bg-[#141d2f]"
+          }`}
+        >
+          <Mic size={11} className="shrink-0" />
+          <span>Narrator</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("sfx")}
+          className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] transition-all cursor-pointer ${
+            activeTab === "sfx"
+              ? "bg-emerald-600 text-white shadow font-bold"
+              : "text-slate-400 hover:text-slate-200 hover:bg-[#141d2f]"
+          }`}
+        >
+          <Volume2 size={11} className="shrink-0" />
+          <span>SFX</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("scene")}
+          className={`flex items-center justify-center gap-1 py-1 rounded-lg text-[10px] transition-all cursor-pointer ${
+            activeTab === "scene"
+              ? "bg-amber-600 text-white shadow font-bold"
+              : "text-slate-400 hover:text-slate-200 hover:bg-[#141d2f]"
+          }`}
+        >
+          <Palette size={11} className="shrink-0" />
+          <span>Scene</span>
+        </button>
+      </div>
+
+      {/* ── Active Tab Textarea & Sub-Action Bar ── */}
+      {activeTab === "speech" && (
+        <div className="flex flex-col gap-1.5 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between gap-1 min-w-0">
+            <span className="text-[10px] font-medium text-slate-300 flex items-center gap-1">
+              <MessageSquare size={11} className="text-sky-400" />
+              <span>Dialogue</span>
+            </span>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => onAudition(panel.id, panel.dialogueText, panel.voiceOverride)}
+                disabled={isAuditioning}
+                className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#162134] hover:bg-sky-600 hover:text-white text-sky-300 border border-[#253752] text-[9.5px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Audition voice synthesis"
+              >
+                <Play size={9} className="fill-current" />
+                <span>{isAuditioning ? "Playing..." : "Play Audio"}</span>
+              </button>
+            </div>
+          </div>
+
           <textarea
             rows={2}
             value={panel.dialogueText}
             onChange={(e) => onUpdate(panel.id, { dialogueText: e.target.value })}
-            placeholder="Type voice dialogue script..."
-            className="w-full bg-[#0c101d] border border-[#1e293b] focus:border-sky-500 rounded-lg p-1.5 text-[11px] text-slate-200 placeholder-slate-600 focus:outline-none resize-none shadow-inner"
+            placeholder="Text from speech bubbles in image..."
+            className="w-full bg-[#0a0d16] border border-[#1e293b] focus:border-sky-500 rounded-xl p-2 text-[11px] text-slate-100 placeholder-slate-500 focus:outline-none resize-none shadow-inner"
           />
+        </div>
+      )}
 
-          <div className="grid grid-cols-2 gap-1.5 min-w-0">
-            {/* Camera Motion Preset */}
-            <div className="flex flex-col min-w-0">
-              <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">
-                Camera Motion
-              </label>
-              <select
-                value={panel.motionPreset}
-                onChange={(e) => onUpdate(panel.id, { motionPreset: e.target.value })}
-                className="w-full bg-[#0c101d] border border-[#1e293b] rounded px-1 py-0.5 text-[9px] text-slate-300 outline-none cursor-pointer mt-0.5 truncate"
-              >
-                {MOTION_PRESETS.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label.split(" (")[0]}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {activeTab === "narrative" && (
+        <div className="flex flex-col gap-1.5 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between gap-1 min-w-0">
+            <span className="text-[10px] font-medium text-purple-300 flex items-center gap-1">
+              <Mic size={11} className="text-purple-400" />
+              <span>Narrator</span>
+            </span>
 
-            {/* Duration Slider with Auto Button */}
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center justify-between">
-                <label className="text-[8px] font-bold text-slate-400 uppercase tracking-wider truncate">
-                  Duration
-                </label>
-                <button
-                  type="button"
-                  onClick={() => onUpdate(panel.id, { duration: suggestedDuration })}
-                  className="text-[8px] text-sky-400 hover:text-sky-200 font-bold bg-sky-950/80 hover:bg-sky-900 border border-sky-800/60 px-1 py-0.2 rounded transition-colors cursor-pointer"
-                  title={`Auto-sync duration to dialogue (${suggestedDuration}s)`}
-                >
-                  ⚡ Auto
-                </button>
-              </div>
-              <div className="flex items-center gap-1 mt-0.5 min-w-0">
-                <input
-                  type="range"
-                  min={1.5}
-                  max={8.0}
-                  step={0.5}
-                  value={panel.duration}
-                  onChange={(e) =>
-                    onUpdate(panel.id, { duration: parseFloat(e.target.value) })
-                  }
-                  className="flex-1 min-w-0 accent-sky-500 h-1 bg-[#1e293b] rounded cursor-pointer"
-                />
-                <span className="text-[9px] font-mono text-slate-300 shrink-0 text-right">
-                  {panel.duration}s
-                </span>
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={() => onAudition(panel.id, panel.narrativeText || panel.dialogueText, panel.voiceOverride)}
+              disabled={isAuditioning}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-600 hover:text-white text-purple-300 border border-purple-800/60 text-[9.5px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95"
+            >
+              <Play size={9} className="fill-current" />
+              <span>Play Audio</span>
+            </button>
+          </div>
+
+          <textarea
+            rows={2}
+            value={panel.narrativeText || ""}
+            onChange={(e) => onUpdate(panel.id, { narrativeText: e.target.value })}
+            placeholder="Story narration explaining actions, atmosphere, and context..."
+            className="w-full bg-[#0a0d16] border border-[#1e293b] focus:border-purple-500 rounded-xl p-2 text-[11px] text-slate-100 placeholder-slate-500 focus:outline-none resize-none shadow-inner"
+          />
+        </div>
+      )}
+
+      {activeTab === "sfx" && (
+        <div className="flex flex-col gap-1.5 animate-in fade-in duration-150">
+          <span className="text-[10px] font-medium text-emerald-300 flex items-center gap-1">
+            <Volume2 size={11} className="text-emerald-400" />
+            <span>Sound Effects (SFX Cue)</span>
+          </span>
+          <input
+            type="text"
+            value={panel.sfx || ""}
+            onChange={(e) => onUpdate(panel.id, { sfx: e.target.value })}
+            placeholder="e.g. SWOOSH, EXPLOSION, FOOTSTEPS..."
+            className="w-full bg-[#0a0d16] border border-[#1e293b] focus:border-emerald-500 rounded-xl p-2 text-[11px] text-slate-100 placeholder-slate-500 focus:outline-none shadow-inner"
+          />
+        </div>
+      )}
+
+      {activeTab === "scene" && (
+        <div className="flex flex-col gap-1.5 animate-in fade-in duration-150">
+          <span className="text-[10px] font-medium text-amber-300 flex items-center gap-1">
+            <Palette size={11} className="text-amber-400" />
+            <span>Scene Visual Description</span>
+          </span>
+          <input
+            type="text"
+            value={panel.visualDescription || ""}
+            onChange={(e) => onUpdate(panel.id, { visualDescription: e.target.value })}
+            placeholder="Scene context description or prompt cues..."
+            className="w-full bg-[#0a0d16] border border-[#1e293b] focus:border-amber-500 rounded-xl p-2 text-[11px] text-slate-100 placeholder-slate-500 focus:outline-none shadow-inner"
+          />
+        </div>
+      )}
+
+      {/* ── Motion & Duration Control Row ── */}
+      <div className="grid grid-cols-2 gap-2 min-w-0">
+        {/* Camera Motion */}
+        <div className="flex items-center bg-[#0a0e18] border border-[#1e293b] rounded-xl px-2 py-1.5 h-8">
+          <select
+            value={panel.motionPreset}
+            onChange={(e) => onUpdate(panel.id, { motionPreset: e.target.value })}
+            className="w-full bg-transparent text-[10px] font-semibold text-slate-200 outline-none cursor-pointer truncate"
+          >
+            {MOTION_PRESETS.map((m) => (
+              <option key={m.id} value={m.id} className="bg-[#0b0f19] text-slate-200">
+                {m.label.split(" (")[0]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Duration Counter with Steppers */}
+        <div className="flex items-center justify-between bg-[#0a0e18] border border-[#1e293b] rounded-xl px-2 py-1.5 h-8">
+          <div className="flex items-center gap-1 flex-1 min-w-0">
+            <Clock size={11} className="text-sky-400 shrink-0" />
+            <span className="text-[10px] font-mono font-bold text-slate-100">
+              {panel.duration.toFixed(1)}
+            </span>
+            <span className="text-[9px] font-mono text-slate-400">sec</span>
+          </div>
+
+          <div className="flex items-center gap-0.5 border-l border-[#1e293b] pl-1 shrink-0">
+            <button
+              type="button"
+              onClick={() =>
+                onUpdate(panel.id, { duration: Math.max(1.0, Math.round((panel.duration - 0.5) * 10) / 10) })
+              }
+              className="w-4 h-4 rounded hover:bg-[#1e293b] text-slate-400 hover:text-white flex items-center justify-center text-[11px] font-bold cursor-pointer transition-colors active:scale-90"
+              title="Decrease duration"
+            >
+              -
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                onUpdate(panel.id, { duration: Math.min(15.0, Math.round((panel.duration + 0.5) * 10) / 10) })
+              }
+              className="w-4 h-4 rounded hover:bg-[#1e293b] text-slate-400 hover:text-white flex items-center justify-center text-[11px] font-bold cursor-pointer transition-colors active:scale-90"
+              title="Increase duration"
+            >
+              +
+            </button>
           </div>
         </div>
       </div>
 
-      {/* ── Bottom Line: Estimated Dialogue & Audition Button ── */}
-      <div className="flex items-center justify-between pt-1 border-t border-[#182236] text-[10px] min-w-0">
-        <span className="text-[9px] text-slate-500 font-mono truncate">
-          Est. speech: {suggestedDuration}s
-        </span>
+      {/* ── Unified 3-in-1 AI Action Toolbar (Exact Website Design) ── */}
+      <div className="grid grid-cols-3 gap-1 pt-0.5 select-none">
+        {/* 1. Analyze / Stop Image */}
+        {panel.isAnalyzing ? (
+          <button
+            type="button"
+            onClick={() => onUpdate(panel.id, { isAnalyzing: false })}
+            className="py-1.5 rounded-xl border text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-rose-600/20 border-rose-500/50 text-rose-300 shadow-sm active:scale-95"
+            title="Stop Analyzing"
+          >
+            <X className="h-3 w-3 text-rose-400" />
+            <span>Stop</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onAnalyze && onAnalyze(panel.id, panel.imageUrl)}
+            className="py-1.5 px-1 rounded-xl border border-neutral-800 bg-[#0e1017] hover:bg-neutral-850 hover:border-[#3B82F6]/60 text-neutral-200 hover:text-[#93C5FD] text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95"
+            title="Analyze Scene with AI"
+          >
+            <Sparkles className="h-3 w-3 text-[#3B82F6]" />
+            <span>Analyze</span>
+          </button>
+        )}
 
+        {/* 2. Magic Motion */}
         <button
           type="button"
-          onClick={() => onAudition(panel.id, panel.dialogueText, panel.voiceOverride)}
-          disabled={isAuditioning}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#162033] hover:bg-sky-600 hover:text-white text-sky-300 border border-[#253652] text-[10px] font-semibold transition-all cursor-pointer shadow-sm shrink-0"
+          onClick={handleMagicMotion}
+          className="py-1.5 px-1 rounded-xl border border-[#3B82F6]/40 bg-gradient-to-r from-[#181a24] to-indigo-950/70 hover:from-[#1e2230] hover:to-indigo-900/70 text-[#60A5FA] hover:text-white text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm disabled:opacity-40 active:scale-95"
+          title="Apply Magic Motion"
         >
-          <Volume2 size={11} className={isAuditioning ? "animate-pulse" : ""} />
-          <span>{isAuditioning ? "Auditioning..." : "Audition Voice"}</span>
+          <Wand2 className="h-3 w-3 text-[#3B82F6]" />
+          <span>Magic</span>
+        </button>
+
+        {/* 3. Panel Assistant */}
+        <button
+          type="button"
+          onClick={() => {
+            if (onOpenAssistant) {
+              onOpenAssistant(panel.index, panel.imageUrl);
+            } else if (typeof chrome !== "undefined" && chrome.runtime) {
+              chrome.runtime.sendMessage({
+                type: "OPEN_WEB_STUDIO",
+                payload: { title: `Scene #${panel.index}` },
+              });
+            }
+          }}
+          className="py-1.5 px-1 rounded-xl border border-neutral-800 bg-[#0e1017] hover:bg-neutral-850 hover:border-purple-500/50 text-neutral-200 hover:text-purple-300 text-[10px] font-mono font-bold flex items-center justify-center gap-1 cursor-pointer transition-all shadow-sm active:scale-95"
+          title="Open Assistant in Web Studio"
+        >
+          <Bot className="h-3 w-3 text-purple-400" />
+          <span>Assistant</span>
         </button>
       </div>
     </div>

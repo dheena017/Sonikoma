@@ -53,80 +53,84 @@ async function getWebBaseUrl(): Promise<string> {
 
 // Dynamic Referer & Hotlink Rules for Manga CDNs (Webtoons pstatic.net, MangaDex, etc.)
 function setupDeclarativeRules() {
-  if (chrome.declarativeNetRequest && chrome.declarativeNetRequest.updateDynamicRules) {
-    chrome.declarativeNetRequest.updateDynamicRules({
-      removeRuleIds: [1001, 1002, 1003],
-      addRules: [
-        {
-          id: 1001,
-          priority: 1,
-          action: {
-            type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
-            requestHeaders: [
-              {
-                header: "Referer",
-                operation: chrome.declarativeNetRequest.HeaderOperation.SET,
-                value: "https://www.webtoons.com/",
-              },
-              {
-                header: "Origin",
-                operation: chrome.declarativeNetRequest.HeaderOperation.REMOVE,
-              },
-            ],
+  try {
+    if (chrome.declarativeNetRequest && chrome.declarativeNetRequest.updateDynamicRules) {
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [1001, 1002, 1003],
+        addRules: [
+          {
+            id: 1001,
+            priority: 1,
+            action: {
+              type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+              requestHeaders: [
+                {
+                  header: "Referer",
+                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                  value: "https://www.webtoons.com/",
+                },
+                {
+                  header: "Origin",
+                  operation: chrome.declarativeNetRequest.HeaderOperation.REMOVE,
+                },
+              ],
+            },
+            condition: {
+              urlFilter: "pstatic.net",
+              resourceTypes: [
+                chrome.declarativeNetRequest.ResourceType.IMAGE,
+                chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+                chrome.declarativeNetRequest.ResourceType.OTHER,
+              ],
+            },
           },
-          condition: {
-            urlFilter: "pstatic.net",
-            resourceTypes: [
-              chrome.declarativeNetRequest.ResourceType.IMAGE,
-              chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-              chrome.declarativeNetRequest.ResourceType.OTHER,
-            ],
+          {
+            id: 1002,
+            priority: 1,
+            action: {
+              type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+              requestHeaders: [
+                {
+                  header: "Referer",
+                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                  value: "https://mangadex.org/",
+                },
+              ],
+            },
+            condition: {
+              urlFilter: "mangadex.org",
+              resourceTypes: [
+                chrome.declarativeNetRequest.ResourceType.IMAGE,
+                chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+              ],
+            },
           },
-        },
-        {
-          id: 1002,
-          priority: 1,
-          action: {
-            type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
-            requestHeaders: [
-              {
-                header: "Referer",
-                operation: chrome.declarativeNetRequest.HeaderOperation.SET,
-                value: "https://mangadex.org/",
-              },
-            ],
+          {
+            id: 1003,
+            priority: 1,
+            action: {
+              type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+              requestHeaders: [
+                {
+                  header: "Referer",
+                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                  value: "https://comic-action.com/",
+                },
+              ],
+            },
+            condition: {
+              urlFilter: "comic-action.com",
+              resourceTypes: [
+                chrome.declarativeNetRequest.ResourceType.IMAGE,
+                chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+              ],
+            },
           },
-          condition: {
-            urlFilter: "mangadex.org",
-            resourceTypes: [
-              chrome.declarativeNetRequest.ResourceType.IMAGE,
-              chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-            ],
-          },
-        },
-        {
-          id: 1003,
-          priority: 1,
-          action: {
-            type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
-            requestHeaders: [
-              {
-                header: "Referer",
-                operation: chrome.declarativeNetRequest.HeaderOperation.SET,
-                value: "https://comic-action.com/",
-              },
-            ],
-          },
-          condition: {
-            urlFilter: "comic-action.com",
-            resourceTypes: [
-              chrome.declarativeNetRequest.ResourceType.IMAGE,
-              chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-            ],
-          },
-        },
-      ],
-    }).catch((err) => console.error("[Sonikoma] declarativeNetRequest setup error:", err));
+        ],
+      }).catch((err) => console.warn("[Sonikoma] declarativeNetRequest setup warning:", err));
+    }
+  } catch (err) {
+    console.warn("[Sonikoma] declarativeNetRequest exception:", err);
   }
 }
 
@@ -135,78 +139,116 @@ setupDeclarativeRules();
 
 // Extension Lifecycle & Context Menus Setup
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("[Sonikoma Background] Extension installed/updated.");
-  setupDeclarativeRules();
+  try {
+    console.log("[Sonikoma Background] Extension installed/updated.");
+    setupDeclarativeRules();
 
-  if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
-    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => {});
+    if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
+      chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => {});
+    }
+
+    if (chrome.contextMenus && chrome.contextMenus.removeAll) {
+      chrome.contextMenus.removeAll(() => {
+        if (chrome.runtime.lastError) return;
+        try {
+          chrome.contextMenus.create({
+            id: "sonikoma-open-sidepanel",
+            title: "🎛️ Open Mini-Studio SidePanel",
+            contexts: ["page", "action"],
+          });
+
+          chrome.contextMenus.create({
+            id: "sonikoma-animate-chapter",
+            title: "🎬 Animate Chapter in Sonikoma",
+            contexts: ["page"],
+          });
+
+          chrome.contextMenus.create({
+            id: "sonikoma-download-chapter",
+            title: "📥 Download High-Res Chapter (ZIP)",
+            contexts: ["page"],
+          });
+        } catch (_) {}
+      });
+    }
+  } catch (err) {
+    console.warn("[Sonikoma] onInstalled error:", err);
   }
-
-  chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({
-      id: "sonikoma-open-sidepanel",
-      title: "🎛️ Open Mini-Studio SidePanel",
-      contexts: ["page", "action"],
-    });
-
-    chrome.contextMenus.create({
-      id: "sonikoma-animate-chapter",
-      title: "🎬 Animate Chapter in Sonikoma",
-      contexts: ["page"],
-    });
-
-    chrome.contextMenus.create({
-      id: "sonikoma-download-chapter",
-      title: "📥 Download High-Res Chapter (ZIP)",
-      contexts: ["page"],
-    });
-  });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (!tab || !tab.id || !tab.url || !tab.url.startsWith("http")) return;
+  try {
+    if (!tab || !tab.id || !tab.url || !tab.url.startsWith("http")) return;
 
-  if (info.menuItemId === "sonikoma-open-sidepanel") {
-    if (chrome.sidePanel && chrome.sidePanel.open) {
-      chrome.sidePanel.open({ tabId: tab.id });
+    if (info.menuItemId === "sonikoma-open-sidepanel") {
+      if (chrome.sidePanel && chrome.sidePanel.open) {
+        chrome.sidePanel.open({ tabId: tab.id }).catch((err) => {
+          console.warn("[Sonikoma] Open sidepanel notice:", err);
+        });
+      }
+    } else if (info.menuItemId === "sonikoma-animate-chapter") {
+      const base = await getWebBaseUrl();
+      const url = new URL(`${base.replace(/\/+$/, "")}/workspace/scraper`);
+      url.searchParams.set("url", tab.url);
+      chrome.tabs.create({ url: url.toString() }, () => {
+        if (chrome.runtime.lastError) {}
+      });
+    } else if (info.menuItemId === "sonikoma-download-chapter") {
+      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CHAPTER_DOWNLOAD" }, () => {
+        if (chrome.runtime.lastError) {}
+      });
     }
-  } else if (info.menuItemId === "sonikoma-animate-chapter") {
-    const base = await getWebBaseUrl();
-    const url = new URL(`${base.replace(/\/+$/, "")}/workspace/scraper`);
-    url.searchParams.set("url", tab.url);
-    chrome.tabs.create({ url: url.toString() });
-  } else if (info.menuItemId === "sonikoma-download-chapter") {
-    chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CHAPTER_DOWNLOAD" }, () => {
-      if (chrome.runtime.lastError) { /* ignore */ }
-    });
+  } catch (err) {
+    console.error("[Sonikoma Background] contextMenu error:", err);
   }
 });
 
 chrome.commands.onCommand.addListener(async (command, tab) => {
-  if (!tab || !tab.id || !tab.url || !tab.url.startsWith("http")) return;
+  try {
+    if (!tab || !tab.id || !tab.url || !tab.url.startsWith("http")) return;
 
-  if (command === "toggle-sidepanel") {
-    if (chrome.sidePanel && chrome.sidePanel.open) {
-      chrome.sidePanel.open({ tabId: tab.id });
+    if (command === "toggle-sidepanel") {
+      if (chrome.sidePanel && chrome.sidePanel.open) {
+        chrome.sidePanel.open({ tabId: tab.id }).catch(() => {});
+      }
+    } else if (command === "snip-panel") {
+      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CINEMA_MODE" }, () => {
+        if (chrome.runtime.lastError) {}
+      });
+    } else if (command === "download-chapter") {
+      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CHAPTER_DOWNLOAD" }, () => {
+        if (chrome.runtime.lastError) {}
+      });
     }
-  } else if (command === "snip-panel") {
-    chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CINEMA_MODE" }, () => {
-      if (chrome.runtime.lastError) { /* ignore */ }
-    });
-  } else if (command === "download-chapter") {
-    chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CHAPTER_DOWNLOAD" }, () => {
-      if (chrome.runtime.lastError) { /* ignore */ }
-    });
+  } catch (err) {
+    console.error("[Sonikoma Background] onCommand error:", err);
   }
 });
 
 // Central Real API Proxy & Message Bus
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  handleIncomingMessage(message, sender)
-    .then((response) => sendResponse(response))
-    .catch((error) => {
-      sendResponse({ success: false, isOffline: true, error: error.message || String(error) });
+  try {
+    handleIncomingMessage(message, sender)
+      .then((response) => {
+        try {
+          sendResponse(response);
+        } catch (_) {}
+      })
+      .catch((error) => {
+        try {
+          sendResponse({
+            success: false,
+            isOffline: true,
+            error: error?.message || String(error),
+          });
+        } catch (_) {}
+      });
+  } catch (err: any) {
+    sendResponse({
+      success: false,
+      error: err?.message || String(err),
     });
+  }
   return true;
 });
 
@@ -282,6 +324,83 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
         return { success: true, data };
       } catch (err: any) {
         return { success: false, isOffline: true, error: err.message };
+      }
+    }
+
+    case "API_ANALYZE_PANEL": {
+      try {
+        const base = await getApiBaseUrl();
+        const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
+        const candidateEndpoints = [
+          `${apiBase}/api/analyze-single-image`,
+          `${apiBase}/api/v1/ocr/bubble-dialogue`,
+        ];
+
+        let resultData: any = null;
+        for (const ep of candidateEndpoints) {
+          try {
+            const controller = new AbortController();
+            // Allow up to 90s for deep AI Vision (YOLO OCR + Gemini 2.5 Flash) to complete
+            const timeout = setTimeout(() => controller.abort(), 90000);
+            const res = await fetch(ep, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              body: JSON.stringify({
+                url: payload.imageUrl,
+                image_url: payload.imageUrl,
+                model: "gemini-2.5-flash",
+                languages: ["en"],
+              }),
+              signal: controller.signal,
+            });
+            clearTimeout(timeout);
+            if (res.ok) {
+              const data = await res.json();
+              if (data) {
+                resultData = data;
+                break;
+              }
+            }
+          } catch (_) {}
+        }
+
+        if (resultData) {
+          const analysis = resultData.analysis || resultData;
+          const detectedText =
+            analysis.speech_text ||
+            analysis.speechText ||
+            analysis.dialogue ||
+            resultData.full_transcript ||
+            resultData.dialogue ||
+            resultData.text ||
+            (Array.isArray(resultData.segments)
+              ? resultData.segments.map((s: any) => s.text).filter(Boolean).join(" ")
+              : "") ||
+            "";
+
+          return {
+            success: true,
+            speech_text: detectedText,
+            motion_type: analysis.motion_type || analysis.motionPreset || resultData.motion_type || "zoom_in",
+            duration: Number(analysis.duration) || 3.5,
+            visual_description: analysis.visual_description || resultData.visual_description || "",
+            narrative: resultData.narrative || resultData.narrativeText || analysis.narrative || analysis.narrativeText || "",
+            sfx: analysis.sfx || resultData.sfx || "",
+          };
+        }
+
+        return {
+          success: true,
+          speech_text: "",
+          motion_type: payload.panelIndex % 2 === 0 ? "zoom_in" : "pan_up",
+          duration: 3.5,
+          visual_description: `Scene #${payload.panelIndex || 1}`,
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          error: err?.message || String(err),
+        };
       }
     }
 

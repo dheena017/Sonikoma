@@ -82,8 +82,14 @@ export const PopupApp: React.FC = () => {
     setIsScanning(true);
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        setIsScanning(false);
+        showToast(`Tab query error: ${chrome.runtime.lastError.message}`);
+        return;
+      }
+
       const tab = tabs[0];
-      if (!tab || !tab.id || !tab.url || !tab.url.startsWith("http")) {
+      if (!tab || !tab.id || !tab.url) {
         setActivePageInfo({
           title: "No Active Comic",
           domain: "Open any comic or manga page",
@@ -92,6 +98,25 @@ export const PopupApp: React.FC = () => {
         });
         setPanels([]);
         setIsScanning(false);
+        return;
+      }
+
+      if (
+        tab.url.startsWith("chrome://") ||
+        tab.url.startsWith("edge://") ||
+        tab.url.startsWith("about:") ||
+        tab.url.startsWith("chrome-extension://")
+      ) {
+        setActivePageInfo({
+          title: "Internal Browser Page",
+          domain: "Please open a manga reader page",
+          panelCount: 0,
+          url: tab.url,
+          hasDetectedChapter: false,
+        });
+        setPanels([]);
+        setIsScanning(false);
+        showToast("⚠️ Cannot scan internal browser pages");
         return;
       }
 

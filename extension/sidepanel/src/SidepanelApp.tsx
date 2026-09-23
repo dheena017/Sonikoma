@@ -85,8 +85,14 @@ export const SidepanelApp: React.FC = () => {
     setIsScanning(true);
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (chrome.runtime.lastError) {
+        setIsScanning(false);
+        showToast(`Tab query error: ${chrome.runtime.lastError.message}`);
+        return;
+      }
+
       const tab = tabs[0];
-      if (!tab || !tab.id || !tab.url || !tab.url.startsWith("http")) {
+      if (!tab || !tab.id || !tab.url) {
         setChapterInfo({
           title: "No active chapter",
           chapterName: "Open any comic or manga page to start",
@@ -94,6 +100,23 @@ export const SidepanelApp: React.FC = () => {
         });
         setPanels([]);
         setIsScanning(false);
+        return;
+      }
+
+      if (
+        tab.url.startsWith("chrome://") ||
+        tab.url.startsWith("edge://") ||
+        tab.url.startsWith("about:") ||
+        tab.url.startsWith("chrome-extension://")
+      ) {
+        setIsScanning(false);
+        setChapterInfo({
+          title: "Internal Browser Page",
+          chapterName: "Please open a manga/webtoon chapter tab",
+          hasDetectedChapter: false,
+        });
+        setPanels([]);
+        showToast("⚠️ Cannot scan browser internal pages. Please open a manga reader.");
         return;
       }
 
@@ -107,6 +130,7 @@ export const SidepanelApp: React.FC = () => {
             hasDetectedChapter: false,
           });
           setPanels([]);
+          showToast("No manga panels found on current page");
           return;
         }
 
@@ -122,7 +146,7 @@ export const SidepanelApp: React.FC = () => {
           index: idx + 1,
           imageUrl: img.src,
           motionPreset: globalMotion,
-          dialogueText: `Scene #${idx + 1} dialogue...`,
+          dialogueText: "",
           duration: 3.5,
           enabled: true,
         }));
@@ -282,10 +306,123 @@ export const SidepanelApp: React.FC = () => {
     showToast("Scene duplicated");
   };
 
+  const [isAnalyzingAll, setIsAnalyzingAll] = useState<boolean>(false);
+
   const handleUpdatePanel = (id: string, updates: Partial<StoryboardPanel>) => {
     setPanels((prev) =>
       prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
     );
+  };
+
+  // AI Storyboard Analysis for Single Panel
+  const handleAnalyzePanel = (panelId: string, imageUrl: string) => {
+    handleUpdatePanel(panelId, { isAnalyzing: true });
+    showToast("AI analyzing panel dialogue & motions...");
+
+    try {
+      if (typeof chrome !== "undefined" && chrome.runtime) {
+        chrome.runtime.sendMessage(
+          {
+            type: "API_ANALYZE_PANEL",
+            payload: { imageUrl, panelId },
+          },
+          (res) => {
+            if (chrome.runtime.lastError) {
+              handleUpdatePanel(panelId, { isAnalyzing: false });
+              showToast(`Analysis communication error: ${chrome.runtime.lastError.message}`);
+              return;
+            }
+
+            if (res && res.success) {
+              handleUpdatePanel(panelId, {
+                isAnalyzing: false,
+                dialogueText: res.speech_text !== undefined && res.speech_text !== "" ? res.speech_text : undefined,
+                motionPreset: res.motion_type || "zoom_in",
+                duration: res.duration || 3.5,
+                visualDescription: res.visual_description,
+                narrativeText: res.narrative,
+                sfx: res.sfx,
+              });
+              showToast("Panel analysis complete!");
+            } else {
+              handleUpdatePanel(panelId, { isAnalyzing: false });
+              showToast(res?.error ? `Analysis note: ${res.error}` : "Analysis fallback applied");
+            }
+          }
+        );
+      } else {
+        handleUpdatePanel(panelId, { isAnalyzing: false });
+        showToast("Extension runtime not available");
+      }
+    } catch (err: any) {
+      handleUpdatePanel(panelId, { isAnalyzing: false });
+      showToast(`Analysis error: ${err?.message || String(err)}`);
+    }
+  };
+
+  // AI Storyboard Analysis for All Panels
+  const handleAnalyzeAllPanels = async () => {
+    const activePanels = panels.filter((p) => p.enabled);
+    if (activePanels.length === 0) {
+      showToast("No enabled scenes to analyze");
+      return;
+    }
+
+    setIsAnalyzingAll(true);
+    showToast(`AI analyzing ${activePanels.length} storyboard panels...`);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < panels.length; i++) {
+      const panel = panels[i];
+      if (!panel.enabled) continue;
+
+      handleUpdatePanel(panel.id, { isAnalyzing: true });
+      await new Promise<void>((resolve) => {
+        try {
+          if (typeof chrome !== "undefined" && chrome.runtime) {
+            chrome.runtime.sendMessage(
+              {
+                type: "API_ANALYZE_PANEL",
+                payload: { imageUrl: panel.imageUrl, panelId: panel.id, panelIndex: panel.index },
+              },
+              (res) => {
+                if (!chrome.runtime.lastError && res && res.success) {
+                  successCount++;
+                  handleUpdatePanel(panel.id, {
+                    isAnalyzing: false,
+                    dialogueText: res.speech_text !== undefined && res.speech_text !== "" ? res.speech_text : panel.dialogueText,
+                    motionPreset: res.motion_type || panel.motionPreset,
+                    duration: res.duration || panel.duration,
+                    visualDescription: res.visual_description,
+                  });
+                } else {
+                  failCount++;
+                  handleUpdatePanel(panel.id, { isAnalyzing: false });
+                }
+                resolve();
+              }
+            );
+          } else {
+            handleUpdatePanel(panel.id, { isAnalyzing: false });
+            failCount++;
+            resolve();
+          }
+        } catch (_) {
+          handleUpdatePanel(panel.id, { isAnalyzing: false });
+          failCount++;
+          resolve();
+        }
+      });
+    }
+
+    setIsAnalyzingAll(false);
+    if (failCount > 0 && successCount === 0) {
+      showToast(`Analysis completed with heuristics (${failCount} scenes)`);
+    } else {
+      showToast(`✨ Analyzed ${successCount} panels successfully!`);
+    }
   };
 
   // Audio Auditioning
@@ -297,33 +434,63 @@ export const SidepanelApp: React.FC = () => {
     setActiveAuditioningId(panelId);
     const voiceToUse = voice || selectedVoice;
 
-    if (typeof chrome !== "undefined" && chrome.runtime) {
-      chrome.runtime.sendMessage(
-        {
-          type: "API_GENERATE_TTS",
-          payload: {
-            dialogue_list: [text],
-            voice: voiceToUse,
-            speech_rate: speechRate,
-            speech_pitch: speechPitch,
-            return_base64: true,
+    try {
+      if (typeof chrome !== "undefined" && chrome.runtime) {
+        chrome.runtime.sendMessage(
+          {
+            type: "API_GENERATE_TTS",
+            payload: {
+              dialogue_list: [text],
+              voice: voiceToUse,
+              speech_rate: speechRate,
+              speech_pitch: speechPitch,
+              return_base64: true,
+            },
           },
-        },
-        (res) => {
-          setActiveAuditioningId(null);
-          if (res && res.success && res.data && res.data.audio_base64) {
-            const audio = new Audio(`data:audio/mp3;base64,${res.data.audio_base64}`);
-            audio.play().catch(() => {});
-            showToast("Playing neural voice preview...");
-          } else if ("speechSynthesis" in window) {
-            const utter = new SpeechSynthesisUtterance(text);
-            utter.rate = speechRate;
-            utter.pitch = speechPitch;
-            window.speechSynthesis.speak(utter);
-            showToast("Playing local voice preview...");
+          (res) => {
+            setActiveAuditioningId(null);
+            if (!chrome.runtime.lastError && res && res.success && res.data && res.data.audio_base64) {
+              try {
+                const audio = new Audio(`data:audio/mp3;base64,${res.data.audio_base64}`);
+                audio.play().catch((playErr) => {
+                  console.warn("[Sonikoma] Audio play failed:", playErr);
+                  fallbackLocalSpeech(text);
+                });
+                showToast("Playing neural voice preview...");
+              } catch (_) {
+                fallbackLocalSpeech(text);
+              }
+            } else {
+              fallbackLocalSpeech(text);
+            }
           }
-        }
-      );
+        );
+      } else {
+        fallbackLocalSpeech(text);
+      }
+    } catch (_) {
+      fallbackLocalSpeech(text);
+    }
+  };
+
+  const fallbackLocalSpeech = (text: string) => {
+    setActiveAuditioningId(null);
+    try {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = speechRate;
+        utter.pitch = speechPitch;
+        utter.onerror = (e) => {
+          showToast(`Speech synthesis error: ${e.error}`);
+        };
+        window.speechSynthesis.speak(utter);
+        showToast("Playing local voice preview...");
+      } else {
+        showToast("Speech audio not supported on this device");
+      }
+    } catch (e: any) {
+      showToast(`Voice preview failed: ${e?.message || String(e)}`);
     }
   };
 
@@ -524,6 +691,7 @@ export const SidepanelApp: React.FC = () => {
             enabledCount={enabledCount}
             chapterInfo={chapterInfo}
             isScanning={isScanning}
+            isAnalyzingAll={isAnalyzingAll}
             activeAuditioningId={activeAuditioningId}
             onSearchChange={setSearchQuery}
             onGlobalMotionChange={handleApplyGlobalMotion}
@@ -535,6 +703,8 @@ export const SidepanelApp: React.FC = () => {
             onDuplicatePanel={handleDuplicatePanel}
             onDeletePanel={handleDeletePanel}
             onAuditionPanel={handleAuditionPanel}
+            onAnalyzePanel={handleAnalyzePanel}
+            onAnalyzeAllPanels={handleAnalyzeAllPanels}
             onPreviewImage={setPreviewImageModal}
           />
         )}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, CheckSquare, Square, RefreshCw } from "lucide-react";
+import { Search, CheckSquare, Square, RefreshCw, Sparkles } from "lucide-react";
 import { StoryboardPanel } from "../types";
 import { StoryboardCard } from "./StoryboardCard";
 import { EmptyStoryboardState } from "./EmptyStoryboardState";
@@ -16,6 +16,7 @@ export interface StoryboardViewProps {
     hasDetectedChapter: boolean;
   };
   isScanning: boolean;
+  isAnalyzingAll?: boolean;
   activeAuditioningId: string | null;
   onSearchChange: (q: string) => void;
   onGlobalMotionChange: (preset: string) => void;
@@ -27,6 +28,8 @@ export interface StoryboardViewProps {
   onDuplicatePanel: (panel: StoryboardPanel, index: number) => void;
   onDeletePanel: (id: string) => void;
   onAuditionPanel: (panelId: string, text: string, voice?: string) => void;
+  onAnalyzePanel?: (panelId: string, imageUrl: string) => void;
+  onAnalyzeAllPanels?: () => void;
   onPreviewImage: (imageUrl: string) => void;
 }
 
@@ -38,6 +41,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
   enabledCount,
   chapterInfo,
   isScanning,
+  isAnalyzingAll = false,
   activeAuditioningId,
   onSearchChange,
   onGlobalMotionChange,
@@ -49,13 +53,15 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
   onDuplicatePanel,
   onDeletePanel,
   onAuditionPanel,
+  onAnalyzePanel,
+  onAnalyzeAllPanels,
   onPreviewImage,
 }) => {
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* ── Unified Header & Toolbar ── */}
       <div className="px-3 py-2 bg-[#0e1422] border-b border-[#1e293b] flex flex-col gap-1.5 shrink-0">
-        {/* Row 1: Series Title & Rescan */}
+        {/* Row 1: Series Title & Action Controls */}
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0 flex-1 truncate">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400 shrink-0" />
@@ -70,15 +76,30 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={onScan}
-            disabled={isScanning}
-            className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#162134] hover:bg-[#202e48] disabled:opacity-50 border border-[#283955] text-sky-300 text-[9px] font-semibold transition-colors cursor-pointer shrink-0"
-          >
-            <RefreshCw size={9} className={isScanning ? "animate-spin" : ""} />
-            <span>{isScanning ? "Scanning..." : "Rescan"}</span>
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {panels.length > 0 && onAnalyzeAllPanels && (
+              <button
+                type="button"
+                onClick={onAnalyzeAllPanels}
+                disabled={isAnalyzingAll}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 disabled:opacity-50 text-white text-[10px] font-bold shadow-md transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+                title="AI Auto-Analyze All Scenes (OCR Dialogue & Smart Motions)"
+              >
+                <Sparkles size={11} className={isAnalyzingAll ? "animate-spin text-sky-200" : "text-sky-100"} />
+                <span>{isAnalyzingAll ? "Analyzing All..." : "✨ AI Analyze All"}</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={onScan}
+              disabled={isScanning}
+              className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#162134] hover:bg-[#202e48] disabled:opacity-50 border border-[#283955] text-sky-300 text-[9px] font-semibold transition-colors cursor-pointer shrink-0"
+            >
+              <RefreshCw size={9} className={isScanning ? "animate-spin" : ""} />
+              <span>{isScanning ? "Scanning..." : "Rescan"}</span>
+            </button>
+          </div>
         </div>
 
         {/* Row 2: Search & Select All */}
@@ -135,6 +156,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
               onDuplicate={onDuplicatePanel}
               onDelete={onDeletePanel}
               onAudition={onAuditionPanel}
+              onAnalyze={onAnalyzePanel}
               onPreviewImage={onPreviewImage}
             />
           ))

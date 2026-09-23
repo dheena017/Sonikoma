@@ -14,7 +14,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.v1.ai._deps import get_user_gemini_key, default_output_path
-from api.dependencies.auth import get_current_user
+from api.dependencies.auth import get_current_user, get_optional_current_user
 
 from services.user.credit_service import get_available_credits, record_credit_transaction
 from database.config import LOW_BALANCE_THRESHOLD
@@ -89,10 +89,10 @@ def _attach_narratives_to_results(results: list) -> list:
 async def analyze_image(
     body: AnalyzeImageRequest,
     user_api_key: dict = Depends(get_user_gemini_key),
-    current_user: dict = Depends(get_current_user)
+    current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     COST = 8
-    if get_available_credits(current_user["user_id"]) < COST:
+    if current_user and get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     try:
         result = await facade_analyze_image(
@@ -103,7 +103,8 @@ async def analyze_image(
             user_keys=user_api_key,
         )
         result = _attach_narratives_to_results([result])[0]
-        record_credit_transaction(current_user["user_id"], -COST, "analyze_image")
+        if current_user:
+            record_credit_transaction(current_user["user_id"], -COST, "analyze_image")
         return result
     except HTTPException:
         raise

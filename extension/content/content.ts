@@ -2,7 +2,7 @@
  * extension/content/content.ts
  * ─────────────────────────────────────────────────────────────────────────────
  * TypeScript Unified Content Script Orchestrator.
- * Self-contained IIFE with zero global variable collisions.
+ * Self-contained IIFE with robust message handling for all UI components.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -45,45 +45,66 @@ import { CinemaPlayer } from "./cinema-player";
     } catch (_) {}
   }, 1200);
 
-  // Message listener for popup & sidepanel
+  // Message listener for popup, sidepanel, and keyboard commands
   chrome.runtime.onMessage.addListener((message: any, _sender: any, sendResponse: any) => {
     const { type } = message || {};
 
-    if (type === "TRIGGER_CINEMA_MODE") {
+    if (type === "PING") {
+      sendResponse({ status: "PONG" });
+      return true;
+    }
+
+    if (type === "TRIGGER_CINEMA_MODE" || type === "START_CINEMA" || type === "TOGGLE_CINEMA") {
       try {
         const player = getCinemaPlayer();
         player.start();
-        sendResponse({ success: true });
+        sendResponse({ success: true, isPlaying: true });
       } catch (err: any) {
         sendResponse({ success: false, error: err?.message || String(err) });
       }
       return true;
     }
 
-    if (type === "GET_READER_STATS") {
-      try {
-        const images = DomMangaScanner.scanChapterImages();
-        const meta = DomMangaScanner.extractPageMetadata();
-        sendResponse({
-          success: true,
-          panelCount: images.length,
-          seriesTitle: meta.seriesTitle,
-          chapterTitle: meta.chapterTitle,
-          url: window.location.href,
-          images: images.map((img, i) => ({
-            index: i + 1,
-            src: img.src,
-            width: img.width,
-            height: img.height,
-          })),
-        });
-      } catch (err: any) {
-        sendResponse({
-          success: false,
-          error: err?.message || String(err),
-          images: [],
-        });
+    if (type === "STOP_CINEMA") {
+      if (cinemaPlayerInstance) {
+        cinemaPlayerInstance.stop();
       }
+      sendResponse({ success: true });
+      return true;
+    }
+
+    if (type === "GET_READER_STATS" || type === "GET_CHAPTER_DATA" || type === "GET_IMAGES" || type === "SCAN_CHAPTER") {
+      (async () => {
+        try {
+          const images = await DomMangaScanner.scanChapterImagesAsync();
+          const meta = DomMangaScanner.extractPageMetadata();
+          sendResponse({
+            success: true,
+            panelCount: images.length,
+            seriesTitle: meta.seriesTitle,
+            chapterTitle: meta.chapterTitle,
+            url: window.location.href,
+            domain: window.location.hostname,
+            images: images.map((img, i) => ({
+              index: i + 1,
+              src: img.src,
+              width: img.width,
+              height: img.height,
+              top: img.top,
+            })),
+            panels: images,
+            meta,
+          });
+        } catch (err: any) {
+          sendResponse({
+            success: false,
+            error: err?.message || String(err),
+            images: [],
+            panels: [],
+            panelCount: 0,
+          });
+        }
+      })();
       return true;
     }
   });

@@ -81,6 +81,12 @@ PUBLIC_ROUTE_SET = {
     "/api/v1/ai/models/routing",
     "/api/list-models",            # Multi-provider dynamic model inspector
     "/api/v1/ai/list-models",
+    "/api/analyze-single-image",
+    "/api/analyze-image",
+    "/api/v1/ai/analyze-single-image",
+    "/api/v1/ai/analyze-image",
+    "/api/analyze-panels",
+    "/api/v1/ai/analyze-panels",
     "/api/proxy-image",
     "/api/proxy/image",
     "/api/v1/proxy/image",
@@ -127,6 +133,8 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/panels/",
     "/api/v1/video/",
     "/api/video/",
+    "/api/v1/ai/",
+    "/api/ai/",
 )
 
 # Admin-only endpoints (require creator_role/admin)

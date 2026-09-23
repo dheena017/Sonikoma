@@ -291,6 +291,12 @@ class AIVoiceNarratorEngine {
         }
       };
 
+      utt.onerror = () => {
+        if (this.onSubtitleCallback) {
+          this.onSubtitleCallback("");
+        }
+      };
+
       this.currentUtterance = utt;
       window.speechSynthesis.speak(utt);
     } catch (_) {}
@@ -1111,6 +1117,14 @@ export class CinemaPlayer {
   private refreshPanels() {
     if (this.scanner?.scanChapterImages) {
       this.detectedPanels = this.scanner.scanChapterImages();
+    }
+    if (this.scanner?.scanChapterImagesAsync) {
+      this.scanner.scanChapterImagesAsync().then((panels: any) => {
+        if (panels && panels.length > 0) {
+          this.detectedPanels = panels;
+          this.updatePanelReadout();
+        }
+      }).catch(() => {});
     }
   }
 
