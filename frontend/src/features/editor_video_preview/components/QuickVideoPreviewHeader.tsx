@@ -64,7 +64,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
   const finalSave = onSave || handleSave;
 
   const titleBlock = (
-    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+    <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
       <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] flex items-center justify-center shrink-0">
         <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
       </div>
@@ -74,12 +74,12 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
             <span className="hidden sm:inline">Quick Video Preview</span>
             <span className="sm:hidden">Preview</span>
           </h3>
-          <span className="hidden min-[480px]:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[9px] sm:text-[10px] font-bold text-[#60A5FA] font-mono">
+          <span className="hidden min-[480px]:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[9px] sm:text-[10px] font-bold text-[#60A5FA] font-mono shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
             Live Sync
           </span>
         </div>
-        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden lg:block">
+        <p className="text-[10px] sm:text-[11px] text-neutral-400 font-mono mt-0.5 truncate hidden xl:block">
           Instant storyboard panel playback and compiled video preview
         </p>
       </div>
@@ -87,19 +87,19 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
   );
 
   const centerBlock = (
-    <div className="flex items-center bg-neutral-950/90 p-0.5 rounded-xl border border-neutral-800 shadow-inner">
+    <div className="flex items-center bg-neutral-950/90 p-0.5 rounded-xl border border-neutral-800 shadow-inner shrink-0">
       <button
         type="button"
         onClick={() => setMonitorTab("timeline")}
-        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer ${
+        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
           monitorTab === "timeline"
             ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white"
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
         }`}
       >
         <Layers className="h-3.5 w-3.5 shrink-0" />
-        <span className="hidden sm:inline">Storyboard Preview</span>
-        <span className="sm:hidden">Storyboard</span>
+        <span className="hidden md:inline">Storyboard Preview</span>
+        <span className="md:hidden">Storyboard</span>
         {panelsCount > 0 && (
           <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-[#3B82F6]">
             {panelsCount}p
@@ -110,15 +110,15 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
       <button
         type="button"
         onClick={() => setMonitorTab("video")}
-        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer ${
+        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
           monitorTab === "video"
             ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white"
             : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
         }`}
       >
         <Video className="h-3.5 w-3.5 shrink-0" />
-        <span className="hidden sm:inline">Final Video</span>
-        <span className="sm:hidden">Final</span>
+        <span className="hidden md:inline">Final Video</span>
+        <span className="md:hidden">Final</span>
         <span className="hidden sm:inline text-[8px] font-mono px-1 py-0.2 rounded bg-[#2A2A2A] border border-neutral-800 text-[#60A5FA] uppercase">
           MP4
         </span>
@@ -127,12 +127,12 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
   );
 
   const rightBlock = (
-    <div className="flex items-center gap-1.5 sm:gap-2">
+    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
       {advancedSettingsProps && (
         <button
           type="button"
           onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
-          className={`h-8 px-2.5 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shrink-0 ${
+          className={`h-8 px-2.5 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap ${
             showAdvancedSettings
               ? "bg-[#2A2A2A] border-[#3B82F6] text-[#3B82F6]"
               : "bg-neutral-900/90 hover:bg-neutral-800 border-transparent text-neutral-300 hover:text-white"
@@ -145,7 +145,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
         </button>
       )}
 
-      <div className="hidden min-[480px]:block">
+      <div className="hidden min-[480px]:block shrink-0">
         <MetadataPanel
           musicTheme={musicTheme}
           voiceActor={voiceActor}
@@ -163,11 +163,11 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           type="button"
           onClick={finalSave}
           disabled={isSaving}
-          className="h-8 px-2.5 sm:px-3 rounded-xl border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50 shrink-0"
+          className="h-8 px-2.5 sm:px-3 rounded-xl border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50 shrink-0 whitespace-nowrap"
           title="Save Storyboard State"
         >
-          <Save className="h-3.5 w-3.5 text-[#3B82F6]" />
-          <span className="hidden sm:inline">{isSaving ? "Saving..." : "Save"}</span>
+          <Save className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
+          <span className="hidden md:inline">{isSaving ? "Saving..." : "Save"}</span>
         </button>
       )}
 
@@ -176,12 +176,12 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           type="button"
           onClick={finalExport}
           disabled={isRendering}
-          className="h-8 px-2.5 sm:px-3.5 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer hover: active:scale-95 disabled:opacity-50 shrink-0"
+          className="h-8 px-2.5 sm:px-3.5 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50 shrink-0 whitespace-nowrap"
           title="Export and render final video"
         >
-          <Video className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">{isRendering ? "Rendering..." : "Export Video"}</span>
-          <span className="sm:hidden">{isRendering ? "..." : "Export"}</span>
+          <Video className="h-3.5 w-3.5 shrink-0" />
+          <span className="hidden md:inline">{isRendering ? "Rendering..." : "Export Video"}</span>
+          <span className="md:hidden">{isRendering ? "..." : "Export"}</span>
         </button>
       )}
 
@@ -189,7 +189,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
         <button
           type="button"
           onClick={onClose}
-          className="h-8 w-8 rounded-xl bg-neutral-900/90 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40 border border-neutral-800 text-neutral-400 flex items-center justify-center transition-all cursor-pointer shadow-md"
+          className="h-8 w-8 rounded-xl bg-neutral-900/90 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/40 border border-neutral-800 text-neutral-400 flex items-center justify-center transition-all cursor-pointer shadow-md shrink-0"
           title="Hide Quick Video Preview"
         >
           <X className="h-4 w-4" />
@@ -204,8 +204,8 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
         left={titleBlock}
         center={centerBlock}
         right={rightBlock}
-        centerClassName="order-3 w-full sm:order-none sm:w-auto mx-auto"
-        className="flex-wrap sm:flex-nowrap"
+        centerClassName="order-3 w-full sm:order-none sm:w-auto sm:flex-1 sm:min-w-0 flex justify-center"
+        className="flex-wrap sm:flex-nowrap gap-2 sm:gap-3"
       />
 
       {/* Collapsible Advanced Settings Modal */}

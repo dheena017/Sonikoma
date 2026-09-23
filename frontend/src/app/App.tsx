@@ -21,9 +21,6 @@ import * as api from "@/api";
 import AppRouter from "@/app/router/AppRouter";
 import { NotificationProvider } from "@/features/app_notification";
 
-// ============================================================================
-// SECTION 2: MAIN APP COMPONENT
-// ============================================================================
 
 export default function App() {
   // --------------------------------------------------------------------------
@@ -498,16 +495,26 @@ export default function App() {
     chapterSlug: chapterSlugState,
   });
 
-  const loadedTransfersRef = React.useRef<Set<string>>(new Set());
+  const notifiedProjectsRef = React.useRef<Set<string>>(new Set());
+  const inFlightTransfersRef = React.useRef<Set<string>>(new Set());
 
   // Trigger automatic scraping or direct storyboard transfer if ?importUrl=... or ?transfer=1 is present
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const importBatchRaw = localStorage.getItem("auto_import_batch");
+    const storedAutoImportUrl = localStorage.getItem("auto_import_url");
     const importUrl =
-      params.get("importUrl") || params.get("url") || localStorage.getItem("auto_import_url");
+      params.get("importUrl") || params.get("url") || storedAutoImportUrl;
     let projId = params.get("id") || params.get("project_id");
     const isTransfer = params.get("transfer") === "1";
+
+    // Consume stored auto-import values immediately so they never re-trigger on subsequent renders
+    if (storedAutoImportUrl) {
+      localStorage.removeItem("auto_import_url");
+    }
+    if (importBatchRaw) {
+      localStorage.removeItem("auto_import_batch");
+    }
 
     const isTempOrImport = Boolean(projId && projId.startsWith("temp_")) || Boolean(importUrl) || isTransfer;
     if (!isTempOrImport && (!isAuthenticated || authLoading || isInitializing)) return;
@@ -518,12 +525,6 @@ export default function App() {
 
     if (!projId || !projId.startsWith("temp_")) return;
 
-    // Prevent duplicate executions / loop for the same temporary project
-    if (loadedTransfersRef.current.has(projId)) {
-      return;
-    }
-    loadedTransfersRef.current.add(projId);
-
     // Clean up the URL parameters so it doesn't trigger again on reload/navigation
     const newParams = new URLSearchParams(window.location.search);
     newParams.delete("importUrl");
@@ -532,9 +533,21 @@ export default function App() {
     const newSearch = newParams.toString();
     const newUrl =
       window.location.pathname + (newSearch ? "?" + newSearch : "");
-    window.history.replaceState(null, "", newUrl);
+    if (newUrl !== window.location.pathname + window.location.search) {
+      window.history.replaceState(null, "", newUrl);
+    }
 
-    // If already hydrated by useProjectStore, sync local state and stop
+    const notifyStoryboardLoaded = (id: string, count: number) => {
+      if (!notifiedProjectsRef.current.has(id)) {
+        notifiedProjectsRef.current.add(id);
+        addNotification(
+          `Loaded storyboard with ${count} scenes, dialogue & motion!`,
+          "success"
+        );
+      }
+    };
+
+    // If already hydrated by useProjectStore, sync local state, notify, and stop
     const currentActive = useProjectStore.getState().activeProjectData;
     if (
       currentActive?.project?.project_id === projId &&
@@ -545,8 +558,15 @@ export default function App() {
       if (scrapedImages.length === 0 && currentActive.scrapedImages) {
         setScrapedImages(currentActive.scrapedImages);
       }
+      notifyStoryboardLoaded(projId, currentActive.panels.length);
       return;
     }
+
+    // Prevent duplicate in-flight network transfer requests for the same temporary project
+    if (inFlightTransfersRef.current.has(projId)) {
+      return;
+    }
+    inFlightTransfersRef.current.add(projId);
 
     // Check if complete storyboard panels, images, and texts were transferred from extension
     const checkAndLoadTransfer = async () => {
@@ -628,10 +648,7 @@ export default function App() {
           if (transferData.music_theme) setMusicTheme(transferData.music_theme);
           if (transferData.aspect_ratio) setAspectRatio(transferData.aspect_ratio);
 
-          addNotification(
-            `Loaded storyboard with ${transferredPanels.length} scenes, dialogue & motion!`,
-            "success"
-          );
+          notifyStoryboardLoaded(projId, transferredPanels.length);
           return true;
         }
 
@@ -642,8 +659,6 @@ export default function App() {
         if (loaded) return;
 
         if (importBatchRaw) {
-          localStorage.removeItem("auto_import_batch");
-          localStorage.removeItem("auto_import_url");
           try {
             const episodesList = JSON.parse(importBatchRaw);
             if (Array.isArray(episodesList) && episodesList.length > 0) {
@@ -664,7 +679,6 @@ export default function App() {
           console.log(
             `[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`
           );
-          localStorage.removeItem("auto_import_url");
           setTargetUrl(importUrl);
           scrapeImages(importUrl, projId).catch((err) => {
             console.error("[Auto Scrape] Failed to scrape images:", err);
@@ -675,18 +689,6 @@ export default function App() {
     isAuthenticated,
     authLoading,
     isInitializing,
-    scrapeImages,
-    scrapeBatchEpisodes,
-    setTargetUrl,
-    setPanels,
-    setScrapedImages,
-    setProjectId,
-    setSeriesTitle,
-    setChapterTitle,
-    setVoiceActor,
-    setMusicTheme,
-    setAspectRatio,
-    addNotification,
     currentPath,
   ]);
 

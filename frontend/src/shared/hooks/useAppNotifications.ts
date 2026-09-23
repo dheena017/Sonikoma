@@ -83,8 +83,8 @@ export function useAppNotifications(volume = 80, isMuted = false) {
       const now = Date.now();
       const lastTriggered = recentNotifsRef.current.get(dedupKey) || 0;
 
-      // Prevent duplicate notification toasts & sounds within 2.5s window
-      if (now - lastTriggered < 2500) {
+      // Prevent duplicate notification toasts & sounds within 1.5s window
+      if (now - lastTriggered < 1500) {
         return;
       }
       recentNotifsRef.current.set(dedupKey, now);
@@ -127,7 +127,13 @@ export function useAppNotifications(volume = 80, isMuted = false) {
         link: opts?.link,
       };
 
-      setNotifications((prev) => [...prev, newNotif]);
+      setNotifications((prev) => {
+        // Prevent stacking duplicate active toasts with the same message and type
+        if (prev.some((n) => !n.toastDismissed && n.message === cleanMsg && n.type === type)) {
+          return prev;
+        }
+        return [...prev, newNotif];
+      });
 
       if (!notificationsMuted) {
         if (type === "success") {

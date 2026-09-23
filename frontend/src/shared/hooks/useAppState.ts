@@ -37,7 +37,7 @@ export function useAppState() {
   const setScrapedImages = useCallback(
     (val: string[] | ((prev: string[]) => string[])) => {
       const cur = useProjectStore.getState().activeProjectData;
-      const currentImgs = cur?.scrapedImages ?? scraper.scrapedImages ?? [];
+      const currentImgs = cur?.scrapedImages ?? [];
       const nextImgs = typeof val === "function" ? val(currentImgs) : val;
 
       scraper.setScrapedImages(nextImgs);
@@ -49,7 +49,7 @@ export function useAppState() {
         });
       }
     },
-    [scraper]
+    []
   );
 
   const setPanels = useCallback(
@@ -60,10 +60,10 @@ export function useAppState() {
       useProjectStore.getState().setActiveProject({
         project: cur?.project ?? { project_id: "", title: "", url: "" },
         panels: nextPanels as any,
-        scrapedImages: cur?.scrapedImages ?? scraper.scrapedImages ?? [],
+        scrapedImages: cur?.scrapedImages ?? [],
       });
     },
-    [scraper.scrapedImages]
+    []
   );
 
   const projectId = activeProjectData?.project?.project_id ?? null;
