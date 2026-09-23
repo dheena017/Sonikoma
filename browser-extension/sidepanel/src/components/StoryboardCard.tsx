@@ -18,6 +18,7 @@ import {
   RefreshCw,
   X,
   Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { StoryboardPanel, MOTION_PRESETS } from "../types";
 
@@ -170,6 +171,24 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
           </div>
         )}
       </div>
+
+      {/* ── Inline Panel Error Banner ── */}
+      {panel.error && (
+        <div className="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-xl bg-rose-950/70 border border-rose-800/80 text-rose-200 text-[10px] leading-snug animate-in fade-in">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <AlertCircle size={12} className="text-rose-400 shrink-0" />
+            <span className="truncate">{panel.error}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => onUpdate(panel.id, { error: undefined })}
+            className="text-rose-400 hover:text-white p-0.5 rounded cursor-pointer shrink-0"
+            title="Dismiss error"
+          >
+            <X size={11} />
+          </button>
+        </div>
+      )}
 
       {/* ── Category Tabs: Dialogue, Narrator, SFX, Scene ── */}
       <div className="grid grid-cols-4 gap-1 p-0.5 rounded-xl bg-[#0a0e18] border border-[#1e293b] select-none">

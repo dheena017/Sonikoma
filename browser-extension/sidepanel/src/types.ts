@@ -13,6 +13,7 @@ export interface StoryboardPanel {
   visualDescription?: string;
   audioUrl?: string;
   narrativeAudioUrl?: string;
+  error?: string;
 }
 
 export interface VoiceOption {
