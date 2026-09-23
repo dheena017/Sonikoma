@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { GeneratedPanel } from "@/types";
 import { processWithConcurrency, chunkArray } from "@/shared/utils/batchUtils";
 import * as api from "@/api/index";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { saveAs } from "file-saver";
 import { buildZipBlobFromUrls } from "@/features/workspace_scraper/hooks/useLiveScraperZip";
 
@@ -163,6 +164,17 @@ export function useCompileActions({
     try {
       abortControllerRef.current = new AbortController();
       console.log("[API] Analyzing image for panel", panelId);
+
+      const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
+      const panelIndex = panels.findIndex((p) => String(p.id) === String(panelId));
+      let precedingContext = "";
+      if (panelIndex > 0) {
+        const prevPanel = panels[panelIndex - 1];
+        const prevSpeech = prevPanel.speech_text ? `Previous speech: "${prevPanel.speech_text}"` : "";
+        const prevNarrative = prevPanel.narrative ? `Previous scene recap: "${prevPanel.narrative}"` : "";
+        precedingContext = [prevSpeech, prevNarrative].filter(Boolean).join(" | ");
+      }
+
       const data = await api.analyzeSingleImage(
         activeFetch,
         {
@@ -170,9 +182,15 @@ export function useCompileActions({
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
+          story_memory: currentMemory || undefined,
+          story_context: precedingContext || undefined,
         },
         { signal: abortControllerRef.current.signal }
       );
+
+      if (data.story_memory) {
+        useProjectStore.getState().updateStoryMemory(data.story_memory);
+      }
 
       const analysis = data.analysis || data;
       if (data.success && (data.analysis || analysis.speech_text !== undefined || analysis.visual_description !== undefined)) {
@@ -300,6 +318,7 @@ export function useCompileActions({
       const targetPanels = panels.filter((p) => selectedIdsSet.has(String(p.id)));
       abortControllerRef.current = new AbortController();
 
+      const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
       const data = await api.analyzeSelectedPanels(
         activeFetch,
         {
@@ -307,9 +326,14 @@ export function useCompileActions({
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
+          story_memory: currentMemory || undefined,
         },
         { signal: abortControllerRef.current.signal }
       );
+
+      if (data.story_memory) {
+        useProjectStore.getState().updateStoryMemory(data.story_memory);
+      }
 
       if (data.success && data.results) {
         const tierLabel = (data as any).tier_label || (data.results?.[0] as any)?.tier_label || "Tier 1: Primary";
@@ -456,6 +480,7 @@ export function useCompileActions({
 
       const imageUrls = panels.map((p) => p.image_url);
 
+      const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
       // Phase 1: Context-aware multimodal panel/sequence analysis
       const data = await api.analyzeAllPanels(
         activeFetch,
@@ -464,9 +489,14 @@ export function useCompileActions({
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
+          story_memory: currentMemory || undefined,
         },
         { signal: abortControllerRef.current.signal }
       );
+
+      if (data.story_memory) {
+        useProjectStore.getState().updateStoryMemory(data.story_memory);
+      }
 
       if (abortSignalRef.current.aborted) return;
 

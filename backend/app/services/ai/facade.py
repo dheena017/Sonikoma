@@ -63,6 +63,10 @@ class StoryMemoryTracker:
 
     def format_for_prompt(self) -> str:
         parts = []
+        if self.scene_history:
+            past_scenes = [s.get("scene", "") for s in self.scene_history[-2:] if s.get("scene")]
+            if past_scenes:
+                parts.append(f"Preceding Story Arc: {'; '.join(past_scenes)}")
         if self.current_scene:
             parts.append(f"Ongoing Scene: {self.current_scene}")
         if self.characters:
@@ -470,13 +474,67 @@ async def facade_analyze_image(
             "motion_type": "zoom_in",
             "duration": 3.5,
             "sfx": "",
-            "narrative": ocr_text or "Scene progression.",
+            "narrative": "The scene unfolds as the characters confront the situation before them with quiet tension.",
             "scene_context": memory_tracker.current_scene or ""
         })
 
+    # Format dialogue turns separated onto distinct lines if multiple turns exist
+    turns = analysis.get("dialogue_turns", [])
+    if isinstance(turns, list) and len(turns) > 1:
+        separated_lines = []
+        for t in turns:
+            t_text = (t.get("text") or "").strip()
+            # Strip any speaker prefixes like "Father:" or "Mother:"
+            t_text = re.sub(r'^(Father|Mother|Child|Man|Woman|Character|\w+):\s*', '', t_text, flags=re.IGNORECASE).strip().strip('"').strip("'").strip()
+            if t_text:
+                separated_lines.append(f'"{t_text}"')
+        if separated_lines:
+            analysis["speech_text"] = "\n\n".join(separated_lines)
+    elif analysis.get("speech_text"):
+        # Ensure any raw speech_text lines don't have unwanted "Speaker: " prefixes
+        cleaned_lines = []
+        for line in analysis["speech_text"].split("\n"):
+            cleaned_line = re.sub(r'^(Father|Mother|Child|Man|Woman|Character|\w+):\s*', '', line.strip(), flags=re.IGNORECASE).strip().strip('"').strip("'").strip()
+            if cleaned_line:
+                cleaned_lines.append(f'"{cleaned_line}"')
+        if cleaned_lines:
+            analysis["speech_text"] = "\n\n".join(cleaned_lines)
+
+    # Guard against title logos / credits / episode headers contaminating speech_text
+    is_cover_or_credit = False
+    ocr_lower = ocr_text.lower()
+    for marker in ("episode", "spin-off", "story-art", "chapter", "vol.", "d jun", "credits", "author", "the past"):
+        if marker in ocr_lower:
+            is_cover_or_credit = True
+            break
+
     # If Gemini didn't return speech_text but OCR found visible dialogue, use OCR as fallback
-    if not analysis.get("speech_text") and ocr_text:
+    if not analysis.get("speech_text") and ocr_text and not is_cover_or_credit:
         analysis["speech_text"] = ocr_text
+
+    # Guard against dialogue/narrative duplication: ensure narrative NEVER mirrors speech_text
+    curr_speech = (analysis.get("speech_text") or "").strip()
+    curr_narrative = (analysis.get("narrative") or "").strip()
+
+    def _normalize_txt(s: str) -> str:
+        return re.sub(r'[\W_]+', '', s.lower())
+
+    if (curr_speech and curr_narrative and _normalize_txt(curr_speech) == _normalize_txt(curr_narrative)) or not curr_narrative:
+        logger.info("[facade_analyze_image] Narrative was identical to dialogue or empty. Synthesizing distinct narrative recap.")
+        scene_ctx = (analysis.get("scene_context") or memory_tracker.current_scene or "").rstrip('.')
+        vis_desc = (analysis.get("visual_description") or "").rstrip('.')
+
+        narrative_parts = []
+        if scene_ctx:
+            narrative_parts.append(f"In this moment, {scene_ctx}.")
+        if curr_speech:
+            narrative_parts.append("A tender yet crucial exchange takes place between them, each spoken word carrying the weight of their unspoken hopes.")
+        elif vis_desc:
+            narrative_parts.append(f"{vis_desc}, capturing a poignant stillness as their story moves forward.")
+        else:
+            narrative_parts.append("An unspoken tension settles over the space, marking a quiet turning point in their ongoing journey.")
+
+        analysis["narrative"] = " ".join(narrative_parts)
 
     # Update working memory state
     memory_tracker.update_from_analysis(analysis, panel_index)
@@ -550,6 +608,7 @@ async def facade_analyze_image(
         "narrative": narrative_val,
         "narrativeText": narrative_val,
         "audio_url": audio_url,
+        "dialogue_turns": analysis.get("dialogue_turns", []),
         "speaker_name": analysis.get("speaker_name"),
         "speaker_gender": analysis.get("speaker_gender"),
         "emotion": analysis.get("emotion"),

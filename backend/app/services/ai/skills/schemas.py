@@ -17,10 +17,10 @@ class DialogueTurnItem(BaseModel):
 
 
 class GeminiAnalysisModel(BaseModel):
-    speech_text: str = Field(default="", description="Spoken character dialogue from speech bubbles, whisper clouds, or visible lettering")
+    speech_text: str = Field(default="", description="Spoken character dialogue strictly from speech bubbles or character lettering. Empty string if silent or no speech bubbles. NEVER recap or narrator exposition.")
     dialogue_turns: List[DialogueTurnItem] = Field(default=[], description="Chronological dialogue turns if multiple speech bubbles exist in the panel")
-    narrative: str = Field(default="", description="Story narration caption box text drawn on the panel, or empty string if no narrator box exists. NEVER visual descriptions.")
-    speaker_name: str = Field(default="", description="Primary speaking character (e.g., 'Father', 'Mother', 'Doctor', or empty if silent)")
+    narrative: str = Field(default="", description="Third-person YouTube comic/manhwa recap voiceover narrative (85-150 words). Dramatically recounts the scene, atmosphere, character emotions, and story stakes. CRITICAL: NEVER copy, quote, or duplicate speech_text.")
+    speaker_name: str = Field(default="", description="Primary speaking character name, title, or role (e.g., 'Arthur', 'Jinwoo', 'Gojo', 'Emperor', 'Commander', 'Doctor', 'Villain', 'Father', or empty if silent)")
     speaker_gender: str = Field(default="neutral", description="Gender of primary speaker: 'male', 'female', 'child', or 'neutral'")
     emotion: str = Field(default="neutral", description="Emotional vocal delivery: 'neutral', 'tender', 'whisper', 'shouting', 'panicked'")
     scene_context: str = Field(default="", description="Concise 1-sentence summary of ongoing scene location, mood, and character activity")

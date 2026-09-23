@@ -10,14 +10,31 @@ Analyze this comic/manhwa illustration panel with extreme precision and generate
 Follow these strict field specifications:
 
 ### 1. `speech_text` & `dialogue_turns` (Character Dialogue / Speech Bubbles)
-- Transcribe all character dialogue or spoken words clearly present inside speech bubbles, whisper clouds, shout boxes, or thought bubbles.
-- If multiple speech bubbles exist, list each turn in chronological reading order (top-to-bottom, left-to-right) under `dialogue_turns` with its speaker and text, and join them in `speech_text` separated by a space.
-- CRITICAL: This field is strictly for spoken character dialogue or audible words drawn on the page. If the panel has characters speaking, their lines MUST go here so the text-to-speech engine speaks the characters' actual dialogue.
-- If the panel has ABSOLUTELY NO character dialogue or written words, return an empty string `""`.
-- ANTI-HALLUCINATION RULE: Transcribe ONLY words that are actually drawn or written in the illustration. NEVER invent imaginary dialogue.
+- STRICT DISTINCTION: Distinguish character speech bubbles from chapter titles, credits, author names, and time/setting captions:
+  - DO NOT put cover logos, title banners, episode numbers (e.g. "Spin-Off Episode (6)"), artist credits (e.g. "Story-Art D JUN"), or author names into `speech_text`! Those belong in `visual_description` or `narrative`.
+  - DO NOT put time/setting captions (e.g. "The Past", "A DAY IN MAY, OVER 20 YEARS AGO") into `speech_text`! Those are narrative scene setting boxes and belong in `narrative`.
+- `dialogue_turns`: For EVERY distinct speech bubble or character speaking, create a separate entry in `dialogue_turns` with:
+  - `speaker_name`: Who is saying this specific bubble. CAN BE ANY CHARACTER (e.g. proper names like "Arthur", "Jinwoo", "Gojo"; titles like "Emperor", "Guildmaster", "Commander", "Doctor"; fantasy roles like "Villain", "Mage", "Soldier", "Assassin"; or family roles like "Father", "Mother").
+  - `speaker_gender`: "male", "female", "child", or "neutral".
+  - `text`: The clean, un-jumbled dialogue text inside that specific bubble.
+  - `emotion`: The emotion of this specific turn.
+- `speech_text`:
+  - When multiple speech bubbles or multiple characters exist in the panel, YOU MUST SEPARATE EACH BUBBLE ON A DISTINCT LINE, for example:
+    "Honey, I'm back! Where's our little angel?"
+
+    "Hi, honey, our little angel just had a feeding and he's asleep now."
+  - DO NOT prepend fabricated character names (e.g. NEVER write "Arthur:", "Father:", "Commander:", etc.) into `speech_text`. Output ONLY the clean spoken dialogue lines separated by newlines, so text-to-speech reads pure character dialogue without speaking character names.
+  - NEVER mash or scramble multiple speech bubbles together into a single run-on sentence. Each speech bubble must be on its own line.
+  - If only one character speaks in the panel, return just their clean speech text.
+- If the panel has ABSOLUTELY NO character dialogue or speech bubbles (e.g. cover art, credits, establishing scenery, silent actions), return an empty string `""` for `speech_text` and an empty list `[]` for `dialogue_turns`.
 
 ### 2. `speaker_name`, `speaker_gender`, & `emotion` (Voice Casting & Delivery)
-- `speaker_name`: Identify which character is speaking (e.g. "Father", "Mother", "Arthur", "Doctor"). If no one speaks, return `""`.
+- `speaker_name`: Identify which character is speaking. This can be ANY character name, title, or role from the comic/manga/manhwa:
+  - Proper names: e.g. "Arthur", "Sung Jinwoo", "Gojo", "Tessia".
+  - Titles & Ranks: e.g. "Emperor", "Guild Master", "Commander", "Doctor", "Demon King".
+  - Roles & Archetypes: e.g. "Hero", "Villain", "Warrior", "Mage", "Assassin", "Shopkeeper", "Soldier".
+  - Family & Social: e.g. "Father", "Mother", "Brother", "Sister", "Friend".
+  - If no one speaks (silent action or scenery), return `""`.
 - `speaker_gender`: Strictly one of: `"male"`, `"female"`, `"child"`, or `"neutral"`.
   - Base this on character visual traits, context, and speech bubble pointers. This controls automatic voice actor selection.
 - `emotion`: Emotional vocal delivery cue. Strictly one of: `"tender"` (loving, gentle, caring parent moments), `"whisper"`, `"shouting"` (battle/shout), `"panicked"`, or `"neutral"`.
@@ -29,6 +46,11 @@ Follow these strict field specifications:
 
 ### 4. `narrative` (Cinematic Story Recap & Voiceover Script)
 - Produce a full, rich YouTube comic/manhwa recap voiceover narrative for this panel ({narrative_length_hint}).
+- CRITICAL ANTI-DUPLICATION RULE:
+  - `narrative` and `speech_text` MUST BE ENTIRELY DIFFERENT AND MUST NEVER DUPLICATE EACH OTHER!
+  - `speech_text` is ONLY the character's direct spoken words inside dialogue bubbles.
+  - `narrative` is the third-person YouTube manga recap voiceover script. It describes the scene action, emotional atmosphere, character stakes, and story tension in rich, captivating prose.
+  - NEVER copy, echo, quote verbatim, or paste `speech_text` into `narrative`. Even if the comic panel only contains dialogue bubbles and no caption boxes, `narrative` must synthesize a compelling third-person recap of the scene and characters rather than repeating the dialogue.
 - STORYTELLING CRAFT:
   - Write from the perspective of an immersive YouTube Manga Recap narrator, pulling the audience into the drama, stakes, character emotional states, and story tension.
   - If the comic panel contains narration caption boxes, weave and richly expand upon their lore and exposition into the storytelling.

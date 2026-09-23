@@ -214,6 +214,15 @@ export interface GeneratedPanel {
   scene_context?: string;
   is_scene_transition?: boolean;
   is_internal_thought?: boolean;
+  dialogue_turns?: DialogueTurn[];
+}
+
+export interface DialogueTurn {
+  speaker_name: string;
+  speaker_gender?: 'male' | 'female' | 'child' | 'neutral' | string;
+  text: string;
+  emotion?: string;
+  audio_url?: string;
 }
 
 export interface CharacterMemory {

@@ -45,6 +45,7 @@ export interface PanelItem {
   scene_context?: string;
   is_scene_transition?: boolean;
   is_internal_thought?: boolean;
+  dialogue_turns?: any[];
   [key: string]: any;
 }
 
@@ -123,6 +124,7 @@ export interface ActiveProjectData {
   project: ProjectMetadata;
   panels: PanelItem[];
   scrapedImages?: string[];
+  story_memory?: any;
 }
 
 export type ProjectStateMode = "idle" | "loading" | "active" | "missing";

@@ -264,7 +264,14 @@ async def extract_text_lines_from_panel(
     langs: Optional[List[str]] = None,
 ) -> List[str]:
     segments = await extract_full_ocr_data(image_path, langs)
-    return [seg["text"] for seg in segments]
+    if not segments:
+        return []
+    # Sort segments by vertical position (Y), then horizontal (X) for comic reading order
+    segments_sorted = sorted(
+        segments,
+        key=lambda s: (_axis_aligned_bbox(s["box"])[1], _axis_aligned_bbox(s["box"])[0])
+    )
+    return [seg["text"].strip() for seg in segments_sorted if seg.get("text", "").strip()]
 
 
 extract_dialogue_from_panel = extract_text_lines_from_panel

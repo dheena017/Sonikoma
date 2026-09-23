@@ -1277,12 +1277,12 @@ const StoryboardCard = ({
 
             {/* Bubble Dialogue Textarea */}
             <textarea
-              rows={1}
+              rows={panel.speech_text && panel.speech_text.includes("\n") ? 3 : 2}
               disabled={isThisPanelAnalyzing}
               value={panel.speech_text || ""}
               onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
               placeholder="Text from speech bubbles in image..."
-              className={`w-full min-h-[36px] bg-[#090b10] border border-neutral-800/90 text-[11px] rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6]/80 focus:ring-1 focus:ring-[#3B82F6]/30 font-sans transition-all resize-none shadow-inner ${
+              className={`w-full min-h-[46px] bg-[#090b10] border border-neutral-800/90 text-[11px] rounded-xl p-2.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-[#3B82F6]/80 focus:ring-1 focus:ring-[#3B82F6]/30 font-sans transition-all resize-y shadow-inner ${
                 isThisPanelAnalyzing
                   ? "opacity-60 cursor-not-allowed border-[#2F2F2F] text-[#60A5FA]"
                   : "hover:border-neutral-700"

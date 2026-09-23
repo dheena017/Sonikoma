@@ -87,7 +87,7 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
   const handleUpdateDialogue = useCallback(
     (idx: number, dialogue: string) => {
       const updated = panels.map((p, i) =>
-        i === idx ? { ...p, speech_text: dialogue, narrative: dialogue } : p
+        i === idx ? { ...p, speech_text: dialogue } : p
       );
       setPanels(updated);
       onTriggerFeedback?.(`Updated dialogue for Panel #${idx + 1}`);
