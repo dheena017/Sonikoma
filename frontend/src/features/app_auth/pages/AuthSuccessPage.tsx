@@ -65,9 +65,14 @@ export default function AuthSuccessPage({
       // Save token to localStorage for authenticated session
       localStorage.setItem("sonikoma_token", token);
 
-      // Clean query parameters from address bar to leave clean /auth-success
+      // Clean address bar and set title to canonical /auth-success
+      document.title = "Sonikoma - Authentication Successful";
       if (window.history && window.history.replaceState) {
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(
+          {},
+          "Sonikoma - Authentication Successful",
+          "/auth-success"
+        );
       }
 
       // Store explicit mutually exclusive flag for Welcome modal in Dashboard

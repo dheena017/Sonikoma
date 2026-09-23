@@ -1044,6 +1044,18 @@ export default function AppRouter(props: AppRouterProps) {
       navigateTo(`${newPath}${search}`);
       return;
     }
+
+    // Cleanly redirect legacy /auth/callback URLs to canonical /auth-success
+    if (
+      currentPath === "/auth/callback" ||
+      currentPath.startsWith("/auth/callback") ||
+      currentPath.startsWith("/auth/redirect") ||
+      currentPath.startsWith("/auth/launch")
+    ) {
+      const search = window.location.search;
+      navigateTo(`/auth-success${search}`);
+      return;
+    }
   }, [currentPath, navigateTo]);
 
   // Redirect legacy /editor or draft URLs back to canonical /scraper/editor routes
