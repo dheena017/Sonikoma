@@ -100,13 +100,20 @@ export function getHumanEditorPath(options: WorkspaceReturnPathOptions = {}): st
   const activeSeries = seriesSlug || (seriesTitle ? slugify(seriesTitle) : null);
   const activeChapter = chapterSlug || (chapterNumber ? `chapter-${chapterNumber}` : null);
 
-  const jobQuery = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
+  const queryParams = new URLSearchParams();
+  if (projectId) {
+    queryParams.set("project_id", projectId);
+  }
+  if (jobId) {
+    queryParams.set("job_id", jobId);
+  }
+  const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
 
   if (activeSeries && activeChapter) {
     const cleanChapter = activeChapter.startsWith("chapter-") || activeChapter.startsWith("ch-")
       ? activeChapter
       : `chapter-${activeChapter}`;
-    return `/editor/${activeSeries}/${cleanChapter}${jobQuery}`;
+    return `/scraper/editor/series/${activeSeries}/chapters/${cleanChapter}${queryString}`;
   }
 
   if (projectId) {
@@ -114,11 +121,10 @@ export function getHumanEditorPath(options: WorkspaceReturnPathOptions = {}): st
       const jobQueryParam = jobId ? `&job_id=${encodeURIComponent(jobId)}` : "";
       return `/scraper/editor?id=${encodeURIComponent(projectId)}${jobQueryParam}`;
     }
-    const cleanSlug = slugify(projectId);
-    return `/editor/${cleanSlug || projectId}${jobQuery}`;
+    return `/scraper/editor${queryString}`;
   }
 
-  return `/editor`;
+  return `/scraper/editor`;
 }
 
 export function resolveWorkspaceReturnPath(

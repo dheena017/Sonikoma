@@ -650,9 +650,11 @@ export default function App() {
       }
 
       // 🌟 Dynamically update browser address bar to clean human URL on save
-      const activeProjId = cur?.project?.id || undefined;
+      const activeProjId = cur?.project?.id || cur?.project?.project_id || undefined;
       const humanPath = getHumanEditorPath({
         projectId: activeProjId,
+        seriesSlug: cur?.project?.series_slug || (seriesSlugState ?? undefined),
+        chapterSlug: cur?.project?.chapter_slug || (chapterSlugState ?? undefined),
         seriesTitle: details.seriesTitle,
         chapterNumber: details.chapterNumber,
       });

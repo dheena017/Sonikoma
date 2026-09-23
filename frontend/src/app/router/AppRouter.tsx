@@ -899,11 +899,13 @@ export default function AppRouter(props: AppRouterProps) {
     }
   }, [currentPath, navigateTo]);
 
-  // Redirect legacy or draft URLs back to the old temp route
+  // Redirect legacy /editor or draft URLs back to canonical /scraper/editor routes
   React.useEffect(() => {
     if (
       currentPath.startsWith("/editor/draft-") ||
-      currentPath === "/editor/draft"
+      currentPath === "/editor/draft" ||
+      currentPath === "/editor" ||
+      currentPath === "/editor/"
     ) {
       const activeProjId =
         projectId ||
@@ -911,14 +913,33 @@ export default function AppRouter(props: AppRouterProps) {
           ? localStorage.getItem("active_project_id")
           : null);
       if (activeProjId) {
-        navigateTo(`/scraper/editor?id=${encodeURIComponent(activeProjId)}`);
+        if (seriesSlugState && chapterSlugState) {
+          navigateTo(
+            `/scraper/editor/series/${seriesSlugState}/chapters/${chapterSlugState}?project_id=${encodeURIComponent(
+              activeProjId
+            )}`
+          );
+        } else {
+          navigateTo(`/scraper/editor?id=${encodeURIComponent(activeProjId)}`);
+        }
       } else {
         navigateTo(`/scraper/editor`);
       }
       return;
     }
 
-    // Cleanly normalize saved series / chapters to /editor/series/chapter, but keep temp projects on /scraper/editor?id=temp_...
+    // Redirect legacy /editor/:series/:chapter to canonical /scraper/editor/series/:series/chapters/:chapter
+    if (currentPath.startsWith("/editor/") && !currentPath.startsWith("/editor/draft")) {
+      const match = currentPath.match(/^\/editor\/([^\/]+)\/([^\/]+)\/?$/);
+      if (match) {
+        const [, sSlug, cSlug] = match;
+        const search = window.location.search;
+        navigateTo(`/scraper/editor/series/${sSlug}/chapters/${cSlug}${search}`);
+        return;
+      }
+    }
+
+    // Cleanly normalize series / chapters to /scraper/editor/series/.../chapters/..., preserving query params
     if (
       currentPath.startsWith("/scraper/series/") ||
       (currentPath.startsWith("/scraper/editor") &&
@@ -928,10 +949,6 @@ export default function AppRouter(props: AppRouterProps) {
       const search = window.location.search;
       const params = new URLSearchParams(search);
       const projId = params.get("id") || params.get("project_id") || projectId;
-
-      if (projId && (projId.startsWith("temp_") || projId.startsWith("draft_"))) {
-        return;
-      }
 
       // Guard: Ensure store data is hydrated and actually matches the target project before normalising
       const activeData = useProjectStore.getState().activeProjectData;
@@ -953,9 +970,10 @@ export default function AppRouter(props: AppRouterProps) {
         jobId: params.get("job_id"),
       });
 
+      const currentFullUrl = window.location.pathname + window.location.search;
       if (
         humanPath &&
-        humanPath !== currentPath &&
+        humanPath !== currentFullUrl &&
         !humanPath.includes("/draft-")
       ) {
         if (window.history && window.history.replaceState) {
