@@ -93,29 +93,26 @@ def _verify_signed_state(state: Optional[str]) -> Optional[str]:
 
 
 def _load_google_secrets() -> tuple[str, str]:
-    """Load Google OAuth client_id and client_secret from env or client_secrets.json."""
-    env_client_id = os.getenv("GOOGLE_CLIENT_ID")
-    env_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
-    if env_client_id and env_client_secret:
-        return env_client_id, env_client_secret
-
+    """Load Google/YouTube OAuth client_id and client_secret directly from .env."""
     base_dir = os.path.dirname(__file__)
     project_root = os.path.abspath(os.path.join(base_dir, "..", "..", "..", "..", ".."))
-    candidates = [
-        os.path.join(project_root, "backend", "client_secrets.json"),
-        os.path.join(project_root, "client_secrets.json"),
-        os.path.join(os.getcwd(), "client_secrets.json"),
-    ]
-    client_secrets_file = next((p for p in candidates if os.path.exists(p)), None)
-    if not client_secrets_file:
-        raise HTTPException(
-            status_code=400,
-            detail="Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env",
-        )
-    with open(client_secrets_file, "r", encoding="utf-8") as f:
-        secrets_data = json.load(f)
-    key = "web" if "web" in secrets_data else "installed"
-    return secrets_data[key]["client_id"], secrets_data[key].get("client_secret", "")
+    dotenv_file = os.path.join(project_root, ".env")
+    if os.path.exists(dotenv_file):
+        try:
+            from dotenv import load_dotenv
+            load_dotenv(dotenv_file, override=True)
+        except Exception:
+            pass
+
+    env_client_id = os.getenv("YOUTUBE_CLIENT_ID") or os.getenv("GOOGLE_CLIENT_ID")
+    env_client_secret = os.getenv("YOUTUBE_CLIENT_SECRET") or os.getenv("GOOGLE_CLIENT_SECRET")
+    if env_client_id and env_client_secret:
+        return env_client_id.strip().strip('"').strip("'"), env_client_secret.strip().strip('"').strip("'")
+
+    raise HTTPException(
+        status_code=400,
+        detail="Google/YouTube OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env",
+    )
 
 
 def _get_user_id(current_user: Optional[dict]) -> Optional[str]:

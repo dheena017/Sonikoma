@@ -198,9 +198,18 @@ async def get_authenticated_service(user_id: Optional[str] = None, allow_interac
                 logger.info(f"Using client secrets from: {legacy_default}")
                 client_secrets_file = legacy_default
             else:
-                # Check environment variables GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
-                google_client_id = os.getenv("GOOGLE_CLIENT_ID")
-                google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+                # Reload .env dynamically so credentials take effect without restarting
+                dotenv_file = os.path.join(PROJECT_ROOT, ".env")
+                if os.path.exists(dotenv_file):
+                    try:
+                        from dotenv import load_dotenv
+                        load_dotenv(dotenv_file, override=True)
+                    except Exception:
+                        pass
+
+                # Check environment variables directly from .env
+                google_client_id = os.getenv("YOUTUBE_CLIENT_ID") or os.getenv("GOOGLE_CLIENT_ID")
+                google_client_secret = os.getenv("YOUTUBE_CLIENT_SECRET") or os.getenv("GOOGLE_CLIENT_SECRET")
                 if google_client_id:
                     synthetic_secrets = json.dumps({
                         "web": {
@@ -216,12 +225,11 @@ async def get_authenticated_service(user_id: Optional[str] = None, allow_interac
                         f.write(synthetic_secrets)
                     client_secrets_file = tmp_secrets_path
                 else:
-                    logger.warning("client_secrets.json not found (locally or via env).")
+                    logger.warning("Google/YouTube OAuth credentials not found in .env.")
                     raise ServiceException(
                         status_code=400,
                         message=(
-                            "YouTube export is not configured. Provide 'client_secrets.json' in backend/ "
-                            "or set env var 'GOOGLE_CLIENT_ID' and 'GOOGLE_CLIENT_SECRET' in .env to enable real uploads."
+                            "YouTube export is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env."
                         ),
                     )
 
