@@ -498,6 +498,8 @@ export default function App() {
     chapterSlug: chapterSlugState,
   });
 
+  const loadedTransfersRef = React.useRef<Set<string>>(new Set());
+
   // Trigger automatic scraping or direct storyboard transfer if ?importUrl=... or ?transfer=1 is present
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -514,19 +516,40 @@ export default function App() {
       projId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     }
 
-    if (projId && projId.startsWith("temp_")) {
-      // Clean up the URL parameters so it doesn't trigger again on reload/navigation
-      const newParams = new URLSearchParams(window.location.search);
-      newParams.delete("importUrl");
-      newParams.delete("url");
-      newParams.delete("transfer");
-      const newSearch = newParams.toString();
-      const newUrl =
-        window.location.pathname + (newSearch ? "?" + newSearch : "");
-      window.history.replaceState(null, "", newUrl);
+    if (!projId || !projId.startsWith("temp_")) return;
 
-      // Check if complete storyboard panels, images, and texts were transferred from extension
-      const checkAndLoadTransfer = async () => {
+    // Prevent duplicate executions / loop for the same temporary project
+    if (loadedTransfersRef.current.has(projId)) {
+      return;
+    }
+    loadedTransfersRef.current.add(projId);
+
+    // Clean up the URL parameters so it doesn't trigger again on reload/navigation
+    const newParams = new URLSearchParams(window.location.search);
+    newParams.delete("importUrl");
+    newParams.delete("url");
+    newParams.delete("transfer");
+    const newSearch = newParams.toString();
+    const newUrl =
+      window.location.pathname + (newSearch ? "?" + newSearch : "");
+    window.history.replaceState(null, "", newUrl);
+
+    // If already hydrated by useProjectStore, sync local state and stop
+    const currentActive = useProjectStore.getState().activeProjectData;
+    if (
+      currentActive?.project?.project_id === projId &&
+      currentActive.panels &&
+      currentActive.panels.length > 0
+    ) {
+      if (panels.length === 0) setPanels(currentActive.panels as any);
+      if (scrapedImages.length === 0 && currentActive.scrapedImages) {
+        setScrapedImages(currentActive.scrapedImages);
+      }
+      return;
+    }
+
+    // Check if complete storyboard panels, images, and texts were transferred from extension
+    const checkAndLoadTransfer = async () => {
         let transferData: any = null;
 
         // 1. Try local storage first if set
@@ -648,7 +671,6 @@ export default function App() {
           });
         }
       });
-    }
   }, [
     isAuthenticated,
     authLoading,

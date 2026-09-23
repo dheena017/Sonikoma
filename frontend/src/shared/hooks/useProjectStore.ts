@@ -460,6 +460,8 @@ async function sendSettingsUpdate(
 // 3. Zustand Store Definition with Reload Resilience & History Stack
 // =============================================================================
 
+const inFlightHydrations = new Map<string, Promise<void>>();
+
 export const useProjectStore = create<ProjectStoreState>()(
   persist(
     (set, get) => ({
@@ -605,6 +607,13 @@ export const useProjectStore = create<ProjectStoreState>()(
           });
           return;
         }
+
+        // Deduplicate in-flight hydration requests for the same targetId
+        if (inFlightHydrations.has(idToHydrate)) {
+          return inFlightHydrations.get(idToHydrate)!;
+        }
+
+        const runHydration = async () => {
 
         // 🌟 Temp projects exist only in localStorage or backend transfer -> Keep active immediately!
         if (isTempProject(idToHydrate)) {
@@ -827,7 +836,16 @@ export const useProjectStore = create<ProjectStoreState>()(
           }
           get().setProjectMissing(idToHydrate, { isJobId: idToHydrate.startsWith("job_") });
         }
-      },
+      };
+
+      const hydrationPromise = runHydration();
+      inFlightHydrations.set(idToHydrate, hydrationPromise);
+      try {
+        await hydrationPromise;
+      } finally {
+        inFlightHydrations.delete(idToHydrate);
+      }
+    },
 
       // ── Save Entire Active Project to Backend ─────────────────────────────
       saveActiveProject: async (fetchClient) => {
