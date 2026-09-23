@@ -189,15 +189,15 @@ async def google_callback(
 
     state = state or request.query_params.get("state")
     if not state:
-        return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Missing OAuth state parameter.')}")
+        return RedirectResponse(f"{base_target}/auth-success?error={urllib.parse.quote('Missing OAuth state parameter.')}")
 
     cookie_state = _get_oauth_state(request)
     if not cookie_state or not hmac.compare_digest(state, cookie_state):
-        return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Invalid or expired OAuth state. Please retry logging in.')}")
+        return RedirectResponse(f"{base_target}/auth-success?error={urllib.parse.quote('Invalid or expired OAuth state. Please retry logging in.')}")
 
     code = code or request.query_params.get("code")
     if not code:
-        return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Missing Google authorization code. Please retry logging in.')}")
+        return RedirectResponse(f"{base_target}/auth-success?error={urllib.parse.quote('Missing Google authorization code. Please retry logging in.')}")
 
     client_id, client_secret = _load_google_secrets()
     redirect_uri = _get_redirect_uri(request)
@@ -218,21 +218,21 @@ async def google_callback(
                 error_msg = "Google Client Secret in .env is invalid. Please copy the matching Client Secret from Google Cloud Console."
             else:
                 error_msg = f"Google token exchange failed: {token_resp.text[:120]}"
-            return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote(error_msg)}")
+            return RedirectResponse(f"{base_target}/auth-success?error={urllib.parse.quote(error_msg)}")
 
         try:
             token_data = token_resp.json()
         except ValueError:
             logger.error("Google token response is not valid JSON: %s", token_resp.text)
-            return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Google token response was not valid JSON.')}")
+            return RedirectResponse(f"{base_target}/auth-success?error={urllib.parse.quote('Google token response was not valid JSON.')}")
 
         if not isinstance(token_data, dict):
             logger.error("Google token response unexpected type: %r", token_data)
-            return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Google token response unexpected format.')}")
+            return RedirectResponse(f"{base_target}/auth-success?error={urllib.parse.quote('Google token response unexpected format.')}")
 
         google_access_token = token_data.get("access_token")
         if not google_access_token:
-            return RedirectResponse(f"{base_target}/auth/callback?error={urllib.parse.quote('Google response did not return an access token.')}")
+            return RedirectResponse(f"{base_target}/auth-success?error={urllib.parse.quote('Google response did not return an access token.')}")
 
         resp = requests.get(
             "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -340,7 +340,7 @@ async def google_callback(
 
         access_token = create_access_token(data={"sub": user["user_id"]})
 
-        redirect_url = f"{base_target}/auth/callback?token={access_token}&is_new={'1' if is_new_user else '0'}"
+        redirect_url = f"{base_target}/auth-success?token={access_token}&is_new={'1' if is_new_user else '0'}"
         resp = RedirectResponse(redirect_url)
 
         cookie_kwargs = {

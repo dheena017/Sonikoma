@@ -16,7 +16,7 @@ import LandingPage from "@/features/app_landing/pages/LandingPage";
 import LoginPage from "@/features/app_auth/pages/LoginPage";
 import RegisterPage from "@/features/app_auth/pages/RegisterPage";
 import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
-import AuthCallbackPage from "@/features/app_auth/pages/AuthCallbackPage";
+import AuthSuccessPage from "@/features/app_auth/pages/AuthSuccessPage";
 
 // --- Lazy Loaded Feature Pages & Modals ---
 const ScraperPage = React.lazy(
@@ -134,6 +134,8 @@ export function isKnownRoute(path: string): boolean {
     clean === "/login" ||
     clean === "/register" ||
     clean === "/forgot-password" ||
+    clean === "/auth-success" ||
+    clean.startsWith("/auth-success") ||
     clean.startsWith("/auth/")
   ) {
     return true;
@@ -742,12 +744,14 @@ export default function AppRouter(props: AppRouterProps) {
 
   // --- Guard: OAuth Callback Launch Screen ---
   if (
+    currentPath === "/auth-success" ||
+    currentPath.startsWith("/auth-success") ||
     currentPath.startsWith("/auth/callback") ||
     currentPath.startsWith("/auth/redirect") ||
     currentPath.startsWith("/auth/google/callback") ||
     currentPath.startsWith("/auth/launch")
   ) {
-    return <AuthCallbackPage navigateTo={navigateTo} checkAuth={checkAuth} />;
+    return <AuthSuccessPage navigateTo={navigateTo} checkAuth={checkAuth} />;
   }
 
   // --- Guard: Route Not Found (404) for Public / Unauthenticated Visitors ---
