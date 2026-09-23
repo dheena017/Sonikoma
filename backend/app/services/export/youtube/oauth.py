@@ -124,13 +124,16 @@ async def get_authenticated_service(user_id: Optional[str] = None, allow_interac
         secrets_text = ""
         secrets_obj = None
 
-        # Canonical location after restructure: backend/client_secrets.json
-        client_secrets_file = os.path.join(PROJECT_ROOT, "backend", "data", "client_secrets.json")
+        # Canonical data location: data/client_secrets.json
+        client_secrets_file = os.path.join(PROJECT_ROOT, "data", "client_secrets.json")
         if not os.path.exists(client_secrets_file):
-            # Legacy root fallback
-            root_secrets = os.path.join(PROJECT_ROOT, "client_secrets.json")
-            if os.path.exists(root_secrets):
-                client_secrets_file = root_secrets
+            backend_secrets = os.path.join(PROJECT_ROOT, "backend", "data", "client_secrets.json")
+            if os.path.exists(backend_secrets):
+                client_secrets_file = backend_secrets
+            else:
+                root_secrets = os.path.join(PROJECT_ROOT, "client_secrets.json")
+                if os.path.exists(root_secrets):
+                    client_secrets_file = root_secrets
             else:
                 cwd_secrets = os.path.join(os.getcwd(), "client_secrets.json")
                 if os.path.exists(cwd_secrets):

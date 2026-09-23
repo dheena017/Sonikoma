@@ -11,10 +11,8 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
 REPO_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, ".."))
 
-# Database path resolution — prioritize app data directory, fallback to backend/database
 DATA_DIR = os.path.join(REPO_ROOT, "data")
 DB_PATH = os.path.join(DATA_DIR, "webtoon_local.db")
-BACKEND_DB_PATH = os.path.join(PROJECT_ROOT, "database", "webtoon_local.db")
 SCHEMA_PATH = os.path.join(PROJECT_ROOT, "app", "database", "schema.sql")
 if not os.path.exists(SCHEMA_PATH):
     SCHEMA_PATH = os.path.join(PROJECT_ROOT, "database", "schema.sql")
@@ -782,10 +780,7 @@ def seed_data_for_path(target_db):
 
 
 def seed_data():
-    target_dbs = [DB_PATH, BACKEND_DB_PATH]
-    unique_dbs = list(dict.fromkeys(target_dbs))
-    for target_db in unique_dbs:
-        seed_data_for_path(target_db)
+    seed_data_for_path(DB_PATH)
 
 
 def seed_training_data():
@@ -793,14 +788,9 @@ def seed_training_data():
     import numpy as np
     import cv2
 
-    training_dirs = [
-        os.path.join(REPO_ROOT, "data", "training_data"),
-        os.path.join(PROJECT_ROOT, "data", "training_data"),
-    ]
-
-    for training_dir in list(dict.fromkeys(training_dirs)):
-        os.makedirs(training_dir, exist_ok=True)
-        logger.info(f"Seeding mock training pairs in {training_dir}...")
+    training_dir = os.path.join(REPO_ROOT, "data", "training_data")
+    os.makedirs(training_dir, exist_ok=True)
+    logger.info(f"Seeding mock training pairs in {training_dir}...")
 
         samples = [
             {"id": "sample001", "text": "BOOM!", "color": (150, 100, 250), "shape": "circle"},
