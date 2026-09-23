@@ -27,7 +27,7 @@ from pathlib import Path
 
 SCRIPT_PATH = Path(__file__).resolve()
 
-# backend/scripts/check_python_modules.py
+# scripts/check_python_modules.py
 # backend root:
 PROJECT_ROOT = SCRIPT_PATH.parent.parent
 

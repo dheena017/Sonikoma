@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/test_target_url.py
+scripts/test_target_url.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma Scraper Engine: Advanced Target URL Test, Audit & Verification CLI.
 
@@ -16,26 +16,26 @@ Comprehensive interactive and command-line test runner for validating:
   • Batch concurrency and JSON audit report export
 ─────────────────────────────────────────────────────────────────────────────
 Usage:
-  python backend/scripts/test_target_url.py [URL] [OPTIONS]
+  python scripts/test_target_url.py [URL] [OPTIONS]
 
 Examples:
   # Interactive mode
-  python backend/scripts/test_target_url.py
+  python scripts/test_target_url.py
 
   # Test single URL with default options
-  python backend/scripts/test_target_url.py "https://manhuatop.org/manhua/i-m-really-not-a-demon-beast"
+  python scripts/test_target_url.py "https://manhuatop.org/manhua/i-m-really-not-a-demon-beast"
 
   # Scrape first 3 chapters with 3 parallel workers
-  python backend/scripts/test_target_url.py "https://manhuatop.org/manhua/my-series" -c 1-3 -j 3
+  python scripts/test_target_url.py "https://manhuatop.org/manhua/my-series" -c 1-3 -j 3
 
   # Test raw unfiltered image extraction
-  python backend/scripts/test_target_url.py "https://manhuatop.org/manhua/my-series/chapter-1" --mode raw
+  python scripts/test_target_url.py "https://manhuatop.org/manhua/my-series/chapter-1" --mode raw
 
   # Scrape and download images to disk with URL reachability verification
-  python backend/scripts/test_target_url.py "https://manhuatop.org/manhua/my-series/chapter-1" --download --verify-images
+  python scripts/test_target_url.py "https://manhuatop.org/manhua/my-series/chapter-1" --download --verify-images
 
   # Output full JSON response to stdout
-  python backend/scripts/test_target_url.py "https://manhuatop.org/manhua/my-series/chapter-1" --json
+  python scripts/test_target_url.py "https://manhuatop.org/manhua/my-series/chapter-1" --json
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -728,10 +728,10 @@ async def async_main():
         description="Sonikoma Scraper Engine: Advanced Target URL Test, Audit & Verification CLI.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""Examples:
-  python backend/scripts/test_target_url.py
-  python backend/scripts/test_target_url.py "https://manhuatop.org/manhua/my-series" -c 1-3
-  python backend/scripts/test_target_url.py "https://manhuatop.org/manhua/my-series" --mode raw --download
-  python backend/scripts/test_target_url.py "https://manhuatop.org/manhua/my-series" --verify-images --json
+  python scripts/test_target_url.py
+  python scripts/test_target_url.py "https://manhuatop.org/manhua/my-series" -c 1-3
+  python scripts/test_target_url.py "https://manhuatop.org/manhua/my-series" --mode raw --download
+  python scripts/test_target_url.py "https://manhuatop.org/manhua/my-series" --verify-images --json
 """
     )
 

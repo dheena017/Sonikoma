@@ -351,9 +351,9 @@ def _train_worker(epochs: int, batch_size: int = 4):
         if not os.path.exists(best_weights):
             raise FileNotFoundError("YOLO training finished but best.pt weights were not found.")
 
-        models_dir = os.path.abspath(os.path.join(base_dir, "local_media", "models"))
-        os.makedirs(models_dir, exist_ok=True)
-        finetuned_path = os.path.join(models_dir, "manga_finetuned.pt")
+        from core.config import MODELS_DIR
+        os.makedirs(MODELS_DIR, exist_ok=True)
+        finetuned_path = os.path.join(MODELS_DIR, "manga_finetuned.pt")
 
         shutil.copy(best_weights, finetuned_path)
         _set_loaded_yolo_model(YOLO(finetuned_path))

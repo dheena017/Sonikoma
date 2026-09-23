@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/test_universal_scraper.py
+scripts/test_universal_scraper.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma Scraper Engine: Master Universal Architecture & Verification Suite.
 
@@ -9,20 +9,20 @@ strict domain whitelist security, ad/lock filtering, memory caching,
 and REST API endpoint contracts.
 ─────────────────────────────────────────────────────────────────────────────
 Usage:
-  python backend/scripts/test_universal_scraper.py [OPTIONS] [USER_INPUT]
+  python scripts/test_universal_scraper.py [OPTIONS] [USER_INPUT]
 
 Examples:
   # Interactive mode with preset selection & custom URL prompt:
-  python backend/scripts/test_universal_scraper.py
+  python scripts/test_universal_scraper.py
 
   # Run the full 100+ check automated verification suite:
-  python backend/scripts/test_universal_scraper.py -a
+  python scripts/test_universal_scraper.py -a
 
   # Test any live URL directly:
-  python backend/scripts/test_universal_scraper.py "https://comic.naver.com/webtoon/detail?titleId=850952&no=21"
+  python scripts/test_universal_scraper.py "https://comic.naver.com/webtoon/detail?titleId=850952&no=21"
 
   # Test domain allowlist/blocklist security:
-  python backend/scripts/test_universal_scraper.py -b "badsite.com"
+  python scripts/test_universal_scraper.py -b "badsite.com"
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -459,11 +459,11 @@ def main():
             if target_domain:
                 run_dynamic_user_tests(user_block_domain=target_domain)
         elif user_input == "4":
-            os.system("python backend/scripts/test_chapter_scraper.py")
+            os.system("python scripts/test_chapter_scraper.py")
         elif user_input == "5":
-            os.system("python backend/scripts/test_series_scraper.py")
+            os.system("python scripts/test_series_scraper.py")
         elif user_input == "6":
-            os.system("python backend/scripts/test_all_chapters_images_scraper.py")
+            os.system("python scripts/test_all_chapters_images_scraper.py")
         elif user_input.startswith("http://") or user_input.startswith("https://") or "/" in user_input:
             run_dynamic_user_tests(user_url=user_input)
         else:

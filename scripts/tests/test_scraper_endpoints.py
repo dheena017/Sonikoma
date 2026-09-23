@@ -1,5 +1,5 @@
 """
-backend/scripts/test_scraper_endpoints.py
+scripts/test_scraper_endpoints.py
 ─────────────────────────────────────────────────────────────────────────────
 Comprehensive Automated REST API Endpoint Validation Suite for the Sonikoma
 Universal Adaptive Scraper.

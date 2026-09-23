@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/test_chapter_scraper.py
+scripts/test_chapter_scraper.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma Universal Chapter Scraper - Interactive CLI & Test Hub.
 

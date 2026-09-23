@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/tests/test_all_ai_models.py
+scripts/tests/test_all_ai_models.py
 ─────────────────────────────────────────────────────────────────────────────
 Universal Interactive & Automated AI Model Test Suite for Sonikoma.
 Features:

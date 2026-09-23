@@ -1,5 +1,5 @@
 """
-backend/scripts/reset_to_defaults.py
+scripts/reset_to_defaults.py
 ─────────────────────────────────────────────────────────────────────────────
 Safely resets all project data:
 1. Creates a timestamped backup of the database in data/backups/.

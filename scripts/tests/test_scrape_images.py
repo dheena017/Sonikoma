@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/test_scrape_images.py
+scripts/test_scrape_images.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma Scraper Engine: Live Comic Chapter Image Extractor & Downloader CLI.
 
@@ -8,7 +8,7 @@ Scrapes, verifies, and downloads full-resolution comic panels in natural reading
 from ANY supported comic, manhwa, or manga chapter URL.
 ─────────────────────────────────────────────────────────────────────────────
 Usage:
-  python backend/scripts/test_scrape_images.py [URL] [OPTIONS]
+  python scripts/test_scrape_images.py [URL] [OPTIONS]
 
 Options:
   --download, -d       Download all scraped panels locally to backend/downloads/

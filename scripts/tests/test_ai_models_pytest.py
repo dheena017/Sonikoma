@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/tests/test_ai_models_pytest.py
+scripts/tests/test_ai_models_pytest.py
 ─────────────────────────────────────────────────────────────────────────────
 Automated & Standalone Test Suite for Dynamic AI Model Catalog & Routing.
 - Dynamically validates all registered models from ModelRegistry (zero hardcoding).

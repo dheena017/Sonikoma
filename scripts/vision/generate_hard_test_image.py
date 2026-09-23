@@ -1,5 +1,5 @@
 """
-backend/scripts/generate_hard_test_image.py
+scripts/generate_hard_test_image.py
 ─────────────────────────────────────────────────────────────────────────────
 Synthetic Hard Challenge Generator for Comic & Manga Panel Detection:
 Creates edge-case benchmark images:

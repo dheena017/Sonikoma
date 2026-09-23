@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/discover_live_ai_models.py
+scripts/discover_live_ai_models.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma Live AI Model Discovery & Specification Inspector
 ─────────────────────────────────────────────────────────────────────────────

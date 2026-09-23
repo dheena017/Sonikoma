@@ -1,5 +1,5 @@
 """
-backend/scripts/test_crop_pipeline.py
+scripts/test_crop_pipeline.py
 ─────────────────────────────────────────────────────────────────────────────
 Interactive Developer Tool for Testing Comic Panel Detection, Characters & Cropping:
 - Enter any image URL or local file path
@@ -9,9 +9,9 @@ Interactive Developer Tool for Testing Comic Panel Detection, Characters & Cropp
 - Generates a visual debug overlay with panel frames, speech bubbles, and character silhouettes
 ─────────────────────────────────────────────────────────────────────────────
 Usage:
-  python backend/scripts/test_crop_pipeline.py
-  python backend/scripts/test_crop_pipeline.py --url "https://example.com/webtoon.webp"
-  python backend/scripts/test_crop_pipeline.py --file "C:/path/to/chapter.png" --out-dir "test_output"
+  python scripts/test_crop_pipeline.py
+  python scripts/test_crop_pipeline.py --url "https://example.com/webtoon.webp"
+  python scripts/test_crop_pipeline.py --file "C:/path/to/chapter.png" --out-dir "test_output"
 ─────────────────────────────────────────────────────────────────────────────
 """
 

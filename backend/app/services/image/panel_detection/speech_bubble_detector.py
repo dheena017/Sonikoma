@@ -55,10 +55,10 @@ def get_yolo_speech_bubble_model():
     from ultralytics import YOLO
     from huggingface_hub import hf_hub_download
 
-    # Priority 0: Custom locally fine-tuned model (if exists)
+    # Priority 0: Custom locally fine-tuned model (if exists in data/models)
     try:
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        custom_model_path = os.path.join(base_dir, "local_media", "models", "manga_finetuned.pt")
+        from core.config import MODELS_DIR
+        custom_model_path = os.path.join(MODELS_DIR, "manga_finetuned.pt")
         if os.path.exists(custom_model_path):
             logger.info(f"[YOLO Detector] Loading custom fine-tuned YOLO model: {custom_model_path}")
             _yolo_model = YOLO(custom_model_path)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/test_series_scraper.py
+scripts/test_series_scraper.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma Series Scraper: Interactive User Hub & Episode Batch Selector.
 
@@ -231,7 +231,7 @@ async def discover_and_select_episodes(
     if not series_data or (not series_data.get("chapters") and not series_data.get("episodes")):
         print(f"\n  {color('Notice:', Style.YELLOW)} No chapter catalog found for this URL.")
         print(f"  💡 {color('Tip:', Style.CYAN)} If this is a single chapter reader, you can test it directly with:")
-        print(f"     python backend/scripts/tests/test_chapter_scraper.py \"{series_url}\"")
+        print(f"     python scripts/tests/test_chapter_scraper.py \"{series_url}\"")
         return
 
     title = series_data.get("title") or series_data.get("series_title") or "Comic Series"

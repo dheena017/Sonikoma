@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-backend/scripts/test_all_chapters_images_scraper.py
+scripts/test_all_chapters_images_scraper.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma Universal Full-Series All-Chapters Image Scraper & Downloader.
 
@@ -14,10 +14,10 @@ Sonikoma Universal Full-Series All-Chapters Image Scraper & Downloader.
 ─────────────────────────────────────────────────────────────────────────────
 Usage:
   # Interactive mode (Prompts for URL & settings):
-  python backend/scripts/test_all_chapters_images_scraper.py
+  python scripts/test_all_chapters_images_scraper.py
 
   # Direct URL via command line:
-  python backend/scripts/test_all_chapters_images_scraper.py "https://comic.naver.com/webtoon/list?titleId=850952"
+  python scripts/test_all_chapters_images_scraper.py "https://comic.naver.com/webtoon/list?titleId=850952"
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -214,7 +214,7 @@ async def process_user_series_input(
     if not series_data or not series_data.get("episodes"):
         print(f"\n  {color('Notice:', Style.YELLOW)} No full episode catalog found for this URL.")
         print(f"  💡 {color('Tip:', Style.CYAN)} If this is a single chapter reader, you can test it directly with:")
-        print(f"     python backend/scripts/test_chapter_scraper.py \"{user_url}\" -d")
+        print(f"     python scripts/test_chapter_scraper.py \"{user_url}\" -d")
         return
 
     title = series_data.get("title") or "Webtoon_Series"
