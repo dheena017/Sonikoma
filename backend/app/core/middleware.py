@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.core.logging import logger
+from app.core.logging import logger, set_current_request_id, set_current_user_id
 from app.core.config import APP_URL, BACKEND_PORT, FRONTEND_PORT, NODE_ENV, API_VERSION
 from app.api.dependencies.auth import get_current_user
 
@@ -257,6 +257,7 @@ async def rate_limiting_middleware(request: Request, call_next):
 # ─────────────────────────────────────────────────────────────────────────────
 async def add_process_time_header(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4())[:8])
+    set_current_request_id(request_id)
 
     start = time.perf_counter()
     response = await call_next(request)

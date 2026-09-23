@@ -31,9 +31,10 @@ class UIStreamLogHandler(logging.Handler):
     def emit(self, record):
         global log_seq, _last_emitted_msg, _last_emitted_time, _repeat_count
         try:
-            from app.core.logging.filters import EndpointFilter
-            if not EndpointFilter().filter(record):
+            from app.core.logging.filters import get_global_endpoint_filter, get_global_redactor_filter
+            if not get_global_endpoint_filter().filter(record):
                 return
+            get_global_redactor_filter().filter(record)
 
             msg = record.getMessage()
             clean_msg = ANSI_ESCAPE.sub('', msg)
