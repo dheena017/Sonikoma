@@ -118,6 +118,120 @@ const AICreditWalletPage = React.lazy(
 import MainLayout from "@/components/layout/MainLayout";
 import { useProjectStore } from "@/shared/hooks";
 
+/**
+ * Validates whether an incoming path matches any registered app route.
+ * Returns false for unknown / undefined URLs so the 404 page is rendered.
+ */
+export function isKnownRoute(path: string): boolean {
+  if (!path) return true;
+  const clean = path.split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+
+  // 1. Landing & Public Auth Routes
+  if (
+    clean === "/" ||
+    clean === "/landing" ||
+    clean === "/index.html" ||
+    clean === "/login" ||
+    clean === "/register" ||
+    clean === "/forgot-password" ||
+    clean.startsWith("/auth/")
+  ) {
+    return true;
+  }
+
+  // 2. Scraper & Chapter Workspaces
+  if (
+    clean === "/scraper" ||
+    clean === "/chapter-scraper" ||
+    clean === "/episode-scraper" ||
+    clean === "/scraper/chapter-scraper" ||
+    clean === "/scraper/episode-scraper" ||
+    clean === "/scraper/audio-settings" ||
+    clean.startsWith("/scraper/editor") ||
+    clean.startsWith("/scraper/series/") ||
+    clean.startsWith("/scraper/")
+  ) {
+    return true;
+  }
+
+  // 3. Studio Editors & Processing
+  if (
+    clean === "/editor" ||
+    clean.startsWith("/editor/") ||
+    clean.includes("/chapters/") ||
+    clean === "/image-editor" ||
+    clean.startsWith("/image-editor/") ||
+    clean === "/video-editor" ||
+    clean.startsWith("/video-editor/") ||
+    clean === "/auto-crop"
+  ) {
+    return true;
+  }
+
+  // 4. Projects & Series Details
+  if (clean === "/projects" || clean.startsWith("/projects/")) {
+    return true;
+  }
+
+  // 5. System, Settings & User Profile
+  if (
+    clean === "/dashboard" ||
+    clean === "/shortcuts" ||
+    clean === "/profile" ||
+    clean.startsWith("/profile/") ||
+    clean === "/settings/account" ||
+    clean.startsWith("/settings/") ||
+    clean === "/notifications" ||
+    clean === "/admin" ||
+    clean === "/admin-dashboard" ||
+    clean.startsWith("/admin/")
+  ) {
+    return true;
+  }
+
+  // 6. Creative Suite
+  if (
+    clean === "/creative-suite" ||
+    clean === "/creative-suite-dashboard" ||
+    clean === "/creative-suite/ai-optimizer" ||
+    clean === "/creative-suite/panel-assistant" ||
+    clean === "/creative-suite/ai-characters" ||
+    clean === "/creative-suite/ai-thumbnails" ||
+    clean === "/creative-suite/ai-voice" ||
+    clean === "/creative-suite/youtube" ||
+    clean === "/ai-optimizer" ||
+    clean === "/panel-assistant" ||
+    clean === "/ai-characters" ||
+    clean === "/ai-thumbnails" ||
+    clean === "/ai-voice" ||
+    clean === "/youtube"
+  ) {
+    return true;
+  }
+
+  // 7. AI Core Suite
+  if (
+    clean === "/ai-core" ||
+    clean === "/ai-core/overview" ||
+    clean === "/ai-core/api-keys" ||
+    clean === "/ai-core/limits" ||
+    clean === "/ai-core/safety-quotas" ||
+    clean === "/ai-core/tokens" ||
+    clean === "/ai-core/usage" ||
+    clean === "/ai-core/charts" ||
+    clean === "/ai-core/analytics" ||
+    clean === "/ai-core/routing" ||
+    clean === "/ai-core/models" ||
+    clean === "/ai-core/wallet" ||
+    clean === "/ai-core/billing" ||
+    clean === "/ai-core/playground" ||
+    clean === "/ai-core/arena"
+  ) {
+    return true;
+  }
+
+  return false;
+}
 
 export interface AppRouterProps {
   currentPath: string;
@@ -636,7 +750,18 @@ export default function AppRouter(props: AppRouterProps) {
     return <AuthCallbackPage navigateTo={navigateTo} checkAuth={checkAuth} />;
   }
 
-  // --- Guard: Protected Route Redirect ---
+  // --- Guard: Route Not Found (404) for Public / Unauthenticated Visitors ---
+  if (!isKnownRoute(currentPath)) {
+    if (!isAuthenticated) {
+      return (
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#07090e] p-4">
+          <PageNotFound onNavigateHome={() => navigateTo("/")} />
+        </div>
+      );
+    }
+  }
+
+  // --- Guard: Protected Route Redirect (Only for valid authenticated routes) ---
   if (
     !isAuthenticated &&
     currentPath !== "/scraper" &&
@@ -1372,7 +1497,9 @@ export default function AppRouter(props: AppRouterProps) {
                   onNavigateHome={handleNavigateHome}
                   addNotification={addNotification}
                 />
-              ) : null}
+              ) : (
+                <PageNotFound onNavigateHome={() => navigateTo("/creative-suite")} />
+              )}
             </CreativeSuiteLayout>
           </div>
         )}
@@ -1391,8 +1518,10 @@ export default function AppRouter(props: AppRouterProps) {
                 <AIRoutingPage addNotification={addNotification} />
               ) : isAIWalletPath ? (
                 <AICreditWalletPage addNotification={addNotification} />
-              ) : (
+              ) : isAICoreDashboardPath ? (
                 <AICoreOverviewPage addNotification={addNotification} />
+              ) : (
+                <PageNotFound onNavigateHome={() => navigateTo("/ai-core")} />
               )}
 
             </div>
@@ -1589,31 +1718,9 @@ export default function AppRouter(props: AppRouterProps) {
         )}
 
         {/* FALLBACK VIEW: 404 Route Not Found */}
-        {!isWorkspacePath &&
-          !isDashboardOverviewPath &&
-          !isProjectsPath &&
-          !isAutoCropPath &&
-          !isEditorPath &&
-          !isImageEditorPage &&
-          !isShortcutsPath &&
-          !isAudioSettingsPath &&
-          !isOptimizerPath &&
-          !isPanelAssistantPath &&
-          !isCharacterPath &&
-          !isVoicePath &&
-          !isYouTubePath &&
-          !isProfilePath &&
-          !isNotificationsPath &&
-          !isAdminPath &&
-          !isAdminDashboardPath &&
-          !isSeriesDetailsPath &&
-          !isEpisodeScraperPath &&
-          !isCreativeSuitePath &&
-          !isCreativeSuiteDashboardPath &&
-          !isAICorePath &&
-          !isVideoEditorPath && (
-            <PageNotFound onNavigateHome={() => navigateTo("/")} />
-          )}
+        {!isKnownRoute(currentPath) && (
+          <PageNotFound onNavigateHome={() => navigateTo(isAuthenticated ? "/dashboard" : "/")} />
+        )}
       </React.Suspense>
     </MainLayout>
   );

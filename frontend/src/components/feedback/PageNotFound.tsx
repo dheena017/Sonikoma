@@ -27,7 +27,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
         </div>
 
         {/* 404 Header Text with Gradient */}
-        <h1 className="relative z-10 font-sans font-extrabold text-8xl md:text-9xl tracking-tighter bg-gradient-to-r from-[#2A2A2A] via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent select-none filter drop- leading-none mb-4">
+        <h1 className="relative z-10 font-sans font-extrabold text-8xl md:text-9xl tracking-tighter bg-gradient-to-r from-blue-400 via-fuchsia-400 to-indigo-400 bg-clip-text text-transparent select-none drop-shadow-[0_0_35px_rgba(168,85,247,0.35)] leading-none mb-4">
           404
         </h1>
 
@@ -36,7 +36,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
           Page Not Found
         </h2>
 
-        <p className="relative z-10 text-sm text-neutral-400 max-w-md mx-auto mb-8 font-sans leading-relaxed">
+        <p className="relative z-10 text-sm text-neutral-300 max-w-md mx-auto mb-8 font-sans leading-relaxed">
           The route you are trying to reach is not defined in this application.
           It may have been moved, renamed, or vanished into the digital ether.
         </p>
@@ -45,7 +45,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
         <div className="relative z-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
             onClick={onNavigateHome}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-medium hover:from-blue-500 hover:to-indigo-500 transition-all duration-300 shadow-lg shadow-black/50 hover:shadow-black/50 hover:scale-[1.02] cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium transition-all duration-300 shadow-lg shadow-indigo-900/40 hover:scale-[1.02] cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
             Return to Dashboard
@@ -53,7 +53,7 @@ export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
 
           <button
             onClick={() => window.location.reload()}
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl border border-neutral-800 bg-neutral-900/40 text-neutral-300 font-medium hover:bg-neutral-900 hover:text-white hover:border-neutral-700 transition-all duration-300 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-xl border border-neutral-800 bg-neutral-900/60 text-neutral-200 font-medium hover:bg-neutral-800 hover:text-white hover:border-neutral-700 transition-all duration-300 cursor-pointer"
           >
             Reload Page
           </button>
