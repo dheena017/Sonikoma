@@ -110,13 +110,13 @@ class EndpointFilter(logging.Filter):
             if record.levelno >= logging.WARNING:
                 return True
 
-            # Block third-party internal compiler/optimization dumps (e.g. numba ssa.py, byteflow.py)
+            # Block third-party internal dumps (e.g. numba compiler passes, hpack http2 header bit dumps)
             filename = getattr(record, "filename", "")
-            if filename in ("ssa.py", "byteflow.py", "interpreter.py", "transforms.py", "typeinfer.py", "kdtree.py"):
+            if filename in ("ssa.py", "byteflow.py", "interpreter.py", "transforms.py", "typeinfer.py", "kdtree.py", "hpack.py", "table.py"):
                 return False
 
             record_name = getattr(record, "name", "")
-            if any(record_name.startswith(pkg) for pkg in ("numba", "matplotlib", "scipy", "librosa", "pymatting")):
+            if any(record_name.startswith(pkg) for pkg in ("numba", "matplotlib", "scipy", "librosa", "pymatting", "hpack", "h2", "httpcore")):
                 return False
 
             msg = record.getMessage()
