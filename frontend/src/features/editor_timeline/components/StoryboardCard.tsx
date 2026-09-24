@@ -1509,27 +1509,18 @@ const StoryboardCard = ({
             <div />
           )}
 
-          {/* Details / Narrator Toggle Button */}
+          {/* AI Panel Assistant */}
           <button
             type="button"
-            onClick={() => setShowDetails(!showDetails)}
-            className={`h-7.5 rounded-lg border text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors outline-none focus:outline-none focus:ring-0 ${showDetails
-                ? "border-blue-500/40 bg-blue-950/30 text-blue-200 shadow-xs"
-                : "border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white"
-              }`}
-            title={showDetails ? "Switch back to Narrator" : "Show Details (Dialogue, SFX, Scene)"}
+            onClick={handleOpenAssistant}
+            className="h-7.5 rounded-lg border border-emerald-500/30 bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors outline-none focus:outline-none focus:ring-0"
+            title="Open AI Panel Assistant"
           >
-            <span>{showDetails ? "Narrator" : "Details"}</span>
-            {hasExtraDetails && !showDetails && (
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            )}
-            {showDetails ? (
-              <ChevronUp className="h-3.5 w-3.5 text-blue-400" />
-            ) : (
-              <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />
-            )}
+            <Bot className="h-3.5 w-3.5 text-emerald-400" />
+            <span>AI Asset</span>
           </button>
         </div>
+
       </div>
     </div>
   );
