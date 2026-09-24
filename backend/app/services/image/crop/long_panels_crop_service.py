@@ -19,6 +19,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Tuple
 
 from PIL import Image, ImageOps
+import numpy as np
 
 from schemas.crop import (
     PanelBoundingBox,
@@ -35,6 +36,61 @@ logger = logging.getLogger("sonikoma.services.crop.long_panels")
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", ".."))
 MEDIA_DIR = os.path.join(PROJECT_ROOT, "data", "local_media")
 os.makedirs(MEDIA_DIR, exist_ok=True)
+
+
+def _apply_color_distance_autotrim(
+    img: Image.Image,
+    tolerance: int = 22
+) -> Tuple[Image.Image, Tuple[int, int, int, int], bool]:
+    """
+    Trims solid/scanned borders (e.g. white/black/neutral margins) from an image.
+    Uses Euclidean color distance from corner pixels to eliminate extra whitespace around panels.
+    """
+    w, h = img.size
+    if h < 25 or w < 25:
+        return img, (0, 0, w, h), False
+
+    try:
+        rgb = np.array(img.convert("RGB"))
+
+        # Sample corner background color
+        corners = [rgb[0, 0], rgb[0, w - 1], rgb[h - 1, 0], rgb[h - 1, w - 1]]
+        bg_rgb = np.mean(corners, axis=0)
+
+        # Check that corners are reasonably consistent background
+        corner_stds = np.std(corners, axis=0)
+        if np.max(corner_stds) > 25.0:
+            return img, (0, 0, w, h), False
+
+        # Compute Euclidean distance of every pixel to background color
+        diff = np.linalg.norm(rgb - bg_rgb, axis=2)
+        is_content = diff > tolerance
+
+        if not np.any(is_content):
+            return img, (0, 0, w, h), False
+
+        rows = np.any(is_content, axis=1)
+        cols = np.any(is_content, axis=0)
+
+        ymin, ymax = np.where(rows)[0][[0, -1]]
+        xmin, xmax = np.where(cols)[0][[0, -1]]
+
+        # Ensure reasonable bounds
+        if (xmax - xmin >= 15) and (ymax - ymin >= 15):
+            t_x1 = max(0, int(xmin))
+            t_y1 = max(0, int(ymin))
+            t_x2 = min(w, int(xmax + 1))
+            t_y2 = min(h, int(ymax + 1))
+
+            # Only trim if there are actually extra borders (> 1px on any side)
+            if t_x1 > 1 or t_y1 > 1 or (w - t_x2) > 1 or (h - t_y2) > 1:
+                trimmed = img.crop((t_x1, t_y1, t_x2, t_y2))
+                return trimmed, (t_x1, t_y1, t_x2, t_y2), True
+
+    except Exception as err:
+        logger.warning(f"[LongPanelsCrop] Auto-trim failed: {err}")
+
+    return img, (0, 0, w, h), False
 
 
 def _box_to_dict(box) -> dict:
@@ -101,6 +157,16 @@ def _encode_slice_worker(args: Tuple) -> Optional[CroppedSliceItem]:
         w = int(box_dict.get("width") or box_dict.get("w") or cropped_img.width)
         h = int(box_dict.get("height") or box_dict.get("h") or cropped_img.height)
         panel_id = box_dict.get("panel_id") or str(box_dict.get("id") or f"panel_{order_idx + 1}")
+
+        # Auto-trim solid background borders (white/off-white margins) to eliminate extra whitespace
+        trimmed_img, trim_box, was_trimmed = _apply_color_distance_autotrim(cropped_img, tolerance=22)
+        if was_trimmed:
+            cropped_img = trimmed_img
+            t_x1, t_y1, t_x2, t_y2 = trim_box
+            x += t_x1
+            y += t_y1
+            w = t_x2 - t_x1
+            h = t_y2 - t_y1
 
         target_fmt = (output_format or "webp").upper()
         if target_fmt in ("JPG", "JPEG"):

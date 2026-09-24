@@ -204,27 +204,27 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                                 piece_h = piece.get("h", ph)
                                 if piece_h >= max(40, int(pw * 0.10)):
                                     subdivided_cv.append({
-                                        "x": 0,
+                                        "x": px,
                                         "y": py + piece.get("y", 0),
-                                        "w": img_w,
+                                        "w": pw,
                                         "h": piece_h,
                                         "confidence": p.get("confidence", 0.95),
                                         "label": "webtoon_subpanel"
                                     })
                         else:
                             subdivided_cv.append({
-                                "x": 0,
+                                "x": px,
                                 "y": py,
-                                "w": img_w,
+                                "w": pw,
                                 "h": ph,
                                 "confidence": p.get("confidence", 0.95),
                                 "label": "panel"
                             })
                     else:
                         subdivided_cv.append({
-                            "x": 0,
+                            "x": px,
                             "y": py,
-                            "w": img_w,
+                            "w": pw,
                             "h": ph,
                             "confidence": p.get("confidence", 0.95),
                             "label": p.get("label", "panel")
