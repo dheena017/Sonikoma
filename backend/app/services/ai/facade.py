@@ -825,7 +825,9 @@ async def facade_analyze_batch(
         if isinstance(p_idx, int):
             items_by_idx[p_idx] = it
 
-    results = []
+    # 3. Assemble analyses and update rolling memory
+    parsed_panel_data = []
+
     for i, p in enumerate(panels):
         p_id = getattr(p, "id", None) if not isinstance(p, dict) else p.get("id")
         p_url = getattr(p, "url", None) if not isinstance(p, dict) else p.get("url")
@@ -846,10 +848,6 @@ async def facade_analyze_batch(
         global_panel_idx = start_index + i
         memory_tracker.update_from_analysis(analysis, global_panel_idx)
 
-        # Granular audio generation
-        audio_url = None
-        narrative_audio_url = None
-
         speech_text = (analysis.get("speech_text") or "").strip()
         narrative_text = (analysis.get("narrative") or analysis.get("narrativeText") or "").strip()
 
@@ -869,32 +867,74 @@ async def facade_analyze_batch(
         else:
             target_voice = "en-US-GuyNeural"
 
-        if do_dialogue_tts and speech_text:
-            audio_url, actual_dur = await _synthesize_tts_to_cache(speech_text, target_voice, analysis.get("duration", 4.0))
-            if actual_dur:
-                analysis["duration"] = actual_dur
+        narr_voice = voice or "en-US-GuyNeural"
 
-        if do_narrative_tts and narrative_text:
-            narr_voice = voice or "en-US-GuyNeural"
-            narrative_audio_url, narr_dur = await _synthesize_tts_to_cache(narrative_text, narr_voice, analysis.get("duration", 4.0))
-            if narr_dur and not audio_url:
-                analysis["duration"] = narr_dur
+        parsed_panel_data.append({
+            "p_id": p_id,
+            "p_url": p_url,
+            "analysis": analysis,
+            "speech_text": speech_text,
+            "narrative_text": narrative_text,
+            "do_dialogue_tts": do_dialogue_tts,
+            "do_narrative_tts": do_narrative_tts,
+            "target_voice": target_voice,
+            "narr_voice": narr_voice,
+        })
+
+    # Concurrently synthesize all TTS audio for the batch in parallel
+    async def _synth_for_panel(panel_item):
+        a_url, a_dur = None, None
+        n_url, n_dur = None, None
+        ana = panel_item["analysis"]
+
+        sub_tasks = []
+        if panel_item["do_dialogue_tts"] and panel_item["speech_text"]:
+            sub_tasks.append(("dialogue", _synthesize_tts_to_cache(panel_item["speech_text"], panel_item["target_voice"], ana.get("duration", 4.0))))
+        if panel_item["do_narrative_tts"] and panel_item["narrative_text"]:
+            sub_tasks.append(("narrative", _synthesize_tts_to_cache(panel_item["narrative_text"], panel_item["narr_voice"], ana.get("duration", 4.0))))
+
+        if sub_tasks:
+            synth_results = await asyncio.gather(*(t[1] for t in sub_tasks), return_exceptions=True)
+            for idx, res in enumerate(synth_results):
+                kind = sub_tasks[idx][0]
+                if isinstance(res, tuple):
+                    url, dur = res
+                    if kind == "dialogue":
+                        a_url, a_dur = url, dur
+                    elif kind == "narrative":
+                        n_url, n_dur = url, dur
+                elif isinstance(res, Exception):
+                    logger.warning(f"[facade_analyze_batch] Audio synthesis exception for {kind}: {res}")
+
+        return a_url, a_dur, n_url, n_dur
+
+    tts_results = await asyncio.gather(*(_synth_for_panel(it) for it in parsed_panel_data))
+
+    results = []
+    for i, it in enumerate(parsed_panel_data):
+        analysis = it["analysis"]
+        a_url, a_dur, n_url, n_dur = tts_results[i]
+
+        if a_dur:
+            analysis["duration"] = a_dur
+        if n_dur and not a_url:
+            analysis["duration"] = n_dur
 
         if not analysis.get("duration") or analysis["duration"] <= 0:
-            ref_text = narrative_text if do_narrative_tts else speech_text
+            ref_text = it["narrative_text"] if it["do_narrative_tts"] else it["speech_text"]
             if ref_text:
                 analysis["duration"] = estimate_duration_from_speech(ref_text)
 
         narrative_val = analysis.get("narrative") or ""
         results.append({
-            "id": p_id,
-            "url": p_url,
+            "id": it["p_id"],
+            "url": it["p_url"],
             "success": True,
             "analysis": analysis,
             "narrative": narrative_val,
             "narrativeText": narrative_val,
-            "audio_url": audio_url,
-            "narrative_audio_url": narrative_audio_url,
+            "audio_url": a_url,
+            "narrative_audio_url": n_url,
             "dialogue_turns": analysis.get("dialogue_turns", []),
             "speaker_name": analysis.get("speaker_name"),
             "speaker_gender": analysis.get("speaker_gender"),

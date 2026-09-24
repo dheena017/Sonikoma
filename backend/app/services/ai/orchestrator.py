@@ -245,9 +245,9 @@ class AIOrchestrator:
     """
 
     DEFAULT_CAPABILITY_ROUTING = {
-        "storyboard_narrative": "gemini-2.5-flash",
-        "panel_analysis": "gemini-2.5-flash",
-        "batch_panel_analysis": "gemini-2.5-flash",
+        "storyboard_narrative": "gemini-3.5-flash-lite",
+        "panel_analysis": "gemini-3.5-flash-lite",
+        "batch_panel_analysis": "gemini-3.5-flash-lite",
         "scraper_blueprint": "gemini-2.5-flash",
         "prompt_enhancement": "gemini-2.5-flash",
         "image_diffusion": "FLUX.1-schnell",
@@ -259,7 +259,7 @@ class AIOrchestrator:
         "seo_optimization": "gemini-2.5-flash",
         "sfx_audio": "gemini-2.5-flash",
         "bgm_vibe": "gemini-2.5-flash",
-        "smart_crop": "gemini-2.5-flash",
+        "smart_crop": "gemini-3.5-flash-lite",
         "chat_completion": "gemini-2.5-flash",
         "text": "gemini-2.5-flash",
     }

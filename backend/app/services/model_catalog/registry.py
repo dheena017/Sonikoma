@@ -273,8 +273,9 @@ class ModelRegistry:
         return matching[:2] if matching else ["gemini-3.5-flash-lite"]
 
     RECOMMENDED_CAPABILITY_CHAINS: Dict[str, List[tuple[str, str]]] = {
-        "storyboard_narrative": [("gemini", "gemini-2.5-flash"), ("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o")],
-        "panel_analysis": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
+        "storyboard_narrative": [("gemini", "gemini-3.5-flash-lite"), ("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o")],
+        "panel_analysis": [("gemini", "gemini-3.5-flash-lite"), ("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o")],
+        "batch_panel_analysis": [("gemini", "gemini-3.5-flash-lite"), ("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o")],
         "scraper_blueprint": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("deepseek", "deepseek-chat")],
         "prompt_enhancement": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
         "image_diffusion": [("huggingface", "FLUX.1-schnell"), ("openai", "dall-e-3"), ("stablediffusion", "stable-diffusion-xl")],
@@ -283,7 +284,7 @@ class ModelRegistry:
         "character_persona": [("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o"), ("gemini", "gemini-2.5-flash")],
         "seo_optimization": [("openai", "gpt-4o-mini"), ("gemini", "gemini-2.5-flash"), ("deepseek", "deepseek-chat")],
         "sfx_audio": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
-        "smart_crop": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
+        "smart_crop": [("gemini", "gemini-3.5-flash-lite"), ("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o")],
     }
 
     @classmethod
