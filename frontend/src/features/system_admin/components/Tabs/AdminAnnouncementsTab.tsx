@@ -31,7 +31,7 @@ export function AdminAnnouncementsTab({
   const fetchAnnouncements = async () => {
     try {
       setLoading(true);
-      const res = await fetchWithInterceptor("/api/auth/admin/announcements");
+      const res = await fetchWithInterceptor("/api/v1/auth/admin/announcements");
       const data = await res.json();
       if (data.success) {
         setAnnouncements(data.announcements);
@@ -48,7 +48,7 @@ export function AdminAnnouncementsTab({
     if (!newTitle || !newMessage) return;
 
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/announcements", {
+      const res = await fetchWithInterceptor("/api/v1/auth/admin/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -75,7 +75,7 @@ export function AdminAnnouncementsTab({
       return;
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/announcements/${id}`,
+        `/api/v1/auth/admin/announcements/${id}`,
         {
           method: "DELETE",
         }

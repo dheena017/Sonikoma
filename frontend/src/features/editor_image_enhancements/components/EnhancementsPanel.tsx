@@ -72,7 +72,7 @@ export default function EnhancementsPanel({
     try {
       if (fetchWithInterceptor) {
         await fetchWithInterceptor(
-          `/api/image/analyze-panel/${activeStoryboardPanel.id}`,
+          `/api/v1/images/analyze-panel/${activeStoryboardPanel.id}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -110,7 +110,7 @@ export default function EnhancementsPanel({
     try {
       if (fetchWithInterceptor && activeStoryboardPanel.id) {
         await fetchWithInterceptor(
-          `/api/image/process-layers/${activeStoryboardPanel.id}`,
+          `/api/v1/images/process-layers/${activeStoryboardPanel.id}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

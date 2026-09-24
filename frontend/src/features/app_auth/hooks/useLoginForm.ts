@@ -271,11 +271,11 @@ export default function useLoginForm(props: LoginFormProps) {
     setInfoMessage(null);
 
     if (provider === "Google") {
-      window.location.href = "/api/auth/google/login";
+      window.location.href = "/api/v1/auth/google/login";
     } else if (provider === "GitHub") {
-      window.location.href = "/api/auth/github/login";
+      window.location.href = "/api/v1/auth/github/login";
     } else if (provider === "Discord") {
-      window.location.href = "/api/auth/discord/login";
+      window.location.href = "/api/v1/auth/discord/login";
     } else {
       setSocialProviderLoading(null);
       setError(`OAuth sign in with ${provider} is currently unavailable.`);

@@ -33,7 +33,7 @@ async def debug_yolo_detections_service(url: str, confidence: float = 0.25) -> D
         "image/png"
     )
     unique_id = f"yolo_debug_{int(time.time() * 1000)}"
-    proxy_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
+    proxy_url = supabase_url if supabase_url else f"/api/v1/images/cached/{unique_id}"
     stitched_cache.set(unique_id, {"data": cleaned_bytes, "content_type": "image/png"})
     return {"success": True, "url": proxy_url, "detections_count": len(boxes), "boxes": boxes}
 
@@ -54,7 +54,7 @@ async def bubble_cleaning_service(url: str, confidence: float = 0.25) -> Dict[st
         "image/png"
     )
     unique_id = f"cleaned_{int(time.time() * 1000)}"
-    proxy_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
+    proxy_url = supabase_url if supabase_url else f"/api/v1/images/cached/{unique_id}"
     stitched_cache.set(unique_id, {"data": cleaned_bytes, "content_type": "image/png"})
     edit_history.set(proxy_url, url)
     try:

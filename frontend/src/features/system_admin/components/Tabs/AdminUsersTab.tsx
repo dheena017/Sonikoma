@@ -59,7 +59,7 @@ export function AdminUsersTab({
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/users");
+      const res = await fetchWithInterceptor("/api/v1/auth/admin/users");
       if (res.ok) {
         const data = await res.json();
         if (data.success) setUsers(data.users);
@@ -92,7 +92,7 @@ export function AdminUsersTab({
 
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/users/${editingUser.id}`,
+        `/api/v1/auth/admin/users/${editingUser.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -126,7 +126,7 @@ export function AdminUsersTab({
     }
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/users/${deletingUser.id}`,
+        `/api/v1/auth/admin/users/${deletingUser.id}`,
         { method: "DELETE" }
       );
       if (res.ok) {
@@ -146,7 +146,7 @@ export function AdminUsersTab({
     setUserLogs([]);
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/users/${user.id}/logs?limit=50`
+        `/api/v1/auth/admin/users/${user.id}/logs?limit=50`
       );
       if (res.ok) {
         const data = await res.json();
@@ -162,7 +162,7 @@ export function AdminUsersTab({
   const handleBulkAction = async (action: string, value?: string) => {
     if (selectedUsers.size === 0) return;
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/users/bulk", {
+      const res = await fetchWithInterceptor("/api/v1/auth/admin/users/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -185,7 +185,7 @@ export function AdminUsersTab({
     if (!confirm("Impersonate this user?")) return;
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/impersonate/${user_id}`,
+        `/api/v1/auth/admin/impersonate/${user_id}`,
         { method: "POST" }
       );
       if (res.ok) {
@@ -641,7 +641,7 @@ export function AdminUsersTab({
                   setIsGranting(true);
                   try {
                     const res = await fetchWithInterceptor(
-                      `/api/auth/admin/users/${grantCreditsUser.id}/add-credits`,
+                      `/api/v1/auth/admin/users/${grantCreditsUser.id}/add-credits`,
                       {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },

@@ -105,7 +105,7 @@ export default function YouTubeCreatePlaylistPanel({
     const fetchVideos = async () => {
       setLoadingVideos(true);
       try {
-        const res = await fetch("/api/export/youtube/videos?max_results=50", {
+        const res = await fetch("/api/v1/export/youtube/videos?max_results=50", {
           headers: { Authorization: `Bearer ${getToken()}` },
         });
         if (res.ok) {
@@ -250,7 +250,7 @@ export default function YouTubeCreatePlaylistPanel({
         channel_name: "Webtoon Anime Studio",
       };
 
-      const res = await fetch("/api/export/youtube/playlist/ai-generate", {
+      const res = await fetch("/api/v1/export/youtube/playlist/ai-generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -344,7 +344,7 @@ export default function YouTubeCreatePlaylistPanel({
         ];
       }
 
-      const res = await fetch("/api/export/youtube/playlists", {
+      const res = await fetch("/api/v1/export/youtube/playlists", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

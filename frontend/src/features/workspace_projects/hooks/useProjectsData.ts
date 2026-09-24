@@ -23,7 +23,7 @@ export function useProjectsData(): UseProjectsDataState {
         setLoading(true);
       }
       setError(null);
-      const res = await fetch("/api/projects", {
+      const res = await fetch("/api/v1/projects", {
         headers: {
           Authorization: `Bearer ${
             localStorage.getItem("sonikoma_token") ||

@@ -131,7 +131,7 @@ export default function LayerSeparationPanel({
 
     try {
       const res = await fetchWithInterceptor(
-        `/api/audio/align-dialogue/${activeStoryboardPanel.id}`,
+        `/api/v1/audio/align-dialogue/${activeStoryboardPanel.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

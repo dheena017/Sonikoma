@@ -65,7 +65,7 @@ export function AdminSettingsTab({
       return;
     setResetting(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/settings/reset", {
+      const res = await fetchWithInterceptor("/api/v1/auth/admin/settings/reset", {
         method: "POST",
       });
       if (res.ok) {
@@ -94,7 +94,7 @@ export function AdminSettingsTab({
     setPurging(true);
     try {
       const res = await fetchWithInterceptor(
-        "/api/auth/admin/settings/purge-cache",
+        "/api/v1/auth/admin/settings/purge-cache",
         {
           method: "POST",
         }

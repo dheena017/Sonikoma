@@ -119,8 +119,8 @@ async def resolve_url_to_buffer(
             break
 
     # 2. Check in-memory merged/stitch cache first (zero-cost retrieval)
-    if '/api/image/cached/' in working_url or '/api/merge-images/cached/' in working_url or '/api/stitch-images/cached/' in working_url:
-        match = re.search(r'/(?:image|(?:merge|stitch)-images?)/cached/([^/?&]+)', working_url)
+    if '/api/v1/images/cached/' in working_url or '/api/images/cached/' in working_url or '/api/image/cached/' in working_url or '/api/merge-images/cached/' in working_url or '/api/stitch-images/cached/' in working_url:
+        match = re.search(r'/(?:v1/images|images?|(?:merge|stitch)-images?)/cached/([^/?&]+)', working_url)
         if match:
             cache_id = match.group(1)
             cached = stitched_cache.get(cache_id)

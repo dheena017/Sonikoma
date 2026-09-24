@@ -35,7 +35,7 @@ function shouldTrackSkillRequest(input: RequestInfo | URL): boolean {
       : input instanceof URL
       ? input.toString()
       : input.url;
-  return url.includes("/api/skills/");
+  return url.includes("/api/v1/ai/skills/");
 }
 
 function createTrackedAbortController(

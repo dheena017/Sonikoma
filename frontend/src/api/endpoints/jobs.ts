@@ -48,7 +48,7 @@ export async function getJobStatus<T = any>(
     sessionStorage.getItem("sonikoma_token") ||
     "";
 
-  const res = await fetch(`/api/jobs/${jobId}`, {
+  const res = await fetch(`/api/v1/jobs/${jobId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -73,7 +73,7 @@ export async function cancelJob<T = any>(
     sessionStorage.getItem("sonikoma_token") ||
     "";
 
-  const res = await fetch(`/api/jobs/${jobId}/cancel`, {
+  const res = await fetch(`/api/v1/jobs/${jobId}/cancel`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -166,7 +166,7 @@ export async function listJobs<T = any>(
   if (options.offset) params.append("offset", String(options.offset));
 
   const qs = params.toString();
-  const url = `/api/jobs/${qs ? `?${qs}` : ""}`;
+  const url = `/api/v1/jobs/${qs ? `?${qs}` : ""}`;
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,

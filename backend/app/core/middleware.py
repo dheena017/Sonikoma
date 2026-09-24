@@ -42,60 +42,33 @@ else:
 
 # Public routes (no Authorization header required)
 PUBLIC_ROUTE_SET = {
-    "/api/health",
-    "/api/py/health",
     "/api/v1/health",
     "/api/v1/system/health",
-    "/api/status",
-    "/api/py/status",
     "/api/v1/status",
-    "/api/system/status",
     "/api/v1/system/status",
-    "/api/health/ffmpeg",
-    "/api/py/health/ffmpeg",
+    "/api/v1/health/ffmpeg",
+    "/api/v1/system/health/ffmpeg",
+    "/api/v1/metrics",
     "/api/v1/system/metrics",
-    "/api/metrics",
-    "/api/py/metrics",
     "/api/v1/system/logs",            # Diagnostic log polling (system terminal panel)
     "/api/v1/system/system-logs",     # Alias
-    "/api/system/logs",               # Legacy alias
-    "/api/auth/register",
     "/api/v1/auth/register",
-    "/api/auth/login",
     "/api/v1/auth/login",
-    "/api/auth/forgot-password",
     "/api/v1/auth/forgot-password",
-    "/api/auth/google/login",
     "/api/v1/auth/google/login",
-    "/api/auth/google/callback",
     "/api/v1/auth/google/callback",
-    "/api/auth/google/session",
     "/api/v1/auth/google/session",
-    "/api/export/youtube/oauth/callback",
     "/api/v1/export/youtube/oauth/callback",
-    "/api/auth/token",             # Swagger Authorize button
-    "/api/v1/auth/token",
-    "/api/ai/models/catalog",      # AI Model Catalog metadata
-    "/api/v1/ai/models/catalog",
-    "/api/ai/models/routing",      # AI Task-to-Model Routing configuration
-    "/api/v1/ai/models/routing",
-    "/api/list-models",            # Multi-provider dynamic model inspector
+    "/api/v1/auth/token",             # Swagger Authorize button
+    "/api/v1/ai/models/catalog",      # AI Model Catalog metadata
+    "/api/v1/ai/models/routing",      # AI Task-to-Model Routing configuration
     "/api/v1/ai/list-models",
-    "/api/analyze-single-image",
-    "/api/analyze-image",
-    "/api/v1/ai/analyze-single-image",
     "/api/v1/ai/analyze-image",
-    "/api/analyze-panels",
-    "/api/v1/ai/analyze-panels",
-    "/api/analyze-all-panels",
     "/api/v1/ai/analyze-all-panels",
-    "/api/analyze-selected-panels",
-    "/api/v1/ai/analyze-selected-panels",
-    "/api/proxy-image",
-    "/api/proxy/image",
+    "/api/v1/ai/analyze-sequence",
+    "/api/v1/ai/analyze-batch",
     "/api/v1/proxy/image",
     "/api/v1/scraper/reader-chapter",
-    "/api/scraper/reader-chapter",
     "/api/v1/scraper/chapter/sync",
     "/api/v1/scraper/series",
     "/api/v1/scraper/separate-url",
@@ -104,58 +77,52 @@ PUBLIC_ROUTE_SET = {
     "/api/redoc",
     "/openapi.json",
     "/api/openapi.json",
+    "/api/v1/docs",
+    "/api/v1/redoc",
+    "/api/v1/openapi.json",
+    "/api/tests",
+    "/api/v1/tests",
+    "/api/docs/tests",
+    "/api/v1/docs/tests",
 }
 
 PUBLIC_ROUTE_PREFIXES = (
-    "/api/openapi/",   # Category-filtered OpenAPI JSONs (/api/openapi/projects.json, etc.)
-    "/api/v1/openapi/",
-    "/api/projects/public/",
+    "/api/v1/openapi/",   # Category-filtered OpenAPI JSONs (/api/v1/openapi/projects.json, etc.)
     "/api/v1/projects/public/",
-    "/api/projects/transfer",
     "/api/v1/projects/transfer",
     "/static/",        # Swagger UI local CSS/JS assets
     "/api/docs/",      # Swagger sub-paths (e.g. /api/docs/projects, /api/docs/jobs, etc.)
-    "/api/image/cached/",
+    "/api/v1/docs/",
+    "/api/v1/images/",
     "/api/v1/images/cached/",
-    "/api/merge-images/cached/",
-    "/api/stitch-images/cached/",
+    "/api/v1/proxy/",
     "/videos/",        # Generated videos serving
     "/media/",         # Local processed panel layers served via <img src="/media/...">
     "/media",          # Defensive: allow the exact mount path too
     "/playwright-report", # Playwright Interactive Visual Report assets & pages
     "/playwright-report/",
-    "/api/export/youtube/", # YouTube publisher routes (uses get_optional_current_user in router)
-    "/api/v1/export/youtube/",
+    "/api/v1/export/youtube/", # YouTube publisher routes (uses get_optional_current_user in router)
     "/api/v1/system/logs/",   # SSE real-time log stream (/api/v1/system/logs/stream)
-    "/api/system/logs/",      # Legacy SSE alias
     "/api/v1/scraper/",
-    "/api/scraper/",
     "/api/v1/audio/",
-    "/api/audio/",
-    "/api/py/audio/",
     "/api/v1/ocr/",
-    "/api/ocr/",
     "/api/v1/panels/",
-    "/api/panels/",
     "/api/v1/video/",
-    "/api/video/",
     "/api/v1/jobs/",
-    "/api/jobs/",
     "/api/v1/ai/",
-    "/api/ai/",
 )
 
 # Admin-only endpoints (require creator_role/admin)
 ADMIN_ROUTE_PREFIXES = (
-    "/api/auth/admin",             # Match without trailing slash to cover all subroutes cleanly
-    "/api/metrics/purge-cache",
-    "/api/py/metrics/purge-cache",
-    "/api/metrics/flush-temp",
-    "/api/py/metrics/flush-temp",
-    "/api/metrics/emergency-stop",
-    "/api/py/metrics/emergency-stop",
-    "/api/system-logs",
-    "/api/py/system-logs",
+    "/api/v1/auth/admin",             # Match without trailing slash to cover all subroutes cleanly
+    "/api/v1/system/metrics/purge-cache",
+    "/api/v1/metrics/purge-cache",
+    "/api/v1/system/metrics/flush-temp",
+    "/api/v1/metrics/flush-temp",
+    "/api/v1/system/metrics/emergency-stop",
+    "/api/v1/metrics/emergency-stop",
+    "/api/v1/system/logs",
+    "/api/v1/system/system-logs",
 )
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):
@@ -184,8 +151,8 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         # 3) Admin role guard
         is_admin_route = False
         if any(path.startswith(p) for p in ADMIN_ROUTE_PREFIXES):
-            # Special exception: GET/POST/stream on /api/system-logs is standard authenticated user, only DELETE is admin.
-            if (path.startswith("/api/system-logs") or path.startswith("/api/py/system-logs")) and request.method != "DELETE":
+            # Special exception: GET/POST/stream on /api/v1/system/logs is standard authenticated user, only DELETE is admin.
+            if (path.startswith("/api/v1/system/logs") or path.startswith("/api/v1/system/system-logs")) and request.method != "DELETE":
                 is_admin_route = False
             else:
                 is_admin_route = True
@@ -211,7 +178,7 @@ client_request_log = {}
 async def rate_limiting_middleware(request: Request, call_next):
     # Bypass metrics, health, docs, openapi, and logs to prevent lockout or UI terminal interruption
     path = request.url.path
-    if any(p in path for p in ["/system-logs", "/api/metrics", "/api/health", "/metrics", "/health", "/api/docs", "/api/openapi.json"]):
+    if any(p in path for p in ["/api/v1/system/logs", "/system-logs", "/api/v1/system/metrics", "/api/v1/system/health", "/api/v1/system/status", "/metrics", "/health", "/api/docs", "/api/openapi.json"]):
         return await call_next(request)
 
     client_ip = request.client.host if request.client else "unknown"
@@ -276,7 +243,7 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-API-Version"]  = API_VERSION
 
     # Avoid logging high-frequency image proxy/cached & SSE polling endpoint spam
-    if not any(path in request.url.path for path in ["/system-logs", "/api/metrics", "/api/health", "auth/credits", "credits", "/proxy-image", "/proxy/image", "/image/cached"]):
+    if not any(p in request.url.path for p in ["/system/logs", "/system/metrics", "/system/health", "/health", "/metrics", "/credits", "/proxy/image", "/images/cached"]):
         method_colors = {
             "GET": "\x1b[32m",
             "POST": "\x1b[33m",

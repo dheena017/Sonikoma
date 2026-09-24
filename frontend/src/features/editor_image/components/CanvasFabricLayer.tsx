@@ -396,7 +396,7 @@ export default function CanvasFabricLayer({
         try {
           const srcToLoad =
             imgUrl.startsWith("http://") || imgUrl.startsWith("https://")
-              ? `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`
+              ? `/api/v1/proxy/image?url=${encodeURIComponent(imgUrl)}`
               : imgUrl;
 
           const fabImg = await fabric.Image.fromURL(srcToLoad, {

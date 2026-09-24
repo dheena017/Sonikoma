@@ -298,7 +298,7 @@ class AdaptiveScraperEngine:
         from urllib.parse import quote
         for item in raw_images:
             if not item.proxy_url and item.url:
-                item.proxy_url = f"/api/proxy-image?url={quote(item.url)}&referer={quote(normalized_url)}"
+                item.proxy_url = f"/api/v1/proxy/image?url={quote(item.url)}&referer={quote(normalized_url)}"
 
         latency_ms = (time.time() - start_time) * 1000.0
         return ScrapeAllImagesResponse(

@@ -424,7 +424,7 @@ export default function AudioSettingsPage({
       localStorage.setItem("ai_comic_enable_narrative_audio", String(enableNarrativeAudio));
 
       const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
-      const res = await fetchFn(`/api/projects/${projectId}/settings/audio`, {
+      const res = await fetchFn(`/api/v1/projects/${projectId}/settings/audio`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

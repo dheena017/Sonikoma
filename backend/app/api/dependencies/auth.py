@@ -13,7 +13,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from services.auth.auth_service import AuthService
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token", auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token", auto_error=False)
 auth_service = AuthService()
 
 async def get_current_user(request: Request, token: Optional[str] = Depends(oauth2_scheme)):

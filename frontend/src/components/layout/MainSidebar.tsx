@@ -106,7 +106,7 @@ export const ActiveProjectSidebarWidget: React.FC<{
                 <img
                   src={
                     coverUrl.startsWith("http")
-                      ? `/api/proxy-image?url=${encodeURIComponent(coverUrl)}`
+                      ? `/api/v1/proxy/image?url=${encodeURIComponent(coverUrl)}`
                       : coverUrl
                   }
                   alt={activeProjectData.project?.title || "Project Cover"}

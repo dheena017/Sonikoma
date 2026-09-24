@@ -37,7 +37,7 @@ export function AdminExplorerTab({
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/projects");
+      const res = await fetchWithInterceptor("/api/v1/auth/admin/projects");
       if (res.ok) {
         const data = await res.json();
         if (data.success) setProjects(data.projects);
@@ -53,7 +53,7 @@ export function AdminExplorerTab({
     setLoading(true);
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/db/query?table=${activeTable}&limit=${limit}&offset=${offset}`
+        `/api/v1/auth/admin/db/query?table=${activeTable}&limit=${limit}&offset=${offset}`
       );
       if (res.ok) {
         const data = await res.json();

@@ -115,7 +115,7 @@ export default function ProjectsTable({
                         <img
                           src={
                             project.cover_image.startsWith("http")
-                              ? `/api/proxy-image?url=${encodeURIComponent(
+                              ? `/api/v1/proxy/image?url=${encodeURIComponent(
                                   project.cover_image
                                 )}`
                               : project.cover_image

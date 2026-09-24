@@ -113,7 +113,7 @@ async def discover_html_dom_endpoint(
             {
                 "index": i,
                 "url": c.url,
-                "proxy_url": f"/api/proxy-image?url={quote(c.url)}&referer={quote(body.url)}",
+                "proxy_url": f"/api/v1/proxy/image?url={quote(c.url)}&referer={quote(body.url)}",
                 "source": c.source_type.value
             }
             for i, c in enumerate(candidates)
@@ -144,7 +144,7 @@ async def discover_js_state_endpoint(
             {
                 "index": i,
                 "url": c.url,
-                "proxy_url": f"/api/proxy-image?url={quote(c.url)}&referer={quote(body.url)}",
+                "proxy_url": f"/api/v1/proxy/image?url={quote(c.url)}&referer={quote(body.url)}",
                 "source": c.source_type.value
             }
             for i, c in enumerate(state_candidates)
@@ -167,7 +167,7 @@ async def discover_network_traffic_endpoint(
         formatted_images.append({
             "index": i,
             "url": img_u,
-            "proxy_url": f"/api/proxy-image?url={quote(img_u)}&referer={quote(body.url)}" if img_u else ""
+            "proxy_url": f"/api/v1/proxy/image?url={quote(img_u)}&referer={quote(body.url)}" if img_u else ""
         })
     return {
         "url": body.url,

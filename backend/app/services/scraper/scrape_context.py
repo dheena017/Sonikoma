@@ -133,7 +133,7 @@ class ScrapeContext:
         if self.validated_images:
             for img in self.validated_images:
                 if not img.proxy_url and img.url:
-                    img.proxy_url = f"/api/proxy-image?url={quote(img.url)}&referer={quote(canonical_ref)}"
+                    img.proxy_url = f"/api/v1/proxy/image?url={quote(img.url)}&referer={quote(canonical_ref)}"
 
         # Ensure series and chapter cover images are populated with real comic art (ignoring logos/branding/avatars)
         if self.validated_images:
@@ -147,9 +147,9 @@ class ScrapeContext:
                 self.chapter_info.cover_image = self.series_info.cover_image or best_cover_art
 
         if self.series_info.cover_image and not self.series_info.proxy_cover_image:
-            self.series_info.proxy_cover_image = f"/api/proxy-image?url={quote(self.series_info.cover_image)}&referer={quote(canonical_ref)}"
+            self.series_info.proxy_cover_image = f"/api/v1/proxy/image?url={quote(self.series_info.cover_image)}&referer={quote(canonical_ref)}"
         if self.chapter_info.cover_image and not self.chapter_info.proxy_cover_image:
-            self.chapter_info.proxy_cover_image = f"/api/proxy-image?url={quote(self.chapter_info.cover_image)}&referer={quote(canonical_ref)}"
+            self.chapter_info.proxy_cover_image = f"/api/v1/proxy/image?url={quote(self.chapter_info.cover_image)}&referer={quote(canonical_ref)}"
 
 
 

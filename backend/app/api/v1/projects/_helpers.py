@@ -15,5 +15,5 @@ def wrap_proxy_url(url_str: str) -> str:
         return ""
     if cleaned.startswith("http") and "/api/" not in cleaned:
         from urllib.parse import quote
-        return f"/api/proxy-image?url={quote(cleaned)}"
+        return f"/api/v1/proxy/image?url={quote(cleaned)}"
     return cleaned

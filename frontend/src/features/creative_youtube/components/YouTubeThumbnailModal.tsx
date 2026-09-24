@@ -139,7 +139,7 @@ export default function YouTubeThumbnailModal({
     setIsSynthesizingConcept(true);
     try {
       const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
-      const res = await fetch("/api/export/youtube/thumbnail/generate-concept", {
+      const res = await fetch("/api/v1/export/youtube/thumbnail/generate-concept", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -183,7 +183,7 @@ export default function YouTubeThumbnailModal({
       let generatedUrl: string | null = null;
 
       try {
-        const res = await fetch("/api/export/youtube/thumbnail/generate-image", {
+        const res = await fetch("/api/v1/export/youtube/thumbnail/generate-image", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -215,8 +215,6 @@ async def analyze_sequence(
     return {"success": True, "results": results}
 
 
-@router.post("/analyze-panels", summary="Analyze multiple storyboard panels in a single batch request")
-@router.post("/analyze-selected-panels", summary="Analyze selected storyboard panels and generate dialogue, SFX, scene description, motion, timing, and narrative")
 @router.post("/analyze-all-panels", summary="Analyze all storyboard panels and generate dialogue, SFX, scene description, motion, timing, and narrative")
 async def analyze_panels(
     body: AnalyzePanelSequenceRequest,
@@ -336,7 +334,7 @@ async def analyze_panels(
     used_model = first_success.get("model") or body.model or default_routed_model
 
     logger.info(
-        f"[AI Analysis] Model: {used_model} <<< Completed /api/analyze-panels with {success_count}/{len(results)} success results"
+        f"[AI Analysis] Model: {used_model} <<< Completed /api/v1/ai/analyze-all-panels with {success_count}/{len(results)} success results"
     )
     return {
         "success": success_count > 0,

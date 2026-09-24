@@ -31,7 +31,7 @@ export function YouTubeCommentsViewer({ videoId }: YouTubeCommentsViewerProps) {
           localStorage.getItem("token") ||
           "";
         const res = await fetch(
-          `/api/export/youtube/videos/${videoId}/comments`,
+          `/api/v1/export/youtube/videos/${videoId}/comments`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }

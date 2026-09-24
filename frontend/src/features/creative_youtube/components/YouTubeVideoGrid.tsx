@@ -37,7 +37,7 @@ export default function YouTubeVideoGrid() {
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/videos", {
+      const res = await fetch("/api/v1/export/youtube/videos", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

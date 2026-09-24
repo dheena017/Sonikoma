@@ -47,7 +47,7 @@ export default function PlaylistSelector({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/playlists", {
+      const res = await fetch("/api/v1/export/youtube/playlists", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -75,7 +75,7 @@ export default function PlaylistSelector({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/playlists", {
+      const res = await fetch("/api/v1/export/youtube/playlists", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

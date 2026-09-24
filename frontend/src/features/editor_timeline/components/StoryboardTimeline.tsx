@@ -378,7 +378,7 @@ const StoryboardTimeline = React.memo(
               try {
                 // 1. Separate Layers
                 const layerRes = await activeFetch(
-                  `/api/image/process-layers/${panel.id}`,
+                  `/api/v1/images/process-layers/${panel.id}`,
                   {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -434,7 +434,7 @@ const StoryboardTimeline = React.memo(
                     .map((s) => s.trim())
                     .filter(Boolean);
                   const alignRes = await activeFetch(
-                    `/api/audio/align-dialogue/${panel.id}`,
+                    `/api/v1/audio/align-dialogue/${panel.id}`,
                     {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },

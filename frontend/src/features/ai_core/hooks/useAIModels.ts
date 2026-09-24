@@ -131,7 +131,7 @@ export function useAIModels() {
 
         for (const provider of availableProviders) {
           try {
-            const res = await fetch("/api/list-models", {
+            const res = await fetch("/api/v1/ai/list-models", {
               method: "POST",
               headers: reqHeaders,
               body: JSON.stringify({

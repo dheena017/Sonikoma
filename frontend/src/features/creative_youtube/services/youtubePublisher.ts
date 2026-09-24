@@ -78,7 +78,7 @@ export async function publishVideoJson({
     finalDescription += `\n\n📅 Scheduled Publish: ${scheduleDate} at ${scheduleTime} (GMT/Local)`;
   }
 
-  const res = await fetch("/api/export/youtube", {
+  const res = await fetch("/api/v1/export/youtube", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -163,7 +163,7 @@ export async function publishVideoMultipart({
     formData.append("thumbnail", thumbnailFile);
   }
 
-  const res = await fetch("/api/export/youtube/upload", {
+  const res = await fetch("/api/v1/export/youtube/upload", {
     method: "POST",
     headers: {
       ...getAuthHeaders(),
@@ -194,7 +194,7 @@ export async function generateSeoMetadata(
           .slice(0, 1000)
       : "A customized webtoon compilation video review.";
 
-  const res = await fetch("/api/skills/seo", {
+  const res = await fetch("/api/v1/ai/skills/seo", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -216,7 +216,7 @@ export async function generateSeoMetadata(
 }
 
 export async function fetchDbProfiles() {
-  const res = await fetch("/api/export/youtube/profiles", {
+  const res = await fetch("/api/v1/export/youtube/profiles", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -231,7 +231,7 @@ export async function fetchDbProfiles() {
 }
 
 export async function saveDbProfile(profile: any) {
-  const res = await fetch("/api/export/youtube/profiles", {
+  const res = await fetch("/api/v1/export/youtube/profiles", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -272,7 +272,7 @@ export async function saveDbProfile(profile: any) {
 
 export async function deleteDbProfile(profileName: string) {
   const res = await fetch(
-    `/api/export/youtube/profiles/${encodeURIComponent(profileName)}`,
+    `/api/v1/export/youtube/profiles/${encodeURIComponent(profileName)}`,
     {
       method: "DELETE",
       headers: {
@@ -289,7 +289,7 @@ export async function deleteDbProfile(profileName: string) {
 }
 
 export async function fetchDbUploadHistory() {
-  const res = await fetch("/api/export/youtube/history", {
+  const res = await fetch("/api/v1/export/youtube/history", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -304,7 +304,7 @@ export async function fetchDbUploadHistory() {
 }
 
 export async function fetchDbCredentials() {
-  const res = await fetch("/api/export/youtube/credentials", {
+  const res = await fetch("/api/v1/export/youtube/credentials", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -323,7 +323,7 @@ export async function saveDbCredentials(
   clientSecret: string,
   projectId: string
 ) {
-  const res = await fetch("/api/export/youtube/credentials", {
+  const res = await fetch("/api/v1/export/youtube/credentials", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -343,7 +343,7 @@ export async function saveDbCredentials(
 }
 
 export async function deleteDbCredentials() {
-  const res = await fetch("/api/export/youtube/credentials", {
+  const res = await fetch("/api/v1/export/youtube/credentials", {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

@@ -151,7 +151,7 @@ export const scrapeImages = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/scrape-images", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/images", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

@@ -175,7 +175,7 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
           const token =
             localStorage.getItem("sonikoma_token") ||
             sessionStorage.getItem("sonikoma_token");
-          const res = await fetch(`/api/projects/${projectId}`, {
+          const res = await fetch(`/api/v1/projects/${projectId}`, {
             method: "DELETE",
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
@@ -226,7 +226,7 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
           if (token) {
             headers["Authorization"] = `Bearer ${token}`;
           }
-          const res = await fetch(`/api/projects/batch-delete`, {
+          const res = await fetch(`/api/v1/projects/batch-delete`, {
             method: "POST",
             headers,
             body: JSON.stringify({ project_ids: selectedIds }),

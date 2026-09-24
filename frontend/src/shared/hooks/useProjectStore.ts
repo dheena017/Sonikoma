@@ -456,7 +456,7 @@ async function sendSettingsUpdate(
 ): Promise<any | null> {
   const fetchFn = fetchClient || window.fetch || fetch;
   const res = await fetchFn(
-    `/api/projects/${encodeURIComponent(projectId)}/settings${endpointSubpath}`,
+    `/api/v1/projects/${encodeURIComponent(projectId)}/settings${endpointSubpath}`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -803,7 +803,7 @@ export const useProjectStore = create<ProjectStoreState>()(
           const fetcher = fetchClient || window.fetch;
           const token = getStoredAuthToken();
 
-          const res = await fetcher(`/api/projects/${encodeURIComponent(idToHydrate)}`, {
+          const res = await fetcher(`/api/v1/projects/${encodeURIComponent(idToHydrate)}`, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });
 
@@ -885,7 +885,7 @@ export const useProjectStore = create<ProjectStoreState>()(
             ? scrapedImgs.length
             : (activeProjectData.project.imported_assets_count || panelsCount);
 
-          const res = await fetcher(`/api/projects/${encodeURIComponent(activeProjectId)}`, {
+          const res = await fetcher(`/api/v1/projects/${encodeURIComponent(activeProjectId)}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",

@@ -89,7 +89,7 @@ export default function YouTubePlaylistsManager({
   const fetchPlaylists = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("/api/export/youtube/playlists", {
+      const res = await fetch("/api/v1/export/youtube/playlists", {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       if (res.ok) {
@@ -115,7 +115,7 @@ export default function YouTubePlaylistsManager({
     setLoadingVideos(true);
     try {
       const res = await fetch(
-        `/api/export/youtube/playlist/${playlist.id}/items`,
+        `/api/v1/export/youtube/playlist/${playlist.id}/items`,
         {
           headers: { Authorization: `Bearer ${getToken()}` },
         }

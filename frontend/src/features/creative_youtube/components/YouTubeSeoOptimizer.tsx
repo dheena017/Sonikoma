@@ -28,7 +28,7 @@ export default function YouTubeSeoOptimizer({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/seo/generate", {
+      const res = await fetch("/api/v1/export/youtube/seo/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

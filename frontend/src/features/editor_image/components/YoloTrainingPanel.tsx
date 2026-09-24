@@ -27,7 +27,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
       const fetchCount = async () => {
         try {
           const res = await fetchWithInterceptor(
-            "/api/image/training-data-count"
+            "/api/v1/images/training-data-count"
           );
           const data = await res.json();
           if (data && typeof data.count === "number") {
@@ -56,7 +56,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
 
         if (!data.is_training && isTraining) {
           const countRes = await fetchWithInterceptor(
-            "/api/image/training-data-count"
+            "/api/v1/images/training-data-count"
           );
           const countData = await countRes.json();
           if (countData && typeof countData.count === "number") {

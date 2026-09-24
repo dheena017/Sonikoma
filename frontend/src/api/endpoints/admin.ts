@@ -4,7 +4,7 @@ import { FetchClient, ApiResponse } from "../types";
 export const adminGetUsers = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/users");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/users");
 };
 
 export const adminUpdateUser = async (
@@ -12,7 +12,7 @@ export const adminUpdateUser = async (
   userId: string,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/auth/admin/users/${userId}`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/auth/admin/users/${userId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -23,7 +23,7 @@ export const adminDeleteUser = async (
   fetchWithInterceptor: FetchClient,
   userId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/auth/admin/users/${userId}`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/auth/admin/users/${userId}`, {
     method: "DELETE",
   });
 };
@@ -31,14 +31,14 @@ export const adminDeleteUser = async (
 export const adminGetSettings = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/settings");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/settings");
 };
 
 export const adminUpdateSettings = async (
   fetchWithInterceptor: FetchClient,
   settings: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/settings", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/settings", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ settings }),
@@ -48,19 +48,19 @@ export const adminUpdateSettings = async (
 export const adminGetAuditLogs = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/audit-logs");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/audit-logs");
 };
 
 export const adminGetAnalytics = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/analytics");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/analytics");
 };
 
 export const adminGetProjects = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/projects");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/projects");
 };
 
 export const adminDeleteProject = async (
@@ -69,7 +69,7 @@ export const adminDeleteProject = async (
 ): Promise<ApiResponse<any>> => {
   return apiRequest(
     fetchWithInterceptor,
-    `/api/auth/admin/projects/${projectId}`,
+    `/api/v1/auth/admin/projects/${projectId}`,
     {
       method: "DELETE",
     }
@@ -83,7 +83,7 @@ export const adminGetUserLogs = async (
 ): Promise<ApiResponse<any>> => {
   return apiRequest(
     fetchWithInterceptor,
-    `/api/auth/admin/users/${userId}/logs?limit=${limit}`
+    `/api/v1/auth/admin/users/${userId}/logs?limit=${limit}`
   );
 };
 
@@ -91,7 +91,7 @@ export const adminBulkAction = async (
   fetchWithInterceptor: FetchClient,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/users/bulk", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/users/bulk", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -104,7 +104,7 @@ export const adminImpersonateUser = async (
 ): Promise<ApiResponse<any>> => {
   return apiRequest(
     fetchWithInterceptor,
-    `/api/auth/admin/impersonate/${userId}`,
+    `/api/v1/auth/admin/impersonate/${userId}`,
     {
       method: "POST",
     }
@@ -114,14 +114,14 @@ export const adminImpersonateUser = async (
 export const adminGetAnnouncements = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/announcements");
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/announcements");
 };
 
 export const adminCreateAnnouncement = async (
   fetchWithInterceptor: FetchClient,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/auth/admin/announcements", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/announcements", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -134,7 +134,7 @@ export const adminDeleteAnnouncement = async (
 ): Promise<ApiResponse<any>> => {
   return apiRequest(
     fetchWithInterceptor,
-    `/api/auth/admin/announcements/${id}`,
+    `/api/v1/auth/admin/announcements/${id}`,
     {
       method: "DELETE",
     }

@@ -64,7 +64,7 @@ export default function useDashboardPage() {
     const fetchProjects = async () => {
       try {
         setError(null);
-        const res = await fetch("/api/projects", {
+        const res = await fetch("/api/v1/projects", {
           headers: {
             Authorization: `Bearer ${
               localStorage.getItem("sonikoma_token") ||
@@ -104,7 +104,7 @@ export default function useDashboardPage() {
 
     const fetchMetrics = async () => {
       try {
-        const res = await fetch("/api/metrics");
+        const res = await fetch("/api/v1/system/metrics");
         if (res.ok) {
           const data = await res.json();
           setMetrics(data);
@@ -116,7 +116,7 @@ export default function useDashboardPage() {
 
     const fetchAnalytics = async () => {
       try {
-        const res = await fetch("/api/auth/analytics", {
+        const res = await fetch("/api/v1/auth/analytics", {
           headers: {
             Authorization: `Bearer ${
               localStorage.getItem("sonikoma_token") ||
@@ -148,7 +148,7 @@ export default function useDashboardPage() {
 
     const fetchProjects = async () => {
       try {
-        const res = await fetch("/api/projects", {
+        const res = await fetch("/api/v1/projects", {
           headers: {
             Authorization: `Bearer ${
               localStorage.getItem("sonikoma_token") ||
@@ -198,7 +198,7 @@ export default function useDashboardPage() {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      const res = await fetch(`/api/projects/${project.project_id}`, {
+      const res = await fetch(`/api/v1/projects/${project.project_id}`, {
         headers,
       });
       if (res.ok) {
@@ -259,7 +259,7 @@ export default function useDashboardPage() {
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
         }
-        const res = await fetch(`/api/projects/${project.project_id}`, {
+        const res = await fetch(`/api/v1/projects/${project.project_id}`, {
           headers,
         });
         if (res.ok) {
@@ -312,7 +312,7 @@ export default function useDashboardPage() {
           const token =
             localStorage.getItem("sonikoma_token") ||
             sessionStorage.getItem("sonikoma_token");
-          const res = await fetch(`/api/projects/${projectId}`, {
+          const res = await fetch(`/api/v1/projects/${projectId}`, {
             method: "DELETE",
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });

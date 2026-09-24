@@ -53,7 +53,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
     try {
       const fetcher = fetchWithInterceptor || window.fetch;
       const res = await fetcher(
-        `/api/projects/${encodeURIComponent(activeProjectId)}/promote`,
+        `/api/v1/projects/${encodeURIComponent(activeProjectId)}/promote`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

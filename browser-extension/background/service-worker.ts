@@ -372,7 +372,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
       try {
         const base = await getApiBaseUrl();
         const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
-        const endpoint = `${apiBase}/api/analyze-single-image`;
+        const endpoint = `${apiBase}/api/v1/ai/analyze-image`;
 
         let resultData: any = null;
         let fetchError: string | null = null;
@@ -468,7 +468,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
       try {
         const base = await getApiBaseUrl();
         const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
-        const endpoint = `${apiBase}/api/analyze-all-panels`;
+        const endpoint = `${apiBase}/api/v1/ai/analyze-all-panels`;
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 180000);

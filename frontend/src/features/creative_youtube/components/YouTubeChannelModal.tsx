@@ -91,7 +91,7 @@ export default function YouTubeChannelModal({
         localStorage.getItem("token") ||
         "";
       const cacheBust = Date.now();
-      const res = await fetch(`/api/export/youtube/channels?_t=${cacheBust}`, {
+      const res = await fetch(`/api/v1/export/youtube/channels?_t=${cacheBust}`, {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
@@ -146,8 +146,8 @@ export default function YouTubeChannelModal({
       }
       const qs = params.toString();
       const connectUrl = qs
-        ? `/api/export/youtube/oauth/connect?${qs}`
-        : "/api/export/youtube/oauth/connect";
+        ? `/api/v1/export/youtube/oauth/connect?${qs}`
+        : "/api/v1/export/youtube/oauth/connect";
 
       const res = await fetch(connectUrl, {
         method: "GET",
@@ -189,7 +189,7 @@ export default function YouTubeChannelModal({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/channel/lookup", {
+      const res = await fetch("/api/v1/export/youtube/channel/lookup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -236,7 +236,7 @@ export default function YouTubeChannelModal({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/select-channel", {
+      const res = await fetch("/api/v1/export/youtube/select-channel", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -289,7 +289,7 @@ export default function YouTubeChannelModal({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch(`/api/export/youtube/channel/${channelId}`, {
+      const res = await fetch(`/api/v1/export/youtube/channel/${channelId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -336,7 +336,7 @@ export default function YouTubeChannelModal({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/select-channel", {
+      const res = await fetch("/api/v1/export/youtube/select-channel", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

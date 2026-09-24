@@ -224,7 +224,7 @@ export function ScraperSelectionToolbar({
     const matches = scrapedImages.filter((imgUrl) => {
       const proxiedUrl = imgUrl?.startsWith("/api/")
         ? imgUrl
-        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+        : `/api/v1/proxy/image?url=${encodeURIComponent(imgUrl)}`;
       return activePanels.some(
         (p) =>
           p.image_url === imgUrl ||
@@ -243,7 +243,7 @@ export function ScraperSelectionToolbar({
     const matches = scrapedImages.filter((imgUrl) => {
       const proxiedUrl = imgUrl?.startsWith("/api/")
         ? imgUrl
-        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+        : `/api/v1/proxy/image?url=${encodeURIComponent(imgUrl)}`;
       return !activePanels.some(
         (p) =>
           p.image_url === imgUrl ||

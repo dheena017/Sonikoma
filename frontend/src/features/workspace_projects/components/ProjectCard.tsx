@@ -135,7 +135,7 @@ export default function ProjectCard({
                 isSelected ? "scale-105 opacity-90" : "group-hover:scale-105"
               }`}
               onError={() => {
-                if (imgSrc.includes("/api/proxy-image") && project.cover_image) {
+                if ((imgSrc.includes("/api/v1/proxy/image") || imgSrc.includes("/api/proxy-image")) && project.cover_image) {
                   setImgSrc(project.cover_image);
                 } else {
                   setImageError(true);

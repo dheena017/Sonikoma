@@ -140,7 +140,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
           sessionStorage.getItem("sonikoma_token") ||
           "";
 
-        const res = await fetcher("/api/projects", {
+        const res = await fetcher("/api/v1/projects", {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
 

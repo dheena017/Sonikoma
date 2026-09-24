@@ -14,6 +14,7 @@ import os
 import uuid
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 
 from core.cache import stitched_cache
 from database.supabase.storage import upload_to_supabase_bucket
@@ -64,7 +65,7 @@ async def upload_image(file: UploadFile = File(...)):
         else:
             cache_id = f"upload_{int(time.time() * 1000)}"
             stitched_cache.set(cache_id, {"data": file_bytes, "content_type": content_type})
-            new_url = f"/api/image/cached/{cache_id}"
+            new_url = f"/api/v1/images/cached/{cache_id}"
 
         return {"success": True, "url": new_url}
     except Exception as e:
@@ -132,8 +133,8 @@ async def save_training_data(
         return {
             "success": True,
             "pair_id": unique_pair_id,
-            "original_panel_url": orig_url or f"/api/image/training/{orig_filename}",
-            "corrected_text_mask_url": mask_url or f"/api/image/training/{mask_filename}",
+            "original_panel_url": orig_url or f"/api/v1/images/training/{orig_filename}",
+            "corrected_text_mask_url": mask_url or f"/api/v1/images/training/{mask_filename}",
         }
     except Exception as e:
         logger.error(f"[Data Flywheel] Failed to save training pair: {e}", exc_info=True)
@@ -207,8 +208,8 @@ async def get_training_data_list():
             mask_candidates = glob.glob(os.path.join(_TRAINING_DIR, f"mask_{pair_id}.*"))
             pairs.append({
                 "pair_id": pair_id,
-                "original_url": f"/api/image/training/original_{pair_id}.png",
-                "mask_url": f"/api/image/training/mask_{pair_id}.png" if mask_candidates else None,
+                "original_url": f"/api/v1/images/training/original_{pair_id}.png",
+                "mask_url": f"/api/v1/images/training/mask_{pair_id}.png" if mask_candidates else None,
             })
         return {"success": True, "pairs": pairs, "count": len(pairs)}
     except Exception as e:
@@ -237,3 +238,12 @@ async def delete_training_data_pair(pair_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/training/{filename}", summary="Retrieve saved training image file directly")
+async def get_training_image(filename: str):
+    file_path = os.path.abspath(os.path.join(_TRAINING_DIR, filename))
+    if not file_path.startswith(_TRAINING_DIR) or not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Training image not found")
+    media_type = mimetypes.guess_type(file_path)[0] or "image/png"
+    return FileResponse(file_path, media_type=media_type)

@@ -132,7 +132,7 @@ const YouTubePage = React.memo(
             localStorage.getItem("sonikoma_token") ||
             localStorage.getItem("token") ||
             "";
-          const res = await fetch("/api/export/youtube/channel/details", {
+          const res = await fetch("/api/v1/export/youtube/channel/details", {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {

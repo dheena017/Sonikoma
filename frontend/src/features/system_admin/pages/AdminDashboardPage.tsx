@@ -123,7 +123,7 @@ const AdminDashboardPage = React.memo(
     const fetchRecentAuditLogs = async () => {
       try {
         const res = await fetchWithInterceptor(
-          "/api/auth/admin/audit-logs?limit=8"
+          "/api/v1/auth/admin/audit-logs?limit=8"
         );
         if (res.ok) {
           const data = await res.json();
@@ -153,7 +153,7 @@ const AdminDashboardPage = React.memo(
     const verifyDatabase = async () => {
       try {
         const res = await fetchWithInterceptor(
-          "/api/auth/admin/db/query?table=platform_settings&limit=1"
+          "/api/v1/auth/admin/db/query?table=platform_settings&limit=1"
         );
         if (res.ok) {
           setDbStatus("Healthy");
@@ -189,7 +189,7 @@ const AdminDashboardPage = React.memo(
     const handleClearCache = async () => {
       setProcessingAction("cache");
       try {
-        const res = await fetchWithInterceptor("/api/metrics/purge-cache", {
+        const res = await fetchWithInterceptor("/api/v1/system/metrics/purge-cache", {
           method: "POST",
         });
         if (res.ok) {
@@ -217,7 +217,7 @@ const AdminDashboardPage = React.memo(
         return;
       setProcessingAction("flush");
       try {
-        const res = await fetchWithInterceptor("/api/metrics/flush-temp", {
+        const res = await fetchWithInterceptor("/api/v1/system/metrics/flush-temp", {
           method: "POST",
         });
         if (res.ok) {
@@ -247,7 +247,7 @@ const AdminDashboardPage = React.memo(
         return;
       setProcessingAction("stop");
       try {
-        const res = await fetchWithInterceptor("/api/metrics/emergency-stop", {
+        const res = await fetchWithInterceptor("/api/v1/system/metrics/emergency-stop", {
           method: "POST",
         });
         if (res.ok) {
@@ -267,7 +267,7 @@ const AdminDashboardPage = React.memo(
     const handleExportLogs = async () => {
       try {
         const res = await fetchWithInterceptor(
-          "/api/auth/admin/activity/export"
+          "/api/v1/auth/admin/activity/export"
         );
         if (res.ok) {
           const blob = await res.blob();
@@ -297,7 +297,7 @@ const AdminDashboardPage = React.memo(
       setProcessingAction("broadcast");
       try {
         const res = await fetchWithInterceptor(
-          "/api/auth/admin/announcements",
+          "/api/v1/auth/admin/announcements",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -335,7 +335,7 @@ const AdminDashboardPage = React.memo(
         return;
       try {
         const res = await fetchWithInterceptor(
-          `/api/auth/admin/impersonate/${userId}`,
+          `/api/v1/auth/admin/impersonate/${userId}`,
           { method: "POST" }
         );
         if (res.ok) {
@@ -640,7 +640,7 @@ const AdminDashboardPage = React.memo(
                     const token =
                       localStorage.getItem("sonikoma_token") ||
                       sessionStorage.getItem("sonikoma_token");
-                    const res = await fetch("/api/auth/profile", {
+                    const res = await fetch("/api/v1/auth/profile", {
                       method: "PUT",
                       headers: {
                         "Content-Type": "application/json",

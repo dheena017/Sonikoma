@@ -2,20 +2,20 @@ import { apiRequest } from "../client/request";
 import { FetchClient, ApiResponse } from "../types";
 
 export const SKILL_ENDPOINTS = {
-  TRANSLATE: "/api/skills/translate",
-  DRAMATIZE: "/api/skills/dramatize",
-  SEO: "/api/skills/seo",
-  VOICE_CAST: "/api/skills/voice-cast",
-  COPYRIGHT_SCRUB: "/api/skills/copyright-scrub",
-  BGM_VIBE: "/api/skills/bgm-vibe",
-  SFX_MIX: "/api/skills/sfx-mix",
-  SFX_AUDIO: "/api/skills/sfx-audio",
-  THUMBNAIL_VISUAL: "/api/skills/thumbnail-visual",
-  THUMBNAIL_LAYOUT: "/api/skills/thumbnail-layout",
-  THUMBNAIL: "/api/skills/thumbnail",
-  MIDROLLS: "/api/skills/midrolls",
-  SHORTS_SCRIPT: "/api/skills/shorts-script",
-  SHORTS_HOOK: "/api/skills/shorts-hook",
+  TRANSLATE: "/api/v1/ai/skills/translate",
+  DRAMATIZE: "/api/v1/ai/skills/dramatize",
+  SEO: "/api/v1/ai/skills/seo",
+  VOICE_CAST: "/api/v1/ai/skills/voice-cast",
+  COPYRIGHT_SCRUB: "/api/v1/ai/skills/copyright-scrub",
+  BGM_VIBE: "/api/v1/ai/skills/bgm-vibe",
+  SFX_MIX: "/api/v1/ai/skills/sfx-mix",
+  SFX_AUDIO: "/api/v1/ai/skills/sfx-audio",
+  THUMBNAIL_VISUAL: "/api/v1/ai/skills/thumbnail-visual",
+  THUMBNAIL_LAYOUT: "/api/v1/ai/skills/thumbnail-layout",
+  THUMBNAIL: "/api/v1/ai/skills/thumbnail",
+  MIDROLLS: "/api/v1/ai/skills/midrolls",
+  SHORTS_SCRIPT: "/api/v1/ai/skills/shorts-script",
+  SHORTS_HOOK: "/api/v1/ai/skills/shorts-hook",
 };
 
 export const runSkill = async (
@@ -41,7 +41,7 @@ export const alignDialogue = async (
 ): Promise<ApiResponse<any>> => {
   return apiRequest(
     fetchWithInterceptor,
-    `/api/audio/align-dialogue/${panelId}`,
+    `/api/v1/audio/align-dialogue/${panelId}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -53,14 +53,14 @@ export const alignDialogue = async (
 export const getVoices = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/audio/voices");
+  return apiRequest(fetchWithInterceptor, "/api/v1/audio/voices");
 };
 
 export const generateAudio = async (
   fetchWithInterceptor: FetchClient,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/audio/generate", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/audio/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

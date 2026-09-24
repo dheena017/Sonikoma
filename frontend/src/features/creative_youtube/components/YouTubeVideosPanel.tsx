@@ -58,7 +58,7 @@ export default function YouTubeVideosPanel({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/videos?max_results=50", {
+      const res = await fetch("/api/v1/export/youtube/videos?max_results=50", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {

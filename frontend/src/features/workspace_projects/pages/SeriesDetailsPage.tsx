@@ -102,7 +102,7 @@ export default function SeriesDetailsPage({
       const token =
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
-      await fetch(`/api/projects/${projectId}`, {
+      await fetch(`/api/v1/projects/${projectId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -149,7 +149,7 @@ export default function SeriesDetailsPage({
         if (!cachedSeriesMap.has(seriesSlug)) {
           setLoading(true);
         }
-        const res = await fetchWithInterceptor("/api/projects");
+        const res = await fetchWithInterceptor("/api/v1/projects");
         if (!res.ok) {
           throw new Error("Failed to load projects");
         }
@@ -280,7 +280,7 @@ export default function SeriesDetailsPage({
     const firstChapterId = series.chapters[0].project_id;
     try {
       const res = await fetchWithInterceptor(
-        `/api/projects/${firstChapterId}`,
+        `/api/v1/projects/${firstChapterId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

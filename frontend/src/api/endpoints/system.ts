@@ -24,7 +24,7 @@ export const checkHealth = async (): Promise<ApiResponse<any>> => {
     const res = await fetch("/api/v1/system/status");
     if (res.ok) return await res.json();
   } catch {}
-  const res = await fetch("/api/health");
+  const res = await fetch("/api/v1/system/health");
   if (!res.ok) throw new Error("Health check failed");
   return res.json();
 };
@@ -72,7 +72,7 @@ export const testModelLatency = async (
   fetchWithInterceptor: FetchClient,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/test-model-latency", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/ai/test-model-latency", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -84,7 +84,7 @@ export const enhancePrompt = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/enhance-prompt", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/ai/enhance-prompt", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

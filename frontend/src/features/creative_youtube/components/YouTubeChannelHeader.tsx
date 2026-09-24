@@ -73,7 +73,7 @@ export default function YouTubeChannelHeader({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/profile", {
+      const res = await fetch("/api/v1/export/youtube/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -111,10 +111,10 @@ export default function YouTubeChannelHeader({
         localStorage.getItem("email") ||
         "";
       const connectUrl = userEmail
-        ? `/api/export/youtube/oauth/connect?email=${encodeURIComponent(
+        ? `/api/v1/export/youtube/oauth/connect?email=${encodeURIComponent(
             userEmail.trim()
           )}`
-        : "/api/export/youtube/oauth/connect";
+        : "/api/v1/export/youtube/oauth/connect";
 
       const res = await fetch(connectUrl, {
         method: "GET",
@@ -318,7 +318,7 @@ export default function YouTubeChannelHeader({
                             localStorage.getItem("token") ||
                             "";
                           const res = await fetch(
-                            "/api/export/youtube/select-channel",
+                            "/api/v1/export/youtube/select-channel",
                             {
                               method: "POST",
                               headers: {

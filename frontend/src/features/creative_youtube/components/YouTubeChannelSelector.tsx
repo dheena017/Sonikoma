@@ -45,7 +45,7 @@ export default function YouTubeChannelSelector({
         localStorage.getItem("sonikoma_token") ||
         localStorage.getItem("token") ||
         "";
-      const res = await fetch("/api/export/youtube/channels", {
+      const res = await fetch("/api/v1/export/youtube/channels", {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,

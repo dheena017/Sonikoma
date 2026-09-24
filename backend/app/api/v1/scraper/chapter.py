@@ -264,7 +264,7 @@ async def get_reader_chapter_panels_post(
     panels = []
     for idx, img in enumerate(result.images):
         raw_u = img.url if hasattr(img, "url") else str(img)
-        proxied_u = f"/api/proxy-image?url={quote(raw_u, safe='')}&referer={quote(target_url, safe='')}"
+        proxied_u = f"/api/v1/proxy/image?url={quote(raw_u, safe='')}&referer={quote(target_url, safe='')}"
         panels.append({"index": idx, "url": raw_u, "proxied_url": proxied_u,
                         "width": getattr(img, "width", None), "height": getattr(img, "height", None)})
     return {
@@ -301,7 +301,7 @@ async def get_reader_chapter_panels_get(
     panels = []
     for idx, img in enumerate(result.images):
         raw_u = img.url if hasattr(img, "url") else str(img)
-        proxied_u = f"/api/proxy-image?url={quote(raw_u, safe='')}&referer={quote(target_url, safe='')}"
+        proxied_u = f"/api/v1/proxy/image?url={quote(raw_u, safe='')}&referer={quote(target_url, safe='')}"
         panels.append({"index": idx, "url": raw_u, "proxied_url": proxied_u,
                         "width": getattr(img, "width", None), "height": getattr(img, "height", None)})
     return {

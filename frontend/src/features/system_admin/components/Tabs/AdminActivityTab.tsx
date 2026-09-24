@@ -84,7 +84,7 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
         </div>
         <button
           onClick={() => {
-            const res = fetchWithInterceptor("/api/auth/admin/activity/export");
+            const res = fetchWithInterceptor("/api/v1/auth/admin/activity/export");
             res.then((r: any) => {
               if (r.ok) {
                 r.blob().then((blob: any) => {

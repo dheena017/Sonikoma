@@ -58,7 +58,7 @@ class ImageValidator:
             if url.startswith("http") and " " in url:
                 url = url.split()[0]
 
-            if not url.startswith(("http://", "https://", "data:image/", "/api/proxy-image")):
+            if not url.startswith(("http://", "https://", "data:image/", "/api/v1/proxy/image", "/api/proxy-image")):
                 rejections.append({"url": url, "reason": "invalid_url_scheme"})
                 ScraperDiagnosticsLogger.log_rejection(url, "invalid_url_scheme")
                 continue
@@ -167,7 +167,7 @@ class ImageValidator:
                 file_type = "image/avif"
 
             from urllib.parse import quote
-            proxy_url = f"/api/proxy-image?url={quote(url)}" if url else None
+            proxy_url = f"/api/v1/proxy/image?url={quote(url)}" if url else None
 
             accepted.append(ImageItem(
                 index=len(accepted),

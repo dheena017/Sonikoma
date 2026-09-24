@@ -7,45 +7,24 @@ export const analyzeImage = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/analyze-image url=${data?.url?.slice(0, 60)}... model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
+  console.log(`[AI Endpoint] POST /api/v1/ai/analyze-image url=${data?.url?.slice(0, 60)}... model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
   try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/analyze-image", {
+    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/analyze-image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/analyze-image success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/analyze-image success (${elapsed}ms):`, res);
     return res;
   } catch (err) {
-    console.error(`[AI Endpoint] /api/analyze-image failed:`, err);
+    console.error(`[AI Endpoint] /api/v1/ai/analyze-image failed:`, err);
     throw err;
   }
 };
 
-export const analyzeSingleImage = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/analyze-single-image url=${data?.url?.slice(0, 60)}...`);
-  try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/analyze-single-image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      ...options,
-    });
-    const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/analyze-single-image success (${elapsed}ms):`, res);
-    return res;
-  } catch (err) {
-    console.error(`[AI Endpoint] /api/analyze-single-image failed:`, err);
-    throw err;
-  }
-};
+export const analyzeSingleImage = analyzeImage;
 
 export const analyzeSequence = async (
   fetchWithInterceptor: FetchClient,
@@ -53,65 +32,19 @@ export const analyzeSequence = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/analyze-sequence total_urls=${data?.urls?.length || 0}`);
+  console.log(`[AI Endpoint] POST /api/v1/ai/analyze-sequence total_urls=${data?.urls?.length || 0}`);
   try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/analyze-sequence", {
+    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/analyze-sequence", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/analyze-sequence success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/analyze-sequence success (${elapsed}ms):`, res);
     return res;
   } catch (err) {
-    console.error(`[AI Endpoint] /api/analyze-sequence failed:`, err);
-    throw err;
-  }
-};
-
-export const analyzePanels = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/analyze-panels total_panels=${data?.panels?.length || 0} model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
-  try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/analyze-panels", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      ...options,
-    });
-    const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/analyze-panels success (${elapsed}ms):`, res);
-    return res;
-  } catch (err) {
-    console.error(`[AI Endpoint] /api/analyze-panels failed:`, err);
-    throw err;
-  }
-};
-
-export const analyzeSelectedPanels = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/analyze-selected-panels panels=${data?.panels?.length || 0} model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
-  try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/analyze-selected-panels", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      ...options,
-    });
-    const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/analyze-selected-panels success (${elapsed}ms):`, res);
-    return res;
-  } catch (err) {
-    console.error(`[AI Endpoint] /api/analyze-selected-panels failed:`, err);
+    console.error(`[AI Endpoint] /api/v1/ai/analyze-sequence failed:`, err);
     throw err;
   }
 };
@@ -122,22 +55,25 @@ export const analyzeAllPanels = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/analyze-all-panels panels=${data?.panels?.length || 0}`);
+  console.log(`[AI Endpoint] POST /api/v1/ai/analyze-all-panels panels=${data?.panels?.length || 0} model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
   try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/analyze-all-panels", {
+    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/analyze-all-panels", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/analyze-all-panels success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/analyze-all-panels success (${elapsed}ms):`, res);
     return res;
   } catch (err) {
-    console.error(`[AI Endpoint] /api/analyze-all-panels failed:`, err);
+    console.error(`[AI Endpoint] /api/v1/ai/analyze-all-panels failed:`, err);
     throw err;
   }
 };
+
+export const analyzeSelectedPanels = analyzeAllPanels;
+export const analyzePanels = analyzeAllPanels;
 
 export const generateSpeechText = async (
   fetchWithInterceptor: FetchClient,
@@ -145,19 +81,19 @@ export const generateSpeechText = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/generate-speech-text:`, data);
+  console.log(`[AI Endpoint] POST /api/v1/ai/generate-speech-text:`, data);
   try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/generate-speech-text", {
+    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/generate-speech-text", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/generate-speech-text success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/generate-speech-text success (${elapsed}ms):`, res);
     return res;
   } catch (err) {
-    console.error(`[AI Endpoint] /api/generate-speech-text failed:`, err);
+    console.error(`[AI Endpoint] /api/v1/ai/generate-speech-text failed:`, err);
     throw err;
   }
 };
@@ -168,19 +104,19 @@ export const aiDetectPanels = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/ai-detect-panels url=${data?.url?.slice(0, 60)}...`);
+  console.log(`[AI Endpoint] POST /api/v1/ai/ai-detect-panels url=${data?.url?.slice(0, 60)}...`);
   try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/ai-detect-panels", {
+    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/ai-detect-panels", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/ai-detect-panels success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/ai-detect-panels success (${elapsed}ms):`, res);
     return res;
   } catch (err) {
-    console.error(`[AI Endpoint] /api/ai-detect-panels failed:`, err);
+    console.error(`[AI Endpoint] /api/v1/ai/ai-detect-panels failed:`, err);
     throw err;
   }
 };
@@ -191,19 +127,19 @@ export const aiSmartCrop = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/ai-smart-crop url=${data?.url?.slice(0, 60)}...`);
+  console.log(`[AI Endpoint] POST /api/v1/ai/ai-smart-crop url=${data?.url?.slice(0, 60)}...`);
   try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/ai-smart-crop", {
+    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/ai-smart-crop", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/ai-smart-crop success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/ai-smart-crop success (${elapsed}ms):`, res);
     return res;
   } catch (err) {
-    console.error(`[AI Endpoint] /api/ai-smart-crop failed:`, err);
+    console.error(`[AI Endpoint] /api/v1/ai/ai-smart-crop failed:`, err);
     throw err;
   }
 };
@@ -214,9 +150,9 @@ export const listModels = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/list-models provider=${data?.provider || "default"}`);
+  console.log(`[AI Endpoint] POST /api/v1/ai/list-models provider=${data?.provider || "default"}`);
   try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/list-models", {
+    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/list-models", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -225,10 +161,10 @@ export const listModels = async (
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/list-models success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/list-models success (${elapsed}ms):`, res);
     return res;
   } catch (err) {
-    console.error(`[AI Endpoint] /api/list-models failed:`, err);
+    console.error(`[AI Endpoint] /api/v1/ai/list-models failed:`, err);
     throw err;
   }
 };

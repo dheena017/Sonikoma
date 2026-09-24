@@ -48,26 +48,7 @@ api_router.include_router(jobs_router,           prefix="/api/v1/jobs", tags=["1
 api_router.include_router(export_router,         prefix="/api/v1/export", tags=["12. Export & Archiving"])
 api_router.include_router(health_router,         prefix="/api/v1/system", tags=["13. System Health & Telemetry"])
 
-# ── Compatibility Aliases (Hidden from Swagger Docs to Eliminate Duplication) ──
-api_router.include_router(auth_router,           prefix="/api/auth", include_in_schema=False)
-api_router.include_router(project_router,        prefix="/api/projects", include_in_schema=False)
-api_router.include_router(jobs_router,           prefix="/api/jobs", include_in_schema=False)
-api_router.include_router(scraper_router,        prefix="/api/scraper", include_in_schema=False)
-api_router.include_router(scraper_router,        prefix="/api", include_in_schema=False)
-api_router.include_router(panels_router,         prefix="/api/panels", include_in_schema=False)
-api_router.include_router(ocr_router,            prefix="/api/ocr", include_in_schema=False)
-api_router.include_router(storyboard_router,     prefix="/api/storyboard", include_in_schema=False)
-api_router.include_router(ai_router,             prefix="/api/ai", include_in_schema=False)
-api_router.include_router(ai_router,             prefix="/api", include_in_schema=False)
-api_router.include_router(image_router,          prefix="/api/image", include_in_schema=False)
-api_router.include_router(audio_router,          prefix="/api/audio", include_in_schema=False)
-api_router.include_router(video_router,          prefix="/api/video", include_in_schema=False)
-api_router.include_router(export_router,         prefix="/api/export", include_in_schema=False)
-api_router.include_router(proxy_router,          prefix="/api", include_in_schema=False)
-api_router.include_router(health_router,         prefix="/api", include_in_schema=False)
-api_router.include_router(health_router,         prefix="/api/system", include_in_schema=False)
-api_router.include_router(health_router,         prefix="/api/py", include_in_schema=False)
-api_router.include_router(audio_router,          prefix="/api/py/audio", include_in_schema=False)
+
 
 
 def register_routers(app: FastAPI):
@@ -132,7 +113,7 @@ def register_routers(app: FastAPI):
         accept_header = request.headers.get("accept", "")
         if "text/html" in accept_header:
             return RedirectResponse(url="/api/docs")
-        return RedirectResponse(url="/api/health")
+        return RedirectResponse(url="/api/v1/system/health")
 
     # SPA Fallback Route for client-side routing & browser navigation (/workspace/*, /editor/*, etc.)
     @app.get("/{fallback_path:path}", include_in_schema=False)
@@ -163,6 +144,6 @@ def register_routers(app: FastAPI):
                 "hint": "This route may require an HTTP POST/PUT/DELETE request or authorization token.",
                 "docs_url": "/api/docs",
                 "redoc_url": "/api/redoc",
-                "health_url": "/api/health"
+                "health_url": "/api/v1/system/health"
             }
         )

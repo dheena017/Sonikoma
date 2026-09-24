@@ -145,7 +145,7 @@ export default function useRegisterForm(props: RegisterFormProps) {
   const handleSocialRegister = (provider: string) => {
     if (provider === "Google") {
       setIsSocialLoading(true);
-      window.location.href = "/api/auth/google/login";
+      window.location.href = "/api/v1/auth/google/login";
     } else {
       setError(`OAuth register via ${provider} is not configured yet.`);
     }

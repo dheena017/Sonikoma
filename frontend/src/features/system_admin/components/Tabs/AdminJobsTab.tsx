@@ -69,7 +69,7 @@ export function AdminJobsTab({
       if (statusFilter && statusFilter !== "all") params.append("status", statusFilter);
       if (typeFilter && typeFilter !== "all") params.append("job_type", typeFilter);
 
-      const res = await fetchWithInterceptor(`/api/auth/admin/jobs?${params.toString()}`);
+      const res = await fetchWithInterceptor(`/api/v1/auth/admin/jobs?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setJobs(data.jobs || []);
@@ -90,7 +90,7 @@ export function AdminJobsTab({
   const handleCancelJob = async (jobId: string) => {
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/jobs/${jobId}/cancel`,
+        `/api/v1/auth/admin/jobs/${jobId}/cancel`,
         { method: "POST" }
       );
       if (res.ok) {
@@ -107,7 +107,7 @@ export function AdminJobsTab({
   const handleDeleteJob = async (jobId: string) => {
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/jobs/${jobId}`,
+        `/api/v1/auth/admin/jobs/${jobId}`,
         { method: "DELETE" }
       );
       if (res.ok) {
@@ -124,7 +124,7 @@ export function AdminJobsTab({
     if (!window.confirm("Are you sure you want to cancel all currently running and queued jobs?")) return;
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/jobs/cancel-all-active`,
+        `/api/v1/auth/admin/jobs/cancel-all-active`,
         { method: "POST" }
       );
       if (res.ok) {
@@ -144,7 +144,7 @@ export function AdminJobsTab({
     if (!window.confirm("Are you sure you want to purge all completed, failed, and cancelled jobs from the database?")) return;
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/jobs/purge-completed`,
+        `/api/v1/auth/admin/jobs/purge-completed`,
         { method: "POST" }
       );
       if (res.ok) {

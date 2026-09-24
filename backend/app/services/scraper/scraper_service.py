@@ -41,9 +41,9 @@ logger = logging.getLogger("sonikoma.services.scraper.service")
 
 def wrap_proxy_image(img_url: str, referer_url: str) -> str:
     """Wraps an external image URL in the local image proxy endpoint."""
-    if not img_url or img_url.startswith("/api/proxy-image") or "/api/proxy-image" in img_url or img_url.startswith("data:image/"):
+    if not img_url or img_url.startswith("/api/v1/proxy/image") or img_url.startswith("/api/proxy-image") or "/api/v1/proxy/image" in img_url or "/api/proxy-image" in img_url or img_url.startswith("data:image/"):
         return img_url
-    return f"/api/proxy-image?url={quote(img_url)}&referer={quote(referer_url)}"
+    return f"/api/v1/proxy/image?url={quote(img_url)}&referer={quote(referer_url)}"
 
 
 async def scrape_chapter_service(
@@ -203,7 +203,7 @@ async def scrape_and_initialize_project(
                 if stitched_bytes:
                     filename = f"stitched_{int(time.time())}.png"
                     saved_path = img_utils.save_image_to_cache(stitched_bytes, filename)
-                    stitched_url = f"/api/cache-image/{filename}"
+                    stitched_url = f"/api/v1/images/cached/{filename}"
                     if hasattr(stitched_cache, "set"):
                         stitched_cache.set(normalized_url, {"data": stitched_bytes, "content_type": "image/png"})
                     else:

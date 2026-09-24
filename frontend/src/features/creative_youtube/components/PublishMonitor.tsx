@@ -169,7 +169,7 @@ export default function PublishMonitor({
           localStorage.getItem("sonikoma_token") ||
           localStorage.getItem("token") ||
           "";
-        const res = await fetch("/api/export/youtube/active-channel", {
+        const res = await fetch("/api/v1/export/youtube/active-channel", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {

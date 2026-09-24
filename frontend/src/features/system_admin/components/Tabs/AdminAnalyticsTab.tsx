@@ -30,7 +30,7 @@ export function AdminAnalyticsTab({
 
   const fetchAnalytics = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/analytics");
+      const res = await fetchWithInterceptor("/api/v1/auth/admin/analytics");
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.analytics) {

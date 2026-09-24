@@ -176,6 +176,7 @@ export function PanelCardThumbnail({
             img.dataset.retried = "1";
 
             if (
+              currentSrc.includes("/api/v1/proxy/image") ||
               currentSrc.includes("/api/proxy-image") ||
               currentSrc.includes("/api/") ||
               currentSrc.includes("/media/") ||
@@ -185,7 +186,7 @@ export function PanelCardThumbnail({
               return;
             }
 
-            img.src = `/api/proxy-image?url=${encodeURIComponent(currentSrc)}`;
+            img.src = `/api/v1/proxy/image?url=${encodeURIComponent(currentSrc)}`;
           }}
         />
       )}

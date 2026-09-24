@@ -140,13 +140,20 @@ def register_docs_routes(app: FastAPI):
     """Registers the interactive documentation endpoints and filtered OpenAPI schemas."""
     setup_custom_openapi(app)
 
+    @app.get("/api/v1/openapi.json", include_in_schema=False)
+    async def v1_openapi_json():
+        return JSONResponse(content=app.openapi())
+
     @app.get("/api/openapi/{category}.json", include_in_schema=False)
+    @app.get("/api/v1/openapi/{category}.json", include_in_schema=False)
     async def category_openapi_json(category: str):
         schema = get_category_openapi_schema(app, category)
         return JSONResponse(content=schema)
 
     @app.get("/api/docs", include_in_schema=False)
+    @app.get("/api/v1/docs", include_in_schema=False)
     @app.get("/api/docs/{category}", include_in_schema=False)
+    @app.get("/api/v1/docs/{category}", include_in_schema=False)
     async def custom_swagger_ui(category: str = "all"):
         category_clean = (category or "all").lower()
         valid_ids = [c["id"] for c in CATEGORY_METADATA]
@@ -194,7 +201,9 @@ def register_docs_routes(app: FastAPI):
         return HTMLResponse(content=content)
 
     @app.get("/api/redoc", include_in_schema=False)
+    @app.get("/api/v1/redoc", include_in_schema=False)
     @app.get("/api/redoc/{category}", include_in_schema=False)
+    @app.get("/api/v1/redoc/{category}", include_in_schema=False)
     async def custom_redoc_html(category: str = "all"):
         category_clean = (category or "all").lower().strip()
         valid_ids = [c["id"] for c in CATEGORY_METADATA]
@@ -231,9 +240,11 @@ def register_docs_routes(app: FastAPI):
 
     @app.get("/tests", include_in_schema=False)
     @app.get("/api/tests", include_in_schema=False)
+    @app.get("/api/v1/tests", include_in_schema=False)
     @app.get("/testing", include_in_schema=False)
     @app.get("/test-portal", include_in_schema=False)
     @app.get("/api/docs/tests", include_in_schema=False)
+    @app.get("/api/v1/docs/tests", include_in_schema=False)
     async def custom_test_portal_html():
         portal_html = get_test_portal_html()
         if portal_html:

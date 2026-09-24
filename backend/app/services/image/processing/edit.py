@@ -135,7 +135,7 @@ async def apply_image_edits_service(
     except Exception:
         supabase_url = None
 
-    new_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
+    new_url = supabase_url if supabase_url else f"/api/v1/images/cached/{unique_id}"
 
     try:
         stitched_cache.set(unique_id, {"data": img_buffer, "content_type": content_type})
@@ -197,7 +197,7 @@ async def transform_image_service(url: str, trans_type: str, value: str) -> Dict
         supabase_url = None
 
     unique_id = f"transform_{int(time.time() * 1000)}"
-    proxy_url = supabase_url if supabase_url else f"/api/image/cached/{unique_id}"
+    proxy_url = supabase_url if supabase_url else f"/api/v1/images/cached/{unique_id}"
 
     try:
         stitched_cache.set(unique_id, {"data": out_bytes, "content_type": "image/jpeg"})

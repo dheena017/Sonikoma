@@ -207,7 +207,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token") ||
         "";
-      await fetch(`/api/projects/${projectId}`, {
+      await fetch(`/api/v1/projects/${projectId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -240,7 +240,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token") ||
         "";
-      await fetch(`/api/projects/${projectId}`, {
+      await fetch(`/api/v1/projects/${projectId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -336,7 +336,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
     try {
       setLoadingProjects(true);
       setStatsLoading(true);
-      const res = await fetch("/api/projects", {
+      const res = await fetch("/api/v1/projects", {
         headers: {
           Authorization: `Bearer ${
             localStorage.getItem("sonikoma_token") ||

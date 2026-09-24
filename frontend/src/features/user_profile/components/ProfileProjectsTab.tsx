@@ -253,7 +253,7 @@ export default function ProfileProjectsTab({
             synopsis: proj.synopsis || null,
           };
 
-          const createRes = await fetch("/api/projects", {
+          const createRes = await fetch("/api/v1/projects", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -291,7 +291,7 @@ export default function ProfileProjectsTab({
             };
 
             const panelsRes = await fetch(
-              `/api/projects/${proj.project_id}/panels`,
+              `/api/v1/projects/${proj.project_id}/panels`,
               {
                 method: "POST",
                 headers: {

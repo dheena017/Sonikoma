@@ -22,7 +22,7 @@ export function AdminFinanceTab({ fetchWithInterceptor, analytics }: any) {
   const fetchInvoices = async () => {
     try {
       const res = await fetchWithInterceptor(
-        "/api/auth/admin/finance/invoices?limit=50"
+        "/api/v1/auth/admin/finance/invoices?limit=50"
       );
       if (res.ok) {
         const data = await res.json();

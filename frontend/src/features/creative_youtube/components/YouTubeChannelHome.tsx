@@ -99,13 +99,13 @@ export default function YouTubeChannelHome({
       const cacheBust = Date.now();
 
       const [videosRes, channelRes, playlistsRes] = await Promise.all([
-        fetch(`/api/export/youtube/videos?max_results=50&_t=${cacheBust}`, {
+        fetch(`/api/v1/export/youtube/videos?max_results=50&_t=${cacheBust}`, {
           headers,
         }),
-        fetch(`/api/export/youtube/channel/details?_t=${cacheBust}`, {
+        fetch(`/api/v1/export/youtube/channel/details?_t=${cacheBust}`, {
           headers,
         }),
-        fetch(`/api/export/youtube/playlists?_t=${cacheBust}`, { headers }),
+        fetch(`/api/v1/export/youtube/playlists?_t=${cacheBust}`, { headers }),
       ]);
 
       if (videosRes.ok) {

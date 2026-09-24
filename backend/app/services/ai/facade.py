@@ -412,7 +412,7 @@ async def _synthesize_tts_to_cache(text: str, voice: str, target_dur: float) -> 
                 audio_bytes = f.read()
             unique_id = f"audio_{uuid.uuid4().hex[:8]}" if 'uuid' in globals() else f"audio_{os.urandom(4).hex()}"
             stitched_cache.set(unique_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
-            return f"/api/image/cached/{unique_id}", actual_dur
+            return f"/api/v1/images/cached/{unique_id}", actual_dur
     except Exception as exc:
         logger.warning(f"[_synthesize_tts_to_cache] TTS failed: {exc}")
     finally:
@@ -989,7 +989,7 @@ def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], so
             panel_num = f"{idx + 1:02d}" if len(panels) >= 10 else f"{idx + 1}"
             geom_hash = hashlib.md5(f"{bounds.x}_{bounds.y}_{bounds.width}_{bounds.height}".encode()).hexdigest()[:8]
             cache_key = f"panel_crop_{img_hash}_{geom_hash}_{panel_num}"
-            cached_url = f"/api/image/cached/{cache_key}"
+            cached_url = f"/api/v1/images/cached/{cache_key}"
             stitched_cache.set(cache_key, {"data": cropped_bytes, "content_type": "image/jpeg"})
             if source_url:
                 edit_history.set(cached_url, source_url)
@@ -1277,7 +1277,7 @@ async def facade_analyze_narrative_sequence(
                         audio_bytes = f.read()
                     unique_audio_id = f"narrative_{uuid.uuid4().hex[:8]}"
                     stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
-                    audio_url = f"/api/image/cached/{unique_audio_id}"
+                    audio_url = f"/api/v1/images/cached/{unique_audio_id}"
 
                 if os.path.exists(temp_audio_path):
                     os.remove(temp_audio_path)

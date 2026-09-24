@@ -27,8 +27,8 @@ export function AdminConsoleTab() {
         localStorage.getItem("sonikoma_token") ||
         sessionStorage.getItem("sonikoma_token");
       const url = token
-        ? `/api/system-logs/stream?token=${encodeURIComponent(token)}`
-        : "/api/system-logs/stream";
+        ? `/api/v1/system/logs/stream?token=${encodeURIComponent(token)}`
+        : "/api/v1/system/logs/stream";
       ev = new EventSource(url);
 
       ev.onmessage = (event) => {

@@ -48,7 +48,7 @@ async def merge_images_service(
 
     panel_count = len(urls)
     unique_id = f"stitch_{int(time.time() * 1000)}_{panel_count}p"
-    cached_url = f"/api/image/cached/{unique_id}"
+    cached_url = f"/api/v1/images/cached/{unique_id}"
 
     try:
         stitched_cache.set(unique_id, {"data": merged_bytes, "content_type": "image/png"})
@@ -111,7 +111,7 @@ async def execute_splits_service(url: str, splitLines: List[float], output_forma
             except Exception:
                 sup_url = None
 
-            new_url = sup_url if sup_url else f"/api/image/cached/{cache_id}"
+            new_url = sup_url if sup_url else f"/api/v1/images/cached/{cache_id}"
 
             try:
                 stitched_cache.set(cache_id, {"data": seg_bytes, "content_type": f"image/{output_format}"})

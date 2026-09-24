@@ -60,11 +60,11 @@ export function AdminContentTab({
     try {
       let res;
       if (type === "DELETE") {
-        res = await fetchWithInterceptor(`/api/auth/admin/projects/${id}`, {
+        res = await fetchWithInterceptor(`/api/v1/auth/admin/projects/${id}`, {
           method: "DELETE",
         });
       } else {
-        res = await fetchWithInterceptor(`/api/auth/admin/projects/${id}`, {
+        res = await fetchWithInterceptor(`/api/v1/auth/admin/projects/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...payload, reason }),

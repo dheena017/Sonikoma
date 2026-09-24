@@ -25,7 +25,7 @@ class EndpointFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         try:
             msg = record.getMessage()
-            if any(path in msg for path in ["/api/v1/jobs", "/jobs", "/system-logs", "/api/metrics", "/api/health", "/metrics", "/health", "/api/auth/credits", "auth/credits"]):
+            if any(path in msg for path in ["/api/v1/jobs", "/api/v1/system/logs", "/system-logs", "/api/v1/system/metrics", "/api/v1/system/health", "/api/v1/system/status", "/api/v1/auth/credits"]):
                 return False
         except Exception:
             pass

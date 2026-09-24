@@ -6,7 +6,7 @@ export const generateVideo = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/generate", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/video/render", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -19,7 +19,7 @@ export const renderVideo = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/video/render", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/video/render", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -40,7 +40,7 @@ export const generateTts = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/audio/generate", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/audio/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

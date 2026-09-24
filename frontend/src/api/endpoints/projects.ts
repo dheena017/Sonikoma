@@ -10,7 +10,7 @@ import {
 export const getProjects = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/projects");
+  return apiRequest(fetchWithInterceptor, "/api/v1/projects");
 };
 
 export const getProject = async (
@@ -19,21 +19,21 @@ export const getProject = async (
   jobId?: string | null
 ): Promise<ApiResponse<any>> => {
   const query = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}${query}`);
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}${query}`);
 };
 
 export const getPublicProject = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/public/${projectId}`);
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/public/${projectId}`);
 };
 
 export const createProject = async (
   fetchWithInterceptor: FetchClient,
   projectData: CreateProjectPayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/projects", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/projects", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(projectData),
@@ -45,7 +45,7 @@ export const updateProject = async (
   projectId: string,
   projectData: UpdateProjectPayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(projectData),
@@ -56,7 +56,7 @@ export const deleteProject = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}`, {
     method: "DELETE",
   });
 };
@@ -65,7 +65,7 @@ export const batchDeleteProjects = async (
   fetchWithInterceptor: FetchClient,
   projectIds: string[]
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/projects/batch-delete", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/projects/batch-delete", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ project_ids: projectIds }),
@@ -76,14 +76,14 @@ export const getSeries = async (
   fetchWithInterceptor: FetchClient,
   seriesSlug: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/series/${seriesSlug}`);
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/series/${seriesSlug}`);
 };
 
 export const deleteSeries = async (
   fetchWithInterceptor: FetchClient,
   seriesId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/series/${seriesId}`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/series/${seriesId}`, {
     method: "DELETE",
   });
 };
@@ -97,7 +97,7 @@ export const updateProjectPanels = async (
   const query = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
   return apiRequest(
     fetchWithInterceptor,
-    `/api/projects/${projectId}/panels${query}`,
+    `/api/v1/projects/${projectId}/panels${query}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -110,7 +110,7 @@ export const saveScrapedImages = async (
   fetchWithInterceptor: FetchClient,
   data: SaveScrapedImagesPayload
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/scraper/cache/session", {
+  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/cache/session", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -123,7 +123,7 @@ export const updateProjectTokens = async (
   tokens: number,
   jobId?: string | null
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/tokens`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/tokens`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ tokens, ...(jobId ? { job_id: jobId } : {}) }),
@@ -134,7 +134,7 @@ export const getProjectSettings = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings`);
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings`);
 };
 
 export const updateProjectSettings = async (
@@ -146,7 +146,7 @@ export const updateProjectSettings = async (
     autocrop_settings?: any;
   }
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(settings),
@@ -158,7 +158,7 @@ export const getVideoSettings = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/video`);
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/video`);
 };
 
 export const updateVideoSettings = async (
@@ -166,7 +166,7 @@ export const updateVideoSettings = async (
   projectId: string,
   videoSettings: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/video`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/video`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ video_settings: videoSettings }),
@@ -178,7 +178,7 @@ export const getAudioSettings = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/audio`);
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/audio`);
 };
 
 export const updateAudioSettings = async (
@@ -186,7 +186,7 @@ export const updateAudioSettings = async (
   projectId: string,
   audioSettings: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/audio`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/audio`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ audio_settings: audioSettings }),
@@ -198,7 +198,7 @@ export const getAutoCropSettings = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/autocrop`);
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/autocrop`);
 };
 
 export const updateAutoCropSettings = async (
@@ -206,7 +206,7 @@ export const updateAutoCropSettings = async (
   projectId: string,
   autoCropSettings: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/projects/${projectId}/settings/autocrop`, {
+  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/autocrop`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ autocrop_settings: autoCropSettings }),

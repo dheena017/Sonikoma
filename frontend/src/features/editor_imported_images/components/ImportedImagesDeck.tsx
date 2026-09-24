@@ -1188,7 +1188,7 @@ const ChapterScraperDeck = React.memo(
                       const isSelected = selectedScraped.includes(imgUrl);
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
-                        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                        : `/api/v1/proxy/image?url=${encodeURIComponent(imgUrl)}`;
                       const isInTimeline = activePanelsList.some(
                         (p) =>
                           p.image_url === imgUrl ||
@@ -1237,7 +1237,7 @@ const ChapterScraperDeck = React.memo(
                       const isSelected = selectedScraped.includes(imgUrl);
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
-                        : `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`;
+                        : `/api/v1/proxy/image?url=${encodeURIComponent(imgUrl)}`;
                       const isInTimeline = activePanelsList.some(
                         (p) =>
                           p.image_url === imgUrl ||

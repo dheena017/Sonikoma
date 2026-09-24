@@ -688,7 +688,7 @@ const StoryboardCard = ({
       // 1. Separate Layers
       addNotification?.("Step 1/3: Running AI Layer Separation...", "info");
       const layerRes = await fetchWithInterceptor(
-        `/api/image/process-layers/${panel.id}`,
+        `/api/v1/images/process-layers/${panel.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -749,7 +749,7 @@ const StoryboardCard = ({
           .map((s) => s.trim())
           .filter(Boolean);
         const alignRes = await fetchWithInterceptor(
-          `/api/audio/align-dialogue/${panel.id}`,
+          `/api/v1/audio/align-dialogue/${panel.id}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -930,12 +930,13 @@ const StoryboardCard = ({
               img.dataset.retried = "1";
               const src = img.src;
               if (
+                !src.includes("/api/v1/proxy/image") &&
                 !src.includes("/api/proxy-image") &&
-                !src.includes("/api/image/") &&
+                !src.includes("/api/v1/images/") &&
                 !src.includes("/media/") &&
                 !src.includes("/videos/")
               ) {
-                img.src = `/api/proxy-image?url=${encodeURIComponent(src)}`;
+                img.src = `/api/v1/proxy/image?url=${encodeURIComponent(src)}`;
               } else {
                 img.style.display = "none";
               }

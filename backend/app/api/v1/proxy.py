@@ -208,7 +208,7 @@ async def proxy_image_stream_endpoint(
 
     fetch_url = url
     visited = set()
-    while "/api/proxy-image" in fetch_url:
+    while "/api/proxy-image" in fetch_url or "/api/v1/proxy/image" in fetch_url or "/proxy/image" in fetch_url:
         if fetch_url in visited:
             raise HTTPException(status_code=400, detail="Infinite proxy redirect loop detected")
         visited.add(fetch_url)

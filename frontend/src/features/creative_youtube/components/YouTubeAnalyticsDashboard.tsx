@@ -211,10 +211,10 @@ export default function YouTubeAnalyticsDashboard({
       const headers = getHeaders();
       const [videosRes, channelRes, quotaRes, playlistsRes] = await Promise.all(
         [
-          fetch("/api/export/youtube/videos?max_results=50", { headers }),
-          fetch("/api/export/youtube/channel/details", { headers }),
-          fetch("/api/export/youtube/quota", { headers }),
-          fetch("/api/export/youtube/playlists", { headers }),
+          fetch("/api/v1/export/youtube/videos?max_results=50", { headers }),
+          fetch("/api/v1/export/youtube/channel/details", { headers }),
+          fetch("/api/v1/export/youtube/quota", { headers }),
+          fetch("/api/v1/export/youtube/playlists", { headers }),
         ]
       );
       if (videosRes.ok) {

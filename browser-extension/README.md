@@ -45,6 +45,6 @@
 The extension connects directly to Sonikoma's FastAPI backend:
 - Neural Voices: `GET /api/v1/audio/voices`
 - TTS Synthesis: `POST /api/v1/audio/tts`
-- Vision AI & Panel OCR: `POST /api/analyze-single-image`
+- Vision AI & Panel OCR: `POST /api/v1/ai/analyze-image`
 - Video Rendering: `POST /api/v1/video/render`
 - Web Studio Bridge: `/scraper?url=...`

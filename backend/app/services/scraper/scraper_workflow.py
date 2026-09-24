@@ -242,7 +242,7 @@ async def scrape_series_chapters(
                 cover_img = urljoin(clean_base, cover_img)
 
             from urllib.parse import quote
-            proxy_cover = f"/api/proxy-image?url={quote(cover_img)}&referer={quote(raw_input)}" if cover_img else ""
+            proxy_cover = f"/api/v1/proxy/image?url={quote(cover_img)}&referer={quote(raw_input)}" if cover_img else ""
 
             series_dict["title"] = series_title
             series_dict["cover_image"] = cover_img
@@ -297,7 +297,7 @@ async def scrape_series_chapters(
                     clean_base = raw_input if raw_input.endswith("/") else (raw_input + "/")
                     ch_img = urljoin(clean_base, ch_img)
                 ch["cover_image"] = ch_img
-                ch["proxy_url"] = f"/api/proxy-image?url={quote(ch_img)}&referer={quote(raw_input)}" if ch_img else ""
+                ch["proxy_url"] = f"/api/v1/proxy/image?url={quote(ch_img)}&referer={quote(raw_input)}" if ch_img else ""
                 ch["proxy_cover_image"] = ch["proxy_url"]
                 ch_num = ch.get("chapter_number") or ch.get("episode_no") or ch.get("number")
                 ch["chapter_number"] = ch_num

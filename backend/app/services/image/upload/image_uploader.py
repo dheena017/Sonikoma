@@ -51,7 +51,7 @@ async def upload_image_service(
     else:
         cache_id = f"upload_{int(time.time() * 1000)}"
         stitched_cache.set(cache_id, {"data": file_bytes, "content_type": content_type})
-        new_url = f"/api/image/cached/{cache_id}"
+        new_url = f"/api/v1/images/cached/{cache_id}"
 
     return {"success": True, "url": new_url}
 

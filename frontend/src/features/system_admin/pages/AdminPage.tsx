@@ -135,7 +135,7 @@ const AdminPage = React.memo(
                     const token =
                       localStorage.getItem("sonikoma_token") ||
                       sessionStorage.getItem("sonikoma_token");
-                    const res = await fetch("/api/auth/profile", {
+                    const res = await fetch("/api/v1/auth/profile", {
                       method: "PUT",
                       headers: {
                         "Content-Type": "application/json",

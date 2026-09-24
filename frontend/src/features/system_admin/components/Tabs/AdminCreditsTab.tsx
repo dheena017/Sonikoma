@@ -81,7 +81,7 @@ export function AdminCreditsTab({
 
   const fetchUsers = async () => {
     try {
-      const res = await fetchWithInterceptor("/api/auth/admin/users");
+      const res = await fetchWithInterceptor("/api/v1/auth/admin/users");
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.users)) {
@@ -108,7 +108,7 @@ export function AdminCreditsTab({
     setLoading(true);
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/credits/transactions?limit=${limit}&offset=${offset}`
+        `/api/v1/auth/admin/credits/transactions?limit=${limit}&offset=${offset}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -192,7 +192,7 @@ export function AdminCreditsTab({
       for (const u of filteredUsers) {
         try {
           const res = await fetchWithInterceptor(
-            `/api/auth/admin/users/${u.id}/add-credits`,
+            `/api/v1/auth/admin/users/${u.id}/add-credits`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -226,7 +226,7 @@ export function AdminCreditsTab({
     setIsSubmitting(true);
     try {
       const res = await fetchWithInterceptor(
-        `/api/auth/admin/users/${selectedUserId}/add-credits`,
+        `/api/v1/auth/admin/users/${selectedUserId}/add-credits`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
