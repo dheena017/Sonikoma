@@ -83,7 +83,6 @@ def _attach_narratives_to_results(results: list) -> list:
     return results
 
 
-@router.post("/analyze-image", summary="Analyze a single storyboard panel and generate dialogue, SFX, scene description, motion, timing, and narrative")
 @router.post("/analyze-single-image", summary="Analyze a single storyboard panel and generate dialogue, SFX, scene description, motion, timing, and narrative")
 async def analyze_image(
     body: AnalyzeImageRequest,

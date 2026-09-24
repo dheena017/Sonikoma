@@ -7,23 +7,24 @@ export const analyzeImage = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/v1/ai/analyze-image url=${data?.url?.slice(0, 60)}... model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
+  console.log(`[AI Endpoint] POST /api/v1/ai/analyze-single-image url=${data?.url?.slice(0, 60)}... model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
   try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/analyze-image", {
+    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/analyze-single-image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/v1/ai/analyze-image success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/analyze-single-image success (${elapsed}ms):`, res);
     return res;
   } catch (err) {
-    console.error(`[AI Endpoint] /api/v1/ai/analyze-image failed:`, err);
+    console.error(`[AI Endpoint] /api/v1/ai/analyze-single-image failed:`, err);
     throw err;
   }
 };
 
+// analyzeSingleImage is the canonical name — analyzeImage is kept as an alias for backward compat
 export const analyzeSingleImage = analyzeImage;
 
 export const analyzeSequence = async (

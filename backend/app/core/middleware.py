@@ -63,7 +63,7 @@ PUBLIC_ROUTE_SET = {
     "/api/v1/ai/models/catalog",      # AI Model Catalog metadata
     "/api/v1/ai/models/routing",      # AI Task-to-Model Routing configuration
     "/api/v1/ai/list-models",
-    "/api/v1/ai/analyze-image",
+    "/api/v1/ai/analyze-single-image",
     "/api/v1/ai/analyze-all-panels",
     "/api/v1/ai/analyze-sequence",
     "/api/v1/ai/analyze-batch",

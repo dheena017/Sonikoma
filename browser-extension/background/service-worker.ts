@@ -372,7 +372,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
       try {
         const base = await getApiBaseUrl();
         const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
-        const endpoint = `${apiBase}/api/v1/ai/analyze-image`;
+        const endpoint = `${apiBase}/api/v1/ai/analyze-single-image`;
 
         let resultData: any = null;
         let fetchError: string | null = null;
