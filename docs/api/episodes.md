@@ -25,7 +25,7 @@ All are already in your project!
 
 ## API Endpoint
 
-### `POST /api/scrape-episodes`
+### `POST /api/v1/scraper/scrape-episodes`
 
 **Purpose:** Scrape episode list from a WEBTOON series
 
@@ -89,7 +89,7 @@ _Note: Either `url` or `title_no` is required_
 ### Example 1: Using Full URL
 
 ```bash
-curl -X POST http://localhost:8000/api/scrape-episodes \
+curl -X POST http://localhost:8000/api/v1/scraper/scrape-episodes \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://www.webtoons.com/en/romance/love-by-mistake/list?title_no=10411"
@@ -99,7 +99,7 @@ curl -X POST http://localhost:8000/api/scrape-episodes \
 ### Example 2: Using title_no Only
 
 ```bash
-curl -X POST http://localhost:8000/api/scrape-episodes \
+curl -X POST http://localhost:8000/api/v1/scraper/scrape-episodes \
   -H "Content-Type: application/json" \
   -d '{
     "title_no": "10411"
@@ -109,7 +109,7 @@ curl -X POST http://localhost:8000/api/scrape-episodes \
 ### Example 3: Limit Episodes
 
 ```bash
-curl -X POST http://localhost:8000/api/scrape-episodes \
+curl -X POST http://localhost:8000/api/v1/scraper/scrape-episodes \
   -H "Content-Type: application/json" \
   -d '{
     "title_no": "10411",
@@ -128,7 +128,7 @@ import asyncio
 async def scrape_webtoon():
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            "http://localhost:8000/api/scrape-episodes",
+            "http://localhost:8000/api/v1/scraper/scrape-episodes",
             json={"title_no": "10411", "max_episodes": 50}
         )
         result = response.json()
@@ -144,7 +144,7 @@ asyncio.run(scrape_webtoon())
 
 ```javascript
 async function scrapeWebtoon() {
-  const response = await fetch("http://localhost:8000/api/scrape-episodes", {
+  const response = await fetch("http://localhost:8000/api/v1/scraper/scrape-episodes", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -205,7 +205,7 @@ python scratch/test_webtoon_episodes.py
 
 2. **`backend/python/routes/scraper_routes.py`**
    - Added `ScrapeEpisodesRequest` model
-   - Added `POST /api/scrape-episodes` endpoint
+   - Added `POST /api/v1/scraper/scrape-episodes` endpoint
    - Imports new scraper function
 
 ### Key Features
@@ -347,7 +347,7 @@ The episode scraper has been significantly enhanced with production-ready featur
 
 ## Advanced API Endpoints
 
-### `POST /api/scrape-episodes-advanced`
+### `POST /api/v1/scraper/scrape-episodes-advanced`
 
 **Enhanced scraper with sorting and ratings extraction**
 
@@ -416,7 +416,7 @@ The episode scraper has been significantly enhanced with production-ready featur
 }
 ```
 
-### `POST /api/scrape-episodes-paginated`
+### `POST /api/v1/scraper/scrape-episodes-paginated`
 
 **Automatically handle multi-page series**
 
@@ -448,7 +448,7 @@ The episode scraper has been significantly enhanced with production-ready featur
 }
 ```
 
-### `POST /api/batch-scrape-series`
+### `POST /api/v1/scraper/batch-scrape-series`
 
 **Scrape multiple series in one request**
 

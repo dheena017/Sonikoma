@@ -754,7 +754,7 @@
     }
 
     // Load full schemas
-    fetch('/api/openapi.json')
+    fetch('/api/v1/openapi.json')
       .then(res => res.json())
       .then(data => {
         allSchemasMap = data.components ? (data.components.schemas || {}) : {};

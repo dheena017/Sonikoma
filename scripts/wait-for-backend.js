@@ -83,7 +83,7 @@ if (!geminiApiKey) {
   process.exit(1);
 }
 
-const url = `http://127.0.0.1:${port}/api/health`;
+const url = `http://127.0.0.1:${port}/api/v1/system/health`;
 
 logger.info(`Waiting for backend to start at ${url}...`);
 

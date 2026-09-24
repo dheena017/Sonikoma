@@ -40,7 +40,7 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
         return cached["data"], cached["content_type"]
 
     cached_url_key = f"/api/v1/images/cached/{cache_id}"
-    original_url = edit_history.get(cached_url_key) or edit_history.get(f"/api/image/cached/{cache_id}")
+    original_url = edit_history.get(cached_url_key)
 
     if not original_url:
         try:

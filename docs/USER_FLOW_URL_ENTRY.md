@@ -22,7 +22,7 @@ flowchart TD
     G --> H["🚀 handleScrape?.() called"]
 
     H --> I["📤 Frontend sends request"]
-    I --> J["API: POST /api/scraper/scrape-images"]
+    I --> J["API: POST /api/v1/scraper/scrape-images"]
 
     J --> K["🛠️ Backend Processing<br/>(scrape_and_initialize_project)"]
     K --> K1["1️⃣ Normalize URL<br/>(extract_webtoon_url)"]
@@ -136,7 +136,7 @@ const scrapeImages = useCallback(
     const normalizedTargetUrl = extractWebtoonUrl(resolvedUrl);
 
     // API Call
-    const response = await fetch("/api/scraper/scrape-images", {
+    const response = await fetch("/api/v1/scraper/scrape-images", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: JSON.stringify({
@@ -283,7 +283,7 @@ async def scrape_images_from_url(url, ...):
     # Step 5: Proxy images (optional)
     if proxy_images:
         filtered_images = [
-            f"/api/proxy-image?url={quote(img)}&referer={quote(fetch_url)}"
+            f"/api/v1/proxy/image?url={quote(img)}&referer={quote(fetch_url)}"
             for img in filtered_images
         ]
 

@@ -83,7 +83,7 @@ export const RecentSeriesCard: React.FC<RecentSeriesCardProps> = ({
             alt={series.title}
             className="w-16 h-20 object-cover rounded-lg border border-transparent flex-shrink-0 group-hover:scale-105 transition-transform shadow-md"
             onError={() => {
-              if ((imgSrc.includes("/api/v1/proxy/image") || imgSrc.includes("/api/proxy-image")) && series.cover_image) {
+              if (imgSrc.includes("/api/v1/proxy/image") && series.cover_image) {
                 setImgSrc(series.cover_image);
               } else {
                 setImageError(true);

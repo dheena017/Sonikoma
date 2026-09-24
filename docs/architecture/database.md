@@ -44,4 +44,4 @@ The database manages persistent states for scraped episodes, edited segments, us
    ```
 
 3. **Status Reporting:**
-   The `/api/health` endpoint queries table record counts to verify active connections and report stats back to the user interface.
+   The `/api/v1/system/health` endpoint queries table record counts to verify active connections and report stats back to the user interface.

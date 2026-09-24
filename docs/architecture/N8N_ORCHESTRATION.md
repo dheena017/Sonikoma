@@ -64,19 +64,19 @@ START
  ↓
 [Download Files] → Fetch video & audio from URLs
  ↓
-[Extract Metadata] → Call /api/py/ffmpeg/metadata
+[Extract Metadata] → Call /api/v1/video/ffmpeg/metadata
  ↓
-[Cut Video] → Call /api/py/ffmpeg/cut
+[Cut Video] → Call /api/v1/video/ffmpeg/cut
  ↓
-[Extract Audio] → Call /api/py/ffmpeg/extract-audio
+[Extract Audio] → Call /api/v1/video/ffmpeg/extract-audio
  ↓
-[Transcribe] → Call /api/py/audio/transcribe
+[Transcribe] → Call /api/v1/audio/transcribe
  ↓
-[Generate Subtitles] → Call /api/py/whisper/generate-srt
+[Generate Subtitles] → Call /api/v1/audio/whisper/generate-srt
  ↓
-[Mix Audio] → Call /api/py/ffmpeg/mix-audio
+[Mix Audio] → Call /api/v1/video/ffmpeg/mix-audio
  ↓
-[Add Subtitles] → Call /api/py/ffmpeg/add-subtitles
+[Add Subtitles] → Call /api/v1/video/ffmpeg/add-subtitles
  ↓
 [Upload Result] → Save to Supabase Storage
  ↓
@@ -113,14 +113,14 @@ END
 4. **HTTP Request** (Get metadata)
 
    ```
-   POST http://localhost:5000/api/py/ffmpeg/metadata
+   POST http://localhost:5000/api/v1/video/ffmpeg/metadata
    Body: { "video_path": "{{ $prev.video_path }}" }
    ```
 
 5. **HTTP Request** (Cut video)
 
    ```
-   POST http://localhost:5000/api/py/ffmpeg/cut
+   POST http://localhost:5000/api/v1/video/ffmpeg/cut
    Body: {
      "video_path": "{{ $prev.video_path }}",
      "cuts": {{ $json.cuts }},
@@ -131,14 +131,14 @@ END
 6. **HTTP Request** (Transcribe) - Parallel
 
    ```
-   POST http://localhost:5000/api/py/audio/transcribe
+   POST http://localhost:5000/api/v1/audio/transcribe
    Body: { "audio_url": "{{ $prev.audio_path }}" }
    ```
 
 7. **HTTP Request** (Mix audio)
 
    ```
-   POST http://localhost:5000/api/py/ffmpeg/mix-audio
+   POST http://localhost:5000/api/v1/video/ffmpeg/mix-audio
    Body: {
      "video_path": "{{ $prev.cut_video_path }}",
      "audio_paths": [{{ $prev.audio_path }}],
@@ -214,7 +214,7 @@ END
 3. **HTTP Request** (Transcribe) - Parallel
 
    ```
-   POST http://localhost:5000/api/py/audio/transcribe
+   POST http://localhost:5000/api/v1/audio/transcribe
    Body: {
      "audio_url": "{{ $prev.audio_path }}",
      "language": "{{ $json.language || 'en' }}"
@@ -224,7 +224,7 @@ END
 4. **HTTP Request** (Analyze Audio) - Parallel
 
    ```
-   POST http://localhost:5000/api/py/audio/analyze
+   POST http://localhost:5000/api/v1/audio/analyze
    Body: {
      "audio_url": "{{ $prev.audio_path }}",
      "analysis_types": ["tempo", "mfcc", "energy", "silence"]
@@ -234,7 +234,7 @@ END
 5. **HTTP Request** (Generate SRT)
 
    ```
-   POST http://localhost:5000/api/py/whisper/generate-srt
+   POST http://localhost:5000/api/v1/audio/whisper/generate-srt
    Body: {
      "audio_url": "{{ $prev.audio_path }}",
      "output_path": "/tmp/subtitles.srt"
@@ -299,7 +299,7 @@ END
 2. **HTTP Request** (Generate)
 
    ```
-   POST http://localhost:5000/api/py/image/generate-ai
+   POST http://localhost:5000/api/v1/image/generate-ai
    Body: {
      "prompt": "{{ $json.prompt }}",
      "num_images": {{ $json.num_images || 1 }},
@@ -313,7 +313,7 @@ END
    ```
    {
      "HTTP Request": {
-       "POST": "/api/py/image/enhance",
+       "POST": "/api/v1/image/enhance",
        "Body": {
          "image_path": "{{ $item.path }}",
          "brightness": {{ $json.enhancement.brightness || 1.1 }},
@@ -382,44 +382,44 @@ END
 
 ```python
 # FFmpeg routes
-POST /api/py/ffmpeg/metadata
-POST /api/py/ffmpeg/cut
-POST /api/py/ffmpeg/extract-audio
-POST /api/py/ffmpeg/mix-audio
-POST /api/py/ffmpeg/add-subtitles
-POST /api/py/ffmpeg/apply-filter
+POST /api/v1/video/ffmpeg/metadata
+POST /api/v1/video/ffmpeg/cut
+POST /api/v1/video/ffmpeg/extract-audio
+POST /api/v1/video/ffmpeg/mix-audio
+POST /api/v1/video/ffmpeg/add-subtitles
+POST /api/v1/video/ffmpeg/apply-filter
 
 # Librosa routes
-POST /api/py/audio/analyze
-POST /api/py/audio/detect-silence
-POST /api/py/audio/segment-by-energy
+POST /api/v1/audio/analyze
+POST /api/v1/audio/detect-silence
+POST /api/v1/audio/segment-by-energy
 
 # Whisper routes
-POST /api/py/audio/transcribe
-POST /api/py/whisper/generate-srt
-POST /api/py/whisper/generate-vtt
-POST /api/py/whisper/extract-words
+POST /api/v1/audio/transcribe
+POST /api/v1/audio/whisper/generate-srt
+POST /api/v1/audio/whisper/generate-vtt
+POST /api/v1/audio/whisper/extract-words
 
 # ImageMagick routes
-POST /api/py/image/resize
-POST /api/py/image/rotate
-POST /api/py/image/enhance
-POST /api/py/image/remove-background
-POST /api/py/image/add-text
-POST /api/py/image/batch-process
+POST /api/v1/image/resize
+POST /api/v1/image/rotate
+POST /api/v1/image/enhance
+POST /api/v1/image/remove-background
+POST /api/v1/image/add-text
+POST /api/v1/image/batch-process
 
 # Stable Diffusion routes
-POST /api/py/image/generate-ai
-POST /api/py/image/inpaint
-POST /api/py/image/upscale
-POST /api/py/image/style-transfer
+POST /api/v1/image/generate-ai
+POST /api/v1/image/inpaint
+POST /api/v1/image/upscale
+POST /api/v1/image/style-transfer
 
 # Compound processor routes
-POST /api/py/workflows/video/edit
-POST /api/py/workflows/audio/enhance
-POST /api/py/workflows/image/generate
-POST /api/py/workflows/multimedia/full-pipeline
-GET /api/py/workflows/{workflow_id}/progress
+POST /api/v1/ai/workflows/video/edit
+POST /api/v1/ai/workflows/audio/enhance
+POST /api/v1/ai/workflows/image/generate
+POST /api/v1/ai/workflows/multimedia/full-pipeline
+GET /api/v1/ai/workflows/{workflow_id}/progress
 ```
 
 ---
@@ -520,7 +520,7 @@ curl -X POST http://localhost:5678/webhook/video-edit \
   }'
 
 # 3. Check workflow progress
-curl http://localhost:5000/api/py/workflows/{workflow_id}/progress
+curl http://localhost:5000/api/v1/ai/workflows/{workflow_id}/progress
 
 # 4. Monitor logs
 docker-compose logs -f n8n

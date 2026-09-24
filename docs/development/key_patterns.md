@@ -11,7 +11,7 @@ Stores temporary stitched or processed images in memory, reducing disk reads.
 ```typescript
 // Store processed image buffer in backend memory
 const uniqueId = `stitched_${Date.now()}_<descriptor>`;
-const newUrl = `/api/stitch-images/cached/${uniqueId}`;
+const newUrl = `/api/v1/image/stitch-images/cached/${uniqueId}`;
 
 stitchedCache.set(uniqueId, {
   data: buffer,

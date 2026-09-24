@@ -4,7 +4,7 @@ scripts/test_scraper_endpoints.py
 Comprehensive Automated REST API Endpoint Validation Suite for the Sonikoma
 Universal Adaptive Scraper.
 
-Tests every route mounted under /api/v1/scraper/* and /api/scraper/*
+Tests every route mounted under /api/v1/scraper/*
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -214,10 +214,10 @@ record_test(
     f"Status: {res.status_code}, Version: {res.json().get('version')}"
 )
 
-# GET /api/health (root proxy health)
-res = client.get("/api/health")
+# GET /api/v1/system/health (root system health)
+res = client.get("/api/v1/system/health")
 record_test(
-    "GET /api/health",
+    "GET /api/v1/system/health",
     res.status_code == 200 and res.json().get("status") == "healthy",
     f"Status: {res.status_code}"
 )

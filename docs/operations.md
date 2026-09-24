@@ -48,7 +48,7 @@ Sonikoma includes an internal SSE (Server-Sent Events) mechanism. Logs generated
 
 ### Health Checks
 
-The backend provides a `/api/health` HTTP GET endpoint. It returns a JSON payload detailing:
+The backend provides a `/api/v1/system/health` HTTP GET endpoint. It returns a JSON payload detailing:
 
 - System status (healthy/unhealthy).
 - Process uptime.

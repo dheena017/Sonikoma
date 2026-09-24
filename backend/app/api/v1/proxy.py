@@ -197,7 +197,6 @@ def is_safe_proxy_url(target_url: str) -> tuple[bool, str]:
 # ─── Routes ───────────────────────────────────────────────────────────────────
 
 @router.get("/image", summary="Spoofed referrer image bypass proxy")
-@router.get("/proxy-image", include_in_schema=False)
 async def proxy_image_stream_endpoint(
     request: Request,
     url: str = Query(..., description="Target image URL to fetch"),
@@ -208,7 +207,7 @@ async def proxy_image_stream_endpoint(
 
     fetch_url = url
     visited = set()
-    while "/api/proxy-image" in fetch_url or "/api/v1/proxy/image" in fetch_url or "/proxy/image" in fetch_url:
+    while "/api/v1/proxy/image" in fetch_url:
         if fetch_url in visited:
             raise HTTPException(status_code=400, detail="Infinite proxy redirect loop detected")
         visited.add(fetch_url)

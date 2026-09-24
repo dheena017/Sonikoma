@@ -22,7 +22,7 @@ class RateLimitingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Bypass metrics, health, docs, openapi, and logs to prevent lockout or UI terminal interruption
         path = request.url.path
-        if any(p in path for p in ["/system-logs", "/api/v1/system/logs", "/api/v1/system/metrics", "/api/metrics", "/api/v1/system/health", "/api/health", "/metrics", "/health", "/api/docs", "/api/openapi.json"]):
+        if any(p in path for p in ["/system-logs", "/api/v1/system/logs", "/api/v1/system/metrics", "/api/v1/system/health", "/metrics", "/health", "/api/v1/docs", "/api/v1/openapi.json"]):
             return await call_next(request)
 
         client_ip = request.client.host if request.client else "unknown"

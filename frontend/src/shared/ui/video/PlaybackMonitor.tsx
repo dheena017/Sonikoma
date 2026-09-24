@@ -1242,7 +1242,6 @@ export default function VideoPreviewCinemaPlayer({
                       if (
                         src &&
                         !src.includes("/api/v1/proxy/image") &&
-                        !src.includes("/api/proxy-image") &&
                         !src.includes("/api/v1/images/")
                       ) {
                         img.src = `/api/v1/proxy/image?url=${encodeURIComponent(

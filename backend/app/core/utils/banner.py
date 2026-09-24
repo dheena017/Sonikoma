@@ -125,10 +125,10 @@ def _print_startup_banner():
     rate_limit = RATE_LIMIT_RPM or 120
     max_proxy = MAX_PROXY_MB or 20
 
-    url_api = f"http://localhost:{port}/api"
-    url_docs = f"http://localhost:{port}/api/docs"
-    url_redoc = f"http://localhost:{port}/api/redoc"
-    url_health = f"http://localhost:{port}/api/health"
+    url_api = f"http://localhost:{port}/api/v1"
+    url_docs = f"http://localhost:{port}/api/v1/docs"
+    url_redoc = f"http://localhost:{port}/api/v1/redoc"
+    url_health = f"http://localhost:{port}/api/v1/system/health"
 
     INNER_WIDTH = 76
 
@@ -202,10 +202,10 @@ def _print_startup_banner():
 +-----------------------------------------------------------------------------+
 | SONIKOMA COMPUTE ENGINE - FastAPI v{API_VERSION} (Python {py_ver})                    |
 +-----------------------------------------------------------------------------+
-| API Base: http://localhost:{port}/api                                       |
-| Docs:     http://localhost:{port}/api/docs                                  |
-| ReDoc:    http://localhost:{port}/api/redoc                                 |
-| Health:   http://localhost:{port}/api/health                                |
+| API Base: http://localhost:{port}/api/v1                                    |
+| Docs:     http://localhost:{port}/api/v1/docs                               |
+| ReDoc:    http://localhost:{port}/api/v1/redoc                              |
+| Health:   http://localhost:{port}/api/v1/system/health                      |
 +-----------------------------------------------------------------------------+
 | Mode: {prod_mode_ascii:<12} | Port: {port:<6} | Gemini: {gemini_status_ascii:<10}               |
 +-----------------------------------------------------------------------------+

@@ -73,16 +73,10 @@ PUBLIC_ROUTE_SET = {
     "/api/v1/scraper/series",
     "/api/v1/scraper/separate-url",
     "/api/v1/scraper/detect-platform",
-    "/api/docs",
-    "/api/redoc",
-    "/openapi.json",
-    "/api/openapi.json",
     "/api/v1/docs",
     "/api/v1/redoc",
     "/api/v1/openapi.json",
-    "/api/tests",
     "/api/v1/tests",
-    "/api/docs/tests",
     "/api/v1/docs/tests",
 }
 
@@ -91,7 +85,6 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/v1/projects/public/",
     "/api/v1/projects/transfer",
     "/static/",        # Swagger UI local CSS/JS assets
-    "/api/docs/",      # Swagger sub-paths (e.g. /api/docs/projects, /api/docs/jobs, etc.)
     "/api/v1/docs/",
     "/api/v1/images/",
     "/api/v1/images/cached/",
@@ -178,7 +171,7 @@ client_request_log = {}
 async def rate_limiting_middleware(request: Request, call_next):
     # Bypass metrics, health, docs, openapi, and logs to prevent lockout or UI terminal interruption
     path = request.url.path
-    if any(p in path for p in ["/api/v1/system/logs", "/system-logs", "/api/v1/system/metrics", "/api/v1/system/health", "/api/v1/system/status", "/metrics", "/health", "/api/docs", "/api/openapi.json"]):
+    if any(p in path for p in ["/api/v1/system/logs", "/system-logs", "/api/v1/system/metrics", "/api/v1/system/health", "/api/v1/system/status", "/metrics", "/health", "/api/v1/docs", "/api/v1/openapi.json"]):
         return await call_next(request)
 
     client_ip = request.client.host if request.client else "unknown"

@@ -108,7 +108,7 @@ if (!geminiApiKey) {
   process.exit(1);
 }
 
-const url = `http://127.0.0.1:${port}/api/health`;
+const url = `http://127.0.0.1:${port}/api/v1/system/health`;
 let pyProcess = null;
 let viteProcess = null;
 
@@ -639,7 +639,7 @@ async function start() {
       `● ${CLR_TEXT}Backend API Proxy :${CLR_RESET} ${CLR_HEADER}http://localhost:${bPort}/api${CLR_RESET}`
     );
     const lineHealth = formatLine(
-      `● ${CLR_TEXT}Backend Health    :${CLR_RESET} ${CLR_HEADER}http://localhost:${bPort}/api/health${CLR_RESET}`
+      `● ${CLR_TEXT}Backend Health    :${CLR_RESET} ${CLR_HEADER}http://localhost:${bPort}/api/v1/system/health${CLR_RESET}`
     );
 
     const lineEnv = formatLine(

@@ -1538,10 +1538,10 @@ const generatedHTML = `<!DOCTYPE html>
       <a href="http://localhost:3000" target="_blank" class="sidebar-nav-item" style="text-decoration: none;">
         <span>🚀 Open Web App</span>
       </a>
-      <a href="/api/docs" target="_blank" class="sidebar-nav-item" style="text-decoration: none;">
+      <a href="/api/v1/docs" target="_blank" class="sidebar-nav-item" style="text-decoration: none;">
         <span>⚡ Swagger UI</span>
       </a>
-      <a href="/api/redoc" target="_blank" class="sidebar-nav-item" style="text-decoration: none;">
+      <a href="/api/v1/redoc" target="_blank" class="sidebar-nav-item" style="text-decoration: none;">
         <span>📖 ReDoc Reference</span>
       </a>
 
@@ -1596,10 +1596,10 @@ const generatedHTML = `<!DOCTYPE html>
 
       <!-- Direct ReDoc & Swagger Dataset Links -->
       <div id="insp-docs-row" style="display: flex; gap: 8px;">
-        <a id="insp-redoc-btn" href="/api/redoc" target="_blank" class="hdr-btn-dark" style="flex: 1; justify-content: center;">
+        <a id="insp-redoc-btn" href="/api/v1/redoc" target="_blank" class="hdr-btn-dark" style="flex: 1; justify-content: center;">
           <span>📖 View in ReDoc</span>
         </a>
-        <a id="insp-swagger-btn" href="/api/docs" target="_blank" class="hdr-btn-dark" style="flex: 1; justify-content: center;">
+        <a id="insp-swagger-btn" href="/api/v1/docs" target="_blank" class="hdr-btn-dark" style="flex: 1; justify-content: center;">
           <span>⚡ Try in Swagger UI</span>
         </a>
       </div>
@@ -1739,8 +1739,8 @@ const generatedHTML = `<!DOCTYPE html>
       const docsRow = document.getElementById('insp-docs-row');
       if (test.suite === 'endpoints') {
         docsRow.style.display = 'flex';
-        redocBtn.href = '/api/redoc';
-        swaggerBtn.href = '/api/docs';
+        redocBtn.href = '/api/v1/redoc';
+        swaggerBtn.href = '/api/v1/docs';
       } else {
         docsRow.style.display = 'none';
       }

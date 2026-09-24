@@ -177,7 +177,6 @@ export function PanelCardThumbnail({
 
             if (
               currentSrc.includes("/api/v1/proxy/image") ||
-              currentSrc.includes("/api/proxy-image") ||
               currentSrc.includes("/api/") ||
               currentSrc.includes("/media/") ||
               currentSrc.includes("/videos/")

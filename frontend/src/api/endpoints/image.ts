@@ -141,7 +141,7 @@ export const getProxyImageUrl = (url: string): string => {
 };
 
 export const isProxyUrl = (url: string): boolean => {
-  return !!(url && typeof url === "string" && (url.includes("/api/v1/proxy/image") || url.includes("/api/proxy-image") || url.includes("/api/proxy/image")));
+  return !!(url && typeof url === "string" && url.includes("/api/v1/proxy/image"));
 };
 
 export const isApiUrl = (url: string): boolean => {

@@ -14,7 +14,7 @@ This document describes the primary REST endpoints available in the Sonikoma Fas
 
 ## Health & Metrics
 
-### `GET /api/health`
+### `GET /api/v1/system/health`
 
 - **Purpose**: Returns the system health, memory usage, and database connection state.
 - **Auth Required**: No.

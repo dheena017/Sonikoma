@@ -16,10 +16,8 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
     return url;
   }
   if (
-    url.includes("proxy/image?url=data") ||
-    url.includes("proxy-image?url=data") ||
-    url.includes("proxy/image?url=blob") ||
-    url.includes("proxy-image?url=blob")
+    url.includes("/api/v1/proxy/image?url=data") ||
+    url.includes("/api/v1/proxy/image?url=blob")
   ) {
     try {
       const match = url.match(/url=([^&]+)/);
@@ -34,10 +32,8 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
   try {
     const decoded = decodeURIComponent(url);
     if (
-      url.includes("/proxy/image") ||
-      url.includes("/proxy-image") ||
-      decoded.includes("/proxy/image") ||
-      decoded.includes("/proxy-image")
+      url.includes("/api/v1/proxy/image") ||
+      decoded.includes("/api/v1/proxy/image")
     ) {
       if (referer && !url.includes("referer=") && !decoded.includes("referer=")) {
         const sep = url.includes("?") ? "&" : "?";
@@ -46,7 +42,7 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
       return url;
     }
   } catch {
-    if (url.includes("/proxy/image") || url.includes("/proxy-image")) {
+    if (url.includes("/api/v1/proxy/image")) {
       if (referer && !url.includes("referer=")) {
         const sep = url.includes("?") ? "&" : "?";
         return `${url}${sep}referer=${encodeURIComponent(referer)}`;

@@ -51,7 +51,6 @@ export default function MergePanelList({
                       const src = img.src;
                       if (
                         !src.includes("/api/v1/proxy/image") &&
-                        !src.includes("/api/proxy-image") &&
                         !src.includes("/api/v1/images/")
                       ) {
                         img.src = `/api/v1/proxy/image?url=${encodeURIComponent(

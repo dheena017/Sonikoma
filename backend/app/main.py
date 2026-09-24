@@ -43,7 +43,7 @@ app = FastAPI(
     default_response_class=PrettyJSONResponse,
     docs_url=None,  # Custom Swagger documentation console mounted via docs router
     redoc_url=None,  # Custom ReDoc documentation console mounted via docs router
-    openapi_url="/api/openapi.json",
+    openapi_url="/api/v1/openapi.json",
     lifespan=lifespan,
 )
 

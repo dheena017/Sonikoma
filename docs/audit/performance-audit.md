@@ -134,11 +134,11 @@ Converting icons inside core layout elements (like `MainSidebar` or `MainHeader`
 ### 8.1. Client-Side Image Cache
 
 - **Current Status:** Eager loading (`loading="eager"`) is implemented inside horizontally scrolling panel thumbnail decks (`PanelCardThumbnail.tsx`) to prevent Chromium off-screen blank placeholder optimization issues, which is highly effective.
-- **Next Steps:** Implement a service-worker or browser-level Cache-Control policy specifically for scraped and cropped panel assets (`/api/image/cached/...`) to avoid repetitive HTTP re-downloads.
+- **Next Steps:** Implement a service-worker or browser-level Cache-Control policy specifically for scraped and cropped panel assets (`/api/v1/image/cached/...`) to avoid repetitive HTTP re-downloads.
 
 ### 8.2. Backend SQLite Caching
 
-- **Current Status:** The `/api/scrape` endpoints utilize the `scrape_sessions` table inside `webtoon_local.db` to store and recover scraped image list sessions.
+- **Current Status:** The `/api/v1/scraper/scrape` endpoints utilize the `scrape_sessions` table inside `webtoon_local.db` to store and recover scraped image list sessions.
 - **Next Steps:** Introduce a light memory cache (like `cachetools` or standard `dict`) in python routers to skip database reads for frequently queried platform settings.
 
 ---
@@ -159,7 +159,7 @@ File uploads and image operations define image paths as `None` and run body pars
 
 ### 10.1. Parallel Model Execution
 
-The `/api/analyze-batch` and `/api/analyze-sequence` routes utilize `asyncio.Semaphore(4)` and `asyncio.Semaphore(5)` to constrain concurrent Gemini Vision and Edge-TTS synthesis processes. This prevents thread deadlock and rate-limit exhaustion, reflecting great enterprise-level concurrent design.
+The `/api/v1/ai/analyze-batch` and `/api/v1/ai/analyze-sequence` routes utilize `asyncio.Semaphore(4)` and `asyncio.Semaphore(5)` to constrain concurrent Gemini Vision and Edge-TTS synthesis processes. This prevents thread deadlock and rate-limit exhaustion, reflecting great enterprise-level concurrent design.
 
 ### 10.2. CUDA Memory Releases
 

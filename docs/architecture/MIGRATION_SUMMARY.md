@@ -128,56 +128,56 @@ Required routes for integration:
 
 **FFmpeg Routes** (8 endpoints)
 
-- `/api/py/ffmpeg/metadata` - Get video metadata
-- `/api/py/ffmpeg/cut` - Cut/trim video
-- `/api/py/ffmpeg/extract-audio` - Extract audio track
-- `/api/py/ffmpeg/mix-audio` - Mix multiple audio tracks
-- `/api/py/ffmpeg/add-subtitles` - Burn subtitles
-- `/api/py/ffmpeg/apply-filter` - Apply visual filters
-- `/api/py/ffmpeg/adjust-speed` - Change playback speed
-- `/api/py/ffmpeg/concatenate` - Join multiple videos
+- `/api/v1/video/ffmpeg/metadata` - Get video metadata
+- `/api/v1/video/ffmpeg/cut` - Cut/trim video
+- `/api/v1/video/ffmpeg/extract-audio` - Extract audio track
+- `/api/v1/video/ffmpeg/mix-audio` - Mix multiple audio tracks
+- `/api/v1/video/ffmpeg/add-subtitles` - Burn subtitles
+- `/api/v1/video/ffmpeg/apply-filter` - Apply visual filters
+- `/api/v1/video/ffmpeg/adjust-speed` - Change playback speed
+- `/api/v1/video/ffmpeg/concatenate` - Join multiple videos
 
 **Librosa Routes** (4 endpoints)
 
-- `/api/py/audio/analyze` - Extract audio features
-- `/api/py/audio/detect-silence` - Find silent segments
-- `/api/py/audio/segment-by-energy` - Split by energy levels
-- `/api/py/audio/summary-stats` - Get audio statistics
+- `/api/v1/audio/analyze` - Extract audio features
+- `/api/v1/audio/detect-silence` - Find silent segments
+- `/api/v1/audio/segment-by-energy` - Split by energy levels
+- `/api/v1/audio/summary-stats` - Get audio statistics
 
 **Whisper Routes** (5 endpoints)
 
-- `/api/py/audio/transcribe` - Transcribe audio
-- `/api/py/whisper/generate-srt` - Generate SRT subtitles
-- `/api/py/whisper/generate-vtt` - Generate WebVTT subtitles
-- `/api/py/whisper/extract-words` - Word-level timestamps
-- `/api/py/whisper/batch-transcribe` - Batch processing
+- `/api/v1/audio/transcribe` - Transcribe audio
+- `/api/v1/audio/whisper/generate-srt` - Generate SRT subtitles
+- `/api/v1/audio/whisper/generate-vtt` - Generate WebVTT subtitles
+- `/api/v1/audio/whisper/extract-words` - Word-level timestamps
+- `/api/v1/audio/whisper/batch-transcribe` - Batch processing
 
 **ImageMagick Routes** (8 endpoints)
 
-- `/api/py/image/resize` - Resize with options
-- `/api/py/image/rotate` - Rotate image
-- `/api/py/image/enhance` - Auto-enhance
-- `/api/py/image/remove-background` - Transparency creation
-- `/api/py/image/add-text` - Text overlay
-- `/api/py/image/batch-process` - Parallel processing
-- `/api/py/image/composite` - Image blending
-- `/api/py/image/metadata` - Get image info
+- `/api/v1/image/resize` - Resize with options
+- `/api/v1/image/rotate` - Rotate image
+- `/api/v1/image/enhance` - Auto-enhance
+- `/api/v1/image/remove-background` - Transparency creation
+- `/api/v1/image/add-text` - Text overlay
+- `/api/v1/image/batch-process` - Parallel processing
+- `/api/v1/image/composite` - Image blending
+- `/api/v1/image/metadata` - Get image info
 
 **Stable Diffusion Routes** (5 endpoints)
 
-- `/api/py/image/generate-ai` - Text-to-image
-- `/api/py/image/inpaint` - Image editing
-- `/api/py/image/upscale` - Super-resolution
-- `/api/py/image/style-transfer` - Apply style
-- `/api/py/image/batch-generate` - Batch creation
+- `/api/v1/image/generate-ai` - Text-to-image
+- `/api/v1/image/inpaint` - Image editing
+- `/api/v1/image/upscale` - Super-resolution
+- `/api/v1/image/style-transfer` - Apply style
+- `/api/v1/image/batch-generate` - Batch creation
 
 **Compound Workflow Routes** (5 endpoints)
 
-- `POST /api/py/workflows/video/edit` - Video editing
-- `POST /api/py/workflows/audio/enhance` - Audio enhancement
-- `POST /api/py/workflows/image/generate` - Image generation
-- `POST /api/py/workflows/multimedia/full-pipeline` - Full pipeline
-- `GET /api/py/workflows/{id}/progress` - Track progress
+- `POST /api/v1/ai/workflows/video/edit` - Video editing
+- `POST /api/v1/ai/workflows/audio/enhance` - Audio enhancement
+- `POST /api/v1/ai/workflows/image/generate` - Image generation
+- `POST /api/v1/ai/workflows/multimedia/full-pipeline` - Full pipeline
+- `GET /api/v1/ai/workflows/{id}/progress` - Track progress
 
 ---
 
@@ -236,12 +236,12 @@ Update `backend/python/main.py`:
 from routes import ffmpeg_routes, librosa_routes, whisper_routes
 from routes import imagemagick_routes, stable_diffusion_routes, workflow_routes
 
-app.include_router(ffmpeg_routes.router, prefix="/api/py/ffmpeg")
-app.include_router(librosa_routes.router, prefix="/api/py/audio")
-app.include_router(whisper_routes.router, prefix="/api/py/whisper")
-app.include_router(imagemagick_routes.router, prefix="/api/py/image")
-app.include_router(stable_diffusion_routes.router, prefix="/api/py/image")
-app.include_router(workflow_routes.router, prefix="/api/py/workflows")
+app.include_router(ffmpeg_routes.router, prefix="/api/v1/ffmpeg")
+app.include_router(librosa_routes.router, prefix="/api/v1/audio")
+app.include_router(whisper_routes.router, prefix="/api/v1/whisper")
+app.include_router(imagemagick_routes.router, prefix="/api/v1/image")
+app.include_router(stable_diffusion_routes.router, prefix="/api/v1/image")
+app.include_router(workflow_routes.router, prefix="/api/v1/workflows")
 ```
 
 ### Phase 4: Deploy n8n (Day 4)

@@ -83,16 +83,16 @@ OPENAPI_TAGS = [
 API_DESCRIPTION = ""
 
 CATEGORY_METADATA = [
-    {"id": "all", "label": "🌐 All APIs (Full Hub)", "path": "/api/docs"},
-    {"id": "auth", "label": "🔐 Auth & Creator Profile", "path": "/api/docs/auth"},
-    {"id": "projects", "label": "📁 Projects & Workspace", "path": "/api/docs/projects"},
-    {"id": "scraper", "label": "🕷️ Webtoon Scraper", "path": "/api/docs/scraper"},
-    {"id": "panels", "label": "📐 Panel Splitting & OCR", "path": "/api/docs/panels"},
-    {"id": "ai", "label": "🧠 AI Models & Storyboard", "path": "/api/docs/ai"},
-    {"id": "audio", "label": "🎙️ Audio Synthesis & TTS", "path": "/api/docs/audio"},
-    {"id": "video", "label": "🎬 Video Rendering Engine", "path": "/api/docs/video"},
-    {"id": "jobs", "label": "⚡ Background Jobs & Queue", "path": "/api/docs/jobs"},
-    {"id": "export", "label": "📦 Export & Archiving", "path": "/api/docs/export"},
-    {"id": "system", "label": "💚 Health & System Stats", "path": "/api/docs/system"},
-    {"id": "schemas", "label": "📊 Data Models & Schemas", "path": "/api/docs/schemas"},
+    {"id": "all", "label": "🌐 All APIs (Full Hub)", "path": "/api/v1/docs"},
+    {"id": "auth", "label": "🔐 Auth & Creator Profile", "path": "/api/v1/docs/auth"},
+    {"id": "projects", "label": "📁 Projects & Workspace", "path": "/api/v1/docs/projects"},
+    {"id": "scraper", "label": "🕷️ Webtoon Scraper", "path": "/api/v1/docs/scraper"},
+    {"id": "panels", "label": "📐 Panel Splitting & OCR", "path": "/api/v1/docs/panels"},
+    {"id": "ai", "label": "🧠 AI Models & Storyboard", "path": "/api/v1/docs/ai"},
+    {"id": "audio", "label": "🎙️ Audio Synthesis & TTS", "path": "/api/v1/docs/audio"},
+    {"id": "video", "label": "🎬 Video Rendering Engine", "path": "/api/v1/docs/video"},
+    {"id": "jobs", "label": "⚡ Background Jobs & Queue", "path": "/api/v1/docs/jobs"},
+    {"id": "export", "label": "📦 Export & Archiving", "path": "/api/v1/docs/export"},
+    {"id": "system", "label": "💚 Health & System Stats", "path": "/api/v1/docs/system"},
+    {"id": "schemas", "label": "📊 Data Models & Schemas", "path": "/api/v1/docs/schemas"},
 ]

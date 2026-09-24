@@ -35,7 +35,7 @@ _Note: Codebase metrics can be calculated locally by running standard static ana
 
 ## ⚙️ 3. Operational Performance & Runtime Health
 
-_The metrics below track the real-time operational state of the backend service endpoints under standard user load, as reported via the `/api/metrics` dashboard._
+_The metrics below track the real-time operational state of the backend service endpoints under standard user load, as reported via the `/api/v1/system/metrics` dashboard._
 
 ### Server Performance
 

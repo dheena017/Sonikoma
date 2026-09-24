@@ -8,7 +8,7 @@ Welcome to the Sonikoma API documentation. This directory contains detailed refe
 
 ## Authentication
 
-Most endpoints (except `/api/health` and `/api/v1/auth/login`) require a valid JSON Web Token (JWT) passed in the `Authorization` header as a Bearer token:
+Most endpoints (except `/api/v1/system/health` and `/api/v1/auth/login`) require a valid JSON Web Token (JWT) passed in the `Authorization` header as a Bearer token:
 
 ```
 Authorization: Bearer <your_jwt_token>

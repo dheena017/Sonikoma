@@ -148,7 +148,7 @@ export default function SeriesCard({
               }`}
               loading="lazy"
               onError={() => {
-                if ((imgSrc.includes("/api/v1/proxy/image") || imgSrc.includes("/api/proxy-image")) && series.cover) {
+                if (imgSrc.includes("/api/v1/proxy/image") && series.cover) {
                   setImgSrc(series.cover);
                 } else {
                   setImageError(true);

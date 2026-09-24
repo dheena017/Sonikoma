@@ -287,7 +287,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             onError={() => {
               const firstP = getFirstPanel();
               const proxiedFirstP = firstP ? getProxiedImageUrl(firstP, chapter.url) : "";
-              if ((imgSrc.includes("/api/v1/proxy/image") || imgSrc.includes("/api/proxy-image")) && chapter.cover_image && imgSrc !== chapter.cover_image) {
+              if (imgSrc.includes("/api/v1/proxy/image") && chapter.cover_image && imgSrc !== chapter.cover_image) {
                 setImgSrc(chapter.cover_image);
               } else if (firstP && imgSrc !== proxiedFirstP && imgSrc !== firstP) {
                 setImgSrc(proxiedFirstP || firstP);

@@ -32,20 +32,20 @@ Sonikoma is built as a two-tier, high-performance multimedia compiler:
 
 The existing AI features are built on **Multimodal AI Markdown Skills** under `backend/python/skills/`.
 
-- **Single Panel Analysis (`/api/analyze-image`):** Downloads the target panel, computes its average brightness (to pass a dark/moody vs. light/vibrant style hint to the prompt), runs EasyOCR text extraction, and uses Gemini 2.5 Flash to generate a structured JSON object containing:
+- **Single Panel Analysis (`/api/v1/ai/analyze-image`):** Downloads the target panel, computes its average brightness (to pass a dark/moody vs. light/vibrant style hint to the prompt), runs EasyOCR text extraction, and uses Gemini 2.5 Flash to generate a structured JSON object containing:
   - `speech_text` (extracted or storyteller narrator-generated dialogue)
   - `sfx` (sound effect keyword, e.g., "Swoosh", "Crash")
   - `duration` (ideal timing in seconds based on speech speaking rate)
   - `motion_type` (suggested camera effect, e.g., `zoom_in`, `pan_left`)
   - `visual_description` (for subsequent image generation or accessibility checks)
 - **Silent Storyteller Fallback:** If OCR detects zero dialogue inside a panel, the system triggers the `panel_storyteller` skill. This acts as a Narrator that interprets the visual elements of the illustration and inserts dramatic, descriptive spoken voiceover scripts.
-- **Context-Aware Sequence Analysis (`/api/analyze-sequence`):** Extracts downscaled JPEGs of up to 20 panels, sends them in a single multimodal batch to Gemini, and returns a sequential array of cohesive dialogue scripts, preventing disjointed "panel-by-panel" disjointed narration.
+- **Context-Aware Sequence Analysis (`/api/v1/ai/analyze-sequence`):** Extracts downscaled JPEGs of up to 20 panels, sends them in a single multimodal batch to Gemini, and returns a sequential array of cohesive dialogue scripts, preventing disjointed "panel-by-panel" disjointed narration.
 
 ---
 
 ## 3. Current Project Lifecycle
 
-1. **Scrape/Ingest Phase:** User enters Webtoon URL. Playwright launches (incremental scrolling to expand lazy-loaded panels) or a ZIP/CBZ local archive is extracted. Raw images are cached under `/api/image/cached/` or `/media/`.
+1. **Scrape/Ingest Phase:** User enters Webtoon URL. Playwright launches (incremental scrolling to expand lazy-loaded panels) or a ZIP/CBZ local archive is extracted. Raw images are cached under `/api/v1/image/cached/` or `/media/`.
 2. **Project Creation:** An atomic SQLite transaction inserts a metadata parent row in `series` and an episodic chapter child row in `chapters`.
 3. **Drafting Phase:** Images are sliced into panels. The AI populates initial narration scripts and pre-generates TTS audio tracks (Edge-TTS) stored locally in the stitched cache.
 4. **Editor Refinement Phase:** The user manually crops, cleans speech bubbles using YOLO segmentation + OpenCV inpainting, alters dialogue, and arranges panel timing on the timeline.

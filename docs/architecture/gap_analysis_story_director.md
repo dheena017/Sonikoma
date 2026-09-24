@@ -24,11 +24,11 @@ This document identifies the architectural, procedural, database, and user inter
 
 ### B. Missing Backend Services & APIs
 
-1. **Narrative Generation Service:** A global multimodal analysis service (`POST /api/narrative/generate`) that aggregates all panels, runs OCR text, merges metadata, and feeds them into Gemini 2.5 Flash to output a unified, comprehensive `Narrative` JSON model.
+1. **Narrative Generation Service:** A global multimodal analysis service (`POST /api/v1/ai/narrative/generate`) that aggregates all panels, runs OCR text, merges metadata, and feeds them into Gemini 2.5 Flash to output a unified, comprehensive `Narrative` JSON model.
 2. **Speech Provider Factory & Service Interface:**
    - Evolve current Edge-TTS into a plug-and-play polymorphic `SpeechProvider` factory pattern.
    - Ready-to-implement providers: `OpenAIProvider`, `ElevenLabsProvider`, `GoogleProvider`, `AzureProvider`, `AmazonPollyProvider`, and `EdgeTTSProvider`.
-3. **Synchronized Panel Generation Service (`POST /api/narrative/apply`):** Translates narrative beats and emotion curves into panel-level fields (pacing, custom voice intensities, exact cinematic timings, and transitions).
+3. **Synchronized Panel Generation Service (`POST /api/v1/ai/narrative/apply`):** Translates narrative beats and emotion curves into panel-level fields (pacing, custom voice intensities, exact cinematic timings, and transitions).
 
 ### C. Missing UI Panels & Components
 

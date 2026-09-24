@@ -931,7 +931,6 @@ const StoryboardCard = ({
               const src = img.src;
               if (
                 !src.includes("/api/v1/proxy/image") &&
-                !src.includes("/api/proxy-image") &&
                 !src.includes("/api/v1/images/") &&
                 !src.includes("/media/") &&
                 !src.includes("/videos/")

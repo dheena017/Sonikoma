@@ -216,7 +216,7 @@ function killStaleListenerOnPort(port) {
 }
 
 // Poll the health endpoint
-const url = `http://127.0.0.1:${port}/api/health`;
+const url = `http://127.0.0.1:${port}/api/v1/system/health`;
 
 function checkHealth() {
   if (pyProcess && pyProcess.exitCode !== null) {

@@ -85,7 +85,7 @@ def get_redoc_custom_html(category: str = "all") -> str:
         theme_css = get_swagger_dark_theme_css()
         redoc_theme_css = get_redoc_dark_theme_css()
         navbar_html = get_swagger_navbar_html(category)
-        openapi_url = f"/api/openapi/{category}.json" if category and category != "all" else "/api/openapi.json"
+        openapi_url = f"/api/v1/openapi/{category}.json" if category and category != "all" else "/api/v1/openapi.json"
         return (
             template
             .replace("__THEME_CSS_PLACEHOLDER__", theme_css)

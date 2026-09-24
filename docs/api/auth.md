@@ -4,11 +4,11 @@ Endpoints for user registration, login, and profile management.
 
 | Endpoint                    | Method | Input Parameters                | Description                                   |
 | :-------------------------- | :----- | :------------------------------ | :-------------------------------------------- |
-| `/api/auth/register`        | `POST` | `username`, `password`, `email` | Registers a new user account.                 |
-| `/api/auth/login`           | `POST` | `username`, `password`          | Logs in a user, returning a JWT token.        |
-| `/api/auth/google`          | `POST` | `token` (Google ID token)       | Handles federated Google Authentication.      |
-| `/api/auth/forgot-password` | `POST` | `email`                         | Initiates the account recovery flow (mocked). |
-| `/api/auth/me`              | `GET`  | _Header Authorization Token_    | Returns the currently logged-in user profile. |
+| `/api/v1/auth/register`        | `POST` | `username`, `password`, `email` | Registers a new user account.                 |
+| `/api/v1/auth/login`           | `POST` | `username`, `password`          | Logs in a user, returning a JWT token.        |
+| `/api/v1/auth/google`          | `POST` | `token` (Google ID token)       | Handles federated Google Authentication.      |
+| `/api/v1/auth/forgot-password` | `POST` | `email`                         | Initiates the account recovery flow (mocked). |
+| `/api/v1/auth/me`              | `GET`  | _Header Authorization Token_    | Returns the currently logged-in user profile. |
 
 ---
 
@@ -20,13 +20,13 @@ The credits system gates all AI and media-generation features. Every deduction a
 
 | Endpoint                                 | Method | Auth Required | Description                                          |
 | :--------------------------------------- | :----- | :------------ | :--------------------------------------------------- |
-| `/api/auth/credits`                      | `GET`  | ✅ User       | Returns current balance + low_balance flag.          |
-| `/api/auth/transactions`                 | `GET`  | ✅ User       | Returns the paginated ledger (default 100, max 500). |
-| `/api/admin/users/{user_id}/add-credits` | `POST` | ✅ Admin only | Manually grant credits to a user.                    |
+| `/api/v1/auth/credits`                      | `GET`  | ✅ User       | Returns current balance + low_balance flag.          |
+| `/api/v1/auth/transactions`                 | `GET`  | ✅ User       | Returns the paginated ledger (default 100, max 500). |
+| `/api/v1/admin/users/{user_id}/add-credits` | `POST` | ✅ Admin only | Manually grant credits to a user.                    |
 
 ---
 
-### `GET /api/auth/credits`
+### `GET /api/v1/auth/credits`
 
 Polled by the frontend header every 30 seconds to keep the badge in sync.
 
@@ -49,7 +49,7 @@ Polled by the frontend header every 30 seconds to keep the badge in sync.
 
 ---
 
-### `GET /api/auth/transactions?limit=N`
+### `GET /api/v1/auth/transactions?limit=N`
 
 Returns the credit ledger for the authenticated user.
 
@@ -85,7 +85,7 @@ Returns the credit ledger for the authenticated user.
 
 ---
 
-### `POST /api/admin/users/{user_id}/add-credits`
+### `POST /api/v1/admin/users/{user_id}/add-credits`
 
 Admin-only. Grants credits to any user and writes an audit ledger row.
 

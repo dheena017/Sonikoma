@@ -144,15 +144,12 @@ def register_docs_routes(app: FastAPI):
     async def v1_openapi_json():
         return JSONResponse(content=app.openapi())
 
-    @app.get("/api/openapi/{category}.json", include_in_schema=False)
     @app.get("/api/v1/openapi/{category}.json", include_in_schema=False)
     async def category_openapi_json(category: str):
         schema = get_category_openapi_schema(app, category)
         return JSONResponse(content=schema)
 
-    @app.get("/api/docs", include_in_schema=False)
     @app.get("/api/v1/docs", include_in_schema=False)
-    @app.get("/api/docs/{category}", include_in_schema=False)
     @app.get("/api/v1/docs/{category}", include_in_schema=False)
     async def custom_swagger_ui(category: str = "all"):
         category_clean = (category or "all").lower()
@@ -160,7 +157,7 @@ def register_docs_routes(app: FastAPI):
         if category_clean not in valid_ids:
             category_clean = "all"
 
-        openapi_url = f"/api/openapi/{category_clean}.json" if category_clean != "all" else "/api/openapi.json"
+        openapi_url = f"/api/v1/openapi/{category_clean}.json" if category_clean != "all" else "/api/v1/openapi.json"
         current_label = next((c["label"] for c in CATEGORY_METADATA if c["id"] == category_clean), "API Console")
 
         if category_clean == "schemas":
@@ -168,7 +165,7 @@ def register_docs_routes(app: FastAPI):
             if schemas_html:
                 return HTMLResponse(content=schemas_html)
 
-        openapi_url = f"/api/openapi/{category_clean}.json" if category_clean != "all" else "/api/openapi.json"
+        openapi_url = f"/api/v1/openapi/{category_clean}.json" if category_clean != "all" else "/api/v1/openapi.json"
         current_label = next((c["label"] for c in CATEGORY_METADATA if c["id"] == category_clean), "API Console")
 
         html_res = get_swagger_ui_html(
@@ -200,9 +197,7 @@ def register_docs_routes(app: FastAPI):
         content = content.replace("<body>", f"<body>\n{custom_navbar_html}")
         return HTMLResponse(content=content)
 
-    @app.get("/api/redoc", include_in_schema=False)
     @app.get("/api/v1/redoc", include_in_schema=False)
-    @app.get("/api/redoc/{category}", include_in_schema=False)
     @app.get("/api/v1/redoc/{category}", include_in_schema=False)
     async def custom_redoc_html(category: str = "all"):
         category_clean = (category or "all").lower().strip()
@@ -216,7 +211,7 @@ def register_docs_routes(app: FastAPI):
 
         from fastapi.openapi.docs import get_redoc_html
         return get_redoc_html(
-            openapi_url=f"/api/openapi/{category_clean}.json" if category_clean != "all" else "/api/openapi.json",
+            openapi_url=f"/api/v1/openapi/{category_clean}.json" if category_clean != "all" else "/api/v1/openapi.json",
             title=f"Sonikoma - ReDoc Reference",
             redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.1.3/bundles/redoc.standalone.js",
             redoc_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
@@ -226,24 +221,22 @@ def register_docs_routes(app: FastAPI):
     @app.get("/admin/dashboard", include_in_schema=False)
     async def redirect_admin_to_docs():
         from fastapi.responses import RedirectResponse
-        return RedirectResponse(url="/api/docs/system")
+        return RedirectResponse(url="/api/v1/docs/system")
 
     @app.get("/admin/jobs", include_in_schema=False)
     async def redirect_admin_jobs_to_docs():
         from fastapi.responses import RedirectResponse
-        return RedirectResponse(url="/api/docs/jobs")
+        return RedirectResponse(url="/api/v1/docs/jobs")
 
     @app.get("/ai-core/models", include_in_schema=False)
     async def redirect_ai_models_to_docs():
         from fastapi.responses import RedirectResponse
-        return RedirectResponse(url="/api/docs/ai")
+        return RedirectResponse(url="/api/v1/docs/ai")
 
     @app.get("/tests", include_in_schema=False)
-    @app.get("/api/tests", include_in_schema=False)
     @app.get("/api/v1/tests", include_in_schema=False)
     @app.get("/testing", include_in_schema=False)
     @app.get("/test-portal", include_in_schema=False)
-    @app.get("/api/docs/tests", include_in_schema=False)
     @app.get("/api/v1/docs/tests", include_in_schema=False)
     async def custom_test_portal_html():
         portal_html = get_test_portal_html()

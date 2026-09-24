@@ -260,7 +260,7 @@ Results: Episodes sorted by like count (most first)
 ```
 User Input (URL or ID)
     ↓
-API Call: /api/scrape-episodes-advanced
+API Call: /api/v1/scraper/scrape-episodes-advanced
     ↓
 Backend Scrapes Episodes + Ratings
     ↓
@@ -289,7 +289,7 @@ Video Generation Workflow
 **Basic Scrape:**
 
 ```typescript
-POST /api/scrape-episodes
+POST /api/v1/scraper/scrape-episodes
 {
   "url": "https://...",
   "title_no": "10411",
@@ -300,7 +300,7 @@ POST /api/scrape-episodes
 **Advanced Scrape with Ratings & Sorting:** ✨
 
 ```typescript
-POST /api/scrape-episodes-advanced
+POST /api/v1/scraper/scrape-episodes-advanced
 {
   "url": "https://...",
   "title_no": "10411",
@@ -314,7 +314,7 @@ POST /api/scrape-episodes-advanced
 **Paginated Multi-Page:** ✨
 
 ```typescript
-POST /api/scrape-episodes-paginated
+POST /api/v1/scraper/scrape-episodes-paginated
 {
   "title_no": "10411",
   "max_episodes": 500  // Automatically pages through all
@@ -324,7 +324,7 @@ POST /api/scrape-episodes-paginated
 **Batch Multiple Series:** ✨
 
 ```typescript
-POST /api/batch-scrape-series
+POST /api/v1/scraper/batch-scrape-series
 {
   "series": [
     { "title_no": "10411" },
@@ -394,7 +394,7 @@ POST /api/batch-scrape-series
 
 ## File Changes
 
-1. **`frontend/src/api/scraper.ts`** ✏️
+1. **`frontend/src/api/v1/scraper/scraper.ts`** ✏️
 
    - Added `scrapeEpisodesAdvanced()`
    - Added `scrapeEpisodesPaginated()`

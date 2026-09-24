@@ -33,11 +33,11 @@ A summary of finding counts by severity is presented below:
 ### Findings & Analysis
 
 The authentication system relies on the standard `bcrypt` hashing algorithm with custom salt lengths to securely store passwords in the local SQLite database. JWT tokens are issued on successful login and validated via authorization headers.
-An architectural audit of Google OAuth 2.0 (`/api/auth/google/callback`) indicates it is properly designed as a stateful flow retrieving profiles via secure backchannel HTTPS calls to Google APIs.
+An architectural audit of Google OAuth 2.0 (`/api/v1/auth/google/callback`) indicates it is properly designed as a stateful flow retrieving profiles via secure backchannel HTTPS calls to Google APIs.
 
 #### Finding AUTH-01: Plaintext Forgot Password Log (Low)
 
-- **Description:** The `/api/auth/forgot-password` endpoint logs the user's email address in plaintext on password reset requests.
+- **Description:** The `/api/v1/auth/forgot-password` endpoint logs the user's email address in plaintext on password reset requests.
 - **Risk:** High exposure of sensitive user email addresses to console logs, increasing leak vectors on centralized log aggregators.
 - **Impact:** Low.
 - **Recommendation:** Mask email addresses or remove them from standard stdout logs.
@@ -56,7 +56,7 @@ An architectural audit of Google OAuth 2.0 (`/api/auth/google/callback`) indicat
 
 The authorization engine uses `AuthorizationMiddleware` (inheriting from `BaseHTTPMiddleware` in `main.py`) to enforce a secure 3-tier hierarchy:
 
-1. **Public Bypass:** Endpoints in `PUBLIC_ROUTE_SET` or matching `PUBLIC_ROUTE_PREFIXES` bypass credentials checking (e.g. `/api/health`, images cached).
+1. **Public Bypass:** Endpoints in `PUBLIC_ROUTE_SET` or matching `PUBLIC_ROUTE_PREFIXES` bypass credentials checking (e.g. `/api/v1/system/health`, images cached).
 2. **Standard Creator Guard:** Endpoints requiring bearer tokens validated against users in the SQLite db.
 3. **Admin role Guard:** Enforces `creator_role == 'admin'` for routes matching `ADMIN_ROUTE_PREFIXES`.
 
@@ -160,7 +160,7 @@ The codebase uses parameterization (`?` placeholders) for standard database exec
 
 #### Finding SQL-01: Dynamic SQL Whitelisting Check (Informational)
 
-- **Description:** The `/api/admin/db/query` endpoint allows querying tables dynamically.
+- **Description:** The `/api/v1/admin/db/query` endpoint allows querying tables dynamically.
 - **Risk:** SQL databases do not support parameterizing table names. Directly concatenating table names into raw queries can lead to arbitrary SQL injection.
 - **Impact:** None (Mitigated).
 - **Analysis:** The `admin_query_db` function inside `db.py` contains a strict whitelist check:
@@ -188,7 +188,7 @@ Endpoints processing file uploads (such as OCR, cleaner, and panel slicers) util
 
 #### Finding FILE-02: Path Traversal Verification in Training File Serving (Informational)
 
-- **Description:** The `/api/image/training-data-file/{filename}` serves files directly from the `training_data` folder.
+- **Description:** The `/api/v1/image/training-data-file/{filename}` serves files directly from the `training_data` folder.
 - **Analysis:** This is a positive finding. The endpoint resolves the requested path via `os.path.abspath` and strictly verifies `.startswith(training_dir)` to prevent path traversal vectors (`../`).
 - **Status:** Documented as a positive security practice.
 

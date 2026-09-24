@@ -150,7 +150,7 @@ export default defineConfig(({ mode, command }) => {
                   return new Promise((resolve) => {
                     try {
                       const checkReq = http.get(
-                        `${backendTarget}/api/health`,
+                        `${backendTarget}/api/v1/system/health`,
                         (checkRes) => {
                           if (
                             checkRes.statusCode === 200 ||
@@ -341,7 +341,7 @@ export default defineConfig(({ mode, command }) => {
           // Forward to in-app system-logs so it appears in the UI terminal
           if (backendTarget) {
             const logMsg = `[Vite HMR] 📝 File changed: ${relativePath} → pushing live update…`;
-            fetch(`${backendTarget}/api/system-logs/log`, {
+            fetch(`${backendTarget}/api/v1/system/system-logs/log`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ message: logMsg, level: "info" }),

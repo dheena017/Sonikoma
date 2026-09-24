@@ -74,7 +74,7 @@ class WhisperModel(str, Enum):
 
 1. **API Endpoints:**
 
-   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/whisper` router
+   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/v1/audio/whisper` router
    - [backend/app/api/v1/audio.py](backend/app/api/v1/audio.py) - Whisper route definitions
 
 2. **Services:**
@@ -185,7 +185,7 @@ Librosa is a Python audio analysis library used for extracting features, detecti
      - Calls `extract_summary_stats()`
 
 4. **API Endpoints:**
-   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/librosa` router
+   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/v1/audio/librosa` router
    - [backend/app/api/v1/audio.py](backend/app/api/v1/audio.py) - Librosa endpoints
 
 ### How It's Used
@@ -278,7 +278,7 @@ FFmpeg is the industry-standard multimedia framework used for video compilation,
 
 4. **API Endpoints:**
 
-   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/ffmpeg` router
+   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/v1/video/ffmpeg` router
    - [backend/app/api/v1/video/router.py](backend/app/api/v1/video/router.py) - Video endpoints
    - [backend/app/api/v1/health.py](backend/app/api/v1/health.py) - FFmpeg health check
 
@@ -391,7 +391,7 @@ YOLO (You Only Look Once) is used for real-time object detection and segmentatio
 4. **API Endpoints:**
 
    - [backend/app/api/v1/images/detect.py](backend/app/api/v1/images/detect.py)
-     - POST `/api/images/debug-yolo-detections` - YOLO diagnostic endpoint
+     - POST `/api/v1/ai/images/debug-yolo-detections` - YOLO diagnostic endpoint
 
 5. **Settings:**
    - [backend/app/core/settings.py](backend/app/core/settings.py) - YOLO models directory configuration
@@ -619,7 +619,7 @@ class StableDiffusionModel(str, Enum):
 
 1. **API Endpoints:**
 
-   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/stable-diffusion` router
+   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/v1/ai/stable-diffusion` router
    - [backend/app/api/v1/ai/image.py](backend/app/api/v1/ai/image.py) - Stable Diffusion endpoints (currently empty router)
 
 2. **Services:**
@@ -708,7 +708,7 @@ ImageMagick is a powerful image manipulation library used for resizing, rotating
 
 3. **API Endpoints:**
 
-   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/imagemagick` router
+   - [backend/app/api/router.py](backend/app/api/router.py) - Registers `/api/v1/image/imagemagick` router
    - [backend/app/api/v1/images/transform.py](backend/app/api/v1/images/transform.py) - All transformation endpoints:
      - POST `/resize` - Resize with fit/cover modes
      - POST `/rotate` - Rotate by angle

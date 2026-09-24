@@ -347,8 +347,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
             >
               {images.map((imgUrl, idx) => {
                 const resolvedSrc =
-                  imgUrl.startsWith("/api/v1/proxy/image") ||
-                  imgUrl.startsWith("/api/proxy-image")
+                  imgUrl.startsWith("/api/v1/proxy/image")
                     ? imgUrl
                     : getProxiedImageUrl(imgUrl, chapter?.url);
 
@@ -363,8 +362,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
                     onError={(e) => {
                       const el = e.target as HTMLImageElement;
                       if (
-                        (el.src.includes("/api/v1/proxy/image") ||
-                          el.src.includes("/api/proxy-image")) &&
+                        el.src.includes("/api/v1/proxy/image") &&
                         !el.dataset.retried
                       ) {
                         el.dataset.retried = "1";

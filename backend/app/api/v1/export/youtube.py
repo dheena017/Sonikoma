@@ -129,10 +129,10 @@ def _get_youtube_redirect_uri(request: Request) -> str:
         return env_uri
     if APP_URL:
         base = APP_URL.rstrip("/")
-        return f"{base}/api/export/youtube/oauth/callback"
+        return f"{base}/api/v1/export/youtube/oauth/callback"
     host = request.headers.get("host", "localhost:8000")
     scheme = "https" if request.url.scheme == "https" else "http"
-    return f"{scheme}://{host}/api/export/youtube/oauth/callback"
+    return f"{scheme}://{host}/api/v1/export/youtube/oauth/callback"
 
 
 @router.post("/youtube")

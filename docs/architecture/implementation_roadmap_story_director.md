@@ -41,7 +41,7 @@ This document outlines the systematic, phased implementation strategy to evolve 
 
 - **Purpose:** Implement the context-aware multimodal AI compiler that reads all panels collectively to produce the single master Narrative document.
 - **API Changes:**
-  - Create endpoint `POST /api/narratives/analyze-sequence`:
+  - Create endpoint `POST /api/v1/ai/narratives/analyze-sequence`:
     - Inputs: chapter_id/project_id, target model, narration style.
     - Output: Complete Narrative JSON model.
 - **Files to Modify:**
@@ -86,10 +86,10 @@ This document outlines the systematic, phased implementation strategy to evolve 
     - `OpenAIProvider.py`
     - `ElevenLabsProvider.py`
     - `AzureProvider.py`
-  - Create endpoint `POST /api/narratives/{chapter_id}/generate-audio`:
+  - Create endpoint `POST /api/v1/ai/narratives/{chapter_id}/generate-audio`:
     - Reads finalized narration script and compiles audio sequentially using the selected speech provider.
 - **API Changes:**
-  - Create `GET /api/audio/providers` to list available audio models and credentials status.
+  - Create `GET /api/v1/audio/providers` to list available audio models and credentials status.
 - **Testing:**
   - Test provider fallbacks (Edge-TTS as solid standard when cloud credentials are unconfigured).
   - Verify chunked audio output concatenation using pydub/FFmpeg.
@@ -101,7 +101,7 @@ This document outlines the systematic, phased implementation strategy to evolve 
 
 - **Purpose:** Synchronize Narrative context down to individual panels, establishing the parent document as the authoritative manager of dialogues, transitions, and timing.
 - **API Changes:**
-  - Create endpoint `POST /api/narratives/{chapter_id}/sync-panels`:
+  - Create endpoint `POST /api/v1/ai/narratives/{chapter_id}/sync-panels`:
     - Propagates narrative parameters to child panel items, applying custom transitions, camera motions, BGM, and scoring metrics.
 - **Files to Modify:**
   - `backend/python/routes/projects.py` (API handler)

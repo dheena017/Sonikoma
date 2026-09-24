@@ -112,7 +112,7 @@ def register_routers(app: FastAPI):
                 return FileResponse(index_file)
         accept_header = request.headers.get("accept", "")
         if "text/html" in accept_header:
-            return RedirectResponse(url="/api/docs")
+            return RedirectResponse(url="/api/v1/docs")
         return RedirectResponse(url="/api/v1/system/health")
 
     # SPA Fallback Route for client-side routing & browser navigation (/workspace/*, /editor/*, etc.)
@@ -132,7 +132,7 @@ def register_routers(app: FastAPI):
         # 3. If accessed from a browser (HTML accept header), redirect to interactive Swagger docs
         accept_header = request.headers.get("accept", "")
         if "text/html" in accept_header:
-            return RedirectResponse(url="/api/docs")
+            return RedirectResponse(url="/api/v1/docs")
 
         # 4. Return structured JSON with documentation hints
         clean_path = fallback_path.lstrip("/")
@@ -142,8 +142,8 @@ def register_routers(app: FastAPI):
                 "success": False,
                 "error": f"Endpoint not found via GET: /{clean_path}",
                 "hint": "This route may require an HTTP POST/PUT/DELETE request or authorization token.",
-                "docs_url": "/api/docs",
-                "redoc_url": "/api/redoc",
+                "docs_url": "/api/v1/docs",
+                "redoc_url": "/api/v1/redoc",
                 "health_url": "/api/v1/system/health"
             }
         )

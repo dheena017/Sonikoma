@@ -299,11 +299,11 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
   switch (type) {
     case "API_CHECK_HEALTH": {
       try {
-        const configuredUrl = `${(await getApiBaseUrl()).replace(/\/+$/, "")}/api/health`;
+        const configuredUrl = `${(await getApiBaseUrl()).replace(/\/+$/, "")}/api/v1/system/health`;
         const candidates = [
           configuredUrl,
-          "http://localhost:5173/api/health",
-          "http://127.0.0.1:5173/api/health",
+          "http://localhost:5173/api/v1/system/health",
+          "http://127.0.0.1:5173/api/v1/system/health",
         ];
         const uniqueCandidates = Array.from(new Set(candidates));
 

@@ -54,9 +54,9 @@ assert "resources" in data
 assert "storage" in data
 assert "capabilities" in data
 
-print("Testing alias route /api/status:")
-res_alias = client.get("/api/status")
-print(f"GET /api/status -> Status Code: {res_alias.status_code}")
+print("Testing primary route /api/v1/system/status:")
+res_alias = client.get("/api/v1/system/status")
+print(f"GET /api/v1/system/status -> Status Code: {res_alias.status_code}")
 assert res_alias.status_code == 200, f"Expected 200, got {res_alias.status_code}"
 
 print("\nALL BACKEND STATUS TESTS PASSED SUCCESSFULLY! 100% AUTHENTIC METRICS.")

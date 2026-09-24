@@ -101,7 +101,7 @@ def unwrap_proxy_url(url_str: Optional[str]) -> str:
     if not url_str:
         return ""
     current = url_str.strip()
-    while "/api/proxy-image" in current or "/api/v1/proxy/image" in current or "/proxy/image" in current:
+    while "/api/v1/proxy/image" in current:
         parsed = urllib.parse.urlparse(current)
         query = urllib.parse.parse_qs(parsed.query)
         if "url" in query:

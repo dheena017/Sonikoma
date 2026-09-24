@@ -123,14 +123,14 @@ def _get_redirect_uri(request: Request) -> str:
 
     if APP_URL:
         base = APP_URL.rstrip("/")
-        return f"{base}/api/auth/google/callback"
+        return f"{base}/api/v1/auth/google/callback"
 
     host = request.headers.get("host")
     scheme = "https" if request.url.scheme == "https" else "http"
     if host:
-        return f"{scheme}://{host}/api/auth/google/callback"
+        return f"{scheme}://{host}/api/v1/auth/google/callback"
 
-    return f"{scheme}://localhost:3000/api/auth/google/callback"
+    return f"{scheme}://localhost:3000/api/v1/auth/google/callback"
 
 
 def _get_base_target(request: Request) -> str:

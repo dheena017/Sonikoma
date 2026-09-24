@@ -58,9 +58,9 @@ Migrating Sonikoma's media processing from basic MoviePy/EdgeTTS to a **professi
                          │
 ┌────────────────────────▼────────────────────────────────────┐
 │             FastAPI Routes (Backend API Layer)              │
-│  ├─ /api/py/video/*        (Orchestrator)                  │
-│  ├─ /api/py/audio/*        (Orchestrator)                  │
-│  └─ /api/py/image/*        (Orchestrator)                  │
+│  ├─ /api/v1/video/*        (Orchestrator)                  │
+│  ├─ /api/v1/audio/*        (Orchestrator)                  │
+│  └─ /api/v1/image/*        (Orchestrator)                  │
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────▼────────────────────────────────────┐
@@ -223,7 +223,7 @@ For Stable Diffusion & Whisper (much faster):
 
 ### 3.1 Enhanced Video Routes
 
-**POST /api/py/video/render-advanced**
+**POST /api/v1/video/render-advanced**
 
 ```json
 {
@@ -240,7 +240,7 @@ For Stable Diffusion & Whisper (much faster):
 }
 ```
 
-**POST /api/py/video/edit**
+**POST /api/v1/video/edit**
 
 ```json
 {
@@ -253,7 +253,7 @@ For Stable Diffusion & Whisper (much faster):
 
 ### 3.2 Enhanced Audio Routes
 
-**POST /api/py/audio/transcribe**
+**POST /api/v1/audio/transcribe**
 
 ```json
 {
@@ -263,7 +263,7 @@ For Stable Diffusion & Whisper (much faster):
 }
 ```
 
-**POST /api/py/audio/analyze**
+**POST /api/v1/audio/analyze**
 
 ```json
 {
@@ -274,7 +274,7 @@ For Stable Diffusion & Whisper (much faster):
 
 ### 3.3 Enhanced Image Routes
 
-**POST /api/py/image/generate-ai**
+**POST /api/v1/image/generate-ai**
 
 ```json
 {
@@ -285,7 +285,7 @@ For Stable Diffusion & Whisper (much faster):
 }
 ```
 
-**POST /api/py/image/batch-transform**
+**POST /api/v1/image/batch-transform**
 
 ```json
 {
@@ -418,15 +418,15 @@ Result
 
 All existing endpoints **remain unchanged**:
 
-- `/api/py/audio/generate` → Still supports EdgeTTS
-- `/api/py/video/render` → Still works with MoviePy
-- `/api/py/image/*` → Still supports PIL/OpenCV
+- `/api/v1/audio/generate` → Still supports EdgeTTS
+- `/api/v1/video/render` → Still works with MoviePy
+- `/api/v1/image/*` → Still supports PIL/OpenCV
 
 **New endpoints** added for advanced features:
 
-- `/api/py/video/render-advanced` → FFmpeg features
-- `/api/py/audio/transcribe` → Whisper integration
-- `/api/py/image/generate-ai` → Stable Diffusion
+- `/api/v1/video/render-advanced` → FFmpeg features
+- `/api/v1/audio/transcribe` → Whisper integration
+- `/api/v1/image/generate-ai` → Stable Diffusion
 
 ---
 

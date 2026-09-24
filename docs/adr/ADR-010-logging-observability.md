@@ -14,7 +14,7 @@ Understanding the real-time state of the application, especially during long-run
 
 ## Decision
 
-We implement a structured logging strategy utilizing ANSI-colored output for console readability. Furthermore, we provide a mechanism (Server-Sent Events or similar) to stream these real-time shell logs directly to the frontend UI. The system also exposes a `/api/health` endpoint for live metrics (uptime, memory, database state).
+We implement a structured logging strategy utilizing ANSI-colored output for console readability. Furthermore, we provide a mechanism (Server-Sent Events or similar) to stream these real-time shell logs directly to the frontend UI. The system also exposes a `/api/v1/system/health` endpoint for live metrics (uptime, memory, database state).
 
 ## Rationale
 
