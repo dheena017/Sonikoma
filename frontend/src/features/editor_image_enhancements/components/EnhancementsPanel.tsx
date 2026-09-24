@@ -179,7 +179,7 @@ export default function EnhancementsPanel({
           type="button"
           disabled={isAnalyzing}
           onClick={handleAnalyzeImage}
-          className="w-full py-2.5 rounded-xl border border-[#2F2F2F] bg-[#2A2A2A] hover:bg-[#333333] hover:border-[#3B82F6] text-white text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50 shadow-sm"
+          className="w-full py-2.5 rounded-xl border border-[#2F2F2F] bg-[#2A2A2A] hover:bg-[#333333] hover:border-neutral-700 text-white text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-50 shadow-sm"
         >
           {isAnalyzing ? (
             <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />
@@ -192,7 +192,7 @@ export default function EnhancementsPanel({
         <button
           type="button"
           onClick={handleOpenPanelAssistant}
-          className="w-full py-2.5 rounded-xl border border-[#2F2F2F] bg-[#2A2A2A] hover:bg-[#333333] hover:border-[#3B82F6] text-neutral-200 hover:text-white text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm"
+          className="w-full py-2.5 rounded-xl border border-[#2F2F2F] bg-[#2A2A2A] hover:bg-[#333333] hover:border-neutral-700 text-neutral-200 hover:text-white text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all shadow-sm"
         >
           <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
           <span>Panel Assistant</span>
@@ -202,7 +202,7 @@ export default function EnhancementsPanel({
           type="button"
           disabled={isMagicProcessing}
           onClick={handleMagicMotion}
-          className="w-full py-2.5 rounded-xl border border-[#2F2F2F] bg-[#2A2A2A] hover:bg-[#333333] hover:border-[#3B82F6] text-white text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40 shadow-sm"
+          className="w-full py-2.5 rounded-xl border border-[#2F2F2F] bg-[#2A2A2A] hover:bg-[#333333] hover:border-neutral-700 text-white text-[10px] font-mono font-bold flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-40 shadow-sm"
         >
           {isMagicProcessing ? (
             <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#3B82F6]" />

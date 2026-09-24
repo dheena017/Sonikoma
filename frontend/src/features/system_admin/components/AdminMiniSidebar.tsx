@@ -154,7 +154,7 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
                 ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
             }`}
           >
             <Icon
@@ -217,9 +217,9 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Return to App"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all  hover: active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg shadow-blue-500/25 active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
           >
-            <ExternalLink className="w-[18px] h-[18px] shrink-0" />
+            <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
           </button>
           <TooltipPortal
             text="Return to App"

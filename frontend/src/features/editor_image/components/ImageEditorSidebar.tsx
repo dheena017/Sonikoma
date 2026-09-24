@@ -247,7 +247,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
                         } rounded-xl transition-all duration-200 group relative cursor-pointer active:scale-[0.98] ${
                           isActive && !isCollapsed
                             ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white font-bold shadow-md"
-                            : "text-neutral-300 hover:text-white hover:bg-[#1E1E1E] border border-transparent hover:border-[#3B82F6]"
+                            : "text-neutral-300 hover:text-white hover:bg-[#1E1E1E] border border-transparent hover:border-neutral-700"
                         }`}
                         title={isCollapsed ? item.label : undefined}
                       >
@@ -307,7 +307,7 @@ export const ImageEditorSidebar: React.FC<ImageEditorSidebarProps> = ({
           />
           <button
             onClick={handleReturnToWorkspace}
-            className={`flex items-center justify-center rounded-xl bg-neutral-900/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white transition-all active:scale-95 border border-neutral-800/80 hover:border-[#60A5FA]/40 cursor-pointer shadow-sm ${
+            className={`flex items-center justify-center rounded-xl bg-neutral-900/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white transition-all active:scale-95 border border-neutral-800/80 hover:border-neutral-700 cursor-pointer shadow-sm ${
               isCollapsed
                 ? "w-11 h-11 p-0"
                 : "w-full py-3.5 px-4 gap-2.5 text-xs font-mono font-bold tracking-wide"

@@ -8,7 +8,7 @@ export const RecentAudioCard: React.FC<{
 }> = ({ item, onAction }) => (
   <div
     onClick={onAction}
-    className="p-3 rounded-[1.75rem] bg-[#09090B] border border-white/5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:border-blue-500/25 hover:shadow-[0_18px_48px_rgba(59,130,246,0.22)] transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer"
+    className="p-3 rounded-[1.75rem] bg-[#09090B] border border-white/5 shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:border-neutral-700 hover:shadow-[0_18px_48px_rgba(59,130,246,0.22)] transition-all duration-200 flex items-center justify-between gap-3 group cursor-pointer"
   >
     <div className="flex items-center gap-3 min-w-0 flex-1">
       <div className="h-11 w-11 rounded-3xl bg-blue-500/12 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">

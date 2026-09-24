@@ -127,7 +127,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
           placeholder="Search chapters by title or chapter number..."
           value={searchQuery}
           onChange={handleSearchChange}
-          className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-600 transition-all focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50"
+          className="w-full rounded-xl border border-neutral-800 bg-neutral-955 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-neutral-600 transition-all focus:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-700"
         />
       </div>
 
@@ -139,7 +139,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
           <select
             value={sortBy}
             onChange={(e) => handleSortChange(e.target.value as any)}
-            className="w-full rounded-xl border border-neutral-800 bg-neutral-955 px-3 py-2.5 text-sm text-white transition-colors focus:border-[#3B82F6] focus:outline-none"
+            className="w-full rounded-xl border border-neutral-800 bg-neutral-955 px-3 py-2.5 text-sm text-white transition-colors focus:border-neutral-600 focus:outline-none"
           >
             <option value="latest">Latest First</option>
             <option value="oldest">Oldest First</option>
@@ -153,7 +153,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
           className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${
             isMultiSelectMode
               ? "border-[#3B82F6]/50 bg-[#2A2A2A] text-white shadow-lg shadow-sm"
-              : "border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-[#3B82F6]/40 hover:text-white"
+              : "border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-neutral-700 hover:text-white"
           }`}
           title="Enable Multi-Select Mode"
         >
@@ -166,7 +166,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
           className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all cursor-pointer active:scale-95 ${
             showAdvanced || hasAdvancedFilters
               ? "border-[#3B82F6]/50 bg-[#2A2A2A] text-[#60A5FA]"
-              : "border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-[#3B82F6]/40 hover:text-white"
+              : "border-neutral-800 bg-neutral-955 text-neutral-300 hover:border-neutral-700 hover:text-white"
           }`}
         >
           <Filter size={16} />
@@ -190,7 +190,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
               <select
                 value={minRating}
                 onChange={(e) => onMinRatingChange(parseFloat(e.target.value))}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-[#3B82F6]"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-neutral-600"
               >
                 <option value="0">All Ratings</option>
                 <option value="9.0">9.0+ Stars</option>
@@ -207,7 +207,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
               <select
                 value={minLikes}
                 onChange={(e) => onMinLikesChange(parseInt(e.target.value))}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-[#3B82F6]"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-neutral-600"
               >
                 <option value="0">All Likes</option>
                 <option value="5000">5k+ Likes</option>
@@ -225,7 +225,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
               <select
                 value={readStatus}
                 onChange={(e) => onReadStatusChange(e.target.value as any)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-[#3B82F6]"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-neutral-600"
               >
                 <option value="all">All</option>
                 <option value="unread">Unread Only</option>
@@ -243,7 +243,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
                   placeholder="e.g. 1"
                   value={startChapterNum || ""}
                   onChange={(e) => onStartChapterChange?.(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-[#3B82F6]"
+                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-neutral-600"
                 />
               </div>
               <div>
@@ -255,7 +255,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
                   placeholder="e.g. 50"
                   value={endChapterNum || ""}
                   onChange={(e) => onEndChapterChange?.(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-[#3B82F6]"
+                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-neutral-600"
                 />
               </div>
             </div>
@@ -272,7 +272,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
                     setFromDate(e.target.value);
                     onDateRangeChange(e.target.value, toDate);
                   }}
-                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-[#3B82F6]"
+                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-neutral-600"
                 />
               </div>
               <div>
@@ -286,7 +286,7 @@ export const ChapterControls: React.FC<ChapterControlsProps> = ({
                     setToDate(e.target.value);
                     onDateRangeChange(fromDate, e.target.value);
                   }}
-                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-[#3B82F6]"
+                  className="w-full px-2 py-1.5 bg-gray-800 border border-gray-750 rounded-lg text-white text-sm focus:outline-none focus:border-neutral-600"
                 />
               </div>
             </div>

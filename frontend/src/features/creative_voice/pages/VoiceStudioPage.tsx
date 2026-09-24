@@ -285,7 +285,7 @@ const VoiceStudioPage = React.memo(
               <div className="relative flex items-center gap-4 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3 shadow-md">
           <button
             onClick={() => scrollFilmstrip("left")}
-            className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-sm"
+            className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-sm"
             title="Scroll left"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -304,7 +304,7 @@ const VoiceStudioPage = React.memo(
                   className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-[#121212] flex items-center justify-center ${
                     isSel
                       ? "border-2 border-[#3B82F6] scale-105 bg-[#3B82F6]/10 shadow-md"
-                      : "border-[#2F2F2F] opacity-70 hover:opacity-100 hover:border-[#3B82F6]/60 hover:scale-102"
+                      : "border-[#2F2F2F] opacity-70 hover:opacity-100 hover:border-neutral-700 hover:scale-102"
                   }`}
                 >
                   {p?.image_url ? (
@@ -328,7 +328,7 @@ const VoiceStudioPage = React.memo(
 
           <button
             onClick={() => scrollFilmstrip("right")}
-            className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-sm"
+            className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-sm"
             title="Scroll right"
           >
             <ChevronRight className="w-4 h-4" />

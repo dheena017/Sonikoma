@@ -30,7 +30,7 @@ export default function ProviderInteractiveLimits({
             placeholder={`Search ${currentProvider.name} models by name...`}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-[#181818] border border-[#2F2F2F] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full bg-[#181818] border border-[#2F2F2F] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 transition-colors"
           />
         </div>
 

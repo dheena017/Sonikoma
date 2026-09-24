@@ -405,7 +405,7 @@ export default function AutoCropSettingsModal({
                 <select
                   value={cropModel}
                   onChange={(e) => setCropModel(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs font-mono text-white appearance-none cursor-pointer focus:outline-none focus:border-[#3B82F6] transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-neutral-950 border border-neutral-800 rounded-xl text-xs font-mono text-white appearance-none cursor-pointer focus:outline-none focus:border-neutral-600 transition-colors"
                 >
                   {visionModels.map((m) => (
                     <option key={m.id} value={m.id}>

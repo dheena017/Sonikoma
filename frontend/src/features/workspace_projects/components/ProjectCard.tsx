@@ -96,9 +96,9 @@ export default function ProjectCard({
   return (
     <div
       onClick={() => onOpenProject(project)}
-      className={`group relative overflow-hidden rounded-3xl border border-[#2F2F2F] bg-[#1E1E1E] hover:bg-[#252525] shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:border-[#3B82F6]/60 hover:shadow-xl flex flex-col h-full ${
+      className={`group relative overflow-hidden rounded-3xl border border-[#2F2F2F] bg-[#1E1E1E] hover:bg-[#252525] shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:border-neutral-700 hover:shadow-xl flex flex-col h-full ${
         isSelected
-          ? "border-[#3B82F6] ring-1 ring-[#3B82F6]"
+          ? "border-neutral-600 bg-neutral-900/90 shadow-md"
           : ""
       }`}
     >
@@ -189,7 +189,7 @@ export default function ProjectCard({
               }}
               aria-label="Project actions & options"
               title="Project actions & options"
-              className="w-7 h-7 rounded-full bg-black/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#60A5FA] transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
+              className="w-7 h-7 rounded-full bg-black/70 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-white/20 hover:border-neutral-700 transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
             >
               <MoreVertical className="w-3.5 h-3.5" />
             </button>
@@ -431,7 +431,7 @@ export default function ProjectCard({
               e.stopPropagation();
               onOpenProject(project);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-[#60A5FA]/40 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-black/50 active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-blue-500/25 active:scale-95 shrink-0"
           >
             <span>Resume</span>
             <ArrowRight className="w-3 h-3 text-white" />

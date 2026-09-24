@@ -261,7 +261,7 @@ export function ScraperSelectionToolbar({
         ref={buttonRef}
         type="button"
         onClick={toggleDropdown}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/30 rounded-xl text-[10px] font-bold text-neutral-300 hover:text-white transition-all shadow-md hover:shadow-black/50 font-mono select-none cursor-pointer duration-200"
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-950/80 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-xl text-[10px] font-bold text-neutral-300 hover:text-white transition-all shadow-md hover:shadow-black/50 font-mono select-none cursor-pointer duration-200"
       >
         <ListFilter className="h-3 w-3 text-[#3B82F6]" />
         <span>Select Filter</span>
@@ -402,7 +402,7 @@ export function ScraperSelectionToolbar({
                 onChange={(e) =>
                   setEveryN(Math.max(1, parseInt(e.target.value) || 1))
                 }
-                className="w-8 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-[#3B82F6] text-center"
+                className="w-8 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-neutral-600 text-center"
               />
               <span className="text-[10px] text-neutral-400 font-sans">
                 th panel
@@ -413,7 +413,7 @@ export function ScraperSelectionToolbar({
                   selectEveryNth(everyN);
                   setIsOpen(false);
                 }}
-                className="ml-auto px-2 py-0.5 rounded bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-[#3B82F6]/20 active:scale-95"
+                className="ml-auto px-2 py-0.5 rounded bg-[#2A2A2A] hover:bg-[#333333] text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-[#3B82F6]/20 active:scale-95"
               >
                 Apply
               </button>
@@ -488,7 +488,7 @@ export function ScraperSelectionToolbar({
                 onChange={(e) =>
                   setRangeFrom(Math.max(1, parseInt(e.target.value) || 1))
                 }
-                className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-[#3B82F6] text-center"
+                className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-neutral-600 text-center"
               />
               <span className="text-[10px] text-neutral-400 font-sans">to</span>
               <input
@@ -499,7 +499,7 @@ export function ScraperSelectionToolbar({
                 onChange={(e) =>
                   setRangeTo(Math.max(1, parseInt(e.target.value) || 1))
                 }
-                className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-[#3B82F6] text-center"
+                className="w-10 px-1 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-white text-[10px] font-mono focus:outline-none focus:border-neutral-600 text-center"
               />
               <button
                 type="button"
@@ -507,7 +507,7 @@ export function ScraperSelectionToolbar({
                   handleSelectRange(rangeFrom, rangeTo);
                   setIsOpen(false);
                 }}
-                className="ml-auto px-2.5 py-0.5 rounded bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-[#3B82F6]/20 active:scale-95"
+                className="ml-auto px-2.5 py-0.5 rounded bg-[#2A2A2A] hover:bg-[#333333] text-white text-[9px] font-mono font-bold transition-all cursor-pointer border border-[#3B82F6]/20 active:scale-95"
               >
                 Select
               </button>

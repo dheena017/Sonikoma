@@ -45,7 +45,7 @@ export default function ThumbnailStudioTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-[#3B82F6]/40 transition-all space-y-2 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-neutral-700 transition-all space-y-2 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-pink-500/10 border border-pink-500/30 rounded-lg text-pink-400 shrink-0">

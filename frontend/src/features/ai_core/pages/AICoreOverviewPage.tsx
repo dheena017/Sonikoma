@@ -99,7 +99,7 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
           <DashboardStatsSkeleton count={4} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-4 hover:border-[#3B82F6]/50 transition-all group">
+            <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-4 hover:border-neutral-700 transition-all group">
               <div className="p-3.5 rounded-2xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0 group-hover:scale-105 transition-transform">
                 <Cpu className="w-6 h-6" />
               </div>
@@ -127,7 +127,7 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-4 hover:border-[#3B82F6]/50 transition-all group">
+            <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-4 hover:border-neutral-700 transition-all group">
               <div className="p-3.5 rounded-2xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0 group-hover:scale-105 transition-transform">
                 <TrendingUp className="w-6 h-6" />
               </div>
@@ -161,7 +161,7 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div
             onClick={() => handleNav("/ai-core/routing")}
-            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/50 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
+            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
           >
             <div>
               <div className="p-3 w-fit rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 mb-4 group-hover:scale-105 transition-transform">
@@ -203,7 +203,7 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
 
           <div
             onClick={() => handleNav("/ai-core/rate-limits")}
-            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/50 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
+            className="p-6 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#242424] transition-all cursor-pointer flex flex-col justify-between group shadow-md"
           >
             <div>
               <div className="p-3 w-fit rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 mb-4 group-hover:scale-105 transition-transform">
@@ -257,7 +257,7 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
               providers.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 transition-all"
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 transition-all"
                 >
                   <div>
                     <span className="text-xs font-bold text-[#E5E5E5] block">{p.name}</span>

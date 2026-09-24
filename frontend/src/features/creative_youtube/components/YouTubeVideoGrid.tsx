@@ -95,7 +95,7 @@ export default function YouTubeVideoGrid() {
           {videos.map((vid) => (
             <div
               key={vid.id}
-              className="bg-neutral-900/60 border border-neutral-850 rounded-2xl overflow-hidden group hover:border-[#3B82F6]/40 transition-all duration-200 flex flex-col justify-between"
+              className="bg-neutral-900/60 border border-neutral-850 rounded-2xl overflow-hidden group hover:border-neutral-700 transition-all duration-200 flex flex-col justify-between"
             >
               <div className="relative aspect-video bg-black">
                 <img

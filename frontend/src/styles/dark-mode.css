@@ -77,14 +77,14 @@ input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
 select:not(.border-0):not(.border-none):not(.seamless-select):not(.bg-transparent):hover,
 textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transparent):hover {
   background-color: #242424 !important;
-  border-color: rgba(59, 130, 246, 0.6) !important;
+  border-color: #4A4A4A !important;
 }
 
 input:not(.border-0):not(.border-none):not(.seamless-input):not(.bg-transparent):focus,
 select:not(.border-0):not(.border-none):not(.seamless-select):not(.bg-transparent):focus,
 textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transparent):focus {
   background-color: #262626 !important;
-  border-color: #3B82F6 !important; /* Electric Blue */
+  border-color: #525252 !important;
   outline: none !important;
 }
 
@@ -100,7 +100,7 @@ aside nav a:hover,
 aside nav button:hover {
   background-color: #262626 !important;
   color: #FFFFFF !important;
-  border-color: #3B82F6 !important;
+  border-color: #4A4A4A !important;
   color: #FFFFFF !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
   transition: all 0.15s ease-in-out;
@@ -130,7 +130,7 @@ tr:hover,
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3B82F6 !important;
+  background: #525252 !important;
 }
 
 /* ── Terminal / Code Output ───────────────────────────────── */

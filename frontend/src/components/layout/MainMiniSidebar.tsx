@@ -241,7 +241,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               item.active
                 ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 "
             }`}
           >
             <Icon
@@ -309,9 +309,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             }}
             onMouseLeave={() => setCreativeHover(false)}
             aria-label="Creative Suite"
-            className="w-11 h-11 rounded-2xl bg-[#1E1E1E] hover:bg-[#3B82F6] text-white transition-all shadow-[0_2px_8px_rgba(0,0,0,0.3)] hover: active:scale-90 border border-[#2F2F2F] hover:border-[#60A5FA] cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg shadow-blue-500/25 active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
           >
-            <Sparkles className="w-5 h-5 shrink-0 text-[#3B82F6] group-hover:text-white transition-colors" />
+            <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
           </button>
           <TooltipPortal
             text="Creative Suite"

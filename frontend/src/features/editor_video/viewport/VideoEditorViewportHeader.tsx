@@ -85,7 +85,7 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
     <div ref={headerRef} className="rounded-none border-b border-[#2F2F2F] bg-[#121212] h-11 px-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 shrink-0 z-20 overflow-hidden">
       {/* Left: Viewport Name & Live Pill */}
       <div className="min-w-0 flex items-center gap-2">
-        <div className="h-6 w-6 rounded-lg bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] flex items-center justify-center  shrink-0">
+        <div className="h-6 w-6 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-sm shadow-blue-500/25 flex items-center justify-center shrink-0 transition-all cursor-pointer">
           <Sparkles className="h-3.5 w-3.5 text-white" />
         </div>
         <div className="min-w-0 flex items-center gap-2">
@@ -106,8 +106,8 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
           onClick={() => setMonitorTab("timeline")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md whitespace-nowrap text-[11px] font-bold transition-all cursor-pointer ${
             monitorTab === "timeline"
-              ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-sm"
-              : "text-neutral-400 hover:text-white hover:bg-white/5"
+              ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25 border border-blue-400/40"
+              : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
           }`}
         >
           <Tv className="h-3 w-3" />
@@ -119,13 +119,15 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
           onClick={() => setMonitorTab("video")}
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md whitespace-nowrap text-[11px] font-bold transition-all cursor-pointer ${
             monitorTab === "video"
-              ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white shadow-sm"
-              : "text-neutral-400 hover:text-white hover:bg-white/5"
+              ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25 border border-blue-400/40"
+              : "text-neutral-400 hover:text-white hover:bg-white/5 border border-transparent"
           }`}
         >
           <Video className="h-3 w-3" />
           <span className={isNarrow ? "hidden" : "inline"}>{isCompact ? "Final" : "Final Video"}</span>
-          <span className={`${isCompact ? "hidden" : "inline"} text-[8px] font-mono px-1 py-0.2 rounded bg-[#2A2A2A] border border-[#2F2F2F] text-[#60A5FA] uppercase`}>
+          <span className={`${isCompact ? "hidden" : "inline"} text-[8px] font-mono px-1 py-0.2 rounded border uppercase ${
+            monitorTab === "video" ? "bg-black/30 border-blue-400/40 text-white" : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
+          }`}>
             MP4
           </span>
         </button>
@@ -186,7 +188,7 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
             type="button"
             onClick={finalExport}
             disabled={isRendering}
-            className="h-7 px-3 rounded-lg bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-blue-600 text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition cursor-pointer active:scale-95 disabled:opacity-50"
+            className="h-7 px-3 rounded-lg border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition cursor-pointer active:scale-95 shadow-sm shadow-blue-500/25 disabled:opacity-50"
             title="Export and render final video"
           >
             <Video className="h-3 w-3" />

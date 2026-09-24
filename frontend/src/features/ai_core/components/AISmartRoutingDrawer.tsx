@@ -283,7 +283,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
           setIsOpen(true);
           fetchRoutingConfig();
         }}
-        className={`h-8.5 flex items-center gap-2 px-3 max-lg:gap-1 max-lg:px-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-xs font-medium text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
+        className={`h-8.5 flex items-center gap-2 px-3 max-lg:gap-1 max-lg:px-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-xs font-medium text-white transition-all shadow-sm select-none shrink-0 cursor-pointer active:scale-95 ${
           isOpen ? "border-[#3B82F6] bg-[#2A2A2A]" : ""
         }`}
         title="AI Smart Routing: Open Multi-Model Cascades Matrix"
@@ -334,7 +334,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                 <div className="flex items-center gap-2">
                   <a
                     href="/ai-core?tab=routing"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] text-xs font-semibold text-neutral-200 hover:text-white transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-xs font-semibold text-neutral-200 hover:text-white transition-all cursor-pointer"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5 text-[#3B82F6]" />
                     <span>Routing Matrix</span>
@@ -342,7 +342,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
 
                   <a
                     href="/ai-core?tab=routing"
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
                   >
                     <Zap className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
                     <span>CONFIGURE</span>
@@ -403,7 +403,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                     </div>
                     <a
                       href="/ai-core?tab=api-keys"
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-white text-xs font-bold transition-all cursor-pointer shrink-0"
+                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-white text-xs font-bold transition-all cursor-pointer shrink-0"
                     >
                       <ShieldCheck className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
                       <span>API Vault</span>
@@ -422,14 +422,14 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                       placeholder="Search pipelines, models, or tasks..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full rounded-xl border border-[#2F2F2F] bg-[#121212] py-2 pl-10 pr-4 text-xs text-white placeholder:text-neutral-500 focus:border-[#3B82F6] focus:outline-none transition-all font-sans"
+                      className="w-full rounded-xl border border-[#2F2F2F] bg-[#121212] py-2 pl-10 pr-4 text-xs text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none transition-all font-sans"
                     />
                   </div>
 
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="rounded-xl border border-[#2F2F2F] bg-[#121212] px-3 py-2 text-xs text-neutral-300 focus:border-[#3B82F6] focus:outline-none transition-all cursor-pointer font-sans"
+                    className="rounded-xl border border-[#2F2F2F] bg-[#121212] px-3 py-2 text-xs text-neutral-300 focus:border-neutral-600 focus:outline-none transition-all cursor-pointer font-sans"
                   >
                     <option value="default">Default Order</option>
                     <option value="alphabetical">Alphabetical</option>
@@ -448,7 +448,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                         className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                           isSelected
                             ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
-                            : "text-neutral-400 bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-[#3B82F6] hover:bg-[#2A2A2A]"
+                            : "text-neutral-400 bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
                         }`}
                       >
                         {cat}
@@ -476,7 +476,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                     return (
                       <div
                         key={task.id}
-                        className="rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] hover:border-[#3B82F6] p-4 transition-all duration-200 flex items-center justify-between gap-3 text-left group"
+                        className="rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] hover:border-neutral-700 p-4 transition-all duration-200 flex items-center justify-between gap-3 text-left group"
                       >
                         <div className="flex items-start gap-3.5 min-w-0">
                           {/* Category Emoji / Icon Box */}
@@ -534,7 +534,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
 
                           <a
                             href="/ai-core/models"
-                            className="px-3.5 py-1.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-xs font-bold text-neutral-200 hover:text-white transition-all cursor-pointer active:scale-95"
+                            className="px-3.5 py-1.5 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-xs font-bold text-neutral-200 hover:text-white transition-all cursor-pointer active:scale-95"
                           >
                             Routing Studio
                           </a>

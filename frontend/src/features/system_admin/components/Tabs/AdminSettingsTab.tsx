@@ -277,7 +277,7 @@ export function AdminSettingsTab({
                           [field.key]: e.target.value,
                         })
                       }
-                      className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#3B82F6] transition-all font-sans"
+                      className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2.5 focus:outline-none focus:border-neutral-600 transition-all font-sans"
                     />
                   )}
                 </div>

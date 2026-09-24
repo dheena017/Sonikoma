@@ -15,7 +15,7 @@ export const ElementGridCard: React.FC<ElementGridCardProps> = ({
   return (
     <div
       onClick={onAdd}
-      className="relative rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950/90 h-36 cursor-pointer group hover:border-[#3B82F6]/80 hover:bg-neutral-900 transition-all flex flex-col justify-between p-2.5 shadow-md"
+      className="relative rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950/90 h-36 cursor-pointer group hover:border-neutral-700 hover:bg-neutral-900 transition-all flex flex-col justify-between p-2.5 shadow-md"
     >
       {/* SVG Graphic Canvas */}
       <div className="flex-1 flex items-center justify-center p-1 group-hover:scale-105 transition-transform duration-300">

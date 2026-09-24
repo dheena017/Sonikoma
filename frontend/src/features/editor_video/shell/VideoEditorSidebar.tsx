@@ -42,7 +42,7 @@ const ActiveProjectSidebarWidget: React.FC<{
     <div className="p-3 rounded-2xl bg-neutral-900/70 border border-neutral-800/80 text-xs shadow-sm my-2 backdrop-blur-md">
       <div className="flex items-center justify-between mb-2.5">
         <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider flex items-center gap-1.5">
-          <Zap className="w-3 h-3 text-[#3B82F6]" /> Active Project
+          <Zap className="w-3 h-3 text-neutral-400" /> Active Project
         </span>
         {activeProjectId ? (
           <div className="flex items-center gap-1.5">
@@ -99,7 +99,7 @@ const ActiveProjectSidebarWidget: React.FC<{
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-[#3B82F6] border border-neutral-700/60 hover:border-[#3B82F6]/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
+            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-white border border-neutral-700/60 hover:border-neutral-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
           >
             <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
@@ -112,7 +112,7 @@ const ActiveProjectSidebarWidget: React.FC<{
           </p>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-blue-600 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-black/50 cursor-pointer active:scale-98"
+            className="w-full py-2 px-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/25 cursor-pointer active:scale-98"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -217,9 +217,9 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                       <li key={item.id} className="relative">
                         {/* Active Side Accent Indicator */}
                         <div
-                          className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${
+                          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
                             isActive
-                              ? "h-5 bg-gradient-to-b from-[#3B82F6] to-[#60A5FA] opacity-100"
+                              ? "h-6 bg-[#3B82F6] opacity-100 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
                               : "h-0 bg-transparent opacity-0"
                           }`}
                         />
@@ -231,8 +231,8 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                           }}
                           className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
                             isActive
-                              ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold shadow-sm"
-                              : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-transparent"
+                              ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-500/25 font-bold border border-[#60A5FA]/40"
+                              : "text-[#9CA3AF] hover:text-white hover:bg-[#1E1E1E] hover:border-[#2F2F2F] border border-transparent"
                           }`}
                         >
                           <div className="flex items-center gap-3">
@@ -240,7 +240,7 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                               className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
                                 isActive
                                   ? "text-white"
-                                  : "text-neutral-400 group-hover:scale-110 group-hover:text-[#3B82F6]"
+                                  : "text-neutral-400 group-hover:scale-110 group-hover:text-white"
                               }`}
                             />
                             <span className="text-sm font-bold tracking-wide font-sans">
@@ -273,10 +273,10 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                           navigateTo?.(item.path);
                           onClose();
                         }}
-                        className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-transparent transition-all duration-300 group cursor-pointer active:scale-[0.98]"
+                        className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-transparent transition-all duration-300 group cursor-pointer active:scale-[0.98]"
                       >
                         <div className="flex items-center gap-3">
-                          <Icon className="w-4 h-4 shrink-0 text-neutral-400 group-hover:scale-110 group-hover:text-[#3B82F6] transition-all" />
+                          <Icon className="w-4 h-4 shrink-0 text-neutral-400 group-hover:scale-110 group-hover:text-white transition-all" />
                           <span className="text-sm font-bold tracking-wide font-sans">
                             {item.title}
                           </span>
@@ -301,7 +301,7 @@ const VideoEditorSidebar: React.FC<VideoEditorSidebarProps> = ({
                 onClose();
                 onBackToApp?.();
               }}
-              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-neutral-300 hover:text-white text-xs font-black tracking-widest uppercase transition-all active:scale-95 border border-[#2F2F2F] hover:border-[#60A5FA]/40 cursor-pointer font-sans shadow-sm"
+              className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 rounded-2xl bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 hover:text-white text-xs font-black tracking-widest uppercase transition-all active:scale-95 border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer font-sans shadow-sm"
             >
               <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
               <span>CREATIVE SUITE</span>

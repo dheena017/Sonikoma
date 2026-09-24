@@ -119,14 +119,14 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
       onClick={(e) => onSelect(index, e)}
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
-          ? "border-[#3B82F6] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 "
-          : "border-white/10 bg-[#18181B] hover:border-[#3B82F6]/50 shadow-md hover:shadow-md"
+          ? "border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md "
+          : "border-white/10 bg-[#18181B] hover:border-neutral-700 shadow-md hover:shadow-md"
       }`}
     >
       {/* Top Media Bar & Details */}
       <div className="flex p-2.5 gap-3 bg-[#18181B] border-b border-white/5 items-start">
         {/* Left Thumbnail Image */}
-        <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-black/60 shrink-0 border border-white/10 group-hover:border-[#3B82F6]/40 transition-colors">
+        <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-black/60 shrink-0 border border-white/10 group-hover:border-neutral-700 transition-colors">
           <img
             src={displayUrl}
             alt={`Panel #${index + 1}`}
@@ -137,7 +137,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
           <div
             className={`absolute top-1.5 left-1.5 h-4 w-4 rounded flex items-center justify-center border transition-all z-10 ${
               isSelected
-                ? "bg-[#2A2A2A] border-[#60A5FA] text-white"
+                ? "bg-[#3B82F6] border-[#60A5FA] text-white shadow-sm shadow-blue-500/25"
                 : "bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
             }`}
           >
@@ -174,7 +174,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
               {duration}s
             </span>
 
-            <span className="inline-flex items-center gap-1 text-[9px] font-mono text-[#60A5FA] bg-[#2A2A2A] px-2 py-0.5 rounded-md border border-[#3B82F6]/30 truncate max-w-[120px]">
+            <span className="inline-flex items-center gap-1 text-[9px] font-mono text-[#60A5FA] bg-[#3B82F6]/15 px-2 py-0.5 rounded-md border border-[#3B82F6]/30 truncate max-w-[120px]">
               <Camera className="h-2.5 w-2.5 text-[#3B82F6] shrink-0" />
               <span className="truncate">{cameraMotion}</span>
             </span>
@@ -194,7 +194,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                   <button
                     type="button"
                     onClick={handleDialogueSave}
-                    className="px-2 py-0.5 rounded bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-bold"
+                    className="px-2 py-0.5 rounded bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-bold shadow-xs shadow-blue-500/25 active:scale-95 cursor-pointer"
                   >
                     Save
                   </button>
@@ -228,7 +228,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                 onClick={handleToggleAudioPlay}
                 className={`inline-flex items-center gap-1 text-[8px] font-mono font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
                   isPlayingAudio
-                    ? "bg-[#2A2A2A] border-[#60A5FA] text-white  animate-pulse"
+                    ? "bg-[#3B82F6] border-[#60A5FA] text-white shadow-xs shadow-blue-500/25 animate-pulse"
                     : "bg-emerald-950/80 hover:bg-emerald-900/90 text-emerald-300 border-emerald-500/40"
                 }`}
                 title={isPlayingAudio ? "Pause Audio" : "Play Voice Track"}
@@ -247,7 +247,7 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
                   e.stopPropagation();
                   onGenerateVoice?.(index);
                 }}
-                className="inline-flex items-center gap-1 text-[8px] font-mono font-semibold text-neutral-400 hover:text-[#93C5FD] bg-neutral-900/80 hover:bg-[#2A2A2A] px-2 py-0.5 rounded-full border border-neutral-800 hover:border-[#3B82F6]/30 transition-all cursor-pointer"
+                className="inline-flex items-center gap-1 text-[8px] font-mono font-semibold text-neutral-400 hover:text-[#93C5FD] bg-neutral-900/80 hover:bg-[#2A2A2A] px-2 py-0.5 rounded-full border border-neutral-800 hover:border-neutral-700 transition-all cursor-pointer"
                 title="Generate AI TTS Voice for this panel"
               >
                 <VolumeX className="h-2.5 w-2.5 text-neutral-500" />

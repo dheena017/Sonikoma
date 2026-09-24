@@ -96,11 +96,11 @@ export default function StoryboardHeader({
   if (selectedCount > 0) {
     const selectionLeftBlock = (
       <div className="flex items-center gap-2.5 flex-wrap">
-        <div className="flex items-center gap-2 bg-[#2A2A2A] border border-[#3B82F6]/40 rounded-xl px-3 py-1.5 ">
-          <div className="h-5 w-5 rounded bg-[#2A2A2A] flex items-center justify-center text-white text-[10px] font-mono font-black">
+        <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 rounded-xl px-3 py-1.5 shadow-sm">
+          <div className="h-5 w-5 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] font-mono font-black shadow-sm">
             {selectedCount}
           </div>
-          <span className="text-xs font-mono font-bold text-white whitespace-nowrap">
+          <span className="text-xs font-mono font-bold text-blue-300 whitespace-nowrap">
             {selectedCount} of {totalCount || panelsLength} Selected
           </span>
           {clearSelection && (
@@ -108,7 +108,7 @@ export default function StoryboardHeader({
               type="button"
               onClick={clearSelection}
               title="Clear Selection"
-              className="ml-1 p-0.5 rounded-md hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-white transition-colors cursor-pointer"
+              className="ml-1 p-0.5 rounded-md hover:bg-blue-500/20 text-blue-300 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -119,20 +119,20 @@ export default function StoryboardHeader({
         <button
           type="button"
           onClick={isAllSelected ? clearSelection : selectAllPanels}
-          className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+          className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-neutral-700 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
         >
           {isAllSelected ? (
-            <Square className="w-3.5 h-3.5 text-[#3B82F6]" />
+            <Square className="w-3.5 h-3.5 text-neutral-400" />
           ) : (
-            <CheckSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
+            <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
           )}
           <span>{isAllSelected ? "Deselect All" : "Select All"}</span>
         </button>
 
         {/* Busy / Progress Indicator */}
         {isBusy && (
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#2A2A2A] border border-[#3B82F6]/40 rounded-xl text-[#60A5FA] text-xs font-mono">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" />
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/30 rounded-xl text-blue-300 text-xs font-mono">
+            <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-400" />
             <span>
               {isBatchCropping
                 ? `Cropping ${batchProgress?.current || 0}/${
@@ -158,9 +158,9 @@ export default function StoryboardHeader({
             onClick={handleAnalyzeSelected}
             disabled={isBusy}
             title="Analyze selected scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+            <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
             <span>Analyze Selected</span>
           </button>
         )}
@@ -172,9 +172,9 @@ export default function StoryboardHeader({
             onClick={handleAutoCropSelected}
             disabled={isBusy}
             title="Auto-crop selected scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Scissors className="w-3.5 h-3.5 text-[#3B82F6]" />
+            <Scissors className="w-3.5 h-3.5 text-neutral-400" />
             <span>Auto Crop</span>
           </button>
         )}
@@ -186,9 +186,9 @@ export default function StoryboardHeader({
             onClick={handleCleanBubblesSelected}
             disabled={isBusy}
             title="Clean text speech bubbles"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+            <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
             <span>Clean Bubbles</span>
           </button>
         )}
@@ -200,9 +200,9 @@ export default function StoryboardHeader({
             onClick={handleBatchMergeSelected}
             disabled={isBusy}
             title="Stitch selected scenes vertically"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-[#3B82F6]/40 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
           >
-            <Link2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+            <Link2 className="w-3.5 h-3.5 text-neutral-400" />
             <span>Merge ({selectedCount})</span>
           </button>
         )}
@@ -265,7 +265,7 @@ export default function StoryboardHeader({
   // Standard Mode Left Title Block
   const titleBlock = (
     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] flex items-center justify-center shrink-0">
+      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shrink-0 shadow-md shadow-blue-500/25">
         <Film className="h-4 w-4 text-white" />
       </div>
       <div className="min-w-0">
@@ -273,16 +273,16 @@ export default function StoryboardHeader({
           <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate">
             Storyboard
           </h3>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-bold text-[#60A5FA] font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2A2A2A] animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-[10px] font-bold text-blue-400 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
             {filteredCount !== undefined && filteredCount !== panelsLength
               ? `${filteredCount} / ${panelsLength}`
               : panelsLength}{" "}
             {panelsLength === 1 ? "Scene" : "Scenes"}
           </span>
           {viewLayout === "scroll" && panelsLength > 1 && (
-            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-[#3B82F6]/30 text-[10px] text-[#93C5FD] font-mono shadow-sm">
-              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-[#3B82F6]/20 text-[#60A5FA] text-[9px] font-bold">⇧</span>
+            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-neutral-700 text-[10px] text-neutral-300 font-mono shadow-sm">
+              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-neutral-800 text-neutral-300 text-[9px] font-bold">⇧</span>
               <span>Hold <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">Shift</kbd> + Scroll to move horizontally</span>
             </span>
           )}
@@ -317,7 +317,7 @@ export default function StoryboardHeader({
           value={searchQuery || ""}
           onChange={(e) => setSearchQuery?.(e.target.value)}
           placeholder="Search scene..."
-          className="w-full h-8 pl-8 pr-6 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-[#3B82F6]/60 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-all shadow-inner"
+          className="w-full h-8 pl-8 pr-6 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-neutral-600 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-all shadow-inner"
         />
         {searchQuery && (
           <button
@@ -338,15 +338,15 @@ export default function StoryboardHeader({
           onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
           className={`h-8 px-2 sm:px-3 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-sm ${
             filterStatus && filterStatus !== "all"
-              ? "bg-[#2A2A2A] border-[#3B82F6]/50 text-[#60A5FA]"
+              ? "bg-[#2A2A2A] border-neutral-700 text-neutral-300"
               : "bg-neutral-950/80 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
           }`}
         >
-          <Filter className="w-3.5 h-3.5 text-[#3B82F6]" />
+          <Filter className="w-3.5 h-3.5 text-neutral-400" />
           <span>{getStatusLabel()}</span>
           <ChevronDown
             className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
-              isFilterDropdownOpen ? "rotate-180 text-[#3B82F6]" : ""
+              isFilterDropdownOpen ? "rotate-180 text-white" : ""
             }`}
           />
         </button>
@@ -365,7 +365,7 @@ export default function StoryboardHeader({
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
                 !filterStatus || filterStatus === "all"
-                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
+                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -383,7 +383,7 @@ export default function StoryboardHeader({
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
                 filterStatus === "with_speech"
-                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
+                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -398,7 +398,7 @@ export default function StoryboardHeader({
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
                 filterStatus === "with_motion"
-                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
+                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -413,12 +413,12 @@ export default function StoryboardHeader({
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
                 filterStatus === "selected"
-                  ? "bg-[#2A2A2A] text-[#60A5FA] border border-[#3B82F6]/30"
+                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
               <span>Selected Only</span>
-              <span className="text-[10px] text-[#60A5FA] font-normal">
+              <span className="text-[10px] text-neutral-300 font-normal">
                 {selectedCount}
               </span>
             </button>
@@ -435,7 +435,7 @@ export default function StoryboardHeader({
             title="Horizontal Scroll View"
             className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewLayout === "scroll"
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white"
+                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
             }`}
           >
@@ -448,7 +448,7 @@ export default function StoryboardHeader({
             title="Grid View"
             className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewLayout === "grid"
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white"
+                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
             }`}
           >
@@ -468,9 +468,9 @@ export default function StoryboardHeader({
           type="button"
           onClick={isAllSelected ? clearSelection : selectAllPanels}
           title={isAllSelected ? "Deselect all scenes" : "Select all scenes"}
-          className="text-[11px] font-mono font-bold border border-[#3B82F6]/35 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+          className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-neutral-700 text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
         >
-          <CheckSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
+          <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
           <span className="hidden 2xl:inline">Select All</span>
         </button>
       )}
@@ -481,11 +481,11 @@ export default function StoryboardHeader({
           onClick={handleAnalyzeAllPanels}
           disabled={isAnalyzingAll}
           title="Analyze full sequence"
-          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white hover:border-[#3B82F6] transition-all cursor-pointer"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-900/30 transition-all cursor-pointer active:scale-95"
         >
           <RefreshCw
             className={`w-3.5 h-3.5 ${
-              isAnalyzingAll ? "animate-spin text-[#3B82F6]" : ""
+              isAnalyzingAll ? "animate-spin text-white" : ""
             }`}
           />
           <span className="hidden 2xl:inline">Analyze Sequence</span>
@@ -498,9 +498,9 @@ export default function StoryboardHeader({
           onClick={handleDownloadZip}
           disabled={isZipping}
           title="Download ZIP"
-          className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-md active:scale-95 cursor-pointer"
+          className="text-[11px] font-mono font-bold border border-neutral-700 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
         >
-          <Download className="w-3.5 h-3.5 text-neutral-400" />
+          <Download className="w-3.5 h-3.5 text-blue-400" />
           <span className="hidden 2xl:inline">
             {isZipping ? "Zipping..." : "ZIP"}
           </span>
@@ -512,9 +512,9 @@ export default function StoryboardHeader({
           type="button"
           onClick={() => setShowBulkOps(!showBulkOps)}
           title="Bulk actions"
-          className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-md active:scale-95 cursor-pointer ${
+          className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-sm active:scale-95 cursor-pointer ${
             showBulkOps
-              ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] "
+              ? "border-blue-500/40 bg-blue-600/20 text-blue-300"
               : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"
           }`}
         >

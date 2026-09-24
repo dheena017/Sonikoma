@@ -80,10 +80,10 @@ interface ProjectConfirmModalProps {
 
 // ── Shared Style Classes ──
 const inputCls =
-  "w-full bg-[#0a0a12] border border-white/[0.08] focus:border-[#3B82F6]/60 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner placeholder:text-neutral-600 focus:bg-[#0e0f1a]";
+  "w-full bg-[#0a0a12] border border-white/[0.08] focus:border-neutral-600 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner placeholder:text-neutral-600 focus:bg-[#0e0f1a]";
 
 const selectCls =
-  "w-full bg-[#0a0a12] border border-white/[0.08] focus:border-[#3B82F6]/60 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner cursor-pointer focus:bg-[#0e0f1a]";
+  "w-full bg-[#0a0a12] border border-white/[0.08] focus:border-neutral-600 rounded-2xl px-4 py-3 text-sm text-neutral-200 outline-none transition-all shadow-inner cursor-pointer focus:bg-[#0e0f1a]";
 
 const labelCls =
   "text-[10px] font-bold text-neutral-500 uppercase tracking-wider font-mono flex items-center gap-1.5 mb-1.5";

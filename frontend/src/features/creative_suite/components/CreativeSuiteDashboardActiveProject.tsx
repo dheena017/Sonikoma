@@ -43,7 +43,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
   const safePanels = panels || [];
 
   return (
-    <div className="relative bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 shadow-md hover:border-[#3B82F6]/40 transition-all duration-200 text-left overflow-hidden">
+    <div className="relative bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 shadow-md hover:border-neutral-700 transition-all duration-200 text-left overflow-hidden">
       <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#3B82F6] to-[#3B82F6] opacity-90" />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
@@ -169,7 +169,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                             }`
                           );
                         }}
-                        className="relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-950 hover:border-[#3B82F6]/60 transition-all cursor-pointer group shadow-md"
+                        className="relative flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border border-neutral-850 bg-neutral-950 hover:border-neutral-700 transition-all cursor-pointer group shadow-md"
                         title={`Panel #${idx + 1}: ${
                           p?.speech_text || p?.visual_description || "Frame"
                         }`}
@@ -225,7 +225,7 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                       `/scraper/editor/series/${seriesSlug}/chapters/${chapterSlug}`
                     );
                   }}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-black/50 cursor-pointer"
+                  className="w-full py-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 cursor-pointer"
                   aria-label="Resume Editing"
                 >
                   <Play className="w-4 h-4 fill-white" />{" "}

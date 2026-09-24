@@ -90,7 +90,7 @@ const ActiveProjectSidebarWidget: React.FC<{
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-[#3B82F6] border border-neutral-700/60 hover:border-[#3B82F6]/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
+            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-[#3B82F6] border border-neutral-700/60 hover:border-neutral-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
           >
             <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
@@ -103,7 +103,7 @@ const ActiveProjectSidebarWidget: React.FC<{
           </p>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-black/50 cursor-pointer active:scale-98"
+            className="w-full py-2 px-3 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-black/50 cursor-pointer active:scale-98"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -322,7 +322,7 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
             navigateTo("/dashboard");
             onClose();
           }}
-          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-neutral-900/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all active:scale-95 border border-neutral-800/80 hover:border-[#60A5FA]/40 cursor-pointer font-sans shadow-sm"
+          className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl bg-neutral-900/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white text-xs font-semibold tracking-wide transition-all active:scale-95 border border-neutral-800/80 hover:border-neutral-700 cursor-pointer font-sans shadow-sm"
         >
           <ArrowLeft className="w-4 h-4 shrink-0 stroke-[2.5]" />
           <span>MAIN DASHBOARD</span>

@@ -751,7 +751,7 @@ export function FloatingSelectionBar({
               <button
                 type="button"
                 onClick={exportIndividual}
-                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/30 text-neutral-455 hover:text-[#93C5FD] transition-all active:scale-95"
+                className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center gap-1.5 cursor-pointer bg-neutral-900 border-neutral-800 hover:bg-[#3B82F6]/10 hover:border-neutral-700 text-neutral-455 hover:text-[#93C5FD] transition-all active:scale-95"
               >
                 <ImageIcon className="h-4 w-4 text-blue-400" /> Export
               </button>
@@ -1048,7 +1048,7 @@ export function FloatingSelectionBar({
                 <button
                   type="button"
                   onClick={() => setShowMoreActions(!showMoreActions)}
-                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-[#3B82F6]/40 hover:bg-[#2A2A2A] text-neutral-400 hover:text-[#93C5FD]"
+                  className="px-3.5 py-2 text-xs rounded-xl border font-bold flex items-center justify-center gap-1 cursor-pointer transition-all bg-neutral-900 border-neutral-700 hover:border-neutral-700 hover:bg-[#2A2A2A] text-neutral-400 hover:text-[#93C5FD]"
                 >
                   {showMoreActions ? (
                     <ChevronUp className="h-4 w-4" />

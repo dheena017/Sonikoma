@@ -202,7 +202,7 @@ const NotificationsPage = React.memo(
                 placeholder="Search logs, errors, or messages..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl py-2.5 pl-11 pr-4 text-xs sm:text-sm text-[#E5E5E5] focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all placeholder:text-[#6B7280]"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl py-2.5 pl-11 pr-4 text-xs sm:text-sm text-[#E5E5E5] focus:outline-none focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700 transition-all placeholder:text-[#6B7280]"
               />
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -228,7 +228,7 @@ const NotificationsPage = React.memo(
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
-                  className="w-full appearance-none bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] rounded-xl py-2.5 pl-4 pr-10 text-xs sm:text-sm font-bold uppercase tracking-widest outline-none focus:border-[#3B82F6] transition-all cursor-pointer"
+                  className="w-full appearance-none bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] rounded-xl py-2.5 pl-4 pr-10 text-xs sm:text-sm font-bold uppercase tracking-widest outline-none focus:border-neutral-600 transition-all cursor-pointer"
                 >
                   <option value="all">All Logs</option>
                   <option value="unread">Unread</option>
@@ -297,7 +297,7 @@ const NotificationsPage = React.memo(
                             className={`group relative rounded-2xl border transition-all duration-200 overflow-hidden ${
                               !note.isRead
                                 ? "bg-[#1E1E1E] border-[#3B82F6]/70 ring-1 ring-[#3B82F6]/30 shadow-md"
-                                : "bg-[#1E1E1E] border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626]"
+                                : "bg-[#1E1E1E] border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#262626]"
                             }`}
                           >
                             <div

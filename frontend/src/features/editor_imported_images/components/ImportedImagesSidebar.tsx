@@ -135,7 +135,7 @@ export const ImportedImagesSidebar: React.FC<ImportedImagesSidebarProps> = ({
           value={episodeSearchQuery}
           onChange={(e) => setEpisodeSearchQuery(e.target.value)}
           placeholder="Search episodes..."
-          className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#3B82F6]/60 font-mono transition-all"
+          className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 font-mono transition-all"
         />
         {episodeSearchQuery && (
           <button

@@ -83,7 +83,7 @@ export default function AIModelCard({
   return (
     <div
       onClick={() => onSelect?.(model.id)}
-      className="group relative rounded-2xl border border-neutral-850 bg-[#161616] p-5 space-y-4 hover:border-[#3B82F6]/60 hover:bg-[#1a1a1a] transition-all duration-200 text-left shadow-sm flex flex-col justify-between"
+      className="group relative rounded-2xl border border-neutral-850 bg-[#161616] p-5 space-y-4 hover:border-neutral-700 hover:bg-[#1a1a1a] transition-all duration-200 text-left shadow-sm flex flex-col justify-between"
     >
       {/* ── CARD HEADER ───────────────────────────────────────────────────── */}
       <div className="space-y-2">

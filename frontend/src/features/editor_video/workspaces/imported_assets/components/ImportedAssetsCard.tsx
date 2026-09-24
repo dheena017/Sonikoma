@@ -77,8 +77,8 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
       onClick={(e) => onSelect(index, url, e)}
       className={`relative group rounded-2xl overflow-hidden border transition-all flex flex-col cursor-pointer select-none ${
         isSelected
-          ? "border-[#3B82F6] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 "
-          : "border-white/10 bg-[#121212] hover:border-[#3B82F6]/50 shadow-md hover:shadow-md"
+          ? "border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md"
+          : "border-white/10 bg-[#121212] hover:border-neutral-700 shadow-md hover:shadow-md"
       }`}
     >
       {/* Thumbnail Image Container */}
@@ -101,7 +101,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
             <div
               className={`h-4 w-4 rounded flex items-center justify-center border transition-all ${
                 isSelected
-                  ? "bg-[#2A2A2A] border-[#60A5FA] text-white"
+                  ? "bg-[#3B82F6] border-[#60A5FA] text-white shadow-sm shadow-blue-500/25"
                   : "bg-black/60 border-white/20 text-transparent group-hover:border-white/50"
               }`}
             >
@@ -141,7 +141,7 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           <div className="absolute inset-0 z-20 bg-black/75 backdrop-blur-sm flex flex-col items-center justify-center gap-2 p-3 text-center animate-in fade-in duration-150">
             <div className="relative flex items-center justify-center">
               <div className="w-9 h-9 rounded-full bg-[#3B82F6]/20 border border-[#3B82F6]/40 animate-ping absolute inset-0" />
-              <div className="w-8 h-8 rounded-full bg-[#2A2A2A] border border-[#60A5FA]/60 flex items-center justify-center ">
+              <div className="w-8 h-8 rounded-full bg-[#3B82F6] border border-[#60A5FA]/60 text-white flex items-center justify-center shadow-sm shadow-blue-500/25">
                 <Loader2 className="h-4 w-4 text-[#60A5FA] animate-spin" />
               </div>
             </div>
@@ -170,12 +170,12 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           disabled={isProcessing}
           className={`w-full py-1 px-2 rounded-lg font-mono text-[9px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 shadow-sm transition active:scale-95 cursor-pointer ${
             isAdding
-              ? "bg-[#2A2A2A] text-[#3B82F6] opacity-90 cursor-wait"
-              : "bg-[#2A2A2A] hover:bg-[#3B82F6] text-white"
+              ? "bg-[#3B82F6] text-white opacity-90 cursor-wait"
+              : "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
           }`}
         >
           {isAdding ? (
-            <Loader2 className="h-2.5 w-2.5 animate-spin text-[#3B82F6]" />
+            <Loader2 className="h-2.5 w-2.5 animate-spin text-white" />
           ) : (
             <Plus className="h-2.5 w-2.5" />
           )}
@@ -194,8 +194,8 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
             index >= totalImagesCount - 1
               ? "bg-white/[0.02] border-white/[0.05] text-neutral-600 cursor-not-allowed select-none opacity-40"
               : isMerging
-              ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-neutral-200 cursor-wait"
-              : "bg-[#2A2A2A] hover:bg-[#333333] border-[#2F2F2F] text-neutral-300 hover:text-white cursor-pointer"
+              ? "bg-[#3B82F6]/20 border-[#3B82F6]/40 text-white cursor-wait"
+              : "bg-white/5 hover:bg-[#3B82F6] border-white/10 hover:border-[#60A5FA]/40 text-neutral-300 hover:text-white cursor-pointer"
           }`}
         >
           {isMerging ? (

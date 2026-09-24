@@ -493,7 +493,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
                 key={route.task}
                 type="button"
                 onClick={() => onSelectTask(route.task)}
-                className="p-3 rounded-xl border border-white/[0.06] bg-[#121218] hover:bg-[#1A1A22] hover:border-blue-500/40 text-left transition-all group cursor-pointer"
+                className="p-3 rounded-xl border border-white/[0.06] bg-[#121218] hover:bg-[#1A1A22] hover:border-neutral-700 text-left transition-all group cursor-pointer"
               >
                 <div className="text-lg mb-1">{route.emoji}</div>
                 <p className="text-xs font-bold text-white group-hover:text-blue-300 transition-colors truncate">

@@ -245,13 +245,13 @@ export function AdminUsersTab({
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-[#3B82F6]"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-neutral-600"
             />
           </div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2 focus:outline-none focus:border-[#3B82F6]"
+            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2 focus:outline-none focus:border-neutral-600"
           >
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
@@ -261,7 +261,7 @@ export function AdminUsersTab({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2 focus:outline-none focus:border-[#3B82F6]"
+            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl px-4 py-2 focus:outline-none focus:border-neutral-600"
           >
             <option value="all">All Statuses</option>
             <option value="active">Active</option>
@@ -514,7 +514,7 @@ export function AdminUsersTab({
                   value={justificationReason}
                   onChange={(e) => setJustificationReason(e.target.value)}
                   placeholder="Reason for change (required for sensitive actions)..."
-                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm h-20 focus:border-[#3B82F6] outline-none"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm h-20 focus:border-neutral-600 outline-none"
                 />
               </div>
             </div>
@@ -606,7 +606,7 @@ export function AdminUsersTab({
                   onChange={(e) =>
                     setGrantAmount(parseInt(e.target.value) || 0)
                   }
-                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm focus:border-[#3B82F6] outline-none"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm focus:border-neutral-600 outline-none"
                 />
               </div>
               <div>
@@ -617,7 +617,7 @@ export function AdminUsersTab({
                   value={grantReason}
                   onChange={(e) => setGrantReason(e.target.value)}
                   placeholder="Reason for manual adjustment..."
-                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm h-20 focus:border-[#3B82F6] outline-none"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-2.5 text-white text-sm h-20 focus:border-neutral-600 outline-none"
                 />
               </div>
             </div>

@@ -196,7 +196,7 @@ const AIOptimizerPage = React.memo(
             <Tooltip text="Copy complete YouTube title, description, chapters & summary package" placement="bottom">
               <button
                 onClick={handleCopyAllPackage}
-                className="px-4 py-2.5 bg-[#1E1E1E] hover:bg-[#252525] text-[#E5E5E5] hover:text-white rounded-2xl border border-[#2F2F2F] hover:border-[#3B82F6]/60 text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm"
+                className="px-4 py-2.5 bg-[#1E1E1E] hover:bg-[#252525] text-[#E5E5E5] hover:text-white rounded-2xl border border-[#2F2F2F] hover:border-neutral-700 text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer shadow-sm"
                 aria-label="Copy Package"
               >
                 {copiedAll ? (
@@ -273,7 +273,7 @@ const AIOptimizerPage = React.memo(
               <Tooltip text="Scroll panels left" placement="top">
                 <button
                   onClick={() => scrollFilmstrip("left")}
-                  className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-sm"
+                  className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-sm"
                   aria-label="Scroll left"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -291,7 +291,7 @@ const AIOptimizerPage = React.memo(
                     className={`w-20 shrink-0 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer relative flex items-center justify-center bg-[#121212] ${
                       selectedIdx === idx
                         ? "border-2 border-[#3B82F6] scale-105 bg-[#3B82F6]/10 shadow-md"
-                        : "border-[#2F2F2F] opacity-70 hover:opacity-100 hover:border-[#3B82F6]/60 hover:scale-102"
+                        : "border-[#2F2F2F] opacity-70 hover:opacity-100 hover:border-neutral-700 hover:scale-102"
                     }`}
                   >
                     {panel.image_url ? (
@@ -313,7 +313,7 @@ const AIOptimizerPage = React.memo(
               <Tooltip text="Scroll panels right" placement="top">
                 <button
                   onClick={() => scrollFilmstrip("right")}
-                  className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-sm"
+                  className="p-2.5 text-[#9CA3AF] hover:text-white bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#252525] rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-sm"
                   aria-label="Scroll right"
                 >
                   <ChevronRight className="w-4 h-4" />

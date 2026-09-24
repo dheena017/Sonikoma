@@ -192,7 +192,7 @@ export default function ProfileAccountTab({
                     fullName: e.target.value,
                   }))
                 }
-                className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all"
+                className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
               />
             </div>
 
@@ -224,7 +224,7 @@ export default function ProfileAccountTab({
                   role: e.target.value,
                 }))
               }
-              className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all"
+              className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
             />
           </div>
 
@@ -238,7 +238,7 @@ export default function ProfileAccountTab({
               onChange={(e) =>
                 setProfileUser((prev) => ({ ...prev, bio: e.target.value }))
               }
-              className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2.5 px-4 text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all resize-none"
+              className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-2.5 px-4 text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all resize-none"
             />
           </div>
 
@@ -321,7 +321,7 @@ export default function ProfileAccountTab({
               <button
                 type="button"
                 onClick={() => handleClaimReward(150, "+100 Smart Credits")}
-                className="bg-[#2A2A2A] hover:bg-[#3B82F6] text-white py-1 px-3 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                className="bg-[#2A2A2A] hover:bg-[#333333] text-white py-1 px-3 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
                 title="Exchange 150 pts for 100 bonus trial credits"
               >
                 Claim Credits (150 pts)

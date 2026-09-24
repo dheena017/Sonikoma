@@ -363,7 +363,7 @@ const VideoPreviewMetadataPanel = React.memo(
           className={`h-7 w-7 rounded-lg flex items-center justify-center border transition-all cursor-pointer shrink-0 ${
             showMore
               ? "bg-[#2A2A2A] border-[#3B82F6] text-white "
-              : "bg-neutral-900/90 border-neutral-700/80 text-neutral-300 hover:text-white hover:bg-neutral-800 hover:border-[#3B82F6]/40"
+              : "bg-neutral-900/90 border-neutral-700/80 text-neutral-300 hover:text-white hover:bg-neutral-800 hover:border-neutral-700"
           }`}
         >
           <MoreHorizontal className="h-3.5 w-3.5" />

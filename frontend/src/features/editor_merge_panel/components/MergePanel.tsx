@@ -174,7 +174,7 @@ export default function MergePanel({
                     className={`px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 ${
                       mergeCount === n
                         ? "bg-[#3B82F6] border-[#60A5FA]/40 text-white font-bold"
-                        : "bg-[#2A2A2A] border-[#2F2F2F] text-neutral-400 hover:text-white hover:border-[#3B82F6]"
+                        : "bg-[#2A2A2A] border-[#2F2F2F] text-neutral-400 hover:text-white hover:border-neutral-700"
                     }`}
                   >
                     +{n}
@@ -185,7 +185,7 @@ export default function MergePanel({
                 <button
                   type="button"
                   onClick={() => setMergeCount(maxMergeable)}
-                  className="px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 bg-[#2A2A2A] border-[#2F2F2F] hover:border-[#3B82F6] hover:bg-[#3B82F6] text-white"
+                  className="px-3 py-1 rounded-lg border text-[10px] font-bold font-mono transition-all cursor-pointer active:scale-95 bg-[#2A2A2A] border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#3B82F6] text-white"
                 >
                   Merge All Remaining
                 </button>
@@ -233,7 +233,7 @@ export default function MergePanel({
               });
             }}
             disabled={isMerging || !canMerge}
-            className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA]/40 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+            className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-white text-xs font-bold font-sans transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
           >
             {isMerging ? (
               <>

@@ -149,7 +149,7 @@ export default function SeriesEditModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Solo Leveling"
-              className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
+              className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors font-sans"
               required
             />
           </div>
@@ -166,7 +166,7 @@ export default function SeriesEditModal({
                 value={author}
                 onChange={(e) => setAuthor(e.target.value)}
                 placeholder="e.g. Chugong"
-                className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
+                className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors font-sans"
               />
             </div>
 
@@ -180,7 +180,7 @@ export default function SeriesEditModal({
                 value={genre}
                 onChange={(e) => setGenre(e.target.value)}
                 placeholder="e.g. Fantasy Action"
-                className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
+                className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors font-sans"
               />
             </div>
           </div>
@@ -196,7 +196,7 @@ export default function SeriesEditModal({
                 value={cover}
                 onChange={(e) => setCover(e.target.value)}
                 placeholder="https://images.example.com/cover.jpg"
-                className="flex-1 bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
+                className="flex-1 bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors font-sans"
               />
               {cover && (
                 <div className="w-10 h-10 rounded-xl overflow-hidden border border-neutral-800 shrink-0 bg-neutral-955">
@@ -220,7 +220,7 @@ export default function SeriesEditModal({
               value={synopsis}
               onChange={(e) => setSynopsis(e.target.value)}
               placeholder="Enter series summary or story background..."
-              className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#3B82F6] transition-colors font-sans resize-none scrollbar-thin"
+              className="w-full bg-neutral-955 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors font-sans resize-none scrollbar-thin"
             />
           </div>
 

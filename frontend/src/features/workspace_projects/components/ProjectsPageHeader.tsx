@@ -31,7 +31,7 @@ export default function ProjectsPageHeader({
         <button
           type="button"
           onClick={onNewSeries}
-          className="btn-primary flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider shadow-md"
+          className="btn-primary bg-[#3B82F6] hover:bg-[#2563EB] border border-[#3B82F6]/40 text-white flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
         >
           <Plus className="h-4 w-4 text-white" />
           <span>New Chapter</span>

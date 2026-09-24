@@ -101,11 +101,11 @@ function PanelCard({
       case "Too Tall Strip":
         return "bg-rose-950/40 border-rose-800/40 text-rose-350 shadow-[0_0_8px_rgba(239,68,68,0.15)] animate-pulse";
       case "Tall Strip":
-        return "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]";
+        return "bg-blue-950/40 border-blue-500/30 text-blue-400";
       case "Landscape":
-        return "bg-sky-950/40 border-sky-800/40 text-sky-300";
+        return "bg-emerald-950/40 border-emerald-500/30 text-emerald-300";
       default:
-        return "bg-neutral-900 border-neutral-850 text-neutral-400";
+        return "bg-purple-950/30 border-purple-500/30 text-purple-300";
     }
   }, [aspectRatioLabel]);
 
@@ -268,14 +268,14 @@ function PanelCard({
         containIntrinsicSize: viewLayout === "grid" ? "320px 460px" : "300px 460px",
       }}
       className={[
-        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-colors duration-150 text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950",
+        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-colors duration-150 text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-neutral-700 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950",
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center",
         isProcessing
-          ? "border-2 border-blue-500 bg-neutral-900 ring-1 ring-blue-400/60"
+          ? "border-purple-500/60 bg-neutral-900/90 shadow-md ring-1 ring-purple-500/30"
           : isSelected
-          ? "border-blue-500 bg-neutral-900 ring-1 ring-blue-400/50"
+          ? "border-blue-500/80 bg-neutral-900/90 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/30"
           : "border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60",
         className || "",
       ].join(" ")}

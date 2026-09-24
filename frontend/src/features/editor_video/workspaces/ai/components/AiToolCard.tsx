@@ -43,8 +43,8 @@ export const AiToolCard: React.FC<AiToolCardProps> = ({ tool, onRun }) => {
   const Icon = ICON_MAP[tool.iconName] || Wand2;
 
   return (
-    <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/60 cursor-pointer transition-all group flex items-start gap-3 shadow-sm">
-      <div className="h-8 w-8 rounded-lg bg-[#2A2A2A] border border-[#3B82F6]/30 flex items-center justify-center shrink-0 group-hover:bg-[#3B82F6]/40 transition-colors">
+    <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 cursor-pointer transition-all group flex items-start gap-3 shadow-sm">
+      <div className="h-8 w-8 rounded-lg bg-[#3B82F6]/15 border border-[#3B82F6]/40 flex items-center justify-center shrink-0 group-hover:bg-[#3B82F6]/30 transition-colors">
         <Icon className="h-4 w-4 text-[#3B82F6]" />
       </div>
       <div className="flex-1 min-w-0">
@@ -62,7 +62,7 @@ export const AiToolCard: React.FC<AiToolCardProps> = ({ tool, onRun }) => {
       </div>
       <button
         onClick={() => onRun(tool.title)}
-        className="px-2 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold transition-colors shrink-0 cursor-pointer"
+        className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold transition-all shadow-sm shadow-blue-500/25 shrink-0 cursor-pointer active:scale-95"
       >
         Run
       </button>

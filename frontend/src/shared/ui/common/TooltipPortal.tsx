@@ -88,10 +88,10 @@ export interface TooltipPortalProps {
 const VARIANT_STYLES: Record<TooltipVariant, string> = {
   dark: "bg-[#111116]/95 border-[#282832] text-neutral-100 shadow-[0_12px_36px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)]",
   glass: "bg-neutral-900/85 backdrop-blur-xl border-white/15 text-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.6)]",
-  neon: "bg-[#0c1017]/95 border-blue-500/50 text-cyan-50 shadow-[0_0_20px_rgba(6,182,212,0.3)] shadow-cyan-950/50",
-  cyber: "bg-[#110d1f]/95 border-[#3B82F6]/50 text-[#3B82F6]  shadow-black/50",
-  gradient: "bg-gradient-to-r from-neutral-900/95 via-[#2A2A2A] to-neutral-900/95 border-[#3B82F6]/40 text-white shadow-2xl shadow-black/50",
-  primary: "bg-blue-950/95 border-blue-500/50 text-blue-50 shadow-2xl shadow-blue-950/60",
+  neon: "bg-[#0c1017]/95 border-neutral-700 text-neutral-100 shadow-xl",
+  cyber: "bg-[#110d1f]/95 border-neutral-700 text-neutral-100 shadow-black/50",
+  gradient: "bg-gradient-to-r from-neutral-900/95 via-[#2A2A2A] to-neutral-900/95 border-neutral-700 text-white shadow-2xl shadow-black/50",
+  primary: "bg-neutral-900/95 border-neutral-700 text-neutral-100 shadow-2xl shadow-black/50",
   success: "bg-emerald-950/95 border-emerald-500/50 text-emerald-50 shadow-2xl shadow-emerald-950/60",
   warning: "bg-amber-950/95 border-amber-500/50 text-amber-50 shadow-2xl shadow-amber-950/60",
   danger: "bg-rose-950/95 border-rose-500/50 text-rose-50 shadow-2xl shadow-rose-950/60",
@@ -112,10 +112,10 @@ const GLOW_COLORS: Record<TooltipVariant, string> = {
 const ARROW_STYLES: Record<TooltipVariant, string> = {
   dark: "bg-[#111116] border-[#282832]",
   glass: "bg-neutral-900 border-white/20",
-  neon: "bg-[#0c1017] border-blue-500/50",
-  cyber: "bg-[#110d1f] border-[#3B82F6]/50",
-  gradient: "bg-[#1f1f26] border-[#3B82F6]/40",
-  primary: "bg-blue-950 border-blue-500/50",
+  neon: "bg-[#0c1017] border-neutral-700",
+  cyber: "bg-[#110d1f] border-neutral-700",
+  gradient: "bg-[#1f1f26] border-neutral-700",
+  primary: "bg-neutral-900 border-neutral-700",
   success: "bg-emerald-950 border-emerald-500/50",
   warning: "bg-amber-950 border-amber-500/50",
   danger: "bg-rose-950 border-rose-500/50",
@@ -130,11 +130,11 @@ const SIZE_STYLES: Record<TooltipSize, { root: string; text: string; shortcut: s
 
 const BADGE_STYLES: Record<string, string> = {
   default: "bg-neutral-800 text-neutral-300 border-neutral-700",
-  primary: "bg-blue-500/20 text-blue-300 border-blue-500/40",
+  primary: "bg-neutral-800 text-neutral-300 border-neutral-700",
   success: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
   warning: "bg-amber-500/20 text-amber-300 border-amber-500/40",
   danger: "bg-rose-500/20 text-rose-300 border-rose-500/40",
-  purple: "bg-[#3B82F6]/20 text-[#60A5FA] border-[#3B82F6]/40",
+  purple: "bg-neutral-800 text-neutral-300 border-neutral-700",
 };
 
 // --------------------------------------------------------------------------

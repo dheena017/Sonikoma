@@ -61,7 +61,7 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
             onClick={(e) => onSelect(index, e)}
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
-                ? "border-[#2F2F2F] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 shadow-md"
+                ? "border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md"
                 : "border-white/10 bg-[#121212] hover:border-[#2F2F2F]"
             }`}
           >

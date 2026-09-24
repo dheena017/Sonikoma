@@ -28,31 +28,31 @@
 /* Active state */
 .icon-pill.active,
 .icon-pill--active {
-  background-color: rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 0 14px rgba(59, 130, 246, 0.22);
+  background-color: #27272a;
+  border-color: #52525b;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 .icon-pill.active svg,
 .icon-pill--active svg {
-  color: #60a5fa;
+  color: #ffffff;
 }
 
 /* Hover via group */
 .group:hover .icon-pill:not(.active):not(.icon-pill--active) {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.2);
+  background-color: #27272a;
+  border-color: #3f3f46;
 }
 .group:hover .icon-pill:not(.active):not(.icon-pill--active) svg {
-  color: #60a5fa;
+  color: #ffffff;
 }
 
 /* ── Colour variants ─────────────────────────────────────────── */
 .icon-pill--purple {
-  background-color: rgba(59, 130, 246, 0.1);
-  border-color: rgba(59, 130, 246, 0.22);
+  background-color: #27272a;
+  border-color: #3f3f46;
 }
 .icon-pill--purple svg {
-  color: #60a5fa;
+  color: #ffffff;
 }
 .icon-pill--violet {
   background-color: rgba(139, 92, 246, 0.1);

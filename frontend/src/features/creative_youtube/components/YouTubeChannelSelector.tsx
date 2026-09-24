@@ -133,7 +133,7 @@ export default function YouTubeChannelSelector({
           <button
             type="button"
             onClick={() => setIsOpen(!isOpen)}
-            className="w-full flex items-center justify-between p-3 bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-850 hover:border-[#3B82F6]/50 rounded-xl transition-all duration-200 cursor-pointer text-left group"
+            className="w-full flex items-center justify-between p-3 bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-850 hover:border-neutral-700 rounded-xl transition-all duration-200 cursor-pointer text-left group"
           >
             <div className="flex items-center gap-3 min-w-0">
               {activeChannel.thumbnail ? (

@@ -216,7 +216,7 @@ export default function LayerSeparationPanel({
               ? "bg-[#2A2A2A] text-[#3B82F6] border-[#2F2F2F] cursor-not-allowed"
               : hasLayers
               ? "bg-[#2A2A2A] text-[#60A5FA] border-[#2F2F2F] hover:bg-[#2A2A2A]"
-              : "bg-[#2A2A2A] hover:bg-[#3B82F6] text-white border-[#3B82F6]/20 shadow-md shadow-black/50"
+              : "bg-[#2A2A2A] hover:bg-[#333333] text-white border-[#3B82F6]/20 shadow-md shadow-black/50"
           }`}
         >
           {isProcessingLayers ? (

@@ -332,7 +332,7 @@ export default function LoginPage({
                       className={`w-full bg-[#141414] border rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none transition-all font-medium ${
                         fieldErrors.email
                           ? "border-rose-500 ring-2 ring-rose-500/20"
-                          : "border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                          : "border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700"
                       }`}
                       placeholder="name@example.com"
                     />
@@ -375,7 +375,7 @@ export default function LoginPage({
                       className={`w-full bg-[#141414] border rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none transition-all font-medium ${
                         fieldErrors.password
                           ? "border-rose-500 ring-2 ring-rose-500/20"
-                          : "border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                          : "border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700"
                       }`}
                       placeholder="Enter your password"
                     />
@@ -447,7 +447,7 @@ export default function LoginPage({
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
+                    className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
                   >
                     {isLoading ? (
                       <>

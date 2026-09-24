@@ -102,13 +102,13 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
                 setSearchQuery(e.target.value);
                 setShowAll(false);
               }}
-              className="pl-8 pr-3 py-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-[#3B82F6]/40 w-44 transition-colors"
+              className="pl-8 pr-3 py-1.5 bg-neutral-900/60 border border-neutral-800 rounded-xl text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-neutral-600 w-44 transition-colors"
             />
           </div>
           <button
             onClick={() => fetchProjects()}
             title="Refresh projects"
-            className="p-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 transition-all cursor-pointer text-neutral-500 hover:text-[#60A5FA]"
+            className="p-1.5 rounded-xl border border-neutral-800 bg-neutral-900/60 hover:border-neutral-700 hover:bg-[#3B82F6]/10 transition-all cursor-pointer text-neutral-500 hover:text-[#60A5FA]"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${loadingProjects ? "animate-spin" : ""}`}
@@ -207,7 +207,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
             <div className="flex justify-center pt-2">
               <button
                 onClick={() => setShowAll((v) => !v)}
-                className="flex items-center gap-2 px-5 py-2.5 border border-neutral-800 bg-neutral-900/60 hover:border-[#3B82F6]/30 hover:bg-[#3B82F6]/5 rounded-xl text-xs font-bold text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 border border-neutral-800 bg-neutral-900/60 hover:border-neutral-700 hover:bg-[#3B82F6]/5 rounded-xl text-xs font-bold text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer"
               >
                 {showAll ? (
                   <>

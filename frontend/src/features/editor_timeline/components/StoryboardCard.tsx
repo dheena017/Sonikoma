@@ -230,11 +230,11 @@ const DialogueClipSlider: React.FC<DialogueClipSliderProps> = ({
             left: `${leftPct}%`,
             width: `${widthPct}%`,
           }}
-          className="absolute top-0 bottom-0 bg-[#2A2A2A] hover:bg-[#3B82F6]/90 border-l border-r border-[#60A5FA] rounded flex items-center justify-between group cursor-grab active:cursor-grabbing"
+          className="absolute top-0 bottom-0 bg-blue-600/80 hover:bg-blue-500 border-l-2 border-r-2 border-blue-400 rounded flex items-center justify-between group cursor-grab active:cursor-grabbing"
           onMouseDown={(e) => handleMouseDown(e, "center")}
         >
           <div
-            className="w-1.5 h-full bg-[#2A2A2A] hover:bg-white cursor-ew-resize flex-shrink-0"
+            className="w-1.5 h-full bg-blue-300 hover:bg-white cursor-ew-resize flex-shrink-0"
             onMouseDown={(e) => handleMouseDown(e, "left")}
           />
 
@@ -243,7 +243,7 @@ const DialogueClipSlider: React.FC<DialogueClipSliderProps> = ({
           </span>
 
           <div
-            className="w-1.5 h-full bg-[#2A2A2A] hover:bg-white cursor-ew-resize flex-shrink-0"
+            className="w-1.5 h-full bg-blue-300 hover:bg-white cursor-ew-resize flex-shrink-0"
             onMouseDown={(e) => handleMouseDown(e, "right")}
           />
         </div>
@@ -628,12 +628,12 @@ const StoryboardCard = ({
             prev.map((p) =>
               p.id === panel.id
                 ? {
-                    ...p,
-                    narrative_audio_url: currentMode === "narrative" ? audioUrl : p.narrative_audio_url,
-                    speech_audio_url: currentMode === "speech" ? audioUrl : p.speech_audio_url,
-                    audio_url: currentMode === "speech" ? audioUrl : (p.audio_url || audioUrl),
-                    duration: audioDuration > 0 ? audioDuration : p.duration,
-                  }
+                  ...p,
+                  narrative_audio_url: currentMode === "narrative" ? audioUrl : p.narrative_audio_url,
+                  speech_audio_url: currentMode === "speech" ? audioUrl : p.speech_audio_url,
+                  audio_url: currentMode === "speech" ? audioUrl : (p.audio_url || audioUrl),
+                  duration: audioDuration > 0 ? audioDuration : p.duration,
+                }
                 : p
             )
           );
@@ -779,18 +779,18 @@ const StoryboardCard = ({
           prev.map((p) =>
             p.id === panel.id
               ? {
-                  ...p,
-                  // Preserve AI-decided motion; only default if completely unset
-                  motion_type:
-                    p.motion_type && p.motion_type.trim().length > 0
-                      ? p.motion_type
-                      : "",
-                  // Sync timing to actual audio length
-                  duration: audioDuration > 0 ? audioDuration : p.duration,
-                  audio_url: audioUrl || p.audio_url,
-                  layers: layersObj || p.layers,
-                  syncMap: syncMapObj || p.syncMap,
-                }
+                ...p,
+                // Preserve AI-decided motion; only default if completely unset
+                motion_type:
+                  p.motion_type && p.motion_type.trim().length > 0
+                    ? p.motion_type
+                    : "",
+                // Sync timing to actual audio length
+                duration: audioDuration > 0 ? audioDuration : p.duration,
+                audio_url: audioUrl || p.audio_url,
+                layers: layersObj || p.layers,
+                syncMap: syncMapObj || p.syncMap,
+              }
               : p
           )
         );
@@ -884,28 +884,26 @@ const StoryboardCard = ({
         contentVisibility: "auto",
         containIntrinsicSize: viewLayout === "grid" ? "320px 460px" : "300px 460px",
       }}
-      className={`${
-        viewLayout === "grid"
+      className={`${viewLayout === "grid"
           ? "w-full min-w-0"
           : panelsLength === 1
-          ? "w-full max-w-[420px] sm:w-[380px] shrink-0"
-          : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center"
-      } group relative rounded-2xl border p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 transition-colors duration-150 select-none outline-none shadow-sm ${
-        isMenuOpen ? "z-50" : "z-0"
-      } ${
-        isThisPanelAnalyzing
-          ? "border-blue-500 bg-neutral-900 ring-1 ring-blue-500/50"
-          : isSelected
-          ? "border-blue-500 bg-neutral-950 ring-1 ring-blue-500/40"
-          : "border-neutral-800 bg-neutral-950 hover:border-neutral-700"
-      }`}
+            ? "w-full max-w-[420px] sm:w-[380px] shrink-0"
+            : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center"
+        } group relative rounded-2xl border p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 transition-colors duration-150 select-none outline-none shadow-sm ${isMenuOpen ? "z-50" : "z-0"
+        } ${isThisPanelAnalyzing
+          ? "border-purple-500/70 bg-neutral-900 ring-1 ring-purple-500/30 shadow-lg shadow-purple-500/10"
+          : currentPanelIndex === idx
+            ? "border-blue-500/80 bg-neutral-900/90 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/30"
+            : isSelected
+              ? "border-blue-500/40 bg-blue-950/20 shadow-md ring-1 ring-blue-500/20"
+              : "border-neutral-800 bg-neutral-950 hover:border-neutral-700"
+        }`}
     >
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className={`relative ${
-          panelsLength === 1 ? "h-64 sm:h-72" : "h-56 sm:h-64"
-        } rounded-xl cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb hover:border-neutral-700 transition-colors duration-150`}
+        className={`relative ${panelsLength === 1 ? "h-64 sm:h-72" : "h-56 sm:h-64"
+          } rounded-xl cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb hover:border-neutral-700 transition-colors duration-150`}
       >
         <div className="w-full h-full rounded-xl overflow-hidden flex items-center justify-center relative">
           <img
@@ -951,7 +949,11 @@ const StoryboardCard = ({
 
         {/* Top-Left: Index Badge & Reorder Controls */}
         <div className="absolute top-2 left-2 flex items-center gap-1.5 z-20">
-          <div className="px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm border border-neutral-800 text-[10px] font-mono font-medium text-neutral-300">
+          <div className={`px-2 py-0.5 rounded-md backdrop-blur-sm border text-[10px] font-mono transition-colors ${
+            currentPanelIndex === idx
+              ? "bg-blue-950/80 border-blue-500/40 text-blue-300 font-bold"
+              : "bg-black/70 border-neutral-800 text-neutral-300 font-medium"
+          }`}>
             #{idx + 1}
           </div>
 
@@ -1029,7 +1031,7 @@ const StoryboardCard = ({
                   }}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer text-left"
                 >
-                  <Wand2 className="w-3.5 h-3.5 text-blue-400" />
+                  <Wand2 className="w-3.5 h-3.5 text-neutral-400" />
                   <span>Magic Motion</span>
                 </button>
 
@@ -1053,7 +1055,7 @@ const StoryboardCard = ({
                   }}
                   className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer text-left"
                 >
-                  <Mic className="w-3.5 h-3.5 text-blue-400" />
+                  <Mic className="w-3.5 h-3.5 text-neutral-400" />
                   <span>Create Voice Audio</span>
                 </button>
 
@@ -1100,11 +1102,10 @@ const StoryboardCard = ({
               e.stopPropagation();
               onToggleSelect();
             }}
-            className={`rounded-full p-1 border transition-colors cursor-pointer ${
-              isSelected
+            className={`rounded-full p-1 border transition-colors cursor-pointer ${isSelected
                 ? "bg-blue-600 border-blue-500 text-white opacity-100"
                 : "bg-black/70 border-neutral-700 text-neutral-400 opacity-0 group-hover/thumb:opacity-100 hover:border-neutral-500"
-            }`}
+              }`}
             title={isSelected ? "Deselect panel" : "Select panel"}
           >
             <Check className="h-2.5 w-2.5 stroke-[3]" />
@@ -1113,99 +1114,266 @@ const StoryboardCard = ({
 
         {/* Motion overlay text */}
         {panel.motion_type && (
-          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[9px] font-mono uppercase tracking-wider text-neutral-400 border border-neutral-800 z-20">
+          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-sm text-[9px] font-mono uppercase tracking-wider text-indigo-300 border border-indigo-500/30 z-20">
             {panel.motion_type.replace("_", " ")}
           </div>
         )}
       </div>
 
       <div className="space-y-2 w-full">
-        {/* 1. Primary Story Narrator (Always Visible) */}
+        {/* 1. Primary Script & Audio Editor (Narrator by default, or Details when toggled) */}
         <div className="space-y-1.5 animate-in fade-in duration-150">
+          {/* Header Bar */}
           <div className="flex items-center justify-between gap-1.5 px-0.5 min-w-0">
-            <span className="text-[11px] font-medium text-neutral-300 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-              <Mic className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-              <span>Narrator</span>
-            </span>
+            {/* View Mode Toggle: Narrator (Main) vs Details */}
+            <div className="flex items-center p-0.5 rounded-lg bg-neutral-900 border border-neutral-800 gap-0.5 select-none shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowDetails(false)}
+                className={`px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer ${!showDetails
+                    ? "bg-purple-950/60 text-purple-200 shadow-xs border border-purple-500/40 font-semibold"
+                    : "text-neutral-400 hover:text-neutral-200"
+                  }`}
+                title="Story Narrator"
+              >
+                <Mic className="w-3 h-3 text-purple-400" />
+                <span>Narrator</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowDetails(true)}
+                className={`px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer ${showDetails
+                    ? "bg-blue-950/60 text-blue-200 shadow-xs border border-blue-500/40 font-semibold"
+                    : "text-neutral-400 hover:text-neutral-200"
+                  }`}
+                title="Details: Dialogue, SFX, Scene"
+              >
+                <MessageSquare className="w-3 h-3 text-blue-400" />
+                <span>Details</span>
+                {hasExtraDetails && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 ml-0.5" />
+                )}
+              </button>
+            </div>
+
+            {/* Audio Synthesis & Playback Controls for active view */}
             <div className="flex items-center gap-1 shrink-0">
-              {/* Create Voice for Narrator */}
-              <button
-                type="button"
-                disabled={Boolean(isGeneratingVoice && generatingVoiceMode === "narrative") || isThisPanelAnalyzing}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleGenerateVoice(false, "narrative");
-                }}
-                className="h-6 px-2 rounded-md text-[10px] font-medium flex items-center gap-1 border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
-                title="Synthesize story narration voice"
-              >
-                {isGeneratingVoice && generatingVoiceMode === "narrative" ? (
-                  <RefreshCw className="w-2.5 h-2.5 animate-spin text-purple-400" />
-                ) : (
-                  <Mic className="w-2.5 h-2.5 text-purple-400" />
-                )}
-                <span>{isGeneratingVoice && generatingVoiceMode === "narrative" ? "Voicing..." : "Voice"}</span>
-              </button>
+              {(!showDetails || activeTab === "speech") && (
+                <>
+                  <button
+                    type="button"
+                    disabled={
+                      Boolean(
+                        isGeneratingVoice &&
+                        generatingVoiceMode === (!showDetails ? "narrative" : "speech")
+                      ) || isThisPanelAnalyzing
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleGenerateVoice(false, !showDetails ? "narrative" : "speech");
+                    }}
+                    className="h-6 px-2 rounded-md text-[10px] font-medium flex items-center gap-1 border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                    title={!showDetails ? "Synthesize story narration voice" : "Synthesize speech bubble voice"}
+                  >
+                    {isGeneratingVoice &&
+                      generatingVoiceMode === (!showDetails ? "narrative" : "speech") ? (
+                      <RefreshCw className="w-2.5 h-2.5 animate-spin text-purple-400" />
+                    ) : (
+                      <Mic className="w-2.5 h-2.5 text-purple-400" />
+                    )}
+                    <span>
+                      {isGeneratingVoice &&
+                        generatingVoiceMode === (!showDetails ? "narrative" : "speech")
+                        ? "Voicing..."
+                        : "Voice"}
+                    </span>
+                  </button>
 
-              {/* Play Narrator Audio */}
-              <button
-                type="button"
-                disabled={Boolean(isGeneratingVoice && generatingVoiceMode === "narrative") || isThisPanelAnalyzing}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleDialogueAudio("narrative");
-                }}
-                className={`h-6 px-2 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors cursor-pointer ${
-                  isDialoguePlaying && !isDialoguePaused && playingAudioType === "narrative"
-                    ? "bg-amber-950/60 border-amber-500/50 text-amber-200"
-                    : "bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white"
-                }`}
-                title="Play/Pause Narrator Audio"
-              >
-                {isDialoguePlaying && !isDialoguePaused && playingAudioType === "narrative" ? (
-                  <Pause className="w-2.5 h-2.5 fill-current" />
-                ) : (
-                  <Play className="w-2.5 h-2.5 fill-current" />
-                )}
-                <span>
-                  {isDialoguePlaying && !isDialoguePaused && playingAudioType === "narrative"
-                    ? "Pause"
-                    : "Play"}
-                </span>
-              </button>
+                  <button
+                    type="button"
+                    disabled={
+                      Boolean(
+                        isGeneratingVoice &&
+                        generatingVoiceMode === (!showDetails ? "narrative" : "speech")
+                      ) || isThisPanelAnalyzing
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleDialogueAudio(!showDetails ? "narrative" : "speech");
+                    }}
+                    className={`h-6 px-2 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors cursor-pointer ${isDialoguePlaying &&
+                        !isDialoguePaused &&
+                        playingAudioType === (!showDetails ? "narrative" : "speech")
+                        ? "bg-emerald-600 border-emerald-500 text-white shadow-sm shadow-emerald-500/30"
+                        : "bg-emerald-950/30 border-emerald-500/30 hover:bg-emerald-900/40 text-emerald-300 hover:text-white"
+                      }`}
+                    title="Play/Pause Audio"
+                  >
+                    {isDialoguePlaying &&
+                      !isDialoguePaused &&
+                      playingAudioType === (!showDetails ? "narrative" : "speech") ? (
+                      <Pause className="w-2.5 h-2.5 fill-current" />
+                    ) : (
+                      <Play className="w-2.5 h-2.5 fill-current text-emerald-400" />
+                    )}
+                    <span>
+                      {isDialoguePlaying &&
+                        !isDialoguePaused &&
+                        playingAudioType === (!showDetails ? "narrative" : "speech")
+                        ? "Pause"
+                        : "Play"}
+                    </span>
+                  </button>
 
-              {(isDialoguePlaying || isDialoguePaused) && playingAudioType === "narrative" && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    stopDialogueAudio();
-                  }}
-                  className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/50 text-rose-300 hover:bg-rose-900/60 cursor-pointer"
-                  title="Stop Audio"
-                >
-                  <Square className="w-2.5 h-2.5 fill-current" />
-                </button>
+                  {(isDialoguePlaying || isDialoguePaused) &&
+                    playingAudioType === (!showDetails ? "narrative" : "speech") && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          stopDialogueAudio();
+                        }}
+                        className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/50 text-rose-300 hover:bg-rose-900/60 cursor-pointer"
+                        title="Stop Audio"
+                      >
+                        <Square className="w-2.5 h-2.5 fill-current" />
+                      </button>
+                    )}
+                </>
               )}
             </div>
           </div>
 
-          {/* Narrator Textarea */}
-          <textarea
-            rows={panel.narrative && panel.narrative.includes("\n") ? 3 : 2}
-            disabled={isThisPanelAnalyzing}
-            value={panel.narrative || ""}
-            onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
-            placeholder="Story narration explaining actions, atmosphere, and context..."
-            className="w-full min-h-[44px] bg-neutral-900 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-neutral-700 font-sans transition-colors resize-y"
-          />
+          {/* Body: Narrator Textarea or Details Subtab View */}
+          {!showDetails ? (
+            <textarea
+              rows={2}
+              disabled={isThisPanelAnalyzing}
+              value={panel.narrative || ""}
+              onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
+              placeholder="Story narration explaining actions, atmosphere, and context..."
+              className="w-full min-h-[46px] bg-neutral-900 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-neutral-700 font-sans transition-colors resize-y leading-relaxed"
+            />
+          ) : (
+            <div className="space-y-1.5 animate-in fade-in duration-150">
+              {/* Segmented Subtabs: Dialogue, SFX, Scene */}
+              <div className="flex items-center p-0.5 rounded-lg bg-neutral-950 border border-neutral-850 gap-0.5 select-none">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("speech")}
+                  title="Speech Bubble Dialogue"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${activeTab === "speech"
+                      ? "bg-blue-950/60 text-blue-200 shadow-xs border border-blue-500/40 font-semibold"
+                      : "text-neutral-400 hover:text-neutral-200"
+                    }`}
+                >
+                  <MessageSquare className="w-3 h-3 text-blue-400 shrink-0" />
+                  <span>Dialogue</span>
+                  {Boolean(panel.speech_text?.trim()) && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 ml-0.5" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("sfx")}
+                  title="Sound Effects (SFX Cue)"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${activeTab === "sfx"
+                      ? "bg-emerald-950/60 text-emerald-200 shadow-xs border border-emerald-500/40 font-semibold"
+                      : "text-neutral-400 hover:text-neutral-200"
+                    }`}
+                >
+                  <Volume2 className="w-3 h-3 text-emerald-400 shrink-0" />
+                  <span>SFX</span>
+                  {Boolean(panel.sfx?.trim()) && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 ml-0.5" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("visual")}
+                  title="Visual Scene Prompt"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${activeTab === "visual"
+                      ? "bg-amber-950/60 text-amber-200 shadow-xs border border-amber-500/40 font-semibold"
+                      : "text-neutral-400 hover:text-neutral-200"
+                    }`}
+                >
+                  <Palette className="w-3 h-3 text-amber-400 shrink-0" />
+                  <span>Scene</span>
+                  {Boolean(panel.visual_description?.trim()) && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 ml-0.5" />
+                  )}
+                </button>
+              </div>
+
+              {/* Subtab Content */}
+              {activeTab === "speech" && (
+                <textarea
+                  rows={2}
+                  disabled={isThisPanelAnalyzing}
+                  value={panel.speech_text || ""}
+                  onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
+                  placeholder="Character dialogue or speech bubbles from this panel..."
+                  className="w-full min-h-[46px] bg-neutral-900 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-blue-500/50 font-sans transition-colors resize-y leading-relaxed"
+                />
+              )}
+
+              {activeTab === "sfx" && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between gap-1 px-0.5">
+                    <span className="text-[9px] font-mono text-emerald-400/80 uppercase tracking-wider">
+                      Quick SFX
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {["BOOM", "WHOOSH", "SLASH", "STEP"].map((sfxTag) => (
+                        <button
+                          key={sfxTag}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const curr = (panel.sfx || "").trim();
+                            const next = curr ? `${curr}, ${sfxTag}` : sfxTag;
+                            handleModifySFX(panel.id, next);
+                          }}
+                          className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 hover:text-white border border-emerald-500/20 transition-colors cursor-pointer"
+                        >
+                          +{sfxTag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    disabled={isThisPanelAnalyzing}
+                    value={panel.sfx || ""}
+                    onChange={(e) => handleModifySFX(panel.id, e.target.value)}
+                    placeholder="e.g. footsteps, rain, glass shatter..."
+                    className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-emerald-500/50 font-sans transition-colors"
+                  />
+                </div>
+              )}
+
+              {activeTab === "visual" && (
+                <textarea
+                  rows={2}
+                  disabled={isThisPanelAnalyzing}
+                  value={panel.visual_description || ""}
+                  onChange={(e) =>
+                    handleModifyVisualDescription(panel.id, e.target.value)
+                  }
+                  placeholder="Describe scene environment, lighting, camera angle, and atmosphere..."
+                  className="w-full min-h-[46px] bg-neutral-900 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-amber-500/50 font-sans transition-colors resize-y leading-relaxed"
+                />
+              )}
+            </div>
+          )}
         </div>
 
         {/* 2. Motion & Timing Row */}
         <div className="grid grid-cols-2 gap-1.5 pt-0.5 select-none">
           {/* Motion Selector */}
-          <div className="relative flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg px-2.5 py-1 h-7.5 transition-colors cursor-pointer">
-            <Video className="w-3.5 h-3.5 text-neutral-400 shrink-0 pointer-events-none" />
+          <div className="relative flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-indigo-500/40 rounded-lg px-2.5 py-1 h-7.5 transition-colors cursor-pointer">
+            <Video className="w-3.5 h-3.5 text-indigo-400 shrink-0 pointer-events-none" />
             <select
               value={panel.motion_type ?? ""}
               onChange={(e) => handleModifyMotion(panel.id, e.target.value)}
@@ -1234,9 +1402,9 @@ const StoryboardCard = ({
           </div>
 
           {/* Duration Counter with Stepper */}
-          <div className="flex items-center justify-between gap-1 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg px-2 py-1 h-7.5 transition-colors">
+          <div className="flex items-center justify-between gap-1 bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 rounded-lg px-2 py-1 h-7.5 transition-colors">
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <Clock className="w-3.5 h-3.5 text-neutral-400 shrink-0 pointer-events-none" />
+              <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0 pointer-events-none" />
               <input
                 type="number"
                 min={0.5}
@@ -1293,7 +1461,7 @@ const StoryboardCard = ({
           </div>
         </div>
 
-        {/* 3. Action Toolbar: Analyze, Magic, Details Toggle */}
+        {/* 3. Action Toolbar: Analyze, Magic, Details / Narrator Toggle */}
         <div className="grid grid-cols-3 gap-1 pt-0.5 select-none">
           {/* Analyze Image */}
           {isThisPanelAnalyzing ? (
@@ -1313,7 +1481,7 @@ const StoryboardCard = ({
                 analyzingPanelId !== null && String(analyzingPanelId) !== String(panel.id)
               }
               onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
-              className="h-7.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40"
+              className="h-7.5 rounded-lg border border-blue-500/30 bg-blue-950/30 hover:bg-blue-900/40 text-blue-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40 outline-none focus:outline-none focus:ring-0"
               title="Analyze Scene"
             >
               <Sparkles className="h-3.5 w-3.5 text-blue-400" />
@@ -1327,13 +1495,13 @@ const StoryboardCard = ({
               type="button"
               disabled={isMagicProcessing}
               onClick={handleMagicMotion}
-              className="h-7.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40"
+              className="h-7.5 rounded-lg border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40 outline-none focus:outline-none focus:ring-0"
               title="Magic Motion"
             >
               {isMagicProcessing ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin text-blue-400" />
+                <RefreshCw className="h-3.5 w-3.5 animate-spin text-purple-300" />
               ) : (
-                <Wand2 className="h-3.5 w-3.5 text-blue-400" />
+                <Wand2 className="h-3.5 w-3.5 text-purple-400" />
               )}
               <span>{isMagicProcessing ? "Magic..." : "Magic"}</span>
             </button>
@@ -1341,395 +1509,27 @@ const StoryboardCard = ({
             <div />
           )}
 
-          {/* Details Drawer Toggle */}
+          {/* Details / Narrator Toggle Button */}
           <button
             type="button"
             onClick={() => setShowDetails(!showDetails)}
-            className={`h-7.5 rounded-lg border text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors ${
-              showDetails
-                ? "border-neutral-700 bg-neutral-800 text-white"
+            className={`h-7.5 rounded-lg border text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors outline-none focus:outline-none focus:ring-0 ${showDetails
+                ? "border-blue-500/40 bg-blue-950/30 text-blue-200 shadow-xs"
                 : "border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white"
-            }`}
-            title={showDetails ? "Hide options" : "Show options"}
+              }`}
+            title={showDetails ? "Switch back to Narrator" : "Show Details (Dialogue, SFX, Scene)"}
           >
-            <span>Details</span>
+            <span>{showDetails ? "Narrator" : "Details"}</span>
             {hasExtraDetails && !showDetails && (
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
             )}
             {showDetails ? (
-              <ChevronUp className="h-3.5 w-3.5 text-neutral-400" />
+              <ChevronUp className="h-3.5 w-3.5 text-blue-400" />
             ) : (
               <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />
             )}
           </button>
         </div>
-
-        {/* 4. Collapsible Details Drawer (Narrator, SFX, Scene Prompt, Assistant, Multi-Layer) */}
-        {showDetails && (
-          <div className="pt-2 border-t border-neutral-850 space-y-2 animate-in fade-in duration-150">
-            {/* Drawer Subtabs: Dialogue, SFX, Scene */}
-            <div className="grid grid-cols-3 gap-1 p-0.5 rounded-lg bg-neutral-900 border border-neutral-800 select-none">
-              <button
-                type="button"
-                onClick={() => setActiveTab("speech")}
-                title="Speech Bubble Dialogue"
-                className={`flex items-center justify-center gap-1 py-1 rounded text-xs transition-colors cursor-pointer ${
-                  activeTab === "speech"
-                    ? "bg-neutral-800 text-white font-medium"
-                    : "text-neutral-400 hover:text-neutral-200"
-                }`}
-              >
-                <MessageSquare className="w-3 h-3 shrink-0" />
-                <span className="whitespace-nowrap">Dialogue</span>
-                {Boolean(panel.speech_text?.trim()) && (
-                  <span className="w-1 h-1 rounded-full bg-blue-400" />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("sfx")}
-                title="Sound Effects (SFX)"
-                className={`flex items-center justify-center gap-1 py-1 rounded text-xs transition-colors cursor-pointer ${
-                  activeTab === "sfx"
-                    ? "bg-neutral-800 text-white font-medium"
-                    : "text-neutral-400 hover:text-neutral-200"
-                }`}
-              >
-                <Volume2 className="w-3 h-3 shrink-0" />
-                <span className="whitespace-nowrap">SFX</span>
-                {Boolean(panel.sfx?.trim()) && (
-                  <span className="w-1 h-1 rounded-full bg-blue-400" />
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("visual")}
-                title="Visual Scene Prompt"
-                className={`flex items-center justify-center gap-1 py-1 rounded text-xs transition-colors cursor-pointer ${
-                  activeTab === "visual"
-                    ? "bg-neutral-800 text-white font-medium"
-                    : "text-neutral-400 hover:text-neutral-200"
-                }`}
-              >
-                <Palette className="w-3 h-3 shrink-0" />
-                <span className="whitespace-nowrap">Scene</span>
-                {Boolean(panel.visual_description?.trim()) && (
-                  <span className="w-1 h-1 rounded-full bg-blue-400" />
-                )}
-              </button>
-            </div>
-
-            {/* Subtab 1: Speech Bubble Dialogue */}
-            {activeTab === "speech" && (
-              <div className="space-y-1.5 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between gap-1.5 px-0.5 min-w-0">
-                  <span className="text-[11px] font-medium text-neutral-300 flex items-center gap-1.5 shrink-0 whitespace-nowrap">
-                    <MessageSquare className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                    <span>Dialogue</span>
-                  </span>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      disabled={Boolean(isGeneratingVoice && generatingVoiceMode === "speech") || isThisPanelAnalyzing}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleGenerateVoice(false, "speech");
-                      }}
-                      className="h-6 px-2 rounded-md text-[10px] font-medium flex items-center gap-1 border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
-                      title="Synthesize dialogue voice"
-                    >
-                      {isGeneratingVoice && generatingVoiceMode === "speech" ? (
-                        <RefreshCw className="w-2.5 h-2.5 animate-spin text-blue-400" />
-                      ) : (
-                        <Mic className="w-2.5 h-2.5 text-blue-400" />
-                      )}
-                      <span>{isGeneratingVoice && generatingVoiceMode === "speech" ? "Voicing..." : "Voice"}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={Boolean(isGeneratingVoice && generatingVoiceMode === "speech") || isThisPanelAnalyzing}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleToggleDialogueAudio("speech");
-                      }}
-                      className={`h-6 px-2 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors cursor-pointer ${
-                        isDialoguePlaying && !isDialoguePaused && playingAudioType === "speech"
-                          ? "bg-amber-950/60 border-amber-500/50 text-amber-200"
-                          : "bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white"
-                      }`}
-                      title="Play/Pause Dialogue Audio"
-                    >
-                      {isDialoguePlaying && !isDialoguePaused && playingAudioType === "speech" ? (
-                        <Pause className="w-2.5 h-2.5 fill-current" />
-                      ) : (
-                        <Play className="w-2.5 h-2.5 fill-current" />
-                      )}
-                      <span>
-                        {isDialoguePlaying && !isDialoguePaused && playingAudioType === "speech"
-                          ? "Pause"
-                          : "Play"}
-                      </span>
-                    </button>
-
-                    {(isDialoguePlaying || isDialoguePaused) && playingAudioType === "speech" && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          stopDialogueAudio();
-                        }}
-                        className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/50 text-rose-300 hover:bg-rose-900/60 cursor-pointer"
-                        title="Stop Audio"
-                      >
-                        <Square className="w-2.5 h-2.5 fill-current" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <textarea
-                  rows={panel.speech_text && panel.speech_text.includes("\n") ? 3 : 2}
-                  disabled={isThisPanelAnalyzing}
-                  value={panel.speech_text || ""}
-                  onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
-                  placeholder="Text from speech bubbles in image..."
-                  className="w-full min-h-[44px] bg-neutral-900 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-neutral-700 font-sans transition-colors resize-y"
-                />
-              </div>
-            )}
-
-            {/* Subtab 2: SFX */}
-            {activeTab === "sfx" && (
-              <div className="space-y-1.5 animate-in fade-in duration-150">
-                <div className="flex items-center gap-1.5 px-0.5">
-                  <Volume2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="text-[11px] font-medium text-neutral-300">
-                    Sound Effects (SFX Cue)
-                  </span>
-                </div>
-                <input
-                  type="text"
-                  disabled={isThisPanelAnalyzing}
-                  value={panel.sfx || ""}
-                  onChange={(e) => handleModifySFX(panel.id, e.target.value)}
-                  placeholder="e.g. door slam, footsteps, explosion..."
-                  className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-lg px-2.5 py-1.5 text-neutral-100 placeholder-neutral-500 outline-none focus:border-neutral-700 font-sans transition-colors"
-                />
-              </div>
-            )}
-
-            {/* Subtab 3: Visual Scene Prompt */}
-            {activeTab === "visual" && (
-              <div className="space-y-1.5 animate-in fade-in duration-150">
-                <div className="flex items-center gap-1.5 px-0.5">
-                  <Palette className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span className="text-[11px] font-medium text-neutral-300">
-                    Visual Scene Prompt
-                  </span>
-                </div>
-                <textarea
-                  rows={1}
-                  disabled={isThisPanelAnalyzing}
-                  value={panel.visual_description || ""}
-                  onChange={(e) =>
-                    handleModifyVisualDescription(panel.id, e.target.value)
-                  }
-                  placeholder="Describe visual scene for lighting..."
-                  className="w-full min-h-[36px] bg-neutral-900 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-neutral-700 font-sans transition-colors resize-none"
-                />
-              </div>
-            )}
-
-            {/* Panel Assistant Button */}
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof (window as any).navigateTo === "function") {
-                  (window as any).navigateTo(`/creative-suite/panel-assistant?panel_id=${panel.id}`);
-                }
-              }}
-              className="w-full h-7.5 rounded-lg border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-              title="Open Panel Assistant"
-            >
-              <Bot className="h-3.5 w-3.5 text-purple-400" />
-              <span>Open in Panel Assistant</span>
-            </button>
-
-            {/* Accordion Layer Tracks (Motion Comic Mode) */}
-            {panel.layers && setPanels && (
-              <div className="pt-2 border-t border-neutral-900 space-y-2 no-drag">
-                <button
-                  type="button"
-                  onClick={() => setIsTracksExpanded(!isTracksExpanded)}
-                  className="w-full flex items-center justify-between text-[10px] font-mono font-bold text-[#3B82F6] hover:text-[#93C5FD] py-1 transition-all cursor-pointer outline-none focus:outline-none"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <Layers className="h-3.5 w-3.5" />
-                    <span>Multi-Layer Tracks</span>
-                  </div>
-                  {isTracksExpanded ? (
-                    <ChevronUp className="h-3.5 w-3.5" />
-                  ) : (
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  )}
-                </button>
-
-                {isTracksExpanded && (
-                  <div className="space-y-1.5 pl-1 animate-in fade-in slide-in-from-top-1 duration-150">
-                    {/* BG Track */}
-                    <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1 rounded-lg gap-2">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={panel.layers.background_url}
-                          alt="Background Thumbnail"
-                          className="h-8 w-8 object-contain rounded border border-neutral-850 bg-neutral-950 flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = "none";
-                          }}
-                        />
-                        <span className="text-[10px] font-mono text-neutral-300">
-                          Background
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPanels((prev) =>
-                            prev.map((p) =>
-                              p.id === panel.id
-                                ? {
-                                    ...p,
-                                    layers: {
-                                      ...p.layers!,
-                                      bg_visible:
-                                        p.layers!.bg_visible !== false
-                                          ? false
-                                          : true,
-                                    },
-                                  }
-                                : p
-                            )
-                          );
-                        }}
-                        className={`p-1 rounded hover:bg-neutral-800 transition-colors cursor-pointer ${
-                          panel.layers.bg_visible !== false
-                            ? "text-[#3B82F6]"
-                            : "text-neutral-600"
-                        }`}
-                      >
-                        {panel.layers.bg_visible !== false ? (
-                          <Eye className="h-3.5 w-3.5" />
-                        ) : (
-                          <EyeOff className="h-3.5 w-3.5" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Character Track */}
-                    <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1 rounded-lg gap-2">
-                      <div className="flex items-center gap-2">
-                        <img
-                          src={panel.layers.character_url}
-                          alt="Character Thumbnail"
-                          className="h-8 w-8 object-contain rounded border border-neutral-850 bg-neutral-950 flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = "none";
-                          }}
-                        />
-                        <span className="text-[10px] font-mono text-neutral-300">
-                          Character
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPanels((prev) =>
-                            prev.map((p) =>
-                              p.id === panel.id
-                                ? {
-                                    ...p,
-                                    layers: {
-                                      ...p.layers!,
-                                      char_visible:
-                                        p.layers!.char_visible !== false
-                                          ? false
-                                          : true,
-                                    },
-                                  }
-                                : p
-                            )
-                          );
-                        }}
-                        className={`p-1 rounded hover:bg-neutral-800 transition-colors cursor-pointer ${
-                          panel.layers.char_visible !== false
-                            ? "text-[#3B82F6]"
-                            : "text-neutral-600"
-                        }`}
-                      >
-                        {panel.layers.char_visible !== false ? (
-                          <Eye className="h-3.5 w-3.5" />
-                        ) : (
-                          <EyeOff className="h-3.5 w-3.5" />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Text Track */}
-                    <div className="flex items-center justify-between bg-neutral-900 border border-neutral-850 px-2 py-1 rounded-lg gap-2">
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <img
-                          src={panel.layers.text_url}
-                          alt="Text Thumbnail"
-                          className="h-8 w-8 object-contain rounded border border-neutral-850 bg-neutral-950 flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = "none";
-                          }}
-                        />
-                        <span className="text-[10px] font-mono text-neutral-300 flex-shrink-0">
-                          Text Bubbles
-                        </span>
-                        <DialogueClipSlider panel={panel} setPanels={setPanels} />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPanels((prev) =>
-                            prev.map((p) =>
-                              p.id === panel.id
-                                ? {
-                                    ...p,
-                                    layers: {
-                                      ...p.layers!,
-                                      text_visible:
-                                        p.layers!.text_visible !== false
-                                          ? false
-                                          : true,
-                                    },
-                                  }
-                                : p
-                            )
-                          );
-                        }}
-                        className={`p-1 rounded hover:bg-neutral-800 transition-colors cursor-pointer ${
-                          panel.layers.text_visible !== false
-                            ? "text-[#3B82F6]"
-                            : "text-neutral-600"
-                        }`}
-                      >
-                        {panel.layers.text_visible !== false ? (
-                          <Eye className="h-3.5 w-3.5" />
-                        ) : (
-                          <EyeOff className="h-3.5 w-3.5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

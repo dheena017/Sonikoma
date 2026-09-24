@@ -140,7 +140,7 @@ export default function ScraperConnectionErrorCard({
                 placeholder="https://.../series/..."
                 value={retryUrl}
                 onChange={(e) => setRetryUrl(e.target.value)}
-                className="w-full bg-[#1A1A1A] border border-white/[0.1] focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-[#6B7280] outline-none font-mono transition-all"
+                className="w-full bg-[#1A1A1A] border border-white/[0.1] focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder:text-[#6B7280] outline-none font-mono transition-all"
               />
             </div>
             <button
@@ -167,7 +167,7 @@ export default function ScraperConnectionErrorCard({
                 window.dispatchEvent(new Event("popstate"));
               }
             }}
-            className="p-4 rounded-2xl border border-white/[0.08] bg-[#161616] hover:bg-[#1C1C1C] hover:border-[#3B82F6]/40 text-left transition-all group cursor-pointer"
+            className="p-4 rounded-2xl border border-white/[0.08] bg-[#161616] hover:bg-[#1C1C1C] hover:border-neutral-700 text-left transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-xl bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] group-hover:scale-110 transition-transform">
@@ -186,7 +186,7 @@ export default function ScraperConnectionErrorCard({
           <button
             type="button"
             onClick={handleLoadDemo}
-            className="p-4 rounded-2xl border border-white/[0.08] bg-[#161616] hover:bg-[#1C1C1C] hover:border-[#3B82F6]/40 text-left transition-all group cursor-pointer"
+            className="p-4 rounded-2xl border border-white/[0.08] bg-[#161616] hover:bg-[#1C1C1C] hover:border-neutral-700 text-left transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="w-8 h-8 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">

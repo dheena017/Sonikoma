@@ -71,7 +71,7 @@ const ShortcutsPageContent = React.memo(
             <div className="flex items-center flex-wrap gap-2.5">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#1E1E1E] border border-[#2F2F2F] text-[#E5E5E5] hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-[#252525] hover:border-[#3B82F6]/60 cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#1E1E1E] border border-[#2F2F2F] text-[#E5E5E5] hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-[#252525] hover:border-neutral-700 cursor-pointer shadow-sm"
               >
                 <Upload className="h-3.5 w-3.5 text-[#9CA3AF]" />
                 Import
@@ -85,7 +85,7 @@ const ShortcutsPageContent = React.memo(
               />
               <button
                 onClick={handleExport}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#1E1E1E] border border-[#2F2F2F] text-[#E5E5E5] hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-[#252525] hover:border-[#3B82F6]/60 cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#1E1E1E] border border-[#2F2F2F] text-[#E5E5E5] hover:text-white rounded-xl text-xs font-mono transition-all hover:bg-[#252525] hover:border-neutral-700 cursor-pointer shadow-sm"
               >
                 <Download className="h-3.5 w-3.5 text-[#9CA3AF]" />
                 Export

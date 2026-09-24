@@ -431,7 +431,7 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
                         placeholder={`Enter ${provider.name} API Key...`}
                         value={userKey}
                         onChange={(e) => handleKeyChange(provider.id, e.target.value)}
-                        className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-3 pr-20 py-2 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-[#3B82F6]"
+                        className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-3 pr-20 py-2 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600"
                       />
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                         <button

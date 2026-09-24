@@ -21,7 +21,7 @@ const ALL_PROVIDER_SPEC: ProviderFullSpec = {
   icon: Layers,
   badge: "All AI Engines",
   color: "from-blue-600 to-indigo-600",
-  borderHover: "hover:border-blue-500",
+  borderHover: "hover:border-neutral-700",
   docsUrl: "#",
   resetInfo: "Resets every minute / daily at 00:00 UTC",
   priorityFeature: {

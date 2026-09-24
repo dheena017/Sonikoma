@@ -295,7 +295,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                     ? "cursor-col-resize border-[#3B82F6] shadow-sm z-30"
                     : selectedClip === key
                     ? "cursor-grab border-[#3B82F6] z-10"
-                    : "cursor-grab hover:border-[#3B82F6]/40"
+                    : "cursor-grab hover:border-neutral-700"
                 }`}
                 style={{
                   left: `${finalLeftPx}px`,
@@ -307,7 +307,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                 }}
                 title={`Panel #${idx + 1} Effect: ${fx}`}
               >
-                <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] truncate pointer-events-none bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-[#3B82F6]/40 transition-colors">
+                <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] truncate pointer-events-none bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-neutral-700 transition-colors">
                   <GripVertical className="h-3 w-3 text-neutral-300 group-hover:text-white shrink-0 transition-colors" />
                   <Camera className="h-2.5 w-2.5 text-[#60A5FA] shrink-0" />
                   <span className="text-[8.5px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">{fx}</span>
@@ -342,7 +342,7 @@ export const TimelineCameraFxTrack: React.FC<TimelineCameraFxTrackProps> = ({
                       e.stopPropagation();
                       onContextMenu(e, key, idx);
                     }}
-                    className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#3B82F6] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(129,140,248,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                    className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-neutral-700 shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(129,140,248,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
                     title="Camera FX Options"
                   >
                     <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />

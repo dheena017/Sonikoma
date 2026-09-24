@@ -135,7 +135,7 @@ export function AdminAnnouncementsTab({
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="e.g. Scheduled Engine Maintenance (Sunday 02:00 UTC)"
-                className="w-full bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#3B82F6] transition-all font-sans"
+                className="w-full bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-neutral-600 transition-all font-sans"
                 required
               />
             </div>
@@ -148,7 +148,7 @@ export function AdminAnnouncementsTab({
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Enter detailed announcement message..."
-                className="w-full bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-[#3B82F6] min-h-[100px] transition-all resize-none font-sans"
+                className="w-full bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-neutral-600 min-h-[100px] transition-all resize-none font-sans"
                 required
               />
             </div>
@@ -158,7 +158,7 @@ export function AdminAnnouncementsTab({
                 Severity / Type
               </label>
               <div className="flex flex-wrap gap-4 pt-1">
-                <label className="flex items-center gap-2 cursor-pointer bg-[#121212] border border-[#2F2F2F] px-3.5 py-1.5 rounded-xl hover:border-[#3B82F6]/60 transition-all">
+                <label className="flex items-center gap-2 cursor-pointer bg-[#121212] border border-[#2F2F2F] px-3.5 py-1.5 rounded-xl hover:border-neutral-700 transition-all">
                   <input
                     type="radio"
                     name="type"
@@ -229,7 +229,7 @@ export function AdminAnnouncementsTab({
           {announcements.map((announcement) => (
             <div
               key={announcement.id}
-              className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 hover:border-[#3B82F6]/40 transition-all shadow-lg text-left"
+              className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 hover:border-neutral-700 transition-all shadow-lg text-left"
             >
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-3">
                 <div className="flex items-center gap-3">

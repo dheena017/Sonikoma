@@ -84,7 +84,7 @@ export const NumberField: React.FC<{
         step={step}
         value={val}
         onChange={(e) => setVal(Number(e.target.value))}
-        className="w-16 bg-neutral-900/90 border border-neutral-800 focus:border-[#3B82F6]/80 rounded-lg text-right text-[10px] text-[#60A5FA] font-mono px-2 py-0.5 outline-none transition-all shadow-inner"
+        className="w-16 bg-neutral-900/90 border border-neutral-800 focus:border-neutral-600 rounded-lg text-right text-[10px] text-[#60A5FA] font-mono px-2 py-0.5 outline-none transition-all shadow-inner"
       />
     </div>
   );
@@ -155,7 +155,7 @@ export const SelectField: React.FC<{
       <select
         value={val}
         onChange={(e) => setVal(e.target.value)}
-        className="flex-1 bg-neutral-900/90 border border-neutral-800 rounded-lg text-[9px] font-mono text-[#3B82F6] px-2 py-1 outline-none focus:border-[#3B82F6] cursor-pointer"
+        className="flex-1 bg-neutral-900/90 border border-neutral-800 rounded-lg text-[9px] font-mono text-[#3B82F6] px-2 py-1 outline-none focus:border-neutral-600 cursor-pointer"
       >
         {options.map((o) => (
           <option key={o}>{o}</option>
@@ -326,7 +326,7 @@ export const InspectorPanel: React.FC<{
           ].map((layer, i) => (
             <div
               key={layer}
-              className="flex items-center gap-2 p-1.5 rounded-lg bg-neutral-900/60 border border-neutral-800/80 hover:border-[#3B82F6]/50 cursor-pointer transition-all"
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 cursor-pointer transition-all"
             >
               <Eye className="h-3 w-3 text-[#3B82F6] hover:text-white" />
               <Lock className="h-3 w-3 text-neutral-600 hover:text-white" />

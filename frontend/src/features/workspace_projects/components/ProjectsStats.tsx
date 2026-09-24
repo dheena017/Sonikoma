@@ -24,8 +24,8 @@ export default function ProjectsStats({
     <div className="space-y-6 mb-8">
       {/* 3 Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
-        <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] hover:-translate-y-0.5 transition-all shadow-md flex items-center gap-4 group">
-          <div className="w-14 h-14 rounded-2xl bg-[#121212] text-[#3B82F6] border border-[#2F2F2F] group-hover:border-[#3B82F6]/50 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-inner">
+        <div className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#262626] hover:-translate-y-0.5 transition-all shadow-md flex items-center gap-4 group">
+          <div className="w-14 h-14 rounded-2xl bg-[#121212] text-[#3B82F6] border border-[#2F2F2F] group-hover:border-neutral-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform shadow-inner">
             <Film className="w-6 h-6" />
           </div>
           <div>

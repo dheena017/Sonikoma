@@ -126,12 +126,12 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 onClick={() => setInputMode("url")}
                 className={`min-w-0 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 text-center leading-tight cursor-pointer ${
                   inputMode === "url"
-                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
-                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-[#2F2F2F]"
+                    ? "bg-neutral-800 text-white border border-neutral-700 font-bold shadow-sm"
+                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-[#2F2F2F]"
                 }`}
                 aria-label="Scrape Comic / Manhwa URL"
               >
-                <Book className={`w-4 h-4 ${inputMode === "url" ? "text-white" : "text-[#3B82F6]"}`} />
+                <Book className={`w-4 h-4 ${inputMode === "url" ? "text-white" : "text-neutral-400"}`} />
                 <span className="min-w-0">Scrape Comic / Manhwa URL</span>
               </button>
             </Tooltip>
@@ -142,12 +142,12 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 onClick={() => setInputMode("upload")}
                 className={`min-w-0 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 text-center leading-tight cursor-pointer ${
                   inputMode === "upload"
-                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
-                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-[#2F2F2F]"
+                    ? "bg-neutral-800 text-white border border-neutral-700 font-bold shadow-sm"
+                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-[#2F2F2F]"
                 }`}
                 aria-label="Upload Local Images"
               >
-                <UploadCloud className={`w-4 h-4 ${inputMode === "upload" ? "text-white" : "text-[#3B82F6]"}`} />
+                <UploadCloud className={`w-4 h-4 ${inputMode === "upload" ? "text-white" : "text-neutral-400"}`} />
                 <span className="min-w-0">Upload Local Images</span>
                 {selectedFiles.length > 0 && (
                   <span className="px-2 py-0.5 text-[9px] font-black bg-white/20 text-white rounded-full font-mono">

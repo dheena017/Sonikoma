@@ -320,7 +320,7 @@ export default function ImageEditorCanvasContainer({
 
       {activeStoryboardPanel?.layers && activeTab === "separate" ? (
         <div
-          className="relative border border-white/10 hover:border-[#3B82F6]/20 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
+          className="relative border border-white/10 hover:border-neutral-700 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] overflow-hidden flex-1 h-0 flex items-center justify-center select-none transition-colors"
           style={{ boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)" }}
         >
           <div className="relative w-full h-full max-h-full max-w-full z-10 flex items-center justify-center p-4">

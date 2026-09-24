@@ -320,7 +320,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                       ? "cursor-col-resize  z-30"
                       : isSelected
                       ? "cursor-grab border-[#60A5FA]/90  z-20"
-                      : "cursor-grab border-[#3B82F6]/25 hover:border-[#60A5FA]/60 z-10"
+                      : "cursor-grab border-[#3B82F6]/25 hover:border-neutral-700 z-10"
                   }`}
                   style={{
                     left: `${finalLeftPx}px`,
@@ -370,7 +370,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   <div className="absolute top-1 right-1.5 flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
                     {/* Live Drag Delta Display */}
                     {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
-                      <span className="text-[7.5px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1.5 py-0.5 rounded border border-[#2F2F2F]  animate-pulse">
+                      <span className="text-[7.5px] font-mono font-bold text-white bg-[#3B82F6] px-1.5 py-0.5 rounded border border-[#60A5FA]/40 shadow-xs animate-pulse">
                         {movingInfo.deltaPx > 0
                           ? `+${(movingInfo.deltaPx / 30).toFixed(1)}s`
                           : `${(movingInfo.deltaPx / 30).toFixed(1)}s`}
@@ -378,7 +378,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     )}
 
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
-                      <span className="text-[7px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1 py-0.2 rounded-sm border border-[#60A5FA]/50 animate-pulse">
+                      <span className="text-[7px] font-mono font-bold text-white bg-[#3B82F6] px-1 py-0.2 rounded-sm border border-[#60A5FA]/40 shadow-xs animate-pulse">
                         {resizingInfo.deltaSecs > 0
                           ? `+${resizingInfo.deltaSecs.toFixed(1)}s`
                           : `${resizingInfo.deltaSecs.toFixed(1)}s`}
@@ -387,7 +387,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     <span
                       className={`text-[7px] font-mono px-1 rounded-sm transition-colors ${
                         isResizing
-                          ? "bg-[#2A2A2A] text-white font-bold shadow"
+                          ? "bg-[#3B82F6] text-white font-bold shadow-md shadow-blue-500/25"
                           : "bg-black/80 text-neutral-300"
                       }`}
                     >

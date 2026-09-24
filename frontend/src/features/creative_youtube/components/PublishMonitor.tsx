@@ -241,9 +241,9 @@ export default function PublishMonitor({
       ) : (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="aspect-video bg-neutral-955/20 hover:bg-neutral-955/45 border-2 border-dashed border-neutral-850 hover:border-[#3B82F6]/50 rounded-2xl flex flex-col items-center justify-center p-5 text-center cursor-pointer transition-all duration-300 space-y-2 group shadow-inner"
+          className="aspect-video bg-neutral-955/20 hover:bg-neutral-955/45 border-2 border-dashed border-neutral-850 hover:border-neutral-700 rounded-2xl flex flex-col items-center justify-center p-5 text-center cursor-pointer transition-all duration-300 space-y-2 group shadow-inner"
         >
-          <div className="p-3 bg-neutral-950 rounded-2xl border border-neutral-900 text-neutral-500 group-hover:text-[#60A5FA] group-hover:border-[#3B82F6]/30 transition-all duration-300">
+          <div className="p-3 bg-neutral-950 rounded-2xl border border-neutral-900 text-neutral-500 group-hover:text-[#60A5FA] group-hover:border-neutral-700 transition-all duration-300">
             <Upload className="h-5 w-5" />
           </div>
           <div className="space-y-0.5">
@@ -381,7 +381,7 @@ export default function PublishMonitor({
         ) : (
           <div
             onClick={() => thumbnailInputRef.current?.click()}
-            className="py-6 rounded-2xl bg-neutral-955/20 hover:bg-neutral-955/40 border border-neutral-900 hover:border-[#3B82F6]/40 cursor-pointer flex flex-col items-center justify-center space-y-1.5 transition-all duration-300 text-center group shadow-inner"
+            className="py-6 rounded-2xl bg-neutral-955/20 hover:bg-neutral-955/40 border border-neutral-900 hover:border-neutral-700 cursor-pointer flex flex-col items-center justify-center space-y-1.5 transition-all duration-300 text-center group shadow-inner"
           >
             <Upload className="h-4.5 w-4.5 text-neutral-500 group-hover:text-[#60A5FA] transition-colors duration-300" />
             <span className="text-[10px] font-mono text-neutral-450">
@@ -470,7 +470,7 @@ export default function PublishMonitor({
                 value={clickbaitText}
                 onChange={(e) => setClickbaitText(e.target.value)}
                 placeholder="Or type custom slogan..."
-                className="flex-1 bg-neutral-950/30 border border-neutral-900 focus:border-[#3B82F6]/50 rounded-lg px-2.5 py-1.5 text-[10.5px] text-white outline-none shadow-inner"
+                className="flex-1 bg-neutral-950/30 border border-neutral-900 focus:border-neutral-600 rounded-lg px-2.5 py-1.5 text-[10.5px] text-white outline-none shadow-inner"
               />
               {clickbaitText && (
                 <button
@@ -909,7 +909,7 @@ export default function PublishMonitor({
                   type="date"
                   value={scheduleDate}
                   onChange={(e) => setScheduleDate(e.target.value)}
-                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/50 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
+                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
                 />
               </div>
 
@@ -921,7 +921,7 @@ export default function PublishMonitor({
                   type="time"
                   value={scheduleTime}
                   onChange={(e) => setScheduleTime(e.target.value)}
-                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/50 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
+                  className="w-full bg-neutral-955/40 border border-neutral-900 focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 rounded-xl px-2.5 py-1.5 text-xs text-neutral-300 focus:outline-none shadow-inner"
                 />
               </div>
             </div>

@@ -111,7 +111,7 @@ function VolumeSlider({
   const isActive = pct > 0;
 
   return (
-    <div className="group space-y-2.5 p-3 rounded-2xl bg-neutral-900/40 border border-white/[0.04] hover:border-[#3B82F6]/20 transition-all duration-300">
+    <div className="group space-y-2.5 p-3 rounded-2xl bg-neutral-900/40 border border-white/[0.04] hover:border-neutral-700 transition-all duration-300">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div
@@ -195,7 +195,7 @@ function VoiceCard({
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left px-3 py-2.5 rounded-xl border transition-all duration-200 relative group cursor-pointer hover:border-[#3B82F6]/40"
+      className="w-full text-left px-3 py-2.5 rounded-xl border transition-all duration-200 relative group cursor-pointer hover:border-neutral-700"
       style={{
         borderColor: isSelected ? "#3b82f6" : "#1e1e2e",
         backgroundColor: isSelected ? "#3b82f618" : "#0d0d14",
@@ -761,7 +761,7 @@ export default function AudioSettingsPage({
               <button
                 type="button"
                 onClick={() => setIsVoiceDropdownOpen((prev) => !prev)}
-                className="w-full flex items-center justify-between p-3.5 rounded-xl border border-neutral-750 bg-neutral-900/90 hover:bg-neutral-850 hover:border-[#3B82F6]/60 transition-all cursor-pointer group shadow-sm text-left"
+                className="w-full flex items-center justify-between p-3.5 rounded-xl border border-neutral-750 bg-neutral-900/90 hover:bg-neutral-850 hover:border-neutral-700 transition-all cursor-pointer group shadow-sm text-left"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-8 h-8 rounded-lg bg-[#3B82F6]/20 border border-[#3B82F6]/40 flex items-center justify-center text-[#60A5FA] shrink-0 font-mono font-bold text-xs">
@@ -839,7 +839,7 @@ export default function AudioSettingsPage({
                         value={voiceSearch}
                         onChange={(e) => setVoiceSearch(e.target.value)}
                         placeholder="Search voice or dialect..."
-                        className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl pl-8.5 pr-3 py-1.5 text-white placeholder-neutral-500 focus:border-[#3B82F6] outline-none"
+                        className="w-full bg-neutral-900 border border-neutral-800 text-xs rounded-xl pl-8.5 pr-3 py-1.5 text-white placeholder-neutral-500 focus:border-neutral-600 outline-none"
                       />
                       {voiceSearch && (
                         <button

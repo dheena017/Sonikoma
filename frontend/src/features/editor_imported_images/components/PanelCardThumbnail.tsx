@@ -39,7 +39,7 @@ const getScrapedImageStatus = (url: string) => {
   if (url.includes("_cleaned")) {
     return {
       text: "CLEANED",
-      bg: "bg-gradient-to-r from-fuchsia-600 to-blue-600 border-[#60A5FA]/50 text-[#3B82F6] shadow-[0_4px_12px_rgba(59,130,246,0.25)]",
+      bg: "bg-gradient-to-r from-fuchsia-600 to-blue-600 border-blue-400/50 text-white shadow-[0_4px_12px_rgba(59,130,246,0.25)]",
     };
   }
 
@@ -109,7 +109,7 @@ export function PanelCardThumbnail({
   const resolvedDisplayIdx = displayIdx ?? idx;
 
   return (
-    <div className="relative h-56 sm:h-64 rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-[#3B82F6]/30 transition-all duration-300 ease-out select-none">
+    <div className="relative h-56 sm:h-64 rounded-xl overflow-hidden bg-neutral-950 flex items-center justify-center border border-neutral-800/80 shadow-inner group-hover:border-neutral-700 transition-all duration-300 ease-out select-none">
       {/* Decorative background glow overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent z-10 pointer-events-none" />
 
@@ -207,8 +207,8 @@ export function PanelCardThumbnail({
         className={[
           "absolute top-2 left-2 z-20 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold leading-none border transition-all duration-300",
           isSelected
-            ? "bg-gradient-to-r from-[#2A2A2A] to-indigo-650 border-[#60A5FA]/50 text-white shadow-[0_4px_12px_rgba(59,130,246,0.35)]"
-            : "bg-neutral-900 border-neutral-700 text-[#3B82F6] shadow-inner",
+            ? "bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-400 text-white shadow-md shadow-blue-500/30"
+            : "bg-neutral-900 border-neutral-700 text-blue-400 shadow-inner",
         ].join(" ")}
       >
         #{resolvedDisplayIdx + 1}
@@ -241,16 +241,13 @@ export function PanelCardThumbnail({
 
       {/* Selection checkbox circle */}
       <div className="absolute top-2 right-2 z-20">
-        {isSelected && (
-          <div className="absolute inset-0 rounded-full bg-[#2A2A2A] animate-ping" />
-        )}
         <div
           onClick={onCheckboxClick}
           className={[
             "relative rounded-full p-1 border transition-all duration-300 ease-out cursor-pointer active:scale-90",
             isSelected
-              ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] border-[#60A5FA] shadow-[0_4px_12px_rgba(59,130,246,0.4)] scale-110"
-              : "bg-neutral-900/60 border-neutral-600/70 hover:border-neutral-450 opacity-0 group-hover:opacity-100",
+              ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-500/30 scale-105"
+              : "bg-neutral-900/60 border-neutral-700 hover:border-neutral-500 opacity-0 group-hover:opacity-100",
           ].join(" ")}
         >
           <Check

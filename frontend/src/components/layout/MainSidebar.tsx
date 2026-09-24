@@ -132,7 +132,7 @@ export const ActiveProjectSidebarWidget: React.FC<{
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-[#3B82F6] border border-neutral-700/60 hover:border-[#3B82F6]/40 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
+            className="w-full py-2 px-3 rounded-xl bg-neutral-800/80 hover:bg-[#3B82F6]/20 text-neutral-300 hover:text-[#3B82F6] border border-neutral-700/60 hover:border-neutral-700 text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
           >
             <FolderSync className="w-3.5 h-3.5" />
             <span>Switch Project</span>
@@ -150,9 +150,9 @@ export const ActiveProjectSidebarWidget: React.FC<{
           </div>
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full py-2 px-3 rounded-xl bg-[#1E1E1E] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm hover: cursor-pointer active:scale-[0.98]"
+            className="w-full py-2 px-3 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-700 text-white text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-sm hover: cursor-pointer active:scale-[0.98]"
           >
-            <FolderOpen className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
+            <FolderOpen className="w-3.5 h-3.5 text-[#3B82F6] " />
             <span>Select Project</span>
           </button>
         </div>
@@ -434,7 +434,7 @@ const SidebarInner = ({
                         className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold font-sans transition-all duration-200 cursor-pointer text-left relative group disabled:opacity-35 disabled:cursor-not-allowed ${
                           item.active
                             ? "text-white bg-[#3B82F6] border border-[#60A5FA]/40 shadow-sm"
-                            : "text-neutral-400 bg-transparent hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-transparent"
+                            : "text-neutral-400 bg-transparent hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-transparent"
                         } ${
                           (item as any).isProcessing
                             ? "ring-1 ring-[#3B82F6]/50"
@@ -443,7 +443,7 @@ const SidebarInner = ({
                       >
                         {/* Active Left Indicator Pill */}
                         {item.active && (
-                          <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[#3B82F6] group-hover:bg-[#3B82F6] transition-colors" />
+                          <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[#3B82F6] group-hover:bg-[#2A2A35] transition-colors" />
                         )}
 
                         <div className="flex items-center gap-3">
@@ -458,7 +458,7 @@ const SidebarInner = ({
                             className={
                               item.active
                                 ? "font-bold text-white"
-                                : "font-medium text-neutral-300 group-hover:text-white"
+                                : "font-medium text-neutral-300 "
                             }
                           >
                             {item.label}

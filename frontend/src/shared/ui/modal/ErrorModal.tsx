@@ -149,7 +149,7 @@ export default function ErrorModal({ error, onClose }: ErrorModalProps) {
                 <div className="relative p-4 font-mono text-[10px] text-neutral-400 bg-neutral-950 max-h-40 overflow-y-auto leading-relaxed whitespace-pre-wrap select-all">
                   <button
                     onClick={handleCopy}
-                    className="absolute top-2.5 right-2.5 bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6] text-neutral-300 hover:text-white p-1.5 rounded-lg text-[9px] flex items-center gap-1 cursor-pointer transition-all hover:bg-neutral-950"
+                    className="absolute top-2.5 right-2.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white p-1.5 rounded-lg text-[9px] flex items-center gap-1 cursor-pointer transition-all hover:bg-neutral-950"
                   >
                     {copied ? (
                       <>

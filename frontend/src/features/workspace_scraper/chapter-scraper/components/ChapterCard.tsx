@@ -257,8 +257,8 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
       className={`w-full min-h-[310px] flex flex-col group relative rounded-3xl overflow-hidden cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 bg-[#0e0e14] border ${
         isSelected
-          ? "border-[#3B82F6] ring-2 ring-[#3B82F6]/50 shadow-[0_0_30px_rgba(59,130,246,0.35)] bg-[#2A2A2A]"
-          : "border-transparent hover:border-[#3B82F6]/50 shadow-xl hover:shadow-2xl hover:shadow-black/50"
+          ? "border-neutral-600 shadow-xl bg-neutral-900"
+          : "border-transparent hover:border-neutral-700 shadow-xl hover:shadow-2xl hover:shadow-black/50"
       }`}
     >
       {/* Top Banner / Image Area */}
@@ -272,7 +272,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               type="checkbox"
               checked={isSelected}
               onChange={() => onToggleSelect?.(chapter.url)}
-              className="w-5 h-5 rounded-md border-neutral-700 text-[#3B82F6] focus:ring-[#3B82F6]/50 focus:ring-offset-neutral-900 bg-neutral-955 cursor-pointer accent-blue-600 transition-transform duration-200 hover:scale-105 shadow-md"
+              className="w-5 h-5 rounded-md border-neutral-700 text-[#3B82F6] focus:ring-neutral-700 focus:ring-offset-neutral-900 bg-neutral-955 cursor-pointer accent-blue-600 transition-transform duration-200 hover:scale-105 shadow-md"
             />
           </div>
         )}
@@ -571,7 +571,7 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
                 e.stopPropagation();
                 onClick(chapter);
               }}
-              className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-blue-900/30 cursor-pointer active:scale-95 border border-blue-400/30"
+              className="px-3 py-1.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-mono font-bold transition-all flex items-center justify-center gap-1 shadow-md shadow-blue-900/30 cursor-pointer active:scale-95 border border-blue-400/30"
               title="Open Chapter in Storyboard Timeline Editor"
             >
               <span>Import</span>

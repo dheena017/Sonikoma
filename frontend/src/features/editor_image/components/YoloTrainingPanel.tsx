@@ -193,7 +193,7 @@ export const YoloTrainingPanel: React.FC<YoloTrainingPanelProps> = ({
                   <select
                     value={epochsToTrain}
                     onChange={(e) => setEpochsToTrain(Number(e.target.value))}
-                    className="bg-neutral-950 border border-neutral-800 text-neutral-200 rounded-2xl px-3 py-2.5 text-xs font-mono cursor-pointer focus:outline-none focus:border-[#3B82F6]/60"
+                    className="bg-neutral-950 border border-neutral-800 text-neutral-200 rounded-2xl px-3 py-2.5 text-xs font-mono cursor-pointer focus:outline-none focus:border-neutral-600"
                   >
                     <option value={5}>5 epochs (Fast)</option>
                     <option value={10}>10 epochs</option>

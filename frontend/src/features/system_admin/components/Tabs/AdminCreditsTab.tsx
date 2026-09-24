@@ -719,14 +719,14 @@ export function AdminCreditsTab({
                     placeholder="Search ID/Feature..."
                     value={ledgerSearchQuery}
                     onChange={(e) => setLedgerSearchQuery(e.target.value)}
-                    className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg pl-7 pr-3 py-1 focus:outline-none focus:border-[#3B82F6]/60 w-36"
+                    className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg pl-7 pr-3 py-1 focus:outline-none focus:border-neutral-600 w-36"
                   />
                 </div>
 
                 <select
                   value={ledgerFilterType}
                   onChange={(e) => setLedgerFilterType(e.target.value)}
-                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-[#3B82F6]/60"
+                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-neutral-600"
                 >
                   <option value="all">All Tx</option>
                   <option value="additions">Additions</option>
@@ -737,14 +737,14 @@ export function AdminCreditsTab({
                   type="date"
                   value={ledgerStartDate}
                   onChange={(e) => setLedgerStartDate(e.target.value)}
-                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-[#3B82F6]/60"
+                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-neutral-600"
                 />
 
                 <input
                   type="date"
                   value={ledgerEndDate}
                   onChange={(e) => setLedgerEndDate(e.target.value)}
-                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-[#3B82F6]/60"
+                  className="bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg px-2 py-1 focus:outline-none focus:border-neutral-600"
                 />
 
                 <label className="inline-flex items-center gap-2 text-[11px] text-neutral-300 px-2 py-1 rounded-lg border border-neutral-800 bg-[#111115] cursor-pointer">
@@ -1000,14 +1000,14 @@ export function AdminCreditsTab({
                     placeholder="Search user email/name..."
                     value={userSearchQuery}
                     onChange={(e) => setUserSearchQuery(e.target.value)}
-                    className="w-full bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-lg pl-8 pr-3 py-2.5 focus:outline-none focus:border-[#3B82F6]/60"
+                    className="w-full bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-lg pl-8 pr-3 py-2.5 focus:outline-none focus:border-neutral-600"
                   />
                 </div>
 
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="w-full bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-lg p-2.5 focus:outline-none focus:border-[#3B82F6]/60"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-lg p-2.5 focus:outline-none focus:border-neutral-600"
                 >
                   <option value="">-- Choose User --</option>
                   {filteredUsers.map((u) => (
@@ -1034,7 +1034,7 @@ export function AdminCreditsTab({
                     placeholder="Filter target users..."
                     value={userSearchQuery}
                     onChange={(e) => setUserSearchQuery(e.target.value)}
-                    className="w-full bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-[#3B82F6]/60"
+                    className="w-full bg-[#121212] border border-[#2F2F2F] text-[11px] text-[#E5E5E5] rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-neutral-600"
                   />
                 </div>
               </div>
@@ -1181,7 +1181,7 @@ export function AdminCreditsTab({
                   const val = Math.max(0, parseInt(e.target.value) || 0);
                   setAmount(amount < 0 ? -val : val);
                 }}
-                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-lg p-2.5 text-xs text-[#E5E5E5] font-mono text-center focus:border-[#3B82F6]/60 outline-none"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-lg p-2.5 text-xs text-[#E5E5E5] font-mono text-center focus:border-neutral-600 outline-none"
               />
             </div>
 
@@ -1206,7 +1206,7 @@ export function AdminCreditsTab({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Support ticket # or grant details..."
-                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-lg p-2.5 text-xs text-[#E5E5E5] h-20 focus:border-[#3B82F6]/60 outline-none resize-none"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-lg p-2.5 text-xs text-[#E5E5E5] h-20 focus:border-neutral-600 outline-none resize-none"
               />
             </div>
           </div>

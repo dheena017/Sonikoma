@@ -247,7 +247,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search shortcuts (e.g., Space, Split, Zoom, Ctrl+D)..."
-              className="w-full pl-9 pr-4 py-2 bg-neutral-900/80 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#3B82F6] transition"
+              className="w-full pl-9 pr-4 py-2 bg-neutral-900/80 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 transition"
               autoFocus
             />
           </div>
@@ -320,7 +320,7 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-medium transition cursor-pointer"
+            className="px-4 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium transition cursor-pointer shadow-md shadow-blue-500/25 active:scale-95"
           >
             Got it
           </button>

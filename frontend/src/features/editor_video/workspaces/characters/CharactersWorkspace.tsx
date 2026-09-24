@@ -100,7 +100,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveTab("Character Creator")}
-                className="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer shadow-sm transition-all"
+                className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-mono font-bold flex items-center gap-1 cursor-pointer shadow-sm shadow-blue-500/25 transition-all active:scale-95"
               >
                 <Plus className="h-3 w-3" />
                 <span>+ Add Cast</span>
@@ -189,7 +189,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all active:scale-95 mt-2"
+              className="w-full py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/25 transition-all active:scale-95 mt-2"
             >
               <Plus className="h-4 w-4" /> Save Character to Project
             </button>
@@ -219,7 +219,7 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                     }
                     onTriggerFeedback(`Set active studio voice to ${char.voiceActor}`);
                   }}
-                  className="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#3B82F6]/40 text-white text-[10px] font-mono font-bold cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] border border-[#60A5FA]/40 text-white text-[10px] font-mono font-bold cursor-pointer shadow-sm shadow-blue-500/25 active:scale-95"
                 >
                   Bind Voice
                 </button>

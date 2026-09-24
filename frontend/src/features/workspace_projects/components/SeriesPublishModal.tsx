@@ -246,7 +246,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Packaging CBZ archive for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download CBZ Archive
               </button>
@@ -269,7 +269,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Generating PDF storyboard for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Generate PDF Sheet
               </button>
@@ -292,7 +292,7 @@ export default function SeriesPublishModal({
                 onClick={() =>
                   alert(`Exporting audio track for ${seriesTitle}...`)
                 }
-                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white text-xs font-bold transition-all cursor-pointer shadow-lg shadow-black/50 inline-flex items-center gap-2"
               >
                 <Download className="w-4 h-4" /> Download MP3 Track
               </button>

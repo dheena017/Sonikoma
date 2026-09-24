@@ -69,13 +69,13 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
               placeholder="Search by action or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-[#3B82F6]/60"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-neutral-600"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-lg px-4 py-2 focus:outline-none focus:border-[#3B82F6]/60"
+            className="bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-lg px-4 py-2 focus:outline-none focus:border-neutral-600"
           >
             <option value="ALL">All Statuses</option>
             <option value="Success">Success</option>

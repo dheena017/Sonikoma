@@ -108,8 +108,8 @@ export default function SeriesCard({
       onClick={() => onOpenSeries(series)}
       className={`group relative flex flex-col bg-neutral-900/70 backdrop-blur-xl border ${
         isSelected
-          ? "border-[#3B82F6] shadow-lg shadow-black/50 ring-1 ring-[#3B82F6]/50"
-          : "border-white/10 hover:border-[#3B82F6]/40 hover:shadow-[0_12px_36px_rgba(59,130,246,0.18)]"
+          ? "border-neutral-600 shadow-lg shadow-black/50 bg-neutral-900/90"
+          : "border-white/10 hover:border-neutral-700 hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)]"
       } rounded-3xl overflow-hidden transition-all duration-300 cursor-pointer shadow-xl`}
     >
       {/* ─── Thumbnail / Header Section ────────────────── */}
@@ -119,7 +119,7 @@ export default function SeriesCard({
           <div
             className={`absolute top-2.5 left-2.5 z-20 w-5 h-5 rounded-md border flex items-center justify-center transition-all cursor-pointer shadow-md ${
               isSelected
-                ? "bg-[#2A2A2A] border-[#3B82F6] text-white shadow-black/50"
+                ? "bg-neutral-800 border-neutral-600 text-white shadow-sm"
                 : "bg-black/40 border-white/30 text-transparent hover:border-white/60 backdrop-blur-sm"
             }`}
             onClick={(e) => {
@@ -203,7 +203,7 @@ export default function SeriesCard({
               }}
               aria-label="Series actions & options"
               title="Series actions & options"
-              className="w-7 h-7 rounded-full bg-black/70 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#60A5FA] transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
+              className="w-7 h-7 rounded-full bg-black/70 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-white/20 hover:border-neutral-700 transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
             >
               <MoreVertical className="w-3.5 h-3.5" />
             </button>
@@ -433,7 +433,7 @@ export default function SeriesCard({
               e.stopPropagation();
               onOpenSeries(series);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-[#60A5FA]/40 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-black/50 active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-blue-500/25 active:scale-95 shrink-0"
           >
             <span>Explore</span>
             <ArrowRight className="w-3 h-3 text-white" />

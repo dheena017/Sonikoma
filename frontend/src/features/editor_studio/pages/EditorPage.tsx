@@ -554,7 +554,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                         }
                       }
                     }}
-                    className="p-2 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold active:scale-95 shadow-md"
+                    className="p-2 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold active:scale-95 shadow-md"
                   >
                     <Save className="h-4 w-4" />
                     Save Settings
@@ -797,10 +797,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           .getState()
                           .setPlayerSettings({ isPlayerOpen: true });
                       }}
-                      className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-neutral-900/95 via-neutral-900/80 to-[#2A2A2A] hover:from-neutral-850 hover:to-[#2A2A2A] border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 text-[#60A5FA] hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
+                      className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-neutral-900/90 to-indigo-950/30 hover:from-blue-950/60 hover:to-indigo-950/50 border border-blue-500/30 hover:border-blue-500/50 text-blue-300 hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
                     >
                       <div className="flex items-center gap-3.5">
-                        <div className="h-8 w-8 rounded-xl bg-[#3B82F6]/20 border border-[#3B82F6]/40 flex items-center justify-center text-[#60A5FA] group-hover:scale-105 transition-transform ">
+                        <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-md shadow-blue-500/25 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
                           <Tv className="h-4 w-4" />
                         </div>
                         <div className="text-left">
@@ -813,7 +813,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/40 text-xs font-mono text-[#60A5FA] group-hover:bg-[#2A2A2A] group-hover:text-[#3B82F6] transition-colors shadow-sm">
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-xs font-mono text-white transition-colors shadow-md shadow-blue-500/25">
                         <Eye className="h-3.5 w-3.5" />
                         <span>Expand Preview</span>
                       </div>

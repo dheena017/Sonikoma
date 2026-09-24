@@ -59,7 +59,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
 
   return (
     <>
-      <div className="group bg-gradient-to-br from-[#2A2A2A] to-indigo-900/40 border border-[#3B82F6]/30 rounded-[32px] p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:border-[#60A5FA]/50">
+      <div className="group bg-gradient-to-br from-[#2A2A2A] to-indigo-900/40 border border-[#3B82F6]/30 rounded-[32px] p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:border-neutral-700">
         <div className="flex flex-col md:flex-row items-center gap-6 w-full">
           <div className="relative h-28 w-48 rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-inner shrink-0 group-hover:scale-[1.02] transition-transform duration-500">
             {matchingProject.cover_image ? (

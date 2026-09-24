@@ -266,7 +266,7 @@ const DomainRuleModal = ({
                   value={domainInput}
                   onChange={(e) => setDomainInput(e.target.value)}
                   placeholder="e.g. mangadex.org or https://asuracomic.net"
-                  className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:bg-neutral-900 font-mono transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 disabled:opacity-50 disabled:bg-neutral-900 font-mono transition-colors"
                   required
                 />
               </div>
@@ -279,7 +279,7 @@ const DomainRuleModal = ({
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as any)}
-                    className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 font-mono"
+                    className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-sm text-white focus:outline-none focus:border-neutral-600 font-mono"
                   >
                     <option value="approved">Approved (Allowed)</option>
                     <option value="blocked">Blocked (Banned)</option>
@@ -297,7 +297,7 @@ const DomainRuleModal = ({
                     max={600}
                     value={rateLimit}
                     onChange={(e) => setRateLimit(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-sm text-white focus:outline-none focus:border-blue-500 font-mono"
+                    className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-sm text-white focus:outline-none focus:border-neutral-600 font-mono"
                   />
                 </div>
               </div>
@@ -356,7 +356,7 @@ const DomainRuleModal = ({
                 <select
                   value={engineStrategy}
                   onChange={(e) => setEngineStrategy(e.target.value as any)}
-                  className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                  className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-neutral-600 font-mono"
                 >
                   <option value="auto">Adaptive Auto-Detect (AI + Dynamic Browser Fallback)</option>
                   <option value="http_fast">High-Speed Direct HTTP (Cheerio / Raw HTML Stream)</option>
@@ -381,7 +381,7 @@ const DomainRuleModal = ({
                   type="checkbox"
                   checked={proxyRequired}
                   onChange={(e) => setProxyRequired(e.target.checked)}
-                  className="w-4 h-4 rounded text-blue-600 bg-neutral-800 border-[#2F2F2F] focus:ring-blue-500 cursor-pointer"
+                  className="w-4 h-4 rounded text-blue-600 bg-neutral-800 border-[#2F2F2F] focus:ring-neutral-700 cursor-pointer"
                 />
               </div>
 
@@ -396,7 +396,7 @@ const DomainRuleModal = ({
                     max={180}
                     value={timeoutSec}
                     onChange={(e) => setTimeoutSec(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                    className="w-full px-3 py-2 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-neutral-600 font-mono"
                   />
                 </div>
 
@@ -410,7 +410,7 @@ const DomainRuleModal = ({
                     max={10}
                     value={maxConcurrency}
                     onChange={(e) => setMaxConcurrency(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                    className="w-full px-3 py-2 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-neutral-600 font-mono"
                   />
                 </div>
 
@@ -424,7 +424,7 @@ const DomainRuleModal = ({
                     max={5}
                     value={retryAttempts}
                     onChange={(e) => setRetryAttempts(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                    className="w-full px-3 py-2 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-neutral-600 font-mono"
                   />
                 </div>
               </div>
@@ -443,7 +443,7 @@ const DomainRuleModal = ({
                   onChange={(e) => setCustomHeaders(e.target.value)}
                   placeholder='{"User-Agent": "Custom/1.0", "Referer": "https://..."}'
                   rows={3}
-                  className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-emerald-300 placeholder-neutral-600 focus:outline-none focus:border-blue-500 font-mono resize-none"
+                  className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-emerald-300 placeholder-neutral-600 focus:outline-none focus:border-neutral-600 font-mono resize-none"
                 />
               </div>
 
@@ -456,7 +456,7 @@ const DomainRuleModal = ({
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="e.g. Requires image proxying; lazy-loaded panels stored in data-src attribute."
                   rows={3}
-                  className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-blue-500 font-sans resize-none"
+                  className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600 font-sans resize-none"
                 />
               </div>
             </div>
@@ -493,7 +493,7 @@ const DomainRuleModal = ({
               <button
                 type="submit"
                 disabled={submitting || !domainInput.trim()}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
+                className="px-5 py-2 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer"
               >
                 {submitting ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
@@ -735,7 +735,7 @@ export function AdminScrapersTab({
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-500/20 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-blue-500/20 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             Add Domain Rule
@@ -853,13 +853,13 @@ export function AdminScrapersTab({
               value={probeUrl}
               onChange={(e) => setProbeUrl(e.target.value)}
               placeholder="Paste any comic chapter or series URL to probe (e.g. https://mangadex.org/title/...)"
-              className="flex-1 px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 font-mono"
+              className="flex-1 px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 font-mono"
               required
             />
             <button
               type="submit"
               disabled={probing || !probeUrl.trim()}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer"
+              className="px-5 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer"
             >
               {probing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
               Inspect Target
@@ -974,7 +974,7 @@ export function AdminScrapersTab({
                     setCurrentPage(1);
                   }}
                   placeholder="Filter domain rules…"
-                  className="pl-8 pr-3 py-1.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 w-52 font-mono"
+                  className="pl-8 pr-3 py-1.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 w-52 font-mono"
                 />
               </div>
 

@@ -81,7 +81,7 @@ export default function YouTubeSeoOptimizer({
             value={seriesName}
             onChange={(e) => setSeriesName(e.target.value)}
             placeholder="e.g. Solo Leveling, Tower of God..."
-            className="w-full bg-neutral-900 border border-neutral-850 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#3B82F6]/50"
+            className="w-full bg-neutral-900 border border-neutral-850 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-neutral-600"
           />
         </div>
         <div className="space-y-1">
@@ -93,7 +93,7 @@ export default function YouTubeSeoOptimizer({
             value={chapterTitle}
             onChange={(e) => setChapterTitle(e.target.value)}
             placeholder="e.g. Boss Fight & Power Up..."
-            className="w-full bg-neutral-900 border border-neutral-850 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#3B82F6]/50"
+            className="w-full bg-neutral-900 border border-neutral-850 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-neutral-600"
           />
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function YouTubeSeoOptimizer({
       <button
         onClick={handleGenerate}
         disabled={isGenerating}
-        className="w-full py-2.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98 disabled:opacity-50"
+        className="w-full py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98 disabled:opacity-50"
       >
         <Wand2 className={`w-4 h-4 ${isGenerating ? "animate-spin" : ""}`} />
         <span>

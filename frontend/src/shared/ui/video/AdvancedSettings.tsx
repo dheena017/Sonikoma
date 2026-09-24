@@ -842,7 +842,7 @@ const VideoPreviewAdvancedSettings = React.memo(
                     placeholder="e.g. Action Comic Preset"
                     value={presetName}
                     onChange={(e) => setPresetName(e.target.value)}
-                    className="flex-1 bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-[#3B82F6] outline-none placeholder-neutral-600"
+                    className="flex-1 bg-neutral-950 border border-neutral-800 text-xs rounded-xl px-3 py-2 text-neutral-300 focus:border-neutral-600 outline-none placeholder-neutral-600"
                   />
                   <button
                     type="submit"

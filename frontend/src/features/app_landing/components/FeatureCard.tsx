@@ -24,8 +24,8 @@ export function FeatureCard({
     <div
       className={`p-7 rounded-2xl transition-all duration-300 border relative overflow-hidden hover:-translate-y-1.5 cursor-pointer ${
         isLight
-          ? "bg-white border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-lg"
-          : "bg-[#181818] border-[#2F2F2F] hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-950/20 shadow-md"
+          ? "bg-white border-slate-200 shadow-sm hover:border-neutral-700 hover:shadow-lg"
+          : "bg-[#181818] border-[#2F2F2F] hover:border-neutral-700 hover:shadow-xl hover:shadow-blue-950/20 shadow-md"
       }`}
     >
       <div

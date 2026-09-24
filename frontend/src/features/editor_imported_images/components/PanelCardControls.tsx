@@ -39,7 +39,7 @@ export function PanelCardControls({
             );
             addPanelsToStoryboard([imgUrl]);
           }}
-          className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-[11px] h-9 rounded-xl font-mono font-bold tracking-wider transition-all duration-150 cursor-pointer border border-blue-400/40 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_22px_rgba(37,99,235,0.5)] active:scale-[0.98]"
+          className="w-full flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] active:bg-blue-700 text-white text-[11px] h-9 rounded-xl font-mono font-bold tracking-wider transition-all duration-150 cursor-pointer border border-blue-400/40 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_22px_rgba(37,99,235,0.5)] active:scale-[0.98]"
         >
           <PlusCircle className="h-4 w-4 shrink-0" />
           <span>Add to Timeline</span>

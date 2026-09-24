@@ -87,9 +87,9 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
             onClick={onToggleSelectAll}
             className={`px-2 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
               isAllSelected
-                ? "bg-[#2A2A2A] border-[#3B82F6] text-white "
+                ? "bg-neutral-800 border-neutral-600 text-white"
                 : selectedCount > 0
-                ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-[#60A5FA]"
+                ? "bg-neutral-900 border-neutral-700 text-neutral-200"
                 : "bg-neutral-900/80 hover:bg-neutral-800 border-neutral-800 text-neutral-300"
             }`}
           >
@@ -117,7 +117,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
             onClick={() => onSelectTab(tab.id as AssetFilterTab)}
             className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold whitespace-nowrap transition-all border cursor-pointer ${
               activeTab === tab.id
-                ? "bg-[#2A2A2A] border-[#3B82F6]/60 text-white "
+                ? "bg-[#3B82F6] hover:bg-[#2563EB] border-[#60A5FA]/60 text-white shadow-sm shadow-blue-500/25"
                 : "border-transparent text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/60"
             }`}
           >
@@ -135,7 +135,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search frame (#1, #2...)"
-            className="w-full h-7 pl-7 pr-7 rounded-xl bg-black/50 border border-white/10 text-white placeholder-neutral-500 text-[10px] font-mono focus:outline-none focus:border-[#3B82F6]/60 transition-all"
+            className="w-full h-7 pl-7 pr-7 rounded-xl bg-black/50 border border-white/10 text-white placeholder-neutral-500 text-[10px] font-mono focus:outline-none focus:border-neutral-600 transition-all"
           />
           {searchQuery && (
             <button
@@ -151,7 +151,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
 
       {/* Floating Bulk Action Bar (When frames are selected) */}
       {selectedCount > 0 && (
-        <div className="px-3 py-2 bg-[#2A2A2A] border-t border-[#3B82F6]/30 flex flex-wrap items-center justify-between gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="px-3 py-2 bg-neutral-900 border-t border-[#3B82F6]/30 flex flex-wrap items-center justify-between gap-1.5 animate-in fade-in slide-in-from-top-1 duration-150">
           <span className="text-[10px] font-black font-mono text-[#3B82F6]">
             {selectedCount} Selected
           </span>
@@ -162,7 +162,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
                 type="button"
                 onClick={onAddSelectedToTimeline}
                 disabled={isAddingSelected}
-                className="px-2 py-0.5 rounded-md bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
+                className="px-2.5 py-1 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm shadow-blue-500/25 transition cursor-pointer active:scale-95 disabled:opacity-60"
                 title="Add selected frames to storyboard timeline"
               >
                 {isAddingSelected ? (
@@ -196,7 +196,7 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
                 type="button"
                 onClick={onCleanBubblesSelected}
                 disabled={isCleaningBubbles}
-                className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#3B82F6] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
+                className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono text-[9px] font-bold flex items-center gap-1 shadow-sm transition cursor-pointer disabled:opacity-60"
                 title="Clean speech bubbles in selected frames"
               >
                 {isCleaningBubbles ? (

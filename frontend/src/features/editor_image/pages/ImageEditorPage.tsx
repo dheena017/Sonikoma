@@ -527,7 +527,7 @@ const ImageEditorPage = React.memo(
               aria-label={
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }
-              className="hidden lg:flex absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 sm:w-7 h-24 rounded-r-2xl bg-[#141524] hover:bg-[#1f2138] border-y border-r border-[#3B82F6]/40 hover:border-[#60A5FA] text-[#60A5FA] hover:text-white flex-col items-center justify-center gap-1 shadow-[6px_0_20px_rgba(59,130,246,0.35)] transition-all cursor-pointer group active:scale-95 select-none pointer-events-auto"
+              className="hidden lg:flex absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 sm:w-7 h-24 rounded-r-2xl bg-[#141524] hover:bg-[#1f2138] border-y border-r border-[#3B82F6]/40 hover:border-neutral-700 text-[#60A5FA] hover:text-white flex-col items-center justify-center gap-1 shadow-[6px_0_20px_rgba(59,130,246,0.35)] transition-all cursor-pointer group active:scale-95 select-none pointer-events-auto"
               title={
                 isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
               }

@@ -63,7 +63,7 @@ export const SubscriptionPlanHeader: React.FC<SubscriptionPlanHeaderProps> = ({
             <button
               type="button"
               onClick={onUpgradePlan}
-              className="bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold py-2 px-5 rounded-xl transition-all shadow-md shadow-black/50 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-200"
+              className="bg-[#2A2A2A] hover:bg-[#333333] text-white font-bold py-2 px-5 rounded-xl transition-all shadow-md shadow-black/50 text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 duration-200"
             >
               <Plus className="w-4 h-4" />
               Upgrade to Pro

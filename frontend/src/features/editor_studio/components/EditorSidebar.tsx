@@ -6,6 +6,7 @@ import {
   Film,
   Layers,
   Settings,
+  Sparkles,
   ExternalLink,
   X,
   Edit2,
@@ -72,12 +73,13 @@ const EditorSidebar = ({
 
   const menuGroups: SidebarGroup[] = [
     {
-      title: "Workspace Navigation",
+      title: "Main",
       items: [
         {
-          id: "monitor",
-          label: "Video Monitor",
-          icon: Film,
+          id: "storyboard",
+          label: "Storyboard",
+          icon: Layers,
+          badge: panelsCount > 0 ? panelsCount : undefined,
           type: "section",
         },
         {
@@ -88,16 +90,15 @@ const EditorSidebar = ({
           type: "section",
         },
         {
-          id: "storyboard",
-          label: "Storyboard",
-          icon: Layers,
-          badge: panelsCount > 0 ? panelsCount : undefined,
+          id: "monitor",
+          label: "Video Monitor",
+          icon: Film,
           type: "section",
         },
       ],
     },
     {
-      title: "Tools",
+      title: "Studios",
       items: [
         {
           id: "video-editor",
@@ -181,7 +182,7 @@ const EditorSidebar = ({
         {!isCollapsed && (
           <button
             onClick={() => setIsCollapsed(true)}
-            className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/8 text-neutral-400 hover:text-[#93C5FD] hover:bg-[#3B82F6]/10 hover:border-[#3B82F6]/30 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
+            className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/8 text-neutral-400 hover:text-white hover:bg-neutral-800 hover:border-neutral-700 cursor-pointer transition-all duration-200 flex items-center justify-center active:scale-95 shadow-sm"
             title="Close sidebar"
           >
             <X className="w-4 h-4" />
@@ -218,10 +219,10 @@ const EditorSidebar = ({
 
                 return (
                   <div key={item.id} className="relative flex justify-center">
-                    {/* Premium Floating Active Pill */}
+                    {/* Floating Active Indicator Bar */}
                     <div
-                      className={`absolute left-1 top-1/2 -translate-y-1/2 w-1 rounded-full transition-all duration-300 z-10 ${isActive
-                          ? "h-5 bg-gradient-to-b from-[#2A2A2A] to-amber-400  opacity-100"
+                      className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${isActive
+                          ? "h-6 bg-[#3B82F6] opacity-100 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
                           : "h-0 bg-transparent opacity-0"
                         }`}
                     />
@@ -305,13 +306,13 @@ const EditorSidebar = ({
                       className={`w-full flex items-center ${isCollapsed
                           ? "justify-center p-3"
                           : "justify-between px-4 py-3"
-                        } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${isActive ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold shadow-sm" : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-[#3B82F6] border border-transparent"
+                        } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${isActive ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-500/25 font-bold border border-[#60A5FA]/40" : "text-[#9CA3AF] hover:text-white hover:bg-[#1E1E1E] hover:border-[#2F2F2F] border border-transparent"
                         }`}
                       title={isCollapsed ? item.label : undefined}
                     >
                       <div className="flex items-center gap-3.5">
                         <Icon
-                          className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${isActive ? "text-white" : "group-hover:scale-110 group-hover:text-[#3B82F6]"
+                          className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${isActive ? "text-white" : "group-hover:scale-110 group-hover:text-white"
                             }`}
                         />
                         {!isCollapsed && (
@@ -328,8 +329,8 @@ const EditorSidebar = ({
                               ? "-top-1 -right-1"
                               : "relative top-0 right-0"
                             } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${isActive
-                              ? "bg-[#3B82F6]/20 text-[#60A5FA] border-[#3B82F6]/30"
-                              : "bg-neutral-900 text-neutral-500 border-white/5"
+                              ? "bg-white text-[#3B82F6] border-transparent font-black"
+                              : "bg-[#3B82F6] text-white border-transparent"
                             }`}
                         >
                           {item.badge}
@@ -342,7 +343,7 @@ const EditorSidebar = ({
                           className={`absolute ${isCollapsed
                               ? "top-1 right-1"
                               : "top-1/2 -translate-y-1/2 right-3"
-                            } h-2 w-2 rounded-full bg-[#2A2A2A] animate-ping`}
+                            } h-2 w-2 rounded-full bg-blue-500 animate-ping`}
                         />
                       )}
                     </button>
@@ -355,14 +356,14 @@ const EditorSidebar = ({
       </div>
 
       {/* Bottom Action Footer - Return to Workspace */}
-      <div className="p-4 border-t border-white/5 bg-gradient-to-t from-black/30 to-transparent flex justify-center w-full">
+      <div className="p-4 border-t border-[#2F2F2F] bg-gradient-to-t from-black/30 to-transparent flex justify-center w-full">
         <button
           onClick={handleReturnToWorkspace}
-          className={`flex items-center justify-center rounded-2xl bg-gradient-to-b from-blue-500 to-[#2A2A2A] hover:from-[#2A2A2A] hover:to-blue-600 text-white transition-all active:scale-95 border border-[#60A5FA]/30 cursor-pointer shadow-[0_4px_14px_rgba(59,130,246,0.4)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.6)] ${isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
+          className={`flex items-center justify-center rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white transition-all active:scale-95 border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.3)] group ${isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
             }`}
           title="Return to Workspace"
         >
-          <ExternalLink className="w-[18px] h-[18px] shrink-0" />
+          <Sparkles className="w-5 h-5 shrink-0 transition-colors" />
           {!isCollapsed && (
             <span className="text-sm font-bold tracking-wide">
               Return to Workspace

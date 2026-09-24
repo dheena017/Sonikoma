@@ -198,7 +198,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       return {
         name: displayName,
         domain: host,
-        badgeColor: "bg-[#3B82F6]/15 text-[#60A5FA] border-[#3B82F6]/30",
+        badgeColor: "bg-neutral-900 border border-neutral-800 text-neutral-300",
       };
     } catch {
       return null;
@@ -214,15 +214,16 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
     >
       {/* Left Section - Menu Icon + Title + Metadata */}
       <div className="flex items-center shrink-0 h-full">
-        {/* PREMIUM ALIGNMENT FIX: w-14 wrapper aligns the menu button above mini-sidebar */}
-        <div className="w-9 sm:w-14 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1 sm:mr-3">
+        {/* Match exactly the width and border of the mini-sidebar */}
+        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full mr-0.5 sm:mr-4">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
-              className="w-8.5 h-8.5 rounded-xl bg-white/[0.04] border border-white/8 hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] cursor-pointer transition-all duration-300 active:scale-95 flex items-center justify-center shadow-sm"
+              className="w-11 h-11 rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-700 text-neutral-300 hover:text-white cursor-pointer transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm"
               title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
+              aria-label="Toggle navigation menu"
             >
-              <Menu className="h-4 w-4" />
+              <Menu className="h-5 w-5" />
             </button>
           )}
         </div>
@@ -254,7 +255,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <div className="min-w-0 hidden min-[540px]:block max-w-[180px] sm:max-w-[280px] md:max-w-[340px] lg:max-w-[420px]">
             {/* Top Workspace & Source Website Badge */}
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-[#3B82F6]/90 leading-none">
+              <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400 leading-none">
                 Editor Workspace
               </span>
 
@@ -283,7 +284,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
             {/* Title & Layout Icon */}
             <div className="mt-1 flex items-center gap-1.5">
-              <LayoutPanelTop className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
+              <LayoutPanelTop className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
               <h2 className="truncate text-sm font-bold text-white leading-none tracking-wide">
                 {title}
               </h2>
@@ -362,8 +363,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               aria-label="Toggle Floating Player"
               className={`flex items-center justify-center h-8.5 w-8.5 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
                 isPlayerOpen
-                  ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]"
-                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-[#93C5FD]"
+                  ? "border-neutral-700 bg-neutral-800 text-white shadow-sm"
+                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white"
               }`}
             >
               <Monitor className="h-4 w-4" />
@@ -380,8 +381,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               aria-label={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
               className={`flex items-center justify-center h-8.5 w-8.5 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
                 isFocusMode
-                  ? "border-[#3B82F6]/50 bg-[#3B82F6]/15 text-[#60A5FA] shadow-[inset_0_0_12px_rgba(59,130,246,0.15)]"
-                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-[#93C5FD]"
+                  ? "border-neutral-700 bg-neutral-800 text-white shadow-sm"
+                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white"
               }`}
             >
               <Focus className="h-4 w-4" />
@@ -399,17 +400,16 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             className={`flex items-center gap-1.5 px-2.5 sm:px-3 h-8.5 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border shrink-0 ${
               isSaving
                 ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-[#3B82F6] cursor-wait opacity-80"
-                : isDirty
-                ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white border-[#60A5FA]/50 shadow-lg shadow-black/50 animate-pulse"
+                : isDirty ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border-blue-400/40 shadow-md shadow-blue-900/30 font-bold"
                 : "bg-[#202127] hover:bg-[#282a32] border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white"
             }`}
           >
             <Save
               className={`h-3.5 w-3.5 ${
                 isSaving
-                  ? "animate-spin text-[#3B82F6]"
+                  ? "animate-spin text-white"
                   : isDirty
-                  ? "text-[#60A5FA]"
+                  ? "text-white"
                   : "text-neutral-400"
               }`}
             />
@@ -425,7 +425,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             <button
               onClick={() => setShowNotifications((v) => !v)}
               aria-label="Notifications"
-              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-[#93C5FD] transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
+              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
             >
               {notificationsMuted ? (
                 <BellOff className="h-4 w-4 text-rose-500" />
@@ -466,10 +466,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           >
             <button
               onClick={() => setDrawerOpen(true)}
-              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-[#93C5FD] transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
+              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
               aria-label="Active Project Selector"
             >
-              <FolderSync className="h-4 w-4 text-[#3B82F6]" />
+              <FolderSync className="h-4 w-4 text-neutral-400" />
               {activeProjectId && activeProjectData && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
               )}
@@ -481,15 +481,15 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo?.("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-[#3B82F6]/50 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="text-xs font-bold text-white group-hover:text-white truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
               {user?.full_name ||
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-[#60A5FA] transition-all duration-300">
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
               <img
                 key={user?.avatar_url || user?.full_name || "avatar"}
                 src={getUserAvatarUrl(user)}

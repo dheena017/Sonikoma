@@ -33,8 +33,8 @@ export const THEMES: Record<
     accentBg: "bg-blue-500/10",
     accentBorder: "border-blue-500/20",
     button:
-      "bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md",
-    focus: "focus:border-blue-500/60 focus:ring-blue-600/20",
+      "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md",
+    focus: "focus:border-neutral-600 focus:ring-blue-600/20",
     dot: "bg-blue-500",
     cardBorder: "from-blue-500/30 via-indigo-500/20 to-transparent",
     badgeBg: "bg-blue-500/10 border-blue-500/20 text-blue-400",
@@ -46,8 +46,8 @@ export const THEMES: Record<
     accentBg: "bg-[#3B82F6]/10",
     accentBorder: "border-[#3B82F6]/20",
     button:
-      "bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-md",
-    focus: "focus:border-blue-500/60 focus:ring-blue-600/20",
+      "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md",
+    focus: "focus:border-neutral-600 focus:ring-blue-600/20",
     dot: "bg-blue-500",
     cardBorder: "from-blue-500/30 via-indigo-500/20 to-transparent",
     badgeBg: "bg-blue-500/10 border-blue-500/20 text-blue-400",

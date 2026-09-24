@@ -56,7 +56,7 @@ export default function SoundOutroTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-[#3B82F6]/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-neutral-700 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/30 rounded-lg text-[#3B82F6]">
@@ -97,7 +97,7 @@ export default function SoundOutroTab({
       {bgm && !loading && (
         <div className="space-y-4 animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-2 shadow-lg">
+            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4.5 space-y-2 shadow-lg">
               <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest block border-b border-neutral-850 pb-2">
                 Recommended Music Genre
               </span>
@@ -107,7 +107,7 @@ export default function SoundOutroTab({
               </p>
             </div>
 
-            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-2 shadow-lg">
+            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4.5 space-y-2 shadow-lg">
               <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest block border-b border-neutral-850 pb-2">
                 Mood Keywords
               </span>
@@ -125,7 +125,7 @@ export default function SoundOutroTab({
           </div>
 
           {bgm.suggested_tracks && (
-            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg">
+            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg">
               <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest block border-b border-neutral-850 pb-2">
                 Suggested Soundtrack Cues
               </span>

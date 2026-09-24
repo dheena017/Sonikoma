@@ -56,7 +56,7 @@ export const CreditCalculator: React.FC<CreditCalculatorProps> = ({
       <button
         type="button"
         onClick={onPurchase}
-        className="w-full bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-black/50"
+        className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 shadow-md shadow-black/50"
       >
         Purchase Custom Package ({formatCustomPrice(customCredits)})
       </button>

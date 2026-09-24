@@ -183,7 +183,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => onImport(chapter)}
-              className="px-4 py-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-black/50 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-bold shadow-lg shadow-black/50 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
             >
               <Play size={14} />
               <span className="hidden sm:inline">Open in Editor</span>
@@ -318,7 +318,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
               <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                 <button
                   onClick={() => fetchPanels(true)}
-                  className="px-5 py-2.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-black/50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+                  className="px-5 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-black/50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
                 >
                   <RotateCw size={14} className={loading ? "animate-spin" : ""} />
                   Retry Scraping
@@ -396,7 +396,7 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
             </button>
             <button
               onClick={() => onImport(chapter)}
-              className="px-6 py-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-black/50 transition-all flex items-center gap-2 cursor-pointer"
+              className="px-6 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-bold shadow-lg shadow-black/50 transition-all flex items-center gap-2 cursor-pointer"
             >
               <Play size={14} />
               Open in Editor

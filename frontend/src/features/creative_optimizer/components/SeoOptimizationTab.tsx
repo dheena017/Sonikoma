@@ -115,7 +115,7 @@ export default function SeoOptimizationTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-[#3B82F6]/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-neutral-700 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/30 rounded-lg text-[#3B82F6]">
@@ -168,7 +168,7 @@ export default function SeoOptimizationTab({
       {data && !loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
           {/* 1. VIRAL TITLE CARD WITH 3 VARIANTS */}
-          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
                 <div className="flex items-center gap-2">
@@ -250,7 +250,7 @@ export default function SeoOptimizationTab({
           </div>
 
           {/* 2. INTERACTIVE SEARCH TAGS CARD */}
-          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
                 <div className="flex items-center gap-2">
@@ -317,7 +317,7 @@ export default function SeoOptimizationTab({
                 ) : (
                   <button
                     onClick={() => setShowTagAdd(true)}
-                    className="text-[9px] font-mono text-[#3B82F6] hover:text-white bg-neutral-900 px-2 py-1 rounded-lg border border-[#3B82F6]/20 hover:border-[#3B82F6]/50 flex items-center gap-1 cursor-pointer transition-all"
+                    className="text-[9px] font-mono text-[#3B82F6] hover:text-white bg-neutral-900 px-2 py-1 rounded-lg border border-[#3B82F6]/20 hover:border-neutral-700 flex items-center gap-1 cursor-pointer transition-all"
                   >
                     <Plus className="w-3 h-3" /> Add Tag
                   </button>
@@ -332,7 +332,7 @@ export default function SeoOptimizationTab({
           </div>
 
           {/* 3. CHAPTERS & TIMESTAMPS CARD */}
-          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
             <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-blue-400" />
@@ -365,12 +365,12 @@ export default function SeoOptimizationTab({
                 setData({ ...data, timestamps: e.target.value.split("\n") })
               }
               rows={4}
-              className="w-full text-[11px] font-mono text-cyan-100 bg-neutral-950 p-4 rounded-xl border border-neutral-800 leading-relaxed shadow-inner outline-none focus:border-blue-500/50 resize-none"
+              className="w-full text-[11px] font-mono text-cyan-100 bg-neutral-950 p-4 rounded-xl border border-neutral-800 leading-relaxed shadow-inner outline-none focus:border-neutral-600 resize-none"
             />
           </div>
 
           {/* 4. EDITABLE DESCRIPTION CARD */}
-          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
+          <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg md:col-span-2">
             <div className="flex justify-between items-center border-b border-neutral-850 pb-2.5">
               <div className="flex items-center gap-2">
                 <FileText className="w-4 h-4 text-[#3B82F6]" />
@@ -403,7 +403,7 @@ export default function SeoOptimizationTab({
                 setData({ ...data, youtube_description: e.target.value })
               }
               rows={6}
-              className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-4 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-[#3B82F6]/50 resize-y"
+              className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-4 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-neutral-600 resize-y"
             />
           </div>
         </div>

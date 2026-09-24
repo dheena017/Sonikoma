@@ -209,7 +209,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                     e.stopPropagation();
                     onTriggerVoiceGen(index);
                   }}
-                  className="px-2.5 py-1 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#3B82F6]/40 text-[#3B82F6] hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-[#60A5FA]/40 text-white text-[9px] font-mono font-bold flex items-center gap-1 transition-all shadow-sm shadow-blue-500/25 cursor-pointer active:scale-95"
                 >
                   <Sparkles className="h-2.5 w-2.5" />
                   <span>Gen Voice</span>

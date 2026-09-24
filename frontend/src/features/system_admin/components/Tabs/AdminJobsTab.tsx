@@ -331,7 +331,7 @@ export function AdminJobsTab({
               placeholder="Search ID, model, stage, project..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 text-xs bg-[#121212] border border-[#2F2F2F] rounded-xl text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6]"
+              className="w-full pl-9 pr-3 py-1.5 text-xs bg-[#121212] border border-[#2F2F2F] rounded-xl text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600"
             />
           </div>
 
@@ -358,7 +358,7 @@ export function AdminJobsTab({
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               aria-label="Filter by job operation type"
-              className="bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#3B82F6]"
+              className="bg-[#121212] border border-[#2F2F2F] text-[#E5E5E5] text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-neutral-600"
             >
               <option value="all">All Types ({distinctJobTypes.length})</option>
               {distinctJobTypes.map((t) => (

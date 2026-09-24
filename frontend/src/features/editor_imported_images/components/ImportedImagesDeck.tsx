@@ -236,7 +236,7 @@ export const HorizontalScrollContainer: React.FC<{
         aria-label="Scroll Left"
         title="Scroll Left"
         disabled={!canScrollLeft}
-        className={`flex absolute left-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-blue-400 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
+        className={`flex absolute left-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-neutral-700 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
           canScrollLeft
             ? "opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
             : "opacity-0 scale-75 pointer-events-none"
@@ -272,7 +272,7 @@ export const HorizontalScrollContainer: React.FC<{
         aria-label="Scroll Right"
         title="Scroll Right"
         disabled={!canScrollRight}
-        className={`flex absolute right-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-blue-400 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
+        className={`flex absolute right-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-neutral-700 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
           canScrollRight
             ? "opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
             : "opacity-0 scale-75 pointer-events-none"

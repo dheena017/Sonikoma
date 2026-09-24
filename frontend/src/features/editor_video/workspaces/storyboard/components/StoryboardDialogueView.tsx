@@ -41,7 +41,7 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
         <button
           type="button"
           onClick={() => onTriggerFeedback?.("AI Generated dialogue for all empty panels")}
-          className="px-2 py-0.5 rounded-md bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm transition"
+          className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm shadow-blue-500/25 transition active:scale-95"
         >
           <Wand2 className="h-2.5 w-2.5" />
           <span>Auto-Script</span>
@@ -61,8 +61,8 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
             onClick={(e) => onSelect(index, e)}
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
-                ? "border-[#3B82F6] bg-[#2A2A2A] ring-2 ring-[#3B82F6]/50 shadow-md"
-                : "border-white/10 bg-[#121212] hover:border-[#3B82F6]/40"
+                ? "border-[#3B82F6] bg-[#3B82F6]/15 ring-2 ring-[#3B82F6]/50 shadow-md"
+                : "border-white/10 bg-[#121212] hover:border-neutral-700"
             }`}
           >
             {/* Top row: Panel thumbnail + Speaker selector */}
@@ -110,7 +110,7 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
               placeholder="Enter character dialogue, narration line, or subtitles..."
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => onUpdateDialogue(index, e.target.value)}
-              className="w-full h-16 p-2 rounded-xl bg-black/50 border border-white/10 text-white placeholder-neutral-500 text-[10px] font-mono resize-none focus:outline-none focus:border-[#3B82F6]/60 transition-colors leading-relaxed"
+              className="w-full h-16 p-2 rounded-xl bg-black/50 border border-white/10 text-white placeholder-neutral-500 text-[10px] font-mono resize-none focus:outline-none focus:border-neutral-600 transition-colors leading-relaxed"
             />
           </div>
         );

@@ -51,7 +51,7 @@ const SAMPLE_URLS = [
     tag: "Manhwa / Action",
     icon: "⚡",
     platform: "MangaDex",
-    glowColor: "hover:border-blue-500 hover:shadow-blue-500/20 active:border-blue-400",
+    glowColor: "hover:border-neutral-700 hover:shadow-blue-500/20 active:border-blue-400",
   },
   {
     name: "Lore Olympus",
@@ -245,7 +245,7 @@ export default function LandingPage({
               <button
                 disabled={isNavigating}
                 onClick={() => handleAction(onGetStarted)}
-                className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none flex items-center gap-2"
+                className="px-3.5 sm:px-5 py-2 sm:py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-60 text-white text-xs sm:text-sm font-bold rounded-xl transition-all duration-200 shadow-md hover:shadow-blue-500/20 active:scale-95 cursor-pointer select-none focus:outline-none flex items-center gap-2"
               >
                 {isNavigating ? (
                   <>
@@ -577,8 +577,8 @@ export default function LandingPage({
                                 ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20 -translate-y-0.5"
                                 : "bg-blue-600/30 text-blue-200 border-blue-400 shadow-md shadow-blue-500/20 -translate-y-0.5"
                               : isLight
-                              ? "bg-slate-100 hover:bg-blue-50 border-slate-300 hover:border-blue-400 text-slate-800 hover:text-blue-700"
-                              : "bg-[#181a22] hover:bg-[#20232d] border-white/10 hover:border-blue-500/50 text-neutral-300 hover:text-white"
+                              ? "bg-slate-100 hover:bg-blue-50 border-slate-300 hover:border-neutral-700 text-slate-800 hover:text-blue-700"
+                              : "bg-[#181a22] hover:bg-[#20232d] border-white/10 hover:border-neutral-700 text-neutral-300 hover:text-white"
                           } ${sample.glowColor}`}
                         >
                           <span className="text-sm leading-none">{sample.icon}</span>
@@ -671,8 +671,8 @@ export default function LandingPage({
               <div
                 className={`p-7 rounded-[28px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-950/20"
+                    ? "bg-white border-slate-200 shadow-sm hover:border-neutral-700 hover:shadow-lg"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-neutral-700 hover:shadow-xl hover:shadow-blue-950/20"
                 }`}
               >
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-black mb-5">
@@ -725,8 +725,8 @@ export default function LandingPage({
               <div
                 className={`p-7 rounded-[28px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-[#3B82F6] hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-[#3B82F6]/50 hover:shadow-xl hover:shadow-cyan-950/20"
+                    ? "bg-white border-slate-200 shadow-sm hover:border-neutral-700 hover:shadow-lg"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-neutral-700 hover:shadow-xl hover:shadow-cyan-950/20"
                 }`}
               >
                 <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-black mb-5">
@@ -810,8 +810,8 @@ export default function LandingPage({
                       demoTab === t.id
                         ? "bg-blue-600 text-white shadow-md shadow-sm -translate-y-0.5"
                         : isLight
-                        ? "bg-white text-slate-800 border border-slate-300 hover:border-blue-400 hover:text-blue-600 hover:-translate-y-0.5 shadow-2xs"
-                        : "bg-[#181818] text-neutral-300 border border-[#2F2F2F] hover:border-blue-500/60 hover:text-white hover:bg-[#222] hover:-translate-y-0.5 shadow-2xs"
+                        ? "bg-white text-slate-800 border border-slate-300 hover:border-neutral-700 hover:text-blue-600 hover:-translate-y-0.5 shadow-2xs"
+                        : "bg-[#181818] text-neutral-300 border border-[#2F2F2F] hover:border-neutral-700 hover:text-white hover:bg-[#222] hover:-translate-y-0.5 shadow-2xs"
                     }`}
                   >
                     {t.icon}
@@ -922,7 +922,7 @@ export default function LandingPage({
                         billingCycle === "monthly" ? "yearly" : "monthly"
                       )
                     }
-                    className="w-12 h-7 rounded-full bg-blue-600/20 p-1 border border-blue-500/30 hover:border-blue-500/60 relative transition-all cursor-pointer"
+                    className="w-12 h-7 rounded-full bg-blue-600/20 p-1 border border-blue-500/30 hover:border-neutral-700 relative transition-all cursor-pointer"
                   >
                     <div
                       className={`w-5 h-5 rounded-full bg-blue-600 transition-transform ${
@@ -1124,7 +1124,7 @@ export default function LandingPage({
               <button
                 disabled={isNavigating}
                 onClick={() => handleAction(onGetStarted)}
-                className="mx-auto px-7 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 cursor-pointer text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20"
+                className="mx-auto px-7 py-3.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-60 text-white font-bold rounded-xl transition-all duration-200 active:scale-95 cursor-pointer text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20"
               >
                 {isNavigating ? (
                   <>

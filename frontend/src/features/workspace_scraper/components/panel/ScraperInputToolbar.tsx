@@ -283,7 +283,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               }
             }}
             placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic reader URL..."
-            className="w-full bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 rounded-2xl px-6 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-[#6B7280] transition-all shadow-inner"
+            className="w-full bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700 rounded-2xl px-6 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-[#6B7280] transition-all shadow-inner"
           />
 
           {showSuggestions && suggestions.length > 0 && (
@@ -319,7 +319,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                       className="w-full px-4 py-3 hover:bg-[#181D2A] border-b border-[#282834]/50 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-[#121217]"
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#181820] border border-[#2F2F38] group-hover:bg-[#3B82F6] group-hover:border-[#60A5FA] group-hover:shadow-[0_0_14px_rgba(59,130,246,0.6)] transition-all duration-200 flex-shrink-0 shadow-sm">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#181820] border border-[#2F2F38] group-hover:bg-[#2A2A35] group-hover:border-neutral-700 group-hover:shadow-[0_0_14px_rgba(59,130,246,0.6)] transition-all duration-200 flex-shrink-0 shadow-sm">
                           <Book className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-all duration-200 transform group-hover:scale-110" />
                         </div>
                         <div className="flex-grow min-w-0">
@@ -335,7 +335,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-widest rounded border bg-[#181820] text-[#9CA3AF] border-[#2F2F38] group-hover:bg-[#3B82F6]/20 group-hover:text-[#93C5FD] group-hover:border-[#3B82F6]/50 transition-all">
+                        <span className="px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-widest rounded border bg-[#181820] text-[#9CA3AF] border-[#2F2F38] group-hover:bg-[#3B82F6]/20 group-hover:text-[#93C5FD] group-hover:border-neutral-700 transition-all">
                           Recent
                         </span>
                         <button
@@ -349,7 +349,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                               setMenuAnchor({ rect, series });
                             }
                           }}
-                          className="w-7 h-7 rounded-lg bg-[#181820] hover:bg-[#3B82F6] hover:border-[#60A5FA] text-[#9CA3AF] hover:text-white border border-[#2F2F38] flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm hover:shadow-[0_0_10px_rgba(59,130,246,0.4)]"
+                          className="w-7 h-7 rounded-lg bg-[#181820] hover:bg-[#252530] hover:border-neutral-700 text-[#9CA3AF] hover:text-white border border-[#2F2F38] flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm hover:shadow-[0_0_10px_rgba(59,130,246,0.4)]"
                           title="Options"
                         >
                           <MoreVertical className="w-3.5 h-3.5" />

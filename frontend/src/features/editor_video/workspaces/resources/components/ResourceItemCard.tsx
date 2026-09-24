@@ -16,7 +16,7 @@ export const ResourceItemCard: React.FC<ResourceItemCardProps> = ({
   onApply,
 }) => {
   return (
-    <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/60 transition-all flex items-center justify-between group shadow-sm">
+    <div className="p-3 rounded-xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 transition-all flex items-center justify-between group shadow-sm">
       <div className="flex items-center gap-3 min-w-0">
         {resource.hex ? (
           <div
@@ -24,7 +24,7 @@ export const ResourceItemCard: React.FC<ResourceItemCardProps> = ({
             style={{ backgroundColor: resource.hex }}
           />
         ) : (
-          <div className="h-8 w-8 rounded-lg bg-[#2A2A2A] border border-[#3B82F6]/30 flex items-center justify-center shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-[#3B82F6]/15 border border-[#3B82F6]/30 flex items-center justify-center shrink-0">
             <Package className="h-4 w-4 text-[#3B82F6]" />
           </div>
         )}
@@ -53,7 +53,7 @@ export const ResourceItemCard: React.FC<ResourceItemCardProps> = ({
       ) : (
         <button
           onClick={() => onApply(resource.title)}
-          className="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[9px] font-mono font-bold shrink-0 transition-colors cursor-pointer"
+          className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold shrink-0 transition-all shadow-sm shadow-blue-500/25 cursor-pointer active:scale-95"
         >
           Apply
         </button>

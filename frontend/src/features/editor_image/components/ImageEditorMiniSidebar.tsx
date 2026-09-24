@@ -13,6 +13,7 @@ import {
   Link2,
   Database,
   ArrowLeft,
+  ExternalLink,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
@@ -147,7 +148,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
             className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               active
                 ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-neutral-400 group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-neutral-400 group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
             }`}
           >
             <Icon
@@ -215,9 +216,9 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           }}
           onMouseLeave={() => setReturnHover(false)}
           aria-label="Return to Storyboard"
-          className="w-11 h-11 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] text-neutral-400 hover:text-[#3B82F6] border border-[#2F2F2F] hover:border-[#3B82F6] flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-95 shadow-sm"
+          className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all duration-200 cursor-pointer active:scale-90"
         >
-          <ArrowLeft className="w-5 h-5 text-white" />
+          <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
         </button>
         <TooltipPortal
           text="Return to Storyboard"

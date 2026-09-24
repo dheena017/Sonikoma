@@ -485,34 +485,34 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               }`}
               title="Drag to resize Timeline (Double click to reset)"
             >
-              <div className="h-[2px] w-12 rounded-full bg-white/20 group-hover:bg-[#2A2A2A] transition-colors" />
+              <div className="h-[2px] w-12 rounded-full bg-white/20 group-hover:bg-[#3B82F6] transition-colors" />
             </div>
           )}
 
           {/* ── Bottom Multi-Track NLE Timeline ─────────────────────────────── */}
           <div
             className={`w-full overflow-hidden transition-all duration-150 ${
-              mobileTab === "timeline"
+              layoutMode === "full_timeline"
                 ? "flex flex-1 h-full"
+                : mobileTab === "timeline"
+                ? "flex flex-1 h-full"
+                : !layoutConfig.timeline
+                ? "hidden"
                 : mobileTab === "player"
-                ? "flex shrink-0 border-t border-white/10 h-[260px] md:h-auto"
-                : layoutConfig.timeline
-                ? "hidden md:block"
-                : "hidden"
-            } ${
-              layoutMode === "full_timeline" ? "flex-1 h-full" : "shrink-0"
+                ? "flex flex-col shrink-0 border-t border-white/10"
+                : "hidden md:flex md:flex-col shrink-0 border-t border-white/10"
             }`}
             style={{
               height:
-                mobileTab === "timeline"
+                layoutMode === "full_timeline"
                   ? "100%"
-                  : mobileTab === "player"
-                  ? undefined
-                  : layoutMode === "full_timeline"
+                  : mobileTab === "timeline"
                   ? "100%"
-                  : layoutConfig.timeline
-                  ? Math.min(timelineHeight, 380)
-                  : 0,
+                  : !layoutConfig.timeline
+                  ? 0
+                  : typeof window !== "undefined" && window.innerWidth >= 768
+                  ? timelineHeight
+                  : 240,
             }}
           >
             <Timeline

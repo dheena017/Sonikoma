@@ -51,7 +51,7 @@ export default function ProviderHeroBanner({
           <button
             onClick={onSyncLiveQuotas}
             disabled={isRefreshing}
-            className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-sm flex items-center gap-2 transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold shadow-sm flex items-center gap-2 transition-all cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
             <span>Refresh Limits</span>

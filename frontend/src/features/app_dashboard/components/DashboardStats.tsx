@@ -33,7 +33,7 @@ export default function DashboardStats({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
       {/* 1. Total Series */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-[#3B82F6]/60 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-neutral-700 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
         <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
           <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
@@ -78,7 +78,7 @@ export default function DashboardStats({
       </div>
 
       {/* 4. Production Health */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-[#3B82F6]/60 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-neutral-700 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
         <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
           <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>

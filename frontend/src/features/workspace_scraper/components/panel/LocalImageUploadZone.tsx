@@ -66,7 +66,7 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
         className={`relative border-2 border-dashed rounded-3xl p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
           isDraggingOver
             ? "border-[#3B82F6] bg-[#2A2A2A] shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.01]"
-            : "border-[#3B82F6]/25 hover:border-[#3B82F6]/50 bg-[#12131e]/50 hover:bg-[#181926]/80 shadow-lg"
+            : "border-[#3B82F6]/25 hover:border-neutral-700 bg-[#12131e]/50 hover:bg-[#181926]/80 shadow-lg"
         }`}
       >
         <input
@@ -140,7 +140,7 @@ export const LocalImageUploadZone: React.FC<LocalImageUploadZoneProps> = ({
           <button
             type="button"
             onClick={handleExecuteUpload}
-            className="w-full py-3 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-lg active:scale-98 flex items-center justify-center gap-2"
           >
             <Plus className="w-4 h-4" /> Import {selectedFiles.length} Image(s)
             into Imported Assets

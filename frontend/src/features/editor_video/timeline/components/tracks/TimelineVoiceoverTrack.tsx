@@ -345,7 +345,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
 
                 {/* Voice dialogue badge */}
                 <div className="absolute inset-0 flex items-center justify-between px-1.5 z-10 pointer-events-none">
-                  <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-[#60A5FA]/60 transition-colors">
+                  <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-neutral-700 transition-colors">
                     <GripVertical className="h-3 w-3 text-[#60A5FA] group-hover:text-white shrink-0 transition-colors" />
                     <Mic className="h-2.5 w-2.5 text-[#3B82F6] shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
                     <span className="text-[8.5px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">

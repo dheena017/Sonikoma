@@ -21,7 +21,7 @@ export const StoryPipelineBreadcrumb: React.FC<
             <div
               className={`flex items-center gap-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full transition-all whitespace-nowrap ${
                 step.active
-                  ? "bg-[#2A2A2A] text-[#3B82F6] border border-[#3B82F6]/30 "
+                  ? "bg-[#3B82F6] text-white border border-[#60A5FA]/50 shadow-sm shadow-blue-500/25"
                   : "text-neutral-500 border border-transparent"
               }`}
             >

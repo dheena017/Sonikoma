@@ -361,7 +361,7 @@ export default function SeriesDetailsPage({
           </button>
           <button
             onClick={() => navigateTo("/projects")}
-            className="px-6 py-2.5 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white rounded-xl font-bold transition-all cursor-pointer"
+            className="px-6 py-2.5 bg-[#2A2A2A] hover:bg-[#333333] text-white rounded-xl font-bold transition-all cursor-pointer"
           >
             Back to Projects
           </button>
@@ -380,7 +380,7 @@ export default function SeriesDetailsPage({
           <button
             type="button"
             onClick={() => navigateTo("/projects")}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-[#2A2A2A] border border-white/10 hover:border-[#3B82F6]/30 text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer shadow-sm group"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-[#2A2A2A] border border-white/10 hover:border-neutral-700 text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer shadow-sm group"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
             <span>Projects</span>
@@ -412,7 +412,7 @@ export default function SeriesDetailsPage({
           <button
             type="button"
             onClick={() => setIsEditModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 border border-white/10 hover:border-[#3B82F6]/40 text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer hover:bg-neutral-850"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 border border-white/10 hover:border-neutral-700 text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer hover:bg-neutral-850"
           >
             <Edit3 className="w-3.5 h-3.5 text-[#3B82F6]" />
             <span>Edit Info</span>
@@ -507,7 +507,7 @@ export default function SeriesDetailsPage({
             <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10 xl:flex xl:flex-wrap">
               <button
                 onClick={handleNewChapter}
-                className="flex items-center gap-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95"
               >
                 <Plus className="h-4 w-4" />
                 <span>New Chapter</span>
@@ -515,7 +515,7 @@ export default function SeriesDetailsPage({
 
               <button
                 onClick={() => setIsPublishModalOpen(true)}
-                className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/40 hover:bg-neutral-850 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:bg-neutral-850 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
               >
                 <Film className="h-4 w-4 text-[#3B82F6]" />
                 <span>Export Full Series</span>
@@ -639,7 +639,7 @@ export default function SeriesDetailsPage({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search chapter..."
-              className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#3B82F6] transition-colors font-sans"
+              className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 transition-colors font-sans"
             />
           </div>
 
@@ -651,7 +651,7 @@ export default function SeriesDetailsPage({
                 onClick={() => setStatusFilter(status)}
                 className={`px-3 py-1 rounded-lg uppercase tracking-wider font-bold transition-all cursor-pointer ${
                   statusFilter === status
-                    ? "bg-[#2A2A2A] text-white"
+                    ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
                     : "text-neutral-400 hover:text-white"
                 }`}
               >
@@ -710,7 +710,7 @@ export default function SeriesDetailsPage({
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
                           isSelected
-                            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white font-bold shadow-md shadow-black/50"
+                            ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md shadow-blue-500/25"
                             : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
                         }`}
                       >
@@ -732,7 +732,7 @@ export default function SeriesDetailsPage({
               onClick={() => setViewMode("grid")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "grid"
-                  ? "bg-neutral-800 text-white"
+                  ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
                   : "text-neutral-500 hover:text-white"
               }`}
               title="Grid View"
@@ -743,7 +743,7 @@ export default function SeriesDetailsPage({
               onClick={() => setViewMode("list")}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === "list"
-                  ? "bg-neutral-800 text-white"
+                  ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
                   : "text-neutral-500 hover:text-white"
               }`}
               title="List View"
@@ -766,7 +766,7 @@ export default function SeriesDetailsPage({
                       type="checkbox"
                       checked={selectedProjectIds.includes(chapter.project_id)}
                       onChange={() => toggleSelectChapter(chapter.project_id)}
-                      className="w-5 h-5 rounded border-neutral-700 text-[#3B82F6] focus:ring-[#3B82F6]/50 bg-neutral-955 cursor-pointer"
+                      className="w-5 h-5 rounded border-neutral-700 text-[#3B82F6] focus:ring-neutral-700 bg-neutral-955 cursor-pointer"
                     />
                   </div>
                 )}
@@ -811,7 +811,7 @@ export default function SeriesDetailsPage({
               <div
                 key={chapter.project_id}
                 onClick={() => actions.handleOpenProject(chapter)}
-                className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/40 flex items-center justify-between gap-4 transition-all cursor-pointer group"
+                className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 flex items-center justify-between gap-4 transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-4 min-w-0">
                   {isBatchMode && (
@@ -822,7 +822,7 @@ export default function SeriesDetailsPage({
                         e.stopPropagation();
                         toggleSelectChapter(chapter.project_id);
                       }}
-                      className="w-5 h-5 rounded border-neutral-700 text-[#3B82F6] focus:ring-[#3B82F6]/50 bg-neutral-955 cursor-pointer shrink-0"
+                      className="w-5 h-5 rounded border-neutral-700 text-[#3B82F6] focus:ring-neutral-700 bg-neutral-955 cursor-pointer shrink-0"
                     />
                   )}
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-neutral-955 border border-neutral-800 shrink-0">
@@ -865,7 +865,7 @@ export default function SeriesDetailsPage({
                       e.stopPropagation();
                       actions.handleOpenProject(chapter);
                     }}
-                    className="px-4 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-bold transition-all"
+                    className="px-4 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
                   >
                     Open Studio
                   </button>

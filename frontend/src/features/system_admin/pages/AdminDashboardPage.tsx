@@ -744,7 +744,7 @@ const AdminDashboardPage = React.memo(
           <DashboardStatsSkeleton count={4} />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#3B82F6]/50 transition-all shadow-sm text-left">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Users className="w-16 h-16 text-[#3B82F6]" />
               </div>
@@ -765,7 +765,7 @@ const AdminDashboardPage = React.memo(
               </p>
             </div>
 
-            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#3B82F6]/50 transition-all shadow-sm text-left">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <FolderGit2 className="w-16 h-16 text-[#3B82F6]" />
               </div>
@@ -809,7 +809,7 @@ const AdminDashboardPage = React.memo(
               </p>
             </div>
 
-            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#3B82F6]/50 transition-all shadow-sm text-left">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                 <Activity className="w-16 h-16 text-[#3B82F6]" />
               </div>
@@ -947,7 +947,7 @@ const AdminDashboardPage = React.memo(
               <button
                 onClick={handleClearCache}
                 disabled={processingAction === "cache"}
-                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#3B82F6] hover:bg-[#3B82F6]/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
@@ -983,7 +983,7 @@ const AdminDashboardPage = React.memo(
 
               <button
                 onClick={handleExportLogs}
-                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#3B82F6] hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
+                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
@@ -998,7 +998,7 @@ const AdminDashboardPage = React.memo(
 
               <button
                 onClick={() => navigateTo("/admin/jobs")}
-                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#3B82F6] hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
+                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
@@ -1042,20 +1042,20 @@ const AdminDashboardPage = React.memo(
                 placeholder="Headline/Title"
                 value={announcementTitle}
                 onChange={(e) => setAnnouncementTitle(e.target.value)}
-                className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6]"
+                className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600"
               />
               <textarea
                 placeholder="Announcement message..."
                 rows={2}
                 value={announcementMsg}
                 onChange={(e) => setAnnouncementMsg(e.target.value)}
-                className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6] resize-none"
+                className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600 resize-none"
               />
               <div className="flex gap-2">
                 <select
                   value={announcementType}
                   onChange={(e: any) => setAnnouncementType(e.target.value)}
-                  className="px-2.5 py-1.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] focus:outline-none focus:border-[#3B82F6]"
+                  className="px-2.5 py-1.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] focus:outline-none focus:border-neutral-600"
                 >
                   <option value="info">💡 Info</option>
                   <option value="warning">⚠️ Warning</option>
@@ -1093,7 +1093,7 @@ const AdminDashboardPage = React.memo(
                     placeholder="Search users..."
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
-                    className="bg-[#121212] border border-[#2F2F2F] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6] w-44"
+                    className="bg-[#121212] border border-[#2F2F2F] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600 w-44"
                   />
                 </div>
               </div>
@@ -1111,7 +1111,7 @@ const AdminDashboardPage = React.memo(
                   filteredUsers.map((u) => (
                     <div
                       key={u.id}
-                      className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-center justify-between group hover:border-[#3B82F6]/50 transition-all"
+                      className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-center justify-between group hover:border-neutral-700 transition-all"
                     >
                       <div className="space-y-0.5 min-w-0 flex-1 pr-2">
                         <div className="font-bold text-xs text-[#E5E5E5]">
@@ -1154,7 +1154,7 @@ const AdminDashboardPage = React.memo(
                   recentLogs.map((log) => (
                     <div
                       key={log.id}
-                      className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-start justify-between text-xs hover:border-[#3B82F6]/40 transition-all gap-2"
+                      className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-start justify-between text-xs hover:border-neutral-700 transition-all gap-2"
                     >
                       <div className="space-y-0.5 min-w-0 flex-1">
                         <div className="font-bold text-[#E5E5E5] text-xs">

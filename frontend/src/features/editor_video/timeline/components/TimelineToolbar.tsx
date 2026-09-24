@@ -158,7 +158,7 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         <ToolBtn
           title={formatTooltip("Split Clip", "timeline_split", "S")}
           onClick={onSplit}
-          className="p-1.5 ml-0.5 text-[#3B82F6] hover:bg-[#3B82F6]/20 rounded transition-colors cursor-pointer border border-[#3B82F6]/20 hover:border-[#60A5FA]"
+          className="p-1.5 ml-0.5 text-[#3B82F6] hover:bg-[#3B82F6]/20 rounded transition-colors cursor-pointer border border-[#3B82F6]/20 hover:border-neutral-700"
         >
           <SplitSquareHorizontal className="h-3.5 w-3.5" />
         </ToolBtn>

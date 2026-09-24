@@ -20,7 +20,7 @@ export function CutsRegistrySelector({
         type="button"
         onClick={handlePushToSlices}
         disabled={!hasSelection}
-        className="w-full bg-[#2A2A2A] hover:bg-[#3B82F6] disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-black/50"
+        className="w-full bg-[#2A2A2A] hover:bg-[#333333] disabled:opacity-30 disabled:cursor-not-allowed text-white text-xs font-bold py-2 rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-black/50"
         style={{
           boxShadow: !hasSelection
             ? undefined

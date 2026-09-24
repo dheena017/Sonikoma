@@ -72,7 +72,7 @@ export function PanelCardActions({
             type="button"
             onClick={handleEditClick}
             aria-label="Open Image Editor"
-            className="flex-1 flex items-center justify-center gap-1.5 h-8.5 rounded-xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-300 transition-all duration-150 hover:bg-neutral-800 hover:text-blue-400 hover:border-blue-500/40 active:scale-[0.98] cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-1.5 h-8.5 rounded-xl border border-neutral-800 bg-neutral-900/90 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-300 transition-all duration-150 hover:bg-neutral-800 hover:text-blue-400 hover:border-neutral-700 active:scale-[0.98] cursor-pointer"
           >
             <Edit2 className="h-3.5 w-3.5 shrink-0" />
             <span>Edit</span>

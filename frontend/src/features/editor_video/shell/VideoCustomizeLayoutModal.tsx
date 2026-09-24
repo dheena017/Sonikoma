@@ -112,7 +112,7 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
       onClick={() => toggleField(field)}
       className={`flex items-center justify-between px-4 py-2.5 rounded-xl border border-transparent cursor-pointer transition-all group ${
         highlight
-          ? "hover:bg-[#3B82F6]/15 hover:border-[#3B82F6]/30"
+          ? "hover:bg-[#3B82F6]/15 hover:border-neutral-700"
           : "hover:bg-neutral-800/60 hover:border-neutral-700/50"
       }`}
     >
@@ -247,7 +247,7 @@ const VideoCustomizeLayoutModal: React.FC<VideoCustomizeLayoutModalProps> = ({
         <div className="flex items-center justify-end gap-3 px-6 py-3 border-t border-neutral-700/70 bg-[#18181B]">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-semibold text-xs transition-all shadow-md active:scale-95"
+            className="px-5 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-semibold text-xs transition-all shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
           >
             Done
           </button>

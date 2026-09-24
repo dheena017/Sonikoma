@@ -95,7 +95,7 @@ export default function HorizontalSplitterControls({
                 handleSetSplitPosition(target);
                 setShowSplitPosition(true);
               }}
-              className="px-2 py-1.5 text-neutral-300 hover:text-white bg-[#2A2A2A] hover:bg-[#333333] rounded-xl border border-[#2F2F2F] hover:border-[#3B82F6] cursor-pointer text-[9.5px] font-bold font-mono transition-all active:scale-95 shadow-sm"
+              className="px-2 py-1.5 text-neutral-300 hover:text-white bg-[#2A2A2A] hover:bg-[#333333] rounded-xl border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer text-[9.5px] font-bold font-mono transition-all active:scale-95 shadow-sm"
               title="Fast Nudge Up (-5%)"
             >
               -5%
@@ -110,7 +110,7 @@ export default function HorizontalSplitterControls({
                 handleSetSplitPosition(target);
                 setShowSplitPosition(true);
               }}
-              className="p-1.5 text-neutral-300 hover:text-white bg-[#2A2A2A] hover:bg-[#333333] rounded-xl border border-[#2F2F2F] hover:border-[#3B82F6] cursor-pointer transition-all active:scale-95 flex items-center justify-center shadow-sm"
+              className="p-1.5 text-neutral-300 hover:text-white bg-[#2A2A2A] hover:bg-[#333333] rounded-xl border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer transition-all active:scale-95 flex items-center justify-center shadow-sm"
               title="Nudge Up (-1%)"
             >
               <ChevronUp className="h-3.5 w-3.5" />
@@ -154,7 +154,7 @@ export default function HorizontalSplitterControls({
                 handleSetSplitPosition(target);
                 setShowSplitPosition(true);
               }}
-              className="p-1.5 text-neutral-300 hover:text-white bg-[#2A2A2A] hover:bg-[#333333] rounded-xl border border-[#2F2F2F] hover:border-[#3B82F6] cursor-pointer transition-all active:scale-95 flex items-center justify-center shadow-sm"
+              className="p-1.5 text-neutral-300 hover:text-white bg-[#2A2A2A] hover:bg-[#333333] rounded-xl border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer transition-all active:scale-95 flex items-center justify-center shadow-sm"
               title="Nudge Down (+1%)"
             >
               <ChevronDown className="h-3.5 w-3.5" />
@@ -169,7 +169,7 @@ export default function HorizontalSplitterControls({
                 handleSetSplitPosition(target);
                 setShowSplitPosition(true);
               }}
-              className="px-2 py-1.5 text-neutral-300 hover:text-white bg-[#2A2A2A] hover:bg-[#333333] rounded-xl border border-[#2F2F2F] hover:border-[#3B82F6] cursor-pointer text-[9.5px] font-bold font-mono transition-all active:scale-95 shadow-sm"
+              className="px-2 py-1.5 text-neutral-300 hover:text-white bg-[#2A2A2A] hover:bg-[#333333] rounded-xl border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer text-[9.5px] font-bold font-mono transition-all active:scale-95 shadow-sm"
               title="Fast Nudge Down (+5%)"
             >
               +5%
@@ -181,7 +181,7 @@ export default function HorizontalSplitterControls({
         <button
           type="button"
           onClick={handleAddSplitLine}
-          className="w-full bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA]/40 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 font-mono transition-all cursor-pointer active:scale-98 shadow-sm"
+          className="w-full bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5 font-mono transition-all cursor-pointer active:scale-98 shadow-sm"
         >
           <Plus className="h-4 w-4 text-white" />
           <span>Add Split Line</span>

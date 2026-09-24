@@ -89,7 +89,7 @@ export default function AICreditWalletPage({ addNotification }: AICreditWalletPa
           {CREDIT_PACKAGES.map((pkg) => (
             <div
               key={pkg.id}
-              className="rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] p-5 space-y-4 hover:border-[#3B82F6]/50 hover:bg-[#242424] transition-all flex flex-col justify-between shadow-md"
+              className="rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] p-5 space-y-4 hover:border-neutral-700 hover:bg-[#242424] transition-all flex flex-col justify-between shadow-md"
             >
               <div className="space-y-3">
                 <div className="flex justify-between items-start">

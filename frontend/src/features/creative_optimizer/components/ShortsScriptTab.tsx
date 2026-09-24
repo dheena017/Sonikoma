@@ -89,7 +89,7 @@ export default function ShortsScriptTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-[#3B82F6]/40 transition-all space-y-2 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 rounded-2xl border border-neutral-850 hover:border-neutral-700 transition-all space-y-2 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/30 rounded-lg text-[#3B82F6] shrink-0">
@@ -153,7 +153,7 @@ export default function ShortsScriptTab({
       {(shortsData || hookData) && !loading && (
         <div className="space-y-4 animate-fade-in">
           {hookData && (
-            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+            <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
               <div className="flex justify-between items-center border-b border-neutral-850 pb-2">
                 <div className="flex items-center gap-2">
                   <Flame className="w-4 h-4 text-pink-400" />
@@ -192,7 +192,7 @@ export default function ShortsScriptTab({
 
           {shortsData && (
             <>
-              <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+              <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
                 <div className="flex justify-between items-center border-b border-neutral-850 pb-2">
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4 text-[#3B82F6]" />
@@ -222,12 +222,12 @@ export default function ShortsScriptTab({
                     })
                   }
                   rows={5}
-                  className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-3 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-[#3B82F6]/50 resize-y"
+                  className="w-full text-[11px] font-sans text-neutral-200 bg-neutral-950 p-3 rounded-xl leading-relaxed border border-neutral-800 shadow-inner outline-none focus:border-neutral-600 resize-y"
                 />
               </div>
 
               {shortsData.visual_milestones && (
-                <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
+                <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4 space-y-3 shadow-lg">
                   <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest block border-b border-neutral-850 pb-2">
                     Visual Milestones & Frame Pacing
                   </span>

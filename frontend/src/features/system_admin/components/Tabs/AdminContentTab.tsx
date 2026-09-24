@@ -110,13 +110,13 @@ export function AdminContentTab({
               placeholder="Search by Title, Author, or Creator..."
               value={projectSearch}
               onChange={(e) => setProjectSearch(e.target.value)}
-              className="w-full bg-[#121212] border border-[#2F2F2F] text-xs sm:text-sm text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 placeholder:text-[#6B7280] transition-all"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-xs sm:text-sm text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700 placeholder:text-[#6B7280] transition-all"
             />
           </div>
           <select
             value={moderationFilter}
             onChange={(e) => setModerationFilter(e.target.value)}
-            className="bg-[#121212] border border-[#2F2F2F] text-xs sm:text-sm text-[#E5E5E5] rounded-xl px-4 py-2.5 outline-none focus:border-[#3B82F6] cursor-pointer transition-all font-mono"
+            className="bg-[#121212] border border-[#2F2F2F] text-xs sm:text-sm text-[#E5E5E5] rounded-xl px-4 py-2.5 outline-none focus:border-neutral-600 cursor-pointer transition-all font-mono"
           >
             <option value="all">All Statuses</option>
             <option value="clean">Clean</option>
@@ -369,7 +369,7 @@ export function AdminContentTab({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="e.g. Terms of Service violation, User request, Ticket #1234..."
-                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-3 text-sm text-white h-24 focus:border-[#3B82F6] outline-none transition-colors"
+                className="w-full bg-[#121212] border border-[#2F2F2F] rounded-xl p-3 text-sm text-white h-24 focus:border-neutral-600 outline-none transition-colors"
               />
             </div>
 

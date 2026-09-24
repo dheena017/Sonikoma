@@ -61,7 +61,7 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
         </div>
 
         {/* Upload Zone */}
-        <div className="border-2 border-dashed border-white/15 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:border-[#3B82F6]/50 hover:bg-[#3B82F6]/5 transition-all cursor-pointer">
+        <div className="border-2 border-dashed border-white/15 rounded-xl p-6 flex flex-col items-center justify-center gap-2 hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all cursor-pointer">
           <Upload className="h-6 w-6 text-[#3B82F6]" />
           <span className="text-xs text-neutral-300 font-medium">
             Drag and drop files here, or click to upload
@@ -84,7 +84,7 @@ const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
                   onSelectMedia(item);
                   onClose();
                 }}
-                className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-[#3B82F6]/20 hover:border-[#60A5FA] transition-all cursor-pointer flex flex-col items-center gap-1.5 text-center group"
+                className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-[#3B82F6]/20 hover:border-neutral-700 transition-all cursor-pointer flex flex-col items-center gap-1.5 text-center group"
               >
                 {item.type === "image" && (
                   <Image className="h-5 w-5 text-[#3B82F6] group-hover:scale-110 transition-transform" />

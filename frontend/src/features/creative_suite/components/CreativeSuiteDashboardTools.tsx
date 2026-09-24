@@ -31,13 +31,13 @@ const CreativeSuiteDashboardTools: React.FC<
           <div
             key={tool.id}
             onClick={() => navigateTo(tool.path)}
-            className={`bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-5 hover:border-[#3B82F6]/60 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between group relative shadow-md ${
+            className={`bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-5 hover:border-neutral-700 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 cursor-pointer flex flex-col justify-between group relative shadow-md ${
               isLocked ? "opacity-75 hover:border-[#EF4444]/40" : ""
             }`}
           >
             <div>
               <div className="flex justify-between items-start mb-3">
-                <div className="p-2.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-[#9CA3AF] group-hover:text-[#3B82F6] group-hover:border-[#3B82F6]/40 group-hover:bg-[#3B82F6]/10 transition-all shadow-inner">
+                <div className="p-2.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-[#9CA3AF] group-hover:text-[#3B82F6] group-hover:border-neutral-700 group-hover:bg-[#3B82F6]/10 transition-all shadow-inner">
                   <Icon className="w-4.5 h-4.5" />
                 </div>
 

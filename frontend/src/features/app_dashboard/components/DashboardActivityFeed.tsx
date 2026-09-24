@@ -119,7 +119,7 @@ export default function DashboardActivityFeed({
                   );
                 }
               }}
-              className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 hover:bg-[#262626] hover:-translate-y-0.5 transition-all group cursor-pointer shadow-sm"
+              className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 hover:bg-[#262626] hover:-translate-y-0.5 transition-all group cursor-pointer shadow-sm"
             >
               {/* Event Details */}
               <div className="min-w-0 flex-1">
@@ -149,7 +149,7 @@ export default function DashboardActivityFeed({
                   {act.time}
                 </span>
                 {act.projectId && (
-                  <div className="p-1.5 rounded-lg bg-[#121212] border border-[#2F2F2F] group-hover:border-[#3B82F6] group-hover:bg-[#3B82F6] text-[#9CA3AF] group-hover:text-white transition-all">
+                  <div className="p-1.5 rounded-lg bg-[#121212] border border-[#2F2F2F] group-hover:border-neutral-700 group-hover:bg-[#2A2A35] text-[#9CA3AF] group-hover:text-white transition-all">
                     <ArrowUpRight className="w-3.5 h-3.5" />
                   </div>
                 )}

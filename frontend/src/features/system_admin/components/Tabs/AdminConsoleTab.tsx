@@ -146,14 +146,14 @@ export function AdminConsoleTab() {
               placeholder="Filter logs..."
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-[#3B82F6] w-48 font-sans"
+              className="bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-neutral-600 w-48 font-sans"
             />
           </div>
 
           <select
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
-            className="bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-xl px-3 py-2 focus:outline-none focus:border-[#3B82F6] font-sans"
+            className="bg-[#121212] border border-[#2F2F2F] text-xs text-[#E5E5E5] rounded-xl px-3 py-2 focus:outline-none focus:border-neutral-600 font-sans"
           >
             <option value="ALL">All Levels</option>
             <option value="INFO">Info</option>

@@ -192,7 +192,7 @@ export default function ScriptDramatizerForm({
         <div className="flex items-center gap-2">
           <button
             onClick={handleSyncTimeline}
-            className="px-3 py-2 bg-[#121212] hover:bg-[#252525] text-[#E5E5E5] border border-[#2F2F2F] hover:border-[#3B82F6]/60 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+            className="px-3 py-2 bg-[#121212] hover:bg-[#252525] text-[#E5E5E5] border border-[#2F2F2F] hover:border-neutral-700 rounded-xl text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
             title="Reload raw speech texts from storyboard panels"
           >
             <RotateCcw className="w-3.5 h-3.5 text-[#9CA3AF]" />
@@ -230,7 +230,7 @@ export default function ScriptDramatizerForm({
                     key={g}
                     type="button"
                     onClick={() => setGenre(g)}
-                    className="px-1.5 py-0.5 rounded text-[8px] font-mono bg-[#1E1E1E] text-[#9CA3AF] border border-[#2F2F2F] hover:border-[#3B82F6] hover:text-white"
+                    className="px-1.5 py-0.5 rounded text-[8px] font-mono bg-[#1E1E1E] text-[#9CA3AF] border border-[#2F2F2F] hover:border-neutral-700 hover:text-white"
                   >
                     {g}
                   </button>
@@ -241,7 +241,7 @@ export default function ScriptDramatizerForm({
               type="text"
               value={genre}
               onChange={(e) => setGenre(e.target.value)}
-              className="w-full bg-[#1E1E1E] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium"
+              className="w-full bg-[#1E1E1E] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-neutral-600 transition-all font-sans font-medium"
             />
           </div>
 
@@ -253,7 +253,7 @@ export default function ScriptDramatizerForm({
               rows={2}
               value={context}
               onChange={(e) => setContext(e.target.value)}
-              className="w-full bg-[#1E1E1E] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans leading-relaxed resize-y"
+              className="w-full bg-[#1E1E1E] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-neutral-600 transition-all font-sans leading-relaxed resize-y"
             />
           </div>
 
@@ -313,7 +313,7 @@ export default function ScriptDramatizerForm({
                       setRawLines(copy);
                     }}
                     placeholder={`Type speech dialogue line #${idx + 1}...`}
-                    className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-200 outline-none focus:border-[#3B82F6] transition-all font-sans leading-relaxed resize-none"
+                    className="w-full bg-neutral-950 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-200 outline-none focus:border-neutral-600 transition-all font-sans leading-relaxed resize-none"
                   />
                 </div>
               ))}
@@ -340,7 +340,7 @@ export default function ScriptDramatizerForm({
                 {results.map((resLine, idx) => (
                   <div
                     key={idx}
-                    className="group relative bg-neutral-900 p-3 rounded-xl border border-neutral-800 hover:border-[#3B82F6]/40 transition-all space-y-2"
+                    className="group relative bg-neutral-900 p-3 rounded-xl border border-neutral-800 hover:border-neutral-700 transition-all space-y-2"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-[9px] font-mono text-[#3B82F6] font-bold">
@@ -416,7 +416,7 @@ export default function ScriptDramatizerForm({
             {results.length > 0 && setPanels && (
               <button
                 onClick={handleApplyToTimeline}
-                className="mt-4 w-full py-2.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-95 border border-[#3B82F6]/30"
+                className="mt-4 w-full py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-mono font-bold transition-all shadow-lg flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.01] active:scale-95 border border-[#3B82F6]/30"
               >
                 <Check className="h-4 w-4 text-emerald-300" />
                 <span>Apply Dramatized Script to All Timeline Panels</span>

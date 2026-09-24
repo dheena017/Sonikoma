@@ -103,7 +103,7 @@ export default function ForgotPasswordPage({
                   <Tooltip text="Go to Sign In" placement="bottom">
                     <button
                       onClick={onNavigateToLogin}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 transition-all cursor-pointer text-sm"
+                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 transition-all cursor-pointer text-sm"
                     >
                       Go to Login
                     </button>
@@ -126,7 +126,7 @@ export default function ForgotPasswordPage({
                       required
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono tracking-widest text-center"
+                      className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-mono tracking-widest text-center"
                       placeholder="6-digit code"
                     />
                   </div>
@@ -144,7 +144,7 @@ export default function ForgotPasswordPage({
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
                         placeholder="Enter new password"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
@@ -175,7 +175,7 @@ export default function ForgotPasswordPage({
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
                         placeholder="Confirm new password"
                       />
                     </div>
@@ -185,7 +185,7 @@ export default function ForgotPasswordPage({
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
                     >
                       {isLoading ? (
                         <>
@@ -230,7 +230,7 @@ export default function ForgotPasswordPage({
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
                         placeholder="name@example.com"
                       />
                     </div>
@@ -240,7 +240,7 @@ export default function ForgotPasswordPage({
                     <button
                       type="submit"
                       disabled={isLoading || !isEmailValid}
-                      className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
                     >
                       {isLoading ? (
                         <>

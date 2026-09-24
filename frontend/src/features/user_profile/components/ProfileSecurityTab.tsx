@@ -285,7 +285,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-mono"
                 />
               </div>
 
@@ -312,7 +312,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-mono"
                 />
 
                 {/* Password strength checklist and bar */}
@@ -427,7 +427,7 @@ export default function ProfileSecurityTab({
                     }))
                   }
                   placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all font-mono"
+                  className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-mono"
                 />
               </div>
             </div>
@@ -489,7 +489,7 @@ export default function ProfileSecurityTab({
               {!show2faSetup ? (
                 <button
                   onClick={() => setShow2faSetup(true)}
-                  className="w-full bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
+                  className="w-full bg-[#2A2A2A] hover:bg-[#333333] text-white font-bold py-2 rounded-xl text-[10px] transition-all cursor-pointer"
                 >
                   Configure 2FA Protection
                 </button>
@@ -525,7 +525,7 @@ export default function ProfileSecurityTab({
                         setOtpCode(e.target.value.replace(/\D/g, ""))
                       }
                       placeholder="Enter 6-digit code"
-                      className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs text-white focus:outline-none font-mono text-center tracking-[0.2em]"
+                      className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-2 px-3 text-xs text-white focus:outline-none font-mono text-center tracking-[0.2em]"
                     />
                     {otpError && (
                       <p className="text-[9px] text-rose-400 font-bold ml-1">
@@ -544,7 +544,7 @@ export default function ProfileSecurityTab({
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-[#2A2A2A] hover:bg-[#3B82F6] text-white py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                      className="flex-1 bg-[#2A2A2A] hover:bg-[#333333] text-white py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
                     >
                       Verify & Activate
                     </button>
@@ -632,7 +632,7 @@ export default function ProfileSecurityTab({
                 setCurrentPage(1);
               }}
               placeholder="Search event or IP..."
-              className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all placeholder:text-neutral-700"
+              className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-2 px-3 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all placeholder:text-neutral-700"
             />
           </div>
         </div>

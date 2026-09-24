@@ -384,14 +384,14 @@ export default function ProfileProjectsTab({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search projects..."
-            className="w-full bg-black/40 border border-white/5 focus:border-[#3B82F6]/50 rounded-xl py-2 pl-9 pr-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all placeholder:text-neutral-700"
+            className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-2 pl-9 pr-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all placeholder:text-neutral-700"
           />
         </div>
       </div>
 
       {/* Statistics Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-[#0c0c0e]/40 border border-white/5 hover:border-[#3B82F6]/20 backdrop-blur-md rounded-2xl p-4 transition-all duration-300 text-left shadow-lg">
+        <div className="bg-[#0c0c0e]/40 border border-white/5 hover:border-neutral-700 backdrop-blur-md rounded-2xl p-4 transition-all duration-300 text-left shadow-lg">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">
               Total Projects
@@ -552,7 +552,7 @@ export default function ProfileProjectsTab({
 
           <button
             onClick={handleExportJSON}
-            className="flex items-center gap-1.5 py-1.5 px-4 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white border border-[#3B82F6]/30 hover:border-[#60A5FA]/50 rounded-xl text-[10px] font-extrabold transition-all duration-300 cursor-pointer shadow-md shadow-black/50 active:scale-95"
+            className="flex items-center gap-1.5 py-1.5 px-4 bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#3B82F6]/30 hover:border-neutral-700 rounded-xl text-[10px] font-extrabold transition-all duration-300 cursor-pointer shadow-md shadow-black/50 active:scale-95"
             title="Export project data as JSON file"
           >
             <Download className="w-3.5 h-3.5 text-[#3B82F6]" />

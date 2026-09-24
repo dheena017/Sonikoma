@@ -95,7 +95,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                 <Mic className="h-3.5 w-3.5 text-[#3B82F6]" />
                 Live Microphone Voiceover
               </h4>
-              <span className="text-[10px] font-mono text-[#60A5FA] bg-[#2A2A2A] px-2 py-0.5 rounded-full border border-[#2F2F2F]">
+              <span className="text-[10px] font-mono text-[#60A5FA] bg-[#3B82F6]/15 px-2 py-0.5 rounded-full border border-[#3B82F6]/30">
                 100% Real Browser Audio
               </span>
             </div>
@@ -171,7 +171,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={handleAddRecordedVoiceToTimeline}
-                  className="w-full py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md hover:shadow-black/50 transition-all"
+                  className="w-full py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white border border-[#60A5FA]/40 text-xs font-mono font-bold flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-blue-500/25 transition-all active:scale-95"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Voice Recording to A3 Track
@@ -195,7 +195,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
             ].map((v) => (
               <div
                 key={v.id}
-                className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 hover:border-[#3B82F6]/60 flex items-center justify-between shadow-sm transition-all"
+                className="p-3 rounded-xl bg-neutral-900/80 border border-neutral-800 hover:border-neutral-700 flex items-center justify-between shadow-sm transition-all"
               >
                 <div className="flex items-center gap-2.5">
                   <Wand2 className="h-4 w-4 text-[#3B82F6] shrink-0" />
@@ -230,7 +230,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                       }
                       onTriggerFeedback(`Set active voice actor to ${v.name}`);
                     }}
-                    className="px-2.5 py-1 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-white text-[10px] font-mono font-bold transition-colors cursor-pointer"
+                    className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[10px] font-mono font-bold transition-all shadow-sm shadow-blue-500/25 cursor-pointer active:scale-95"
                   >
                     Select
                   </button>

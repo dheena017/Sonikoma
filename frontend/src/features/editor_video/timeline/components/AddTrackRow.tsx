@@ -14,7 +14,7 @@ const AddTrackRow: React.FC<AddTrackRowProps> = ({ onOpenMediaPicker }) => (
       <button
         type="button"
         onClick={onOpenMediaPicker || (() => {})}
-        className="w-full h-6 rounded flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold text-neutral-400 hover:text-white bg-white/[0.04] hover:bg-[#3B82F6]/20 border border-white/10 hover:border-[#3B82F6]/40 transition-all cursor-pointer"
+        className="w-full h-6 rounded flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold text-neutral-400 hover:text-white bg-white/[0.04] hover:bg-[#3B82F6]/20 border border-white/10 hover:border-neutral-700 transition-all cursor-pointer"
         title="Add Track / Media"
       >
         <Plus className="h-3 w-3 text-[#3B82F6]" />

@@ -23,7 +23,7 @@ const CreativeSuiteDashboardStats: React.FC<
         return (
           <div
             key={idx}
-            className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-5 hover:border-[#3B82F6]/50 hover:bg-[#242424] transition-all duration-200 shadow-md group"
+            className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-5 hover:border-neutral-700 hover:bg-[#242424] transition-all duration-200 shadow-md group"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`p-2.5 rounded-xl border ${stat.color}`}>

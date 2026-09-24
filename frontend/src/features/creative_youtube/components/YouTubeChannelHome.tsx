@@ -325,7 +325,7 @@ export default function YouTubeChannelHome({
 
           <button
             onClick={() => onNavigateTab("playlists")}
-            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-[#2A2A2A] to-neutral-900/80 hover:from-[#2A2A2A] hover:to-neutral-850 border border-[#3B82F6]/30 hover:border-[#3B82F6]/60 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
+            className="flex items-center gap-3 p-3.5 bg-gradient-to-r from-[#2A2A2A] to-neutral-900/80 hover:from-[#2A2A2A] hover:to-neutral-850 border border-[#3B82F6]/30 hover:border-neutral-700 rounded-2xl transition-all cursor-pointer group shadow-lg text-left"
           >
             <div className="p-2.5 rounded-xl bg-[#2A2A2A] text-white shadow-md shadow-sm shrink-0 group-hover:scale-105 transition-transform">
               <FolderPlus className="w-4 h-4" />
@@ -657,7 +657,7 @@ export default function YouTubeChannelHome({
                       onClick={() =>
                         onNavigateTab && onNavigateTab("playlists")
                       }
-                      className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-[#3B82F6]/50 hover:shadow-xl transition-all cursor-pointer flex flex-col"
+                      className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-neutral-700 hover:shadow-xl transition-all cursor-pointer flex flex-col"
                     >
                       <div className="relative aspect-video bg-neutral-950 flex items-center justify-center overflow-hidden">
                         {pl.thumbnail ? (
@@ -703,7 +703,7 @@ export default function YouTubeChannelHome({
                 {onNavigateTab && (
                   <button
                     onClick={() => onNavigateTab("playlists")}
-                    className="px-5 py-2.5 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
+                    className="px-5 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
                   >
                     <FolderPlus className="w-4 h-4" />
                     <span>Create Playlist</span>

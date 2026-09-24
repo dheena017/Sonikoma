@@ -67,7 +67,7 @@ export default function MergePanelOptions({
               className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer ${
                 direction === "prev"
                   ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40"
-                  : "bg-[#2A2A2A] text-neutral-400 hover:text-white hover:border-[#3B82F6]"
+                  : "bg-[#2A2A2A] text-neutral-400 hover:text-white hover:border-neutral-700"
               }`}
             >
               <ArrowUp className="h-2.5 w-2.5" /> Prev
@@ -78,7 +78,7 @@ export default function MergePanelOptions({
               className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer ${
                 direction === "next"
                   ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40"
-                  : "bg-[#2A2A2A] text-neutral-400 hover:text-white hover:border-[#3B82F6]"
+                  : "bg-[#2A2A2A] text-neutral-400 hover:text-white hover:border-neutral-700"
               }`}
             >
               Next <ArrowDown className="h-2.5 w-2.5" />
@@ -98,7 +98,7 @@ export default function MergePanelOptions({
               className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer ${
                 layout === "vertical"
                   ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40"
-                  : "bg-[#2A2A2A] text-neutral-400 hover:text-white hover:border-[#3B82F6]"
+                  : "bg-[#2A2A2A] text-neutral-400 hover:text-white hover:border-neutral-700"
               }`}
             >
               <Rows className="h-2.5 w-2.5" /> Vert
@@ -109,7 +109,7 @@ export default function MergePanelOptions({
               className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[9px] font-mono font-bold transition-all cursor-pointer ${
                 layout === "horizontal"
                   ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40"
-                  : "bg-[#2A2A2A] text-neutral-400 hover:text-white hover:border-[#3B82F6]"
+                  : "bg-[#2A2A2A] text-neutral-400 hover:text-white hover:border-neutral-700"
               }`}
             >
               <Columns className="h-2.5 w-2.5" /> Horz
@@ -147,7 +147,7 @@ export default function MergePanelOptions({
             value={spacingColor}
             onChange={(e) => setSpacingColor(e.target.value)}
             disabled={spacing === 0}
-            className="w-full bg-[#121212] border border-[#2F2F2F] text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none disabled:opacity-40 focus:border-[#3B82F6]"
+            className="w-full bg-[#121212] border border-[#2F2F2F] text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none disabled:opacity-40 focus:border-neutral-600"
           >
             <option value="white">White</option>
             <option value="black">Black</option>
@@ -165,7 +165,7 @@ export default function MergePanelOptions({
           <select
             value={scaleToFit ? "fit" : "original"}
             onChange={(e) => setScaleToFit(e.target.value === "fit")}
-            className="w-full bg-[#121212] border border-[#2F2F2F] text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none focus:border-[#3B82F6]"
+            className="w-full bg-[#121212] border border-[#2F2F2F] text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none focus:border-neutral-600"
           >
             <option value="fit">Scale to Fit</option>
             <option value="original">Keep Original Size</option>
@@ -179,7 +179,7 @@ export default function MergePanelOptions({
             value={alignMode}
             onChange={(e) => setAlignMode(e.target.value as any)}
             disabled={scaleToFit}
-            className="w-full bg-[#121212] border border-[#2F2F2F] text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none disabled:opacity-40 focus:border-[#3B82F6]"
+            className="w-full bg-[#121212] border border-[#2F2F2F] text-neutral-300 rounded-lg px-2 py-1 text-[9px] font-mono focus:outline-none disabled:opacity-40 focus:border-neutral-600"
           >
             <option value="center">Center</option>
             <option value="start">

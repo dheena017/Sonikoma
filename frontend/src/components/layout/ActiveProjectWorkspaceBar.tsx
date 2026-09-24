@@ -127,7 +127,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
             </button>
             <button
               onClick={() => setDrawerOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2A2A2A] hover:bg-[#3B82F6] text-[#60A5FA] hover:text-white border border-[#3B82F6]/30 transition-all text-xs font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2A2A2A] hover:bg-[#333333] text-[#60A5FA] hover:text-white border border-[#3B82F6]/30 transition-all text-xs font-medium"
             >
               <FolderSync className="w-3.5 h-3.5" />
               <span>Select Another</span>
@@ -188,7 +188,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
 
           <button
             onClick={() => setDrawerOpen(true)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-medium shadow-md shadow-black/50 transition-all text-xs"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium shadow-md shadow-black/50 transition-all text-xs"
           >
             <FolderOpen className="w-3.5 h-3.5" />
             <span>Select Active Project</span>
@@ -384,7 +384,7 @@ export const ActiveProjectWorkspaceBar: React.FC<
             <Tooltip text="Switch or Activate another Project" placement="bottom">
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-medium shadow-sm transition-all text-xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium shadow-sm transition-all text-xs cursor-pointer"
                 aria-label="Switch Project"
               >
                 <FolderSync className="w-3.5 h-3.5" />

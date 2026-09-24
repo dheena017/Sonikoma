@@ -141,7 +141,7 @@ export function AdminExplorerTab({
                 }
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-[#3B82F6] font-sans"
+                className="w-full bg-[#121212] border border-[#2F2F2F] text-sm text-[#E5E5E5] rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:border-neutral-600 font-sans"
               />
             </div>
           </div>

@@ -103,7 +103,7 @@ export default function RegisterForm({
               <button
                 disabled={isSocialLoading || isLoading}
                 onClick={() => handleSocialRegister("Google")}
-                className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-bold text-sm transition-all duration-200 cursor-pointer shadow-md hover:shadow-blue-500/20 active:scale-[0.99] group"
+                className="w-full flex items-center justify-center gap-3 py-3.5 px-5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-60 text-white font-bold text-sm transition-all duration-200 cursor-pointer shadow-md hover:shadow-blue-500/20 active:scale-[0.99] group"
               >
                 {isSocialLoading ? (
                   <>
@@ -174,7 +174,7 @@ export default function RegisterForm({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
                     placeholder="Your Name"
                   />
                 </div>
@@ -205,7 +205,7 @@ export default function RegisterForm({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
                     placeholder="name@example.com"
                   />
                 </div>
@@ -225,7 +225,7 @@ export default function RegisterForm({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-blue-500 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
                     placeholder="Create password (8+ characters)"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
@@ -282,7 +282,7 @@ export default function RegisterForm({
                 <button
                   type="submit"
                   disabled={isLoading || !isFormValid}
-                  className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
+                  className="w-full bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
                 >
                   {isLoading ? (
                     <>

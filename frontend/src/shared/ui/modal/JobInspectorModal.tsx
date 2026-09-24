@@ -238,7 +238,7 @@ export default function JobInspectorModal({
                   {job.result.images.slice(0, 36).map((img: any, idx: number) => (
                     <div
                       key={idx}
-                      className="relative group rounded-xl overflow-hidden border border-neutral-800 aspect-[3/4] bg-neutral-950 hover:border-blue-500/50 transition-all"
+                      className="relative group rounded-xl overflow-hidden border border-neutral-800 aspect-[3/4] bg-neutral-950 hover:border-neutral-700 transition-all"
                     >
                       <img
                         src={img.proxy_url || img.url}

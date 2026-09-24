@@ -342,7 +342,7 @@ export default function CropCanvas({
   return (
     <div
       ref={scrollParentRef}
-      className={`relative border border-white/10 hover:border-[#3B82F6]/30 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] ${
+      className={`relative border border-white/10 hover:border-neutral-700 rounded-2xl bg-[#0a0b10] bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:24px_24px] ${
         zoom > 1 ? "overflow-auto" : "overflow-hidden"
       } flex-1 h-0 flex items-center justify-center select-none transition-all shadow-[0_10px_40px_rgba(0,0,0,0.7)]`}
     >

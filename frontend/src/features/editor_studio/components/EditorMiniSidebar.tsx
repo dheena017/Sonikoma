@@ -90,9 +90,9 @@ const EditorMiniSidebarInner = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Left edge active indicator bar */}
         <div
-          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
+          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
             isActive
-              ? "h-5 bg-[#3B82F6]  opacity-100"
+              ? "h-6 bg-[#3B82F6] opacity-100 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -106,14 +106,14 @@ const EditorMiniSidebarInner = ({
             setHover(true);
           }}
           onMouseLeave={() => setHover(false)}
-          className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none"
+          className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
           aria-label={tool.label}
         >
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               isActive
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white shadow-lg shadow-blue-500/25 scale-105"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 "
             }`}
           >
             <Icon
@@ -125,7 +125,7 @@ const EditorMiniSidebarInner = ({
 
           {/* Crop Slices Count Badge */}
           {tool.key === "crop" && slicesCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-[#3B82F6] text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
+            <span className="absolute -top-1 -right-1 h-5 min-w-[20px] bg-[#3B82F6] text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1.5 border-2 border-neutral-950 shadow-md z-20">
               {slicesCount}
             </span>
           )}
@@ -204,7 +204,7 @@ const EditorMiniSidebarInner = ({
                 {gi > 0 && (
                   <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
                 )}
-                <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
+                <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-neutral-400 select-none text-center w-full px-1">
                   {group.label}
                 </span>
               </div>
@@ -222,12 +222,13 @@ const EditorMiniSidebarInner = ({
 
   const menuGroups: Array<{ label: string; items: SidebarMenuItem[] }> = [
     {
-      label: "Views",
+      label: "Main",
       items: [
         {
-          id: "monitor",
-          label: "Video Monitor",
-          icon: Film,
+          id: "storyboard",
+          label: "Storyboard",
+          icon: Layers,
+          badge: panelsCount > 0 ? panelsCount : undefined,
         },
         {
           id: "assets",
@@ -236,15 +237,14 @@ const EditorMiniSidebarInner = ({
           badge: scrapedCount > 0 ? scrapedCount : undefined,
         },
         {
-          id: "storyboard",
-          label: "Storyboard",
-          icon: Layers,
-          badge: panelsCount > 0 ? panelsCount : undefined,
+          id: "monitor",
+          label: "Video Monitor",
+          icon: Film,
         },
       ],
     },
     {
-      label: "Tools",
+      label: "Studios",
       items: [
         {
           id: "video-editor",
@@ -304,9 +304,9 @@ const EditorMiniSidebarInner = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Left edge active indicator bar */}
         <div
-          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
+          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
             isActive
-              ? "h-5 bg-[#3B82F6]  opacity-100"
+              ? "h-6 bg-[#3B82F6] opacity-100 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
               : "h-0 bg-transparent opacity-0"
           }`}
         />
@@ -386,14 +386,14 @@ const EditorMiniSidebarInner = ({
             setHover(true);
           }}
           onMouseLeave={() => setHover(false)}
-          className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none"
+          className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
           aria-label={item.label}
         >
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
               isActive
-                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105"
-                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-[#3B82F6] group-hover:text-white"
+                ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105 shadow-lg shadow-blue-500/25"
+                : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 "
             }`}
           >
             <Icon
@@ -405,7 +405,7 @@ const EditorMiniSidebarInner = ({
 
           {/* Notification Badge */}
           {item.badge !== undefined && (
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-[16px] bg-[#3B82F6] text-[10px] text-white font-black rounded-full flex items-center justify-center px-1 border border-neutral-950 shadow-md z-20">
+            <span className="absolute -top-1 -right-1 h-5 min-w-[20px] bg-[#3B82F6] text-[10px] text-white font-bold rounded-full flex items-center justify-center px-1.5 border-2 border-neutral-950 shadow-md z-20">
               {item.badge}
             </span>
           )}
@@ -414,7 +414,7 @@ const EditorMiniSidebarInner = ({
           {item.isProcessing && (
             <>
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-blue-400 animate-ping z-20 opacity-75" />
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-blue-500 z-20 shadow-[0_0_6px_rgba(59,130,246,1)]" />
+              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-blue-500 z-20 shadow-sm" />
             </>
           )}
         </button>
@@ -426,7 +426,7 @@ const EditorMiniSidebarInner = ({
   return (
     <aside
       style={{ top: `${topOffsetPx}px` }}
-      className="hidden lg:flex fixed bottom-0 left-0 w-20 bg-[#0c0d12]/95 backdrop-blur-2xl border-r border-white/10 flex-col items-center py-3 z-[90] shadow-xl select-none overflow-hidden"
+      className="hidden lg:flex fixed bottom-0 left-0 w-20 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] flex-col items-center py-3 z-[90] shadow-xl select-none overflow-hidden"
     >
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
@@ -441,9 +441,9 @@ const EditorMiniSidebarInner = ({
               }}
             >
               {gi > 0 && (
-                <div className="w-6 h-[1px] bg-neutral-800/80 rounded-full mb-1.5" />
+                <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
               )}
-              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#3B82F6] select-none text-center w-full px-1">
+              <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#9CA3AF] select-none text-center w-full px-1">
                 {group.label}
               </span>
             </div>
@@ -457,8 +457,8 @@ const EditorMiniSidebarInner = ({
         ))}
       </div>
 
-      {/* Bottom Action Footer - Return to Workspace */}
-      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-white/10 shrink-0">
+      {/* Bottom Action Footer - Creative Suite / Return */}
+      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-[#2F2F2F] shrink-0">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={handleReturnToWorkspace}
@@ -468,9 +468,9 @@ const EditorMiniSidebarInner = ({
             }}
             onMouseLeave={() => setReturnHover(false)}
             aria-label="Return to Workspace"
-            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all  hover: active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center"
+            className="w-11 h-11 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white transition-all shadow-lg shadow-blue-500/25 active:scale-90 border border-[#60A5FA]/40 cursor-pointer flex items-center justify-center group"
           >
-            <ExternalLink className="w-[18px] h-[18px] shrink-0" strokeWidth={2.2} />
+            <ExternalLink className="w-[18px] h-[18px] shrink-0 text-white" />
           </button>
           <TooltipPortal
             text="Return to Workspace"

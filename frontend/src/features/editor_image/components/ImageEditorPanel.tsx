@@ -193,7 +193,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(-90)}
                 disabled={isTransforming}
                 title="Rotate 90° Counter-Clockwise"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <RotateCcw className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">-90°</span>
@@ -204,7 +204,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(180)}
                 disabled={isTransforming}
                 title="Rotate 180°"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <ChevronsUpDown className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">180°</span>
@@ -215,7 +215,7 @@ export default function ImageEditorPanel({
                 onClick={() => onRotate(90)}
                 disabled={isTransforming}
                 title="Rotate 90° Clockwise"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <RotateCw className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">+90°</span>
@@ -226,7 +226,7 @@ export default function ImageEditorPanel({
                 onClick={() => onFlip("h")}
                 disabled={isTransforming}
                 title="Flip Horizontal"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <FlipHorizontal className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">Flip H</span>
@@ -237,7 +237,7 @@ export default function ImageEditorPanel({
                 onClick={() => onFlip("v")}
                 disabled={isTransforming}
                 title="Flip Vertical"
-                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-[#3B82F6] rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
+                className="flex flex-col items-center justify-center gap-1 py-3 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 rounded-2xl text-neutral-300 hover:text-white transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-sm"
               >
                 <FlipVertical className="h-4 w-4" />
                 <span className="text-[7.5px] font-mono font-bold">Flip V</span>
@@ -266,7 +266,7 @@ export default function ImageEditorPanel({
                     className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${
                       active
                         ? "bg-[#3B82F6] border-[#60A5FA]/40 text-white font-bold"
-                        : "bg-[#2A2A2A] border-[#2F2F2F] text-neutral-400 hover:border-[#3B82F6] hover:text-white"
+                        : "bg-[#2A2A2A] border-[#2F2F2F] text-neutral-400 hover:border-neutral-700 hover:text-white"
                     }`}
                   >
                     <div className="text-xs font-bold uppercase tracking-[0.18em] font-mono">

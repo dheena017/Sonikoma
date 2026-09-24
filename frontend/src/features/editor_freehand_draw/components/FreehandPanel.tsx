@@ -188,7 +188,7 @@ export default function FreehandPanel({
           type="button"
           onClick={handleEyedropper}
           title="Pick Color from Screen"
-          className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-[#3B82F6]/50 hover:bg-neutral-800 text-[#3B82F6] transition-all cursor-pointer"
+          className="p-1.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:bg-neutral-800 text-[#3B82F6] transition-all cursor-pointer"
         >
           <Pipette className="h-3.5 w-3.5" />
         </button>
@@ -405,7 +405,7 @@ export default function FreehandPanel({
                 setLocalFont(e.target.value);
                 setFontFamily?.(e.target.value);
               }}
-              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 text-[10px] font-mono rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[#3B82F6]"
+              className="w-full bg-neutral-900 border border-neutral-800 text-neutral-200 text-[10px] font-mono rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-neutral-600"
             >
               {FONT_OPTIONS.map((f) => (
                 <option key={f.value} value={f.value}>

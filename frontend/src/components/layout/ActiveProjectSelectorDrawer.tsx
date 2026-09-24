@@ -474,7 +474,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         setDrawerOpen(false);
                         navigateTo("/scraper");
                       }}
-                      className="px-3.5 py-2 bg-[#2A2A2A] hover:bg-[#3B82F6] border border-[#2F2F2F] hover:border-[#60A5FA] text-white rounded-xl text-xs font-bold transition-all shadow-sm hover: shrink-0 flex items-center gap-1.5 cursor-pointer active:scale-95 group"
+                      className="px-3.5 py-2 bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm hover: shrink-0 flex items-center gap-1.5 cursor-pointer active:scale-95 group"
                     >
                       <PlusCircle className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white transition-colors" />
                       <span>New Project</span>
@@ -535,7 +535,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
               </div>
 
               {/* Title, Source, Cover & Actions */}
-              <div className="bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/60 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-md transition-all">
+              <div className="bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-md transition-all">
                 <div className="flex items-center gap-3.5 min-w-0">
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-black border border-[#2F2F2F] shrink-0 relative shadow-md">
                     {activeCover ? (
@@ -685,7 +685,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
 
               {/* Real Stats Grid — 4 columns with contextual data */}
               <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 p-2.5 rounded-xl transition-all">
+                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 p-2.5 rounded-xl transition-all">
                   <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
                     Panels
                   </span>
@@ -693,7 +693,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     {activePanelsCount}
                   </span>
                 </div>
-                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 p-2.5 rounded-xl transition-all">
+                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 p-2.5 rounded-xl transition-all">
                   <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
                     Imported
                   </span>
@@ -705,7 +705,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     {importedCount}
                   </span>
                 </div>
-                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 p-2.5 rounded-xl transition-all">
+                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 p-2.5 rounded-xl transition-all">
                   <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
                     Speech
                   </span>
@@ -719,7 +719,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                     {activeSpeechCount}
                   </span>
                 </div>
-                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6]/40 p-2.5 rounded-xl transition-all">
+                <div className="bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 p-2.5 rounded-xl transition-all">
                   <span className="text-[10px] text-[#9CA3AF] font-mono uppercase tracking-wider block">
                     Audio
                   </span>
@@ -760,7 +760,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                             );
                           }
                         }}
-                        className="w-11 h-11 rounded-lg overflow-hidden bg-[#121212] border border-[#2F2F2F] hover:border-[#3B82F6] shrink-0 relative transition-all group cursor-pointer"
+                        className="w-11 h-11 rounded-lg overflow-hidden bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 shrink-0 relative transition-all group cursor-pointer"
                         title={`Panel #${i + 1} — Click to edit`}
                       >
                         {panel.image_url ? (
@@ -855,7 +855,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-[#3B82F6] transition-colors"
+                className="w-full pl-9 pr-8 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600 transition-colors"
               />
               {searchQuery && (
                 <button
@@ -872,7 +872,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] px-3 py-2 focus:outline-none focus:border-[#3B82F6] cursor-pointer font-mono"
+                className="bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] px-3 py-2 focus:outline-none focus:border-neutral-600 cursor-pointer font-mono"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -898,7 +898,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 className={`px-3 py-1.5 rounded-xl transition-all text-xs font-medium whitespace-nowrap cursor-pointer ${
                   activeTab === tab.id
                     ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
-                    : "text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-[#3B82F6] hover:bg-[#2A2A2A]"
+                    : "text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
                 }`}
               >
                 {tab.label}
@@ -976,7 +976,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   className={`group relative p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                     isActive
                       ? "bg-[#1E1E1E] border-[#3B82F6] shadow-md ring-1 ring-[#3B82F6]/50"
-                      : "bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-[#3B82F6]/60"
+                      : "bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-neutral-700"
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">

@@ -290,7 +290,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                     ? "cursor-col-resize border-[#2F2F2F]  z-30"
                     : selectedClip === key
                     ? "cursor-grab border-[#2F2F2F]  z-20"
-                    : "cursor-grab hover:border-[#60A5FA]/60 z-10"
+                    : "cursor-grab hover:border-neutral-700 z-10"
                 }`}
                 style={{
                   left: `${finalLeftPx}px`,
@@ -302,7 +302,7 @@ export const TimelineSubtitlesTrack: React.FC<TimelineSubtitlesTrackProps> = ({
                 }}
                 title={`Panel #${idx + 1} Subtitle: ${text}`}
               >
-                <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] truncate pointer-events-none bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-[#60A5FA]/60 transition-colors">
+                <div className="flex items-center gap-1 min-w-0 max-w-[calc(100%-48px)] truncate pointer-events-none bg-black/65 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/20 shadow-md group-hover:border-neutral-700 transition-colors">
                   <GripVertical className="h-3 w-3 text-[#60A5FA] group-hover:text-white shrink-0 transition-colors" />
                   <Type className="h-2.5 w-2.5 text-[#3B82F6] shrink-0" />
                   <span className="text-[8.5px] font-mono font-bold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] truncate">"{text}"</span>

@@ -13,7 +13,7 @@ export const ImportedAssetsUploadZone: React.FC<ImportedAssetsUploadZoneProps> =
   return (
     <div
       onClick={onOpenBrowser}
-      className={`border-2 border-dashed border-[#3B82F6]/25 hover:border-[#3B82F6]/50 bg-[#2A2A2A] hover:bg-[#2A2A2A] rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all group ${
+      className={`border-2 border-dashed border-[#3B82F6]/40 hover:border-[#3B82F6] bg-[#3B82F6]/5 hover:bg-[#3B82F6]/10 rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all group ${
         isEmpty ? "my-6" : "mb-3"
       }`}
     >

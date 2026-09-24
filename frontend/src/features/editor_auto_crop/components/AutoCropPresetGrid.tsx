@@ -16,7 +16,7 @@ export function AutoCropPresetGrid({
   const border = (slot: string) =>
     activeSlot === slot
       ? "border-[#3B82F6]/80 bg-gradient-to-br from-[#2A2A2A] to-[#2A2A2A] text-[#3B82F6]  ring-1 ring-[#3B82F6]/50 scale-102"
-      : "border-neutral-800/80 bg-neutral-950/70 hover:border-[#3B82F6]/30 hover:bg-neutral-900/80 text-neutral-300";
+      : "border-neutral-800/80 bg-neutral-950/70 hover:border-neutral-700 hover:bg-neutral-900/80 text-neutral-300";
 
   const presets = [
     {

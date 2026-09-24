@@ -125,18 +125,18 @@ export default function ImportedAssetsHeader({
   if (selectedScrapedLength > 0) {
     const selectionLeft = (
       <div className="flex items-center gap-2.5 flex-wrap">
-        <div className="flex items-center gap-2 bg-[#2A2A2A] border border-[#3B82F6]/40 rounded-xl px-3 py-1.5 ">
-          <div className="h-5 w-5 rounded bg-[#2A2A2A] flex items-center justify-center text-white text-[10px] font-mono font-black">
+        <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 rounded-xl px-3 py-1.5">
+          <div className="h-5 w-5 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] font-mono font-black shadow-sm">
             {selectedScrapedLength}
           </div>
-          <span className="text-xs font-mono font-bold text-white whitespace-nowrap">
+          <span className="text-xs font-mono font-bold text-blue-200 whitespace-nowrap">
             {selectedScrapedLength} of {scrapedImagesLength} Selected
           </span>
           <button
             type="button"
             onClick={handleClearAll}
             title="Clear Selection"
-            className="ml-1 p-0.5 rounded-md hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-white transition-colors cursor-pointer"
+            className="ml-1 p-0.5 rounded-md hover:bg-blue-900/40 text-blue-300 hover:text-white transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -291,7 +291,7 @@ export default function ImportedAssetsHeader({
       <EditorHeaderFrame
         left={selectionLeft}
         right={selectionRight}
-        className="border-b-0 rounded-2xl bg-gradient-to-r from-[#2A2A2A] via-neutral-950/95 to-neutral-950/95 border border-[#3B82F6]/35 p-3 shadow-lg"
+        className="border-b-0 rounded-2xl bg-gradient-to-r from-blue-950/40 via-neutral-950/95 to-neutral-950/95 border border-blue-500/30 p-3 shadow-lg"
       />
     );
   }
@@ -301,7 +301,7 @@ export default function ImportedAssetsHeader({
   // ──────────────────────────────────────────────────────────────────────────
   const titleBlock = (
     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] flex items-center justify-center  shrink-0">
+      <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 shadow-md shadow-indigo-500/25 flex items-center justify-center shrink-0">
         <Images className="h-4 w-4 text-white" />
       </div>
       <div className="min-w-0">
@@ -309,16 +309,16 @@ export default function ImportedAssetsHeader({
           <h3 className="text-xs sm:text-sm font-black text-white uppercase tracking-[0.16em] font-mono truncate">
             Imported Assets
           </h3>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-bold text-[#60A5FA] font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2A2A2A] animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-[10px] font-bold text-indigo-300 font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
             {filteredCount !== undefined
               ? `${filteredCount} / ${scrapedImagesLength}`
               : scrapedImagesLength}{" "}
             {scrapedImagesLength === 1 ? "Asset" : "Assets"}
           </span>
           {viewLayout === "scroll" && scrapedImagesLength > 1 && (
-            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-[#3B82F6]/30 text-[10px] text-[#93C5FD] font-mono shadow-sm">
-              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-[#3B82F6]/20 text-[#60A5FA] text-[9px] font-bold">⇧</span>
+            <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-indigo-500/30 text-[10px] text-indigo-200 font-mono shadow-sm">
+              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-indigo-500/20 text-indigo-300 text-[9px] font-bold">⇧</span>
               <span>Hold <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">Shift</kbd> + Scroll to move horizontally</span>
             </span>
           )}
@@ -367,9 +367,9 @@ export default function ImportedAssetsHeader({
           type="button"
           onClick={handleSelectAllToggle}
           title={isAllSelected ? "Deselect all assets" : "Select all assets"}
-          className="text-[11px] font-mono font-bold border border-[#3B82F6]/35 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#60A5FA] hover:text-[#3B82F6] rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all  active:scale-95 cursor-pointer"
+          className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-neutral-700 text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
         >
-          <CheckSquare className="w-3.5 h-3.5 text-[#3B82F6]" />
+          <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
           <span className="hidden 2xl:inline">Select All</span>
         </button>
       )}
@@ -379,7 +379,7 @@ export default function ImportedAssetsHeader({
           type="button"
           onClick={handleReloadAssets}
           title="Reload all assets"
-          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white hover:border-[#3B82F6] transition-all cursor-pointer"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-neutral-700 bg-neutral-900 text-neutral-300 hover:text-white hover:border-neutral-700 transition-all cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span className="hidden 2xl:inline">Reload Assets</span>
@@ -398,8 +398,8 @@ export default function ImportedAssetsHeader({
           }
           className={`h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border transition-all cursor-pointer ${
             isEpisodeCollapsed
-              ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-[#93C5FD] hover:border-[#2F2F2F]"
-              : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA] hover:bg-[#3B82F6]/30"
+              ? "bg-neutral-900 border-neutral-700 text-neutral-400 hover:text-blue-300 hover:border-blue-500/30"
+              : "bg-blue-600/20 border-blue-500/30 text-blue-300 hover:bg-blue-600/30"
           }`}
         >
           {isEpisodeCollapsed ? (
@@ -420,9 +420,9 @@ export default function ImportedAssetsHeader({
         <button
           type="button"
           onClick={handleSaveAssets}
-          className="relative overflow-hidden h-8 px-3.5 rounded-xl font-black text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-[#3B82F6]/30 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white cursor-pointer shadow-[0_0_14px_rgba(139,92,246,0.4)] hover:shadow-[0_0_22px_rgba(139,92,246,0.6)] active:scale-95"
+          className="relative overflow-hidden h-8 px-3.5 rounded-xl font-black text-[11px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white cursor-pointer shadow-md shadow-blue-500/25 active:scale-95"
         >
-          <Save className="w-3.5 h-3.5 text-[#3B82F6]" />
+          <Save className="w-3.5 h-3.5 text-white" />
           <span className="hidden sm:inline">Save</span>
         </button>
       )}

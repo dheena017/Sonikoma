@@ -11,7 +11,7 @@ function FooterSocial({ icon }: { icon: React.ReactElement<any> }) {
       href="#"
       className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer border ${
         isLight
-          ? "bg-slate-100 border-slate-200 text-slate-700 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50"
+          ? "bg-slate-100 border-slate-200 text-slate-700 hover:text-blue-600 hover:border-neutral-700 hover:bg-blue-50"
           : "bg-[#181818] border-[#2F2F2F] text-neutral-400 hover:text-white hover:border-neutral-500 hover:bg-[#222]"
       }`}
     >

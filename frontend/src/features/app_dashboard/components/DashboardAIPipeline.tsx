@@ -18,7 +18,7 @@ export default function DashboardAIPipeline() {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="flex gap-3.5 p-4 rounded-2xl bg-[#181818] border border-[#2F2F2F] hover:border-[#3B82F6]/40 transition-all">
+        <div className="flex gap-3.5 p-4 rounded-2xl bg-[#181818] border border-[#2F2F2F] hover:border-neutral-700 transition-all">
           <div className="p-2.5 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 h-fit shrink-0">
             <Scissors className="h-4 w-4" />
           </div>
@@ -48,7 +48,7 @@ export default function DashboardAIPipeline() {
           </div>
         </div>
 
-        <div className="flex gap-3.5 p-4 rounded-2xl bg-black/40 border border-white/5 hover:border-[#3B82F6]/30 transition-all">
+        <div className="flex gap-3.5 p-4 rounded-2xl bg-black/40 border border-white/5 hover:border-neutral-700 transition-all">
           <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 h-fit shrink-0">
             <Volume2 className="h-4 w-4" />
           </div>

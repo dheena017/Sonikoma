@@ -52,7 +52,7 @@ export default function AdPlacementTab({
   return (
     <div className="space-y-4 w-full animate-fade-in">
       {/* COMPILER ACTION BANNER */}
-      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-[#3B82F6]/40 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
+      <div className="bg-neutral-900/60 p-4 sm:p-5 rounded-2xl border border-neutral-850 hover:border-neutral-700 transition-all flex flex-col sm:flex-row justify-between sm:items-center gap-4 shadow-xl">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/30 rounded-lg text-[#3B82F6]">
@@ -91,7 +91,7 @@ export default function AdPlacementTab({
       )}
 
       {placements.length > 0 && !loading && (
-        <div className="bg-neutral-900/60 border border-neutral-850 hover:border-[#3B82F6]/40 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg animate-fade-in">
+        <div className="bg-neutral-900/60 border border-neutral-850 hover:border-neutral-700 transition-all rounded-2xl p-4.5 space-y-3 shadow-lg animate-fade-in">
           <span className="text-[10px] font-mono font-bold text-[#60A5FA] uppercase tracking-widest block border-b border-neutral-850 pb-2.5">
             Recommended Midroll Timestamps & Rationale
           </span>

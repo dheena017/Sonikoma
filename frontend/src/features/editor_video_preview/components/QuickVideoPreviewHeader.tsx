@@ -65,7 +65,7 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
 
   const titleBlock = (
     <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
-      <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] flex items-center justify-center shrink-0">
+      <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-md shadow-blue-500/25 flex items-center justify-center shrink-0 transition-all cursor-pointer">
         <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
       </div>
       <div className="min-w-0">
@@ -91,17 +91,23 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
       <button
         type="button"
         onClick={() => setMonitorTab("timeline")}
-        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
+        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
           monitorTab === "timeline"
-            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white"
-            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
+            ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-500/25 border border-blue-400/40"
+            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
         }`}
       >
         <Layers className="h-3.5 w-3.5 shrink-0" />
         <span className="hidden md:inline">Storyboard Preview</span>
         <span className="md:hidden">Storyboard</span>
         {panelsCount > 0 && (
-          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-black/40 text-[#3B82F6]">
+          <span
+            className={`text-[9px] font-mono px-1.5 py-0.2 rounded ${
+              monitorTab === "timeline"
+                ? "bg-black/30 text-white font-bold"
+                : "bg-black/40 text-[#60A5FA]"
+            }`}
+          >
             {panelsCount}p
           </span>
         )}
@@ -110,16 +116,22 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
       <button
         type="button"
         onClick={() => setMonitorTab("video")}
-        className={`flex items-center gap-1.5 px-2 sm:px-3 py-1 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
+        className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-[10px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
           monitorTab === "video"
-            ? "bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] text-white"
-            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
+            ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-500/25 border border-blue-400/40"
+            : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 border border-transparent"
         }`}
       >
         <Video className="h-3.5 w-3.5 shrink-0" />
         <span className="hidden md:inline">Final Video</span>
         <span className="md:hidden">Final</span>
-        <span className="hidden sm:inline text-[8px] font-mono px-1 py-0.2 rounded bg-[#2A2A2A] border border-neutral-800 text-[#60A5FA] uppercase">
+        <span
+          className={`hidden sm:inline text-[8px] font-mono px-1 py-0.2 rounded border uppercase ${
+            monitorTab === "video"
+              ? "bg-black/30 border-blue-400/40 text-white"
+              : "bg-[#2A2A2A] border-neutral-800 text-[#60A5FA]"
+          }`}
+        >
           MP4
         </span>
       </button>
@@ -176,10 +188,10 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           type="button"
           onClick={finalExport}
           disabled={isRendering}
-          className="h-8 px-2.5 sm:px-3.5 rounded-xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 disabled:opacity-50 shrink-0 whitespace-nowrap"
+          className="h-8 px-2.5 sm:px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-blue-500/25 active:scale-95 disabled:opacity-50 shrink-0 whitespace-nowrap"
           title="Export and render final video"
         >
-          <Video className="h-3.5 w-3.5 shrink-0" />
+          <Video className="h-3.5 w-3.5 text-white shrink-0" />
           <span className="hidden md:inline">{isRendering ? "Rendering..." : "Export Video"}</span>
           <span className="md:hidden">{isRendering ? "..." : "Export"}</span>
         </button>

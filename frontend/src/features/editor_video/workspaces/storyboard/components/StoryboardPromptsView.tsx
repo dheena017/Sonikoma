@@ -74,7 +74,7 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
             className={`p-3 rounded-2xl border transition-all flex flex-col gap-2.5 cursor-pointer ${
               isSelected
                 ? "border-[#3B82F6]/30 bg-neutral-900 ring-2 ring-[#3B82F6]/50 shadow-md"
-                : "border-white/10 bg-[#121212] hover:border-[#3B82F6]/30"
+                : "border-white/10 bg-[#121212] hover:border-neutral-700"
             }`}
           >
             {/* Top row: Thumbnail + Prompt title */}
@@ -136,7 +136,7 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
               placeholder="Enter visual generation prompt or description..."
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => onUpdatePrompt(index, e.target.value)}
-              className="w-full h-18 p-2 rounded-xl bg-black/50 border border-white/10 text-white placeholder-neutral-500 text-[10px] font-mono resize-none focus:outline-none focus:border-[#3B82F6]/30 transition-colors leading-relaxed"
+              className="w-full h-18 p-2 rounded-xl bg-black/50 border border-white/10 text-white placeholder-neutral-500 text-[10px] font-mono resize-none focus:outline-none focus:border-neutral-600 transition-colors leading-relaxed"
             />
 
             {/* Style Pills */}
@@ -151,7 +151,7 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
                     onUpdatePrompt(index, `${promptText}, ${tag} style`);
                     onTriggerFeedback?.(`Added ${tag} style to Panel #${index + 1}`);
                   }}
-                  className="px-2 py-0.5 rounded-lg bg-black/40 hover:bg-neutral-900 border border-white/5 hover:border-[#3B82F6]/30 text-[8px] font-mono text-neutral-400 hover:text-neutral-200 whitespace-nowrap transition-all"
+                  className="px-2 py-0.5 rounded-lg bg-black/40 hover:bg-neutral-900 border border-white/5 hover:border-neutral-700 text-[8px] font-mono text-neutral-400 hover:text-neutral-200 whitespace-nowrap transition-all"
                 >
                   +{tag}
                 </button>

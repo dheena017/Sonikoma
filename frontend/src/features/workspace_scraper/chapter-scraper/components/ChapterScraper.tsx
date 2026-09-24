@@ -734,7 +734,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 window.dispatchEvent(new Event("popstate"));
               }
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900/80 border border-neutral-700/60 hover:border-[#3B82F6]/50 text-neutral-300 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer group active:scale-95 backdrop-blur-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900/80 border border-neutral-700/60 hover:border-neutral-700 text-neutral-300 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer group active:scale-95 backdrop-blur-sm"
           >
             <Plus className="w-3.5 h-3.5 text-[#3B82F6] group-hover:rotate-90 transition-transform duration-200" />
             New Chapter
@@ -766,7 +766,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               }}
               onFocus={() => setShowSuggestions(true)}
               placeholder="Paste any comic, manga, or manhwa series URL (e.g. Webtoons, FlameComics, Toonily...)"
-              className="w-full rounded-2xl border border-neutral-800 bg-neutral-955/90 py-3 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:border-[#3B82F6] focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/50 font-mono transition-all"
+              className="w-full rounded-2xl border border-neutral-800 bg-neutral-955/90 py-3 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none focus:ring-1 focus:ring-neutral-700 font-mono transition-all"
             />
 
             {/* Autocomplete Dropdown */}
@@ -802,14 +802,14 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               value={titleNoInput}
               onChange={(e) => setTitleNoInput(e.target.value)}
               placeholder="Series ID (Optional)"
-              className="w-full rounded-2xl border border-neutral-800 bg-neutral-955/90 px-3.5 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-[#3B82F6] focus:outline-none font-mono"
+              className="w-full rounded-2xl border border-neutral-800 bg-neutral-955/90 px-3.5 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none font-mono"
             />
           </div>
 
           <button
             type="submit"
             disabled={isLoading || (!urlInput.trim() && !titleNoInput.trim())}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 px-6 py-3 text-sm font-extrabold text-white transition-all shadow-lg shadow-black/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] px-6 py-3 text-sm font-extrabold text-white transition-all shadow-lg shadow-black/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
           >
             {isLoading ? (
               <Loader className="h-4 w-4 animate-spin" />
@@ -958,7 +958,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 <button
                   type="button"
                   onClick={() => triggerScrape(undefined, undefined, true)}
-                  className="flex items-center gap-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+                  className="flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
                 >
                   <Plus className="h-4 w-4" />
                   <span>Fetch New Chapters</span>
@@ -967,7 +967,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 <button
                   type="button"
                   onClick={handleExportJSON}
-                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
                 >
                   <Film className="h-4 w-4 text-[#3B82F6]" />
                   <span>Export Full Series</span>
@@ -980,7 +980,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                       setPreviewChapter(chapters[0]);
                     }
                   }}
-                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
                 >
                   <BookOpen className="h-4 w-4 text-emerald-400" />
                   <span>Read Series</span>
@@ -992,7 +992,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                     const nav = (window as any).navigateTo;
                     if (typeof nav === "function") nav("/creative-suite/ai-voice");
                   }}
-                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-[#3B82F6]/40 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
                 >
                   <Volume2 className="h-4 w-4 text-amber-400" />
                   <span>Audio Studio</span>
@@ -1091,7 +1091,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search chapter..."
-                  className="w-full rounded-xl border border-transparent bg-neutral-900/80 py-2 pl-9 pr-3 text-xs text-white placeholder:text-neutral-500 focus:border-[#3B82F6] focus:outline-none font-mono"
+                  className="w-full rounded-xl border border-transparent bg-neutral-900/80 py-2 pl-9 pr-3 text-xs text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none font-mono"
                 />
               </div>
 
@@ -1136,7 +1136,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 bg-neutral-900 border border-transparent text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-[#3B82F6] cursor-pointer"
+                className="px-3 py-2 bg-neutral-900 border border-transparent text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-neutral-600 cursor-pointer"
               >
                 <option value="latest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -1216,7 +1216,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   disabled={selectedUrls.length === 0}
                   onClick={handleBatchScrape}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-black/50"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-black/50"
                 >
                   <Zap size={13} />
                   <span>Import Batch ({selectedUrls.length})</span>
@@ -1250,7 +1250,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 <div
                   key={chapter.url}
                   onClick={() => handleChapterClick(chapter)}
-                  className="flex items-center justify-between p-3.5 bg-neutral-900/60 hover:bg-neutral-850/80 border border-transparent hover:border-[#3B82F6]/40 rounded-2xl transition-all cursor-pointer group shadow-sm"
+                  className="flex items-center justify-between p-3.5 bg-neutral-900/60 hover:bg-neutral-850/80 border border-transparent hover:border-neutral-700 rounded-2xl transition-all cursor-pointer group shadow-sm"
                 >
                   <div className="flex items-center gap-4 min-w-0">
                     <div className="w-16 h-12 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-transparent relative">
@@ -1304,7 +1304,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                         e.stopPropagation();
                         handleChapterClick(chapter);
                       }}
-                      className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-[#2A2A2A] hover:bg-[#3B82F6] text-white font-mono font-bold text-xs shadow-md shadow-black/50 transition-all cursor-pointer"
+                      className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white font-mono font-bold text-xs shadow-md shadow-black/50 transition-all cursor-pointer"
                     >
                       <span>Import</span>
                       <ArrowRight size={13} />
@@ -1385,7 +1385,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   window.dispatchEvent(new Event("popstate"));
                 }
               }}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-gradient-to-r from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+              className="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-extrabold text-sm shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
             >
               <Plus className="w-4 h-4" />
               Go to Scraper

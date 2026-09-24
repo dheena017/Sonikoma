@@ -127,7 +127,7 @@ export function CinematicRenderDemo({
             <select
               value={aspect}
               onChange={(e) => setAspect(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-[#3B82F6] outline-none cursor-pointer transition-all ${
+              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-neutral-600 outline-none cursor-pointer transition-all ${
                 isLight
                   ? "bg-white border-slate-300 text-slate-900"
                   : "bg-neutral-900 border-neutral-700 text-white"
@@ -150,7 +150,7 @@ export function CinematicRenderDemo({
             <select
               value={audioStyle}
               onChange={(e) => setAudioStyle(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-[#3B82F6] outline-none cursor-pointer transition-all ${
+              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-neutral-600 outline-none cursor-pointer transition-all ${
                 isLight
                   ? "bg-white border-slate-300 text-slate-900"
                   : "bg-neutral-900 border-neutral-700 text-white"
@@ -173,7 +173,7 @@ export function CinematicRenderDemo({
             <select
               value={musicTheme}
               onChange={(e) => setMusicTheme(e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-[#3B82F6] outline-none cursor-pointer transition-all ${
+              className={`w-full px-3 py-2 border rounded-lg text-xs font-medium focus:border-neutral-600 outline-none cursor-pointer transition-all ${
                 isLight
                   ? "bg-white border-slate-300 text-slate-900"
                   : "bg-neutral-900 border-neutral-700 text-white"

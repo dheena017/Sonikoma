@@ -39,7 +39,7 @@ export default function DashboardHeader({
             placeholder="Search projects, chapters, or series..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-[#18181E] border border-white/[0.08] hover:border-[#3B82F6]/50 focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 rounded-xl py-2 pl-10 pr-9 text-xs sm:text-sm text-[#E5E5E5] outline-none font-sans transition-all placeholder:text-[#6B7280]"
+            className="w-full bg-[#18181E] border border-white/[0.08] hover:border-neutral-700 focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 rounded-xl py-2 pl-10 pr-9 text-xs sm:text-sm text-[#E5E5E5] outline-none font-sans transition-all placeholder:text-[#6B7280]"
           />
           {searchQuery && (
             <Tooltip text="Clear search" placement="top">

@@ -249,7 +249,7 @@ export const VideoPreviewBottomControls: React.FC<
 
           <button
             onClick={togglePlay}
-            className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#2A2A2A] to-[#2A2A2A] hover:border-[#3B82F6] hover:from-blue-500 hover:to-indigo-500 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 "
+            className="h-10 w-10 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-md shadow-blue-500/30 text-white flex items-center justify-center transition-all cursor-pointer active:scale-95"
           >
             {isPlaying ? (
               <Pause className="h-4 w-4 fill-white" />

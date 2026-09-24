@@ -288,7 +288,7 @@ export default function VoiceSettingsPanel({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Jinwoo / Shadow Sovereign"
-              className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-neutral-600 transition-all font-sans font-medium"
             />
           </div>
           <div className="space-y-1.5">
@@ -300,7 +300,7 @@ export default function VoiceSettingsPanel({
               value={dialogue}
               onChange={(e) => setDialogue(e.target.value)}
               placeholder="e.g. Prepare to perish."
-              className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium"
+              className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-neutral-600 transition-all font-sans font-medium"
             />
           </div>
         </div>
@@ -314,7 +314,7 @@ export default function VoiceSettingsPanel({
             value={visual}
             onChange={(e) => setVisual(e.target.value)}
             placeholder="Describe character's gender, style, aura, look..."
-            className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium leading-relaxed"
+            className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-neutral-600 transition-all font-sans font-medium leading-relaxed"
           />
         </div>
 
@@ -368,7 +368,7 @@ export default function VoiceSettingsPanel({
                     className={`px-2.5 py-1 rounded-lg text-[9px] font-bold transition-all border cursor-pointer whitespace-nowrap ${
                       filterCategory === cat
                         ? "bg-[#3B82F6]/15 text-[#3B82F6] border-[#3B82F6]/40 shadow-sm"
-                        : "bg-[#121212] text-[#9CA3AF] border-[#2F2F2F] hover:text-white hover:border-[#3B82F6]/60"
+                        : "bg-[#121212] text-[#9CA3AF] border-[#2F2F2F] hover:text-white hover:border-neutral-700"
                     }`}
                   >
                     {cat}
@@ -386,7 +386,7 @@ export default function VoiceSettingsPanel({
               <select
                 value={selectedVoice}
                 onChange={(e) => setSelectedVoice(e.target.value)}
-                className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans cursor-pointer"
+                className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 text-[#E5E5E5] outline-none focus:border-neutral-600 transition-all font-sans cursor-pointer"
               >
                 {filteredVoices.map((v) => (
                   <option
@@ -410,7 +410,7 @@ export default function VoiceSettingsPanel({
                   value={testScript}
                   onChange={(e) => setTestScript(e.target.value)}
                   placeholder="Type preview dialogue..."
-                  className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 pr-24 text-[#E5E5E5] outline-none focus:border-[#3B82F6] transition-all font-sans font-medium"
+                  className="w-full bg-[#121212] border border-[#2F2F2F] text-xs rounded-xl p-2.5 pr-24 text-[#E5E5E5] outline-none focus:border-neutral-600 transition-all font-sans font-medium"
                 />
                 <button
                   onClick={handlePreviewToggle}

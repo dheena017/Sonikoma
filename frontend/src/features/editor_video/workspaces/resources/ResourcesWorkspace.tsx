@@ -78,7 +78,7 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
                   className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between group shadow-sm ${
                     activeLutId === lut.id
                       ? "bg-[#2A2A2A] border-[#60A5FA] "
-                      : "bg-neutral-900/80 border-neutral-800 hover:border-[#3B82F6]/60"
+                      : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700"
                   }`}
                 >
                   <div>
@@ -91,7 +91,7 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
                   <span className={`px-2 py-1 rounded-lg text-[9px] font-mono font-bold shrink-0 flex items-center gap-1 ${
                     activeLutId === lut.id
                       ? "bg-[#2A2A2A] text-white"
-                      : "bg-neutral-800 text-neutral-300 group-hover:bg-[#3B82F6] group-hover:text-white"
+                      : "bg-neutral-800 text-neutral-300 group-hover:bg-[#2A2A35] group-hover:text-white"
                   }`}>
                     {activeLutId === lut.id && <Check className="h-3 w-3" />}
                     {activeLutId === lut.id ? "Active" : "Apply LUT"}

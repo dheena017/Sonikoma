@@ -18,13 +18,13 @@ export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({
           onClick={() =>
             onTriggerFeedback("AI generating new facial expression...")
           }
-          className="px-2.5 py-1 rounded-2xl bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#3B82F6]/25 transition-all cursor-pointer whitespace-nowrap"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <Smile className="h-2.5 w-2.5" /> Gen Expression
         </button>
         <button
           onClick={() => onTriggerFeedback("AI synthesizing action pose...")}
-          className="px-2.5 py-1 rounded-2xl bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#3B82F6]/25 transition-all cursor-pointer whitespace-nowrap"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <Activity className="h-2.5 w-2.5" /> Gen Pose
         </button>
@@ -32,7 +32,7 @@ export const CharacterAiToolbar: React.FC<CharacterAiToolbarProps> = ({
           onClick={() =>
             onTriggerFeedback("AI generating character voice line...")
           }
-          className="px-2.5 py-1 rounded-2xl bg-[#2A2A2A] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#3B82F6]/25 transition-all cursor-pointer whitespace-nowrap"
+          className="px-2.5 py-1 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 border border-[#60A5FA]/40 shadow-xs shadow-blue-500/25 transition-all cursor-pointer whitespace-nowrap active:scale-95"
         >
           <Volume2 className="h-2.5 w-2.5" /> Gen Voice
         </button>

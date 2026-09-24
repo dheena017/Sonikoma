@@ -14,7 +14,7 @@ export const CharacterRosterCard: React.FC<CharacterRosterCardProps> = ({
   return (
     <div
       onClick={onSelect}
-      className="p-3 rounded-[1.75rem] bg-[#1E1E1E] border border-[#2F2F2F] hover:border-[#3B82F6]/30 cursor-pointer transition-all flex items-center justify-between gap-3 group shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_48px_rgba(59,130,246,0.22)]"
+      className="p-3 rounded-[1.75rem] bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer transition-all flex items-center justify-between gap-3 group shadow-[0_18px_42px_rgba(0,0,0,0.18)] hover:shadow-[0_18px_48px_rgba(59,130,246,0.22)]"
     >
       <div className="flex items-center gap-3">
         <img
@@ -27,7 +27,7 @@ export const CharacterRosterCard: React.FC<CharacterRosterCardProps> = ({
             <h4 className="text-sm font-semibold text-white group-hover:text-[#3B82F6] truncate">
               {character.name}
             </h4>
-            <span className="text-[9px] font-semibold font-mono bg-[#2A2A2A] text-[#3B82F6] px-2 py-0.5 rounded-full border border-[#3B82F6]/20 shrink-0">
+            <span className="text-[9px] font-semibold font-mono bg-[#3B82F6]/15 text-[#60A5FA] px-2 py-0.5 rounded-full border border-[#3B82F6]/30 shrink-0">
               {character.role}
             </span>
           </div>
