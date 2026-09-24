@@ -1018,7 +1018,6 @@ async def get_model_routing():
     from services.model_catalog.registry import ModelRegistry
     
     capabilities = [
-        "batch_panel_analysis",
         "storyboard_narrative",
         "panel_analysis",
         "scraper_blueprint",
@@ -1032,15 +1031,12 @@ async def get_model_routing():
         "smart_crop",
     ]
 
-    AIOrchestrator.load_custom_routing()
-
     dynamic_routing = {}
     for cap in capabilities:
-        rec_chain = ModelRegistry.get_cross_provider_fallback_chain(cap)
         dynamic_routing[cap] = {
-            "primary": rec_chain[0][1] if len(rec_chain) > 0 else "gemini-3.5-flash-lite",
-            "fallback": rec_chain[1][1] if len(rec_chain) > 1 else "",
-            "tertiary": rec_chain[2][1] if len(rec_chain) > 2 else "",
+            "primary": "",
+            "fallback": "",
+            "tertiary": "",
         }
 
     # Merge custom user/admin overrides

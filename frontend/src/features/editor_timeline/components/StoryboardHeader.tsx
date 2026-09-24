@@ -266,8 +266,10 @@ export default function StoryboardHeader({
     return (
       <EditorHeaderFrame
         left={selectionLeftBlock}
+        center={centerBlock}
         right={selectionRightBlock}
-        className="border-b-0 rounded-2xl bg-gradient-to-r from-blue-950/40 via-neutral-950/95 to-neutral-950/95 border border-blue-500/30 p-3 shadow-lg"
+        centerClassName="order-3 w-full sm:order-none sm:w-auto sm:flex-1 sm:min-w-0"
+        className="flex-wrap sm:flex-nowrap"
       />
     );
   }
@@ -389,8 +391,8 @@ export default function StoryboardHeader({
       left={titleBlock}
       center={centerBlock}
       right={rightBlock}
-      centerClassName="order-3 w-full lg:order-none lg:w-auto lg:flex-1 lg:min-w-0"
-      className="flex-wrap lg:flex-nowrap"
+      centerClassName="order-3 w-full sm:order-none sm:w-auto sm:flex-1 sm:min-w-0"
+      className="flex-wrap sm:flex-nowrap"
     />
   );
 }
