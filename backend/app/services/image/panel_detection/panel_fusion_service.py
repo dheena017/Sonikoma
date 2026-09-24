@@ -2,9 +2,12 @@
 backend/app/services/image/panel_detection/panel_fusion_service.py
 ─────────────────────────────────────────────────────────────────────────────
 Intelligent Fusion Engine for OpenCV + YOLO + AI Entities:
-- Speech Bubble Proximity Binding: Expands panel boundaries to include dialogue
-- Gutter SFX Rejection: Filters loose floating text ("RATTLE", "SIGH") in gutters
-- Tight Frame Snapping: Snaps tightly to dominant black frames (e.g. carriage)
+- Speech Bubble Proximity Binding: Expands panel boundaries to include dialogue,
+  capped by neighbouring-panel boundaries so panels never overlap
+- Strict Non-Overlap Enforcement: Final sweep clips any residual vertical
+  overlaps at the midpoint boundary
+- Gutter SFX Rejection: Filters loose floating text ("RATTLE", "SIGH")
+- Tight Frame Snapping: Snaps tightly to dominant black frames
 - Margin Calculation: Produces clean directional margins (crop_top/bottom/left/right)
 ─────────────────────────────────────────────────────────────────────────────
 """
@@ -19,59 +22,66 @@ from schemas.project import (
     CharacterEntityItem,
     PanelCinematography,
     EntityLabel,
-    EntityCategory
+    EntityCategory,
 )
 
 logger = logging.getLogger("sonikoma.services.panel_detection.fusion")
 
 
-def _box_distance(p_x: int, p_y: int, p_w: int, p_h: int, b_x: int, b_y: int, b_w: int, b_h: int) -> float:
-    """Calculates minimum Euclidean distance between two bounding rectangles."""
-    p_x2, p_y2 = p_x + p_w, p_y + p_h
-    b_x2, b_y2 = b_x + b_w, b_y + b_h
+# ── Geometry Helpers ──────────────────────────────────────────────────────────
 
-    dx = max(0, p_x - b_x2, b_x - p_x2)
-    dy = max(0, p_y - b_y2, b_y - p_y2)
+def _box_distance(px: int, py: int, pw: int, ph: int, bx: int, by: int, bw: int, bh: int) -> float:
+    """Minimum Euclidean distance between two axis-aligned rectangles (0 if overlapping)."""
+    dx = max(0, px - (bx + bw), bx - (px + pw))
+    dy = max(0, py - (by + bh), by - (py + ph))
     return math.sqrt(dx * dx + dy * dy)
 
 
+def _raw_y1(panel: Dict[str, Any]) -> int:
+    """Top Y coordinate of a raw cv_panel dict."""
+    return int(panel.get("y") or 0)
+
+
+def _raw_y2(panel: Dict[str, Any]) -> int:
+    """Bottom Y coordinate of a raw cv_panel dict."""
+    return _raw_y1(panel) + int(panel.get("h") or panel.get("height") or 0)
+
+
 def _estimate_cinematography(panel_w: int, panel_h: int, characters: List[CharacterEntityItem]) -> PanelCinematography:
-    """Estimates camera shot type and camera motion recommendations based on character framing."""
+    """Infer camera shot type and suggested motion from character framing."""
     if not characters:
         return PanelCinematography(
             shot_type="wide_shot",
             camera_angle="eye_level",
             dominant_mood="ambient",
-            suggested_camera_motion="slow_zoom_in"
+            suggested_camera_motion="slow_zoom_in",
         )
 
-    # Find dominant character height ratio relative to panel height
-    max_char_h = max(c.height for c in characters)
-    h_ratio = max_char_h / float(max(1, panel_h))
+    h_ratio = max(c.height for c in characters) / float(max(1, panel_h))
 
     if h_ratio >= 0.75:
-        res = PanelCinematography(
+        return PanelCinematography(
             shot_type="close_up",
             camera_angle="eye_level",
             dominant_mood="dramatic",
-            suggested_camera_motion="static"
+            suggested_camera_motion="static",
         )
-    elif h_ratio >= 0.45:
-        res = PanelCinematography(
+    if h_ratio >= 0.45:
+        return PanelCinematography(
             shot_type="medium_shot",
             camera_angle="eye_level",
             dominant_mood="neutral",
-            suggested_camera_motion="slow_zoom_in"
+            suggested_camera_motion="slow_zoom_in",
         )
-    else:
-        res = PanelCinematography(
-            shot_type="wide_shot",
-            camera_angle="high_angle",
-            dominant_mood="action",
-            suggested_camera_motion="pan_down"
-        )
-    return res
+    return PanelCinematography(
+        shot_type="wide_shot",
+        camera_angle="high_angle",
+        dominant_mood="action",
+        suggested_camera_motion="pan_down",
+    )
 
+
+# ── Main Fusion Function ──────────────────────────────────────────────────────
 
 def fuse_panels_and_bubbles(
     cv_panels: List[Dict[str, Any]],
@@ -82,54 +92,50 @@ def fuse_panels_and_bubbles(
     is_small_panel: bool = False,
     snap_to_frame: bool = True,
     max_binding_dist_px: int = 60,
-    bleed_padding_px: int = 5
+    bleed_padding_px: int = 5,
 ) -> Tuple[List[PanelBoundingBox], List[SpeechBubbleItem], Dict[str, Any]]:
     """
-    Fuses OpenCV geometric frames, YOLO speech bubbles, and Characters into rich PanelBoundingBox models.
+    Fuse OpenCV geometric frames, YOLO speech bubbles, and characters into
+    rich PanelBoundingBox objects.
+
+    Key guarantees:
+    - Bubble-driven boundary expansion is capped at neighbouring-panel edges,
+      so panels can never grow into each other during fusion.
+    - A final non-overlap sweep clips any residual vertical overlaps at the
+      midpoint boundary between adjacent panels.
+
+    Returns:
+        fused_panels: List of PanelBoundingBox, sorted top-to-bottom, no overlaps.
+        yolo_bubbles: All detected bubbles (bound ones carry parent_panel_id).
+        margins:      Dict with crop_top/bottom/left/right pixel values.
     """
-    fused_panels: List[PanelBoundingBox] = []
     char_list = list(characters or [])
     logger.info(
-        f"[Panel Fusion] Fusing {len(cv_panels)} CV frame(s), {len(yolo_bubbles)} bubble(s), "
-        f"and {len(char_list)} character(s) on image ({img_w}x{img_h})"
+        "[Panel Fusion] Fusing %d CV frame(s), %d bubble(s), %d character(s) on %dx%d image",
+        len(cv_panels), len(yolo_bubbles), len(char_list), img_w, img_h,
     )
 
-    # If no OpenCV frames detected, synthesize a baseline frame
+    # ── Synthesise a full-image baseline when no frames were detected ─────────
     if not cv_panels:
         cv_panels = [{
             "id": "panel_1",
-            "x": 0,
-            "y": 0,
-            "w": img_w,
-            "h": img_h,
-            "width": img_w,
-            "height": img_h,
+            "x": 0, "y": 0,
+            "w": img_w, "h": img_h,
+            "width": img_w, "height": img_h,
             "confidence": 1.0,
             "label": EntityLabel.PANEL_STANDARD.value,
-            "category": EntityCategory.PANEL.value
+            "category": EntityCategory.PANEL.value,
         }]
 
-    # Pre-sort panels by Y so we can compute neighbor boundaries for safe expansion
-    cv_panels_sorted = sorted(
-        cv_panels,
-        key=lambda p: (int(p.get("y") or 0), int(p.get("x") or 0))
-    )
+    # Sort panels top-to-bottom so neighbour boundary lookups are stable
+    ordered = sorted(cv_panels, key=lambda p: (_raw_y1(p), int(p.get("x") or 0)))
+    n = len(ordered)
 
-    # Build neighbor boundary map: panel_index -> (prev_y2, next_y1)
-    # We compute neighbour panel boundaries BEFORE expansion so they are stable
-    def _panel_y1(p: Dict[str, Any]) -> int:
-        return int(p.get("y") or 0)
-
-    def _panel_y2(p: Dict[str, Any]) -> int:
-        py_ = int(p.get("y") or 0)
-        ph_ = int(p.get("h") or p.get("height") or 0)
-        return py_ + ph_
-
-    # Process all detected frames
     unassigned_bubbles = list(yolo_bubbles)
     max_gutter_reach = max(20, int(img_w * 0.25))
+    fused_panels: List[PanelBoundingBox] = []
 
-    for idx, cp in enumerate(cv_panels_sorted):
+    for idx, cp in enumerate(ordered):
         px = int(cp.get("x") or 0)
         py = int(cp.get("y") or 0)
         pw = int(cp.get("w") or cp.get("width") or img_w)
@@ -137,83 +143,73 @@ def fuse_panels_and_bubbles(
         p_id = f"panel_{idx + 1}"
         polygon = cp.get("polygon")
 
-        panel_bubbles: List[SpeechBubbleItem] = []
-        panel_characters: List[CharacterEntityItem] = []
+        # Neighbour vertical boundaries (original boxes, before any expansion)
+        prev_y2 = _raw_y2(ordered[idx - 1]) if idx > 0 else 0
+        next_y1 = _raw_y1(ordered[idx + 1]) if idx < n - 1 else img_h
 
-        # Resolution-adaptive margin tolerances
+        # Tolerance margins for containment checks
         tol_x = max(4, int(pw * 0.03))
         tol_y = max(4, int(ph * 0.03))
         dyn_max_dist = max(10, int(pw * 0.08)) if max_binding_dist_px == 60 else max_binding_dist_px
 
+        panel_bubbles: List[SpeechBubbleItem] = []
+        panel_characters: List[CharacterEntityItem] = []
 
-        # 1. Assign characters situated within or overlapping this panel frame
+        # 1. Assign characters whose centre falls within (or just outside) this panel
         for char in char_list:
-            cx = char.x + (char.width // 2)
-            cy = char.y + (char.height // 2)
+            cx = char.x + char.width // 2
+            cy = char.y + char.height // 2
             if (px - tol_x) <= cx <= (px + pw + tol_x) and (py - tol_y) <= cy <= (py + ph + tol_y):
                 char.panel_id = p_id
                 panel_characters.append(char)
 
-        # 2. Find bubbles belonging to or adjacent to this OpenCV panel frame
+        # 2. Bind speech bubbles that belong to or are adjacent to this panel
         for bubble in list(unassigned_bubbles):
-            bc_x = bubble.x + (bubble.width // 2)
-            bc_y = bubble.y + (bubble.height // 2)
+            bc_x = bubble.x + bubble.width // 2
+            bc_y = bubble.y + bubble.height // 2
 
-            inside_x = (px - tol_x) <= bc_x <= (px + pw + tol_x)
-            
-            # Check if inside panel or immediately adjacent in gutter/margins
-            dist = _box_distance(px, py, pw, ph, bubble.x, bubble.y, bubble.width, bubble.height)
-            is_inside = (py - tol_y) <= bc_y <= (py + ph + tol_y)
-            is_adjacent_above = (0 <= (py - (bubble.y + bubble.height)) <= max_gutter_reach)
-            is_adjacent_below = (0 <= (bubble.y - (py + ph)) <= max_gutter_reach)
-            is_near = dist <= dyn_max_dist
+            inside_x        = (px - tol_x) <= bc_x <= (px + pw + tol_x)
+            is_inside        = (py - tol_y) <= bc_y <= (py + ph + tol_y)
+            is_above_gutter  = 0 <= (py - (bubble.y + bubble.height)) <= max_gutter_reach
+            is_below_gutter  = 0 <= (bubble.y - (py + ph)) <= max_gutter_reach
+            is_near          = _box_distance(px, py, pw, ph, bubble.x, bubble.y, bubble.width, bubble.height) <= dyn_max_dist
 
+            if not (inside_x and (is_inside or is_above_gutter or is_below_gutter or is_near)):
+                continue
 
-            if inside_x and (is_inside or is_adjacent_above or is_adjacent_below or is_near):
-                bubble.parent_panel_id = p_id
-                bubble.is_bound = True
+            bubble.parent_panel_id = p_id
+            bubble.is_bound = True
 
-                # Speaker attribution: Bind bubble to closest character in this panel
-                if panel_characters:
-                    closest_char = min(
-                        panel_characters,
-                        key=lambda c: math.hypot(
-                            (c.x + c.width // 2) - bc_x,
-                            (c.y + c.height // 2) - bc_y
-                        )
-                    )
-                    closest_char.associated_bubble_ids.append(bubble.bubble_id)
+            if panel_characters:
+                closest = min(
+                    panel_characters,
+                    key=lambda c: math.hypot(
+                        (c.x + c.width // 2) - bc_x,
+                        (c.y + c.height // 2) - bc_y,
+                    ),
+                )
+                closest.associated_bubble_ids.append(bubble.bubble_id)
 
-                panel_bubbles.append(bubble)
-                unassigned_bubbles.remove(bubble)
+            panel_bubbles.append(bubble)
+            unassigned_bubbles.remove(bubble)
 
-                # Expand panel boundary safely to enclose the speech bubble without crossing neighboring panels
-                max_exp_y = max(10, int(ph * 0.15))
-                max_exp_x = max(10, int(pw * 0.10))
+            # Expand panel boundary to enclose bubble, capped by neighbour edges
+            max_exp_y = max(10, int(ph * 0.15))
+            max_exp_x = max(10, int(pw * 0.10))
 
-                # Compute hard boundary limits from neighbouring panels
-                prev_panel = cv_panels_sorted[idx - 1] if idx > 0 else None
-                next_panel = cv_panels_sorted[idx + 1] if idx < len(cv_panels_sorted) - 1 else None
-                min_y1_limit = (_panel_y2(prev_panel) if prev_panel else 0)
-                max_y2_limit = (_panel_y1(next_panel) if next_panel else img_h)
+            new_x1 = max(0,       max(px - max_exp_x,      min(px,      bubble.x)))
+            new_y1 = max(prev_y2, max(py - max_exp_y,      min(py,      bubble.y)))           # capped by prev panel
+            new_x2 = min(img_w,   min(px + pw + max_exp_x, max(px + pw, bubble.x + bubble.width)))
+            new_y2 = min(next_y1, min(py + ph + max_exp_y, max(py + ph, bubble.y + bubble.height)))  # capped by next panel
 
-                new_x1 = max(0, max(px - max_exp_x, min(px, bubble.x)))
-                # Cap upward expansion so we don't enter the previous panel
-                new_y1 = max(min_y1_limit, max(py - max_exp_y, min(py, bubble.y)))
-                new_x2 = min(img_w, min(px + pw + max_exp_x, max(px + pw, bubble.x + bubble.width)))
-                # Cap downward expansion so we don't enter the next panel
-                new_y2 = min(max_y2_limit, min(py + ph + max_exp_y, max(py + ph, bubble.y + bubble.height)))
+            px, py = new_x1, new_y1
+            pw, ph = max(1, new_x2 - new_x1), max(1, new_y2 - new_y1)
 
-                px, py = new_x1, new_y1
-                pw, ph = max(1, new_x2 - new_x1), max(1, new_y2 - new_y1)
-
-        # Apply bleed padding if requested
-        pad_x1 = max(0, px - bleed_padding_px)
-        pad_y1 = max(0, py - bleed_padding_px)
+        # 3. Apply bleed padding (clamped to image boundaries)
+        pad_x1 = max(0,     px - bleed_padding_px)
+        pad_y1 = max(0,     py - bleed_padding_px)
         pad_x2 = min(img_w, px + pw + bleed_padding_px)
         pad_y2 = min(img_h, py + ph + bleed_padding_px)
-
-        cinematography = _estimate_cinematography(pw, ph, panel_characters)
 
         fused_panels.append(PanelBoundingBox(
             id=p_id,
@@ -234,63 +230,65 @@ def fuse_panels_and_bubbles(
             speech_bubbles=panel_bubbles,
             characters=panel_characters,
             characters_count=len(panel_characters),
-            cinematography=cinematography
+            cinematography=_estimate_cinematography(pw, ph, panel_characters),
         ))
 
-    # Detect Inset / Picture-in-Picture Panels (depth lineage)
+    # ── Mark inset / picture-in-picture panels ───────────────────────────────
     for p in fused_panels:
         for other in fused_panels:
-            if p.id != other.id and other.x >= p.x and other.y >= p.y:
-                if (other.x + other.w) <= (p.x + p.w) and (other.y + other.h) <= (p.y + p.h):
-                    if (other.w * other.h) < (p.w * p.h * 0.60):
-                        other.depth = 1
-                        other.parent_panel_id = p.id
-                        other.label = EntityLabel.PANEL_INSET.value
+            if (p.id != other.id
+                    and other.x >= p.x and other.y >= p.y
+                    and (other.x + other.w) <= (p.x + p.w)
+                    and (other.y + other.h) <= (p.y + p.h)
+                    and (other.w * other.h) < (p.w * p.h * 0.60)):
+                other.depth = 1
+                other.parent_panel_id = p.id
+                other.label = EntityLabel.PANEL_INSET.value
 
+    # ── Sort top-to-bottom ────────────────────────────────────────────────────
     fused_panels.sort(key=lambda p: (p.y, p.x))
 
     # ── STRICT NON-OVERLAP ENFORCEMENT ───────────────────────────────────────
-    # Ensure no two vertically adjacent panels overlap. When a panel's bottom (y+h)
-    # extends past the next panel's top (y), clip it at the midpoint of the overlap.
+    # Safety-net: clip residual vertical overlaps at a 60/40 midpoint split.
+    # Primary prevention is the neighbour-bounded expansion above and the
+    # pre-fusion clip in detect_long_panels_service.
     for i in range(len(fused_panels) - 1):
-        p_cur = fused_panels[i]
-        p_nxt = fused_panels[i + 1]
-        cur_y2 = p_cur.y + p_cur.h
-        nxt_y1 = p_nxt.y
-        if cur_y2 > nxt_y1:
-            overlap_px = cur_y2 - nxt_y1
-            # Split the overlap at the midpoint
-            trim_top = max(1, overlap_px // 2)
-            trim_bot = overlap_px - trim_top
-            # Clip current panel's bottom
-            new_h_cur = max(10, p_cur.h - trim_top - trim_bot // 2)
-            p_cur.h = new_h_cur
-            p_cur.height = new_h_cur
-            # Push next panel's top down
-            new_y_nxt = p_cur.y + p_cur.h
-            new_h_nxt = max(10, p_nxt.h - (new_y_nxt - p_nxt.y))
-            p_nxt.y = new_y_nxt
-            p_nxt.h = new_h_nxt
-            p_nxt.height = new_h_nxt
-            logger.debug(
-                f"[Panel Fusion] Non-overlap clip: panel {i} y2 {cur_y2}->{p_cur.y+p_cur.h}, "
-                f"panel {i+1} y1 {nxt_y1}->{p_nxt.y} (overlap was {overlap_px}px)"
-            )
+        cur = fused_panels[i]
+        nxt = fused_panels[i + 1]
+        cur_y2 = cur.y + cur.h
+        if cur_y2 <= nxt.y:
+            continue
 
+        overlap_px = cur_y2 - nxt.y
+        trim_cur   = max(1, int(overlap_px * 0.60))
+        new_h_cur  = max(10, cur.h - trim_cur)
+        boundary   = cur.y + new_h_cur
+        new_h_nxt  = max(10, nxt.h - (boundary - nxt.y))
+
+        logger.debug(
+            "[Panel Fusion] Non-overlap clip: panel %d y2 %d→%d, panel %d y1 %d→%d (overlap=%dpx)",
+            i, cur_y2, boundary, i + 1, nxt.y, boundary, overlap_px,
+        )
+        cur.h = cur.height = new_h_cur
+        nxt.y = boundary
+        nxt.h = nxt.height = new_h_nxt
+
+    # ── Re-index ──────────────────────────────────────────────────────────────
     for i, p in enumerate(fused_panels):
         p.index = i
         p.id = f"panel_{i + 1}"
 
+    # ── Compute outer crop margins ────────────────────────────────────────────
     if fused_panels:
-        margins = {
-            "crop_top": int(min(p.y for p in fused_panels)),
+        margins: Dict[str, Any] = {
+            "crop_top":    int(min(p.y           for p in fused_panels)),
             "crop_bottom": int(max(0, img_h - max(p.y + p.h for p in fused_panels))),
-            "crop_left": int(min(p.x for p in fused_panels)),
-            "crop_right": int(max(0, img_w - max(p.x + p.w for p in fused_panels))),
-            "unit": "pixels"
+            "crop_left":   int(min(p.x           for p in fused_panels)),
+            "crop_right":  int(max(0, img_w - max(p.x + p.w for p in fused_panels))),
+            "unit": "pixels",
         }
     else:
         margins = {"unit": "pixels"}
 
-    logger.info(f"[Panel Fusion] Completed fusion: generated {len(fused_panels)} rich bounding box panel(s)")
+    logger.info("[Panel Fusion] Done: %d panel(s) produced.", len(fused_panels))
     return fused_panels, yolo_bubbles, margins
