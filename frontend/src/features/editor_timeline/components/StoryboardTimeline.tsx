@@ -190,8 +190,20 @@ const StoryboardTimeline = React.memo(
         if (filterStatus === "selected") {
           return selectedPanelIds.has(panel.id);
         }
+        if (filterStatus === "unselected" || filterStatus === "not_selected") {
+          return !selectedPanelIds.has(panel.id);
+        }
         if (filterStatus === "with_speech") {
           return Boolean(panel.speech_text?.trim());
+        }
+        if (filterStatus === "without_speech") {
+          return !panel.speech_text?.trim();
+        }
+        if (filterStatus === "with_narration" || filterStatus === "with_narrative") {
+          return Boolean(panel.narrative?.trim());
+        }
+        if (filterStatus === "without_narration" || filterStatus === "without_narrative") {
+          return !panel.narrative?.trim();
         }
         if (filterStatus === "with_motion") {
           return Boolean(
@@ -200,10 +212,65 @@ const StoryboardTimeline = React.memo(
               panel.motion_type !== "static"
           );
         }
+        if (filterStatus === "without_motion") {
+          return (
+            !panel.motion_type ||
+            panel.motion_type === "none" ||
+            panel.motion_type === "static"
+          );
+        }
+        if (filterStatus === "with_sfx") {
+          return Boolean(panel.sfx?.trim());
+        }
+        if (filterStatus === "without_sfx") {
+          return !panel.sfx?.trim();
+        }
+        if (filterStatus === "with_audio") {
+          return Boolean(
+            (panel as any).audio_url ||
+              (panel as any).dialogue_audio_url ||
+              (panel as any).narrative_audio_url
+          );
+        }
+        if (filterStatus === "without_audio") {
+          return !(
+            (panel as any).audio_url ||
+              (panel as any).dialogue_audio_url ||
+              (panel as any).narrative_audio_url
+          );
+        }
 
         return true;
       });
     }, [panels, searchQuery, filterStatus, selectedPanelIds]);
+
+    const filterCounts = React.useMemo(() => {
+      let speech = 0;
+      let narration = 0;
+      let motion = 0;
+      let sfx = 0;
+      let audio = 0;
+      for (const p of panels) {
+        if (p.speech_text?.trim()) speech++;
+        if (p.narrative?.trim()) narration++;
+        if (p.motion_type && p.motion_type !== "none" && p.motion_type !== "static") motion++;
+        if (p.sfx?.trim()) sfx++;
+        if ((p as any).audio_url || (p as any).dialogue_audio_url || (p as any).narrative_audio_url) audio++;
+      }
+      const total = panels.length;
+      return {
+        speech,
+        withoutSpeech: Math.max(0, total - speech),
+        narration,
+        withoutNarration: Math.max(0, total - narration),
+        motion,
+        withoutMotion: Math.max(0, total - motion),
+        sfx,
+        withoutSfx: Math.max(0, total - sfx),
+        audio,
+        withoutAudio: Math.max(0, total - audio),
+      };
+    }, [panels]);
 
     const handlePanelClick = useCallback(
       (
@@ -464,9 +531,34 @@ const StoryboardTimeline = React.memo(
       [setSelectedPanelIds]
     );
 
+    const isFilterActive =
+      Boolean(searchQuery?.trim()) ||
+      (filterStatus !== "all" && filterStatus !== "");
+
+    const areAllFilteredSelected = React.useMemo(() => {
+      const target = isFilterActive ? filteredPanels : panels;
+      if (target.length === 0) return false;
+      return target.every((p) => selectedPanelIds.has(p.id));
+    }, [isFilterActive, filteredPanels, panels, selectedPanelIds]);
+
     const selectAllPanels = useCallback(() => {
-      setSelectedPanelIds(new Set(panels.map((p) => p.id)));
-    }, [panels]);
+      const target = isFilterActive ? filteredPanels : panels;
+      if (target.length === 0) return;
+
+      if (areAllFilteredSelected) {
+        setSelectedPanelIds((prev) => {
+          const next = new Set(prev);
+          target.forEach((p) => next.delete(p.id));
+          return next;
+        });
+      } else {
+        setSelectedPanelIds((prev) => {
+          const next = new Set(prev);
+          target.forEach((p) => next.add(p.id));
+          return next;
+        });
+      }
+    }, [isFilterActive, filteredPanels, panels, areAllFilteredSelected, setSelectedPanelIds]);
 
     const clearSelection = useCallback(() => {
       setSelectedPanelIds(new Set());
@@ -995,6 +1087,7 @@ const StoryboardTimeline = React.memo(
           setViewLayout={setStoryboardViewLayout}
           selectedCount={selectedCount}
           totalCount={panels.length}
+          filterCounts={filterCounts}
           handleDownloadZip={handleDownloadZip}
           isAnalyzingAll={isAnalyzingAll || isAnalyzingSelected}
           handleAnalyzeAllPanels={handleAnalyzeAllPanels}

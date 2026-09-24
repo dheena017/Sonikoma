@@ -1,22 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import {
   Film,
-  LayoutGrid,
-  Rows,
   Sparkles,
   CheckSquare,
   Square,
   Scissors,
   Trash2,
   Link2,
-  X,
   RefreshCw,
   Download,
-  Search,
-  Filter,
-  ChevronDown,
+  X,
 } from "lucide-react";
 import EditorHeaderFrame from "@/features/editor_studio/components/EditorHeaderFrame";
+import StoryboardFilterBar, {
+  StoryboardFilterCounts,
+} from "./StoryboardFilterBar";
 
 interface StoryboardHeaderProps {
   panelsLength: number;
@@ -54,6 +52,7 @@ interface StoryboardHeaderProps {
   setSearchQuery?: (q: string) => void;
   filterStatus?: string;
   setFilterStatus?: (status: string) => void;
+  filterCounts?: StoryboardFilterCounts;
 }
 
 export default function StoryboardHeader({
@@ -87,10 +86,32 @@ export default function StoryboardHeader({
   setSearchQuery,
   filterStatus = "all",
   setFilterStatus,
+  filterCounts,
 }: StoryboardHeaderProps) {
-  const isAllSelected =
-    selectedCount > 0 && selectedCount === (totalCount || panelsLength);
+  const isFiltered =
+    Boolean(searchQuery?.trim()) ||
+    (filterStatus !== "all" && filterStatus !== "");
+  const targetCount =
+    isFiltered && filteredCount !== undefined
+      ? filteredCount
+      : totalCount || panelsLength;
+  const isAllSelected = targetCount > 0 && selectedCount >= targetCount;
   const isBusy = isBatchCropping || isCleaningBubbles || isBatchMerging;
+
+  const centerBlock = (
+    <StoryboardFilterBar
+      searchQuery={searchQuery || ""}
+      setSearchQuery={setSearchQuery || (() => {})}
+      filterStatus={filterStatus || "all"}
+      setFilterStatus={setFilterStatus || (() => {})}
+      viewLayout={viewLayout}
+      setViewLayout={setViewLayout}
+      totalCount={totalCount || panelsLength}
+      filteredCount={filteredCount}
+      selectedCount={selectedCount}
+      filterCounts={filterCounts}
+    />
+  );
 
   // When items are selected, render the unified header selection action bar
   if (selectedCount > 0) {
@@ -101,7 +122,7 @@ export default function StoryboardHeader({
             {selectedCount}
           </div>
           <span className="text-xs font-mono font-bold text-blue-300 whitespace-nowrap">
-            {selectedCount} of {totalCount || panelsLength} Selected
+            {selectedCount} of {targetCount} {isFiltered ? "Filtered" : ""} Selected
           </span>
           {clearSelection && (
             <button
@@ -126,7 +147,13 @@ export default function StoryboardHeader({
           ) : (
             <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
           )}
-          <span>{isAllSelected ? "Deselect All" : "Select All"}</span>
+          <span>
+            {isAllSelected
+              ? "Deselect All"
+              : isFiltered
+              ? "Select All Filtered"
+              : "Select All"}
+          </span>
         </button>
 
         {/* Busy / Progress Indicator */}
@@ -239,28 +266,13 @@ export default function StoryboardHeader({
     return (
       <EditorHeaderFrame
         left={selectionLeftBlock}
+        center={centerBlock}
         right={selectionRightBlock}
+        centerClassName="order-3 w-full sm:order-none sm:w-auto sm:flex-1 sm:min-w-0"
+        className="flex-wrap sm:flex-nowrap"
       />
     );
   }
-
-  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
-  const filterDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        filterDropdownRef.current &&
-        !filterDropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsFilterDropdownOpen(false);
-      }
-    };
-    if (isFilterDropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isFilterDropdownOpen]);
 
   // Standard Mode Left Title Block
   const titleBlock = (
@@ -294,172 +306,6 @@ export default function StoryboardHeader({
     </div>
   );
 
-  const getStatusLabel = () => {
-    switch (filterStatus) {
-      case "with_speech":
-        return "Speech";
-      case "with_motion":
-        return "Motion";
-      case "selected":
-        return "Selected";
-      default:
-        return "ALL";
-    }
-  };
-
-  const centerBlock = (
-    <div className="flex items-center justify-between gap-1.5 sm:gap-2 flex-1 w-full min-w-0 max-w-none sm:max-w-xl mx-0 font-mono text-xs select-none">
-      {/* Search Input Box */}
-      <div className="relative flex-1 min-w-[80px] max-w-[240px] flex items-center">
-        <Search className="absolute left-2.5 w-3.5 h-3.5 text-neutral-400 pointer-events-none shrink-0" />
-        <input
-          type="text"
-          value={searchQuery || ""}
-          onChange={(e) => setSearchQuery?.(e.target.value)}
-          placeholder="Search scene..."
-          className="w-full h-8 pl-8 pr-6 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-neutral-600 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-all shadow-inner"
-        />
-        {searchQuery && (
-          <button
-            type="button"
-            onClick={() => setSearchQuery?.("")}
-            title="Clear search"
-            className="absolute right-1.5 p-0.5 rounded-md text-neutral-400 hover:text-white transition-colors cursor-pointer"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
-      {/* Filter Status Dropdown Menu */}
-      <div className="relative shrink-0" ref={filterDropdownRef}>
-        <button
-          type="button"
-          onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
-          className={`h-8 px-2 sm:px-3 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-sm ${
-            filterStatus && filterStatus !== "all"
-              ? "bg-[#2A2A2A] border-neutral-700 text-neutral-300"
-              : "bg-neutral-950/80 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
-          }`}
-        >
-          <Filter className="w-3.5 h-3.5 text-neutral-400" />
-          <span>{getStatusLabel()}</span>
-          <ChevronDown
-            className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
-              isFilterDropdownOpen ? "rotate-180 text-white" : ""
-            }`}
-          />
-        </button>
-
-        {isFilterDropdownOpen && (
-          <div className="absolute right-0 top-full mt-1.5 w-52 bg-neutral-900/95 border border-neutral-800 rounded-2xl shadow-2xl backdrop-blur-xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 flex flex-col gap-1">
-            <div className="px-2 py-1 text-[9px] uppercase font-bold text-neutral-500 tracking-wider">
-              Scene Filter
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setFilterStatus?.("all");
-                setIsFilterDropdownOpen(false);
-              }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                !filterStatus || filterStatus === "all"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
-              }`}
-            >
-              <span>All Scenes</span>
-              <span className="text-[10px] text-neutral-400 font-normal">
-                {totalCount || panelsLength}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setFilterStatus?.("with_speech");
-                setIsFilterDropdownOpen(false);
-              }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "with_speech"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
-              }`}
-            >
-              <span>With Speech</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setFilterStatus?.("with_motion");
-                setIsFilterDropdownOpen(false);
-              }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "with_motion"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
-              }`}
-            >
-              <span>With Motion</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setFilterStatus?.("selected");
-                setIsFilterDropdownOpen(false);
-              }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
-                filterStatus === "selected"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
-                  : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
-              }`}
-            >
-              <span>Selected Only</span>
-              <span className="text-[10px] text-neutral-300 font-normal">
-                {selectedCount}
-              </span>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* View Toggle */}
-      {setViewLayout && (
-        <div className="flex items-center bg-neutral-950/90 p-0.5 rounded-xl border border-neutral-800 shadow-inner shrink-0">
-          <button
-            type="button"
-            onClick={() => setViewLayout("scroll")}
-            title="Horizontal Scroll View"
-            className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              viewLayout === "scroll"
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-            }`}
-          >
-            <Rows className="w-3.5 h-3.5" />
-            <span className="hidden 2xl:inline">Scroll</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewLayout("grid")}
-            title="Grid View"
-            className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              viewLayout === "grid"
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
-                : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
-            }`}
-          >
-            <LayoutGrid className="w-3.5 h-3.5" />
-            <span className="hidden 2xl:inline">Grid</span>
-          </button>
-        </div>
-      )}
-    </div>
-  );
-
   const rightBlock = (
     <div className="flex items-center gap-2 shrink-0">
       {/* Select All Quick Action */}
@@ -467,11 +313,27 @@ export default function StoryboardHeader({
         <button
           type="button"
           onClick={isAllSelected ? clearSelection : selectAllPanels}
-          title={isAllSelected ? "Deselect all scenes" : "Select all scenes"}
+          title={
+            isAllSelected
+              ? "Deselect all scenes"
+              : isFiltered
+              ? "Select filtered scenes"
+              : "Select all scenes"
+          }
           className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-neutral-700 text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
         >
-          <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
-          <span className="hidden 2xl:inline">Select All</span>
+          {isAllSelected ? (
+            <Square className="w-3.5 h-3.5 text-neutral-400" />
+          ) : (
+            <CheckSquare className="w-3.5 h-3.5 text-neutral-400" />
+          )}
+          <span className="hidden 2xl:inline">
+            {isAllSelected
+              ? "Deselect All"
+              : isFiltered
+              ? "Select Filtered"
+              : "Select All"}
+          </span>
         </button>
       )}
 

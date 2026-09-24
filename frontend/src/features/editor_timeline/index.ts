@@ -7,3 +7,12 @@ export { default as StoryboardCard } from "./components/StoryboardCard";
 export { default as StoryboardEmptyState } from "./components/StoryboardEmptyState";
 export { default as StoryboardBulkOps } from "./components/StoryboardBulkOps";
 export { default as StoryboardChapterGroup } from "./components/StoryboardChapterGroup";
+export {
+  default as StoryboardFilterBar,
+  StoryboardFilterBar as StoryboardFilterBarComponent,
+} from "./components/StoryboardFilterBar";
+export type {
+  StoryboardFilterStatus,
+  StoryboardFilterBarProps,
+  StoryboardFilterCounts,
+} from "./components/StoryboardFilterBar";

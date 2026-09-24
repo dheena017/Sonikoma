@@ -121,7 +121,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
       </div>
 
       {/* Filter Status Dropdown Menu */}
-      <div className="relative shrink-0" ref={dropdownRef}>
+      <div className="relative shrink-0 z-30" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
