@@ -172,6 +172,8 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
             gray_arr = np.array(pil_img.convert("L"))
             subdivided_cv: List[Dict[str, Any]] = []
 
+            is_webtoon_scroll = (request.background_mode != "manga_grid") or (img_h > img_w * 1.5)
+
             for p in cv_panels:
                 px = int(p.get("x", 0))
                 py = int(p.get("y", 0))
@@ -182,108 +184,153 @@ async def detect_long_panels_boxes(request: DetectLongPanelsRequest) -> DetectLo
                     subdivided_cv.append(p)
                     continue
 
-                # Crop sub-slice for internal 2D panel grid detection directly from PIL in memory
-                page_crop = pil_img.crop((px, py, px + pw, py + ph))
-
-                cv_grid = detect_opencv_boxes(
-                    page_crop,
-                    min_width_pct=0.20,
-                    min_height_px=max(int(pw * 0.12), int(ph * 0.08)),
-                    bleed_padding_px=request.bleed_padding_px
-                )
-                sub_panels = cv_grid.get("panels", [])
-
-                # Determine whether page slice has multiple distinct closed 2D panels
-                # Check total vertical coverage of detected sub-panels
-                total_covered_h = 0
-                if sub_panels:
-                    min_sub_y = min(sp.get("y", 0) for sp in sub_panels)
-                    max_sub_y2 = max(sp.get("y", 0) + sp.get("h", 0) for sp in sub_panels)
-                    total_covered_h = max_sub_y2 - min_sub_y
-
-                # Only use sub-panels if they cover >= 70% of the slice or if ph is short
-                valid_grid = (len(sub_panels) > 1) and (total_covered_h >= int(ph * 0.70) or ph <= int(pw * 2.0))
-
-                if valid_grid:
-                    # Successfully extracted individual panel frames from this page
-                    # Only merge sub-panels that are true duplicate / subset contours, NEVER vertically stacked panels
-                    cleaned_subs: List[Dict[str, Any]] = []
-                    sub_panels.sort(key=lambda sp: (sp.get("y", 0), sp.get("x", 0)))
-                    for sp in sub_panels:
-                        sp_x = px + sp.get("x", 0)
-                        sp_y = py + sp.get("y", 0)
-                        sp_w = sp.get("w", pw)
-                        sp_h = sp.get("h", ph)
-
-                        # Filter out tiny sliver noise (e.g. < 40px width/height)
-                        if sp_w < max(50, int(pw * 0.15)) or sp_h < max(40, int(ph * 0.05)):
-                            continue
-
-                        if cleaned_subs:
-                            last = cleaned_subs[-1]
-                            last_y2 = last["y"] + last["h"]
-                            last_x2 = last["x"] + last["w"]
-
-                            # Check 2D intersection / overlap
-                            ix1 = max(last["x"], sp_x)
-                            iy1 = max(last["y"], sp_y)
-                            ix2 = min(last_x2, sp_x + sp_w)
-                            iy2 = min(last_y2, sp_y + sp_h)
-                            
-                            inter_w = max(0, ix2 - ix1)
-                            inter_h = max(0, iy2 - iy1)
-                            inter_area = inter_w * inter_h
-                            min_area = min(last["w"] * last["h"], sp_w * sp_h)
-
-                            # ONLY merge if they are essentially the same box (overlap >= 70% of smaller box)
-                            if min_area > 0 and (inter_area / float(min_area)) >= 0.70:
-                                last["x"] = min(last["x"], sp_x)
-                                last["y"] = min(last["y"], sp_y)
-                                last["w"] = max(last_x2, sp_x + sp_w) - last["x"]
-                                last["h"] = max(last_y2, sp_y + sp_h) - last["y"]
-                                continue
-
-                        cleaned_subs.append({
-                            "x": sp_x,
-                            "y": sp_y,
-                            "w": sp_w,
-                            "h": sp_h,
+                if is_webtoon_scroll:
+                    # In Webtoon strips, panels span full canvas width (0..img_w).
+                    # Never split webtoon scenes into artificial side-by-side vertical columns!
+                    # Only subdivide tall continuous panels horizontally along natural valley seams:
+                    if ph > int(pw * 1.35):
+                        from services.image.panel_detection.panel_detector import _subdivide_continuous_tall_art_panel
+                        child_ocr = [
+                            {"x": max(0, b.x - px), "y": max(0, b.y - py), "w": b.width, "h": b.height}
+                            for b in yolo_bubbles
+                            if py <= (b.y + b.height // 2) <= (py + ph)
+                        ]
+                        sub_gray = gray_arr[py : py + ph, px : px + pw]
+                        if sub_gray.shape[0] > 0 and sub_gray.shape[1] > 0:
+                            sub_pieces = _subdivide_continuous_tall_art_panel(
+                                sub_gray, px, py, pw, ph, child_ocr
+                            )
+                            for piece in sub_pieces:
+                                piece_h = piece.get("h", ph)
+                                if piece_h >= max(40, int(pw * 0.10)):
+                                    subdivided_cv.append({
+                                        "x": 0,
+                                        "y": py + piece.get("y", 0),
+                                        "w": img_w,
+                                        "h": piece_h,
+                                        "confidence": p.get("confidence", 0.95),
+                                        "label": "webtoon_subpanel"
+                                    })
+                        else:
+                            subdivided_cv.append({
+                                "x": 0,
+                                "y": py,
+                                "w": img_w,
+                                "h": ph,
+                                "confidence": p.get("confidence", 0.95),
+                                "label": "panel"
+                            })
+                    else:
+                        subdivided_cv.append({
+                            "x": 0,
+                            "y": py,
+                            "w": img_w,
+                            "h": ph,
                             "confidence": p.get("confidence", 0.95),
                             "label": p.get("label", "panel")
                         })
-                    subdivided_cv.extend(cleaned_subs)
-                elif ph > int(pw * 1.35):
-                    # Continuous tall webtoon strip without closed borders: subdivide at natural whitespace / gradient valleys
-                    from services.image.panel_detection.panel_detector import _subdivide_continuous_tall_art_panel
-                    child_ocr = [
-                        {"x": max(0, b.x - px), "y": max(0, b.y - py), "w": b.width, "h": b.height}
-                        for b in yolo_bubbles
-                        if py <= (b.y + b.height // 2) <= (py + ph)
-                    ]
-                    sub_gray = gray_arr[py : py + ph, px : px + pw]
-                    if sub_gray.shape[0] > 0 and sub_gray.shape[1] > 0:
-                        sub_pieces = _subdivide_continuous_tall_art_panel(
-                            sub_gray, px, py, pw, ph, child_ocr
-                        )
-                        for piece in sub_pieces:
-                            subdivided_cv.append({
-                                "x": px + piece.get("x", 0),
-                                "y": py + piece.get("y", 0),
-                                "w": piece.get("w", pw),
-                                "h": piece.get("h", ph),
+                else:
+                    # Non-webtoon (print 2D Manga grid) pages with closed bordered frames
+                    page_crop = pil_img.crop((px, py, px + pw, py + ph))
+
+                    cv_grid = detect_opencv_boxes(
+                        page_crop,
+                        min_width_pct=0.20,
+                        min_height_px=max(int(pw * 0.12), int(ph * 0.08)),
+                        bleed_padding_px=request.bleed_padding_px
+                    )
+                    sub_panels = cv_grid.get("panels", [])
+
+                    total_covered_h = 0
+                    if sub_panels:
+                        min_sub_y = min(sp.get("y", 0) for sp in sub_panels)
+                        max_sub_y2 = max(sp.get("y", 0) + sp.get("h", 0) for sp in sub_panels)
+                        total_covered_h = max_sub_y2 - min_sub_y
+
+                    valid_grid = (len(sub_panels) > 1) and (total_covered_h >= int(ph * 0.70))
+
+                    if valid_grid:
+                        cleaned_subs: List[Dict[str, Any]] = []
+                        sub_panels.sort(key=lambda sp: (sp.get("y", 0), sp.get("x", 0)))
+                        for sp in sub_panels:
+                            sp_x = px + sp.get("x", 0)
+                            sp_y = py + sp.get("y", 0)
+                            sp_w = sp.get("w", pw)
+                            sp_h = sp.get("h", ph)
+
+                            if sp_w < max(50, int(pw * 0.15)) or sp_h < max(40, int(ph * 0.05)):
+                                continue
+
+                            if cleaned_subs:
+                                last = cleaned_subs[-1]
+                                last_y2 = last["y"] + last["h"]
+                                last_x2 = last["x"] + last["w"]
+
+                                ix1 = max(last["x"], sp_x)
+                                iy1 = max(last["y"], sp_y)
+                                ix2 = min(last_x2, sp_x + sp_w)
+                                iy2 = min(last_y2, sp_y + sp_h)
+
+                                inter_w = max(0, ix2 - ix1)
+                                inter_h = max(0, iy2 - iy1)
+                                inter_area = inter_w * inter_h
+                                min_area = min(last["w"] * last["h"], sp_w * sp_h)
+
+                                if min_area > 0 and (inter_area / float(min_area)) >= 0.70:
+                                    last["x"] = min(last["x"], sp_x)
+                                    last["y"] = min(last["y"], sp_y)
+                                    last["w"] = max(last_x2, sp_x + sp_w) - last["x"]
+                                    last["h"] = max(last_y2, sp_y + sp_h) - last["y"]
+                                    continue
+
+                            cleaned_subs.append({
+                                "x": sp_x,
+                                "y": sp_y,
+                                "w": sp_w,
+                                "h": sp_h,
                                 "confidence": p.get("confidence", 0.95),
-                                "label": "webtoon_subpanel"
+                                "label": p.get("label", "panel")
                             })
+                        subdivided_cv.extend(cleaned_subs)
                     else:
                         subdivided_cv.append(p)
-                else:
-                    subdivided_cv.append(p)
 
-            if len(subdivided_cv) > len(cv_panels):
-                logger.info(f"[LongPanels: Subdivider] Split composite slices into separate panels: {len(cv_panels)} -> {len(subdivided_cv)} panels.")
+            if len(subdivided_cv) > 0:
                 cv_panels = subdivided_cv
         except Exception as e:
             logger.warning(f"[LongPanels: Subdivider] Fallback: {e}", exc_info=True)
+
+    # ── PRE-FUSION: Clip overlapping cv_panels before bubble fusion ───────────
+    # detect_vertical_strip_panels can return vertically overlapping boxes when
+    # the gutter classification is ambiguous. Clip them at the midpoint now so
+    # fuse_panels_and_bubbles inherits clean, non-overlapping boundaries.
+    if len(cv_panels) > 1:
+        cv_panels_pre = sorted(cv_panels, key=lambda p: (int(p.get("y") or 0), int(p.get("x") or 0)))
+        for _i in range(len(cv_panels_pre) - 1):
+            p1 = cv_panels_pre[_i]
+            p2 = cv_panels_pre[_i + 1]
+            p1_y1 = int(p1.get("y") or 0)
+            p1_h  = int(p1.get("h") or p1.get("height") or 0)
+            p1_y2 = p1_y1 + p1_h
+            p2_y1 = int(p2.get("y") or 0)
+            if p1_y2 > p2_y1:
+                overlap = p1_y2 - p2_y1
+                clip = max(1, overlap // 2)
+                new_h1 = max(10, p1_h - clip)
+                boundary = p1_y1 + new_h1
+                new_h2 = max(10, int(p2.get("h") or p2.get("height") or 0) - (boundary - p2_y1))
+                p1["h"] = new_h1
+                if "height" in p1:
+                    p1["height"] = new_h1
+                p2["y"] = boundary
+                p2["h"] = new_h2
+                if "height" in p2:
+                    p2["height"] = new_h2
+                logger.debug(
+                    f"[LongPanels: Pre-Fusion Clip] panels[{_i}] y2 {p1_y2}->{boundary}, "
+                    f"panels[{_i+1}] y1 {p2_y1}->{boundary} (overlap was {overlap}px)"
+                )
+        cv_panels = cv_panels_pre
 
     # ── FUSION: Bind Speech Bubbles into Panel Slices ─────────────────────────
     fused_panels, all_bubbles, _ = fuse_panels_and_bubbles(

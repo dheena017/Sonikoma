@@ -109,11 +109,27 @@ def fuse_panels_and_bubbles(
             "category": EntityCategory.PANEL.value
         }]
 
+    # Pre-sort panels by Y so we can compute neighbor boundaries for safe expansion
+    cv_panels_sorted = sorted(
+        cv_panels,
+        key=lambda p: (int(p.get("y") or 0), int(p.get("x") or 0))
+    )
+
+    # Build neighbor boundary map: panel_index -> (prev_y2, next_y1)
+    # We compute neighbour panel boundaries BEFORE expansion so they are stable
+    def _panel_y1(p: Dict[str, Any]) -> int:
+        return int(p.get("y") or 0)
+
+    def _panel_y2(p: Dict[str, Any]) -> int:
+        py_ = int(p.get("y") or 0)
+        ph_ = int(p.get("h") or p.get("height") or 0)
+        return py_ + ph_
+
     # Process all detected frames
     unassigned_bubbles = list(yolo_bubbles)
     max_gutter_reach = max(20, int(img_w * 0.25))
 
-    for idx, cp in enumerate(cv_panels):
+    for idx, cp in enumerate(cv_panels_sorted):
         px = int(cp.get("x") or 0)
         py = int(cp.get("y") or 0)
         pw = int(cp.get("w") or cp.get("width") or img_w)
@@ -174,14 +190,22 @@ def fuse_panels_and_bubbles(
                 # Expand panel boundary safely to enclose the speech bubble without crossing neighboring panels
                 max_exp_y = max(10, int(ph * 0.15))
                 max_exp_x = max(10, int(pw * 0.10))
-                new_x1 = max(0, max(px - max_exp_x, min(px, bubble.x)))
-                new_y1 = max(0, max(py - max_exp_y, min(py, bubble.y)))
-                new_x2 = min(img_w, min(px + pw + max_exp_x, max(px + pw, bubble.x + bubble.width)))
-                new_y2 = min(img_h, min(py + ph + max_exp_y, max(py + ph, bubble.y + bubble.height)))
 
+                # Compute hard boundary limits from neighbouring panels
+                prev_panel = cv_panels_sorted[idx - 1] if idx > 0 else None
+                next_panel = cv_panels_sorted[idx + 1] if idx < len(cv_panels_sorted) - 1 else None
+                min_y1_limit = (_panel_y2(prev_panel) if prev_panel else 0)
+                max_y2_limit = (_panel_y1(next_panel) if next_panel else img_h)
+
+                new_x1 = max(0, max(px - max_exp_x, min(px, bubble.x)))
+                # Cap upward expansion so we don't enter the previous panel
+                new_y1 = max(min_y1_limit, max(py - max_exp_y, min(py, bubble.y)))
+                new_x2 = min(img_w, min(px + pw + max_exp_x, max(px + pw, bubble.x + bubble.width)))
+                # Cap downward expansion so we don't enter the next panel
+                new_y2 = min(max_y2_limit, min(py + ph + max_exp_y, max(py + ph, bubble.y + bubble.height)))
 
                 px, py = new_x1, new_y1
-                pw, ph = new_x2 - new_x1, new_y2 - new_y1
+                pw, ph = max(1, new_x2 - new_x1), max(1, new_y2 - new_y1)
 
         # Apply bleed padding if requested
         pad_x1 = max(0, px - bleed_padding_px)
@@ -224,6 +248,35 @@ def fuse_panels_and_bubbles(
                         other.label = EntityLabel.PANEL_INSET.value
 
     fused_panels.sort(key=lambda p: (p.y, p.x))
+
+    # ── STRICT NON-OVERLAP ENFORCEMENT ───────────────────────────────────────
+    # Ensure no two vertically adjacent panels overlap. When a panel's bottom (y+h)
+    # extends past the next panel's top (y), clip it at the midpoint of the overlap.
+    for i in range(len(fused_panels) - 1):
+        p_cur = fused_panels[i]
+        p_nxt = fused_panels[i + 1]
+        cur_y2 = p_cur.y + p_cur.h
+        nxt_y1 = p_nxt.y
+        if cur_y2 > nxt_y1:
+            overlap_px = cur_y2 - nxt_y1
+            # Split the overlap at the midpoint
+            trim_top = max(1, overlap_px // 2)
+            trim_bot = overlap_px - trim_top
+            # Clip current panel's bottom
+            new_h_cur = max(10, p_cur.h - trim_top - trim_bot // 2)
+            p_cur.h = new_h_cur
+            p_cur.height = new_h_cur
+            # Push next panel's top down
+            new_y_nxt = p_cur.y + p_cur.h
+            new_h_nxt = max(10, p_nxt.h - (new_y_nxt - p_nxt.y))
+            p_nxt.y = new_y_nxt
+            p_nxt.h = new_h_nxt
+            p_nxt.height = new_h_nxt
+            logger.debug(
+                f"[Panel Fusion] Non-overlap clip: panel {i} y2 {cur_y2}->{p_cur.y+p_cur.h}, "
+                f"panel {i+1} y1 {nxt_y1}->{p_nxt.y} (overlap was {overlap_px}px)"
+            )
+
     for i, p in enumerate(fused_panels):
         p.index = i
         p.id = f"panel_{i + 1}"

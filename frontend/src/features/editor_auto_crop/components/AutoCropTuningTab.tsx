@@ -35,6 +35,8 @@ export type PresetType =
   | "safe_bleed";
 
 export interface AutoCropTuningTabProps {
+  engineMode?: "opencv" | "ai";
+  onEngineModeChange?: (mode: "opencv" | "ai") => void;
   padding: number;
   sensitivity: number;
   aspectRatioLock: string;
@@ -64,6 +66,8 @@ export interface AutoCropTuningTabProps {
 }
 
 export function AutoCropTuningTab({
+  engineMode = "opencv",
+  onEngineModeChange,
   padding,
   sensitivity,
   aspectRatioLock,
@@ -149,6 +153,66 @@ export function AutoCropTuningTab({
 
   return (
     <div className="p-4 sm:p-6 rounded-3xl border border-neutral-800 bg-neutral-950/90 space-y-6 animate-in fade-in duration-150 select-none">
+      {/* ── 0. ENGINE SELECTION: OpenCV vs Gemini AI Smart Crop ── */}
+      <div className="space-y-2.5 pb-4 border-b border-neutral-800/80">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <span className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-sky-400" />
+            <span>Detection Engine</span>
+          </span>
+          <span className="text-[11px] text-neutral-500 font-mono">
+            Choose between Local OpenCV or Gemini Vision AI
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => onEngineModeChange?.("opencv")}
+            className={`p-3 rounded-2xl border text-left transition-all flex items-start gap-3 !cursor-pointer active:scale-95 ${
+              engineMode === "opencv"
+                ? "bg-emerald-500/15 border-emerald-500 text-white shadow-md shadow-emerald-500/10 font-medium"
+                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+            }`}
+          >
+            <div className={`p-2 rounded-xl shrink-0 ${engineMode === "opencv" ? "bg-emerald-500 text-black font-bold" : "bg-neutral-800 text-neutral-400"}`}>
+              <Zap className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold flex items-center gap-1.5">
+                <span>OpenCV Fast Engine</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">Local CV</span>
+              </div>
+              <p className="text-[10px] text-neutral-400 mt-0.5">
+                Full-width webtoon gutter detection & tight frame snapping. Ultra fast.
+              </p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onEngineModeChange?.("ai")}
+            className={`p-3 rounded-2xl border text-left transition-all flex items-start gap-3 !cursor-pointer active:scale-95 ${
+              engineMode === "ai"
+                ? "bg-sky-500/15 border-sky-500 text-white shadow-md shadow-sky-500/10 font-medium"
+                : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
+            }`}
+          >
+            <div className={`p-2 rounded-xl shrink-0 ${engineMode === "ai" ? "bg-sky-500 text-black font-bold" : "bg-neutral-800 text-neutral-400"}`}>
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="text-xs font-bold flex items-center gap-1.5">
+                <span>Smart AI Crop (Gemini)</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-mono">Multimodal Vision</span>
+              </div>
+              <p className="text-[10px] text-neutral-400 mt-0.5">
+                AI semantic reasoning. Zero hardcoded cuts, protects speech bubbles and characters.
+              </p>
+            </div>
+          </button>
+        </div>
+      </div>
+
       {/* ── 1. SMART DETECTION PRESETS ── */}
       <div className="space-y-2.5 pb-4 border-b border-neutral-800/80">
         <div className="flex items-center justify-between flex-wrap gap-2">

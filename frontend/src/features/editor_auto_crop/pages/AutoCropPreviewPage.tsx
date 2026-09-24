@@ -31,6 +31,7 @@ import {
   Plus,
   Minus,
   X,
+  Zap,
 } from "lucide-react";
 import * as api from "@/api";
 import { getProxiedImageUrl } from "@/utils";
@@ -168,6 +169,7 @@ export default function AutoCropPreviewPage({
   const [showLayoutDropdown, setShowLayoutDropdown] = useState(false);
 
   // Live adjustment controls state
+  const [engineMode, setEngineMode] = useState<"opencv" | "ai">("opencv");
   const [sensitivity, setSensitivity] = useState(initialSensitivity);
   const [padding, setPadding] = useState(initialPadding);
   const [backgroundColorMode, setBackgroundColorMode] = useState(initialBgMode);
@@ -216,6 +218,7 @@ export default function AutoCropPreviewPage({
     async (
       url: string,
       currentOptions: {
+        engineMode?: "opencv" | "ai";
         sensitivity: number;
         padding: number;
         backgroundColorMode: string;
@@ -256,107 +259,162 @@ export default function AutoCropPreviewPage({
         (typeInfo?.aspect_ratio ?? 0) >= 2.0;
 
       try {
-        if (isTallStrip) {
-          const detected = await api.detectLongPanels(
-            fetcher,
-            {
-              url,
-              sensitivity: currentOptions.sensitivity,
-              background_mode: currentOptions.backgroundColorMode || "auto",
-              min_panel_height: currentOptions.minPanelHeightPx,
-              overlap_merge_threshold: overlapMergeThreshold,
-              auto_split: currentOptions.autoSplitTallStrips,
-              bleed_padding_px: currentOptions.padding,
-            },
-            reqOptions
-          );
-
-          if (detected?.panels && detected.panels.length > 0) {
-            detectedPanels = [...detected.panels].sort((a, b) => {
-              const dy = (a.y ?? 0) - (b.y ?? 0);
-              if (Math.abs(dy) > 20) return dy;
-              return (a.x ?? 0) - (b.x ?? 0);
-            });
-
-            const cropped = await api.cropLongPanels(
+        // ── ENGINE 1: GEMINI SMART AI VISION (ZERO HARDCODED CUTS) ──
+        if (currentOptions.engineMode === "ai") {
+          try {
+            const aiRes = await api.aiSmartCrop(
               fetcher,
               {
                 url,
-                panels: detectedPanels,
-                bleed_guard_px: currentOptions.padding,
-                background_mode: currentOptions.backgroundColorMode || "auto",
-                output_format: "webp",
-                quality: 90,
+                strategy: "ai",
+                aspectRatio: currentOptions.aspectRatioLock,
+                sensitivity: currentOptions.sensitivity,
+                paddingPx: currentOptions.padding,
+                backgroundColorMode: currentOptions.backgroundColorMode || "auto",
               },
               reqOptions
             );
 
-            panelUrls = (cropped?.slices || [])
-              .sort((a, b) => a.index - b.index)
-              .map((slice) => slice.url);
-          } else if (detected && !detected.success) {
-            status = "error";
-            errorMessage = detected.message || "Detection algorithm returned no valid comic panels.";
+            const rawPanels = aiRes?.panels || aiRes?.boxes || [];
+            if (Array.isArray(rawPanels) && rawPanels.length > 0) {
+              const imgW = typeInfo?.width || aiRes?.imageWidth || 900;
+              detectedPanels = rawPanels
+                .map((p: any, i: number) => ({
+                  id: i + 1,
+                  x: Math.max(0, Math.round(p.x ?? 0)),
+                  y: Math.max(0, Math.round(p.y ?? 0)),
+                  width: Math.round(p.width ?? p.w ?? imgW),
+                  height: Math.round(p.height ?? p.h ?? 300),
+                }))
+                .sort((a: any, b: any) => (a.y ?? 0) - (b.y ?? 0));
+
+              const cropped = await api.cropLongPanels(
+                fetcher,
+                {
+                  url,
+                  panels: detectedPanels,
+                  bleed_guard_px: currentOptions.padding,
+                  background_mode: currentOptions.backgroundColorMode || "auto",
+                  output_format: "webp",
+                  quality: 90,
+                },
+                reqOptions
+              );
+
+              panelUrls = (cropped?.slices || [])
+                .sort((a, b) => a.index - b.index)
+                .map((slice) => slice.url);
+            }
+          } catch (aiErr: any) {
+            if (aiErr.name === "AbortError") throw aiErr;
+            console.warn("[AutoCropPreview] AI Smart Crop fallback to OpenCV:", aiErr);
           }
-        } else {
-          const detected = await api.detectSmallPanels(
-            fetcher,
-            {
-              url,
-              aspect_ratio:
-                currentOptions.aspectRatioLock && currentOptions.aspectRatioLock !== "free"
-                  ? currentOptions.aspectRatioLock
-                  : "free",
-              auto_trim: true,
-              snap_to_frame: true,
-              merge_speech_bubbles: true,
-              filter_gutter_sfx: true,
-              bleed_padding_px: currentOptions.padding,
-            },
-            reqOptions
-          );
+        }
 
-          if (detected?.panels && detected.panels.length > 1) {
-            detectedPanels = detected.panels;
-            const cropped = await api.cropLongPanels(
+        // ── ENGINE 2: OPENCV DEEP-LEARNING GUTTER & FRAME ENGINE ──
+        if (detectedPanels.length === 0) {
+          if (isTallStrip) {
+            const detected = await api.detectLongPanels(
               fetcher,
               {
                 url,
-                panels: detected.panels,
-                bleed_guard_px: currentOptions.padding,
+                sensitivity: currentOptions.sensitivity,
                 background_mode: currentOptions.backgroundColorMode || "auto",
-                output_format: "webp",
-                quality: 90,
+                min_panel_height: currentOptions.minPanelHeightPx,
+                overlap_merge_threshold: overlapMergeThreshold,
+                auto_split: currentOptions.autoSplitTallStrips,
+                bleed_padding_px: currentOptions.padding,
               },
               reqOptions
             );
-            panelUrls = (cropped?.slices || [])
-              .sort((a, b) => a.index - b.index)
-              .map((slice) => slice.url);
+
+            if (detected?.panels && detected.panels.length > 0) {
+              detectedPanels = [...detected.panels].sort((a, b) => {
+                const dy = (a.y ?? 0) - (b.y ?? 0);
+                if (Math.abs(dy) > 20) return dy;
+                return (a.x ?? 0) - (b.x ?? 0);
+              });
+
+              const cropped = await api.cropLongPanels(
+                fetcher,
+                {
+                  url,
+                  panels: detectedPanels,
+                  bleed_guard_px: currentOptions.padding,
+                  background_mode: currentOptions.backgroundColorMode || "auto",
+                  output_format: "webp",
+                  quality: 90,
+                },
+                reqOptions
+              );
+
+              panelUrls = (cropped?.slices || [])
+                .sort((a, b) => a.index - b.index)
+                .map((slice) => slice.url);
+            } else if (detected && !detected.success) {
+              status = "error";
+              errorMessage = detected.message || "Detection algorithm returned no valid comic panels.";
+            }
           } else {
-            const margins = detected?.margins || {};
-            const cropped = await api.cropSmallPanels(
+            const detected = await api.detectSmallPanels(
               fetcher,
               {
                 url,
-                crop_top: margins.crop_top || 0,
-                crop_bottom: margins.crop_bottom || 0,
-                crop_left: margins.crop_left || 0,
-                crop_right: margins.crop_right || 0,
-                unit: margins.unit === "percent" ? "percent" : "pixels",
                 aspect_ratio:
                   currentOptions.aspectRatioLock && currentOptions.aspectRatioLock !== "free"
-                    ? (currentOptions.aspectRatioLock as any)
+                    ? currentOptions.aspectRatioLock
                     : "free",
                 auto_trim: true,
-                padding_px: currentOptions.padding,
-                output_format: "webp",
-                quality: 90,
+                snap_to_frame: true,
+                merge_speech_bubbles: true,
+                filter_gutter_sfx: true,
+                bleed_padding_px: currentOptions.padding,
               },
               reqOptions
             );
-            if (cropped?.url) {
-              panelUrls = [cropped.url];
+
+            if (detected?.panels && detected.panels.length > 1) {
+              detectedPanels = detected.panels;
+              const cropped = await api.cropLongPanels(
+                fetcher,
+                {
+                  url,
+                  panels: detected.panels,
+                  bleed_guard_px: currentOptions.padding,
+                  background_mode: currentOptions.backgroundColorMode || "auto",
+                  output_format: "webp",
+                  quality: 90,
+                },
+                reqOptions
+              );
+              panelUrls = (cropped?.slices || [])
+                .sort((a, b) => a.index - b.index)
+                .map((slice) => slice.url);
+            } else {
+              const margins = detected?.margins || {};
+              const cropped = await api.cropSmallPanels(
+                fetcher,
+                {
+                  url,
+                  crop_top: margins.crop_top || 0,
+                  crop_bottom: margins.crop_bottom || 0,
+                  crop_left: margins.crop_left || 0,
+                  crop_right: margins.crop_right || 0,
+                  unit: margins.unit === "percent" ? "percent" : "pixels",
+                  aspect_ratio:
+                    currentOptions.aspectRatioLock && currentOptions.aspectRatioLock !== "free"
+                      ? (currentOptions.aspectRatioLock as any)
+                      : "free",
+                  auto_trim: true,
+                  padding_px: currentOptions.padding,
+                  output_format: "webp",
+                  quality: 90,
+                },
+                reqOptions
+              );
+              if (cropped?.url) {
+                panelUrls = [cropped.url];
+              }
             }
           }
         }
@@ -373,17 +431,17 @@ export default function AutoCropPreviewPage({
       }
 
       if (detectedPanels.length === 0) {
-        const imgH = typeInfo?.height || 1200;
-        const imgW = typeInfo?.width || 800;
-        const sliceCount = panelUrls.length || 1;
-        const sliceH = Math.round(imgH / sliceCount);
-        detectedPanels = Array.from({ length: sliceCount }).map((_, i) => ({
-          id: i + 1,
-          x: 0,
-          y: i * sliceH,
-          width: imgW,
-          height: i === sliceCount - 1 ? imgH - i * sliceH : sliceH,
-        }));
+        const imgH = typeInfo?.height || 1280;
+        const imgW = typeInfo?.width || 900;
+        detectedPanels = [
+          {
+            id: 1,
+            x: 0,
+            y: 0,
+            width: imgW,
+            height: imgH,
+          },
+        ];
       }
 
       return {
@@ -409,6 +467,7 @@ export default function AutoCropPreviewPage({
 
   // Keep options in a ref to decouple slider updates from triggering re-scans and aborting active sessions
   const optionsRef = useRef({
+    engineMode,
     sensitivity,
     padding,
     backgroundColorMode,
@@ -419,6 +478,7 @@ export default function AutoCropPreviewPage({
 
   useEffect(() => {
     optionsRef.current = {
+      engineMode,
       sensitivity,
       padding,
       backgroundColorMode,
@@ -426,7 +486,7 @@ export default function AutoCropPreviewPage({
       aspectRatioLock,
       minPanelHeightPx,
     };
-  }, [sensitivity, padding, backgroundColorMode, autoSplitTallStrips, aspectRatioLock, minPanelHeightPx]);
+  }, [engineMode, sensitivity, padding, backgroundColorMode, autoSplitTallStrips, aspectRatioLock, minPanelHeightPx]);
 
   const targetsKey = targets.join("|||");
   const processedTargetsKeyRef = useRef<string>("");
@@ -981,9 +1041,49 @@ export default function AutoCropPreviewPage({
               <h1 className="text-xs sm:text-sm font-bold tracking-tight truncate text-white">
                 Auto-Crop
               </h1>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold font-mono hidden sm:inline">
-                CV Slicer
-              </span>
+              {/* Quick Engine Switcher */}
+              <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-lg p-0.5 ml-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (engineMode !== "opencv") {
+                      setEngineMode("opencv");
+                      const updated = { ...optionsRef.current, engineMode: "opencv" as const };
+                      optionsRef.current = updated;
+                      void runPreview(undefined, updated);
+                    }
+                  }}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all flex items-center gap-1 !cursor-pointer ${
+                    engineMode === "opencv"
+                      ? "bg-emerald-500 text-black shadow-sm font-bold"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                  title="OpenCV Fast Gutter Engine (Local)"
+                >
+                  <Zap className="h-3 w-3" />
+                  <span>OpenCV</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (engineMode !== "ai") {
+                      setEngineMode("ai");
+                      const updated = { ...optionsRef.current, engineMode: "ai" as const };
+                      optionsRef.current = updated;
+                      void runPreview(undefined, updated);
+                    }
+                  }}
+                  className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-all flex items-center gap-1 !cursor-pointer ${
+                    engineMode === "ai"
+                      ? "bg-sky-500 text-black shadow-sm font-bold"
+                      : "text-neutral-400 hover:text-white"
+                  }`}
+                  title="Gemini AI Multimodal Vision Crop"
+                >
+                  <Sparkles className="h-3 w-3" />
+                  <span>AI Crop</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1432,6 +1532,13 @@ export default function AutoCropPreviewPage({
                     {/* ── TAB 3: TUNING (TUNING PARAMETERS CARD VIEW) ── */}
                     {activeTab === "tuning" && (
                       <AutoCropTuningTab
+                        engineMode={engineMode}
+                        onEngineModeChange={(mode) => {
+                          setEngineMode(mode);
+                          const updated = { ...optionsRef.current, engineMode: mode };
+                          optionsRef.current = updated;
+                          void runPreview(undefined, updated);
+                        }}
                         padding={padding}
                         sensitivity={sensitivity}
                         aspectRatioLock={aspectRatioLock}

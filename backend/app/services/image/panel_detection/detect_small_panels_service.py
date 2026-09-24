@@ -58,25 +58,76 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
 
     logger.info(f"[SmallPanels Detector] Starting Tri-Engine detection on {img_w}x{img_h}px image (aspect_ratio={aspect_ratio:.3f})...")
 
-    # ── ENGINE 1: 2D Manga Grid & OpenCV Geometric Contours ──────────────────
-    prop_min_h = max(15, int(img_h * 0.05))
+    # ── ENGINE 1: YOLO Deep-Learning Speech Bubble Detection ──────────────────
+    # Run YOLO first so dialogue positions guide panel frame boundaries
+    yolo_bubbles = []
+    if request.merge_speech_bubbles:
+        try:
+            yolo_bubbles = detect_yolo_entities(raw_bytes, conf_threshold=0.25)
+            logger.info(f"[SmallPanels: YOLO] Detected {len(yolo_bubbles)} speech bubble(s).")
+        except Exception as e:
+            logger.warning(f"[SmallPanels: YOLO] YOLO detection fallback: {e}", exc_info=True)
+
+    yolo_ocr_boxes = [
+        {"x": b.x, "y": b.y, "w": b.width, "h": b.height}
+        for b in yolo_bubbles
+    ]
+
+    # ── ENGINE 2: Webtoon Gutter Slicing & 2D Manga Grid Detection ───────────
+    prop_min_h = max(20, int(img_h * 0.05))
     cv_panels = []
 
-    # If standard 2D Manga grid page, run Manga grid detector first
-    if 0.5 <= aspect_ratio <= 2.5:
+    # Check for horizontal webtoon gutter seams first if image is tall or square-ish
+    if aspect_ratio >= 1.0:
+        try:
+            from services.image.panel_detection.panel_detector import (
+                detect_vertical_strip_panels,
+                _detect_bg_color_and_threshold
+            )
+            gray_arr = np.array(pil_img.convert("L"))
+            bg_res = _detect_bg_color_and_threshold(gray_arr, "auto", 30.0)
+            is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
+
+            res = detect_vertical_strip_panels(
+                gray_arr=gray_arr,
+                is_white_bg=is_white_bg,
+                threshold_val=threshold_val,
+                min_height_px=max(80, prop_min_h),
+                min_width_pct=0.20,
+                ocr_boxes=yolo_ocr_boxes,
+                median_bg=median_bg,
+                sensitivity=30.0,
+                top_median=top_med,
+                bottom_median=bot_med,
+                enable_x_trimming=False,
+                enable_column_split=False
+            )
+            webtoon_boxes = res.panels if hasattr(res, "panels") else (res[0] if isinstance(res, tuple) else [])
+            if webtoon_boxes and len(webtoon_boxes) >= 2:
+                cv_panels = webtoon_boxes
+                logger.info(f"[SmallPanels: Gutter] Extracted {len(cv_panels)} horizontal webtoon panel seams.")
+        except Exception as e:
+            logger.warning(f"[SmallPanels: Gutter] Webtoon seam segmenter fallback: {e}")
+
+    # If no multi-panel horizontal gutters, try 2D Manga grid for print manga pages
+    if not cv_panels and 0.6 <= aspect_ratio <= 1.6:
         try:
             from services.image.panel_detection.grid_detector import detect_manga_grid_panels
             gray_arr = np.array(pil_img.convert("L"))
-            grid_boxes = detect_manga_grid_panels(gray_arr, min_width_pct=0.10, min_height_px=prop_min_h)
+            grid_boxes = detect_manga_grid_panels(gray_arr, min_width_pct=0.15, min_height_px=prop_min_h)
             if grid_boxes and len(grid_boxes) >= 2:
-                cv_panels = grid_boxes
-                logger.info(f"[SmallPanels: Grid] Extracted {len(cv_panels)} Manga 2D grid panel(s).")
-                for gi, gb in enumerate(cv_panels):
-                    pass
+                # Reject false vertical column cuts spanning full height
+                is_false_columns = any(
+                    int(gb.get("h", 0)) >= int(img_h * 0.75) and int(gb.get("w", 0)) < int(img_w * 0.60)
+                    for gb in grid_boxes
+                )
+                if not is_false_columns:
+                    cv_panels = grid_boxes
+                    logger.info(f"[SmallPanels: Grid] Extracted {len(cv_panels)} Manga 2D grid panel(s).")
         except Exception as e:
             logger.warning(f"[SmallPanels: Grid] Grid detector fallback: {e}")
 
-    # Fallback to OpenCV contour detection if grid detector found <= 1 panel
+    # Fallback to OpenCV contour detection if still <= 1 panel
     if not cv_panels:
         cv_res = detect_opencv_boxes(
             image_bytes=raw_bytes,
@@ -84,24 +135,28 @@ async def detect_small_panels_boxes(request: DetectSmallPanelsRequest) -> Detect
             min_height_px=prop_min_h,
             bleed_padding_px=request.bleed_padding_px
         )
-        cv_panels = cv_res.get("panels", [])
+        candidate_panels = cv_res.get("panels", [])
+        # Filter out false vertical column cuts
+        cv_panels = [
+            cp for cp in candidate_panels
+            if not (int(cp.get("h", 0)) >= int(img_h * 0.80) and int(cp.get("w", 0)) < int(img_w * 0.60))
+        ]
+
+    # If no distinct sub-panels, create a clean full-canvas baseline panel enclosing all speech bubbles
+    if not cv_panels:
+        cv_panels = [{
+            "id": "panel_1",
+            "x": 0,
+            "y": 0,
+            "w": img_w,
+            "h": img_h,
+            "width": img_w,
+            "height": img_h,
+            "confidence": 0.95,
+            "label": "panel_standard"
+        }]
 
     logger.info(f"[SmallPanels: Detected] Total candidate frames: {len(cv_panels)}")
-    for ci, cp in enumerate(cv_panels):
-        pass
-
-    # ── ENGINE 2: YOLO Deep-Learning Speech Bubble Detection ──────────────────
-    yolo_bubbles = []
-    if request.merge_speech_bubbles:
-        try:
-            yolo_bubbles = detect_yolo_entities(raw_bytes, conf_threshold=0.25)
-            logger.info(f"[SmallPanels: YOLO] Detected {len(yolo_bubbles)} speech bubble(s).")
-            for bi, b in enumerate(yolo_bubbles):
-                pass
-        except Exception as e:
-            logger.warning(f"[SmallPanels: YOLO] YOLO detection fallback: {e}", exc_info=True)
-    else:
-        pass
 
     # ── ENGINE 3: AI Vision Reading Flow & Text Analysis (Optional Mode) ─────
     ai_flow = "left_to_right"
