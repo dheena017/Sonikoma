@@ -448,6 +448,10 @@ export function useVideoPreviewGeneration({
         bgm_volume: bgmVolume / 100,
         speech_rate: speechRate,
         speech_pitch: speechPitch,
+        enable_dialogue_audio: typeof window !== "undefined" ? localStorage.getItem("ai_comic_enable_dialogue_audio") === "true" : false,
+        enable_narrative_audio: typeof window !== "undefined" ? localStorage.getItem("ai_comic_enable_narrative_audio") !== "false" : true,
+        enableDialogueAudio: typeof window !== "undefined" ? localStorage.getItem("ai_comic_enable_dialogue_audio") === "true" : false,
+        enableNarrativeAudio: typeof window !== "undefined" ? localStorage.getItem("ai_comic_enable_narrative_audio") !== "false" : true,
       });
       if (!data.success || !data.job_id) {
         throw new Error(

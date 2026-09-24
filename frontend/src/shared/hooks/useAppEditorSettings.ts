@@ -95,6 +95,20 @@ export function useAppEditorSettings() {
   const [speechPitch, setSpeechPitch] = useState<number>(() =>
     parseFloat(localStorage.getItem("ai_comic_speech_pitch") || String(DEFAULT_AUDIO_SETTINGS.speechPitch || 1.0))
   );
+  const [enableDialogueAudio, setEnableDialogueAudio] = useState<boolean>(
+    () => localStorage.getItem("ai_comic_enable_dialogue_audio") === "true" // Default: OFF
+  );
+  const [enableNarrativeAudio, setEnableNarrativeAudio] = useState<boolean>(
+    () => localStorage.getItem("ai_comic_enable_narrative_audio") !== "false" // Default: ON (narratives one)
+  );
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_enable_dialogue_audio", String(enableDialogueAudio));
+  }, [enableDialogueAudio]);
+
+  useEffect(() => {
+    localStorage.setItem("ai_comic_enable_narrative_audio", String(enableNarrativeAudio));
+  }, [enableNarrativeAudio]);
   const [audioReactiveShake, setAudioReactiveShake] = useState<boolean>(() =>
     localStorage.getItem("ai_video_shake") !== null
       ? localStorage.getItem("ai_video_shake") === "true"
@@ -259,6 +273,10 @@ export function useAppEditorSettings() {
     setSpeechRate,
     speechPitch,
     setSpeechPitch,
+    enableDialogueAudio,
+    setEnableDialogueAudio,
+    enableNarrativeAudio,
+    setEnableNarrativeAudio,
     audioReactiveShake,
     setAudioReactiveShake,
     shakeIntensity,

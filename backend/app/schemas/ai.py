@@ -23,6 +23,11 @@ class AnalyzeImageRequest(BaseModel):
     job_id: Optional[str] = None
     story_context: Optional[str] = None
     story_memory: Optional[Dict[str, Any]] = None
+    generate_audio: Optional[bool] = False
+    generate_dialogue_audio: Optional[bool] = False
+    generate_narrative_audio: Optional[bool] = True
+    enableDialogueAudio: Optional[bool] = None
+    enableNarrativeAudio: Optional[bool] = None
 
 
 class AnalyzeBatchRequest(BaseModel):
@@ -45,12 +50,6 @@ class AnalyzeSequenceRequest(BaseModel):
     project_id: Optional[str] = None
     job_id: Optional[str] = None
 
-    @root_validator(pre=True)
-    def require_urls_or_visual_descriptions(cls, values):
-        if not values.get("urls") and not values.get("visual_descriptions"):
-            raise ValueError("Either 'urls' or 'visual_descriptions' is required.")
-        return values
-
 
 class AnalyzePanelItem(BaseModel):
     """Individual panel item containing an ID and image URL."""
@@ -70,6 +69,11 @@ class AnalyzePanelSequenceRequest(BaseModel):
     job_id: Optional[str] = None
     story_context: Optional[str] = None
     story_memory: Optional[Dict[str, Any]] = None
+    generate_audio: Optional[bool] = False
+    generate_dialogue_audio: Optional[bool] = False
+    generate_narrative_audio: Optional[bool] = True
+    enableDialogueAudio: Optional[bool] = None
+    enableNarrativeAudio: Optional[bool] = None
 
 
 class AnalyzeNarrativeSequenceRequest(BaseModel):

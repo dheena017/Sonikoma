@@ -147,7 +147,16 @@ async def execute_provider_call(
         config = types.GenerateContentConfig(**config_args) if types else None
 
         contents = []
-        if image_bytes and types:
+        # Support both single image (bytes) and multi-panel images (list of bytes)
+        image_list = kwargs.get("images_bytes") or kwargs.get("image_list")
+        if not image_list and isinstance(image_bytes, list):
+            image_list = image_bytes
+
+        if image_list and types:
+            for idx, img in enumerate(image_list):
+                contents.append(f"=== PANEL IMAGE {idx + 1} ===")
+                contents.append(types.Part.from_bytes(data=img, mime_type="image/jpeg"))
+        elif image_bytes and types:
             contents.append(types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"))
         contents.append(prompt)
 

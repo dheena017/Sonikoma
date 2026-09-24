@@ -230,6 +230,7 @@ class RateLimiter:
 
 
 _global_rate_limiter = RateLimiter()
+_tier_cooldowns: Dict[Tuple[str, str], float] = {}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -246,6 +247,7 @@ class AIOrchestrator:
     DEFAULT_CAPABILITY_ROUTING = {
         "storyboard_narrative": "gemini-2.5-flash",
         "panel_analysis": "gemini-2.5-flash",
+        "batch_panel_analysis": "gemini-2.5-flash",
         "scraper_blueprint": "gemini-2.5-flash",
         "prompt_enhancement": "gemini-2.5-flash",
         "image_diffusion": "FLUX.1-schnell",
@@ -268,6 +270,7 @@ class AIOrchestrator:
         "chat": {"cross_provider": True, "deterministic": False},
         "vision": {"cross_provider": True, "deterministic": True},
         "panel_analysis": {"cross_provider": True, "deterministic": True},
+        "batch_panel_analysis": {"cross_provider": True, "deterministic": True},
         "smart_crop": {"cross_provider": True, "deterministic": False},
         "image_diffusion": {"cross_provider": True, "deterministic": False},
         "image": {"cross_provider": True, "deterministic": False},
@@ -605,7 +608,13 @@ class AIOrchestrator:
             tier_label = f"Tier {tier_idx}" if tier_idx <= 3 else f"Resilient Tier {tier_idx}"
             attempted_tiers.append(f"{tier_label}: {provider}/{target_model}")
 
-            # 3. Verify provider credentials for candidate
+            # 3. Check rate-limit cooldown
+            cooldown_until = _tier_cooldowns.get((provider, target_model), 0)
+            if time.time() < cooldown_until:
+                logger.debug(f"[AI Core] Skipping {tier_label} ({provider}/{target_model}): rate limit cooldown active.")
+                continue
+
+            # 4. Verify provider credentials for candidate
             if not cls.is_provider_configured(provider, user_keys):
                 logger.debug(f"[AI Core] Skipping {tier_label} ({provider}/{target_model}): provider not configured.")
                 continue
@@ -684,6 +693,7 @@ class AIOrchestrator:
                 # Concise status for clean human terminal log
                 if classified.error_code == AIErrorCode.RATE_LIMITED:
                     short_reason = "Free Tier rate limit reached"
+                    _tier_cooldowns[(provider, target_model)] = time.time() + 60
                 elif classified.error_code == AIErrorCode.MODEL_NOT_FOUND:
                     short_reason = "Model not available"
                 elif classified.error_code == AIErrorCode.AUTH_FAILURE:

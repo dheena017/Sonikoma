@@ -671,6 +671,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   setMusicTheme={appLogic.setMusicTheme}
                   audioDucking={appLogic.audioDucking}
                   setAudioDucking={appLogic.setAudioDucking}
+                  enableDialogueAudio={appLogic.enableDialogueAudio}
+                  setEnableDialogueAudio={appLogic.setEnableDialogueAudio}
+                  enableNarrativeAudio={appLogic.enableNarrativeAudio}
+                  setEnableNarrativeAudio={appLogic.setEnableNarrativeAudio}
                 />
               </div>
             </div>
@@ -875,6 +879,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   audioFeedback={audioFeedback}
                   selectedPanelIds={selectedPanelIds}
                   setSelectedPanelIds={handleSetSelectedPanelIds}
+                  enableDialogueAudio={appLogic.enableDialogueAudio}
+                  enableNarrativeAudio={appLogic.enableNarrativeAudio}
                 />
               </div>
 

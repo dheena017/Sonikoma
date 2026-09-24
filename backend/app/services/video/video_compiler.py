@@ -20,6 +20,7 @@ from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
 from services.image.utils.image_utils import resolve_image_to_buffer
 from services.jobs import job_manager
 from services.audio.tts import generate_panel_audio
+from core.cache import stitched_cache
 
 logger = logging.getLogger("sonikoma.services.video.video_compiler")
 
@@ -63,6 +64,9 @@ async def compile_video_from_panels(
     output_dir: Optional[str] = None,
     target_width: int = 1920,
     target_height: int = 1080,
+    voice: Optional[str] = None,
+    enable_dialogue_audio: Optional[bool] = None,
+    enable_narrative_audio: Optional[bool] = None,
     **kwargs: Any
 ) -> str:
     if not panels:
@@ -121,32 +125,95 @@ async def compile_video_from_panels(
         if suggested_duration <= 0:
             suggested_duration = 4.5
 
-        speech_text = (panel.get("speech_text") or "").strip()
+        # Determine audio prioritization: default is Narratives ON, Dialogue OFF
+        narrative_preferred = enable_narrative_audio is not False
+
+        audio_target = None
+        if narrative_preferred:
+            audio_target = panel.get("narrative_audio_url") or panel.get("audio_url")
+        else:
+            audio_target = panel.get("audio_url") or panel.get("narrative_audio_url")
 
         audio_path = os.path.join(temp_dir, f"{series_slug}_ep{ep_num}_p{panel_id}_audio_{uuid.uuid4().hex[:6]}.mp3")
         actual_duration = suggested_duration
         has_audio = False
 
-        try:
-            dialogue_list = [speech_text] if speech_text else []
-            if dialogue_list:
-                _, actual_duration = await generate_panel_audio(
-                    dialogue_list=dialogue_list,
-                    target_duration=suggested_duration,
-                    output_path=audio_path,
-                    voice="en-US-GuyNeural",
-                    force_duration=False
-                )
-                if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
-                    has_audio = True
-                    audio_files_to_cleanup.append(audio_path)
-                    duration = actual_duration
+        # Step 1: Re-use pre-synthesized audio if present
+        if audio_target and isinstance(audio_target, str) and audio_target.strip():
+            audio_target_str = audio_target.strip()
+            try:
+                if "/cached/" in audio_target_str:
+                    cache_key = audio_target_str.split("/cached/")[-1].split("?")[0].strip("/")
+                    cached_obj = stitched_cache.get(cache_key)
+                    if cached_obj and isinstance(cached_obj, dict) and cached_obj.get("data"):
+                        with open(audio_path, "wb") as f:
+                            f.write(cached_obj["data"])
+                        if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                            has_audio = True
+                            audio_files_to_cleanup.append(audio_path)
+                            logger.info(f"[Video Compiler] Panel {panel_id}: Reusing pre-generated audio from cache ({cache_key})")
+                elif os.path.exists(audio_target_str):
+                    import shutil
+                    shutil.copyfile(audio_target_str, audio_path)
+                    if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                        has_audio = True
+                        audio_files_to_cleanup.append(audio_path)
+                        logger.info(f"[Video Compiler] Panel {panel_id}: Reusing local audio file ({audio_target_str})")
+                elif audio_target_str.startswith("http://") or audio_target_str.startswith("https://"):
+                    import httpx
+                    async with httpx.AsyncClient(timeout=15.0) as client:
+                        resp = await client.get(audio_target_str)
+                        if resp.status_code == 200 and len(resp.content) > 0:
+                            with open(audio_path, "wb") as f:
+                                f.write(resp.content)
+                            if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                                has_audio = True
+                                audio_files_to_cleanup.append(audio_path)
+            except Exception as e:
+                logger.warning(f"[Video Compiler] Panel {panel_id}: Could not load pre-generated audio {audio_target_str}: {e}")
+
+        # Step 2: If no pre-synthesized audio was loaded, synthesize it on the fly!
+        if not has_audio:
+            narrative_text = (panel.get("narrative") or panel.get("narrativeText") or "").strip()
+            speech_text = (panel.get("speech_text") or "").strip()
+
+            text_to_speak = ""
+            if narrative_preferred and narrative_text:
+                text_to_speak = narrative_text
+            elif speech_text:
+                text_to_speak = speech_text
+            elif narrative_text:
+                text_to_speak = narrative_text
+
+            if text_to_speak:
+                panel_voice = panel.get("voice") or voice or "en-US-GuyNeural"
+                try:
+                    logger.info(f"[Video Compiler] Panel {panel_id}: Synthesizing on-the-fly audio ({'Narrative' if text_to_speak == narrative_text else 'Dialogue'}) with voice '{panel_voice}'")
+                    _, actual_duration = await generate_panel_audio(
+                        dialogue_list=[text_to_speak],
+                        target_duration=suggested_duration,
+                        output_path=audio_path,
+                        voice=panel_voice,
+                        force_duration=False
+                    )
+                    if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                        has_audio = True
+                        audio_files_to_cleanup.append(audio_path)
+                except Exception as e:
+                    logger.error(f"[Video Compiler] Failed to generate audio for panel {idx + 1}: {e}")
+
+        # Step 3: Align panel duration with spoken audio duration
+        if has_audio:
+            try:
+                test_audio = AudioFileClip(audio_path)
+                if test_audio.duration and test_audio.duration > 0:
+                    duration = max(test_audio.duration, 1.0)
                 else:
-                    duration = suggested_duration
-            else:
-                duration = suggested_duration
-        except Exception as e:
-            logger.error(f"Failed to generate audio for panel {idx + 1}: {e}")
+                    duration = actual_duration
+                test_audio.close()
+            except Exception:
+                duration = actual_duration
+        else:
             duration = suggested_duration
 
         try:
@@ -247,6 +314,8 @@ async def process_render_job(
     bgm_volume: float = 1.0,
     speech_rate: float = 1.0,
     speech_pitch: float = 1.0,
+    enable_dialogue_audio: Optional[bool] = None,
+    enable_narrative_audio: Optional[bool] = None,
     project_id: Optional[str] = None,
 ) -> Dict[str, str]:
     logger.info(
@@ -260,6 +329,9 @@ async def process_render_job(
         project_id=project_id or job_id,
         panels=panels,
         output_dir=_VIDEO_OUTPUT_DIR,
+        voice=voice,
+        enable_dialogue_audio=enable_dialogue_audio,
+        enable_narrative_audio=enable_narrative_audio,
     )
 
     video_url = f"/videos/{output_filename}"

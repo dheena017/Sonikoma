@@ -66,6 +66,9 @@ async def render_video_endpoint(
     if current_user:
         new_balance = record_credit_transaction(current_user["user_id"], -COST, "video_render")
 
+    gen_diag = request.enableDialogueAudio if request.enableDialogueAudio is not None else request.enable_dialogue_audio
+    gen_narr = request.enableNarrativeAudio if request.enableNarrativeAudio is not None else request.enable_narrative_audio
+
     async def process_render_wrapper(report_progress):
         return await process_render_job(
             report_progress=report_progress,
@@ -85,6 +88,8 @@ async def render_video_endpoint(
             bgm_volume=request.bgm_volume if request.bgm_volume is not None else 1.0,
             speech_rate=request.speech_rate if request.speech_rate is not None else 1.0,
             speech_pitch=request.speech_pitch if request.speech_pitch is not None else 1.0,
+            enable_dialogue_audio=gen_diag,
+            enable_narrative_audio=gen_narr,
             project_id=request.project_id,
         )
 

@@ -33,6 +33,7 @@ from schemas.ai import (
 )
 from services.ai.facade import (
     facade_analyze_image,
+    facade_analyze_batch,
     facade_analyze_narrative_sequence,
     facade_smart_crop,
 )
@@ -93,6 +94,9 @@ async def analyze_image(
     if current_user and get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     try:
+        gen_diag = body.enableDialogueAudio if body.enableDialogueAudio is not None else (body.generate_dialogue_audio if body.generate_dialogue_audio is not None else False)
+        gen_narr = body.enableNarrativeAudio if body.enableNarrativeAudio is not None else (body.generate_narrative_audio if body.generate_narrative_audio is not None else True)
+        should_gen = bool(getattr(body, "generate_audio", False)) or gen_diag or gen_narr
         result = await facade_analyze_image(
             url=body.url,
             model=body.model,
@@ -101,6 +105,9 @@ async def analyze_image(
             user_keys=user_api_key,
             story_context=body.story_context,
             story_memory=body.story_memory,
+            generate_audio=should_gen,
+            generate_dialogue_audio=gen_diag,
+            generate_narrative_audio=gen_narr,
         )
         result = _attach_narratives_to_results([result])[0]
         if current_user:
@@ -226,8 +233,14 @@ async def analyze_panels(
     results = []
     # Seed rolling memory from request body if available
     rolling_memory = body.story_memory or ({"current_scene": body.story_context} if body.story_context else None)
+    
+    # Granular audio generation flags (Narrative defaults to True, Dialogue defaults to False)
+    gen_dialogue_audio = body.enableDialogueAudio if body.enableDialogueAudio is not None else (body.generate_dialogue_audio if body.generate_dialogue_audio is not None else False)
+    gen_narrative_audio = body.enableNarrativeAudio if body.enableNarrativeAudio is not None else (body.generate_narrative_audio if body.generate_narrative_audio is not None else True)
+    should_gen_audio = bool(getattr(body, "generate_audio", False)) or gen_dialogue_audio or gen_narrative_audio
 
-    for idx, panel in enumerate(body.panels):
+    if len(body.panels) == 1:
+        panel = body.panels[0]
         panel_voice = getattr(panel, "voice", None) or body.voice
         panel_context = getattr(panel, "story_context", None)
         try:
@@ -239,22 +252,76 @@ async def analyze_panels(
                 user_keys=user_api_key,
                 story_context=panel_context,
                 story_memory=rolling_memory,
-                panel_index=idx,
+                panel_index=0,
+                generate_audio=should_gen_audio,
+                generate_dialogue_audio=gen_dialogue_audio,
+                generate_narrative_audio=gen_narrative_audio,
             )
-            # Update rolling memory from panel's result
             if res.get("story_memory"):
                 rolling_memory = res["story_memory"]
             results.append({"id": panel.id, "url": panel.url, **res})
         except Exception as e:
             from services.ai.orchestrator import AIExecutionError
             clean_msg = e.message if isinstance(e, AIExecutionError) else str(e)
-            logger.warning(f"[AI Analysis] Panel {panel.id} (index {idx}) analysis failed: {clean_msg}")
+            logger.warning(f"[AI Analysis] Panel {panel.id} analysis failed: {clean_msg}")
             results.append({
                 "id": panel.id,
                 "url": panel.url,
                 "success": False,
                 "error": clean_msg,
             })
+    else:
+        # Micro-batching: process in chunks of up to 5 panels concurrently in one AI vision call
+        BATCH_SIZE = 5
+        for offset in range(0, len(body.panels), BATCH_SIZE):
+            chunk = body.panels[offset:offset + BATCH_SIZE]
+            try:
+                batch_res = await facade_analyze_batch(
+                    panels=chunk,
+                    model=body.model,
+                    voice=body.voice,
+                    narration_style=body.narrationStyle,
+                    user_keys=user_api_key,
+                    story_context=body.story_context,
+                    story_memory=rolling_memory,
+                    start_index=offset,
+                    generate_audio=should_gen_audio,
+                    generate_dialogue_audio=gen_dialogue_audio,
+                    generate_narrative_audio=gen_narrative_audio,
+                )
+                if batch_res.get("story_memory"):
+                    rolling_memory = batch_res["story_memory"]
+                results.extend(batch_res.get("results", []))
+            except Exception as e:
+                logger.warning(f"[AI Analysis] Batch starting at index {offset} failed: {e}. Falling back to single-panel analysis.")
+                for idx_rel, panel in enumerate(chunk):
+                    panel_idx = offset + idx_rel
+                    panel_voice = getattr(panel, "voice", None) or body.voice
+                    panel_context = getattr(panel, "story_context", None)
+                    try:
+                        res = await facade_analyze_image(
+                            url=panel.url,
+                            model=body.model,
+                            voice=panel_voice,
+                            narration_style=body.narrationStyle,
+                            user_keys=user_api_key,
+                            story_context=panel_context,
+                            story_memory=rolling_memory,
+                            panel_index=panel_idx,
+                            generate_audio=should_gen_audio,
+                            generate_dialogue_audio=gen_dialogue_audio,
+                            generate_narrative_audio=gen_narrative_audio,
+                        )
+                        if res.get("story_memory"):
+                            rolling_memory = res["story_memory"]
+                        results.append({"id": panel.id, "url": panel.url, **res})
+                    except Exception as err:
+                        results.append({
+                            "id": panel.id,
+                            "url": panel.url,
+                            "success": False,
+                            "error": str(err),
+                        })
 
     results = _attach_narratives_to_results(results)
     if current_user and any(item.get("success") for item in results):

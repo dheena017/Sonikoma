@@ -74,6 +74,8 @@ interface StoryboardTimelineProps {
   setShowAutoCropModal?: (show: boolean) => void;
   selectedPanelIds?: Set<number>;
   setSelectedPanelIds?: React.Dispatch<React.SetStateAction<Set<number>>>;
+  enableDialogueAudio?: boolean;
+  enableNarrativeAudio?: boolean;
 }
 
 const StoryboardTimeline = React.memo(
@@ -126,6 +128,8 @@ const StoryboardTimeline = React.memo(
     setShowAutoCropModal,
     selectedPanelIds: propSelectedPanelIds,
     setSelectedPanelIds: propSetSelectedPanelIds,
+    enableDialogueAudio,
+    enableNarrativeAudio,
   }: StoryboardTimelineProps) => {
     // ── Panel selection state ────────────────────────────────────────────────
     const [localSelectedPanelIds, setLocalSelectedPanelIds] = useState<
@@ -946,6 +950,8 @@ const StoryboardTimeline = React.memo(
       musicTheme,
       narrationStyle,
       audioFeedback,
+      enableDialogueAudio,
+      enableNarrativeAudio,
     });
 
     if (panels.length === 0) {

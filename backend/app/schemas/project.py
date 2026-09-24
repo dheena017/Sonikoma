@@ -113,6 +113,8 @@ class AudioSettingsUpdateRequest(BaseModel):
     narratorVoice: Optional[str] = Field(None, description="Selected chapter narrator voice")
     musicTheme: Optional[str] = Field(None, description="Background music theme")
     audioDucking: Optional[bool] = Field(None, description="Auto ducking flag")
+    enableDialogueAudio: Optional[bool] = Field(None, description="Audio Generation on/off for dialogues")
+    enableNarrativeAudio: Optional[bool] = Field(None, description="Audio Generation on/off for narratives")
 
 
 class AutoCropSettingsUpdateRequest(BaseModel):

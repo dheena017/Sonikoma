@@ -6,7 +6,7 @@ Pydantic request/response schemas for video timeline, rendering, and FFmpeg oper
 """
 
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Any
 from app.providers.ffmpeg import FilterType
 
 
@@ -44,16 +44,23 @@ class PanelSyncMapData(BaseModel):
 
 class PanelData(BaseModel):
     """Complete panel timeline item (image, audio, motion, shake, layers, duration)."""
-    id: int
+    id: Any
     image_url: str
     duration: float = 3.0
     speech_text: Optional[str] = None
     sfx: Optional[str] = None
     audio_url: Optional[str] = None
+    narrative: Optional[str] = None
+    narrativeText: Optional[str] = None
+    narrative_audio_url: Optional[str] = None
+    voice: Optional[str] = None
     motion_type: Optional[str] = None
     layers: Optional[PanelLayersData] = None
     syncMap: Optional[PanelSyncMapData] = None
     audio_reactive_shake: Optional[bool] = False
+
+    class Config:
+        extra = "allow"
 
 
 class RenderRequest(BaseModel):
@@ -75,6 +82,13 @@ class RenderRequest(BaseModel):
     bgm_volume: Optional[float] = 1.0             # 0.0 to 1.0
     speech_rate: Optional[float] = 1.0            # Speed factor
     speech_pitch: Optional[float] = 1.0           # Pitch factor
+    enable_dialogue_audio: Optional[bool] = None
+    enable_narrative_audio: Optional[bool] = None
+    enableDialogueAudio: Optional[bool] = None
+    enableNarrativeAudio: Optional[bool] = None
+
+    class Config:
+        extra = "allow"
 
 
 # =============================================================================

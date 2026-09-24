@@ -244,12 +244,35 @@ class PanelNarrativeModel(BaseModel):
     narrative: str = Field(description="The storytelling narrative text for this panel (strictly 25-50 words, motion comic style)")
 
 
+class BatchPanelItemAnalysisModel(BaseModel):
+    panel_index: int = Field(default=1, description="1-based index corresponding to PANEL IMAGE 1, 2, 3...")
+    speech_text: str = Field(default="", description="Spoken character dialogue strictly from speech bubbles or character lettering in this panel. Empty string if silent or no speech bubbles. NEVER recap or narrator exposition.")
+    dialogue_turns: List[DialogueTurnItem] = Field(default=[], description="Chronological dialogue turns if multiple speech bubbles exist in the panel")
+    narrative: str = Field(default="", description="Third-person YouTube comic/manhwa recap voiceover narrative (40-80 words). Dramatically recounts the scene, atmosphere, character emotions, and story stakes. CRITICAL: NEVER copy, quote, or duplicate speech_text.")
+    speaker_name: str = Field(default="", description="Primary speaking character name, title, or role (e.g., 'Arthur', 'Jinwoo', 'Gojo', 'Emperor', 'Commander', 'Doctor', 'Villain', 'Father', or empty if silent)")
+    speaker_gender: str = Field(default="neutral", description="Gender of primary speaker: 'male', 'female', 'child', or 'neutral'")
+    emotion: str = Field(default="neutral", description="Emotional vocal delivery: 'neutral', 'tender', 'whisper', 'shouting', 'panicked'")
+    scene_context: str = Field(default="", description="Concise 1-sentence summary of ongoing scene location, mood, and character activity")
+    is_scene_transition: bool = Field(default=False, description="True if this panel begins a new location or time-jump scene")
+    is_internal_thought: bool = Field(default=False, description="True if the text bubble is an internal thought cloud")
+    sfx: str = Field(default="[Atmosphere]", description="Bracketed sound effect text")
+    duration: float = Field(default=4.0, description="Suggested scene duration in seconds")
+    motion_type: str = Field(default="zoom_in", description="Camera movement motion tag: 'pan_left', 'pan_right', 'pan_up', 'pan_down', 'zoom_in', 'zoom_out', 'static'")
+    visual_description: str = Field(default="", description="Visual description of the scene composition for camera animation")
+
+
+class BatchPanelAnalysisModel(BaseModel):
+    panels: List[BatchPanelItemAnalysisModel] = Field(default=[], description="Ordered list of analyses for each panel image in the batch")
+    overall_scene_summary: str = Field(default="", description="Brief narrative summary of this entire sequence of panels")
+
+
 class SequenceNarrativeModel(BaseModel):
     panels: List[PanelNarrativeModel] = Field(description="Chronological narrative texts matching each panel")
 
 
 SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
     "GeminiAnalysisModel":     GeminiAnalysisModel,
+    "BatchPanelAnalysisModel": BatchPanelAnalysisModel,
     "StoryboardModel":         StoryboardModel,
     "CropList":                CropList,
     "DramatizedScriptModel":   DramatizedScriptModel,
@@ -267,3 +290,4 @@ SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
     "ShortsHookModel":         ShortsHookModel,
     "ThumbnailVisualModel":    ThumbnailVisualModel,
 }
+

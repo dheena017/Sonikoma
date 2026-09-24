@@ -16,7 +16,7 @@ import asyncio
 import tempfile
 import json
 import re
-from typing import List, Optional, Dict, Any, Union
+from typing import List, Optional, Dict, Any, Union, Tuple
 from PIL import Image
 
 from app.core.config import call_gemini_with_retry
@@ -385,7 +385,43 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
             })
         return {"success": True, "provider": provider, "total": len(result_list), "models": result_list}
 
-    return {"success": False, "error": f"Unsupported provider {provider}."}
+async def _synthesize_tts_to_cache(text: str, voice: str, target_dur: float) -> Tuple[Optional[str], Optional[float]]:
+    """Synthesizes text using Edge TTS and saves to stitched_cache, returning (cached_url, actual_duration)."""
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
+        temp_audio_path = tmp_audio.name
+    try:
+        try:
+            _, actual_dur = await generate_panel_audio(
+                dialogue_list=[text],
+                target_duration=target_dur,
+                output_path=temp_audio_path,
+                voice=voice,
+                force_duration=False
+            )
+        except Exception as v_err:
+            logger.warning(f"[_synthesize_tts_to_cache] Voice {voice} failed: {v_err}. Retrying with en-US-GuyNeural.")
+            _, actual_dur = await generate_panel_audio(
+                dialogue_list=[text],
+                target_duration=target_dur,
+                output_path=temp_audio_path,
+                voice="en-US-GuyNeural",
+                force_duration=False
+            )
+        if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
+            with open(temp_audio_path, "rb") as f:
+                audio_bytes = f.read()
+            unique_id = f"audio_{uuid.uuid4().hex[:8]}" if 'uuid' in globals() else f"audio_{os.urandom(4).hex()}"
+            stitched_cache.set(unique_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
+            return f"/api/image/cached/{unique_id}", actual_dur
+    except Exception as exc:
+        logger.warning(f"[_synthesize_tts_to_cache] TTS failed: {exc}")
+    finally:
+        if os.path.exists(temp_audio_path):
+            try:
+                os.remove(temp_audio_path)
+            except Exception:
+                pass
+    return None, None
 
 
 async def facade_analyze_image(
@@ -396,7 +432,10 @@ async def facade_analyze_image(
     user_keys: Optional[Dict[str, str]] = None,
     story_context: Optional[Union[str, Dict[str, Any]]] = None,
     story_memory: Optional[Dict[str, Any]] = None,
-    panel_index: int = 0
+    panel_index: int = 0,
+    generate_audio: bool = True,
+    generate_dialogue_audio: Optional[bool] = None,
+    generate_narrative_audio: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """Generates narration script, SFX, voice audio, and cognitive memory continuity for a single panel."""
     start_time = time.time()
@@ -439,20 +478,6 @@ async def facade_analyze_image(
     else:
         narrative_length_hint = "85-150 words, rich, cinematic, and deeply engaging YouTube manga/manhwa recap storytelling that brings the atmosphere, character psychology, and high stakes fully to life."
 
-    ocr_text = ""
-    try:
-        from services.image.ocr.ocr_engine import extract_dialogue_from_panel
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_ocr:
-            tmp_ocr.write(img_buffer)
-            tmp_ocr_path = tmp_ocr.name
-        ocr_dialogue = await extract_dialogue_from_panel(tmp_ocr_path, langs=['en'])
-        if os.path.exists(tmp_ocr_path):
-            os.remove(tmp_ocr_path)
-        if ocr_dialogue:
-            ocr_text = " ".join([t.strip() for t in ocr_dialogue if t.strip()]).strip()
-    except Exception:
-        pass
-
     skill = registry.get("panel_analysis")
     formatted_context = f"STORY CONTEXT & PRECEDING MEMORY:\n{story_context_section}\n" if story_context_section else ""
     try:
@@ -468,6 +493,19 @@ async def facade_analyze_image(
         analysis = validate_analysis(parsed_json)
     except Exception as exc:
         logger.warning(f"[facade_analyze_image] Panel analysis vision execution failed: {exc}. Falling back to OCR.")
+        ocr_text = ""
+        try:
+            from services.image.ocr.ocr_engine import extract_dialogue_from_panel
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_ocr:
+                tmp_ocr.write(img_buffer)
+                tmp_ocr_path = tmp_ocr.name
+            ocr_dialogue = await extract_dialogue_from_panel(tmp_ocr_path, langs=['en'])
+            if os.path.exists(tmp_ocr_path):
+                os.remove(tmp_ocr_path)
+            if ocr_dialogue:
+                ocr_text = " ".join([t.strip() for t in ocr_dialogue if t.strip()]).strip()
+        except Exception:
+            pass
         analysis = validate_analysis({
             "speech_text": ocr_text,
             "visual_description": "Comic panel scene (vision unavailable).",
@@ -555,47 +593,32 @@ async def facade_analyze_image(
         target_voice = "en-US-GuyNeural"
 
     audio_url = None
-    audio_text = (analysis.get("speech_text") or analysis.get("narrative") or "").strip()
-    if audio_text:
-        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
-            temp_audio_path = tmp_audio.name
-        try:
-            # Try primary resolved voice
-            try:
-                _, actual_dur = await generate_panel_audio(
-                    dialogue_list=[audio_text],
-                    target_duration=analysis["duration"],
-                    output_path=temp_audio_path,
-                    voice=target_voice,
-                    force_duration=False
-                )
-                analysis["duration"] = actual_dur
-            except Exception as voice_err:
-                logger.warning(f"[facade_analyze_image] TTS with {target_voice} failed: {voice_err}. Retrying with en-US-GuyNeural.")
-                _, actual_dur = await generate_panel_audio(
-                    dialogue_list=[audio_text],
-                    target_duration=analysis["duration"],
-                    output_path=temp_audio_path,
-                    voice="en-US-GuyNeural",
-                    force_duration=False
-                )
-                analysis["duration"] = actual_dur
+    narrative_audio_url = None
 
-            if os.path.exists(temp_audio_path) and os.path.getsize(temp_audio_path) > 0:
-                with open(temp_audio_path, "rb") as f:
-                    audio_bytes = f.read()
-                unique_audio_id = f"audio_{uuid.uuid4().hex[:8]}" if 'uuid' in globals() else f"audio_{os.urandom(4).hex()}"
-                stitched_cache.set(unique_audio_id, {"data": audio_bytes, "content_type": "audio/mpeg"})
-                audio_url = f"/api/image/cached/{unique_audio_id}"
-        except Exception as tts_err:
-            logger.warning(f"[facade_analyze_image] All TTS attempts failed: {tts_err}. Estimating duration.")
-            analysis["duration"] = estimate_duration_from_speech(audio_text)
-        finally:
-            if os.path.exists(temp_audio_path):
-                try:
-                    os.remove(temp_audio_path)
-                except Exception:
-                    pass
+    do_dialogue_tts = generate_dialogue_audio if generate_dialogue_audio is not None else False
+    do_narrative_tts = generate_narrative_audio if generate_narrative_audio is not None else (generate_audio if not do_dialogue_tts else True)
+
+    speech_text = (analysis.get("speech_text") or "").strip()
+    narrative_text = (analysis.get("narrative") or analysis.get("narrativeText") or "").strip()
+
+    # 1. Synthesize character dialogue audio if enabled
+    if do_dialogue_tts and speech_text:
+        audio_url, actual_dur = await _synthesize_tts_to_cache(speech_text, target_voice, analysis.get("duration", 4.0))
+        if actual_dur:
+            analysis["duration"] = actual_dur
+
+    # 2. Synthesize story recap narrative audio if enabled
+    if do_narrative_tts and narrative_text:
+        narr_voice = voice or "en-US-GuyNeural"
+        narrative_audio_url, narr_dur = await _synthesize_tts_to_cache(narrative_text, narr_voice, analysis.get("duration", 4.0))
+        if narr_dur and not audio_url:
+            analysis["duration"] = narr_dur
+
+    # Fallback duration estimation if no TTS was generated
+    if not analysis.get("duration") or analysis["duration"] <= 0:
+        ref_text = narrative_text if do_narrative_tts else speech_text
+        if ref_text:
+            analysis["duration"] = estimate_duration_from_speech(ref_text)
 
     elapsed = int((time.time() - start_time) * 1000)
     meta = getattr(skill, "last_execution_meta", {}) or {}
@@ -608,6 +631,7 @@ async def facade_analyze_image(
         "narrative": narrative_val,
         "narrativeText": narrative_val,
         "audio_url": audio_url,
+        "narrative_audio_url": narrative_audio_url,
         "dialogue_turns": analysis.get("dialogue_turns", []),
         "speaker_name": analysis.get("speaker_name"),
         "speaker_gender": analysis.get("speaker_gender"),
@@ -621,6 +645,275 @@ async def facade_analyze_image(
         "inputTokens": getattr(skill, "last_input_tokens", 0),
         "outputTokens": getattr(skill, "last_output_tokens", 0)
     }
+
+
+async def _fallback_individual_batch(
+    panels: List[Any],
+    model: Optional[str],
+    voice: Optional[str],
+    narration_style: Optional[str],
+    user_keys: Optional[Dict[str, str]],
+    story_context: Optional[Union[str, Dict[str, Any]]],
+    story_memory: Optional[Dict[str, Any]],
+    start_index: int,
+    generate_audio: bool,
+    generate_dialogue_audio: Optional[bool] = None,
+    generate_narrative_audio: Optional[bool] = None,
+) -> Dict[str, Any]:
+    """Helper to sequentially process panels with facade_analyze_image if batch execution fails."""
+    results = []
+    rolling_memory = story_memory or ({"current_scene": story_context} if story_context else None)
+    used_model = model or "gemini-2.5-flash"
+
+    for i, p in enumerate(panels):
+        p_id = getattr(p, "id", None) if not isinstance(p, dict) else p.get("id")
+        p_url = getattr(p, "url", None) if not isinstance(p, dict) else p.get("url")
+        p_voice = getattr(p, "voice", None) or voice
+        p_context = getattr(p, "story_context", None)
+        try:
+            res = await facade_analyze_image(
+                url=p_url,
+                model=model,
+                voice=p_voice,
+                narration_style=narration_style,
+                user_keys=user_keys,
+                story_context=p_context,
+                story_memory=rolling_memory,
+                panel_index=start_index + i,
+                generate_audio=generate_audio,
+                generate_dialogue_audio=generate_dialogue_audio,
+                generate_narrative_audio=generate_narrative_audio,
+            )
+            if res.get("story_memory"):
+                rolling_memory = res["story_memory"]
+            if res.get("model"):
+                used_model = res["model"]
+            results.append({"id": p_id, "url": p_url, **res})
+        except Exception as exc:
+            results.append({
+                "id": p_id,
+                "url": p_url,
+                "success": False,
+                "error": str(exc),
+            })
+
+    return {
+        "success": any(r.get("success") for r in results),
+        "results": results,
+        "story_memory": rolling_memory,
+        "model": used_model
+    }
+
+
+async def facade_analyze_batch(
+    panels: List[Any],
+    model: Optional[str] = None,
+    voice: Optional[str] = None,
+    narration_style: Optional[str] = None,
+    user_keys: Optional[Dict[str, str]] = None,
+    story_context: Optional[Union[str, Dict[str, Any]]] = None,
+    story_memory: Optional[Dict[str, Any]] = None,
+    start_index: int = 0,
+    generate_audio: bool = False,
+    generate_dialogue_audio: Optional[bool] = None,
+    generate_narrative_audio: Optional[bool] = None,
+) -> Dict[str, Any]:
+    """
+    Analyzes a sequence of 2-8 panels concurrently in a SINGLE AI vision call.
+    Maintains memory continuity and formats results to match single-panel schema.
+    Falls back gracefully to individual panel calls if batch vision fails.
+    """
+    start_time = time.time()
+    memory_tracker = StoryMemoryTracker(story_memory or story_context)
+    story_context_section = memory_tracker.format_for_prompt()
+
+    # 1. Concurrently resolve all image buffers
+    async def _resolve_one(p):
+        p_url = getattr(p, "url", None) if not isinstance(p, dict) else p.get("url")
+        try:
+            res = await img_utils.resolve_image_to_buffer(p_url)
+            return res["data"]
+        except Exception as exc:
+            logger.warning(f"[facade_analyze_batch] Failed to resolve image buffer for {p_url}: {exc}")
+            return None
+
+    img_buffers = await asyncio.gather(*(_resolve_one(p) for p in panels))
+
+    # If any buffer failed to download, fallback to sequential single-panel analysis
+    if not all(img_buffers):
+        logger.warning("[facade_analyze_batch] One or more images failed to download; falling back to single-panel analysis.")
+        return await _fallback_individual_batch(
+            panels=panels,
+            model=model,
+            voice=voice,
+            narration_style=narration_style,
+            user_keys=user_keys,
+            story_context=story_context,
+            story_memory=story_memory,
+            start_index=start_index,
+            generate_audio=generate_audio,
+            generate_dialogue_audio=generate_dialogue_audio,
+            generate_narrative_audio=generate_narrative_audio,
+        )
+
+    # 2. Build prompt context
+    brightness = None
+    try:
+        brightness = img_utils.compute_brightness(img_buffers[0])
+    except Exception:
+        pass
+
+    tone_hint = ""
+    if brightness is not None:
+        if brightness < 80:
+            tone_hint = " The sequence appears dark or moody — favour dramatic or tense SFX."
+        elif brightness > 200:
+            tone_hint = " The sequence appears bright and vibrant — favour action or triumphant SFX."
+
+    style_val = (narration_style or "long").lower()
+    if style_val == "short":
+        narrative_length_hint = "35-50 words, punchy and dramatic."
+    elif style_val == "medium":
+        narrative_length_hint = "50-75 words, vivid and immersive."
+    else:
+        narrative_length_hint = "65-100 words, rich, cinematic YouTube manhwa recap storytelling."
+
+    skill = registry.get("batch_panel_analysis")
+    formatted_context = f"STORY CONTEXT & PRECEDING MEMORY:\n{story_context_section}\n" if story_context_section else ""
+
+    try:
+        raw_text = await skill.execute(
+            model=model,
+            image_bytes=img_buffers,
+            user_keys=user_keys or {},
+            panel_count=len(panels),
+            tone_hint=tone_hint,
+            narrative_length_hint=narrative_length_hint,
+            story_context_section=formatted_context
+        )
+        parsed_json = json.loads(raw_text) if isinstance(raw_text, str) else raw_text
+        if not isinstance(parsed_json, dict) or "panels" not in parsed_json:
+            raise ValueError("Invalid batch panel analysis response structure")
+
+        batch_items = parsed_json.get("panels", [])
+    except Exception as exc:
+        logger.warning(f"[facade_analyze_batch] Batch AI vision execution failed: {exc}. Falling back to single-panel analysis.")
+        return await _fallback_individual_batch(
+            panels=panels,
+            model=model,
+            voice=voice,
+            narration_style=narration_style,
+            user_keys=user_keys,
+            story_context=story_context,
+            story_memory=story_memory,
+            start_index=start_index,
+            generate_audio=generate_audio,
+            generate_dialogue_audio=generate_dialogue_audio,
+            generate_narrative_audio=generate_narrative_audio,
+        )
+
+    # 3. Assemble results and update rolling memory
+    meta = getattr(skill, "last_execution_meta", {}) or {}
+    model_used = meta.get("model") or model or "gemini-2.5-flash"
+    elapsed = int((time.time() - start_time) * 1000)
+
+    # Map parsed items by 1-based panel_index or sequential list index
+    items_by_idx = {}
+    for it in batch_items:
+        p_idx = it.get("panel_index")
+        if isinstance(p_idx, int):
+            items_by_idx[p_idx] = it
+
+    results = []
+    for i, p in enumerate(panels):
+        p_id = getattr(p, "id", None) if not isinstance(p, dict) else p.get("id")
+        p_url = getattr(p, "url", None) if not isinstance(p, dict) else p.get("url")
+        raw_analysis = items_by_idx.get(i + 1) or (batch_items[i] if i < len(batch_items) else {})
+        analysis = validate_analysis(raw_analysis)
+
+        # Format dialogue turns separated onto distinct lines if multiple turns exist
+        turns = analysis.get("dialogue_turns", [])
+        if isinstance(turns, list) and len(turns) > 1:
+            separated_lines = []
+            for t in turns:
+                txt = (t.get("text") or "").strip()
+                if txt:
+                    separated_lines.append(txt)
+            if separated_lines:
+                analysis["speech_text"] = "\n\n".join(separated_lines)
+
+        global_panel_idx = start_index + i
+        memory_tracker.update_from_analysis(analysis, global_panel_idx)
+
+        # Granular audio generation
+        audio_url = None
+        narrative_audio_url = None
+
+        speech_text = (analysis.get("speech_text") or "").strip()
+        narrative_text = (analysis.get("narrative") or analysis.get("narrativeText") or "").strip()
+
+        do_dialogue_tts = generate_dialogue_audio if generate_dialogue_audio is not None else False
+        do_narrative_tts = generate_narrative_audio if generate_narrative_audio is not None else (generate_audio if not do_dialogue_tts else True)
+
+        speaker_name = (analysis.get("speaker_name") or "").strip()
+        speaker_gender = (analysis.get("speaker_gender") or "neutral").strip().lower()
+        if voice and voice.strip() and voice.strip().lower() not in ("undefined", "null", "default"):
+            target_voice = voice
+        elif speaker_name and speaker_name in memory_tracker.characters and memory_tracker.characters[speaker_name].get("voice"):
+            target_voice = memory_tracker.characters[speaker_name]["voice"]
+        elif speaker_gender == "female":
+            target_voice = "en-US-JennyNeural"
+        elif speaker_gender == "child":
+            target_voice = "en-US-AnaNeural"
+        else:
+            target_voice = "en-US-GuyNeural"
+
+        if do_dialogue_tts and speech_text:
+            audio_url, actual_dur = await _synthesize_tts_to_cache(speech_text, target_voice, analysis.get("duration", 4.0))
+            if actual_dur:
+                analysis["duration"] = actual_dur
+
+        if do_narrative_tts and narrative_text:
+            narr_voice = voice or "en-US-GuyNeural"
+            narrative_audio_url, narr_dur = await _synthesize_tts_to_cache(narrative_text, narr_voice, analysis.get("duration", 4.0))
+            if narr_dur and not audio_url:
+                analysis["duration"] = narr_dur
+
+        if not analysis.get("duration") or analysis["duration"] <= 0:
+            ref_text = narrative_text if do_narrative_tts else speech_text
+            if ref_text:
+                analysis["duration"] = estimate_duration_from_speech(ref_text)
+
+        narrative_val = analysis.get("narrative") or ""
+        results.append({
+            "id": p_id,
+            "url": p_url,
+            "success": True,
+            "analysis": analysis,
+            "narrative": narrative_val,
+            "narrativeText": narrative_val,
+            "audio_url": audio_url,
+            "narrative_audio_url": narrative_audio_url,
+            "dialogue_turns": analysis.get("dialogue_turns", []),
+            "speaker_name": analysis.get("speaker_name"),
+            "speaker_gender": analysis.get("speaker_gender"),
+            "emotion": analysis.get("emotion"),
+            "scene_context": analysis.get("scene_context"),
+            "story_memory": memory_tracker.to_dict(),
+            "source": meta.get("provider", "gemini"),
+            "model": model_used,
+            "latencyMs": elapsed,
+            "latency_ms": elapsed,
+        })
+
+    return {
+        "success": True,
+        "results": results,
+        "story_memory": memory_tracker.to_dict(),
+        "model": model_used,
+        "overall_scene_summary": parsed_json.get("overall_scene_summary", "")
+    }
+
 
 def _crop_panels_server_side(img_buffer: bytes, panels: List[Dict[str, Any]], source_url: Optional[str] = None) -> None:
     """

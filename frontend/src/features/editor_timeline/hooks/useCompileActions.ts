@@ -23,6 +23,8 @@ interface UseCompileActionsProps {
   speechRate?: number;
   speechPitch?: number;
   audioFeedback?: any;
+  enableDialogueAudio?: boolean;
+  enableNarrativeAudio?: boolean;
 }
 
 export function useCompileActions({
@@ -41,6 +43,8 @@ export function useCompileActions({
   speechRate = 1.0,
   speechPitch = 1.0,
   audioFeedback,
+  enableDialogueAudio,
+  enableNarrativeAudio,
 }: UseCompileActionsProps) {
   const activeFetch = fetchWithInterceptor || fetch;
   const [analyzingPanelId, setAnalyzingPanelId] = useState<number | string | null>(null);
@@ -49,6 +53,28 @@ export function useCompileActions({
   const [isZipping, setIsZipping] = useState<boolean>(false);
   const abortSignalRef = React.useRef({ aborted: false });
   const abortControllerRef = React.useRef<AbortController | null>(null);
+
+  const getAudioFlags = () => {
+    const genDiag =
+      enableDialogueAudio !== undefined
+        ? enableDialogueAudio
+        : typeof window !== "undefined"
+        ? localStorage.getItem("ai_comic_enable_dialogue_audio") === "true"
+        : false;
+    const genNarr =
+      enableNarrativeAudio !== undefined
+        ? enableNarrativeAudio
+        : typeof window !== "undefined"
+        ? localStorage.getItem("ai_comic_enable_narrative_audio") !== "false"
+        : true;
+    return {
+      generate_audio: genDiag || genNarr,
+      generate_dialogue_audio: genDiag,
+      generate_narrative_audio: genNarr,
+      enableDialogueAudio: genDiag,
+      enableNarrativeAudio: genNarr,
+    };
+  };
 
   const handleCancelAnalysis = () => {
     abortSignalRef.current.aborted = true;
@@ -184,6 +210,7 @@ export function useCompileActions({
           voice: voiceActor,
           story_memory: currentMemory || undefined,
           story_context: precedingContext || undefined,
+          ...getAudioFlags(),
         },
         { signal: abortControllerRef.current.signal }
       );
@@ -318,105 +345,120 @@ export function useCompileActions({
       const targetPanels = panels.filter((p) => selectedIdsSet.has(String(p.id)));
       abortControllerRef.current = new AbortController();
 
-      const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
-      const data = await api.analyzeSelectedPanels(
-        activeFetch,
-        {
-          panels: targetPanels.map((p) => ({ id: p.id, url: p.image_url })),
-          model: activeModel,
-          narrationStyle,
-          voice: voiceActor,
-          story_memory: currentMemory || undefined,
-        },
-        { signal: abortControllerRef.current.signal }
-      );
-
-      if (data.story_memory) {
-        useProjectStore.getState().updateStoryMemory(data.story_memory);
+      const BATCH_SIZE = 5;
+      const chunks: typeof targetPanels[] = [];
+      for (let i = 0; i < targetPanels.length; i += BATCH_SIZE) {
+        chunks.push(targetPanels.slice(i, i + BATCH_SIZE));
       }
 
-      if (data.success && data.results) {
-        const tierLabel = (data as any).tier_label || (data.results?.[0] as any)?.tier_label || "Tier 1: Primary";
-        const modelUsed = (data as any).model || (data.results?.[0] as any)?.model || activeModel || "Dynamic AI Model";
-        const attempt = (data as any).attempt || (data.results?.[0] as any)?.attempt || 1;
-        const totalCandidates = (data as any).total_candidates || (data.results?.[0] as any)?.total_candidates || 1;
+      let totalSuccess = 0;
+      let lastModelUsed = activeModel || "Dynamic AI Model";
 
-        const resultsById = new Map<string, any>();
-        data.results.forEach((r: any, index: number) => {
-          if (r.id !== undefined && r.id !== null) {
-            resultsById.set(String(r.id), r);
-          }
-          if (targetPanels[index]) {
-            resultsById.set(String(targetPanels[index].id), r);
-          }
-        });
-
-        setPanels((prev) =>
-          prev.map((p) => {
-            if (!selectedIdsSet.has(String(p.id))) return p;
-
-            const result =
-              resultsById.get(String(p.id)) ||
-              (data.results.length === 1 && selectedIds.length === 1 ? data.results[0] : undefined);
-            const analysis = result?.analysis || result;
-
-            if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
-              const aiDuration = Number(analysis.duration);
-              const aiMotion = String(analysis.motion_type || "").trim();
-              const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
-              const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
-              const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
-              const narrative =
-                result.narrative ||
-                result.narrativeText ||
-                result.analysis?.narrative ||
-                result.analysis?.narrativeText ||
-                p.narrative;
-              const narrativeAudioUrl =
-                result.narrative_audio_url ||
-                result.analysis?.narrative_audio_url ||
-                p.narrative_audio_url;
-
-              return {
-                ...p,
-                speech_text: speech,
-                dialogueSubtitleText: speech,
-                sfx: sfx,
-                soundEffectSfx: sfx,
-                duration: aiDuration > 0 ? aiDuration : p.duration,
-                timingSec: aiDuration > 0 ? aiDuration : p.duration,
-                motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                visual_description: visual,
-                visual_scene_description: visual,
-                audio_url: result.audio_url || p.audio_url,
-                narrative,
-                narrative_audio_url: narrativeAudioUrl,
-                isAnalyzing: false,
-              };
-            }
-            return { ...p, isAnalyzing: false };
-          })
-        );
+      for (let cIdx = 0; cIdx < chunks.length; cIdx++) {
+        if (abortSignalRef.current.aborted) break;
+        const currentChunk = chunks[cIdx];
+        const currentChunkSet = new Set(currentChunk.map((p) => String(p.id)));
+        const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Sequence Analysis] [SUCCESS] Model: ${modelUsed} | Storyboard script generated for ${targetPanels.length} frame(s)!`,
+            `[Sequence Analysis] Processing Batch ${cIdx + 1}/${chunks.length} (${currentChunk.length} panels)...`,
             ...prev,
           ]);
         }
 
-        if (!abortSignalRef.current.aborted && addNotification) {
-          addNotification(
-            `Model: ${modelUsed} | Sequence analysis completed for ${selectedIds.length} selected panel(s)!`,
-            "success"
-          );
-          audioFeedback?.playSuccess();
-        }
-      } else {
-        throw new Error(
-          data.error || "Sequence analysis returned unsuccessful status"
+        const data = await api.analyzeSelectedPanels(
+          activeFetch,
+          {
+            panels: currentChunk.map((p) => ({ id: p.id, url: p.image_url })),
+            model: activeModel,
+            narrationStyle,
+            voice: voiceActor,
+            story_memory: currentMemory || undefined,
+            ...getAudioFlags(),
+          },
+          { signal: abortControllerRef.current.signal }
         );
+
+        if (data.story_memory) {
+          useProjectStore.getState().updateStoryMemory(data.story_memory);
+        }
+
+        if (data.success && data.results) {
+          lastModelUsed = (data as any).model || (data.results?.[0] as any)?.model || lastModelUsed;
+
+          const resultsById = new Map<string, any>();
+          data.results.forEach((r: any, index: number) => {
+            if (r.id !== undefined && r.id !== null) {
+              resultsById.set(String(r.id), r);
+            }
+            if (currentChunk[index]) {
+              resultsById.set(String(currentChunk[index].id), r);
+            }
+          });
+
+          setPanels((prev) =>
+            prev.map((p) => {
+              if (!currentChunkSet.has(String(p.id))) return p;
+
+              const result = resultsById.get(String(p.id));
+              const analysis = result?.analysis || result;
+
+              if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
+                totalSuccess++;
+                const aiDuration = Number(analysis.duration);
+                const aiMotion = String(analysis.motion_type || "").trim();
+                const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
+                const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
+                const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
+                const narrative =
+                  result.narrative ||
+                  result.narrativeText ||
+                  result.analysis?.narrative ||
+                  result.analysis?.narrativeText ||
+                  p.narrative;
+                const narrativeAudioUrl =
+                  result.narrative_audio_url ||
+                  result.analysis?.narrative_audio_url ||
+                  p.narrative_audio_url;
+
+                return {
+                  ...p,
+                  speech_text: speech,
+                  dialogueSubtitleText: speech,
+                  sfx: sfx,
+                  soundEffectSfx: sfx,
+                  duration: aiDuration > 0 ? aiDuration : p.duration,
+                  timingSec: aiDuration > 0 ? aiDuration : p.duration,
+                  motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                  camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                  visual_description: visual,
+                  visual_scene_description: visual,
+                  audio_url: result.audio_url || p.audio_url,
+                  narrative,
+                  narrative_audio_url: narrativeAudioUrl,
+                  isAnalyzing: false,
+                };
+              }
+              return { ...p, isAnalyzing: false };
+            })
+          );
+        }
+      }
+
+      if (setConsoleLogs) {
+        setConsoleLogs((prev) => [
+          `[Sequence Analysis] [SUCCESS] Model: ${lastModelUsed} | Completed analysis for ${totalSuccess}/${targetPanels.length} frame(s)!`,
+          ...prev,
+        ]);
+      }
+
+      if (!abortSignalRef.current.aborted && addNotification) {
+        addNotification(
+          `Sequence analysis completed for ${totalSuccess} panel(s)!`,
+          "success"
+        );
+        audioFeedback?.playSuccess();
       }
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -478,110 +520,121 @@ export function useCompileActions({
     try {
       abortControllerRef.current = new AbortController();
 
-      const imageUrls = panels.map((p) => p.image_url);
-
-      const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
-      // Phase 1: Context-aware multimodal panel/sequence analysis
-      const data = await api.analyzeAllPanels(
-        activeFetch,
-        {
-          panels: panels.map((p) => ({ id: p.id, url: p.image_url })),
-          model: activeModel,
-          narrationStyle,
-          voice: voiceActor,
-          story_memory: currentMemory || undefined,
-        },
-        { signal: abortControllerRef.current.signal }
-      );
-
-      if (data.story_memory) {
-        useProjectStore.getState().updateStoryMemory(data.story_memory);
+      const BATCH_SIZE = 5;
+      const chunks: typeof panels[] = [];
+      for (let i = 0; i < panels.length; i += BATCH_SIZE) {
+        chunks.push(panels.slice(i, i + BATCH_SIZE));
       }
 
-      if (abortSignalRef.current.aborted) return;
+      let totalSuccess = 0;
+      let lastModelUsed = activeModel || "Dynamic AI Model";
 
-      if (data.success && data.results) {
-        const tierLabel = (data as any).tier_label || (data.results?.[0] as any)?.tier_label || "Tier 1: Primary";
-        const modelUsed = (data as any).model || (data.results?.[0] as any)?.model || activeModel;
-        const attempt = (data as any).attempt || (data.results?.[0] as any)?.attempt || 1;
-        const totalCandidates = (data as any).total_candidates || (data.results?.[0] as any)?.total_candidates || 1;
-
-        const resultsById = new Map<string, any>();
-        data.results.forEach((r: any, index: number) => {
-          if (r.id !== undefined && r.id !== null) {
-            resultsById.set(String(r.id), r);
-          }
-          if (panels[index]) {
-            resultsById.set(String(panels[index].id), r);
-          }
-        });
-
-        // Map of results to panels state
-        setPanels((prev) =>
-          prev.map((p, idx) => {
-            const result =
-              resultsById.get(String(p.id)) ||
-              (data.results.length === prev.length ? data.results[idx] : undefined);
-            const analysis = result?.analysis || result;
-
-            if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
-              const aiDuration = Number(analysis.duration);
-              const aiMotion = String(analysis.motion_type || "").trim();
-              const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
-              const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
-              const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
-              const narrative =
-                result.narrative ||
-                result.narrativeText ||
-                result.analysis?.narrative ||
-                result.analysis?.narrativeText ||
-                p.narrative;
-              const narrativeAudioUrl =
-                result.narrative_audio_url ||
-                result.analysis?.narrative_audio_url ||
-                p.narrative_audio_url;
-
-              return {
-                ...p,
-                speech_text: speech,
-                dialogueSubtitleText: speech,
-                sfx: sfx,
-                soundEffectSfx: sfx,
-                duration: aiDuration > 0 ? aiDuration : p.duration,
-                timingSec: aiDuration > 0 ? aiDuration : p.duration,
-                motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
-                visual_description: visual,
-                visual_scene_description: visual,
-                audio_url: result.audio_url || p.audio_url,
-                narrative,
-                narrative_audio_url: narrativeAudioUrl,
-                isAnalyzing: false,
-              };
-            }
-            return { ...p, isAnalyzing: false };
-          })
-        );
+      for (let cIdx = 0; cIdx < chunks.length; cIdx++) {
+        if (abortSignalRef.current.aborted) break;
+        const currentChunk = chunks[cIdx];
+        const currentChunkSet = new Set(currentChunk.map((p) => String(p.id)));
+        const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Sequence Analysis] [SUCCESS] [${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Phase 1 completed! Created Dialogue, SFX, Motion and Timings for all ${imageUrls.length} frames.`,
-            `[Sequence Analysis] Narrative and TTS generation completed for all panels in a single request!`,
+            `[Sequence Analysis] Processing Batch ${cIdx + 1}/${chunks.length} (${currentChunk.length} panels)...`,
             ...prev,
           ]);
         }
 
-        if (!abortSignalRef.current.aborted && addNotification) {
-          addNotification(
-            `[${tierLabel}] (Attempt ${attempt}/${totalCandidates}) | Model: ${modelUsed} | Smart Full Sequence Analysis completed for all ${panels.length} panels!`,
-            "success"
-          );
-          audioFeedback?.playSuccess();
-        }
-      } else {
-        throw new Error(
-          data.error || "Sequence analysis returned unsuccessful status"
+        const data = await api.analyzeAllPanels(
+          activeFetch,
+          {
+            panels: currentChunk.map((p) => ({ id: p.id, url: p.image_url })),
+            model: activeModel,
+            narrationStyle,
+            voice: voiceActor,
+            story_memory: currentMemory || undefined,
+            ...getAudioFlags(),
+          },
+          { signal: abortControllerRef.current.signal }
         );
+
+        if (data.story_memory) {
+          useProjectStore.getState().updateStoryMemory(data.story_memory);
+        }
+
+        if (data.success && data.results) {
+          lastModelUsed = (data as any).model || (data.results?.[0] as any)?.model || lastModelUsed;
+
+          const resultsById = new Map<string, any>();
+          data.results.forEach((r: any, index: number) => {
+            if (r.id !== undefined && r.id !== null) {
+              resultsById.set(String(r.id), r);
+            }
+            if (currentChunk[index]) {
+              resultsById.set(String(currentChunk[index].id), r);
+            }
+          });
+
+          // Map of results to panels state
+          setPanels((prev) =>
+            prev.map((p) => {
+              if (!currentChunkSet.has(String(p.id))) return p;
+
+              const result = resultsById.get(String(p.id));
+              const analysis = result?.analysis || result;
+
+              if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
+                totalSuccess++;
+                const aiDuration = Number(analysis.duration);
+                const aiMotion = String(analysis.motion_type || "").trim();
+                const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
+                const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
+                const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
+                const narrative =
+                  result.narrative ||
+                  result.narrativeText ||
+                  result.analysis?.narrative ||
+                  result.analysis?.narrativeText ||
+                  p.narrative;
+                const narrativeAudioUrl =
+                  result.narrative_audio_url ||
+                  result.analysis?.narrative_audio_url ||
+                  p.narrative_audio_url;
+
+                return {
+                  ...p,
+                  speech_text: speech,
+                  dialogueSubtitleText: speech,
+                  sfx: sfx,
+                  soundEffectSfx: sfx,
+                  duration: aiDuration > 0 ? aiDuration : p.duration,
+                  timingSec: aiDuration > 0 ? aiDuration : p.duration,
+                  motion_type: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                  camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
+                  visual_description: visual,
+                  visual_scene_description: visual,
+                  audio_url: result.audio_url || p.audio_url,
+                  narrative,
+                  narrative_audio_url: narrativeAudioUrl,
+                  isAnalyzing: false,
+                };
+              }
+              return { ...p, isAnalyzing: false };
+            })
+          );
+        }
+      }
+
+      if (setConsoleLogs) {
+        setConsoleLogs((prev) => [
+          `[Sequence Analysis] [SUCCESS] Model: ${lastModelUsed} | Completed full sequence analysis for ${totalSuccess}/${panels.length} frames!`,
+          ...prev,
+        ]);
+      }
+
+      if (!abortSignalRef.current.aborted && addNotification) {
+        addNotification(
+          `Sequence analysis completed for ${totalSuccess} panel(s)!`,
+          "success"
+        );
+        audioFeedback?.playSuccess();
       }
     } catch (err: any) {
       if (err.name === "AbortError" || abortSignalRef.current.aborted) {

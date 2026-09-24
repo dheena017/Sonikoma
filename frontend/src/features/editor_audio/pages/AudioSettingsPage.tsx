@@ -18,6 +18,7 @@ import {
   Check,
   Search,
   Globe,
+  MessageSquare,
 } from "lucide-react";
 import { MUSIC_THEMES_CATALOG, DEFAULT_TTS_VOICES } from "@/features/editor_studio/types/settings";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
@@ -54,6 +55,10 @@ interface AudioSettingsPageProps {
   setMusicTheme: (val: string) => void;
   audioDucking: boolean;
   setAudioDucking: (val: boolean) => void;
+  enableDialogueAudio?: boolean;
+  setEnableDialogueAudio?: (val: boolean) => void;
+  enableNarrativeAudio?: boolean;
+  setEnableNarrativeAudio?: (val: boolean) => void;
   onSave?: () => void;
 }
 
@@ -259,8 +264,31 @@ export default function AudioSettingsPage({
   setMusicTheme,
   audioDucking,
   setAudioDucking,
+  enableDialogueAudio: propEnableDialogueAudio,
+  setEnableDialogueAudio: propSetEnableDialogueAudio,
+  enableNarrativeAudio: propEnableNarrativeAudio,
+  setEnableNarrativeAudio: propSetEnableNarrativeAudio,
   onSave,
 }: AudioSettingsPageProps) {
+  const [internalEnableDialogueAudio, setInternalEnableDialogueAudio] = useState<boolean>(() =>
+    localStorage.getItem("ai_comic_enable_dialogue_audio") === "true"
+  );
+  const [internalEnableNarrativeAudio, setInternalEnableNarrativeAudio] = useState<boolean>(() =>
+    localStorage.getItem("ai_comic_enable_narrative_audio") !== "false"
+  );
+
+  const enableDialogueAudio = propEnableDialogueAudio !== undefined ? propEnableDialogueAudio : internalEnableDialogueAudio;
+  const setEnableDialogueAudio = propSetEnableDialogueAudio || ((val: boolean) => {
+    setInternalEnableDialogueAudio(val);
+    localStorage.setItem("ai_comic_enable_dialogue_audio", String(val));
+  });
+
+  const enableNarrativeAudio = propEnableNarrativeAudio !== undefined ? propEnableNarrativeAudio : internalEnableNarrativeAudio;
+  const setEnableNarrativeAudio = propSetEnableNarrativeAudio || ((val: boolean) => {
+    setInternalEnableNarrativeAudio(val);
+    localStorage.setItem("ai_comic_enable_narrative_audio", String(val));
+  });
+
   const [projectId, setProjectId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -392,6 +420,9 @@ export default function AudioSettingsPage({
 
     setSaving(true);
     try {
+      localStorage.setItem("ai_comic_enable_dialogue_audio", String(enableDialogueAudio));
+      localStorage.setItem("ai_comic_enable_narrative_audio", String(enableNarrativeAudio));
+
       const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
       const res = await fetchFn(`/api/projects/${projectId}/settings/audio`, {
         method: "PUT",
@@ -408,6 +439,8 @@ export default function AudioSettingsPage({
             narratorVoice: voiceActor,
             musicTheme,
             audioDucking,
+            enableDialogueAudio,
+            enableNarrativeAudio,
           },
         }),
       });
@@ -589,6 +622,119 @@ export default function AudioSettingsPage({
         {/* VOICE TAB */}
         {activeTab === "voice" && (
           <div className="space-y-4">
+            {/* Audio Generation Controls: Dialogues vs Narratives */}
+            <div
+              className="rounded-2xl border p-5 space-y-4 shadow-lg shadow-black/20"
+              style={{ backgroundColor: "#0a0a12", borderColor: "#1e1e30" }}
+            >
+              <div className="flex items-center gap-3 pb-3 border-b border-neutral-800">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 border border-indigo-500/30 flex items-center justify-center">
+                  <Radio className="h-4 w-4 text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    Audio Generation Modes
+                    <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+                      TTS Synthesis
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-neutral-400 mt-0.5">
+                    Choose what audio gets automatically synthesized during storyboard analysis
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Narratives Audio Switch (Default: ON) */}
+                <div
+                  className="p-4 rounded-xl border flex items-center justify-between transition-all"
+                  style={{
+                    backgroundColor: enableNarrativeAudio ? "rgba(99, 102, 241, 0.08)" : "#0d0d1a",
+                    borderColor: enableNarrativeAudio ? "rgba(99, 102, 241, 0.4)" : "#1e1e30",
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                      style={{
+                        backgroundColor: enableNarrativeAudio ? "rgba(99, 102, 241, 0.2)" : "#1a1a2e",
+                        color: enableNarrativeAudio ? "#818cf8" : "#6b7280",
+                      }}
+                    >
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white">Recap Narratives Voice</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono font-semibold">
+                          Default ON
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">
+                        Synthesizes cinematic third-person YouTube manga recap voiceover narration for each panel.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setEnableNarrativeAudio(!enableNarrativeAudio)}
+                    className="ml-4 flex-shrink-0 relative inline-flex h-6 w-11 rounded-full border-2 border-transparent transition-all duration-200 cursor-pointer focus:outline-none"
+                    style={{ backgroundColor: enableNarrativeAudio ? "#6366f1" : "#374151" }}
+                  >
+                    <span
+                      className="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ease-in-out"
+                      style={{ transform: enableNarrativeAudio ? "translateX(20px)" : "translateX(0)" }}
+                    />
+                  </button>
+                </div>
+
+                {/* Dialogues Audio Switch (Default: OFF) */}
+                <div
+                  className="p-4 rounded-xl border flex items-center justify-between transition-all"
+                  style={{
+                    backgroundColor: enableDialogueAudio ? "rgba(59, 130, 246, 0.08)" : "#0d0d1a",
+                    borderColor: enableDialogueAudio ? "rgba(59, 130, 246, 0.4)" : "#1e1e30",
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                      style={{
+                        backgroundColor: enableDialogueAudio ? "rgba(59, 130, 246, 0.2)" : "#1a1a2e",
+                        color: enableDialogueAudio ? "#60a5fa" : "#6b7280",
+                      }}
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white">Character Dialogues Voice</span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
+                          Optional (OFF)
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">
+                        Synthesizes character speech bubble lines with character-assigned voice casting.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setEnableDialogueAudio(!enableDialogueAudio)}
+                    className="ml-4 flex-shrink-0 relative inline-flex h-6 w-11 rounded-full border-2 border-transparent transition-all duration-200 cursor-pointer focus:outline-none"
+                    style={{ backgroundColor: enableDialogueAudio ? "#3b82f6" : "#374151" }}
+                  >
+                    <span
+                      className="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ease-in-out"
+                      style={{ transform: enableDialogueAudio ? "translateX(20px)" : "translateX(0)" }}
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Unified AI Voice Actor Dropdown Card */}
             <div
               className="rounded-2xl border p-5 space-y-4"

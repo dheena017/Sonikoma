@@ -20,6 +20,8 @@ interface UseStoryboardOperationsProps {
   musicTheme?: string;
   narrationStyle?: string;
   audioFeedback?: any;
+  enableDialogueAudio?: boolean;
+  enableNarrativeAudio?: boolean;
 }
 
 export function useStoryboardOperations({
@@ -37,6 +39,8 @@ export function useStoryboardOperations({
   musicTheme,
   narrationStyle = "long",
   audioFeedback,
+  enableDialogueAudio,
+  enableNarrativeAudio,
 }: UseStoryboardOperationsProps) {
   const {
     showBulkOps,
@@ -93,6 +97,8 @@ export function useStoryboardOperations({
     musicTheme,
     narrationStyle,
     audioFeedback,
+    enableDialogueAudio,
+    enableNarrativeAudio,
   });
 
   const handleClearTimeline = async () => {

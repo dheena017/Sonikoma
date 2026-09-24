@@ -24,6 +24,8 @@ export interface AudioSettingsConfig {
   voiceActor: string;      // TTS voice code
   musicTheme: string;      // Background music identifier
   audioDucking: boolean;   // Auto-duck BGM during speech
+  enableDialogueAudio: boolean;  // Character dialogue voice audio synthesis (default: false)
+  enableNarrativeAudio: boolean; // Story recap narrative voice audio synthesis (default: true)
 }
 
 export interface AutoCropSettingsConfig {
@@ -69,6 +71,8 @@ export const DEFAULT_AUDIO_SETTINGS: AudioSettingsConfig = {
   voiceActor: "en-US-ChristopherNeural",
   musicTheme: "",
   audioDucking: true,
+  enableDialogueAudio: false,
+  enableNarrativeAudio: true,
 };
 
 export const DEFAULT_AUTOCROP_SETTINGS: AutoCropSettingsConfig = {
