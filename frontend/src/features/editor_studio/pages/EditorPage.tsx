@@ -828,7 +828,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 data-section="section-timeline"
                 className={`w-full scroll-mt-20 min-h-0 ${
                   currentSection === "storyboard" || currentSection === "timeline"
-                    ? "flex flex-col flex-1 h-full min-h-[calc(100vh-180px)]"
+                    ? "flex flex-col min-h-0"
                     : "hidden lg:flex lg:flex-col"
                 }`}
               >
@@ -889,7 +889,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 id="section-assets"
                 className={`w-full scroll-mt-20 min-h-0 ${
                   currentSection === "assets" || currentSection === "raw-images"
-                    ? "flex flex-col flex-1 h-full min-h-[calc(100vh-180px)]"
+                    ? "flex flex-col min-h-0"
                     : "hidden lg:flex lg:flex-col"
                 }`}
               >
