@@ -223,6 +223,16 @@ class EndpointFilter(logging.Filter):
         "httpcore",
     )
 
+    # Windows asyncio false-alarm: fires when browser disconnects mid-stream (e.g. video seek/close).
+    # These are NOT real errors — they are normal TCP teardown events on Windows Proactor event loop.
+    WINDOWS_STREAM_RESET_SIGNATURES: Tuple[str, ...] = (
+        "ConnectionResetError",
+        "WinError 10054",
+        "_call_connection_lost",
+        "An existing connection was forcibly closed by the remote host",
+        "_ProactorBasePipeTransport",
+    )
+
     def __init__(
         self,
         name: str = "",
@@ -347,6 +357,27 @@ class EndpointFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
         GLOBAL_METRICS.record_evaluated()
         try:
+            # Suppress Windows asyncio ConnectionResetError noise from video stream teardowns.
+            # These fire when a browser disconnects mid-stream (seek, pause, tab close) and
+            # are not real errors — they are normal on Windows Proactor event loop.
+            exc_info = record.exc_info
+            if exc_info and exc_info[1] is not None:
+                exc = exc_info[1]
+                if isinstance(exc, (ConnectionResetError, BrokenPipeError, ConnectionAbortedError)):
+                    GLOBAL_METRICS.record_silenced()
+                    return False
+
+            # Also suppress by message content (asyncio logs these without exc_info sometimes)
+            raw_msg = str(record.msg)
+            if any(sig in raw_msg for sig in self.WINDOWS_STREAM_RESET_SIGNATURES):
+                GLOBAL_METRICS.record_silenced()
+                return False
+
+            # Check traceback text too
+            if record.exc_text and any(sig in record.exc_text for sig in self.WINDOWS_STREAM_RESET_SIGNATURES):
+                GLOBAL_METRICS.record_silenced()
+                return False
+
             # Always allow ERROR, CRITICAL, and WARNING logs through unconditionally
             if record.levelno >= logging.WARNING:
                 GLOBAL_METRICS.record_passed(is_error=True)
