@@ -239,6 +239,9 @@ export function useAppLogic() {
             scrapedImages: finalImages,
           });
 
+          // Immediately persist newly imported chapter project with all scraped assets
+          void useProjectStore.getState().saveActiveProject(state.fetchWithInterceptor as any);
+
           state.setIsScraping(false);
           state.addNotification(`Successfully imported ${finalImages.length} images!`, "success");
           return true;

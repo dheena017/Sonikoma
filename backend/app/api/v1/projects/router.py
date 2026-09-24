@@ -182,7 +182,7 @@ async def save_project_transfer(payload: ProjectTransferPayload):
 async def get_project_transfer(project_id: str = Path(..., description="Project ID")):
     data = _TEMPORARY_PROJECT_TRANSFERS.get(project_id)
     if not data:
-        raise HTTPException(status_code=404, detail="Transfer not found or expired")
+        return {"success": False, "detail": "Transfer not found or expired"}
     return {"success": True, **data}
 
 

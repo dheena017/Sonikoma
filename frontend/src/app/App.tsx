@@ -584,8 +584,8 @@ export default function App() {
           } catch (_) {}
         }
 
-        // 2. Fetch from backend transfer endpoint
-        if (!transferData && (isTransfer || projId)) {
+        // 2. Fetch from backend transfer endpoint only if initiated as a transfer
+        if (!transferData && isTransfer && projId) {
           try {
             const res = await fetch(`/api/v1/projects/transfer/${encodeURIComponent(projId)}`);
             if (res.ok) {

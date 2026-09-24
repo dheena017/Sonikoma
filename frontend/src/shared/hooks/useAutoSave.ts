@@ -60,6 +60,22 @@ export function useAutoSave(state?: AutoSaveState, debounceMs = 1500) {
       setSaveStatus("saving");
       try {
         const fetchClient = overrideFetch || state?.fetchWithInterceptor;
+
+        // Ensure state.scrapedImages (e.g. all 127 imported frames) is synced to activeProjectData before saving
+        const curData = useProjectStore.getState().activeProjectData;
+        if (state?.scrapedImages && state.scrapedImages.length > 0 && curData) {
+          if (!curData.scrapedImages || curData.scrapedImages.length !== state.scrapedImages.length) {
+            useProjectStore.getState().setActiveProject({
+              ...curData,
+              scrapedImages: state.scrapedImages,
+              project: {
+                ...curData.project,
+                imported_assets_count: state.scrapedImages.length,
+              },
+            });
+          }
+        }
+
         const success = await useProjectStore.getState().saveActiveProject(fetchClient);
         if (success) {
           setSaveStatus("saved");

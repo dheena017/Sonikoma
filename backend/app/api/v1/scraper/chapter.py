@@ -79,6 +79,53 @@ async def scrape_chapter_async_endpoint(
             job.project_id = result.series.title
         if result.chapter and (result.chapter.title or result.chapter.number is not None):
             job.chapter_id = result.chapter.title or f"Episode {result.chapter.number}"
+
+        if result.success and result.images:
+            try:
+                from repositories.scraper import save_scrape_session
+                img_urls = [
+                    img.url if hasattr(img, "url") else (img.get("url") if isinstance(img, dict) else str(img))
+                    for img in result.images
+                ]
+                save_scrape_session(target_url, img_urls)
+
+                if body.project_id:
+                    from repositories.project import get_project, insert_project, update_project
+                    series_title = result.series.title if result.series and result.series.title else "Untitled Comic"
+                    cover_img = (result.series.cover_image if result.series and result.series.cover_image else None) or (img_urls[0] if img_urls else None)
+                    genre = (result.series.genres[0] if result.series and result.series.genres else "general")
+                    synopsis = result.series.description if result.series and result.series.description else ""
+                    author = result.series.author if result.series and result.series.author else "Unknown Author"
+                    episode_str = result.chapter.title or f"Chapter {result.chapter.number or 1}" if result.chapter else "Chapter 1"
+
+                    payload = {
+                        "project_id": body.project_id,
+                        "user_id": user_id,
+                        "title": series_title,
+                        "author": author,
+                        "cover_image": cover_img,
+                        "genre": genre,
+                        "synopsis": synopsis,
+                        "episode": episode_str,
+                        "url": target_url,
+                        "source_url": target_url,
+                        "status": "pending",
+                        "panels_count": 0,
+                        "imported_assets_count": len(img_urls),
+                        "audio_settings": {
+                            "scraped_images": img_urls,
+                            "imported_assets_count": len(img_urls),
+                        }
+                    }
+                    existing_p = get_project(body.project_id)
+                    if existing_p:
+                        update_project(body.project_id, payload)
+                    else:
+                        insert_project(payload)
+                    logger.info(f"[ScraperAPI] Async job persisted project {body.project_id} with {len(img_urls)} scraped images")
+            except Exception as persist_err:
+                logger.warning(f"[ScraperAPI] Error auto-saving async scrape session/project: {persist_err}")
+
         report_progress(100.0, JobStage.COMPLETED.value)
         return result.model_dump()
 
