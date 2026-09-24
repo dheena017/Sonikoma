@@ -872,6 +872,19 @@ export const useProjectStore = create<ProjectStoreState>()(
           const fetcher = fetchClient || window.fetch;
           const token = getStoredAuthToken();
 
+          const currentAudioSettings = activeProjectData.project.audio_settings || {};
+          const scrapedImgs = (activeProjectData.scrapedImages && activeProjectData.scrapedImages.length > 0)
+            ? activeProjectData.scrapedImages
+            : (currentAudioSettings.scraped_images || []);
+
+          const panelsCount = (activeProjectData.panels && activeProjectData.panels.length > 0)
+            ? activeProjectData.panels.length
+            : (scrapedImgs.length > 0 ? scrapedImgs.length : (activeProjectData.project.panels_count || 0));
+
+          const importedCount = scrapedImgs.length > 0
+            ? scrapedImgs.length
+            : (activeProjectData.project.imported_assets_count || panelsCount);
+
           const res = await fetcher(`/api/projects/${encodeURIComponent(activeProjectId)}`, {
             method: "PUT",
             headers: {
@@ -879,13 +892,23 @@ export const useProjectStore = create<ProjectStoreState>()(
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({
+              url: activeProjectData.project.url || activeProjectData.project.original_url || "",
+              episode: activeProjectData.project.episode || (activeProjectData.project as any).chapterNumber || "Chapter 1",
               title: activeProjectData.project.title,
               genre: activeProjectData.project.genre,
               author: activeProjectData.project.author,
               synopsis: activeProjectData.project.synopsis,
               cover_image: activeProjectData.project.cover_image,
+              status: activeProjectData.project.status || "ready",
               panels: activeProjectData.panels,
-              audio_settings: activeProjectData.project.audio_settings,
+              panels_count: panelsCount,
+              imported_assets_count: importedCount,
+              scraped_images: scrapedImgs,
+              audio_settings: {
+                ...currentAudioSettings,
+                scraped_images: scrapedImgs,
+                imported_assets_count: importedCount,
+              },
               video_settings: activeProjectData.project.video_settings,
               autocrop_settings: activeProjectData.project.autocrop_settings,
             }),

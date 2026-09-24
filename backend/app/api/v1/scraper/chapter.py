@@ -119,6 +119,50 @@ async def scrape_chapter_sync_post(
     )
     if result.success:
         logger.info(f"[ScraperAPI] Successfully scraped chapter '{target_url}' ({len(result.images)} panels)")
+        try:
+            from repositories.scraper import save_scrape_session
+            img_urls = [
+                img.url if hasattr(img, "url") else (img.get("url") if isinstance(img, dict) else str(img))
+                for img in result.images
+            ]
+            save_scrape_session(target_url, img_urls)
+            if body.project_id:
+                from repositories.project import get_project, insert_project, update_project
+                user_id = current_user.get("user_id") or current_user.get("id") or "system_default" if current_user else "system_default"
+                series_title = result.series.title if result.series and result.series.title else "Untitled Comic"
+                cover_img = (result.series.cover_image if result.series and result.series.cover_image else None) or (img_urls[0] if img_urls else None)
+                genre = (result.series.genres[0] if result.series and result.series.genres else "general")
+                synopsis = result.series.description if result.series and result.series.description else ""
+                author = result.series.author if result.series and result.series.author else "Unknown Author"
+                episode_str = result.chapter.title or f"Chapter {result.chapter.number or 1}" if result.chapter else "Chapter 1"
+
+                payload = {
+                    "project_id": body.project_id,
+                    "user_id": user_id,
+                    "title": series_title,
+                    "author": author,
+                    "cover_image": cover_img,
+                    "genre": genre,
+                    "synopsis": synopsis,
+                    "episode": episode_str,
+                    "url": target_url,
+                    "source_url": target_url,
+                    "status": "pending",
+                    "panels_count": len(img_urls),
+                    "total_panels": len(img_urls),
+                    "audio_settings": {
+                        "scraped_images": img_urls,
+                        "imported_assets_count": len(img_urls),
+                    }
+                }
+                existing_p = get_project(body.project_id)
+                if existing_p:
+                    update_project(body.project_id, payload)
+                else:
+                    insert_project(payload)
+                logger.info(f"[ScraperAPI] Persisted project {body.project_id} with {len(img_urls)} scraped images")
+        except Exception as persist_err:
+            logger.warning(f"[ScraperAPI] Non-fatal error persisting scraped project: {persist_err}")
     else:
         logger.warning(f"[ScraperAPI] Failed scraping chapter '{target_url}': {result.error_message}")
     return result

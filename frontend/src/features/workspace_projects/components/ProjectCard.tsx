@@ -402,11 +402,11 @@ export default function ProjectCard({
             {/* Storyboard Count */}
             <div
               className="flex items-center gap-1 text-[#3B82F6]"
-              title={`${project.panels_count ?? 0} Storyboard Panels`}
+              title={`${project.panels_count || project.imported_assets_count || 0} Storyboard Panels`}
             >
               <Film className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
               <span className="font-bold text-neutral-200">
-                {project.panels_count ?? 0}
+                {project.panels_count || project.imported_assets_count || 0}
               </span>
               <span className="text-[10px] text-neutral-400">panels</span>
             </div>

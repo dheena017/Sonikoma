@@ -130,23 +130,29 @@ def insert_project(data: Dict[str, Any]) -> None:
 def _enrich_project_item(item: Dict[str, Any], conn: Any) -> Dict[str, Any]:
     _parse_audio_settings(item)
     
-    # Check panels table count if c.panels_count is 0 or missing
-    if item.get("panels_count") is None or item.get("panels_count") == 0:
-        try:
-            cnt_row = conn.execute("SELECT COUNT(*) FROM panels WHERE chapter_id = ?", (item["project_id"],)).fetchone()
-            if cnt_row and cnt_row[0] > 0:
-                item["panels_count"] = cnt_row[0]
-            else:
-                item["panels_count"] = item.get("panels_count") or 0
-        except Exception:
-            item["panels_count"] = item.get("panels_count") or 0
+    # 1. Check panels table count
+    panels_count = item.get("panels_count") or 0
+    try:
+        cnt_row = conn.execute("SELECT COUNT(*) FROM panels WHERE chapter_id = ?", (item["project_id"],)).fetchone()
+        if cnt_row and cnt_row[0] > 0:
+            panels_count = cnt_row[0]
+    except Exception:
+        pass
 
-    # Check imported_assets_count from audio_settings, scrape_sessions, or panels_count
+    # 2. Check imported_assets_count from audio_settings
     imported_count = 0
     audio_set = item.get("audio_settings")
-    if isinstance(audio_set, dict) and audio_set.get("scraped_images") and isinstance(audio_set["scraped_images"], list):
-        imported_count = len(audio_set["scraped_images"])
+    if isinstance(audio_set, dict):
+        scraped_imgs = audio_set.get("scraped_images") or audio_set.get("images") or audio_set.get("image_urls")
+        if isinstance(scraped_imgs, list) and len(scraped_imgs) > 0:
+            imported_count = len(scraped_imgs)
+        elif audio_set.get("imported_assets_count"):
+            try:
+                imported_count = int(audio_set["imported_assets_count"])
+            except Exception:
+                pass
     
+    # 3. Check scrape_sessions by url
     target_url = item.get("url") or item.get("original_url")
     if not imported_count and target_url:
         try:
@@ -160,17 +166,72 @@ def _enrich_project_item(item: Dict[str, Any], conn: Any) -> Dict[str, Any]:
                 elif sess_row["image_urls"]:
                     try:
                         urls = json.loads(sess_row["image_urls"])
-                        if isinstance(urls, list):
+                        if isinstance(urls, list) and len(urls) > 0:
                             imported_count = len(urls)
                     except Exception:
                         pass
         except Exception:
             pass
 
-    # Graceful fallback: If imported_count is still 0, fallback to panels_count
-    if not imported_count and item.get("panels_count"):
-        imported_count = item["panels_count"]
+    # 4. If URL was blank or not found in scrape_sessions, try fuzzy match on title or slug
+    if not imported_count:
+        try:
+            title = (item.get("title") or "").strip()
+            slug = (item.get("series_slug") or item.get("chapter_slug") or "").strip()
+            search_term = title if len(title) >= 3 else (slug if len(slug) >= 3 else "")
+            if search_term:
+                sess_row = conn.execute(
+                    "SELECT panel_count, image_urls FROM scrape_sessions WHERE url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
+                    (f"%{search_term}%",)
+                ).fetchone()
+                if sess_row:
+                    if sess_row["panel_count"]:
+                        imported_count = sess_row["panel_count"]
+                    elif sess_row["image_urls"]:
+                        try:
+                            urls = json.loads(sess_row["image_urls"])
+                            if isinstance(urls, list) and len(urls) > 0:
+                                imported_count = len(urls)
+                        except Exception:
+                            pass
+        except Exception:
+            pass
 
+    # 5. Check if another chapter/project with the same series title or cover image has panels or scraped images
+    if not imported_count and not panels_count:
+        try:
+            title = item.get("title")
+            cover = item.get("cover_image")
+            if title or cover:
+                other_p = conn.execute("""
+                    SELECT c.panels_count, c.audio_settings 
+                    FROM chapters c 
+                    JOIN series s ON c.series_id = s.id 
+                    WHERE (s.title = ? OR s.cover_image = ?) AND c.id != ? AND (c.panels_count > 0 OR c.audio_settings LIKE '%http%')
+                    ORDER BY c.created_at DESC LIMIT 1
+                """, (title or "", cover or "", item["project_id"])).fetchone()
+                if other_p:
+                    if other_p["panels_count"] and other_p["panels_count"] > 0:
+                        imported_count = other_p["panels_count"]
+                    elif other_p["audio_settings"]:
+                        try:
+                            o_audio = json.loads(other_p["audio_settings"])
+                            if isinstance(o_audio, dict) and o_audio.get("scraped_images"):
+                                imported_count = len(o_audio["scraped_images"])
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+
+    # 6. Bi-directional Fallback:
+    # If imported_count is 0 but panels_count > 0 -> imported_count = panels_count
+    # If panels_count is 0 but imported_count > 0 -> panels_count = imported_count
+    if not imported_count and panels_count > 0:
+        imported_count = panels_count
+    elif not panels_count and imported_count > 0:
+        panels_count = imported_count
+
+    item["panels_count"] = panels_count
     item["imported_assets_count"] = imported_count
     return item
 
@@ -309,13 +370,18 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                 chapter_set_parts.append("slug = ?")
                 chapter_params.append(new_slug)
 
+            if 'original_url' in updates or 'url' in updates:
+                orig_url_val = updates.get('original_url') or updates.get('url')
+                if orig_url_val:
+                    chapter_set_parts.append("original_url = ?")
+                    chapter_params.append(unwrap_proxy_url(orig_url_val))
             if 'status' in updates:
                 chapter_set_parts.append("status = ?")
                 chapter_params.append(updates['status'])
             if 'video_url' in updates:
                 chapter_set_parts.append("video_url = ?")
                 chapter_params.append(updates['video_url'])
-            if 'panels_count' in updates:
+            if 'panels_count' in updates and updates['panels_count'] is not None:
                 chapter_set_parts.append("panels_count = ?")
                 chapter_params.append(updates['panels_count'])
             if 'job_id' in updates:
@@ -423,7 +489,10 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     ))
 
                 # Sync panel count
-                conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (len(panels), project_id))
+                if len(panels) > 0:
+                    conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (len(panels), project_id))
+                elif 'panels_count' in updates and updates['panels_count'] is not None and updates['panels_count'] > 0:
+                    conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (updates['panels_count'], project_id))
 
                 # Find which old URLs are not in the new list, and clean them up
                 new_urls = set()

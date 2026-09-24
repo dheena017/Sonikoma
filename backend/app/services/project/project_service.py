@@ -201,6 +201,15 @@ class ProjectService:
 
         if not project:
             # Auto-provision new/transient project if updating details
+            panels_cnt = getattr(body, "panels_count", None)
+            if not panels_cnt and getattr(body, "panels", None):
+                panels_cnt = len(body.panels)
+            init_audio = getattr(body, "audio_settings", None) or {}
+            if getattr(body, "scraped_images", None) and isinstance(init_audio, dict):
+                init_audio["scraped_images"] = body.scraped_images
+            if not panels_cnt and isinstance(init_audio, dict) and init_audio.get("scraped_images"):
+                panels_cnt = len(init_audio["scraped_images"])
+
             self.repo.insert_project({
                 "project_id": project_id,
                 "user_id": current_user_id,
@@ -210,7 +219,11 @@ class ProjectService:
                 "author": getattr(body, "author", None) or "Unknown",
                 "synopsis": getattr(body, "synopsis", None) or "",
                 "video_url": getattr(body, "video_url", None) or "",
-                "audio_settings": getattr(body, "audio_settings", None) or {},
+                "audio_settings": init_audio,
+                "url": getattr(body, "url", None) or "",
+                "cover_image": getattr(body, "cover_image", None),
+                "status": getattr(body, "status", None) or "pending",
+                "panels_count": panels_cnt or 0,
             })
             project = self.repo.get_project(project_id)
 
@@ -230,6 +243,18 @@ class ProjectService:
                 f"cannot update under job '{incoming_job_id}'."
             )
 
+        merged_audio = dict(getattr(body, "audio_settings", None) or {}) if isinstance(getattr(body, "audio_settings", None), dict) else {}
+        if not merged_audio and isinstance(project.get("audio_settings"), dict):
+            merged_audio = dict(project["audio_settings"])
+        if getattr(body, "scraped_images", None):
+            merged_audio["scraped_images"] = body.scraped_images
+
+        panels_cnt = getattr(body, "panels_count", None)
+        if not panels_cnt and getattr(body, "panels", None):
+            panels_cnt = len(body.panels)
+        if not panels_cnt and merged_audio.get("scraped_images"):
+            panels_cnt = len(merged_audio["scraped_images"])
+
         field_map = {
             "title": body.title,
             "genre": body.genre,
@@ -238,7 +263,9 @@ class ProjectService:
             "synopsis": body.synopsis,
             "video_url": body.video_url,
             "status": body.status,
-            "audio_settings": body.audio_settings,
+            "audio_settings": merged_audio if merged_audio else body.audio_settings,
+            "url": getattr(body, "url", None),
+            "panels_count": panels_cnt,
         }
         updates = {k: v for k, v in field_map.items() if v is not None}
 
