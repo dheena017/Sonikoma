@@ -34,6 +34,7 @@ import { useBackendHealth } from "@/shared/hooks";
 import { AIModelSelector } from "@/features/ai_core";
 import ServerStatusIndicator from "@/components/status/ServerStatusIndicator";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { SonikomaLogo } from "@/shared/ui/branding";
 
 interface EditorPageHeaderProps {
   title: string;
@@ -232,25 +233,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           className="flex items-center gap-2 sm:gap-3 cursor-pointer"
           onClick={onBackToApp}
         >
-          {coverImage ? (
-            <img
-              src={coverImage}
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              alt={title}
-              className="h-8.5 w-8.5 sm:h-10 sm:w-10 rounded-xl bg-[#1E1E1E] object-cover border border-[#2F2F2F] shrink-0 shadow-md"
-            />
-          ) : (
-            <img
-              src="/logo-dark.png"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = "/logo-dark.png";
-              }}
-              alt="Sonikoma Logo"
-              className="h-8.5 w-8.5 sm:h-10 sm:w-10 rounded-full bg-[#1E1E1E] object-cover border border-[#2F2F2F] shrink-0 shadow-md"
-            />
-          )}
+          <SonikomaLogo iconOnly size="sm" />
 
           <div className="min-w-0 hidden min-[540px]:block max-w-[180px] sm:max-w-[280px] md:max-w-[340px] lg:max-w-[420px]">
             {/* Top Workspace & Source Website Badge */}

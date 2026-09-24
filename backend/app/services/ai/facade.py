@@ -480,6 +480,7 @@ async def facade_analyze_image(
 
     skill = registry.get("panel_analysis")
     formatted_context = f"STORY CONTEXT & PRECEDING MEMORY:\n{story_context_section}\n" if story_context_section else ""
+    ocr_text = ""
     try:
         raw_text = await skill.execute(
             model=model,

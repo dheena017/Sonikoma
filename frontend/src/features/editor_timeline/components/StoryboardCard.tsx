@@ -1124,32 +1124,32 @@ const StoryboardCard = ({
         {/* 1. Primary Script & Audio Editor (Narrator by default, or Details when toggled) */}
         <div className="space-y-1.5 animate-in fade-in duration-150">
           {/* Header Bar */}
-          <div className="flex items-center justify-between gap-1.5 px-0.5 min-w-0">
+          <div className="flex items-center justify-between gap-1 px-0 min-w-0">
             {/* View Mode Toggle: Narrator (Main) vs Details */}
             <div className="flex items-center p-0.5 rounded-lg bg-neutral-900 border border-neutral-800 gap-0.5 select-none shrink-0">
               <button
                 type="button"
                 onClick={() => setShowDetails(false)}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer ${!showDetails
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-all cursor-pointer ${!showDetails
                     ? "bg-purple-950/60 text-purple-200 shadow-xs border border-purple-500/40 font-semibold"
                     : "text-neutral-400 hover:text-neutral-200"
                   }`}
                 title="Story Narrator"
               >
-                <Mic className="w-3 h-3 text-purple-400" />
+                <Mic className="w-2.5 h-2.5 text-purple-400" />
                 <span>Narrator</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowDetails(true)}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-medium flex items-center gap-1 transition-all cursor-pointer ${showDetails
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-all cursor-pointer ${showDetails
                     ? "bg-blue-950/60 text-blue-200 shadow-xs border border-blue-500/40 font-semibold"
                     : "text-neutral-400 hover:text-neutral-200"
                   }`}
                 title="Details: Dialogue, SFX, Scene"
               >
-                <MessageSquare className="w-3 h-3 text-blue-400" />
+                <MessageSquare className="w-2.5 h-2.5 text-blue-400" />
                 <span>Details</span>
                 {hasExtraDetails && (
                   <span className="w-1.5 h-1.5 rounded-full bg-blue-400 ml-0.5" />
@@ -1173,7 +1173,7 @@ const StoryboardCard = ({
                       e.stopPropagation();
                       handleGenerateVoice(false, !showDetails ? "narrative" : "speech");
                     }}
-                    className="h-6 px-2 rounded-md text-[10px] font-medium flex items-center gap-1 border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50"
+                    className="h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50 shrink-0"
                     title={!showDetails ? "Synthesize story narration voice" : "Synthesize speech bubble voice"}
                   >
                     {isGeneratingVoice &&
@@ -1185,7 +1185,7 @@ const StoryboardCard = ({
                     <span>
                       {isGeneratingVoice &&
                         generatingVoiceMode === (!showDetails ? "narrative" : "speech")
-                        ? "Voicing..."
+                        ? "Voicing"
                         : "Voice"}
                     </span>
                   </button>
@@ -1202,7 +1202,7 @@ const StoryboardCard = ({
                       e.stopPropagation();
                       handleToggleDialogueAudio(!showDetails ? "narrative" : "speech");
                     }}
-                    className={`h-6 px-2 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors cursor-pointer ${isDialoguePlaying &&
+                    className={`h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors cursor-pointer shrink-0 ${isDialoguePlaying &&
                         !isDialoguePaused &&
                         playingAudioType === (!showDetails ? "narrative" : "speech")
                         ? "bg-emerald-600 border-emerald-500 text-white shadow-sm shadow-emerald-500/30"
