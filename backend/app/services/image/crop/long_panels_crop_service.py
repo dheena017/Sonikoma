@@ -40,11 +40,14 @@ os.makedirs(MEDIA_DIR, exist_ok=True)
 
 def _apply_color_distance_autotrim(
     img: Image.Image,
-    tolerance: int = 22
+    tolerance: int = 22,
+    safety_padding: int = 1
 ) -> Tuple[Image.Image, Tuple[int, int, int, int], bool]:
     """
     Trims solid/scanned borders (e.g. white/black/neutral margins) from an image.
-    Uses Euclidean color distance from corner pixels to eliminate extra whitespace around panels.
+    Uses independent 4-edge gutter variance detection and Euclidean color distance
+    from outer gutter strips to eliminate extra whitespace around panels without
+    clipping bleed panels or speech bubble strokes.
     """
     w, h = img.size
     if h < 25 or w < 25:
@@ -53,14 +56,44 @@ def _apply_color_distance_autotrim(
     try:
         rgb = np.array(img.convert("RGB"))
 
-        # Sample corner background color
-        corners = [rgb[0, 0], rgb[0, w - 1], rgb[h - 1, 0], rgb[h - 1, w - 1]]
-        bg_rgb = np.mean(corners, axis=0)
+        # Test outer edge border strips (thickness 1-4px depending on dimensions)
+        band_y = min(4, max(1, h // 100))
+        band_x = min(4, max(1, w // 100))
 
-        # Check that corners are reasonably consistent background
-        corner_stds = np.std(corners, axis=0)
-        if np.max(corner_stds) > 25.0:
+        top_strip = rgb[:band_y, :, :]
+        bot_strip = rgb[-band_y:, :, :]
+        left_strip = rgb[:, :band_x, :]
+        right_strip = rgb[:, -band_x:, :]
+
+        top_std = float(np.std(top_strip))
+        bot_std = float(np.std(bot_strip))
+        left_std = float(np.std(left_strip))
+        right_std = float(np.std(right_strip))
+
+        # Threshold for considering an edge strip a uniform background gutter
+        max_edge_std = 25.0
+
+        top_is_gutter = top_std < max_edge_std
+        bot_is_gutter = bot_std < max_edge_std
+        left_is_gutter = left_std < max_edge_std
+        right_is_gutter = right_std < max_edge_std
+
+        # If none of the edges are uniform gutters, no trimming needed
+        if not (top_is_gutter or bot_is_gutter or left_is_gutter or right_is_gutter):
             return img, (0, 0, w, h), False
+
+        # Build reference background color from the uniform gutter strips
+        gutter_samples = []
+        if top_is_gutter:
+            gutter_samples.append(top_strip.reshape(-1, 3))
+        if bot_is_gutter:
+            gutter_samples.append(bot_strip.reshape(-1, 3))
+        if left_is_gutter:
+            gutter_samples.append(left_strip.reshape(-1, 3))
+        if right_is_gutter:
+            gutter_samples.append(right_strip.reshape(-1, 3))
+
+        bg_rgb = np.median(np.concatenate(gutter_samples, axis=0), axis=0)
 
         # Compute Euclidean distance of every pixel to background color
         diff = np.linalg.norm(rgb - bg_rgb, axis=2)
@@ -72,18 +105,19 @@ def _apply_color_distance_autotrim(
         rows = np.any(is_content, axis=1)
         cols = np.any(is_content, axis=0)
 
-        ymin, ymax = np.where(rows)[0][[0, -1]]
-        xmin, xmax = np.where(cols)[0][[0, -1]]
+        ymin_all, ymax_all = np.where(rows)[0][[0, -1]]
+        xmin_all, xmax_all = np.where(cols)[0][[0, -1]]
+
+        # Only trim along edges that were actually identified as gutters
+        t_y1 = max(0, int(ymin_all) - safety_padding) if top_is_gutter else 0
+        t_y2 = min(h, int(ymax_all) + 1 + safety_padding) if bot_is_gutter else h
+        t_x1 = max(0, int(xmin_all) - safety_padding) if left_is_gutter else 0
+        t_x2 = min(w, int(xmax_all) + 1 + safety_padding) if right_is_gutter else w
 
         # Ensure reasonable bounds
-        if (xmax - xmin >= 15) and (ymax - ymin >= 15):
-            t_x1 = max(0, int(xmin))
-            t_y1 = max(0, int(ymin))
-            t_x2 = min(w, int(xmax + 1))
-            t_y2 = min(h, int(ymax + 1))
-
+        if (t_x2 - t_x1 >= 15) and (t_y2 - t_y1 >= 15):
             # Only trim if there are actually extra borders (> 1px on any side)
-            if t_x1 > 1 or t_y1 > 1 or (w - t_x2) > 1 or (h - t_y2) > 1:
+            if t_x1 > 0 or t_y1 > 0 or t_x2 < w or t_y2 < h:
                 trimmed = img.crop((t_x1, t_y1, t_x2, t_y2))
                 return trimmed, (t_x1, t_y1, t_x2, t_y2), True
 
