@@ -24,11 +24,17 @@ DB_PATHS = [
 CACHE_DIRS = [
     os.path.join(REPO_ROOT, "data", "scraped_html"),
     os.path.join(REPO_ROOT, "data", "image_cache"),
+    os.path.join(REPO_ROOT, "data", "local_media"),
+    os.path.join(REPO_ROOT, "data", "logs"),
     os.path.join(REPO_ROOT, "data", "media"),
+    os.path.join(REPO_ROOT, "data", "temp"),
     os.path.join(REPO_ROOT, "data", "training_data"),
     os.path.join(PROJECT_ROOT, "data", "scraped_html"),
     os.path.join(PROJECT_ROOT, "data", "image_cache"),
+    os.path.join(PROJECT_ROOT, "data", "local_media"),
+    os.path.join(PROJECT_ROOT, "data", "logs"),
     os.path.join(PROJECT_ROOT, "data", "media"),
+    os.path.join(PROJECT_ROOT, "data", "temp"),
     os.path.join(PROJECT_ROOT, "data", "training_data"),
 ]
 
