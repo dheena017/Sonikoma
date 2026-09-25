@@ -27,8 +27,8 @@ class GeminiAnalysisModel(BaseModel):
     is_scene_transition: bool = Field(default=False, description="True if this panel begins a new location or time-jump scene")
     is_internal_thought: bool = Field(default=False, description="True if the text bubble is an internal thought cloud")
     sfx: str = Field(default="[Atmosphere]", description="Bracketed sound effect text")
-    duration: float = Field(default=4.0, description="Suggested scene duration in seconds")
-    motion_type: str = Field(default="zoom_in", description="Camera movement motion tag")
+    duration: Optional[float] = Field(default=None, description="Suggested scene duration in seconds")
+    motion_type: Optional[str] = Field(default=None, description="Camera movement motion tag")
     visual_description: str = Field(default="", description="Visual description of the scene composition for camera animation (not for voiceover audio)")
 
 
@@ -257,7 +257,7 @@ class BatchPanelItemAnalysisModel(BaseModel):
     is_internal_thought: bool = Field(default=False, description="True if the text bubble is an internal thought cloud")
     sfx: str = Field(default="[Atmosphere]", description="Bracketed sound effect text")
     duration: float = Field(default=4.0, description="Suggested scene duration in seconds")
-    motion_type: str = Field(default="zoom_in", description="Camera movement motion tag: 'pan_left', 'pan_right', 'pan_up', 'pan_down', 'zoom_in', 'zoom_out', 'static'")
+    motion_type: Optional[str] = Field(default=None, description="Camera movement motion tag: 'pan_left', 'pan_right', 'pan_up', 'pan_down', 'zoom_in', 'zoom_out', 'static'")
     visual_description: str = Field(default="", description="Visual description of the scene composition for camera animation")
 
 

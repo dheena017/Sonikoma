@@ -53,7 +53,7 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
         const imgUrl = panel.image_url || (panel as any).imageUrl || "";
         const displayUrl = getProxiedImageUrl(imgUrl);
         const currentMotion = panel.motion_type || (panel as any).camera_motion || "Slow Zoom In";
-        const duration = panel.duration || 3.5;
+        const duration = panel.duration || 0;
 
         return (
           <div

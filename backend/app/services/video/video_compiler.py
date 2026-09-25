@@ -121,9 +121,9 @@ async def compile_video_from_panels(
             logger.warning(f"Panel {idx + 1} is missing an image_url. Skipping.")
             continue
 
-        suggested_duration = float(panel.get("duration", 4.5))
+        suggested_duration = float(panel.get("duration") or 0)
         if suggested_duration <= 0:
-            suggested_duration = 4.5
+            suggested_duration = 0
 
         # Determine audio prioritization: default is Narratives ON, Dialogue OFF
         narrative_preferred = enable_narrative_audio is not False

@@ -190,7 +190,7 @@ def validate_analysis(raw: Dict[str, Any]) -> Dict[str, Any]:
         "is_internal_thought": is_internal_thought,
         "sfx": sfx.strip()[:50] if isinstance(sfx, str) and sfx.strip() else "",
         "duration": final_duration,
-        "motion_type": motion if motion in VALID_MOTIONS else "zoom_in",
+        "motion_type": motion if motion in VALID_MOTIONS else "",
         "visual_description": vis.strip()[:400] if isinstance(vis, str) and vis.strip() else "",
         "narrative": narrative_val,
         "narrativeText": narrative_val,
@@ -520,8 +520,8 @@ async def facade_analyze_image(
         analysis = validate_analysis({
             "speech_text": ocr_text,
             "visual_description": "Comic panel scene (vision unavailable).",
-            "motion_type": "zoom_in",
-            "duration": 3.5,
+            "motion_type": "",
+            "duration": None,
             "sfx": "",
             "narrative": "The scene unfolds as the characters confront the situation before them with quiet tension.",
             "scene_context": memory_tracker.current_scene or ""

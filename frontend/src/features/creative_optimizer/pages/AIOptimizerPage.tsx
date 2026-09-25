@@ -236,13 +236,13 @@ const AIOptimizerPage = React.memo(
                       {
                         id: 1,
                         prompt: "Dramatic cosmic rift tearing open across the sky",
-                        duration: 3.5,
+                        duration: 0,
                         speech_text: "The seal has broken. Prepare for the final convergence.",
                         visual_description:
                           "Dramatic cosmic rift tearing open across the sky.",
                         image_url: "",
                         sfx: "Rift Crack",
-                        motion_type: "zoom_in",
+                        motion_type: "",
                       },
                       {
                         id: 2,

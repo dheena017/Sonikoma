@@ -224,6 +224,19 @@ export function useAppLogic() {
 
           state.setProjectId(targetProjectId);
 
+          const initialPanels = finalImages.map((imgUrl, idx) => ({
+            id: idx + 1,
+            panel_index: idx,
+            image_url: imgUrl,
+            original_url: imgUrl,
+            prompt: `Scene ${idx + 1}`,
+            speech_text: "",
+            narrative: "",
+            sfx: "",
+            duration: 0,
+            motion_type: "",
+          }));
+
           useProjectStore.getState().setActiveProject({
             project: {
               project_id: targetProjectId,
@@ -234,7 +247,7 @@ export function useAppLogic() {
               synopsis,
               genre,
             },
-            panels: [],
+            panels: initialPanels as any,
             scrapedImages: finalImages,
           });
 

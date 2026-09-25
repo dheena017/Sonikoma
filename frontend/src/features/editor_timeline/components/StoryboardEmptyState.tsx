@@ -1,12 +1,16 @@
 import React from "react";
-import { Layers, Sparkles } from "lucide-react";
+import { Layers, Sparkles, Plus } from "lucide-react";
 
 interface StoryboardEmptyStateProps {
   hasScrapedImages: boolean;
+  onAddAllToStoryboard?: () => void;
+  scrapedCount?: number;
 }
 
 export default function StoryboardEmptyState({
   hasScrapedImages,
+  onAddAllToStoryboard,
+  scrapedCount,
 }: StoryboardEmptyStateProps) {
   return (
     <div
@@ -30,10 +34,21 @@ export default function StoryboardEmptyState({
           </h3>
           <p className="text-[11px] sm:text-xs text-neutral-400 font-mono leading-relaxed">
             {hasScrapedImages
-              ? "Select panels below and click '+ Add to Storyboard' or 'Insert Selected' to build your timeline."
+              ? "Your imported comic assets are ready below. Click below to add all frames to the timeline."
               : "Enter a Webtoon URL above or import images to generate storyboard panel cuts."}
           </p>
         </div>
+
+        {hasScrapedImages && onAddAllToStoryboard && (
+          <button
+            type="button"
+            onClick={onAddAllToStoryboard}
+            className="mt-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-semibold flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] cursor-pointer active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add All Assets to Storyboard {scrapedCount ? `(${scrapedCount} Frames)` : ""}</span>
+          </button>
+        )}
       </div>
     </div>
   );

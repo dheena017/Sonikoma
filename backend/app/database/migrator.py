@@ -155,6 +155,84 @@ def init_postgres(conn) -> None:
             )
             conn.commit()
 
+        # Columns used by OAuth and project token accounting.
+        for table_name, column_name, column_definition in (
+            ("users", "google_access_token", "TEXT"),
+            ("chapters", "total_tokens_used", "INTEGER NOT NULL DEFAULT 0"),
+        ):
+            try:
+                row_column = conn.execute(
+                    "SELECT EXISTS ("
+                    "  SELECT FROM information_schema.columns"
+                    "  WHERE table_schema = 'public'"
+                    "    AND table_name = ?"
+                    "    AND column_name = ?"
+                    ") as exists",
+                    (table_name, column_name),
+                ).fetchone()
+                if not row_column or not row_column.get("exists"):
+                    logger.info(
+                        "[Database] Migration: adding '%s' column to '%s' table...",
+                        column_name,
+                        table_name,
+                    )
+                    conn.execute(
+                        f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}"
+                    )
+                    conn.commit()
+            except Exception:
+                pass
+
+        # YouTube OAuth and channel tables for existing PostgreSQL databases.
+        try:
+            conn.executescript("""
+            CREATE TABLE IF NOT EXISTS youtube_oauth_tokens (
+              user_id                    TEXT PRIMARY KEY,
+              access_token               TEXT NOT NULL,
+              refresh_token              TEXT,
+              token_uri                  TEXT NOT NULL DEFAULT 'https://oauth2.googleapis.com/token',
+              client_id                  TEXT,
+              client_secret              TEXT,
+              scopes                     TEXT,
+              google_email               TEXT,
+              selected_channel_id        TEXT,
+              selected_channel_title     TEXT,
+              selected_channel_thumbnail TEXT,
+              selected_channel_handle    TEXT,
+              updated_at                 TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS user_youtube_channels (
+              channel_id       TEXT NOT NULL,
+              user_id          TEXT NOT NULL,
+              title            TEXT NOT NULL,
+              description      TEXT,
+              custom_url       TEXT,
+              thumbnail        TEXT,
+              subscriber_count TEXT,
+              view_count       TEXT,
+              video_count      TEXT,
+              channel_type     TEXT DEFAULT 'personal',
+              is_selected      INTEGER NOT NULL DEFAULT 0,
+              created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+              updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+              PRIMARY KEY (user_id, channel_id),
+              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS user_unlinked_youtube_channels (
+              user_id     TEXT NOT NULL,
+              channel_id  TEXT NOT NULL,
+              unlinked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+              PRIMARY KEY (user_id, channel_id),
+              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            );
+            CREATE INDEX IF NOT EXISTS idx_user_yt_channels_user
+              ON user_youtube_channels(user_id);
+            """)
+            conn.commit()
+        except Exception as exc:
+            logger.warning("[Database] PostgreSQL YouTube account migration failed: %s", exc)
+
         # narrative column on panels
         try:
             row_panel_col = conn.execute(

@@ -54,7 +54,7 @@ def get_programmatic_panels(title: str, genre: str, episode: str, img_urls: List
             "original_image_url": img_urls[i],
             "speech_text": text,
             "sfx": sfx,
-            "duration": 4.5,
+            "duration": None,
             "motion_type": motion,
             "visual_description": f"Recap scene for {title} showing {genre} themed illustration panel."
         })
@@ -116,11 +116,11 @@ async def generate_dynamic_panels(
             if parsed and isinstance(parsed.get('panels'), list) and len(parsed['panels']) > 0:
                 result = []
                 for idx, p in enumerate(parsed['panels'][:active_slices_count]):
-                    duration_val = p.get("duration", 4.5)
+                    duration_val = p.get("duration")
                     try:
-                        duration_val = float(duration_val)
+                        duration_val = float(duration_val) if duration_val is not None else None
                     except (ValueError, TypeError):
-                        duration_val = 4.5
+                        duration_val = None
 
                     result.append({
                         "id": idx + 1,
@@ -129,7 +129,7 @@ async def generate_dynamic_panels(
                         "speech_text": p.get("speech_text") or f"Scene {idx + 1} of {title}",
                         "sfx": p.get("sfx") or "[Action Sounds]",
                         "duration": duration_val,
-                        "motion_type": p.get("motion_type") or "zoom_in",
+                        "motion_type": p.get("motion_type") or "",
                         "visual_description": p.get("visual_description") or f"Recap scene for {title} showing {genre} themed illustration panel."
                     })
                 logger.info(f"[Storyboard AI] Storyboard narrative successfully generated for {len(result)} slices using {target_model}.")

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   avatar_url      TEXT,
   full_name       TEXT,
   google_id       TEXT,
+  google_access_token TEXT,
   creator_role    TEXT    NOT NULL DEFAULT 'creator',
   bio             TEXT    NOT NULL DEFAULT '',
   newsletter      INTEGER NOT NULL DEFAULT 1,
@@ -83,8 +84,8 @@ CREATE TABLE IF NOT EXISTS panels (
   original_url     TEXT,
   speech_text      TEXT    NOT NULL DEFAULT '',
   sfx              TEXT    NOT NULL DEFAULT '',
-  duration         REAL    NOT NULL DEFAULT 4.5,
-  motion_type      TEXT    NOT NULL DEFAULT 'zoom_in',
+  duration         REAL,
+  motion_type      TEXT,
   visual_description TEXT,
   narrative        TEXT,
   brightness       REAL,
@@ -354,4 +355,53 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id);
+
+-- 22. YouTube OAuth Tokens
+CREATE TABLE IF NOT EXISTS youtube_oauth_tokens (
+  user_id                    TEXT PRIMARY KEY,
+  access_token               TEXT NOT NULL,
+  refresh_token              TEXT,
+  token_uri                  TEXT NOT NULL DEFAULT 'https://oauth2.googleapis.com/token',
+  client_id                  TEXT,
+  client_secret              TEXT,
+  scopes                     TEXT,
+  google_email               TEXT,
+  selected_channel_id        TEXT,
+  selected_channel_title     TEXT,
+  selected_channel_thumbnail TEXT,
+  selected_channel_handle    TEXT,
+  updated_at                 TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 23. Connected YouTube Channels
+CREATE TABLE IF NOT EXISTS user_youtube_channels (
+  channel_id       TEXT NOT NULL,
+  user_id          TEXT NOT NULL,
+  title            TEXT NOT NULL,
+  description      TEXT,
+  custom_url       TEXT,
+  thumbnail        TEXT,
+  subscriber_count TEXT,
+  view_count       TEXT,
+  video_count      TEXT,
+  channel_type     TEXT DEFAULT 'personal',
+  is_selected      INTEGER NOT NULL DEFAULT 0,
+  created_at       TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at       TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, channel_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 24. User-unlinked YouTube Channels
+CREATE TABLE IF NOT EXISTS user_unlinked_youtube_channels (
+  user_id     TEXT NOT NULL,
+  channel_id  TEXT NOT NULL,
+  unlinked_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, channel_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_yt_channels_user
+  ON user_youtube_channels(user_id);
 

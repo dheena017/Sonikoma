@@ -68,8 +68,8 @@ class Panel:
     sfx: str = ""
     visual_description: Optional[str] = None
 
-    duration: float = 4.5
-    motion_type: str = "zoom_in"
+    duration: Optional[float] = None
+    motion_type: Optional[str] = None
 
     brightness: Optional[float] = None
     contrast: Optional[float] = None
@@ -112,8 +112,8 @@ class Panel:
             speech_text=d.get("speech_text") or "",
             sfx=d.get("sfx") or "",
             visual_description=d.get("visual_description"),
-            duration=float(d.get("duration") or 4.5),
-            motion_type=d.get("motion_type") or "zoom_in",
+            duration=float(d["duration"]) if d.get("duration") is not None else None,
+            motion_type=d.get("motion_type") or None,
             brightness=d.get("brightness"),
             contrast=d.get("contrast"),
             saturation=d.get("saturation"),

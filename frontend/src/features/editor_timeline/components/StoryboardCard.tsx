@@ -81,7 +81,7 @@ const DialogueClipSlider: React.FC<DialogueClipSliderProps> = ({
   panel,
   setPanels,
 }) => {
-  const duration = panel.duration || 3.0;
+  const duration = panel.duration || 0;
 
   const dialogueMap = panel.syncMap?.dialogue_map || [];
   const currentSegment = dialogueMap[0] || {

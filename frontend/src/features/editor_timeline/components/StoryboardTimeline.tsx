@@ -12,6 +12,7 @@ import StoryboardHeader from "@/features/editor_timeline/components/StoryboardHe
 import StoryboardBulkOps from "@/features/editor_timeline/components/StoryboardBulkOps";
 import StoryboardCard from "@/features/editor_timeline/components/StoryboardCard";
 import StoryboardSidebar from "@/features/editor_timeline/components/StoryboardSidebar";
+import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import StoryboardChapterGroup from "@/features/editor_timeline/components/StoryboardChapterGroup";
 import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
 import StoryboardAnalysisBanner from "./StoryboardAnalysisBanner";
@@ -1048,6 +1049,25 @@ const StoryboardTimeline = React.memo(
     });
 
     if (panels.length === 0) {
+      const activeScraped = useProjectStore.getState().activeProjectData?.scrapedImages || [];
+      const handleAddAllScraped = () => {
+        if (activeScraped.length === 0) return;
+        const initialPanels = activeScraped.map((imgUrl: string, idx: number) => ({
+          id: idx + 1,
+          panel_index: idx,
+          image_url: imgUrl,
+          original_url: imgUrl,
+          prompt: `Scene ${idx + 1}`,
+          speech_text: "",
+          narrative: "",
+          sfx: "",
+          duration: 0,
+          motion_type: "",
+        }));
+        setPanels(initialPanels as any);
+        addNotification?.(`Added ${activeScraped.length} scene(s) to timeline!`, "success");
+      };
+
       return (
         <div
           id="panels_timeline_section"
@@ -1061,7 +1081,11 @@ const StoryboardTimeline = React.memo(
           {isLoading ? (
             <StoryboardLoadingState />
           ) : (
-            <StoryboardEmptyState hasScrapedImages={hasScrapedImages} />
+            <StoryboardEmptyState
+              hasScrapedImages={hasScrapedImages || activeScraped.length > 0}
+              scrapedCount={activeScraped.length}
+              onAddAllToStoryboard={activeScraped.length > 0 ? handleAddAllScraped : undefined}
+            />
           )}
         </div>
       );

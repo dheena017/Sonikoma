@@ -70,18 +70,18 @@ const PanelAssistantPage = React.memo(
           {
             id: 1,
             prompt: "Mystic runes glowing across the ancient temple chamber",
-            duration: 3.5,
+            duration: 0,
             speech_text: "The awakening of the ancient realm begins now.",
             visual_description:
               "Mystic runes glow across the temple chamber.",
             image_url: "",
             sfx: "Magic Hum",
-            motion_type: "zoom_in",
+            motion_type: "",
           },
           {
             id: 2,
             prompt: "Warriors raising shields against approaching shadows",
-            duration: 4.0,
+            duration: 0,
             speech_text: "We must protect the artifact at all costs!",
             visual_description:
               "Warriors raise their shields as shadowy beasts approach.",

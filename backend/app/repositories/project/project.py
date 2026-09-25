@@ -288,20 +288,29 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
 
 
 def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
-    """Get a single project by its chapter_slug."""
+    """Get a single project by its chapter_slug (supports both raw slug and 'chapter-' prefixed variant)."""
     conn = get_db_connection()
     try:
-        row = conn.execute("""
-            SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
-                   c.episode_number AS episode, c.status, c.panels_count, c.video_url,
-                   c.created_at, c.updated_at, s.user_id, s.id AS series_id,
-                   s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
-                   c.project_type
-            FROM chapters c
-            JOIN series s ON c.series_id = s.id
-            WHERE c.slug = ?
-        """, (chapter_slug,)).fetchone()
-        return _enrich_project_item(dict(row), conn) if row else None
+        slugs_to_check = [chapter_slug]
+        if chapter_slug.startswith("chapter-"):
+            slugs_to_check.append(chapter_slug[8:])
+        else:
+            slugs_to_check.append(f"chapter-{chapter_slug}")
+
+        for s in slugs_to_check:
+            row = conn.execute("""
+                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                       c.episode_number AS episode, c.status, c.panels_count, c.video_url,
+                       c.created_at, c.updated_at, s.user_id, s.id AS series_id,
+                       s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
+                       c.project_type
+                FROM chapters c
+                JOIN series s ON c.series_id = s.id
+                WHERE c.slug = ?
+            """, (s,)).fetchone()
+            if row:
+                return _enrich_project_item(dict(row), conn)
+        return None
     finally:
         conn.close()
 
@@ -468,8 +477,8 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                         unwrap_proxy_url(p.get('original_image_url') or p.get('original_url', None)),
                         speech_text,
                         p.get('sfx') or "",
-                        p.get('duration') if p.get('duration') is not None else 4.5,
-                        p.get('motion_type') or "zoom_in",
+                        p.get('duration'),
+                        p.get('motion_type') or "",
                         visual_description or None,
                         p.get('narrative') or None,
                         p.get('brightness'),

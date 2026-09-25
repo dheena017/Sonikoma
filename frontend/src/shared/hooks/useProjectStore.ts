@@ -551,8 +551,25 @@ export function parseHydratedProjectJson(
     return null;
   }
 
-  const panelsRaw: PanelItem[] = json.panels ?? raw.panels ?? [];
+  let panelsRaw: PanelItem[] = json.panels ?? raw.panels ?? [];
   const scrapedImagesRaw: string[] = json.scraped_images ?? json.scrapedImages ?? [];
+
+  // When opening an imported chapter with no panels generated yet,
+  // auto-synthesize storyboard panels from the scraped images so scenes display immediately
+  if (panelsRaw.length === 0 && scrapedImagesRaw.length > 0) {
+    panelsRaw = scrapedImagesRaw.map((imgUrl: string, idx: number) => ({
+      id: idx + 1,
+      panel_index: idx,
+      image_url: imgUrl,
+      original_url: imgUrl,
+      prompt: `Scene ${idx + 1}`,
+      speech_text: "",
+      narrative: "",
+      sfx: "",
+      duration: 0,
+      motion_type: "",
+    }));
+  }
 
   const { panelsCount, importedCount } = calculateAssetCounts(
     raw,
@@ -880,8 +897,8 @@ export const useProjectStore = create<ProjectStoreState>()(
                   speech_text: p.speech_text || p.dialogueText || "",
                   narrative: p.narrative || p.narrativeText || "",
                   sfx: p.sfx || "",
-                  duration: p.duration || 3.0,
-                  motion_type: p.motion_type || p.motionPreset || "zoom_in",
+                  duration: p.duration || 0,
+                  motion_type: p.motion_type || p.motionPreset || "",
                   visual_description: p.visual_description || p.visualDescription || "",
                   audio_url: p.audio_url || p.audioUrl || "",
                   narrative_audio_url: p.narrative_audio_url || p.narrativeAudioUrl || "",
@@ -936,8 +953,8 @@ export const useProjectStore = create<ProjectStoreState>()(
                   speech_text: p.speech_text || p.dialogueText || "",
                   narrative: p.narrative || p.narrativeText || "",
                   sfx: p.sfx || "",
-                  duration: p.duration || 3.0,
-                  motion_type: p.motion_type || p.motionPreset || "zoom_in",
+                  duration: p.duration || 0,
+                  motion_type: p.motion_type || p.motionPreset || "",
                   visual_description: p.visual_description || p.visualDescription || "",
                 }));
 
@@ -1499,7 +1516,7 @@ export const useProjectStore = create<ProjectStoreState>()(
       getTotalDuration: () => {
         const { activeProjectData } = get();
         if (!activeProjectData) return 0;
-        return activeProjectData.panels.reduce((sum, p) => sum + (p.duration || 3.0), 0);
+        return activeProjectData.panels.reduce((sum, p) => sum + (p.duration || 0), 0);
       },
 
       getTotalWordCount: () => {

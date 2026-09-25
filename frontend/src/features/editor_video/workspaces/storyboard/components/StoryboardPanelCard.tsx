@@ -52,8 +52,8 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
 
   const imgUrl = panel.image_url || (panel as any).imageUrl || (panel as any).url || "";
   const displayUrl = getProxiedImageUrl(imgUrl);
-  const duration = panel.duration || 3.5;
-  const cameraMotion = panel.motion_type || (panel as any).camera_motion || "Slow Zoom In";
+  const duration = panel.duration || 0;
+  const cameraMotion = panel.motion_type || (panel as any).camera_motion || "";
   const audioUrl =
     panel.audio_url ||
     panel.speech_audio_url ||

@@ -187,18 +187,18 @@ const VoiceStudioPage = React.memo(
           {
             id: 1,
             prompt: "Dark celestial monarch standing atop ancient ruins",
-            duration: 3.5,
+            duration: 0,
             speech_text: "The shadow monarch has awakened from his eternal slumber.",
             visual_description:
               "Dark celestial energy swirls around the armored sovereign standing atop the ruins.",
             image_url: "",
             sfx: "Dark Energy Rumble",
-            motion_type: "zoom_in",
+            motion_type: "",
           },
           {
             id: 2,
             prompt: "Hunter recoiling in awe as purple lightning strikes",
-            duration: 4.0,
+            duration: 0,
             speech_text: "Is this... the true power of the ancient monarchs?",
             visual_description:
               "The hunter recoils in awe as purple lightning illuminates the battlefield.",
@@ -209,7 +209,7 @@ const VoiceStudioPage = React.memo(
           {
             id: 3,
             prompt: "Close up of glowing crimson eyes charging energy",
-            duration: 3.0,
+            duration: 0,
             speech_text: "Prepare to perish in the void of darkness.",
             visual_description:
               "Close-up of glowing crimson eyes charging a destructive blast.",

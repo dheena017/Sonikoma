@@ -15,7 +15,7 @@ async def _render_panel_segment_ffmpeg(
     out_path: str,
     w: int = 640,
     h: int = 360,
-    motion_type: str = "zoom_in",
+    motion_type: str = "",
     fps: int = 24,
     layers: dict | None = None,
     sync_map: dict | None = None,

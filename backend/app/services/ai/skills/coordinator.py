@@ -33,8 +33,8 @@ class FallbackCoordinator:
             return {
                 "speech_text": "Cinematic panel capture.",
                 "sfx": "[Impact]",
-                "duration": 4.5,
-                "motion_type": "zoom_in",
+                "duration": None,
+                "motion_type": "",
                 "visual_description": "Static panel segment rendering."
             }
         elif skill_name == "translation":
