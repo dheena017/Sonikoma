@@ -18,6 +18,7 @@ import {
   ArrowLeft,
   Coins,
   Activity,
+  Brain,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { SonikomaLogo } from "@/shared/ui/branding";
@@ -106,6 +107,12 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           label: "Audit Logs",
           icon: Activity,
           path: "/admin/activity",
+        },
+        {
+          id: "training",
+          label: "AI Training",
+          icon: Brain,
+          path: "/admin/training",
         },
       ],
     },

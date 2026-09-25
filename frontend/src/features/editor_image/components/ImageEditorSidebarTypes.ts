@@ -3,7 +3,6 @@ import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
 export interface ImageEditorSidebarProps {
   activeTab: ImageTool;
   setActiveTab: (tab: ImageTool) => void;
-  handleSaveTrainingData: () => Promise<void>;
   slices: any[];
   setSlices: any;
   editingImageIdx: number;

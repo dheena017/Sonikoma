@@ -11,7 +11,6 @@ import {
   Scissors,
   Brush,
   Link2,
-  Database,
   ArrowLeft,
   ExternalLink,
 } from "lucide-react";
@@ -104,11 +103,6 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           id: "separate",
           label: "AI Layer Separation",
           icon: Layers,
-        },
-        {
-          id: "train",
-          label: "YOLO Fine-Tuner",
-          icon: Database,
         },
       ],
     },

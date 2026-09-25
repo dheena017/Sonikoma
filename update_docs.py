@@ -10,9 +10,6 @@ REPLACEMENTS = [
     ("/api/auth/register",          "/api/v1/auth/register"),
     ("/api/auth/login",             "/api/v1/auth/login"),
     ("/api/auth/forgot-password",   "/api/v1/auth/forgot-password"),
-    ("/api/auth/google/callback",   "/api/v1/auth/google/callback"),
-    ("/api/auth/google/login",      "/api/v1/auth/google/login"),
-    ("/api/auth/google",            "/api/v1/auth/google"),
     ("/api/auth/me",                "/api/v1/auth/me"),
     ("/api/auth/credits",           "/api/v1/auth/credits"),
     ("/api/auth/transactions",      "/api/v1/auth/transactions"),
@@ -74,8 +71,6 @@ REPLACEMENTS = [
     # Docs/redoc (legacy)
     ("/api/docs",                   "/api/v1/docs"),
     ("/api/redoc",                  "/api/v1/redoc"),
-    # Export
-    ("/api/export/youtube/oauth/callback", "/api/v1/export/youtube/oauth/callback"),
     # ML engines (py prefix → v1 prefix)
     ("/api/py/ffmpeg/",             "/api/v1/video/ffmpeg/"),
     ("/api/py/audio/",              "/api/v1/audio/"),

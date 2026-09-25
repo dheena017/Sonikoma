@@ -14,6 +14,7 @@ import {
   AdminUsageTab,
   AdminUsersTab,
   AdminCreditsTab,
+  AdminTrainingTab,
 } from "@/features/system_admin/components/Tabs";
 import AdminLayout from "@/features/system_admin/components/AdminLayout";
 import AdminDashboardPage from "@/features/system_admin/pages/AdminDashboardPage";
@@ -243,6 +244,11 @@ const AdminPage = React.memo(
         desc: "Direct command execution and server process diagnostics console",
         badge: "CLI Terminal",
       },
+      training: {
+        title: "AI Training & Data Flywheel",
+        desc: "Manage the YOLO fine-tuning pipeline, dataset gallery, and auto-trigger configuration for speech bubble detection",
+        badge: "ML Engine",
+      },
     };
 
     const currentTabInfo = tabMetadata[activeTab] || {
@@ -336,6 +342,13 @@ const AdminPage = React.memo(
         case "explorer":
           return (
             <AdminExplorerTab fetchWithInterceptor={fetchWithInterceptor} />
+          );
+        case "training":
+          return (
+            <AdminTrainingTab
+              fetchWithInterceptor={fetchWithInterceptor}
+              addNotification={addNotification}
+            />
           );
         default:
           return (

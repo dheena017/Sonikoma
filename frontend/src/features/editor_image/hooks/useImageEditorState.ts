@@ -9,8 +9,7 @@ export type ImageTool =
   | "crop"
   | "merge"
   | "draw"
-  | "separate"
-  | "train";
+  | "separate";
 
 interface PlayerSettings {
   isPlayerOpen: boolean;

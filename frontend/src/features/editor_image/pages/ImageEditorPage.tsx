@@ -519,7 +519,6 @@ const ImageEditorPage = React.memo(
                 detectedBoxes={editorProps.detectedBoxes}
                 handleClearDetectedBoxes={editorProps.handleClearDetectedBoxes}
                 handleExecuteSave={editorProps.handleExecuteSave}
-                handleSaveTrainingData={editorProps.handleSaveTrainingData}
                 activeTab={activeTool as any}
               />
             </div>

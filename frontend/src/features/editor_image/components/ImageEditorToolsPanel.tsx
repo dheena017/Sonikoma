@@ -5,14 +5,9 @@ import FreehandPanel from "@/features/editor_freehand_draw/components/FreehandPa
 import EnhancementsPanel from "@/features/editor_image_enhancements/components/EnhancementsPanel";
 import LayerSeparationPanel from "@/features/editor_layer_separation/components/LayerSeparationPanel";
 import HorizontalSplitter from "@/features/editor_horizontal_splitter";
-import YoloTrainingPanel from "./YoloTrainingPanel";
 import { ImageEditorSidebarProps } from "./ImageEditorSidebarTypes";
 
-function ImageEditorToolsPanel(
-  props: ImageEditorSidebarProps & {
-    handleSaveTrainingData: () => Promise<void>;
-  }
-) {
+function ImageEditorToolsPanel(props: ImageEditorSidebarProps) {
   const {
     activeTab,
     slices,
@@ -111,14 +106,6 @@ function ImageEditorToolsPanel(
           <LayerSeparationPanel
             activeStoryboardPanel={activeStoryboardPanel}
             setPanels={setPanels}
-            addNotification={addNotification}
-            fetchWithInterceptor={fetchWithInterceptor}
-          />
-        )}
-
-        {activeTab === "train" && (
-          <YoloTrainingPanel
-            activeTab={activeTab}
             addNotification={addNotification}
             fetchWithInterceptor={fetchWithInterceptor}
           />

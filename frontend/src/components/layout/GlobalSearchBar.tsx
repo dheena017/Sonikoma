@@ -67,7 +67,12 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   // Load available AI models and real projects on mount
   useEffect(() => {
     loadCatalogFromBackend();
-    fetchRealProjects();
+    const token =
+      localStorage.getItem("sonikoma_token") ||
+      sessionStorage.getItem("sonikoma_token");
+    if (token) {
+      fetchRealProjects();
+    }
   }, [loadCatalogFromBackend]);
 
   const fetchRealProjects = async () => {

@@ -17,6 +17,7 @@ import {
   ExternalLink,
   Coins,
   Activity,
+  Brain,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 
@@ -73,6 +74,12 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           path: "/admin/activity",
         },
         { id: "usage", label: "Usage", icon: Cpu, path: "/admin/usage" },
+        {
+          id: "training",
+          label: "AI Training",
+          icon: Brain,
+          path: "/admin/training",
+        },
       ],
     },
     {

@@ -8,5 +8,6 @@ export * from "./AdminHealthTab";
 export * from "./AdminJobsTab";
 export * from "./AdminScrapersTab";
 export * from "./AdminSettingsTab";
+export * from "./AdminTrainingTab";
 export * from "./AdminUsageTab";
 export * from "./AdminUsersTab";

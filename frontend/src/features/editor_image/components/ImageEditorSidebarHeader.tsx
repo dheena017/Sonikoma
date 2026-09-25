@@ -7,7 +7,6 @@ import {
   Crop,
   Link2,
   Layers,
-  Database,
   SlidersHorizontal,
 } from "lucide-react";
 import { ImageTool } from "@/features/editor_image/hooks/useImageEditorState";
@@ -41,12 +40,6 @@ export const ImageEditorSidebarHeader: React.FC<Props> = ({ activeTab }) => {
         return { title: "Merge Panels", icon: Link2, badge: "STITCH" };
       case "separate":
         return { title: "Layer Separation", icon: Layers, badge: "AI VISION" };
-      case "train":
-        return {
-          title: "YOLO AI Fine-Tuner",
-          icon: Database,
-          badge: "NEURAL MODEL",
-        };
       default:
         return {
           title: "Studio Controls",
