@@ -3,10 +3,7 @@
 // Centralises all Timeline state and derived handlers.
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import {
-  ContextMenuState,
-  AISuggestion,
-} from "./types";
+import { ContextMenuState, AISuggestion } from "./types";
 import { useKeyframes, KeyframesState } from "./useKeyframes";
 import { editorEventBus } from "../events/editorEventBus";
 import { useAppShortcuts } from "@/shared/hooks/useAppShortcuts";
@@ -72,11 +69,11 @@ export interface TimelineState {
   handleSplit: () => void;
 
   // Track-specific workspace launchers (replaces single openMediaPicker)
-  openPanelsPicker: () => void;    // V1 → storyboard
-  openMusicPicker: () => void;     // A1 → audio
-  openSfxPicker: () => void;       // A2 → audio
-  openVoicePicker: () => void;     // A3 → audio
-  openFxPicker: () => void;        // V2 → elements
+  openPanelsPicker: () => void; // V1 → storyboard
+  openMusicPicker: () => void; // A1 → audio
+  openSfxPicker: () => void; // A2 → audio
+  openVoicePicker: () => void; // A3 → audio
+  openFxPicker: () => void; // V2 → elements
   openSubtitlesPicker: () => void; // V3 → text
   // Legacy alias kept for AddTrackRow
   openMediaPicker: () => void;
@@ -142,16 +139,10 @@ export function useTimelineState(
     () => setZoomLevel((z) => Math.max(10, z - 5)),
     []
   );
-  const handleZoomReset = useCallback(
-    () => setZoomLevel(30),
-    []
-  );
+  const handleZoomReset = useCallback(() => setZoomLevel(30), []);
 
   // ── Track controls ──────────────────────────────────────────────────────────
-  const toggleSnap = useCallback(
-    () => setSnapEnabled((p) => !p),
-    []
-  );
+  const toggleSnap = useCallback(() => setSnapEnabled((p) => !p), []);
   const toggleMute = useCallback(
     (id: string) => setMutedTracks((p) => ({ ...p, [id]: !p[id] })),
     []
@@ -276,8 +267,7 @@ export function useTimelineState(
 
   const handleRemoveDuration = useCallback(() => {
     const targetClip = contextMenu?.clipKey || selectedClip;
-    if (targetClip)
-      setClipDurations((p) => ({ ...p, [targetClip]: 0 }));
+    if (targetClip) setClipDurations((p) => ({ ...p, [targetClip]: 0 }));
     closeContextMenu();
   }, [contextMenu, selectedClip, closeContextMenu]);
 
@@ -316,14 +306,35 @@ export function useTimelineState(
     editorEventBus.publish("OPEN_WORKSPACE", { workspaceId });
   }, []);
 
-  const openPanelsPicker   = useCallback(() => openWorkspace("storyboard"), [openWorkspace]);
-  const openMusicPicker    = useCallback(() => openWorkspace("audio"), [openWorkspace]);
-  const openSfxPicker      = useCallback(() => openWorkspace("audio"), [openWorkspace]);
-  const openVoicePicker    = useCallback(() => openWorkspace("audio"), [openWorkspace]);
-  const openFxPicker       = useCallback(() => openWorkspace("elements"), [openWorkspace]);
-  const openSubtitlesPicker = useCallback(() => openWorkspace("text"), [openWorkspace]);
+  const openPanelsPicker = useCallback(
+    () => openWorkspace("storyboard"),
+    [openWorkspace]
+  );
+  const openMusicPicker = useCallback(
+    () => openWorkspace("audio"),
+    [openWorkspace]
+  );
+  const openSfxPicker = useCallback(
+    () => openWorkspace("audio"),
+    [openWorkspace]
+  );
+  const openVoicePicker = useCallback(
+    () => openWorkspace("audio"),
+    [openWorkspace]
+  );
+  const openFxPicker = useCallback(
+    () => openWorkspace("elements"),
+    [openWorkspace]
+  );
+  const openSubtitlesPicker = useCallback(
+    () => openWorkspace("text"),
+    [openWorkspace]
+  );
   // Legacy alias for AddTrackRow
-  const openMediaPicker    = useCallback(() => openWorkspace("imported_assets"), [openWorkspace]);
+  const openMediaPicker = useCallback(
+    () => openWorkspace("imported_assets"),
+    [openWorkspace]
+  );
 
   // ── AI Suggestions ──────────────────────────────────────────────────────────
   const acceptAISuggestion = useCallback(
@@ -373,7 +384,10 @@ export function useTimelineState(
       }
       if (
         matchesShortcut(e, shortcuts.timeline_zoom_reset) ||
-        (!shortcuts.timeline_zoom_reset && e.key === "0" && !e.ctrlKey && !e.metaKey)
+        (!shortcuts.timeline_zoom_reset &&
+          e.key === "0" &&
+          !e.ctrlKey &&
+          !e.metaKey)
       ) {
         e.preventDefault();
         handleZoomReset();
@@ -381,7 +395,10 @@ export function useTimelineState(
       }
       if (
         matchesShortcut(e, shortcuts.timeline_snap) ||
-        (!shortcuts.timeline_snap && (e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey)
+        (!shortcuts.timeline_snap &&
+          (e.key === "n" || e.key === "N") &&
+          !e.ctrlKey &&
+          !e.metaKey)
       ) {
         toggleSnap();
         return;
@@ -391,7 +408,10 @@ export function useTimelineState(
       if (!selectedClip) return;
       if (
         matchesShortcut(e, shortcuts.timeline_split) ||
-        (!shortcuts.timeline_split && (e.key === "s" || e.key === "S") && !e.ctrlKey && !e.metaKey)
+        (!shortcuts.timeline_split &&
+          (e.key === "s" || e.key === "S") &&
+          !e.ctrlKey &&
+          !e.metaKey)
       ) {
         e.preventDefault();
         handleSplit();
@@ -399,7 +419,8 @@ export function useTimelineState(
       }
       if (
         matchesShortcut(e, shortcuts.timeline_delete) ||
-        (!shortcuts.timeline_delete && (e.key === "Delete" || e.key === "Backspace"))
+        (!shortcuts.timeline_delete &&
+          (e.key === "Delete" || e.key === "Backspace"))
       ) {
         e.preventDefault();
         handleRemoveDuration();
@@ -407,7 +428,9 @@ export function useTimelineState(
       }
       if (
         matchesShortcut(e, shortcuts.timeline_copy) ||
-        (!shortcuts.timeline_copy && (e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C"))
+        (!shortcuts.timeline_copy &&
+          (e.ctrlKey || e.metaKey) &&
+          (e.key === "c" || e.key === "C"))
       ) {
         e.preventDefault();
         handleCopy();
@@ -415,7 +438,9 @@ export function useTimelineState(
       }
       if (
         matchesShortcut(e, shortcuts.timeline_paste) ||
-        (!shortcuts.timeline_paste && (e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V"))
+        (!shortcuts.timeline_paste &&
+          (e.ctrlKey || e.metaKey) &&
+          (e.key === "v" || e.key === "V"))
       ) {
         e.preventDefault();
         handlePaste();
@@ -423,7 +448,9 @@ export function useTimelineState(
       }
       if (
         matchesShortcut(e, shortcuts.timeline_duplicate) ||
-        (!shortcuts.timeline_duplicate && (e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D"))
+        (!shortcuts.timeline_duplicate &&
+          (e.ctrlKey || e.metaKey) &&
+          (e.key === "d" || e.key === "D"))
       ) {
         e.preventDefault();
         handleDuplicate();
@@ -431,14 +458,20 @@ export function useTimelineState(
       }
       if (
         matchesShortcut(e, shortcuts.timeline_keyframe) ||
-        (!shortcuts.timeline_keyframe && (e.key === "k" || e.key === "K") && !e.ctrlKey && !e.metaKey)
+        (!shortcuts.timeline_keyframe &&
+          (e.key === "k" || e.key === "K") &&
+          !e.ctrlKey &&
+          !e.metaKey)
       ) {
         keyframesState.addKeyframe(selectedClip, 1.0, "scale", 1.0);
         return;
       }
       if (
         matchesShortcut(e, shortcuts.timeline_mute) ||
-        (!shortcuts.timeline_mute && (e.key === "m" || e.key === "M") && !e.ctrlKey && !e.metaKey)
+        (!shortcuts.timeline_mute &&
+          (e.key === "m" || e.key === "M") &&
+          !e.ctrlKey &&
+          !e.metaKey)
       ) {
         const track = selectedClip.split("-")[0].toUpperCase();
         if (track) toggleMute(track);
@@ -446,7 +479,10 @@ export function useTimelineState(
       }
       if (
         matchesShortcut(e, shortcuts.timeline_lock) ||
-        (!shortcuts.timeline_lock && (e.key === "l" || e.key === "L") && !e.ctrlKey && !e.metaKey)
+        (!shortcuts.timeline_lock &&
+          (e.key === "l" || e.key === "L") &&
+          !e.ctrlKey &&
+          !e.metaKey)
       ) {
         const track = selectedClip.split("-")[0].toUpperCase();
         if (track) toggleLock(track);

@@ -67,7 +67,10 @@ function logBackend(level, file, message, status = "200") {
   const tag = `${C.cyan}[TYPECHECK]${C.reset}`;
   const lvl = `${C.blue}[${level.padEnd(7, " ")}]${C.reset}`;
   const src = `${C.white}[${file.padEnd(14, " ")}]${C.reset}`;
-  const st = status === "200" ? `${C.green}${status}${C.reset}` : `${C.red}${status}${C.reset}`;
+  const st =
+    status === "200"
+      ? `${C.green}${status}${C.reset}`
+      : `${C.red}${status}${C.reset}`;
   console.log(`${ts} ${tag} ${lvl} ${src} ${message} ${st}`);
 }
 
@@ -75,26 +78,67 @@ function logVite(method, endpoint, status, durationMs) {
   const ts = `${C.gray}${getTimestamp12()}${C.reset}`;
   const tag = `${C.magenta}[Vite API]${C.reset}`;
   const meth = `${C.white}${method}${C.reset}`;
-  const st = status === 200 ? `${C.green}${status}${C.reset}` : `${C.red}${status}${C.reset}`;
+  const st =
+    status === 200
+      ? `${C.green}${status}${C.reset}`
+      : `${C.red}${status}${C.reset}`;
   const dur = `${C.green}(${durationMs}ms)${C.reset}`;
   console.log(`${ts} ${tag} ${meth} ${endpoint} ${st} ${dur}`);
 }
 
 // Initial boot logs matching user's exact format
-logBackend("INFO", "scanner.ts", `Initialized TypeScript AST engine • ${totalTsFiles} files`, "200");
+logBackend(
+  "INFO",
+  "scanner.ts",
+  `Initialized TypeScript AST engine • ${totalTsFiles} files`,
+  "200"
+);
 logVite("GET", "/api/v1/types/schema", 200, 142);
-logBackend("INFO", "resolver.ts", `Indexed ${topModules.length} subsystems (editor_video, timeline, studio...)`, "200");
+logBackend(
+  "INFO",
+  "resolver.ts",
+  `Indexed ${topModules.length} subsystems (editor_video, timeline, studio...)`,
+  "200"
+);
 logVite("GET", "/api/v1/editor_video/types", 200, 218);
 
 // Phase checkpoints during compilation
 const checkPhases = [
-  { file: "viewport.tsx", route: "/api/v1/editor_video/viewport", name: "Validating editor_video & viewport components" },
-  { file: "timeline.tsx", route: "/api/v1/editor_timeline/tracks", name: "Validating multi-track timeline & keyframes" },
-  { file: "monitor.tsx", route: "/api/v1/video/playback_monitor", name: "Validating video playback & canvas overlays" },
-  { file: "hooks_store.ts", route: "/api/v1/shared/useProjectStore", name: "Validating reactive state, stores & hooks" },
-  { file: "pipeline.ts", route: "/api/v1/ai/routing/pipeline", name: "Validating AI routing, models & API contracts" },
-  { file: "router.tsx", route: "/api/v1/app/routes/layout", name: "Validating MainLayout, AppRouter & routes" },
-  { file: "fabric_3d.ts", route: "/api/v1/canvas/fabric_three", name: "Validating Three.js and Fabric.js type interfaces" },
+  {
+    file: "viewport.tsx",
+    route: "/api/v1/editor_video/viewport",
+    name: "Validating editor_video & viewport components",
+  },
+  {
+    file: "timeline.tsx",
+    route: "/api/v1/editor_timeline/tracks",
+    name: "Validating multi-track timeline & keyframes",
+  },
+  {
+    file: "monitor.tsx",
+    route: "/api/v1/video/playback_monitor",
+    name: "Validating video playback & canvas overlays",
+  },
+  {
+    file: "hooks_store.ts",
+    route: "/api/v1/shared/useProjectStore",
+    name: "Validating reactive state, stores & hooks",
+  },
+  {
+    file: "pipeline.ts",
+    route: "/api/v1/ai/routing/pipeline",
+    name: "Validating AI routing, models & API contracts",
+  },
+  {
+    file: "router.tsx",
+    route: "/api/v1/app/routes/layout",
+    name: "Validating MainLayout, AppRouter & routes",
+  },
+  {
+    file: "fabric_3d.ts",
+    route: "/api/v1/canvas/fabric_three",
+    name: "Validating Three.js and Fabric.js type interfaces",
+  },
 ];
 
 let phaseIdx = 0;
@@ -108,7 +152,12 @@ const interval = setInterval(() => {
   } else {
     // Keep a subtle heartbeat so terminal is never silent
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    logBackend("HEARTBEAT", "type_graph.ts", `Resolving deep cross-module references (${elapsed}s)...`, "200");
+    logBackend(
+      "HEARTBEAT",
+      "type_graph.ts",
+      `Resolving deep cross-module references (${elapsed}s)...`,
+      "200"
+    );
   }
 }, 1200);
 
@@ -148,8 +197,18 @@ child.on("close", (code) => {
   }
 
   if (code === 0) {
-    logBackend("SUCCESS", "h11_impl.py", `127.0.0.1 - "GET /api/v1/typecheck HTTP/1.1"`, "200");
-    logVite("GET", `/api/v1/typecheck/all (${totalTsFiles} files)`, 200, totalMs);
+    logBackend(
+      "SUCCESS",
+      "h11_impl.py",
+      `127.0.0.1 - "GET /api/v1/typecheck HTTP/1.1"`,
+      "200"
+    );
+    logVite(
+      "GET",
+      `/api/v1/typecheck/all (${totalTsFiles} files)`,
+      200,
+      totalMs
+    );
     console.log(
       `\n${C.green}${C.bold}✓ [SUCCESS] 200 OK • All ${totalTsFiles} TypeScript files passed type verification with 0 errors! (${totalSec}s)${C.reset}\n`
     );

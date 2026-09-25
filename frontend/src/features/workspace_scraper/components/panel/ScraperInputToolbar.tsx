@@ -11,7 +11,10 @@ import {
   Trash2,
 } from "lucide-react";
 import { FavoritesManager } from "@/features/workspace_scraper/chapter-scraper/utils/FavoritesManager";
-import { separateComicUrl, type SeparateUrlResult } from "@/api/endpoints/scraper";
+import {
+  separateComicUrl,
+  type SeparateUrlResult,
+} from "@/api/endpoints/scraper";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 export interface ScraperInputToolbarProps {
@@ -41,22 +44,45 @@ function formatSeriesDisplay(url: string, rawTitle?: string) {
     const domain = parsed.hostname.replace(/^www\./, "");
     const segments = parsed.pathname.split("/").filter(Boolean);
     const contentSegments = segments.filter(
-      (s) => !["en", "viewer", "read", "manga", "series", "comic", "chapter"].includes(s.toLowerCase())
+      (s) =>
+        ![
+          "en",
+          "viewer",
+          "read",
+          "manga",
+          "series",
+          "comic",
+          "chapter",
+        ].includes(s.toLowerCase())
     );
     let title = "";
     let chapter = "";
     for (const seg of contentSegments) {
       if (/^(ep|ch|chapter|episode)[-_]?\d+/i.test(seg)) {
-        chapter = seg.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-      } else if (!title && seg.length > 2 && !/^(genre|romance|action|fantasy|drama|comedy|horror|slice-of-life)$/i.test(seg)) {
-        title = seg.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        chapter = seg
+          .replace(/[-_]+/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+      } else if (
+        !title &&
+        seg.length > 2 &&
+        !/^(genre|romance|action|fantasy|drama|comedy|horror|slice-of-life)$/i.test(
+          seg
+        )
+      ) {
+        title = seg
+          .replace(/[-_]+/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase());
       }
     }
     if (!title && contentSegments.length > 0) {
-      title = contentSegments[0].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      title = contentSegments[0]
+        .replace(/[-_]+/g, " ")
+        .replace(/\b\w/g, (c) => c.toUpperCase());
     }
     const displayTitle = title || domain;
-    const displaySubtitle = [domain, chapter, "Saved Series"].filter(Boolean).join(" • ");
+    const displaySubtitle = [domain, chapter, "Saved Series"]
+      .filter(Boolean)
+      .join(" • ");
     return { title: displayTitle, subtitle: displaySubtitle, domain };
   } catch {
     return { title: url, subtitle: "Saved Series", domain: "" };
@@ -86,7 +112,8 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     series: any;
   } | null>(null);
   const [suggestions, setSuggestions] = React.useState<any[]>([]);
-  const [separatedData, setSeparatedData] = React.useState<SeparateUrlResult | null>(null);
+  const [separatedData, setSeparatedData] =
+    React.useState<SeparateUrlResult | null>(null);
   const [isSeparating, setIsSeparating] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -104,7 +131,8 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     const timer = setTimeout(async () => {
       try {
         setIsSeparating(true);
-        const fetchClient = fetchWithInterceptor || (window.fetch.bind(window) as any);
+        const fetchClient =
+          fetchWithInterceptor || (window.fetch.bind(window) as any);
         const result = await separateComicUrl(fetchClient, trimmed);
         if (isMounted && result && result.success) {
           setSeparatedData(result);
@@ -133,7 +161,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         }
       } catch (err) {
         if (isMounted) {
-          console.debug("[ScraperInputToolbar] URL separation background fetch:", err);
+          console.debug(
+            "[ScraperInputToolbar] URL separation background fetch:",
+            err
+          );
         }
       } finally {
         if (isMounted) setIsSeparating(false);
@@ -144,7 +175,14 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [targetUrl, fetchWithInterceptor, setSeriesTitle, setChapterNumber, setChapterTitle, onSeparatedDataChange]);
+  }, [
+    targetUrl,
+    fetchWithInterceptor,
+    setSeriesTitle,
+    setChapterNumber,
+    setChapterTitle,
+    onSeparatedDataChange,
+  ]);
 
   React.useEffect(() => {
     try {
@@ -208,9 +246,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
   const handleOpenChapterScraperClick = () => {
     const destinationUrl = separatedData?.series_url || targetUrl.trim();
-    let seriesSlug =
-      separatedData?.series_slug ||
-      separatedData?.title_slug;
+    let seriesSlug = separatedData?.series_slug || separatedData?.title_slug;
 
     if (!seriesSlug && destinationUrl) {
       try {
@@ -221,16 +257,35 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         );
         const segments = u.pathname.split("/").filter(Boolean);
         const ignored = new Set([
-          "list", "viewer", "chapter", "episode", "detail", "read", "index",
-          "comic", "comics", "manga", "series", "en", "ko", "id", "zh", "webtoon"
+          "list",
+          "viewer",
+          "chapter",
+          "episode",
+          "detail",
+          "read",
+          "index",
+          "comic",
+          "comics",
+          "manga",
+          "series",
+          "en",
+          "ko",
+          "id",
+          "zh",
+          "webtoon",
         ]);
-        while (segments.length > 0 && ignored.has(segments[segments.length - 1].toLowerCase())) {
+        while (
+          segments.length > 0 &&
+          ignored.has(segments[segments.length - 1].toLowerCase())
+        ) {
           segments.pop();
         }
         if (
           segments.length > 1 &&
-          (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(segments[segments.length - 1]) ||
-           /^\d+$/.test(segments[segments.length - 1]))
+          (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(
+            segments[segments.length - 1]
+          ) ||
+            /^\d+$/.test(segments[segments.length - 1]))
         ) {
           segments.pop();
         }
@@ -301,7 +356,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               </div>
               <div className="max-h-72 overflow-y-auto divide-y divide-[#282834]/50 bg-[#121217]">
                 {suggestions.map((series, idx) => {
-                  const displayInfo = formatSeriesDisplay(series.url, series.title);
+                  const displayInfo = formatSeriesDisplay(
+                    series.url,
+                    series.title
+                  );
 
                   return (
                     <div
@@ -312,7 +370,8 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                             resetWorkspace();
                           }
                           setTargetUrl(series.url);
-                          if (setSeriesTitle && series.title) setSeriesTitle(series.title);
+                          if (setSeriesTitle && series.title)
+                            setSeriesTitle(series.title);
                         }
                         setShowSuggestions(false);
                       }}
@@ -342,8 +401,12 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            if (menuAnchor && menuAnchor.series.url === series.url) {
+                            const rect =
+                              e.currentTarget.getBoundingClientRect();
+                            if (
+                              menuAnchor &&
+                              menuAnchor.series.url === series.url
+                            ) {
                               setMenuAnchor(null);
                             } else {
                               setMenuAnchor({ rect, series });
@@ -426,63 +489,65 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
       </div>
 
       {/* Options Menu Portal (Unclipped by any parent overflow) */}
-      {menuAnchor && typeof document !== "undefined" && createPortal(
-        <div
-          className="fixed inset-0 z-[99999]"
-          onClick={(e) => {
-            e.stopPropagation();
-            setMenuAnchor(null);
-          }}
-        >
+      {menuAnchor &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              position: "fixed",
-              top:
-                menuAnchor.rect.bottom + 8 + 84 >
-                (typeof window !== "undefined" ? window.innerHeight : 1000)
-                  ? Math.max(8, menuAnchor.rect.top - 84)
-                  : menuAnchor.rect.bottom + 6,
-              left: Math.max(12, menuAnchor.rect.right - 144),
+            className="fixed inset-0 z-[99999]"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuAnchor(null);
             }}
-            className="w-36 bg-[#16161D] border border-[#2F2F3D] rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.9),0_0_20px_rgba(59,130,246,0.25)] py-1.5 z-[100000] animate-in fade-in-0 zoom-in-95 duration-100 select-none"
           >
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (menuAnchor.series.url) {
-                  navigator.clipboard.writeText(menuAnchor.series.url);
-                }
-                setMenuAnchor(null);
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: "fixed",
+                top:
+                  menuAnchor.rect.bottom + 8 + 84 >
+                  (typeof window !== "undefined" ? window.innerHeight : 1000)
+                    ? Math.max(8, menuAnchor.rect.top - 84)
+                    : menuAnchor.rect.bottom + 6,
+                left: Math.max(12, menuAnchor.rect.right - 144),
               }}
-              className="w-full px-3.5 py-2 text-left text-xs font-semibold text-neutral-200 hover:text-white hover:bg-[#3B82F6] flex items-center gap-2.5 transition-colors cursor-pointer"
+              className="w-36 bg-[#16161D] border border-[#2F2F3D] rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.9),0_0_20px_rgba(59,130,246,0.25)] py-1.5 z-[100000] animate-in fade-in-0 zoom-in-95 duration-100 select-none"
             >
-              <Copy className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
-              <span>Copy URL</span>
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (menuAnchor.series.url) {
-                  FavoritesManager.removeEnteredUrl(menuAnchor.series.url);
-                  FavoritesManager.removeBookmark(menuAnchor.series.url);
-                  setSuggestions((prev) =>
-                    prev.filter((item) => item.url !== menuAnchor.series.url)
-                  );
-                }
-                setMenuAnchor(null);
-              }}
-              className="w-full px-3.5 py-2 text-left text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-600 flex items-center gap-2.5 transition-colors cursor-pointer"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Remove</span>
-            </button>
-          </div>
-        </div>,
-        document.body
-      )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (menuAnchor.series.url) {
+                    navigator.clipboard.writeText(menuAnchor.series.url);
+                  }
+                  setMenuAnchor(null);
+                }}
+                className="w-full px-3.5 py-2 text-left text-xs font-semibold text-neutral-200 hover:text-white hover:bg-[#3B82F6] flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <Copy className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
+                <span>Copy URL</span>
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (menuAnchor.series.url) {
+                    FavoritesManager.removeEnteredUrl(menuAnchor.series.url);
+                    FavoritesManager.removeBookmark(menuAnchor.series.url);
+                    setSuggestions((prev) =>
+                      prev.filter((item) => item.url !== menuAnchor.series.url)
+                    );
+                  }
+                  setMenuAnchor(null);
+                }}
+                className="w-full px-3.5 py-2 text-left text-xs font-semibold text-rose-400 hover:text-white hover:bg-rose-600 flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

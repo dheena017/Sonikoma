@@ -23,8 +23,21 @@ interface StoryboardAudioViewProps {
   onTriggerFeedback?: (msg: string) => void;
 }
 
-const COMMON_SFX = ["💥 Boom", "⚡ Whoosh", "🚪 Clunk", "🗡️ Slash", "💨 Wind", "👣 Steps"];
-const COMMON_BGM = ["Dramatic Battle", "Suspense Tension", "Eerie Ambient", "Heroic Rise", "Calm Melancholy"];
+const COMMON_SFX = [
+  "💥 Boom",
+  "⚡ Whoosh",
+  "🚪 Clunk",
+  "🗡️ Slash",
+  "💨 Wind",
+  "👣 Steps",
+];
+const COMMON_BGM = [
+  "Dramatic Battle",
+  "Suspense Tension",
+  "Eerie Ambient",
+  "Heroic Rise",
+  "Calm Melancholy",
+];
 
 export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
   panels,
@@ -49,7 +62,11 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
     setPlayingIdx(null);
   };
 
-  const handlePlayAudio = (index: number, panel: GeneratedPanel, e: React.MouseEvent) => {
+  const handlePlayAudio = (
+    index: number,
+    panel: GeneratedPanel,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation();
 
     if (playingIdx === index) {
@@ -66,10 +83,7 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
       (panel as any).voice_url;
 
     const textToSpeak =
-      panel.speech_text ||
-      panel.narrative ||
-      (panel as any).dialogue ||
-      "";
+      panel.speech_text || panel.narrative || (panel as any).dialogue || "";
 
     if (audioUrl) {
       const audio = new Audio(audioUrl);
@@ -88,7 +102,9 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
     } else if (textToSpeak) {
       speakFallback(textToSpeak, index);
     } else {
-      onTriggerFeedback?.(`Panel #${index + 1} has no dialogue or audio to play`);
+      onTriggerFeedback?.(
+        `Panel #${index + 1} has no dialogue or audio to play`
+      );
     }
   };
 
@@ -112,11 +128,15 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
       <div className="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/20 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[10px] font-mono text-emerald-200">
           <Volume2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-          <span>Audio Studio — Real voice tracks, speech synthesis & sound FX</span>
+          <span>
+            Audio Studio — Real voice tracks, speech synthesis & sound FX
+          </span>
         </div>
         <button
           type="button"
-          onClick={() => onTriggerFeedback?.("Batch TTS Voiceover engine started")}
+          onClick={() =>
+            onTriggerFeedback?.("Batch TTS Voiceover engine started")
+          }
           className="px-2 py-0.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm transition"
         >
           <Mic className="h-2.5 w-2.5" />
@@ -133,7 +153,8 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
           panel.speech_audio_url ||
           panel.narrative_audio_url ||
           (panel as any).voice_url;
-        const text = panel.speech_text || panel.narrative || (panel as any).dialogue || "";
+        const text =
+          panel.speech_text || panel.narrative || (panel as any).dialogue || "";
         const hasAudio = !!audioUrl || !!text;
         const isPlaying = playingIdx === index;
         const currentSfx = panel.sfx || "";
@@ -153,7 +174,11 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-white/10">
-                  <img src={displayUrl} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={displayUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                   <span className="absolute bottom-0 right-0 text-[7px] font-black font-mono bg-black/80 text-emerald-200 px-0.5 rounded">
                     #{index + 1}
                   </span>
@@ -219,7 +244,9 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
 
             {/* Quick SFX Soundboard Pill Selector */}
             <div className="flex items-center gap-1.5 overflow-x-auto mini-sidebar-scrollbar pt-1">
-              <span className="text-[8px] font-mono text-neutral-500 shrink-0">SFX:</span>
+              <span className="text-[8px] font-mono text-neutral-500 shrink-0">
+                SFX:
+              </span>
               {COMMON_SFX.map((sfx) => {
                 const isSfxActive = currentSfx === sfx;
                 return (
@@ -230,7 +257,11 @@ export const StoryboardAudioView: React.FC<StoryboardAudioViewProps> = ({
                       e.stopPropagation();
                       const next = isSfxActive ? "" : sfx;
                       onUpdateSfx(index, next);
-                      onTriggerFeedback?.(next ? `Attached ${sfx} to Panel #${index + 1}` : `Removed SFX`);
+                      onTriggerFeedback?.(
+                        next
+                          ? `Attached ${sfx} to Panel #${index + 1}`
+                          : `Removed SFX`
+                      );
                     }}
                     className={`px-2 py-0.5 rounded-lg text-[8px] font-mono whitespace-nowrap transition-all border cursor-pointer ${
                       isSfxActive

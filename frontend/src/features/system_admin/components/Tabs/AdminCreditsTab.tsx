@@ -124,12 +124,16 @@ export function AdminCreditsTab({
             setDailySummary({
               added: data.summary.daily_added || 0,
               deducted: data.summary.daily_deducted || 0,
-              net: (data.summary.daily_added || 0) - (data.summary.daily_deducted || 0),
+              net:
+                (data.summary.daily_added || 0) -
+                (data.summary.daily_deducted || 0),
             });
             setMonthSummary({
               added: data.summary.month_added || 0,
               deducted: data.summary.month_deducted || 0,
-              net: (data.summary.month_added || 0) - (data.summary.month_deducted || 0),
+              net:
+                (data.summary.month_added || 0) -
+                (data.summary.month_deducted || 0),
             });
           }
         }
@@ -141,7 +145,6 @@ export function AdminCreditsTab({
       setLoading(false);
     }
   };
-
 
   const handleSortTransactions = (
     key: "user_id" | "feature_name" | "amount" | "created_at"
@@ -543,9 +546,7 @@ export function AdminCreditsTab({
             <div className="p-2 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl text-[#3B82F6]">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h3 className="text-[#9CA3AF] font-medium text-sm">
-              System Users
-            </h3>
+            <h3 className="text-[#9CA3AF] font-medium text-sm">System Users</h3>
           </div>
           <div className="text-2xl font-black text-[#E5E5E5] font-mono">
             {stats.totalUsers.toLocaleString()}
@@ -566,9 +567,7 @@ export function AdminCreditsTab({
           </div>
           <div className="text-2xl font-black text-[#E5E5E5] font-mono">
             {stats.totalBalance.toLocaleString()}{" "}
-            <span className="text-xs text-[#9CA3AF] font-normal">
-              Credits
-            </span>
+            <span className="text-xs text-[#9CA3AF] font-normal">Credits</span>
           </div>
           <p className="text-[10px] text-neutral-500 mt-1">
             Sum of all current user balances
@@ -679,7 +678,7 @@ export function AdminCreditsTab({
                   onClick={() => setSelectedUserId(u.id)}
                   className={`flex justify-between items-center bg-[#0b0b0e] border border-neutral-850 rounded-lg p-2.5 hover:bg-neutral-900 transition-all cursor-pointer ${
                     selectedUserId === u.id
-                       ? "ring-1 ring-[#3B82F6]/50 border-[#3B82F6]/50"
+                      ? "ring-1 ring-[#3B82F6]/50 border-[#3B82F6]/50"
                       : ""
                   }`}
                 >
@@ -907,9 +906,7 @@ export function AdminCreditsTab({
                       <tr
                         key={tx.id}
                         className={`hover:bg-white/[0.02] transition-colors cursor-pointer ${
-                          selectedUserId === tx.user_id
-                            ? "bg-[#3B82F6]/10"
-                            : ""
+                          selectedUserId === tx.user_id ? "bg-[#3B82F6]/10" : ""
                         }`}
                         onClick={() => setSelectedUserId(tx.user_id)}
                       >

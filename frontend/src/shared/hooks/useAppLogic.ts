@@ -6,7 +6,10 @@ import { usePlaybackEngine } from "./usePlaybackEngine";
 import { usePipelineActions } from "./usePipelineActions";
 
 /** Helper to format chapter title display (e.g. "Chapter 15 - The Awakening") */
-export function formatEpisodeString(chapterNumber = "", chapterTitle = ""): string {
+export function formatEpisodeString(
+  chapterNumber = "",
+  chapterTitle = ""
+): string {
   const num = (chapterNumber || "").trim();
   const name = (chapterTitle || "").trim();
   if (num && name) return `Chapter ${num} - ${name}`;
@@ -18,10 +21,16 @@ export function formatEpisodeString(chapterNumber = "", chapterTitle = ""): stri
 /** Helper to normalize and proxy raw image URLs */
 export function normalizeScrapedImageUrls(images: any[]): string[] {
   if (!Array.isArray(images)) return [];
-  const rawUrls = images.map((img) => (typeof img === "string" ? img : img?.url || ""));
+  const rawUrls = images.map((img) =>
+    typeof img === "string" ? img : img?.url || ""
+  );
   return rawUrls
     .filter(Boolean)
-    .map((img) => (img.startsWith("http") && !api.isApiUrl(img) ? api.getProxyImageUrl(img) : img));
+    .map((img) =>
+      img.startsWith("http") && !api.isApiUrl(img)
+        ? api.getProxyImageUrl(img)
+        : img
+    );
 }
 
 export function useAppLogic() {
@@ -31,7 +40,8 @@ export function useAppLogic() {
   const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
   const isGeneratingRef = useRef(false);
 
-  const [isGeneratingStoryboard, setIsGeneratingStoryboard] = useState<boolean>(false);
+  const [isGeneratingStoryboard, setIsGeneratingStoryboard] =
+    useState<boolean>(false);
 
   // ── 1. AI Storyboard Generation ───────────────────────────────────────────
   const handleGenerateStoryboardAI = useCallback(
@@ -49,7 +59,10 @@ export function useAppLogic() {
       const activeUrl = targetUrl;
       const projId = state.projectId;
       if (!activeUrl || !activeUrl.trim() || !projId) {
-        state.addNotification("Please ensure target URL is pasted and project is created.", "error");
+        state.addNotification(
+          "Please ensure target URL is pasted and project is created.",
+          "error"
+        );
         isGeneratingRef.current = false;
         return;
       }
@@ -62,19 +75,32 @@ export function useAppLogic() {
       ]);
 
       try {
-        const formattedEpisode = overrides?.episode || formatEpisodeString(state.chapterNumber, state.chapterTitle);
+        const formattedEpisode =
+          overrides?.episode ||
+          formatEpisodeString(state.chapterNumber, state.chapterTitle);
 
         const data = await api.generateStoryboard(state.fetchWithInterceptor, {
           url: activeUrl.trim(),
           project_id: projId,
           model: selectedModel,
           narrationStyle: state.narrationStyle,
-          title: overrides?.title?.trim() || state.seriesTitle?.trim() || undefined,
+          title:
+            overrides?.title?.trim() || state.seriesTitle?.trim() || undefined,
           episode: formattedEpisode || undefined,
-          genre: overrides?.genre?.trim() || state.scrapedGenre?.trim() || undefined,
-          author: overrides?.author?.trim() || state.seriesAuthor?.trim() || undefined,
-          cover_image: overrides?.cover_image?.trim() || state.seriesCoverImage?.trim() || undefined,
-          synopsis: overrides?.synopsis?.trim() || state.seriesSynopsis?.trim() || undefined,
+          genre:
+            overrides?.genre?.trim() || state.scrapedGenre?.trim() || undefined,
+          author:
+            overrides?.author?.trim() ||
+            state.seriesAuthor?.trim() ||
+            undefined,
+          cover_image:
+            overrides?.cover_image?.trim() ||
+            state.seriesCoverImage?.trim() ||
+            undefined,
+          synopsis:
+            overrides?.synopsis?.trim() ||
+            state.seriesSynopsis?.trim() ||
+            undefined,
         });
 
         if (data.success && data.panels) {
@@ -88,17 +114,27 @@ export function useAppLogic() {
             `[Smart Timeline] [SUCCESS] Timeline generated with ${mappedPanels.length} panels!`,
             ...prev,
           ]);
-          state.addNotification(`Timeline generated successfully with ${mappedPanels.length} panels!`, "success");
+          state.addNotification(
+            `Timeline generated successfully with ${mappedPanels.length} panels!`,
+            "success"
+          );
         } else {
-          throw new Error(data.message || "Invalid response from AI Model Analysis");
+          throw new Error(
+            data.message || "Invalid response from AI Model Analysis"
+          );
         }
       } catch (err: any) {
         console.error("[Smart Timeline] Generation failed:", err);
         state.setConsoleLogs((prev) => [
-          `[Smart Timeline] [ERROR] Generation failed: ${err.message || String(err)}`,
+          `[Smart Timeline] [ERROR] Generation failed: ${
+            err.message || String(err)
+          }`,
           ...prev,
         ]);
-        state.addNotification(`Timeline generation failed: ${err.message || String(err)}`, "error");
+        state.addNotification(
+          `Timeline generation failed: ${err.message || String(err)}`,
+          "error"
+        );
       } finally {
         setIsGeneratingStoryboard(false);
         isGeneratingRef.current = false;
@@ -190,7 +226,10 @@ export function useAppLogic() {
     async (overrideUrl?: string, overrideProjectId?: string) => {
       const activeUrl = (overrideUrl || targetUrl || "").trim();
       if (!activeUrl) {
-        state.addNotification("Please enter a valid comic URL to import.", "warning");
+        state.addNotification(
+          "Please enter a valid comic URL to import.",
+          "warning"
+        );
         return false;
       }
 
@@ -201,7 +240,9 @@ export function useAppLogic() {
       ]);
 
       try {
-        const targetProjectId = overrideProjectId || `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        const targetProjectId =
+          overrideProjectId ||
+          `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
         const data = await api.scrapeChapter(state.fetchWithInterceptor, {
           url: activeUrl,
@@ -216,11 +257,18 @@ export function useAppLogic() {
           state.setScrapedImages(finalImages);
           state.setSelectedScraped([]);
 
-          const title = data.series?.title || state.seriesTitle || "Untitled Comic";
+          const title =
+            data.series?.title || state.seriesTitle || "Untitled Comic";
           const author = data.series?.author || state.seriesAuthor || "";
-          const cover = data.series?.cover_image || state.seriesCoverImage || finalImages[0] || "";
-          const synopsis = data.series?.description || state.seriesSynopsis || "";
-          const genre = data.series?.genres?.join(", ") || state.scrapedGenre || "";
+          const cover =
+            data.series?.cover_image ||
+            state.seriesCoverImage ||
+            finalImages[0] ||
+            "";
+          const synopsis =
+            data.series?.description || state.seriesSynopsis || "";
+          const genre =
+            data.series?.genres?.join(", ") || state.scrapedGenre || "";
 
           state.setProjectId(targetProjectId);
 
@@ -252,10 +300,15 @@ export function useAppLogic() {
           });
 
           // Immediately persist newly imported chapter project with all scraped assets
-          void useProjectStore.getState().saveActiveProject(state.fetchWithInterceptor as any);
+          void useProjectStore
+            .getState()
+            .saveActiveProject(state.fetchWithInterceptor as any);
 
           state.setIsScraping(false);
-          state.addNotification(`Successfully imported ${finalImages.length} images!`, "success");
+          state.addNotification(
+            `Successfully imported ${finalImages.length} images!`,
+            "success"
+          );
           return true;
         } else {
           throw new Error(data.message || "No images found at this URL.");
@@ -263,7 +316,10 @@ export function useAppLogic() {
       } catch (err: any) {
         console.error("[Scraper] Import error:", err);
         state.setIsScraping(false);
-        state.addNotification(`Import failed: ${err.message || String(err)}`, "error");
+        state.addNotification(
+          `Import failed: ${err.message || String(err)}`,
+          "error"
+        );
         return false;
       }
     },
@@ -272,7 +328,10 @@ export function useAppLogic() {
 
   // ── 5. Scrape Batch Episodes ──────────────────────────────────────────────
   const scrapeBatchEpisodes = useCallback(
-    async (episodesList: Array<{ url: string; number?: string; title?: string }>, overrideProjectId?: string) => {
+    async (
+      episodesList: Array<{ url: string; number?: string; title?: string }>,
+      overrideProjectId?: string
+    ) => {
       if (!episodesList || episodesList.length === 0) return;
 
       state.setIsScraping(true);
@@ -300,13 +359,19 @@ export function useAppLogic() {
             allImages.push(...normalizeScrapedImageUrls(data.images));
           }
         } catch (err) {
-          console.error(`[Batch Import] Failed chapter ${ep.number || i + 1}:`, err);
+          console.error(
+            `[Batch Import] Failed chapter ${ep.number || i + 1}:`,
+            err
+          );
         }
       }
 
       state.setScrapedImages(allImages);
       state.setIsScraping(false);
-      state.addNotification(`Batch import finished! ${allImages.length} total images loaded.`, "success");
+      state.addNotification(
+        `Batch import finished! ${allImages.length} total images loaded.`,
+        "success"
+      );
     },
     [state]
   );

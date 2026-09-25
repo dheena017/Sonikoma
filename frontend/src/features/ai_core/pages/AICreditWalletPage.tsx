@@ -15,12 +15,43 @@ interface AICreditWalletPageProps {
 }
 
 const CREDIT_PACKAGES = [
-  { id: "starter", name: "Creator Starter", credits: 500, price: "$5", badge: "Popular", features: ["~100 Comic Chapters", "Standard Vision & Narration"] },
-  { id: "pro", name: "Pro Studio", credits: 2000, price: "$18", badge: "Best Value", features: ["~450 Comic Chapters", "Ultra-Fast Groq & Claude 3.5 Access", "Priority Queue"] },
-  { id: "enterprise", name: "Studio Ultra", credits: 10000, price: "$75", badge: "Maximum Power", features: ["~2,500 Comic Chapters", "Unlimited Multi-Speaker Audio", "Dedicated GPU Inpainting"] },
+  {
+    id: "starter",
+    name: "Creator Starter",
+    credits: 500,
+    price: "$5",
+    badge: "Popular",
+    features: ["~100 Comic Chapters", "Standard Vision & Narration"],
+  },
+  {
+    id: "pro",
+    name: "Pro Studio",
+    credits: 2000,
+    price: "$18",
+    badge: "Best Value",
+    features: [
+      "~450 Comic Chapters",
+      "Ultra-Fast Groq & Claude 3.5 Access",
+      "Priority Queue",
+    ],
+  },
+  {
+    id: "enterprise",
+    name: "Studio Ultra",
+    credits: 10000,
+    price: "$75",
+    badge: "Maximum Power",
+    features: [
+      "~2,500 Comic Chapters",
+      "Unlimited Multi-Speaker Audio",
+      "Dedicated GPU Inpainting",
+    ],
+  },
 ];
 
-export default function AICreditWalletPage({ addNotification }: AICreditWalletPageProps) {
+export default function AICreditWalletPage({
+  addNotification,
+}: AICreditWalletPageProps) {
   const [balance, setBalance] = useState<number>(1000);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -46,7 +77,10 @@ export default function AICreditWalletPage({ addNotification }: AICreditWalletPa
   }, []);
 
   const handleTopup = (pkg: any) => {
-    addNotification?.(`Simulating checkout for ${pkg.name} (${pkg.credits} credits)`, "info");
+    addNotification?.(
+      `Simulating checkout for ${pkg.name} (${pkg.credits} credits)`,
+      "info"
+    );
   };
 
   return (
@@ -63,7 +97,8 @@ export default function AICreditWalletPage({ addNotification }: AICreditWalletPa
               </span>
             </h1>
             <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
-              Check your current Sonikoma credit balance, purchase generation tokens, and view transaction receipts.
+              Check your current Sonikoma credit balance, purchase generation
+              tokens, and view transaction receipts.
             </p>
           </div>
         </div>
@@ -71,16 +106,24 @@ export default function AICreditWalletPage({ addNotification }: AICreditWalletPa
         {/* Balance Card */}
         <div className="rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
           <div>
-            <span className="text-xs text-[#9CA3AF] font-mono uppercase font-bold block">Available Balance</span>
+            <span className="text-xs text-[#9CA3AF] font-mono uppercase font-bold block">
+              Available Balance
+            </span>
             <div className="flex items-center gap-2 mt-1">
               <Coins className="w-7 h-7 text-[#F59E0B]" />
-              <span className="text-3xl font-black text-[#E5E5E5] font-mono">{balance.toLocaleString()}</span>
+              <span className="text-3xl font-black text-[#E5E5E5] font-mono">
+                {balance.toLocaleString()}
+              </span>
               <span className="text-sm text-[#9CA3AF] font-mono">Credits</span>
             </div>
           </div>
           <div className="text-left sm:text-right">
-            <span className="text-xs text-[#9CA3AF] font-mono block">Estimated Capacity</span>
-            <span className="text-sm font-bold text-[#10B981] font-mono">~{Math.round(balance / 5)} Storyboards</span>
+            <span className="text-xs text-[#9CA3AF] font-mono block">
+              Estimated Capacity
+            </span>
+            <span className="text-sm font-bold text-[#10B981] font-mono">
+              ~{Math.round(balance / 5)} Storyboards
+            </span>
           </div>
         </div>
 
@@ -93,14 +136,20 @@ export default function AICreditWalletPage({ addNotification }: AICreditWalletPa
             >
               <div className="space-y-3">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-sm font-bold text-[#E5E5E5] font-sans">{pkg.name}</h3>
+                  <h3 className="text-sm font-bold text-[#E5E5E5] font-sans">
+                    {pkg.name}
+                  </h3>
                   <span className="text-[9px] font-mono font-bold bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30 px-2 py-0.5 rounded-full">
                     {pkg.badge}
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-black text-[#E5E5E5] font-mono">{pkg.price}</span>
-                  <span className="text-xs text-[#9CA3AF] font-mono">/ {pkg.credits.toLocaleString()} credits</span>
+                  <span className="text-2xl font-black text-[#E5E5E5] font-mono">
+                    {pkg.price}
+                  </span>
+                  <span className="text-xs text-[#9CA3AF] font-mono">
+                    / {pkg.credits.toLocaleString()} credits
+                  </span>
                 </div>
                 <ul className="space-y-1.5 text-xs text-[#E5E5E5] font-mono pt-2 border-t border-[#2F2F2F]">
                   {pkg.features.map((f, i) => (

@@ -42,7 +42,7 @@ class FallbackCoordinator:
         elif skill_name == "storyboard_narrative":
             return {
                 "panels": [
-                    {"speech_text": f"Chapter segment recap: {kwargs.get('title', 'Untitled')}.", "sfx": "[Sound]", "motion_type": "zoom_in"}
+                    {"speech_text": f"Chapter segment recap: {kwargs.get('title', 'Untitled')}.", "sfx": "[Sound]", "motion_type": ""}
                     for _ in range(kwargs.get("active_slices_count", 5))
                 ]
             }

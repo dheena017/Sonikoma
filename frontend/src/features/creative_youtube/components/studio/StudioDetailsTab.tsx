@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Sparkles, UploadCloud, ChevronRight, Wand2, Image as ImageIcon } from "lucide-react";
+import {
+  Sparkles,
+  UploadCloud,
+  ChevronRight,
+  Wand2,
+  Image as ImageIcon,
+} from "lucide-react";
 import PlaylistSelector from "../PlaylistSelector";
 import YouTubeThumbnailModal from "../YouTubeThumbnailModal";
 import CyberSelect from "@/shared/ui/common/CyberSelect";
@@ -118,7 +124,10 @@ export interface StudioDetailsTabProps {
   setMadeForKids: (val: string) => void;
   thumbnailPreviewUrl: string | null;
   onThumbnailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onThumbnailDirectSelect?: (fileOrUrl: File | string, previewUrl?: string) => void;
+  onThumbnailDirectSelect?: (
+    fileOrUrl: File | string,
+    previewUrl?: string
+  ) => void;
   onClearThumbnail: () => void;
   hasCustomCredentials: boolean;
   isAiGenerating: boolean;

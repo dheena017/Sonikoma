@@ -331,8 +331,10 @@ export default function HorizontalSplitter({
           <div className="flex items-center gap-2.5">
             <ImageIcon className="h-4 w-4 text-[#3B82F6]" />
             <div className="text-xs font-mono text-neutral-200">
-              Image size: <span className="font-bold text-white">{naturalWidth}px</span>{" "}
-              &times; <span className="font-bold text-white">{naturalHeight}px</span>
+              Image size:{" "}
+              <span className="font-bold text-white">{naturalWidth}px</span>{" "}
+              &times;{" "}
+              <span className="font-bold text-white">{naturalHeight}px</span>
             </div>
           </div>
           {detectedGutters.length > 0 && (

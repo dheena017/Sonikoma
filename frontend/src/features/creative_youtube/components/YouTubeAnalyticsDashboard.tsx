@@ -455,7 +455,8 @@ export default function YouTubeAnalyticsDashboard({
                         No video analytics yet
                       </p>
                       <p className="text-[11px] text-neutral-500 font-mono max-w-xs mx-auto">
-                        Top performing videos and rankings will populate here as you publish videos to your channel.
+                        Top performing videos and rankings will populate here as
+                        you publish videos to your channel.
                       </p>
                     </div>
                   ) : (
@@ -693,7 +694,9 @@ export default function YouTubeAnalyticsDashboard({
                       )}
                       <div className="min-w-0">
                         <p className="text-sm font-black text-white truncate">
-                          {isConnected ? channel?.title : "YouTube Not Connected"}
+                          {isConnected
+                            ? channel?.title
+                            : "YouTube Not Connected"}
                         </p>
                         <p className="text-[10px] font-mono text-neutral-500 truncate">
                           {isConnected && channel?.custom_url
@@ -782,7 +785,9 @@ export default function YouTubeAnalyticsDashboard({
               {videos.length === 0 ? (
                 <div className="text-center py-16 space-y-3 border border-neutral-800/80 rounded-3xl bg-neutral-950/40 p-8">
                   <Play className="w-10 h-10 text-neutral-600 mx-auto" />
-                  <h4 className="text-sm font-bold text-white">No videos found</h4>
+                  <h4 className="text-sm font-bold text-white">
+                    No videos found
+                  </h4>
                   <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
                     {isConnected
                       ? "No videos have been uploaded or tracked for this channel yet."
@@ -895,7 +900,9 @@ export default function YouTubeAnalyticsDashboard({
               {playlists.length === 0 ? (
                 <div className="text-center py-16 space-y-3 border border-neutral-800/80 rounded-3xl bg-neutral-950/40 p-8">
                   <ListMusic className="w-10 h-10 text-neutral-600 mx-auto" />
-                  <h4 className="text-sm font-bold text-white">No playlists found</h4>
+                  <h4 className="text-sm font-bold text-white">
+                    No playlists found
+                  </h4>
                   <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
                     {isConnected
                       ? "No playlists are currently associated with your YouTube channel."
@@ -1001,7 +1008,9 @@ export default function YouTubeAnalyticsDashboard({
                   {mostLiked.length === 0 ? (
                     <div className="text-center py-8 space-y-1.5">
                       <ThumbsUp className="w-6 h-6 text-neutral-600 mx-auto" />
-                      <p className="text-xs font-bold text-white">No likes data</p>
+                      <p className="text-xs font-bold text-white">
+                        No likes data
+                      </p>
                       <p className="text-[11px] text-neutral-500 font-mono">
                         Like counts will appear as your videos gain engagement.
                       </p>
@@ -1059,7 +1068,9 @@ export default function YouTubeAnalyticsDashboard({
                   {mostDiscussed.length === 0 ? (
                     <div className="text-center py-8 space-y-1.5">
                       <MessageCircle className="w-6 h-6 text-neutral-600 mx-auto" />
-                      <p className="text-xs font-bold text-white">No comment data</p>
+                      <p className="text-xs font-bold text-white">
+                        No comment data
+                      </p>
                       <p className="text-[11px] text-neutral-500 font-mono">
                         Comment counts will appear as your audience engages.
                       </p>

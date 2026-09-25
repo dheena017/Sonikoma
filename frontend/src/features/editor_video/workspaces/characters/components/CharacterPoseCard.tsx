@@ -2,7 +2,13 @@ import React from "react";
 import { Sparkles, Check } from "lucide-react";
 
 interface CharacterPoseCardProps {
-  pose: { id: string; title: string; tag: string; angle?: string; icon?: string };
+  pose: {
+    id: string;
+    title: string;
+    tag: string;
+    angle?: string;
+    icon?: string;
+  };
   onApply: () => void;
 }
 
@@ -65,4 +71,3 @@ export const CharacterPoseCard: React.FC<CharacterPoseCardProps> = ({
     </div>
   );
 };
-

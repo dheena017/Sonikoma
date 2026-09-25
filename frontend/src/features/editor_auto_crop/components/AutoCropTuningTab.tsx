@@ -174,16 +174,25 @@ export function AutoCropTuningTab({
                 : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
-            <div className={`p-2 rounded-xl shrink-0 ${engineMode === "opencv" ? "bg-emerald-500 text-black font-bold" : "bg-neutral-800 text-neutral-400"}`}>
+            <div
+              className={`p-2 rounded-xl shrink-0 ${
+                engineMode === "opencv"
+                  ? "bg-emerald-500 text-black font-bold"
+                  : "bg-neutral-800 text-neutral-400"
+              }`}
+            >
               <Zap className="h-4 w-4" />
             </div>
             <div>
               <div className="text-xs font-bold flex items-center gap-1.5">
                 <span>OpenCV Fast Engine</span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">Local CV</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono">
+                  Local CV
+                </span>
               </div>
               <p className="text-[10px] text-neutral-400 mt-0.5">
-                Full-width webtoon gutter detection & tight frame snapping. Ultra fast.
+                Full-width webtoon gutter detection & tight frame snapping.
+                Ultra fast.
               </p>
             </div>
           </button>
@@ -197,16 +206,25 @@ export function AutoCropTuningTab({
                 : "bg-neutral-900/80 border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white"
             }`}
           >
-            <div className={`p-2 rounded-xl shrink-0 ${engineMode === "ai" ? "bg-sky-500 text-black font-bold" : "bg-neutral-800 text-neutral-400"}`}>
+            <div
+              className={`p-2 rounded-xl shrink-0 ${
+                engineMode === "ai"
+                  ? "bg-sky-500 text-black font-bold"
+                  : "bg-neutral-800 text-neutral-400"
+              }`}
+            >
               <Sparkles className="h-4 w-4" />
             </div>
             <div>
               <div className="text-xs font-bold flex items-center gap-1.5">
                 <span>Smart AI Crop (Gemini)</span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-mono">Multimodal Vision</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300 font-mono">
+                  Multimodal Vision
+                </span>
               </div>
               <p className="text-[10px] text-neutral-400 mt-0.5">
-                AI semantic reasoning. Zero hardcoded cuts, protects speech bubbles and characters.
+                AI semantic reasoning. Zero hardcoded cuts, protects speech
+                bubbles and characters.
               </p>
             </div>
           </button>
@@ -238,7 +256,9 @@ export function AutoCropTuningTab({
           >
             <Smartphone className="h-4 w-4 text-emerald-400" />
             <span className="text-[11px] leading-tight">Webtoon</span>
-            <span className="text-[9px] text-neutral-500 font-mono">Vertical Strip</span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              Vertical Strip
+            </span>
           </button>
 
           {/* Preset 2: Manga */}
@@ -253,7 +273,9 @@ export function AutoCropTuningTab({
           >
             <BookOpen className="h-4 w-4 text-purple-400" />
             <span className="text-[11px] leading-tight">Manga Page</span>
-            <span className="text-[9px] text-neutral-500 font-mono">Right-to-Left</span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              Right-to-Left
+            </span>
           </button>
 
           {/* Preset 3: Shorts 9:16 */}
@@ -268,7 +290,9 @@ export function AutoCropTuningTab({
           >
             <Film className="h-4 w-4 text-sky-400" />
             <span className="text-[11px] leading-tight">9:16 Shorts</span>
-            <span className="text-[9px] text-neutral-500 font-mono">TikTok / Reels</span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              TikTok / Reels
+            </span>
           </button>
 
           {/* Preset 4: 16:9 Landscape */}
@@ -283,7 +307,9 @@ export function AutoCropTuningTab({
           >
             <Monitor className="h-4 w-4 text-amber-400" />
             <span className="text-[11px] leading-tight">16:9 Video</span>
-            <span className="text-[9px] text-neutral-500 font-mono">Landscape Frame</span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              Landscape Frame
+            </span>
           </button>
 
           {/* Preset 5: 1:1 Square */}
@@ -298,7 +324,9 @@ export function AutoCropTuningTab({
           >
             <Square className="h-4 w-4 text-pink-400" />
             <span className="text-[11px] leading-tight">1:1 Square</span>
-            <span className="text-[9px] text-neutral-500 font-mono">Instagram Feed</span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              Instagram Feed
+            </span>
           </button>
 
           {/* Preset 6: Granular / Detail */}
@@ -313,7 +341,9 @@ export function AutoCropTuningTab({
           >
             <Scissors className="h-4 w-4 text-teal-400" />
             <span className="text-[11px] leading-tight">Granular</span>
-            <span className="text-[9px] text-neutral-500 font-mono">Deep Seams (85%)</span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              Deep Seams (85%)
+            </span>
           </button>
 
           {/* Preset 7: Safe Bleed */}
@@ -328,7 +358,9 @@ export function AutoCropTuningTab({
           >
             <Shield className="h-4 w-4 text-indigo-400" />
             <span className="text-[11px] leading-tight">Safe Bleed</span>
-            <span className="text-[9px] text-neutral-500 font-mono">+22px Margins</span>
+            <span className="text-[9px] text-neutral-500 font-mono">
+              +22px Margins
+            </span>
           </button>
         </div>
       </div>
@@ -381,11 +413,14 @@ export function AutoCropTuningTab({
               min="10"
               max="95"
               value={sensitivity}
-              onChange={(e) => onSensitivityChange(parseInt(e.target.value, 10))}
+              onChange={(e) =>
+                onSensitivityChange(parseInt(e.target.value, 10))
+              }
               className="w-full accent-emerald-500 h-2 bg-neutral-800 rounded-lg cursor-pointer"
             />
             <span className="text-[10px] text-neutral-400 block leading-tight">
-              Higher = finds subtle gaps; lower = groups larger continuous scenes.
+              Higher = finds subtle gaps; lower = groups larger continuous
+              scenes.
             </span>
           </div>
 
@@ -406,11 +441,14 @@ export function AutoCropTuningTab({
               max="300"
               step="5"
               value={minPanelHeightPx}
-              onChange={(e) => onMinPanelHeightChange?.(parseInt(e.target.value, 10))}
+              onChange={(e) =>
+                onMinPanelHeightChange?.(parseInt(e.target.value, 10))
+              }
               className="w-full accent-teal-400 h-2 bg-neutral-800 rounded-lg cursor-pointer"
             />
             <span className="text-[10px] text-neutral-400 block leading-tight">
-              Filters out accidental artifact slivers and speckles below this size.
+              Filters out accidental artifact slivers and speckles below this
+              size.
             </span>
           </div>
 
@@ -431,11 +469,14 @@ export function AutoCropTuningTab({
               max="40"
               step="2"
               value={overlapMergeThreshold}
-              onChange={(e) => onOverlapMergeThresholdChange?.(parseInt(e.target.value, 10))}
+              onChange={(e) =>
+                onOverlapMergeThresholdChange?.(parseInt(e.target.value, 10))
+              }
               className="w-full accent-sky-400 h-2 bg-neutral-800 rounded-lg cursor-pointer"
             />
             <span className="text-[10px] text-neutral-400 block leading-tight">
-              Automatically bridges micro-gutters smaller than this gap distance.
+              Automatically bridges micro-gutters smaller than this gap
+              distance.
             </span>
           </div>
         </div>
@@ -506,7 +547,9 @@ export function AutoCropTuningTab({
             >
               <option value="top_to_bottom">Vertical Strip (Webtoon)</option>
               <option value="right_to_left">Right-to-Left (Manga / RTL)</option>
-              <option value="left_to_right">Left-to-Right (Western Comic)</option>
+              <option value="left_to_right">
+                Left-to-Right (Western Comic)
+              </option>
             </select>
             <span className="text-[10px] text-neutral-400 block">
               Dictates panel numbering & slice order.
@@ -548,8 +591,12 @@ export function AutoCropTuningTab({
             <div className="flex items-center gap-2.5">
               <MessageSquare className="h-4 w-4 text-emerald-400 shrink-0" />
               <div>
-                <span className="text-xs font-semibold text-neutral-200 block">Bubble Guard</span>
-                <span className="text-[10px] text-neutral-500 block">Avoids slicing speech balloons</span>
+                <span className="text-xs font-semibold text-neutral-200 block">
+                  Bubble Guard
+                </span>
+                <span className="text-[10px] text-neutral-500 block">
+                  Avoids slicing speech balloons
+                </span>
               </div>
             </div>
             <input
@@ -565,8 +612,12 @@ export function AutoCropTuningTab({
             <div className="flex items-center gap-2.5">
               <Volume2 className="h-4 w-4 text-purple-400 shrink-0" />
               <div>
-                <span className="text-xs font-semibold text-neutral-200 block">Gutter SFX Filter</span>
-                <span className="text-[10px] text-neutral-500 block">Ignores sound effect marks</span>
+                <span className="text-xs font-semibold text-neutral-200 block">
+                  Gutter SFX Filter
+                </span>
+                <span className="text-[10px] text-neutral-500 block">
+                  Ignores sound effect marks
+                </span>
               </div>
             </div>
             <input
@@ -582,8 +633,12 @@ export function AutoCropTuningTab({
             <div className="flex items-center gap-2.5">
               <Scissors className="h-4 w-4 text-sky-400 shrink-0" />
               <div>
-                <span className="text-xs font-semibold text-neutral-200 block">Auto Gutter Trim</span>
-                <span className="text-[10px] text-neutral-500 block">Strips excessive white/black margins</span>
+                <span className="text-xs font-semibold text-neutral-200 block">
+                  Auto Gutter Trim
+                </span>
+                <span className="text-[10px] text-neutral-500 block">
+                  Strips excessive white/black margins
+                </span>
               </div>
             </div>
             <input
@@ -599,7 +654,9 @@ export function AutoCropTuningTab({
       {/* ── 5. BOTTOM ACTION FOOTER ── */}
       <div className="flex items-center justify-between flex-wrap gap-3 pt-3 border-t border-neutral-900">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-neutral-400 font-medium">Apply Scope:</span>
+          <span className="text-xs text-neutral-400 font-medium">
+            Apply Scope:
+          </span>
           <div className="flex items-center bg-neutral-900 rounded-xl p-0.5 border border-neutral-800">
             <button
               type="button"
@@ -632,7 +689,10 @@ export function AutoCropTuningTab({
           className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold flex items-center gap-2 transition-all !cursor-pointer shadow-xl shadow-emerald-500/20 active:scale-95"
         >
           <RefreshCw className="h-4 w-4" />
-          <span>Apply Parameters & Re-Detect ({applyScope === "all" ? "All" : "Current"})</span>
+          <span>
+            Apply Parameters & Re-Detect (
+            {applyScope === "all" ? "All" : "Current"})
+          </span>
         </button>
       </div>
     </div>

@@ -58,10 +58,7 @@ export const ImportedImagesSidebar: React.FC<ImportedImagesSidebarProps> = ({
     return label.includes(episodeSearchQuery.toLowerCase());
   });
 
-  const totalScrapedFrames = episodeGroups.reduce(
-    (acc, g) => acc + g.count,
-    0
-  );
+  const totalScrapedFrames = episodeGroups.reduce((acc, g) => acc + g.count, 0);
 
   if (isEpisodeCollapsed) {
     return (

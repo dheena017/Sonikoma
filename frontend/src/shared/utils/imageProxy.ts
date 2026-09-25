@@ -35,7 +35,11 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
       url.includes("/api/v1/proxy/image") ||
       decoded.includes("/api/v1/proxy/image")
     ) {
-      if (referer && !url.includes("referer=") && !decoded.includes("referer=")) {
+      if (
+        referer &&
+        !url.includes("referer=") &&
+        !decoded.includes("referer=")
+      ) {
         const sep = url.includes("?") ? "&" : "?";
         return `${url}${sep}referer=${encodeURIComponent(referer)}`;
       }
@@ -67,8 +71,13 @@ export function getProxiedImageUrl(url?: string, referer?: string): string {
     // Prevent proxying HTML reader/manga pages as images
     try {
       const pathname = new URL(resolvedUrl).pathname.toLowerCase();
-      const hasImageExt = /\.(jpe?g|png|webp|avif|gif|svg)(\?.*)?$/i.test(pathname);
-      const isHtmlMangaPage = /\/(serie|series|manga|comic|comics|webtoon|webtoons|read|book|chapter|ep|episode|ch)([-_/]|$)/i.test(pathname);
+      const hasImageExt = /\.(jpe?g|png|webp|avif|gif|svg)(\?.*)?$/i.test(
+        pathname
+      );
+      const isHtmlMangaPage =
+        /\/(serie|series|manga|comic|comics|webtoon|webtoons|read|book|chapter|ep|episode|ch)([-_/]|$)/i.test(
+          pathname
+        );
       if (isHtmlMangaPage && !hasImageExt) {
         return "";
       }
@@ -92,7 +101,9 @@ export function getSourceName(urlStr: string): string {
   try {
     if (!urlStr) return "Custom Source";
     const cleaned = urlStr.trim();
-    const urlObj = new URL(cleaned.startsWith("http") ? cleaned : "https://" + cleaned);
+    const urlObj = new URL(
+      cleaned.startsWith("http") ? cleaned : "https://" + cleaned
+    );
     const host = urlObj.hostname.toLowerCase();
 
     const parts = host
@@ -101,16 +112,45 @@ export function getSourceName(urlStr: string): string {
       .filter(
         (p) =>
           ![
-            "com", "net", "org", "io", "co", "kr", "app", "fan", "mobi",
-            "tv", "cc", "us", "me", "xyz", "top", "site", "online", "store"
+            "com",
+            "net",
+            "org",
+            "io",
+            "co",
+            "kr",
+            "app",
+            "fan",
+            "mobi",
+            "tv",
+            "cc",
+            "us",
+            "me",
+            "xyz",
+            "top",
+            "site",
+            "online",
+            "store",
           ].includes(p)
       );
 
     const nameParts = parts.filter(
       (p) =>
         ![
-          "m", "api", "cdn", "static", "assets", "v1", "v2", "v3",
-          "en", "kr", "jp", "cn", "fr", "es", "de"
+          "m",
+          "api",
+          "cdn",
+          "static",
+          "assets",
+          "v1",
+          "v2",
+          "v3",
+          "en",
+          "kr",
+          "jp",
+          "cn",
+          "fr",
+          "es",
+          "de",
         ].includes(p)
     );
     const activeParts = nameParts.length > 0 ? nameParts : parts;
@@ -133,10 +173,13 @@ export function getSourceIcon(urlStr: string) {
   try {
     if (!urlStr) return Globe;
     const cleaned = urlStr.trim();
-    const urlObj = new URL(cleaned.startsWith("http") ? cleaned : "https://" + cleaned);
+    const urlObj = new URL(
+      cleaned.startsWith("http") ? cleaned : "https://" + cleaned
+    );
     const host = urlObj.hostname.toLowerCase();
 
-    if (host.includes("webtoons.com") || host.includes("webtoon.com")) return Book;
+    if (host.includes("webtoons.com") || host.includes("webtoon.com"))
+      return Book;
     if (host.includes("webcomicsapp.com")) return Smartphone;
     return ExternalLink;
   } catch {

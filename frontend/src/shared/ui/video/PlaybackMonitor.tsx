@@ -67,11 +67,11 @@ export default function VideoPreviewCinemaPlayer({
     videoUrl && videoDuration > 0
       ? videoDuration
       : panels.length > 0
-        ? panels.reduce(
+      ? panels.reduce(
           (acc, p) => acc + (p.duration || (p as any).duration_sec || 3.0),
           0
         )
-        : 0;
+      : 0;
 
   // Define Chapters dynamically from scraped episode groups if multiple exist
   const chapters: Chapter[] = useMemo(() => {
@@ -178,20 +178,18 @@ export default function VideoPreviewCinemaPlayer({
             p.speechRate !== undefined
               ? p.speechRate
               : parseFloat(
-                localStorage.getItem("ai_comic_speech_rate") || "1.0"
-              ) || 1.0,
+                  localStorage.getItem("ai_comic_speech_rate") || "1.0"
+                ) || 1.0,
           speechPitch:
             p.speechPitch !== undefined
               ? p.speechPitch
               : parseFloat(
-                localStorage.getItem("ai_comic_speech_pitch") || "1.0"
-              ) || 1.0,
+                  localStorage.getItem("ai_comic_speech_pitch") || "1.0"
+                ) || 1.0,
           bgmVolume: p.bgmVolume !== undefined ? p.bgmVolume : 50,
           audioDucking: p.audioDucking !== undefined ? p.audioDucking : true,
           musicTheme:
-            p.musicTheme ||
-            localStorage.getItem("ai_comic_music_theme") ||
-            "",
+            p.musicTheme || localStorage.getItem("ai_comic_music_theme") || "",
         };
       }
     } catch (e) {
@@ -409,7 +407,7 @@ export default function VideoPreviewCinemaPlayer({
         v.loop = isLooping;
         v.playbackRate = playbackSpeed;
         if (isPlaying) {
-          v.play().catch(() => { });
+          v.play().catch(() => {});
         } else {
           v.pause();
         }
@@ -553,13 +551,13 @@ export default function VideoPreviewCinemaPlayer({
   const activePanelForHover = getPanelAtTime(hoverProgress.time);
   const activePanelNow = isPlaying
     ? getPanelAtTime(currentTime) ||
-    (currentPanelIndex !== undefined && panels[currentPanelIndex]) ||
-    panels[0] ||
-    null
+      (currentPanelIndex !== undefined && panels[currentPanelIndex]) ||
+      panels[0] ||
+      null
     : (currentPanelIndex !== undefined && panels[currentPanelIndex]) ||
-    getPanelAtTime(currentTime) ||
-    panels[0] ||
-    null;
+      getPanelAtTime(currentTime) ||
+      panels[0] ||
+      null;
 
   const activePanelImg = useMemo(() => {
     if (!activePanelNow) return null;
@@ -686,7 +684,7 @@ export default function VideoPreviewCinemaPlayer({
     e: React.MouseEvent<HTMLDivElement>
   ) => {
     if (!progressBarRef.current) return;
-    
+
     // Helper function for the scrubbing calculation
     const calculateAndSetTime = (clientX: number, isShiftPressed: boolean) => {
       const rect = progressBarRef.current!.getBoundingClientRect();
@@ -710,7 +708,9 @@ export default function VideoPreviewCinemaPlayer({
         const startDiff = Math.abs(closestChapter.startTime - targetTime);
         const endDiff = Math.abs(closestChapter.endTime - targetTime);
         targetTime =
-          startDiff < endDiff ? closestChapter.startTime : closestChapter.endTime;
+          startDiff < endDiff
+            ? closestChapter.startTime
+            : closestChapter.endTime;
       }
 
       setCurrentTime(targetTime);
@@ -1029,24 +1029,27 @@ export default function VideoPreviewCinemaPlayer({
         setShowSettings(false);
         setShowChaptersMenu(false);
       }}
-      className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${variant === "floating" || variant === "embedded"
+      className={`relative select-none flex flex-col justify-center items-center bg-black overflow-hidden transition-all duration-300 ${
+        variant === "floating" || variant === "embedded"
           ? "w-full h-full rounded-none"
           : isTheaterMode
-            ? "w-full h-[85vh] lg:h-[90vh]"
-            : "fixed inset-0 z-50 w-screen h-screen"
-        }`}
+          ? "w-full h-[85vh] lg:h-[90vh]"
+          : "fixed inset-0 z-50 w-screen h-screen"
+      }`}
     >
       {/* BACKGROUND OVERLAY */}
       <div className="absolute inset-0 bg-radial-gradient from-[#2A2A2A] via-black to-black opacity-95 pointer-events-none z-0" />
 
       {/* CINEMATIC LETTERBOX BARS */}
       <div
-        className={`absolute top-0 inset-x-0 bg-black z-40 transition-all duration-500 pointer-events-none ${cinematicBars ? "h-[10%] opacity-100" : "h-0 opacity-0"
-          }`}
+        className={`absolute top-0 inset-x-0 bg-black z-40 transition-all duration-500 pointer-events-none ${
+          cinematicBars ? "h-[10%] opacity-100" : "h-0 opacity-0"
+        }`}
       />
       <div
-        className={`absolute bottom-0 inset-x-0 bg-black z-40 transition-all duration-500 pointer-events-none ${cinematicBars ? "h-[10%] opacity-100" : "h-0 opacity-0"
-          }`}
+        className={`absolute bottom-0 inset-x-0 bg-black z-40 transition-all duration-500 pointer-events-none ${
+          cinematicBars ? "h-[10%] opacity-100" : "h-0 opacity-0"
+        }`}
       />
 
       {/* SUB-COMPONENT: Keyboard HUD Shortcuts */}
@@ -1125,11 +1128,13 @@ export default function VideoPreviewCinemaPlayer({
       <div className="relative w-full h-full flex items-center justify-center z-10 overflow-hidden bg-[#09090f]">
         {/* Workspace dot grid pattern - hidden during empty state for clean cinematic canvas */}
         {((mode === "video" && videoUrl && !videoHasError) ||
-          (mode === "timeline" && activePanelNow && (activePanelImg || activePanelNow.layers?.background_url))) && (
+          (mode === "timeline" &&
+            activePanelNow &&
+            (activePanelImg || activePanelNow.layers?.background_url))) && (
           <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]" />
         )}
 
-        <div 
+        <div
           className="relative w-full h-full flex items-center justify-center bg-transparent overflow-hidden cursor-pointer"
           onClick={togglePlay}
         >
@@ -1170,7 +1175,8 @@ export default function VideoPreviewCinemaPlayer({
                     Storyboard Awaiting Panels
                   </h3>
                   <p className="text-[11px] sm:text-xs text-neutral-400 font-mono leading-relaxed">
-                    Enter a Webtoon URL above or import images to generate storyboard panel cuts.
+                    Enter a Webtoon URL above or import images to generate
+                    storyboard panel cuts.
                   </p>
                 </div>
               </div>
@@ -1184,7 +1190,8 @@ export default function VideoPreviewCinemaPlayer({
                     No Compiled Video Yet
                   </h3>
                   <p className="text-[11px] sm:text-xs text-neutral-400 font-mono max-w-xs leading-relaxed">
-                    Export your storyboard cut sequence above to generate the final rendered MP4 video file.
+                    Export your storyboard cut sequence above to generate the
+                    final rendered MP4 video file.
                   </p>
                 </div>
               </div>
@@ -1195,7 +1202,11 @@ export default function VideoPreviewCinemaPlayer({
               {/* Ambient Blurred Backdrop */}
               <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none select-none">
                 <img
-                  src={activePanelNow.layers?.background_url || activePanelImg || ""}
+                  src={
+                    activePanelNow.layers?.background_url ||
+                    activePanelImg ||
+                    ""
+                  }
                   alt=""
                   aria-hidden="true"
                   className="w-full h-full object-cover object-center filter blur-3xl opacity-30 scale-125 saturate-150 transition-all duration-700"
@@ -1271,7 +1282,8 @@ export default function VideoPreviewCinemaPlayer({
                   Storyboard Awaiting Panels
                 </h3>
                 <p className="text-[11px] sm:text-xs text-neutral-400 font-mono leading-relaxed">
-                  Enter a Webtoon URL above or import images to generate storyboard panel cuts.
+                  Enter a Webtoon URL above or import images to generate
+                  storyboard panel cuts.
                 </p>
               </div>
             </div>
@@ -1315,7 +1327,8 @@ export default function VideoPreviewCinemaPlayer({
         />
       )}
 
-      {((mode === "video" && videoUrl && !videoHasError) || mode === "timeline") && (
+      {((mode === "video" && videoUrl && !videoHasError) ||
+        mode === "timeline") && (
         <>
           {/* SUB-COMPONENT: Floating Chapters Menu */}
           {chapters.length > 1 && (
@@ -1353,41 +1366,41 @@ export default function VideoPreviewCinemaPlayer({
 
           {/* SUB-COMPONENT: Bottom Controls Bar */}
           <VideoPreviewBottomControls
-        visible={controlsVisible}
-        progressBarRef={progressBarRef}
-        handleProgressBarInteraction={handleProgressBarInteraction}
-        handleProgressBarMouseMove={handleProgressBarMouseMove}
-        handleProgressBarMouseLeave={handleProgressBarMouseLeave}
-        hoverProgress={hoverProgress}
-        activePanelForHover={activePanelForHover}
-        chapters={chapters}
-        activeChapter={activeChapter}
-        totalDuration={totalDuration}
-        currentTime={currentTime}
-        formatTime={formatTime}
-        getActiveChapter={getActiveChapter}
-        handleSkipBackward={handleSkipBackward}
-        handleSkipForward={handleSkipForward}
-        togglePlay={togglePlay}
-        isPlaying={isPlaying}
-        isMuted={isMuted}
-        setIsMuted={setIsMuted}
-        volume={volume}
-        setVolume={setVolume}
-        showChaptersMenu={showChaptersMenu}
-        setShowChaptersMenu={setShowChaptersMenu}
-        showSettings={showSettings}
-        setShowSettings={setShowSettings}
-        isLooping={isLooping}
-        setIsLooping={setIsLooping}
-        showSubtitles={showSubtitles}
-        setShowSubtitles={setShowSubtitles}
-        togglePictureInPicture={togglePictureInPicture}
-        variant={variant}
-        isTheaterMode={isTheaterMode}
-        setIsTheaterMode={setIsTheaterMode}
-        toggleFullscreen={toggleFullscreen}
-        isFullscreen={isFullscreen}
+            visible={controlsVisible}
+            progressBarRef={progressBarRef}
+            handleProgressBarInteraction={handleProgressBarInteraction}
+            handleProgressBarMouseMove={handleProgressBarMouseMove}
+            handleProgressBarMouseLeave={handleProgressBarMouseLeave}
+            hoverProgress={hoverProgress}
+            activePanelForHover={activePanelForHover}
+            chapters={chapters}
+            activeChapter={activeChapter}
+            totalDuration={totalDuration}
+            currentTime={currentTime}
+            formatTime={formatTime}
+            getActiveChapter={getActiveChapter}
+            handleSkipBackward={handleSkipBackward}
+            handleSkipForward={handleSkipForward}
+            togglePlay={togglePlay}
+            isPlaying={isPlaying}
+            isMuted={isMuted}
+            setIsMuted={setIsMuted}
+            volume={volume}
+            setVolume={setVolume}
+            showChaptersMenu={showChaptersMenu}
+            setShowChaptersMenu={setShowChaptersMenu}
+            showSettings={showSettings}
+            setShowSettings={setShowSettings}
+            isLooping={isLooping}
+            setIsLooping={setIsLooping}
+            showSubtitles={showSubtitles}
+            setShowSubtitles={setShowSubtitles}
+            togglePictureInPicture={togglePictureInPicture}
+            variant={variant}
+            isTheaterMode={isTheaterMode}
+            setIsTheaterMode={setIsTheaterMode}
+            toggleFullscreen={toggleFullscreen}
+            isFullscreen={isFullscreen}
             addNotification={addNotification}
           />
         </>

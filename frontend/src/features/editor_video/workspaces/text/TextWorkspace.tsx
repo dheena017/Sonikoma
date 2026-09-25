@@ -28,7 +28,8 @@ export const TextWorkspace: React.FC<TextWorkspaceProps> = ({
   const filteredPresets = REAL_TEXT_PRESETS.filter((preset) => {
     const tabMatch =
       activeTab === "All" ||
-      preset.category.toLowerCase().replace("-", " ") === activeTab.toLowerCase();
+      preset.category.toLowerCase().replace("-", " ") ===
+        activeTab.toLowerCase();
     const searchMatch =
       !searchQuery.trim() ||
       preset.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -39,7 +40,7 @@ export const TextWorkspace: React.FC<TextWorkspaceProps> = ({
 
   const handleApplyPreset = (preset: any) => {
     loadGoogleFont(preset.fontFamily);
-    
+
     // Broadcast on EventBus to add subtitle/caption
     editorEventBus.publish("MEDIA_ADDED", {
       assetId: preset.id,

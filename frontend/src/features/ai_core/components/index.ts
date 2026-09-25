@@ -4,8 +4,14 @@ export { default as AICoreMiniSidebar } from "./AICoreMiniSidebar";
 export { default as AICoreSidebar } from "./AICoreSidebar";
 export { default as HeaderCreditsPopover } from "./HeaderCreditsPopover";
 export type { HeaderCreditsPopoverProps } from "./HeaderCreditsPopover";
-export { default as AIModelSelector, AIModelSelector as NamedAIModelSelector } from "./AIModelSelector";
-export { default as AISmartRoutingDrawer, AISmartRoutingDrawer as NamedAISmartRoutingDrawer } from "./AISmartRoutingDrawer";
+export {
+  default as AIModelSelector,
+  AIModelSelector as NamedAIModelSelector,
+} from "./AIModelSelector";
+export {
+  default as AISmartRoutingDrawer,
+  AISmartRoutingDrawer as NamedAISmartRoutingDrawer,
+} from "./AISmartRoutingDrawer";
 export type { AISmartRoutingDrawerProps } from "./AISmartRoutingDrawer";
 export { default as TaskRouteConfigureView } from "./TaskRouteConfigureView";
 export * from "./TaskRouteConfigureView";

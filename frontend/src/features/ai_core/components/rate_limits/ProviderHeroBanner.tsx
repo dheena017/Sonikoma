@@ -19,7 +19,8 @@ export default function ProviderHeroBanner({
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-blue-400" /> {currentProvider.name} Usage & Limits
+              <Zap className="w-4 h-4 text-blue-400" /> {currentProvider.name}{" "}
+              Usage & Limits
             </h3>
             <span className="text-[10px] font-mono font-bold bg-[#0E0E0E] border border-[#2F2F2F] text-neutral-300 px-2.5 py-0.5 rounded-full flex items-center gap-1">
               <Clock className="w-3 h-3 text-blue-400" />
@@ -31,7 +32,8 @@ export default function ProviderHeroBanner({
             {currentProvider.name} Rate Limits & Plans
           </h1>
           <p className="text-xs sm:text-sm text-neutral-400 max-w-3xl leading-relaxed font-normal">
-            View how many requests per minute (RPM) and tokens per minute (TPM) are available for {currentProvider.name} models.
+            View how many requests per minute (RPM) and tokens per minute (TPM)
+            are available for {currentProvider.name} models.
           </p>
         </div>
 
@@ -53,7 +55,9 @@ export default function ProviderHeroBanner({
             disabled={isRefreshing}
             className="px-4 py-2 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold shadow-sm flex items-center gap-2 transition-all cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             <span>Refresh Limits</span>
           </button>
         </div>

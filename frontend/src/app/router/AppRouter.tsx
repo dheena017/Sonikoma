@@ -675,8 +675,8 @@ export default function AppRouter(props: AppRouterProps) {
   // Detect whether we have a saved auth token in local or session storage
   const hasSavedToken = Boolean(
     typeof window !== "undefined" &&
-    (localStorage.getItem("sonikoma_token") ||
-      sessionStorage.getItem("sonikoma_token"))
+      (localStorage.getItem("sonikoma_token") ||
+        sessionStorage.getItem("sonikoma_token"))
   );
 
   const isPublicAuthRoute =
@@ -687,8 +687,6 @@ export default function AppRouter(props: AppRouterProps) {
     currentPath === "/login" ||
     currentPath === "/register" ||
     currentPath === "/forgot-password";
-
-
 
   // --- Guard: Public Landing Page ---
   if (
@@ -912,11 +910,9 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/ai-core/charts" ||
         currentPath === "/ai-core/analytics",
       isAIRoutingPath:
-        currentPath === "/ai-core/routing" ||
-        currentPath === "/ai-core/models",
+        currentPath === "/ai-core/routing" || currentPath === "/ai-core/models",
       isAIWalletPath:
-        currentPath === "/ai-core/wallet" ||
-        currentPath === "/ai-core/billing",
+        currentPath === "/ai-core/wallet" || currentPath === "/ai-core/billing",
 
       editorRouteMatch,
       isImageEditorPage,
@@ -962,7 +958,6 @@ export default function AppRouter(props: AppRouterProps) {
     isImageEditorPage,
     isVideoEditorPath,
   } = pathFlags;
-
 
   const isAnyAdmin = isAdminPath || isAdminDashboardPath;
 
@@ -1037,7 +1032,10 @@ export default function AppRouter(props: AppRouterProps) {
       return;
     }
 
-    if (currentPath === "/scraper/scraper" || currentPath.startsWith("/scraper/scraper/")) {
+    if (
+      currentPath === "/scraper/scraper" ||
+      currentPath.startsWith("/scraper/scraper/")
+    ) {
       const newPath = currentPath.replace(/^\/scraper\/scraper/, "/scraper");
       const search = window.location.search;
       navigateTo(`${newPath}${search}`);
@@ -1087,12 +1085,17 @@ export default function AppRouter(props: AppRouterProps) {
     }
 
     // Redirect legacy /editor/:series/:chapter to canonical /scraper/editor/series/:series/chapters/:chapter
-    if (currentPath.startsWith("/editor/") && !currentPath.startsWith("/editor/draft")) {
+    if (
+      currentPath.startsWith("/editor/") &&
+      !currentPath.startsWith("/editor/draft")
+    ) {
       const match = currentPath.match(/^\/editor\/([^\/]+)\/([^\/]+)\/?$/);
       if (match) {
         const [, sSlug, cSlug] = match;
         const search = window.location.search;
-        navigateTo(`/scraper/editor/series/${sSlug}/chapters/${cSlug}${search}`);
+        navigateTo(
+          `/scraper/editor/series/${sSlug}/chapters/${cSlug}${search}`
+        );
         return;
       }
     }
@@ -1110,12 +1113,18 @@ export default function AppRouter(props: AppRouterProps) {
 
       // Guard: Ensure store data is hydrated and actually matches the target project before normalising
       const activeData = useProjectStore.getState().activeProjectData;
-      if (projId && activeData?.project?.project_id && activeData.project.project_id !== projId) {
+      if (
+        projId &&
+        activeData?.project?.project_id &&
+        activeData.project.project_id !== projId
+      ) {
         return;
       }
 
-      const activeSeriesSlug = activeData?.project?.series_slug || seriesSlugState;
-      const activeChapterSlug = activeData?.project?.chapter_slug || chapterSlugState;
+      const activeSeriesSlug =
+        activeData?.project?.series_slug || seriesSlugState;
+      const activeChapterSlug =
+        activeData?.project?.chapter_slug || chapterSlugState;
 
       if (!activeSeriesSlug || !activeChapterSlug) {
         return;
@@ -1278,127 +1287,125 @@ export default function AppRouter(props: AppRouterProps) {
       <React.Suspense fallback={<RouteLoadingFallback />}>
         {/* PAGE VIEW 1: Main Editor Workspace */}
         {isWorkspacePath && (
-          <div
-            className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]"
-          >
+          <div className="page-transition w-full flex-1 flex flex-col animate-[fadeIn_0.2s_ease-out]">
             <ScraperPage
-            isDashboardOnly={isWorkspaceOnly}
-            projectId={projectId}
-            seriesSlug={seriesSlugState}
-            chapterSlug={chapterSlugState}
-            isGeneratingStoryboard={appLogic.isGeneratingStoryboard}
-            handleGenerateStoryboardAI={appLogic.handleGenerateStoryboardAI}
-            panels={panels}
-            setPanels={setPanels}
-            saveProject={saveProject}
-            videoUrl={videoUrl}
-            consoleLogs={consoleLogs}
-            setConsoleLogs={setConsoleLogs}
-            scrapedImages={scrapedImages}
-            setScrapedImages={appLogic.setScrapedImages}
-            selectedScraped={selectedScraped}
-            setSelectedScraped={setSelectedScraped}
-            activePreviewTab={activePreviewTab}
-            setActivePreviewTab={setActivePreviewTab}
-            setEditingImageIdx={setEditingImageIdx}
-            setEditCropTop={setEditCropTop}
-            setEditCropBottom={setEditCropBottom}
-            setEditCropLeft={setEditCropLeft}
-            setEditCropRight={setEditCropRight}
-            isRendering={isRendering}
-            renderProgress={renderProgress}
-            handleRenderFinalVideo={handleRenderFinalVideo}
-            setEditAutoTrim={setEditAutoTrim}
-            showBubbleModal={showBubbleModal}
-            setShowBubbleModal={setShowBubbleModal}
-            playStoryboardAudio={playStoryboardAudio}
-            isCleaningBubbles={isCleaningBubbles}
-            cleanProgress={cleanProgress}
-            bubbleCroppingImgUrl={bubbleCroppingImgUrl}
-            showAutoCropModal={showAutoCropModal}
-            setShowAutoCropModal={setShowAutoCropModal}
-            isBatchCropping={isBatchCropping}
-            batchProgress={batchProgress}
-            croppingImgUrl={croppingImgUrl}
-            resetWorkspace={resetWorkspace}
-            handleAutoCropSelected={handleAutoCropSelected}
-            handleCleanBubblesSelected={handleCleanBubblesSelected}
-            scrapeImages={scrapeImages}
-            videoPlayerRef={videoPlayerRef}
-            addNotification={addNotification}
-            setErrorPopup={setErrorPopup}
-            fetchWithInterceptor={fetchWithInterceptor}
-            targetUrl={targetUrl}
-            setTargetUrl={setTargetUrl}
-            selectedSource={selectedSource}
-            setSelectedSource={setSelectedSource}
-            seriesTitle={seriesTitle}
-            setSeriesTitle={setSeriesTitle}
-            chapterNumber={chapterNumber}
-            setChapterNumber={setChapterNumber}
-            chapterTitle={chapterTitle}
-            setChapterTitle={setChapterTitle}
-            scrapedGenre={scrapedGenre}
-            setScrapedGenre={setScrapedGenre}
-            seriesAuthor={seriesAuthor}
-            setSeriesAuthor={setSeriesAuthor}
-            seriesCoverImage={seriesCoverImage}
-            setSeriesCoverImage={setSeriesCoverImage}
-            seriesSynopsis={seriesSynopsis}
-            setSeriesSynopsis={setSeriesSynopsis}
-            selectedModel={selectedModel}
-            setSelectedModel={setSelectedModel}
-            isProcessing={isProcessing}
-            handleGenerateVideo={handleGenerateVideo}
-            isScraping={isScraping}
-            mergingIndices={mergingIndices}
-            handleStitchWithNext={handleStitchWithNext}
-            addPanelsToStoryboard={addPanelsToStoryboard}
-            progressStatus={progressStatus}
-            setVideoUrl={setVideoUrl}
-            aspectRatio={aspectRatio}
-            currentPanelIndex={currentPanelIndex}
-            setCurrentPanelIndex={setCurrentPanelIndex}
-            playbackTime={playbackTime}
-            setPlaybackTime={setPlaybackTime}
-            reprocessingPanelId={reprocessingPanelId}
-            storyboardPlaying={storyboardPlaying}
-            toggleStoryboardPlayback={toggleStoryboardPlayback}
-            resetStoryboardPlayback={resetStoryboardPlayback}
-            isMuted={isMuted}
-            setIsMuted={setIsMuted}
-            volume={volume}
-            setVolume={setVolume}
-            musicTheme={musicTheme}
-            voiceActor={voiceActor}
-            narrationStyle={narrationStyle}
-            setNarrationStyle={setNarrationStyle}
-            smartSlice={smartSlice}
-            setSmartSlice={setSmartSlice}
-            bubbleSensitivity={bubbleSensitivity}
-            bubbleDetectionStyle={bubbleDetectionStyle}
-            bubbleEraseMethod={bubbleEraseMethod}
-            bubbleDilation={bubbleDilation}
-            bubbleInpaintRadius={bubbleInpaintRadius}
-            cropSensitivity={cropSensitivity}
-            cropBackgroundMode={cropBackgroundMode}
-            aspectRatioLock={aspectRatioLock}
-            minPanelAreaPct={minPanelAreaPct}
-            overlapMergeThreshold={overlapMergeThreshold}
-            useLocalCV={useLocalCV}
-            autoSplitTallStrips={autoSplitTallStrips}
-            cropModel={cropModel}
-            cropMinHeightPx={cropMinHeightPx}
-            cropCannyLow={cropCannyLow}
-            cropCannyHigh={cropCannyHigh}
-            cropCloseKernelSize={cropCloseKernelSize}
-            showScrapeConfirmModal={showScrapeConfirmModal}
-            setShowScrapeConfirmModal={setShowScrapeConfirmModal}
-            navigateTo={navigateTo}
-            audioFeedback={audioFeedback}
-          />
-        </div>
-      )}
+              isDashboardOnly={isWorkspaceOnly}
+              projectId={projectId}
+              seriesSlug={seriesSlugState}
+              chapterSlug={chapterSlugState}
+              isGeneratingStoryboard={appLogic.isGeneratingStoryboard}
+              handleGenerateStoryboardAI={appLogic.handleGenerateStoryboardAI}
+              panels={panels}
+              setPanels={setPanels}
+              saveProject={saveProject}
+              videoUrl={videoUrl}
+              consoleLogs={consoleLogs}
+              setConsoleLogs={setConsoleLogs}
+              scrapedImages={scrapedImages}
+              setScrapedImages={appLogic.setScrapedImages}
+              selectedScraped={selectedScraped}
+              setSelectedScraped={setSelectedScraped}
+              activePreviewTab={activePreviewTab}
+              setActivePreviewTab={setActivePreviewTab}
+              setEditingImageIdx={setEditingImageIdx}
+              setEditCropTop={setEditCropTop}
+              setEditCropBottom={setEditCropBottom}
+              setEditCropLeft={setEditCropLeft}
+              setEditCropRight={setEditCropRight}
+              isRendering={isRendering}
+              renderProgress={renderProgress}
+              handleRenderFinalVideo={handleRenderFinalVideo}
+              setEditAutoTrim={setEditAutoTrim}
+              showBubbleModal={showBubbleModal}
+              setShowBubbleModal={setShowBubbleModal}
+              playStoryboardAudio={playStoryboardAudio}
+              isCleaningBubbles={isCleaningBubbles}
+              cleanProgress={cleanProgress}
+              bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+              showAutoCropModal={showAutoCropModal}
+              setShowAutoCropModal={setShowAutoCropModal}
+              isBatchCropping={isBatchCropping}
+              batchProgress={batchProgress}
+              croppingImgUrl={croppingImgUrl}
+              resetWorkspace={resetWorkspace}
+              handleAutoCropSelected={handleAutoCropSelected}
+              handleCleanBubblesSelected={handleCleanBubblesSelected}
+              scrapeImages={scrapeImages}
+              videoPlayerRef={videoPlayerRef}
+              addNotification={addNotification}
+              setErrorPopup={setErrorPopup}
+              fetchWithInterceptor={fetchWithInterceptor}
+              targetUrl={targetUrl}
+              setTargetUrl={setTargetUrl}
+              selectedSource={selectedSource}
+              setSelectedSource={setSelectedSource}
+              seriesTitle={seriesTitle}
+              setSeriesTitle={setSeriesTitle}
+              chapterNumber={chapterNumber}
+              setChapterNumber={setChapterNumber}
+              chapterTitle={chapterTitle}
+              setChapterTitle={setChapterTitle}
+              scrapedGenre={scrapedGenre}
+              setScrapedGenre={setScrapedGenre}
+              seriesAuthor={seriesAuthor}
+              setSeriesAuthor={setSeriesAuthor}
+              seriesCoverImage={seriesCoverImage}
+              setSeriesCoverImage={setSeriesCoverImage}
+              seriesSynopsis={seriesSynopsis}
+              setSeriesSynopsis={setSeriesSynopsis}
+              selectedModel={selectedModel}
+              setSelectedModel={setSelectedModel}
+              isProcessing={isProcessing}
+              handleGenerateVideo={handleGenerateVideo}
+              isScraping={isScraping}
+              mergingIndices={mergingIndices}
+              handleStitchWithNext={handleStitchWithNext}
+              addPanelsToStoryboard={addPanelsToStoryboard}
+              progressStatus={progressStatus}
+              setVideoUrl={setVideoUrl}
+              aspectRatio={aspectRatio}
+              currentPanelIndex={currentPanelIndex}
+              setCurrentPanelIndex={setCurrentPanelIndex}
+              playbackTime={playbackTime}
+              setPlaybackTime={setPlaybackTime}
+              reprocessingPanelId={reprocessingPanelId}
+              storyboardPlaying={storyboardPlaying}
+              toggleStoryboardPlayback={toggleStoryboardPlayback}
+              resetStoryboardPlayback={resetStoryboardPlayback}
+              isMuted={isMuted}
+              setIsMuted={setIsMuted}
+              volume={volume}
+              setVolume={setVolume}
+              musicTheme={musicTheme}
+              voiceActor={voiceActor}
+              narrationStyle={narrationStyle}
+              setNarrationStyle={setNarrationStyle}
+              smartSlice={smartSlice}
+              setSmartSlice={setSmartSlice}
+              bubbleSensitivity={bubbleSensitivity}
+              bubbleDetectionStyle={bubbleDetectionStyle}
+              bubbleEraseMethod={bubbleEraseMethod}
+              bubbleDilation={bubbleDilation}
+              bubbleInpaintRadius={bubbleInpaintRadius}
+              cropSensitivity={cropSensitivity}
+              cropBackgroundMode={cropBackgroundMode}
+              aspectRatioLock={aspectRatioLock}
+              minPanelAreaPct={minPanelAreaPct}
+              overlapMergeThreshold={overlapMergeThreshold}
+              useLocalCV={useLocalCV}
+              autoSplitTallStrips={autoSplitTallStrips}
+              cropModel={cropModel}
+              cropMinHeightPx={cropMinHeightPx}
+              cropCannyLow={cropCannyLow}
+              cropCannyHigh={cropCannyHigh}
+              cropCloseKernelSize={cropCloseKernelSize}
+              showScrapeConfirmModal={showScrapeConfirmModal}
+              setShowScrapeConfirmModal={setShowScrapeConfirmModal}
+              navigateTo={navigateTo}
+              audioFeedback={audioFeedback}
+            />
+          </div>
+        )}
 
         {/* PAGE VIEW 1.5: Dashboard Overview */}
         {(isDashboardOverviewPath || currentPath === "/") && (
@@ -1531,7 +1538,9 @@ export default function AppRouter(props: AppRouterProps) {
                   addNotification={addNotification}
                 />
               ) : (
-                <PageNotFound onNavigateHome={() => navigateTo("/creative-suite")} />
+                <PageNotFound
+                  onNavigateHome={() => navigateTo("/creative-suite")}
+                />
               )}
             </CreativeSuiteLayout>
           </div>
@@ -1556,7 +1565,6 @@ export default function AppRouter(props: AppRouterProps) {
               ) : (
                 <PageNotFound onNavigateHome={() => navigateTo("/ai-core")} />
               )}
-
             </div>
           </div>
         )}
@@ -1628,7 +1636,10 @@ export default function AppRouter(props: AppRouterProps) {
             <AutoCropPreviewPage
               onClose={handleAutoCropClose}
               onConfirm={async (confirmedResults) => {
-                if (confirmedResults && Object.keys(confirmedResults).length > 0) {
+                if (
+                  confirmedResults &&
+                  Object.keys(confirmedResults).length > 0
+                ) {
                   appLogic?.setScrapedImages?.((prev: string[]) => {
                     const copy: string[] = [];
                     prev.forEach((img) => {
@@ -1641,7 +1652,10 @@ export default function AppRouter(props: AppRouterProps) {
                     return copy;
                   });
                   setSelectedScraped([]);
-                  addNotification?.("Successfully sliced & auto-cropped panels!", "success");
+                  addNotification?.(
+                    "Successfully sliced & auto-cropped panels!",
+                    "success"
+                  );
                 } else {
                   await handleAutoCropSelected();
                 }
@@ -1752,7 +1766,11 @@ export default function AppRouter(props: AppRouterProps) {
 
         {/* FALLBACK VIEW: 404 Route Not Found */}
         {!isKnownRoute(currentPath) && (
-          <PageNotFound onNavigateHome={() => navigateTo(isAuthenticated ? "/dashboard" : "/")} />
+          <PageNotFound
+            onNavigateHome={() =>
+              navigateTo(isAuthenticated ? "/dashboard" : "/")
+            }
+          />
         )}
       </React.Suspense>
     </MainLayout>

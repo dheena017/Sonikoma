@@ -133,11 +133,14 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
               title="Click to jump directly to a panel number"
             >
               <span>
-                #{selectedPanelIndex !== null && selectedPanelIndex >= 0
+                #
+                {selectedPanelIndex !== null && selectedPanelIndex >= 0
                   ? selectedPanelIndex + 1
                   : "—"}
               </span>
-              <span className="text-neutral-500 font-normal">/{boxes.length}</span>
+              <span className="text-neutral-500 font-normal">
+                /{boxes.length}
+              </span>
             </button>
             <button
               type="button"
@@ -200,7 +203,11 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
             }`}
             title={showCutLines ? "Hide Panel Boxes" : "Show Panel Boxes"}
           >
-            {showCutLines ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+            {showCutLines ? (
+              <Eye className="h-3.5 w-3.5" />
+            ) : (
+              <EyeOff className="h-3.5 w-3.5" />
+            )}
           </button>
         )}
 
@@ -239,7 +246,9 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
         <div className="flex items-center bg-neutral-900 border border-neutral-800 rounded-xl p-0.5 text-[11px] font-mono">
           <button
             type="button"
-            onClick={() => setZoomScale((prev) => Math.max(0.5, +(prev - 0.25).toFixed(2)))}
+            onClick={() =>
+              setZoomScale((prev) => Math.max(0.5, +(prev - 0.25).toFixed(2)))
+            }
             className="px-2 py-1 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-colors !cursor-pointer"
             title="Zoom Out (-)"
           >
@@ -255,7 +264,9 @@ export const InteractiveCutToolbar: React.FC<InteractiveCutToolbarProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => setZoomScale((prev) => Math.min(2.5, +(prev + 0.25).toFixed(2)))}
+            onClick={() =>
+              setZoomScale((prev) => Math.min(2.5, +(prev + 0.25).toFixed(2)))
+            }
             className="px-2 py-1 hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-lg transition-colors !cursor-pointer"
             title="Zoom In (+)"
           >

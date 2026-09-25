@@ -68,7 +68,16 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
   const [projectNames, setProjectNames] = useState<Record<string, string>>({});
   const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({});
   const [testingStatus, setTestingStatus] = useState<
-    Record<string, { loading: boolean; success?: boolean; message?: string; latency?: number; project_name?: string }>
+    Record<
+      string,
+      {
+        loading: boolean;
+        success?: boolean;
+        message?: string;
+        latency?: number;
+        project_name?: string;
+      }
+    >
   >({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -190,8 +199,14 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
           localStorage.setItem(`sonikoma_key_${providerId}`, trimmed);
           localStorage.setItem(`user_${providerId}_key`, trimmed);
           if (data.project_name) {
-            setProjectNames((prev) => ({ ...prev, [providerId]: data.project_name }));
-            localStorage.setItem(`sonikoma_project_${providerId}`, data.project_name);
+            setProjectNames((prev) => ({
+              ...prev,
+              [providerId]: data.project_name,
+            }));
+            localStorage.setItem(
+              `sonikoma_project_${providerId}`,
+              data.project_name
+            );
           }
           window.dispatchEvent(new Event("sonikoma-keys-updated"));
           window.dispatchEvent(new Event("api-key-updated"));
@@ -299,8 +314,14 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
       const data = await res.json();
       if (data.success) {
         if (data.project_name && !projectNames[providerId]) {
-          setProjectNames((prev) => ({ ...prev, [providerId]: data.project_name }));
-          localStorage.setItem(`sonikoma_project_${providerId}`, data.project_name);
+          setProjectNames((prev) => ({
+            ...prev,
+            [providerId]: data.project_name,
+          }));
+          localStorage.setItem(
+            `sonikoma_project_${providerId}`,
+            data.project_name
+          );
         }
 
         setTestingStatus((prev) => ({
@@ -313,7 +334,12 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
             project_name: data.project_name,
           },
         }));
-        addNotification?.(`⚡ ${providerId.toUpperCase()} ping successful (${data.latency_ms}ms)`, "success");
+        addNotification?.(
+          `⚡ ${providerId.toUpperCase()} ping successful (${
+            data.latency_ms
+          }ms)`,
+          "success"
+        );
       } else {
         setTestingStatus((prev) => ({
           ...prev,
@@ -323,7 +349,10 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
             message: data.error || "Connection failed",
           },
         }));
-        addNotification?.(`Failed to connect to ${providerId.toUpperCase()}: ${data.error}`, "error");
+        addNotification?.(
+          `Failed to connect to ${providerId.toUpperCase()}: ${data.error}`,
+          "error"
+        );
       }
     } catch (err: any) {
       setTestingStatus((prev) => ({
@@ -334,11 +363,16 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
           message: "Network request failed",
         },
       }));
-      addNotification?.(`Error testing ${providerId.toUpperCase()} key`, "error");
+      addNotification?.(
+        `Error testing ${providerId.toUpperCase()} key`,
+        "error"
+      );
     }
   };
 
-  const configuredCount = Object.values(keys).filter((k) => k && k.trim()).length;
+  const configuredCount = Object.values(keys).filter(
+    (k) => k && k.trim()
+  ).length;
 
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-in fade-in duration-200 text-left text-[#E5E5E5]">
@@ -354,7 +388,9 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
               </span>
             </h1>
             <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
-              Connect your own API keys (BYOK) for Google Gemini, OpenAI, Claude, Groq, and more. Keys and configurations remain securely stored in your local browser storage.
+              Connect your own API keys (BYOK) for Google Gemini, OpenAI,
+              Claude, Groq, and more. Keys and configurations remain securely
+              stored in your local browser storage.
             </p>
           </div>
 
@@ -370,132 +406,151 @@ export default function AIAPIKeysPage({ addNotification }: AIAPIKeysPageProps) {
           </div>
         </div>
 
-      {/* ── PROVIDER CARDS GRID ───────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {isLoading ? (
-          <AICardSkeleton count={6} />
-        ) : (
-          providers.map((provider) => {
-          const Icon = ICON_MAP[provider.id] || Sparkles;
-          const userKey = keys[provider.id] || "";
-          const isVisible = Boolean(visibleKeys[provider.id]);
-          const testState = testingStatus[provider.id];
-          const isLocal = provider.id === "edgetts" || provider.id === "stable_diffusion";
-          const currentProject = projectNames[provider.id] || "";
+        {/* ── PROVIDER CARDS GRID ───────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {isLoading ? (
+            <AICardSkeleton count={6} />
+          ) : (
+            providers.map((provider) => {
+              const Icon = ICON_MAP[provider.id] || Sparkles;
+              const userKey = keys[provider.id] || "";
+              const isVisible = Boolean(visibleKeys[provider.id]);
+              const testState = testingStatus[provider.id];
+              const isLocal =
+                provider.id === "edgetts" || provider.id === "stable_diffusion";
+              const currentProject = projectNames[provider.id] || "";
 
-          return (
-            <div
-              key={provider.id}
-              className="rounded-2xl bg-neutral-900/90 border border-neutral-800 p-5 space-y-4 hover:border-neutral-700 transition-all text-left"
-            >
-              {/* Card Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-[#3B82F6]">
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-bold text-white font-sans">{provider.name}</h3>
-                      <span className="text-[9px] font-mono font-bold bg-neutral-950 px-2 py-0.5 rounded-full border border-neutral-800 text-neutral-300">
-                        {provider.badge}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-neutral-400 font-mono">{provider.category}</span>
-                  </div>
-                </div>
-
-                {provider.console_url && provider.console_url !== "#" && (
-                  <a
-                    href={provider.console_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-1.5 rounded-lg bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-[#93C5FD] transition-colors"
-                    title="Get API Key from provider console"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-
-              {/* Input & Action Row */}
-              {!isLocal ? (
-                <div className="space-y-2.5">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-neutral-400 flex items-center gap-1">
-                      <Key className="w-3 h-3 text-[#3B82F6]" /> {provider.name} API Key
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={isVisible ? "text" : "password"}
-                        placeholder={`Enter ${provider.name} API Key...`}
-                        value={userKey}
-                        onChange={(e) => handleKeyChange(provider.id, e.target.value)}
-                        className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-3 pr-20 py-2 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600"
-                      />
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => toggleVisibility(provider.id)}
-                          className="p-1 text-neutral-500 hover:text-neutral-300 transition-colors"
-                          title={isVisible ? "Hide Key" : "Reveal Key"}
-                        >
-                          {isVisible ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                        </button>
-                        {userKey && (
-                          <button
-                            type="button"
-                            onClick={() => handleClearKey(provider.id)}
-                            className="p-1 text-neutral-500 hover:text-rose-400 transition-colors"
-                            title="Clear Key"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+              return (
+                <div
+                  key={provider.id}
+                  className="rounded-2xl bg-neutral-900/90 border border-neutral-800 p-5 space-y-4 hover:border-neutral-700 transition-all text-left"
+                >
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-neutral-950 border border-neutral-800 text-[#3B82F6]">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-bold text-white font-sans">
+                            {provider.name}
+                          </h3>
+                          <span className="text-[9px] font-mono font-bold bg-neutral-950 px-2 py-0.5 rounded-full border border-neutral-800 text-neutral-300">
+                            {provider.badge}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-neutral-400 font-mono">
+                          {provider.category}
+                        </span>
                       </div>
                     </div>
+
+                    {provider.console_url && provider.console_url !== "#" && (
+                      <a
+                        href={provider.console_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1.5 rounded-lg bg-neutral-950 hover:bg-neutral-800 text-neutral-400 hover:text-[#93C5FD] transition-colors"
+                        title="Get API Key from provider console"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    )}
                   </div>
 
+                  {/* Input & Action Row */}
+                  {!isLocal ? (
+                    <div className="space-y-2.5">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-mono text-neutral-400 flex items-center gap-1">
+                          <Key className="w-3 h-3 text-[#3B82F6]" />{" "}
+                          {provider.name} API Key
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={isVisible ? "text" : "password"}
+                            placeholder={`Enter ${provider.name} API Key...`}
+                            value={userKey}
+                            onChange={(e) =>
+                              handleKeyChange(provider.id, e.target.value)
+                            }
+                            className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-3 pr-20 py-2 text-xs font-mono text-white placeholder-neutral-600 focus:outline-none focus:border-neutral-600"
+                          />
+                          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => toggleVisibility(provider.id)}
+                              className="p-1 text-neutral-500 hover:text-neutral-300 transition-colors"
+                              title={isVisible ? "Hide Key" : "Reveal Key"}
+                            >
+                              {isVisible ? (
+                                <EyeOff className="w-3.5 h-3.5" />
+                              ) : (
+                                <Eye className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                            {userKey && (
+                              <button
+                                type="button"
+                                onClick={() => handleClearKey(provider.id)}
+                                className="p-1 text-neutral-500 hover:text-rose-400 transition-colors"
+                                title="Clear Key"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
 
-                  {/* Real-time Live Validation Status */}
-                  <div className="flex items-center justify-between text-[11px] font-mono pt-1 min-h-[26px]">
-                    <div className="flex items-center gap-1.5">
-                      {testState?.loading ? (
-                        <span className="flex items-center gap-1.5 text-[#3B82F6] font-medium animate-pulse">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Verifying key...
-                        </span>
-                      ) : testState && testState.success ? (
-                        <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-0.5 rounded-lg">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Valid & Active {testState.latency ? `(${testState.latency}ms)` : ""}
-                        </span>
-                      ) : testState && !testState.success ? (
-                        <span className="flex items-center gap-1.5 text-rose-400 font-bold bg-rose-950/40 border border-rose-800/40 px-2.5 py-0.5 rounded-lg">
-                          <AlertCircle className="w-3.5 h-3.5" /> {testState.message || "Invalid Key"}
-                        </span>
-                      ) : userKey ? (
-                        <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/30 border border-emerald-800/30 px-2 py-0.5 rounded-lg">
-                          <CheckCircle2 className="w-3 h-3" /> Configured
-                        </span>
-                      ) : (
-                        <span className="text-neutral-500 text-[10.5px]">
-                          Auto-validates on entering API key
-                        </span>
-                      )}
+                      {/* Real-time Live Validation Status */}
+                      <div className="flex items-center justify-between text-[11px] font-mono pt-1 min-h-[26px]">
+                        <div className="flex items-center gap-1.5">
+                          {testState?.loading ? (
+                            <span className="flex items-center gap-1.5 text-[#3B82F6] font-medium animate-pulse">
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />{" "}
+                              Verifying key...
+                            </span>
+                          ) : testState && testState.success ? (
+                            <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/40 border border-emerald-800/40 px-2.5 py-0.5 rounded-lg">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Valid &
+                              Active{" "}
+                              {testState.latency
+                                ? `(${testState.latency}ms)`
+                                : ""}
+                            </span>
+                          ) : testState && !testState.success ? (
+                            <span className="flex items-center gap-1.5 text-rose-400 font-bold bg-rose-950/40 border border-rose-800/40 px-2.5 py-0.5 rounded-lg">
+                              <AlertCircle className="w-3.5 h-3.5" />{" "}
+                              {testState.message || "Invalid Key"}
+                            </span>
+                          ) : userKey ? (
+                            <span className="flex items-center gap-1.5 text-emerald-400 font-bold bg-emerald-950/30 border border-emerald-800/30 px-2 py-0.5 rounded-lg">
+                              <CheckCircle2 className="w-3 h-3" /> Configured
+                            </span>
+                          ) : (
+                            <span className="text-neutral-500 text-[10.5px]">
+                              Auto-validates on entering API key
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-neutral-950/60 border border-neutral-850 flex items-center justify-between">
+                      <span className="text-xs text-neutral-400 font-mono">
+                        Built-in local engine (No API Key needed)
+                      </span>
+                      <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
+                        Ready
+                      </span>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div className="p-3 rounded-xl bg-neutral-950/60 border border-neutral-850 flex items-center justify-between">
-                  <span className="text-xs text-neutral-400 font-mono">Built-in local engine (No API Key needed)</span>
-                  <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40">
-                    Ready
-                  </span>
-                </div>
-              )}
-            </div>
-          );
-        })
-      )}
+              );
+            })
+          )}
         </div>
       </div>
     </div>

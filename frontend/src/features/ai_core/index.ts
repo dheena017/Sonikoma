@@ -1,6 +1,13 @@
 // Export Single Canonical AI Smart Routing Drawer & Selector from AI Core
-export { default as AISmartRoutingDrawer, AISmartRoutingDrawer as AIModelSelector, AISmartRoutingDrawer as NamedAIModelSelector } from "./components/AISmartRoutingDrawer";
-export type { AISmartRoutingDrawerProps, AISmartRoutingDrawerProps as AIModelSelectorProps } from "./components/AISmartRoutingDrawer";
+export {
+  default as AISmartRoutingDrawer,
+  AISmartRoutingDrawer as AIModelSelector,
+  AISmartRoutingDrawer as NamedAIModelSelector,
+} from "./components/AISmartRoutingDrawer";
+export type {
+  AISmartRoutingDrawerProps,
+  AISmartRoutingDrawerProps as AIModelSelectorProps,
+} from "./components/AISmartRoutingDrawer";
 
 // Export HeaderCreditsPopover
 export { default as HeaderCreditsPopover } from "./components/HeaderCreditsPopover";

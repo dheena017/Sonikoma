@@ -2,8 +2,8 @@
 
 Endpoints for health checks, system metrics, and real-time logging.
 
-| Endpoint                  | Method | Input Parameters   | Description                                                                           |
-| :------------------------ | :----- | :----------------- | :------------------------------------------------------------------------------------ |
+| Endpoint                            | Method | Input Parameters   | Description                                                                           |
+| :---------------------------------- | :----- | :----------------- | :------------------------------------------------------------------------------------ |
 | `/api/v1/system/health`             | `GET`  | None               | Liveness check; validates SQLite connection.                                          |
 | `/api/v1/system/metrics`            | `GET`  | None               | Reports live server uptime, RSS memory, request stats, rate-limits, and image caches. |
 | `/api/v1/system/system-logs`        | `GET`  | `limit` (optional) | Retrieval fallback for backend logs.                                                  |

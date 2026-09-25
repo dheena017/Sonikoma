@@ -38,7 +38,7 @@ const safeLocalStorage = {
       ) {
         console.warn(
           "[Storage] localStorage quota exceeded — project data could not be saved locally. " +
-          "Use the Save button to persist to the server."
+            "Use the Save button to persist to the server."
         );
         // Try to save only the minimal essential keys (project_id) to recover space
         try {
@@ -94,10 +94,13 @@ function writeJsonToStorage<T>(key: string, value: T): void {
 }
 
 function readStoredProjectStoreState(): ActiveProjectData | null {
-  const parsed = readJsonFromStorage<PersistedProjectEnvelope>(STORAGE_KEYS.ZUSTAND_PROJECT_STORE);
+  const parsed = readJsonFromStorage<PersistedProjectEnvelope>(
+    STORAGE_KEYS.ZUSTAND_PROJECT_STORE
+  );
   if (!parsed) return null;
 
-  const stored = parsed?.state?.activeProjectData ?? parsed?.activeProjectData ?? null;
+  const stored =
+    parsed?.state?.activeProjectData ?? parsed?.activeProjectData ?? null;
   if (!stored?.project?.project_id) return null;
 
   return normalizeProjectData(stored as ActiveProjectData);
@@ -105,7 +108,8 @@ function readStoredProjectStoreState(): ActiveProjectData | null {
 
 function readStoredProjectImport(): Record<string, any> | null {
   const parsed = readJsonFromStorage<any>(STORAGE_KEYS.IMPORT_PROJECT);
-  if (!parsed || !Array.isArray(parsed?.panels) || parsed.panels.length === 0) return null;
+  if (!parsed || !Array.isArray(parsed?.panels) || parsed.panels.length === 0)
+    return null;
 
   return parsed;
 }
@@ -120,10 +124,7 @@ let _autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
  * Call this after any panel/data change to schedule a background save.
  * Resets the timer if called again before the delay expires.
  */
-export function scheduleAutoSave(
-  fetchClient?: any,
-  delayMs = 2000
-): void {
+export function scheduleAutoSave(fetchClient?: any, delayMs = 2000): void {
   if (_autoSaveTimer) clearTimeout(_autoSaveTimer);
   _autoSaveTimer = setTimeout(async () => {
     _autoSaveTimer = null;
@@ -172,7 +173,7 @@ export interface PanelItem {
   smart_crop?: boolean;
   crop_padding?: number | null;
   speaker_name?: string;
-  speaker_gender?: 'male' | 'female' | 'child' | 'neutral' | string;
+  speaker_gender?: "male" | "female" | "child" | "neutral" | string;
   emotion?: string;
   scene_context?: string;
   is_scene_transition?: boolean;
@@ -303,9 +304,15 @@ export interface ProjectStoreState {
   setActiveProjectId: (id: string | null) => void;
   setActiveProject: (data: ActiveProjectData | null) => void;
   setProjectLoading: () => void;
-  setProjectMissing: (missingId: string, options?: { isJobId?: boolean }) => void;
+  setProjectMissing: (
+    missingId: string,
+    options?: { isJobId?: boolean }
+  ) => void;
   setWorkspaceContext: (ctx: WorkspaceContext) => void;
-  hydrateActiveProject: (id?: string | null, fetchClient?: any) => Promise<void>;
+  hydrateActiveProject: (
+    id?: string | null,
+    fetchClient?: any
+  ) => Promise<void>;
   saveActiveProject: (fetchClient?: any) => Promise<boolean>;
   clearActiveProject: () => void;
 
@@ -327,7 +334,10 @@ export interface ProjectStoreState {
   setGlobalPanelDuration: (duration: number) => void;
   applyMotionPresetToAll: (motionType: string) => void;
   applyStylePresetToAll: (presetName: string) => void;
-  autoCalculateSpeechDurations: (wordsPerSec?: number, bufferSec?: number) => void;
+  autoCalculateSpeechDurations: (
+    wordsPerSec?: number,
+    bufferSec?: number
+  ) => void;
 
   // ── Import / Export Backup Actions ────────────────────────────────────────
   exportProjectAsJson: () => string | null;
@@ -338,10 +348,22 @@ export interface ProjectStoreState {
   getTotalWordCount: () => number;
 
   // ── Settings Actions ──────────────────────────────────────────────────────
-  updateProjectSettings: (settings: ProjectSettingsPayload, fetchClient?: any) => Promise<boolean>;
-  updateVideoSettings: (videoSettings: VideoSettings, fetchClient?: any) => Promise<boolean>;
-  updateAudioSettings: (audioSettings: AudioSettings, fetchClient?: any) => Promise<boolean>;
-  updateAutoCropSettings: (autoCropSettings: AutoCropSettings, fetchClient?: any) => Promise<boolean>;
+  updateProjectSettings: (
+    settings: ProjectSettingsPayload,
+    fetchClient?: any
+  ) => Promise<boolean>;
+  updateVideoSettings: (
+    videoSettings: VideoSettings,
+    fetchClient?: any
+  ) => Promise<boolean>;
+  updateAudioSettings: (
+    audioSettings: AudioSettings,
+    fetchClient?: any
+  ) => Promise<boolean>;
+  updateAutoCropSettings: (
+    autoCropSettings: AutoCropSettings,
+    fetchClient?: any
+  ) => Promise<boolean>;
 
   // ── Cognitive Story Memory ───────────────────────────────────────────────
   storyMemory: StoryMemoryState | null;
@@ -395,7 +417,10 @@ export function clearStoredProjectSession(): void {
   safeLocalStorage.removeItem(STORAGE_KEYS.ACTIVE_CHAPTER_SLUG);
 }
 
-export function setActiveProjectSession(projectId: string | null, jobId?: string | null): void {
+export function setActiveProjectSession(
+  projectId: string | null,
+  jobId?: string | null
+): void {
   if (typeof window === "undefined") return;
 
   if (projectId) {
@@ -427,14 +452,19 @@ export function readPersistedProjectSnapshot(): ActiveProjectData | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const directSnapshot = readJsonFromStorage<ActiveProjectData>(STORAGE_KEYS.PROJECT_SNAPSHOT);
+    const directSnapshot = readJsonFromStorage<ActiveProjectData>(
+      STORAGE_KEYS.PROJECT_SNAPSHOT
+    );
     if (directSnapshot?.project?.project_id) {
       return normalizeProjectData(directSnapshot);
     }
 
     return readStoredProjectStoreState();
   } catch (error) {
-    console.warn("[useProjectStore] Failed to read persisted project snapshot:", error);
+    console.warn(
+      "[useProjectStore] Failed to read persisted project snapshot:",
+      error
+    );
     return null;
   }
 }
@@ -458,9 +488,15 @@ export function calculateAssetCounts(
   scrapedImages: string[] = []
 ): { panelsCount: number; importedCount: number } {
   const panelsCount = project?.panels_count ?? panels.length;
-  let importedCount = project?.imported_assets_count ?? (scrapedImages.length > 0 ? scrapedImages.length : 0);
+  let importedCount =
+    project?.imported_assets_count ??
+    (scrapedImages.length > 0 ? scrapedImages.length : 0);
 
-  if (!importedCount && Array.isArray(project?.audio_settings?.scraped_images) && project.audio_settings.scraped_images.length > 0) {
+  if (
+    !importedCount &&
+    Array.isArray(project?.audio_settings?.scraped_images) &&
+    project.audio_settings.scraped_images.length > 0
+  ) {
     importedCount = project.audio_settings.scraped_images.length;
   }
   if (!importedCount && panelsCount > 0) {
@@ -471,7 +507,9 @@ export function calculateAssetCounts(
 }
 
 /** 6. Normalize project data with computed counts and defaults */
-export function normalizeProjectData(data: ActiveProjectData | null): ActiveProjectData | null {
+export function normalizeProjectData(
+  data: ActiveProjectData | null
+): ActiveProjectData | null {
   if (!data) return null;
 
   const { panelsCount, importedCount } = calculateAssetCounts(
@@ -494,7 +532,10 @@ export function normalizeProjectData(data: ActiveProjectData | null): ActiveProj
 export function applyWorkspaceContextChange(
   currentData: ActiveProjectData | null,
   ctx: WorkspaceContext
-): { activeProjectId: string | null; activeProjectData: ActiveProjectData | null } {
+): {
+  activeProjectId: string | null;
+  activeProjectData: ActiveProjectData | null;
+} {
   if (!ctx.projectId) {
     return { activeProjectId: null, activeProjectData: null };
   }
@@ -528,15 +569,18 @@ export function applyLocalSettings(
     ...currentData,
     project: {
       ...currentData.project,
-      video_settings: settings.video_settings !== undefined
-        ? settings.video_settings
-        : currentData.project.video_settings,
-      audio_settings: settings.audio_settings !== undefined
-        ? settings.audio_settings
-        : currentData.project.audio_settings,
-      autocrop_settings: settings.autocrop_settings !== undefined
-        ? settings.autocrop_settings
-        : currentData.project.autocrop_settings,
+      video_settings:
+        settings.video_settings !== undefined
+          ? settings.video_settings
+          : currentData.project.video_settings,
+      audio_settings:
+        settings.audio_settings !== undefined
+          ? settings.audio_settings
+          : currentData.project.audio_settings,
+      autocrop_settings:
+        settings.autocrop_settings !== undefined
+          ? settings.autocrop_settings
+          : currentData.project.autocrop_settings,
     },
   };
 }
@@ -552,7 +596,8 @@ export function parseHydratedProjectJson(
   }
 
   let panelsRaw: PanelItem[] = json.panels ?? raw.panels ?? [];
-  const scrapedImagesRaw: string[] = json.scraped_images ?? json.scrapedImages ?? [];
+  const scrapedImagesRaw: string[] =
+    json.scraped_images ?? json.scrapedImages ?? [];
 
   // When opening an imported chapter with no panels generated yet,
   // auto-synthesize storyboard panels from the scraped images so scenes display immediately
@@ -588,7 +633,11 @@ export function parseHydratedProjectJson(
     series_slug: raw.series_slug || null,
     chapter_slug: raw.chapter_slug || null,
     author: raw.author || null,
-    cover_image: raw.cover_image || raw.first_panel_image || panelsRaw[0]?.image_url || null,
+    cover_image:
+      raw.cover_image ||
+      raw.first_panel_image ||
+      panelsRaw[0]?.image_url ||
+      null,
     first_panel_image: raw.first_panel_image || panelsRaw[0]?.image_url || null,
     synopsis: raw.synopsis || null,
     genre: raw.genre || null,
@@ -615,15 +664,19 @@ export async function fetchProjectFromServer(
   fetchClient?: any
 ): Promise<ActiveProjectData | null> {
   if (!identifier) return null;
-  const fetcher = fetchClient || (typeof window !== "undefined" ? window.fetch : null);
+  const fetcher =
+    fetchClient || (typeof window !== "undefined" ? window.fetch : null);
   if (!fetcher) return null;
   const token = getStoredAuthToken();
 
   // 1. Try authenticated project endpoint
   try {
-    const res = await fetcher(`/api/v1/projects/${encodeURIComponent(identifier)}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+    const res = await fetcher(
+      `/api/v1/projects/${encodeURIComponent(identifier)}`,
+      {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      }
+    );
     if (res.ok) {
       const json = await res.json();
       const parsed = parseHydratedProjectJson(json, identifier);
@@ -633,7 +686,9 @@ export async function fetchProjectFromServer(
 
   // 2. Fall back to public project endpoint (no auth required, works for public projects and chapter slugs)
   try {
-    const res = await fetcher(`/api/v1/projects/public/${encodeURIComponent(identifier)}`);
+    const res = await fetcher(
+      `/api/v1/projects/public/${encodeURIComponent(identifier)}`
+    );
     if (res.ok) {
       const json = await res.json();
       const parsed = parseHydratedProjectJson(json, identifier);
@@ -645,7 +700,11 @@ export async function fetchProjectFromServer(
 }
 
 /** 10. Reorder helper for Drag-and-Drop panels */
-export function reorderPanelArray(list: PanelItem[], startIndex: number, endIndex: number): PanelItem[] {
+export function reorderPanelArray(
+  list: PanelItem[],
+  startIndex: number,
+  endIndex: number
+): PanelItem[] {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
@@ -657,7 +716,12 @@ export function pushHistorySnapshot(
   history: ActiveProjectData[],
   currentIndex: number,
   newSnapshot: ActiveProjectData
-): { history: ActiveProjectData[]; historyIndex: number; canUndo: boolean; canRedo: boolean } {
+): {
+  history: ActiveProjectData[];
+  historyIndex: number;
+  canUndo: boolean;
+  canRedo: boolean;
+} {
   const truncated = history.slice(0, currentIndex + 1);
   const updated = [...truncated, newSnapshot];
   if (updated.length > MAX_HISTORY_SNAPSHOTS) {
@@ -673,14 +737,17 @@ export function pushHistorySnapshot(
 }
 
 /** 12. Dynamic panel reading duration calculator */
-export function computeSpeechDuration(text: string, wordsPerSec = 2.5, bufferSec = 1.5): number {
+export function computeSpeechDuration(
+  text: string,
+  wordsPerSec = 2.5,
+  bufferSec = 1.5
+): number {
   const clean = text.trim();
   if (!clean) return 3.0;
   const words = clean.split(/\s+/).length;
   const calculated = Math.round((words / wordsPerSec + bufferSec) * 10) / 10;
   return Math.max(2.5, Math.min(calculated, 15.0)); // Between 2.5s and 15s
 }
-
 
 // =============================================================================
 // 3. Zustand Store Definition with Reload Resilience & History Stack
@@ -718,7 +785,8 @@ export const useProjectStore = create<ProjectStoreState>()(
       // ── Select Active Project ID ──────────────────────────────────────────
       setActiveProjectId: (id) =>
         set((state) => {
-          if (state.activeProjectId === id && state.projectState === "active") return state;
+          if (state.activeProjectId === id && state.projectState === "active")
+            return state;
           if (!id) {
             setActiveProjectSession(null, null);
             return {
@@ -734,8 +802,12 @@ export const useProjectStore = create<ProjectStoreState>()(
             };
           }
 
-          setActiveProjectSession(id, state.activeProjectData?.project?.job_id ?? null);
-          const hasMatchingData = state.activeProjectData?.project?.project_id === id;
+          setActiveProjectSession(
+            id,
+            state.activeProjectData?.project?.job_id ?? null
+          );
+          const hasMatchingData =
+            state.activeProjectData?.project?.project_id === id;
           return {
             activeProjectId: id,
             projectState: hasMatchingData ? "active" : "loading",
@@ -747,7 +819,10 @@ export const useProjectStore = create<ProjectStoreState>()(
         const normalized = normalizeProjectData(data);
         if (normalized) {
           const snapshot = pushHistorySnapshot([], -1, normalized);
-          setActiveProjectSession(normalized.project.project_id ?? null, normalized.project.job_id ?? null);
+          setActiveProjectSession(
+            normalized.project.project_id ?? null,
+            normalized.project.job_id ?? null
+          );
           writeProjectSnapshot(normalized);
           set({
             activeProjectData: normalized,
@@ -815,18 +890,27 @@ export const useProjectStore = create<ProjectStoreState>()(
       setProjectMissing: (missingId, options) =>
         set({
           projectState: "missing",
-          missingProjectInfo: buildMissingProjectInfo(missingId, options?.isJobId),
+          missingProjectInfo: buildMissingProjectInfo(
+            missingId,
+            options?.isJobId
+          ),
           isHydrating: false,
         }),
 
       // ── Workspace Context Switch ──────────────────────────────────────────
       setWorkspaceContext: (ctx) =>
-        set((state) => applyWorkspaceContextChange(state.activeProjectData, ctx)),
+        set((state) =>
+          applyWorkspaceContextChange(state.activeProjectData, ctx)
+        ),
 
       // ── Hydrate / Fetch From Backend (Preserves Temp & Saved Projects on Reload) ──
       hydrateActiveProject: async (targetId, fetchClient) => {
         const persistedSnapshot = readPersistedProjectSnapshot();
-        const fallbackId = targetId ?? get().activeProjectId ?? persistedSnapshot?.project?.project_id ?? null;
+        const fallbackId =
+          targetId ??
+          get().activeProjectId ??
+          persistedSnapshot?.project?.project_id ??
+          null;
         const idToHydrate = fallbackId;
         const currentData = get().activeProjectData;
 
@@ -834,7 +918,10 @@ export const useProjectStore = create<ProjectStoreState>()(
           const restoredFromPersist = persistedSnapshot;
           if (restoredFromPersist) {
             const favProjectId = restoredFromPersist.project.project_id;
-            setActiveProjectSession(favProjectId, restoredFromPersist.project.job_id ?? null);
+            setActiveProjectSession(
+              favProjectId,
+              restoredFromPersist.project.job_id ?? null
+            );
             set({
               activeProjectId: favProjectId,
               activeProjectData: restoredFromPersist,
@@ -863,18 +950,272 @@ export const useProjectStore = create<ProjectStoreState>()(
         }
 
         const runHydration = async () => {
+          // 🌟 Temp projects exist only in localStorage or backend transfer -> Keep active immediately!
+          if (isTempProject(idToHydrate)) {
+            // If current in-memory project matches this exact id, keep it
+            if (
+              currentData &&
+              currentData.project &&
+              currentData.project.project_id === idToHydrate &&
+              (currentData.panels?.length > 0 ||
+                (currentData.scrapedImages &&
+                  currentData.scrapedImages.length > 0))
+            ) {
+              set({
+                activeProjectId: idToHydrate,
+                projectState: "active",
+                missingProjectInfo: null,
+                isHydrating: false,
+              });
+              return;
+            }
 
-        // 🌟 Temp projects exist only in localStorage or backend transfer -> Keep active immediately!
-        if (isTempProject(idToHydrate)) {
-          // If current in-memory project matches this exact id, keep it
-          if (
-            currentData &&
-            currentData.project &&
-            currentData.project.project_id === idToHydrate &&
-            (currentData.panels?.length > 0 || (currentData.scrapedImages && currentData.scrapedImages.length > 0))
-          ) {
+            // 1. Check if this temp project has transferred storyboard panels/images from backend
+            try {
+              const transferRes = await fetch(
+                `/api/v1/projects/transfer/${encodeURIComponent(idToHydrate)}`
+              );
+              if (transferRes.ok) {
+                const transferData = await transferRes.json();
+                if (
+                  transferData &&
+                  transferData.success &&
+                  Array.isArray(transferData.panels) &&
+                  transferData.panels.length > 0
+                ) {
+                  const transferredPanels: PanelItem[] =
+                    transferData.panels.map((p: any, idx: number) => ({
+                      id: p.id || idx + 1,
+                      panel_index: p.panel_index ?? idx,
+                      prompt:
+                        p.prompt ||
+                        p.visual_description ||
+                        p.speech_text ||
+                        `Scene ${idx + 1}`,
+                      image_url: p.image_url || p.imageUrl || "",
+                      original_url:
+                        p.original_url || p.imageUrl || p.image_url || "",
+                      speech_text: p.speech_text || p.dialogueText || "",
+                      narrative: p.narrative || p.narrativeText || "",
+                      sfx: p.sfx || "",
+                      duration: p.duration || 0,
+                      motion_type: p.motion_type || p.motionPreset || "",
+                      visual_description:
+                        p.visual_description || p.visualDescription || "",
+                      audio_url: p.audio_url || p.audioUrl || "",
+                      narrative_audio_url:
+                        p.narrative_audio_url || p.narrativeAudioUrl || "",
+                      speech_audio_url: p.speech_audio_url || p.audioUrl || "",
+                    }));
+
+                  const transferredImages: string[] =
+                    Array.isArray(transferData.scraped_images) &&
+                    transferData.scraped_images.length > 0
+                      ? transferData.scraped_images
+                      : transferredPanels
+                          .map((p) => p.image_url)
+                          .filter(Boolean);
+
+                  const title =
+                    transferData.title ||
+                    transferData.series_title ||
+                    "Imported Comic";
+
+                  const newActiveData: ActiveProjectData = {
+                    project: {
+                      project_id: idToHydrate,
+                      title: title,
+                      url: transferData.url || "",
+                      chapter_title: transferData.chapter_title || "",
+                      cover_image: transferredImages[0] || "",
+                    },
+                    panels: transferredPanels,
+                    scrapedImages: transferredImages,
+                  };
+
+                  set({
+                    activeProjectId: idToHydrate,
+                    activeProjectData: newActiveData,
+                    projectState: "active",
+                    missingProjectInfo: null,
+                    isHydrating: false,
+                  });
+                  return;
+                }
+              }
+            } catch (e) {
+              console.warn(
+                "[useProjectStore] Error checking transfer project:",
+                e
+              );
+            }
+
+            // 2. Check localStorage for sonikoma_import_project
+            try {
+              const importedProject = readStoredProjectImport();
+              if (
+                importedProject &&
+                (importedProject.project_id === idToHydrate ||
+                  !importedProject.project_id)
+              ) {
+                const parsed = importedProject;
+                if (
+                  parsed &&
+                  Array.isArray(parsed.panels) &&
+                  parsed.panels.length > 0
+                ) {
+                  const transferredPanels: PanelItem[] = parsed.panels.map(
+                    (p: any, idx: number) => ({
+                      id: p.id || idx + 1,
+                      panel_index: p.panel_index ?? idx,
+                      prompt:
+                        p.prompt ||
+                        p.visual_description ||
+                        p.speech_text ||
+                        `Scene ${idx + 1}`,
+                      image_url: p.image_url || p.imageUrl || "",
+                      original_url:
+                        p.original_url || p.imageUrl || p.image_url || "",
+                      speech_text: p.speech_text || p.dialogueText || "",
+                      narrative: p.narrative || p.narrativeText || "",
+                      sfx: p.sfx || "",
+                      duration: p.duration || 0,
+                      motion_type: p.motion_type || p.motionPreset || "",
+                      visual_description:
+                        p.visual_description || p.visualDescription || "",
+                    })
+                  );
+
+                  const transferredImages: string[] =
+                    Array.isArray(parsed.scraped_images) &&
+                    parsed.scraped_images.length > 0
+                      ? parsed.scraped_images
+                      : transferredPanels
+                          .map((p) => p.image_url)
+                          .filter(Boolean);
+
+                  const newActiveData: ActiveProjectData = {
+                    project: {
+                      project_id: idToHydrate,
+                      title:
+                        parsed.title || parsed.series_title || "Imported Comic",
+                      url: parsed.url || "",
+                      chapter_title: parsed.chapter_title || "",
+                      cover_image: transferredImages[0] || "",
+                    },
+                    panels: transferredPanels,
+                    scrapedImages: transferredImages,
+                  };
+
+                  set({
+                    activeProjectId: idToHydrate,
+                    activeProjectData: newActiveData,
+                    projectState: "active",
+                    missingProjectInfo: null,
+                    isHydrating: false,
+                  });
+                  return;
+                }
+              }
+            } catch (e) {
+              console.error(
+                "Error reading import project from local storage:",
+                e
+              );
+            }
+
+            // 3. Check localStorage active-project-store for matching or any temp project with data
+            try {
+              const storeData = readStoredProjectStoreState();
+              if (storeData?.project) {
+                // Exact match — always use it
+                if (storeData.project.project_id === idToHydrate) {
+                  set({
+                    activeProjectId: idToHydrate,
+                    activeProjectData: storeData,
+                    projectState: "active",
+                    missingProjectInfo: null,
+                    isHydrating: false,
+                  });
+                  return;
+                }
+                // Stale URL: stored project is also a temp project with actual data → restore it
+                // (temp IDs diverge when navigating to an old URL from browser history)
+                const storedIsTempWithData =
+                  isTempProject(storeData.project.project_id) &&
+                  ((storeData.panels && storeData.panels.length > 0) ||
+                    (storeData.scrapedImages &&
+                      storeData.scrapedImages.length > 0));
+                if (storedIsTempWithData) {
+                  console.info(
+                    `[useProjectStore] Stale temp URL (${idToHydrate}), restoring stored temp project: ${storeData.project.project_id}`
+                  );
+                  set({
+                    activeProjectId: storeData.project.project_id,
+                    activeProjectData: storeData,
+                    projectState: "active",
+                    missingProjectInfo: null,
+                    isHydrating: false,
+                  });
+                  return;
+                }
+              }
+            } catch (e) {
+              console.error(
+                "Error reading temp project from local storage:",
+                e
+              );
+            }
+
+            // 4. Check server for this project_id or chapter_slug (e.g. if saved to SQLite/Postgres)
+            try {
+              let serverProject = await fetchProjectFromServer(
+                idToHydrate,
+                fetchClient
+              );
+              if (!serverProject && typeof window !== "undefined") {
+                const slugMatch = window.location.pathname.match(
+                  /\/chapters\/([^\/\?]+)/
+                );
+                if (slugMatch && slugMatch[1] && slugMatch[1] !== idToHydrate) {
+                  serverProject = await fetchProjectFromServer(
+                    slugMatch[1],
+                    fetchClient
+                  );
+                }
+              }
+              if (serverProject) {
+                const snapshot = pushHistorySnapshot([], -1, serverProject);
+                set({
+                  activeProjectId: serverProject.project.project_id,
+                  activeProjectData: serverProject,
+                  projectState: "active",
+                  missingProjectInfo: null,
+                  isHydrating: false,
+                  ...snapshot,
+                });
+                return;
+              }
+            } catch (e) {
+              console.warn(
+                "[useProjectStore] Server check for temp project failed:",
+                e
+              );
+            }
+
+            // 5. Initialize fresh local draft — no stored or server data found for this temp project
+            const draftData: ActiveProjectData = {
+              project: {
+                project_id: idToHydrate,
+                title: "Draft Project",
+                url: "",
+              },
+              panels: [],
+              scrapedImages: [],
+            };
             set({
               activeProjectId: idToHydrate,
+              activeProjectData: draftData,
               projectState: "active",
               missingProjectInfo: null,
               isHydrating: false,
@@ -882,253 +1223,84 @@ export const useProjectStore = create<ProjectStoreState>()(
             return;
           }
 
-          // 1. Check if this temp project has transferred storyboard panels/images from backend
+          // 🌟 Permanent saved projects -> Fetch latest server state
+          set({
+            isHydrating: true,
+            projectState: currentData ? "active" : "loading",
+          });
+
           try {
-            const transferRes = await fetch(`/api/v1/projects/transfer/${encodeURIComponent(idToHydrate)}`);
-            if (transferRes.ok) {
-              const transferData = await transferRes.json();
-              if (transferData && transferData.success && Array.isArray(transferData.panels) && transferData.panels.length > 0) {
-                const transferredPanels: PanelItem[] = transferData.panels.map((p: any, idx: number) => ({
-                  id: p.id || idx + 1,
-                  panel_index: p.panel_index ?? idx,
-                  prompt: p.prompt || p.visual_description || p.speech_text || `Scene ${idx + 1}`,
-                  image_url: p.image_url || p.imageUrl || "",
-                  original_url: p.original_url || p.imageUrl || p.image_url || "",
-                  speech_text: p.speech_text || p.dialogueText || "",
-                  narrative: p.narrative || p.narrativeText || "",
-                  sfx: p.sfx || "",
-                  duration: p.duration || 0,
-                  motion_type: p.motion_type || p.motionPreset || "",
-                  visual_description: p.visual_description || p.visualDescription || "",
-                  audio_url: p.audio_url || p.audioUrl || "",
-                  narrative_audio_url: p.narrative_audio_url || p.narrativeAudioUrl || "",
-                  speech_audio_url: p.speech_audio_url || p.audioUrl || "",
-                }));
+            let parsed = await fetchProjectFromServer(idToHydrate, fetchClient);
 
-                const transferredImages: string[] =
-                  Array.isArray(transferData.scraped_images) && transferData.scraped_images.length > 0
-                    ? transferData.scraped_images
-                    : transferredPanels.map((p) => p.image_url).filter(Boolean);
-
-                const title = transferData.title || transferData.series_title || "Imported Comic";
-
-                const newActiveData: ActiveProjectData = {
-                  project: {
-                    project_id: idToHydrate,
-                    title: title,
-                    url: transferData.url || "",
-                    chapter_title: transferData.chapter_title || "",
-                    cover_image: transferredImages[0] || "",
-                  },
-                  panels: transferredPanels,
-                  scrapedImages: transferredImages,
-                };
-
-                set({
-                  activeProjectId: idToHydrate,
-                  activeProjectData: newActiveData,
-                  projectState: "active",
-                  missingProjectInfo: null,
-                  isHydrating: false,
-                });
-                return;
-              }
-            }
-          } catch (e) {
-            console.warn("[useProjectStore] Error checking transfer project:", e);
-          }
-
-          // 2. Check localStorage for sonikoma_import_project
-          try {
-            const importedProject = readStoredProjectImport();
-            if (importedProject && (importedProject.project_id === idToHydrate || !importedProject.project_id)) {
-              const parsed = importedProject;
-              if (parsed && Array.isArray(parsed.panels) && parsed.panels.length > 0) {
-                const transferredPanels: PanelItem[] = parsed.panels.map((p: any, idx: number) => ({
-                  id: p.id || idx + 1,
-                  panel_index: p.panel_index ?? idx,
-                  prompt: p.prompt || p.visual_description || p.speech_text || `Scene ${idx + 1}`,
-                  image_url: p.image_url || p.imageUrl || "",
-                  original_url: p.original_url || p.imageUrl || p.image_url || "",
-                  speech_text: p.speech_text || p.dialogueText || "",
-                  narrative: p.narrative || p.narrativeText || "",
-                  sfx: p.sfx || "",
-                  duration: p.duration || 0,
-                  motion_type: p.motion_type || p.motionPreset || "",
-                  visual_description: p.visual_description || p.visualDescription || "",
-                }));
-
-                const transferredImages: string[] =
-                  Array.isArray(parsed.scraped_images) && parsed.scraped_images.length > 0
-                    ? parsed.scraped_images
-                    : transferredPanels.map((p) => p.image_url).filter(Boolean);
-
-                const newActiveData: ActiveProjectData = {
-                  project: {
-                    project_id: idToHydrate,
-                    title: parsed.title || parsed.series_title || "Imported Comic",
-                    url: parsed.url || "",
-                    chapter_title: parsed.chapter_title || "",
-                    cover_image: transferredImages[0] || "",
-                  },
-                  panels: transferredPanels,
-                  scrapedImages: transferredImages,
-                };
-
-                set({
-                  activeProjectId: idToHydrate,
-                  activeProjectData: newActiveData,
-                  projectState: "active",
-                  missingProjectInfo: null,
-                  isHydrating: false,
-                });
-                return;
-              }
-            }
-          } catch (e) {
-            console.error("Error reading import project from local storage:", e);
-          }
-
-          // 3. Check localStorage active-project-store for matching or any temp project with data
-          try {
-            const storeData = readStoredProjectStoreState();
-            if (storeData?.project) {
-              // Exact match — always use it
-              if (storeData.project.project_id === idToHydrate) {
-                set({
-                  activeProjectId: idToHydrate,
-                  activeProjectData: storeData,
-                  projectState: "active",
-                  missingProjectInfo: null,
-                  isHydrating: false,
-                });
-                return;
-              }
-              // Stale URL: stored project is also a temp project with actual data → restore it
-              // (temp IDs diverge when navigating to an old URL from browser history)
-              const storedIsTempWithData =
-                isTempProject(storeData.project.project_id) &&
-                ((storeData.panels && storeData.panels.length > 0) ||
-                  (storeData.scrapedImages && storeData.scrapedImages.length > 0));
-              if (storedIsTempWithData) {
-                console.info(
-                  `[useProjectStore] Stale temp URL (${idToHydrate}), restoring stored temp project: ${storeData.project.project_id}`
-                );
-                set({
-                  activeProjectId: storeData.project.project_id,
-                  activeProjectData: storeData,
-                  projectState: "active",
-                  missingProjectInfo: null,
-                  isHydrating: false,
-                });
-                return;
-              }
-            }
-          } catch (e) {
-            console.error("Error reading temp project from local storage:", e);
-          }
-
-          // 4. Check server for this project_id or chapter_slug (e.g. if saved to SQLite/Postgres)
-          try {
-            let serverProject = await fetchProjectFromServer(idToHydrate, fetchClient);
-            if (!serverProject && typeof window !== "undefined") {
-              const slugMatch = window.location.pathname.match(/\/chapters\/([^\/\?]+)/);
+            // If not found by ID, also check if current URL contains a chapter slug
+            if (!parsed && typeof window !== "undefined") {
+              const slugMatch = window.location.pathname.match(
+                /\/chapters\/([^\/\?]+)/
+              );
               if (slugMatch && slugMatch[1] && slugMatch[1] !== idToHydrate) {
-                serverProject = await fetchProjectFromServer(slugMatch[1], fetchClient);
+                parsed = await fetchProjectFromServer(
+                  slugMatch[1],
+                  fetchClient
+                );
               }
             }
-            if (serverProject) {
-              const snapshot = pushHistorySnapshot([], -1, serverProject);
-              set({
-                activeProjectId: serverProject.project.project_id,
-                activeProjectData: serverProject,
-                projectState: "active",
-                missingProjectInfo: null,
-                isHydrating: false,
-                ...snapshot,
+
+            if (!parsed) {
+              if (
+                currentData &&
+                currentData.project?.project_id === idToHydrate
+              ) {
+                set({ projectState: "active", isHydrating: false });
+                return;
+              }
+              get().setProjectMissing(idToHydrate, {
+                isJobId: idToHydrate.startsWith("job_"),
               });
               return;
             }
-          } catch (e) {
-            console.warn("[useProjectStore] Server check for temp project failed:", e);
-          }
 
-          // 5. Initialize fresh local draft — no stored or server data found for this temp project
-          const draftData: ActiveProjectData = {
-            project: {
-              project_id: idToHydrate,
-              title: "Draft Project",
-              url: "",
-            },
-            panels: [],
-            scrapedImages: [],
-          };
-          set({
-            activeProjectId: idToHydrate,
-            activeProjectData: draftData,
-            projectState: "active",
-            missingProjectInfo: null,
-            isHydrating: false,
-          });
-          return;
-        }
-
-        // 🌟 Permanent saved projects -> Fetch latest server state
-        set({ isHydrating: true, projectState: currentData ? "active" : "loading" });
-
-        try {
-          let parsed = await fetchProjectFromServer(idToHydrate, fetchClient);
-
-          // If not found by ID, also check if current URL contains a chapter slug
-          if (!parsed && typeof window !== "undefined") {
-            const slugMatch = window.location.pathname.match(/\/chapters\/([^\/\?]+)/);
-            if (slugMatch && slugMatch[1] && slugMatch[1] !== idToHydrate) {
-              parsed = await fetchProjectFromServer(slugMatch[1], fetchClient);
+            // Preserve in-memory scrapedImages if server response doesn't have them
+            if (
+              (!parsed.scrapedImages || parsed.scrapedImages.length === 0) &&
+              currentData?.project?.project_id === idToHydrate &&
+              currentData?.scrapedImages?.length
+            ) {
+              parsed.scrapedImages = currentData.scrapedImages;
             }
-          }
 
-          if (!parsed) {
-            if (currentData && currentData.project?.project_id === idToHydrate) {
+            const snapshot = pushHistorySnapshot([], -1, parsed);
+
+            set({
+              activeProjectId: parsed.project.project_id,
+              activeProjectData: parsed,
+              projectState: "active",
+              missingProjectInfo: null,
+              isHydrating: false,
+              ...snapshot,
+            });
+          } catch (err) {
+            console.error("Error in hydrateActiveProject:", err);
+            if (
+              currentData &&
+              currentData.project?.project_id === idToHydrate
+            ) {
               set({ projectState: "active", isHydrating: false });
               return;
             }
-            get().setProjectMissing(idToHydrate, { isJobId: idToHydrate.startsWith("job_") });
-            return;
+            get().setProjectMissing(idToHydrate, {
+              isJobId: idToHydrate.startsWith("job_"),
+            });
           }
+        };
 
-          // Preserve in-memory scrapedImages if server response doesn't have them
-          if ((!parsed.scrapedImages || parsed.scrapedImages.length === 0) && currentData?.project?.project_id === idToHydrate && currentData?.scrapedImages?.length) {
-            parsed.scrapedImages = currentData.scrapedImages;
-          }
-
-          const snapshot = pushHistorySnapshot([], -1, parsed);
-
-          set({
-            activeProjectId: parsed.project.project_id,
-            activeProjectData: parsed,
-            projectState: "active",
-            missingProjectInfo: null,
-            isHydrating: false,
-            ...snapshot,
-          });
-        } catch (err) {
-          console.error("Error in hydrateActiveProject:", err);
-          if (currentData && currentData.project?.project_id === idToHydrate) {
-            set({ projectState: "active", isHydrating: false });
-            return;
-          }
-          get().setProjectMissing(idToHydrate, { isJobId: idToHydrate.startsWith("job_") });
+        const hydrationPromise = runHydration();
+        inFlightHydrations.set(idToHydrate, hydrationPromise);
+        try {
+          await hydrationPromise;
+        } finally {
+          inFlightHydrations.delete(idToHydrate);
         }
-      };
-
-      const hydrationPromise = runHydration();
-      inFlightHydrations.set(idToHydrate, hydrationPromise);
-      try {
-        await hydrationPromise;
-      } finally {
-        inFlightHydrations.delete(idToHydrate);
-      }
-    },
+      },
 
       // ── Save Entire Active Project to Backend ─────────────────────────────
       saveActiveProject: async (fetchClient) => {
@@ -1141,51 +1313,71 @@ export const useProjectStore = create<ProjectStoreState>()(
           const fetcher = fetchClient || window.fetch;
           const token = getStoredAuthToken();
 
-          const currentAudioSettings = activeProjectData.project.audio_settings || {};
-          const scrapedImgs = (activeProjectData.scrapedImages && activeProjectData.scrapedImages.length > 0)
-            ? activeProjectData.scrapedImages
-            : (currentAudioSettings.scraped_images || []);
+          const currentAudioSettings =
+            activeProjectData.project.audio_settings || {};
+          const scrapedImgs =
+            activeProjectData.scrapedImages &&
+            activeProjectData.scrapedImages.length > 0
+              ? activeProjectData.scrapedImages
+              : currentAudioSettings.scraped_images || [];
 
-          const panelsCount = (activeProjectData.panels && activeProjectData.panels.length > 0)
-            ? activeProjectData.panels.length
-            : (scrapedImgs.length > 0 ? scrapedImgs.length : (activeProjectData.project.panels_count || 0));
+          const panelsCount =
+            activeProjectData.panels && activeProjectData.panels.length > 0
+              ? activeProjectData.panels.length
+              : scrapedImgs.length > 0
+              ? scrapedImgs.length
+              : activeProjectData.project.panels_count || 0;
 
-          const importedCount = scrapedImgs.length > 0
-            ? scrapedImgs.length
-            : (activeProjectData.project.imported_assets_count || panelsCount);
+          const importedCount =
+            scrapedImgs.length > 0
+              ? scrapedImgs.length
+              : activeProjectData.project.imported_assets_count || panelsCount;
 
-          const res = await fetcher(`/api/v1/projects/${encodeURIComponent(activeProjectId)}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify({
-              url: activeProjectData.project.url || activeProjectData.project.original_url || "",
-              episode: activeProjectData.project.episode || (activeProjectData.project as any).chapterNumber || "Chapter 1",
-              title: activeProjectData.project.title,
-              genre: activeProjectData.project.genre,
-              author: activeProjectData.project.author,
-              synopsis: activeProjectData.project.synopsis,
-              cover_image: activeProjectData.project.cover_image,
-              status: activeProjectData.project.status || "ready",
-              panels: activeProjectData.panels,
-              panels_count: panelsCount,
-              imported_assets_count: importedCount,
-              scraped_images: scrapedImgs,
-              audio_settings: {
-                ...currentAudioSettings,
-                scraped_images: scrapedImgs,
-                imported_assets_count: importedCount,
+          const res = await fetcher(
+            `/api/v1/projects/${encodeURIComponent(activeProjectId)}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
               },
-              video_settings: activeProjectData.project.video_settings,
-              autocrop_settings: activeProjectData.project.autocrop_settings,
-            }),
-          });
+              body: JSON.stringify({
+                url:
+                  activeProjectData.project.url ||
+                  activeProjectData.project.original_url ||
+                  "",
+                episode:
+                  activeProjectData.project.episode ||
+                  (activeProjectData.project as any).chapterNumber ||
+                  "Chapter 1",
+                title: activeProjectData.project.title,
+                genre: activeProjectData.project.genre,
+                author: activeProjectData.project.author,
+                synopsis: activeProjectData.project.synopsis,
+                cover_image: activeProjectData.project.cover_image,
+                status: activeProjectData.project.status || "ready",
+                panels: activeProjectData.panels,
+                panels_count: panelsCount,
+                imported_assets_count: importedCount,
+                scraped_images: scrapedImgs,
+                audio_settings: {
+                  ...currentAudioSettings,
+                  scraped_images: scrapedImgs,
+                  imported_assets_count: importedCount,
+                },
+                video_settings: activeProjectData.project.video_settings,
+                autocrop_settings: activeProjectData.project.autocrop_settings,
+              }),
+            }
+          );
 
           if (!res.ok) throw new Error("Save failed");
 
-          set({ isSaving: false, isDirty: false, lastSavedAt: new Date().toLocaleTimeString() });
+          set({
+            isSaving: false,
+            isDirty: false,
+            lastSavedAt: new Date().toLocaleTimeString(),
+          });
           return true;
         } catch (err) {
           console.error("Error saving active project:", err);
@@ -1209,14 +1401,29 @@ export const useProjectStore = create<ProjectStoreState>()(
           panels: updatedPanels,
         };
 
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         let newStoryMemory = storyMemory;
-        if (updates.speaker_name && typeof updates.speaker_name === "string" && updates.speaker_name.trim()) {
+        if (
+          updates.speaker_name &&
+          typeof updates.speaker_name === "string" &&
+          updates.speaker_name.trim()
+        ) {
           const sName = updates.speaker_name.trim();
           const curChar = storyMemory?.characters?.[sName] || {
             gender: updates.speaker_gender || "neutral",
-            voice: (updates.voice || updates.voiceActor || (updates.speaker_gender === "female" ? "en-US-JennyNeural" : updates.speaker_gender === "child" ? "en-US-AnaNeural" : "en-US-GuyNeural")),
+            voice:
+              updates.voice ||
+              updates.voiceActor ||
+              (updates.speaker_gender === "female"
+                ? "en-US-JennyNeural"
+                : updates.speaker_gender === "child"
+                ? "en-US-AnaNeural"
+                : "en-US-GuyNeural"),
           };
           newStoryMemory = {
             current_scene: storyMemory?.current_scene || "",
@@ -1224,8 +1431,15 @@ export const useProjectStore = create<ProjectStoreState>()(
               ...(storyMemory?.characters || {}),
               [sName]: {
                 ...curChar,
-                ...(updates.speaker_gender ? { gender: updates.speaker_gender } : {}),
-                ...(updates.voice || updates.voiceActor ? { voice: updates.voice || updates.voiceActor, is_user_locked: true } : {}),
+                ...(updates.speaker_gender
+                  ? { gender: updates.speaker_gender }
+                  : {}),
+                ...(updates.voice || updates.voiceActor
+                  ? {
+                      voice: updates.voice || updates.voiceActor,
+                      is_user_locked: true,
+                    }
+                  : {}),
               },
             },
             dialogue_history: storyMemory?.dialogue_history || [],
@@ -1247,21 +1461,35 @@ export const useProjectStore = create<ProjectStoreState>()(
         if (!activeProjectData) return;
 
         const updatedPanels = [...activeProjectData.panels];
-        if (atIndex !== undefined && atIndex >= 0 && atIndex <= updatedPanels.length) {
+        if (
+          atIndex !== undefined &&
+          atIndex >= 0 &&
+          atIndex <= updatedPanels.length
+        ) {
           updatedPanels.splice(atIndex, 0, panel);
         } else {
           updatedPanels.push(panel);
         }
 
-        const reindexed = updatedPanels.map((p, idx) => ({ ...p, panel_index: idx }));
+        const reindexed = updatedPanels.map((p, idx) => ({
+          ...p,
+          panel_index: idx,
+        }));
 
         const updatedData: ActiveProjectData = {
           ...activeProjectData,
-          project: { ...activeProjectData.project, panels_count: reindexed.length },
+          project: {
+            ...activeProjectData.project,
+            panels_count: reindexed.length,
+          },
           panels: reindexed,
         };
 
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({
           activeProjectData: updatedData,
@@ -1272,12 +1500,19 @@ export const useProjectStore = create<ProjectStoreState>()(
 
       duplicatePanel: (index) => {
         const { activeProjectData } = get();
-        if (!activeProjectData || index < 0 || index >= activeProjectData.panels.length) return;
+        if (
+          !activeProjectData ||
+          index < 0 ||
+          index >= activeProjectData.panels.length
+        )
+          return;
 
         const targetPanel = activeProjectData.panels[index];
         const duplicated: PanelItem = {
           ...targetPanel,
-          speech_text: targetPanel.speech_text ? `${targetPanel.speech_text} (Copy)` : "",
+          speech_text: targetPanel.speech_text
+            ? `${targetPanel.speech_text} (Copy)`
+            : "",
         };
 
         get().addPanel(duplicated, index + 1);
@@ -1285,22 +1520,38 @@ export const useProjectStore = create<ProjectStoreState>()(
       },
 
       removePanel: (index) => {
-        const { activeProjectData, selectedPanelIndex, history, historyIndex } = get();
-        if (!activeProjectData || index < 0 || index >= activeProjectData.panels.length) return;
+        const { activeProjectData, selectedPanelIndex, history, historyIndex } =
+          get();
+        if (
+          !activeProjectData ||
+          index < 0 ||
+          index >= activeProjectData.panels.length
+        )
+          return;
 
         const updatedPanels = activeProjectData.panels
           .filter((_, idx) => idx !== index)
           .map((p, idx) => ({ ...p, panel_index: idx }));
 
-        const nextSelectedIndex = Math.min(selectedPanelIndex, Math.max(0, updatedPanels.length - 1));
+        const nextSelectedIndex = Math.min(
+          selectedPanelIndex,
+          Math.max(0, updatedPanels.length - 1)
+        );
 
         const updatedData: ActiveProjectData = {
           ...activeProjectData,
-          project: { ...activeProjectData.project, panels_count: updatedPanels.length },
+          project: {
+            ...activeProjectData.project,
+            panels_count: updatedPanels.length,
+          },
           panels: updatedPanels,
         };
 
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({
           activeProjectData: updatedData,
@@ -1314,13 +1565,21 @@ export const useProjectStore = create<ProjectStoreState>()(
         const { activeProjectData, history, historyIndex } = get();
         if (!activeProjectData) return;
 
-        const reordered = reorderPanelArray(activeProjectData.panels, startIndex, endIndex);
+        const reordered = reorderPanelArray(
+          activeProjectData.panels,
+          startIndex,
+          endIndex
+        );
         const updatedData: ActiveProjectData = {
           ...activeProjectData,
           panels: reordered,
         };
 
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({
           activeProjectData: updatedData,
@@ -1344,7 +1603,11 @@ export const useProjectStore = create<ProjectStoreState>()(
           panels: updatedPanels,
         };
 
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({
           activeProjectData: updatedData,
@@ -1360,7 +1623,10 @@ export const useProjectStore = create<ProjectStoreState>()(
         const reindexed = panels.map((p, idx) => ({ ...p, panel_index: idx }));
         const updatedData: ActiveProjectData = {
           ...activeProjectData,
-          project: { ...activeProjectData.project, panels_count: reindexed.length },
+          project: {
+            ...activeProjectData.project,
+            panels_count: reindexed.length,
+          },
           panels: reindexed,
         };
 
@@ -1390,7 +1656,11 @@ export const useProjectStore = create<ProjectStoreState>()(
           return;
         }
 
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({
           activeProjectData: updatedData,
@@ -1409,7 +1679,11 @@ export const useProjectStore = create<ProjectStoreState>()(
           panels: [],
         };
 
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({
           activeProjectData: updatedData,
@@ -1447,9 +1721,16 @@ export const useProjectStore = create<ProjectStoreState>()(
         const { activeProjectData, history, historyIndex } = get();
         if (!activeProjectData) return;
 
-        const updatedPanels = activeProjectData.panels.map((p) => ({ ...p, duration }));
+        const updatedPanels = activeProjectData.panels.map((p) => ({
+          ...p,
+          duration,
+        }));
         const updatedData = { ...activeProjectData, panels: updatedPanels };
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({ activeProjectData: updatedData, isDirty: true, ...snapshot });
       },
@@ -1458,9 +1739,16 @@ export const useProjectStore = create<ProjectStoreState>()(
         const { activeProjectData, history, historyIndex } = get();
         if (!activeProjectData) return;
 
-        const updatedPanels = activeProjectData.panels.map((p) => ({ ...p, motion_type: motionType }));
+        const updatedPanels = activeProjectData.panels.map((p) => ({
+          ...p,
+          motion_type: motionType,
+        }));
         const updatedData = { ...activeProjectData, panels: updatedPanels };
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({ activeProjectData: updatedData, isDirty: true, ...snapshot });
       },
@@ -1469,9 +1757,16 @@ export const useProjectStore = create<ProjectStoreState>()(
         const { activeProjectData, history, historyIndex } = get();
         if (!activeProjectData) return;
 
-        const updatedPanels = activeProjectData.panels.map((p) => ({ ...p, filter_preset: presetName }));
+        const updatedPanels = activeProjectData.panels.map((p) => ({
+          ...p,
+          filter_preset: presetName,
+        }));
         const updatedData = { ...activeProjectData, panels: updatedPanels };
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({ activeProjectData: updatedData, isDirty: true, ...snapshot });
       },
@@ -1489,7 +1784,11 @@ export const useProjectStore = create<ProjectStoreState>()(
         });
 
         const updatedData = { ...activeProjectData, panels: updatedPanels };
-        const snapshot = pushHistorySnapshot(history, historyIndex, updatedData);
+        const snapshot = pushHistorySnapshot(
+          history,
+          historyIndex,
+          updatedData
+        );
 
         set({ activeProjectData: updatedData, isDirty: true, ...snapshot });
       },
@@ -1516,7 +1815,10 @@ export const useProjectStore = create<ProjectStoreState>()(
       getTotalDuration: () => {
         const { activeProjectData } = get();
         if (!activeProjectData) return 0;
-        return activeProjectData.panels.reduce((sum, p) => sum + (p.duration || 0), 0);
+        return activeProjectData.panels.reduce(
+          (sum, p) => sum + (p.duration || 0),
+          0
+        );
       },
 
       getTotalWordCount: () => {
@@ -1532,7 +1834,10 @@ export const useProjectStore = create<ProjectStoreState>()(
       updateProjectSettings: async (settings) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
-        set({ activeProjectData: applyLocalSettings(activeProjectData, settings), isDirty: true });
+        set({
+          activeProjectData: applyLocalSettings(activeProjectData, settings),
+          isDirty: true,
+        });
         return true;
       },
 
@@ -1540,7 +1845,12 @@ export const useProjectStore = create<ProjectStoreState>()(
       updateVideoSettings: async (videoSettings) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
-        set({ activeProjectData: applyLocalSettings(activeProjectData, { video_settings: videoSettings }), isDirty: true });
+        set({
+          activeProjectData: applyLocalSettings(activeProjectData, {
+            video_settings: videoSettings,
+          }),
+          isDirty: true,
+        });
         return true;
       },
 
@@ -1548,7 +1858,12 @@ export const useProjectStore = create<ProjectStoreState>()(
       updateAudioSettings: async (audioSettings) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
-        set({ activeProjectData: applyLocalSettings(activeProjectData, { audio_settings: audioSettings }), isDirty: true });
+        set({
+          activeProjectData: applyLocalSettings(activeProjectData, {
+            audio_settings: audioSettings,
+          }),
+          isDirty: true,
+        });
         return true;
       },
 
@@ -1556,7 +1871,12 @@ export const useProjectStore = create<ProjectStoreState>()(
       updateAutoCropSettings: async (autoCropSettings) => {
         const { activeProjectId, activeProjectData } = get();
         if (!activeProjectId) return false;
-        set({ activeProjectData: applyLocalSettings(activeProjectData, { autocrop_settings: autoCropSettings }), isDirty: true });
+        set({
+          activeProjectData: applyLocalSettings(activeProjectData, {
+            autocrop_settings: autoCropSettings,
+          }),
+          isDirty: true,
+        });
         return true;
       },
 
@@ -1571,8 +1891,12 @@ export const useProjectStore = create<ProjectStoreState>()(
                   ...state.storyMemory.characters,
                   ...(memoryUpdates.characters || {}),
                 },
-                dialogue_history: memoryUpdates.dialogue_history ?? state.storyMemory.dialogue_history,
-                scene_history: memoryUpdates.scene_history ?? state.storyMemory.scene_history,
+                dialogue_history:
+                  memoryUpdates.dialogue_history ??
+                  state.storyMemory.dialogue_history,
+                scene_history:
+                  memoryUpdates.scene_history ??
+                  state.storyMemory.scene_history,
               }
             : ({
                 current_scene: "",
@@ -1624,7 +1948,9 @@ export const useProjectStore = create<ProjectStoreState>()(
         activeProjectData: state.activeProjectData
           ? {
               ...state.activeProjectData,
-              scrapedImages: (state.activeProjectData.scrapedImages ?? []).slice(0, 200),
+              scrapedImages: (
+                state.activeProjectData.scrapedImages ?? []
+              ).slice(0, 200),
             }
           : null,
         selectedPanelIndex: state.selectedPanelIndex,
@@ -1654,7 +1980,10 @@ export const useProjectStore = create<ProjectStoreState>()(
         if (state?.activeProjectData && state.activeProjectId) {
           state.projectState = "active";
           state.isHydrating = false;
-          setActiveProjectSession(state.activeProjectId, state.activeProjectData.project.job_id ?? null);
+          setActiveProjectSession(
+            state.activeProjectId,
+            state.activeProjectData.project.job_id ?? null
+          );
           writeProjectSnapshot(state.activeProjectData);
         }
       },

@@ -33,7 +33,9 @@ const CreativeSuiteDashboardStats: React.FC<
                 Telemetry
               </span>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-[#E5E5E5] font-mono tracking-tight">{stat.value}</div>
+            <div className="text-2xl sm:text-3xl font-black text-[#E5E5E5] font-mono tracking-tight">
+              {stat.value}
+            </div>
             <div className="text-[10px] font-bold text-[#9CA3AF] font-mono uppercase tracking-wider mt-1">
               {stat.label}
             </div>

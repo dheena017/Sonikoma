@@ -53,7 +53,9 @@ export const QuickVideoPreview: React.FC<QuickVideoPreviewProps> = ({
   targetUrl,
   advancedSettingsProps,
 }) => {
-  const [monitorTab, setMonitorTab] = useState<"timeline" | "video">("timeline");
+  const [monitorTab, setMonitorTab] = useState<"timeline" | "video">(
+    "timeline"
+  );
   const finalExport = onExportVideo || handleRenderFinalVideo || onExport;
   const finalSave = onSave || handleSave;
 
@@ -98,4 +100,7 @@ export const QuickVideoPreview: React.FC<QuickVideoPreviewProps> = ({
 };
 
 export default QuickVideoPreview;
-export { QuickVideoPreview as StudioVideoPreview, QuickVideoPreview as VideoPreviewDeck };
+export {
+  QuickVideoPreview as StudioVideoPreview,
+  QuickVideoPreview as VideoPreviewDeck,
+};

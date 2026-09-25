@@ -72,7 +72,12 @@
       "server": "Uvicorn (ASGI)",
       "orm": "SQLAlchemy 2.0 (Async/Sync)",
       "database": "SQLite / PostgreSQL",
-      "computerVision": ["OpenCV (cv2)", "Ultralytics YOLOv8", "NumPy", "Pillow"],
+      "computerVision": [
+        "OpenCV (cv2)",
+        "Ultralytics YOLOv8",
+        "NumPy",
+        "Pillow"
+      ],
       "mediaProcessing": ["MoviePy", "FFmpeg", "Edge-TTS"]
     },
     "frontend": {

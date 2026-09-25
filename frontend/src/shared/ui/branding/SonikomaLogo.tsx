@@ -92,7 +92,9 @@ export function SonikomaLogo({
     >
       {/* 1. Seamless Circular Emblem Frame - crops inner square background natively */}
       <div
-        className={`${config.boxSize} rounded-full flex items-center justify-center overflow-hidden shrink-0 border transition-all duration-200 shadow-sm ${
+        className={`${
+          config.boxSize
+        } rounded-full flex items-center justify-center overflow-hidden shrink-0 border transition-all duration-200 shadow-sm ${
           isLight
             ? "border-slate-300 bg-white group-hover:border-slate-400"
             : "border-[#2F2F2F] bg-[#0A0B0E] group-hover:border-neutral-500"
@@ -114,7 +116,9 @@ export function SonikomaLogo({
         <div className="flex flex-col text-left leading-tight">
           <div className="flex items-center gap-2">
             <span
-              className={`${config.textSize} transition-colors duration-200 hidden min-[380px]:inline-block ${
+              className={`${
+                config.textSize
+              } transition-colors duration-200 hidden min-[380px]:inline-block ${
                 isLight
                   ? "text-slate-900 group-hover:text-blue-600"
                   : "text-white group-hover:text-neutral-200"
@@ -138,7 +142,9 @@ export function SonikomaLogo({
 
           {showSubtitle && (
             <span
-              className={`${config.subtextSize} font-medium transition-colors duration-200 ${
+              className={`${
+                config.subtextSize
+              } font-medium transition-colors duration-200 ${
                 isLight ? "text-slate-500" : "text-neutral-400"
               }`}
             >

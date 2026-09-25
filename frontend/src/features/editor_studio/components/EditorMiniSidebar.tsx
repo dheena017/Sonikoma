@@ -17,7 +17,10 @@ import {
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
-import { useImageEditorStore, type EditorTool } from "@/features/editor_studio/hooks/useEditorState";
+import {
+  useImageEditorStore,
+  type EditorTool,
+} from "@/features/editor_studio/hooks/useEditorState";
 
 interface EditorMiniSidebarProps {
   isCollapsed: boolean;
@@ -80,7 +83,11 @@ const EditorMiniSidebarInner = ({
   const [menuHover, setMenuHover] = useState(false);
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
-  const CropSidebarToolItem = ({ tool }: { tool: { key: EditorTool; label: string; icon: any } }) => {
+  const CropSidebarToolItem = ({
+    tool,
+  }: {
+    tool: { key: EditorTool; label: string; icon: any };
+  }) => {
     const [hover, setHover] = useState(false);
     const [rect, setRect] = useState<DOMRect | null>(null);
     const isActive = activeTool === tool.key;
@@ -118,7 +125,9 @@ const EditorMiniSidebarInner = ({
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                isActive
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
@@ -130,11 +139,7 @@ const EditorMiniSidebarInner = ({
             </span>
           )}
         </button>
-        <TooltipPortal
-          text={tool.label}
-          visible={hover}
-          anchorRect={rect}
-        />
+        <TooltipPortal text={tool.label} visible={hover} anchorRect={rect} />
       </div>
     );
   };
@@ -318,7 +323,9 @@ const EditorMiniSidebarInner = ({
               if (p.has("tab")) {
                 p.delete("tab");
                 const searchStr = p.toString();
-                const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""}`;
+                const newPath = `${window.location.pathname}${
+                  searchStr ? "?" + searchStr : ""
+                }`;
                 if (navigateTo) {
                   navigateTo(newPath);
                 } else {
@@ -365,11 +372,22 @@ const EditorMiniSidebarInner = ({
                 setTimeout(() => {
                   const targetMap: Record<string, string[]> = {
                     monitor: ["section-monitor", "section-monitor-placeholder"],
-                    storyboard: ["section-storyboard", "section-timeline", "panels_timeline_section"],
-                    timeline: ["section-storyboard", "section-timeline", "panels_timeline_section"],
+                    storyboard: [
+                      "section-storyboard",
+                      "section-timeline",
+                      "panels_timeline_section",
+                    ],
+                    timeline: [
+                      "section-storyboard",
+                      "section-timeline",
+                      "panels_timeline_section",
+                    ],
                     assets: ["section-assets", "section-raw-images"],
                   };
-                  const candidateIds = targetMap[item.id] || [`section-${item.id}`, item.id];
+                  const candidateIds = targetMap[item.id] || [
+                    `section-${item.id}`,
+                    item.id,
+                  ];
                   for (const id of candidateIds) {
                     const el = document.getElementById(id);
                     if (el) {
@@ -398,7 +416,9 @@ const EditorMiniSidebarInner = ({
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                isActive
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
@@ -431,7 +451,10 @@ const EditorMiniSidebarInner = ({
       {/* Scrollable Tools Area */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {menuGroups.map((group, gi) => (
-          <div key={group.label} className="w-full flex flex-col items-center pb-1">
+          <div
+            key={group.label}
+            className="w-full flex flex-col items-center pb-1"
+          >
             {/* Section divider + label */}
             <div
               className="w-full flex flex-col items-center"

@@ -1,6 +1,14 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { X, LogOut, Heart, AlertTriangle, Trash2, CreditCard, ShieldX } from "lucide-react";
+import {
+  X,
+  LogOut,
+  Heart,
+  AlertTriangle,
+  Trash2,
+  CreditCard,
+  ShieldX,
+} from "lucide-react";
 import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface GoodbyeUserModalProps {
@@ -93,7 +101,9 @@ export function GoodbyeUserModal({
             <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <div className="flex items-center gap-2.5">
                 <Trash2 className="h-4 w-4 text-rose-400 shrink-0" />
-                <span className="font-semibold text-white">Projects & Storyboards</span>
+                <span className="font-semibold text-white">
+                  Projects & Storyboards
+                </span>
               </div>
               <span className="text-[11px] text-rose-400 font-bold bg-rose-500/10 px-2.5 py-0.5 rounded-lg border border-rose-500/20">
                 Deleted
@@ -103,7 +113,9 @@ export function GoodbyeUserModal({
             <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-900/60 border border-white/5 text-xs">
               <div className="flex items-center gap-2.5">
                 <CreditCard className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="font-semibold text-white">Subscriptions & Credits</span>
+                <span className="font-semibold text-white">
+                  Subscriptions & Credits
+                </span>
               </div>
               <span className="text-[11px] text-amber-400 font-bold bg-amber-500/10 px-2.5 py-0.5 rounded-lg border border-amber-500/20">
                 Cancelled
@@ -123,7 +135,9 @@ export function GoodbyeUserModal({
 
           <div className="flex items-center gap-2 text-[11px] text-neutral-400 bg-neutral-900/60 border border-white/5 p-3 rounded-xl">
             <Heart className="h-4 w-4 text-rose-400 shrink-0" />
-            <span>Thank you for using Sonikoma Studio. You're always welcome back!</span>
+            <span>
+              Thank you for using Sonikoma Studio. You're always welcome back!
+            </span>
           </div>
         </div>
 

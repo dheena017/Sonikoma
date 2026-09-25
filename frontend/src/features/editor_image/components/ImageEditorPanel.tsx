@@ -355,7 +355,13 @@ export default function ImageEditorPanel({
                 <Shield className="h-3.5 w-3.5 text-neutral-400" />
                 Show Shorts/Reels Safe Zone
               </span>
-              <span className={showSafeZones ? "text-blue-300 font-black" : "text-neutral-500"}>
+              <span
+                className={
+                  showSafeZones
+                    ? "text-blue-300 font-black"
+                    : "text-neutral-500"
+                }
+              >
                 {showSafeZones ? "ON" : "OFF"}
               </span>
             </button>
@@ -431,7 +437,9 @@ function ToggleRow({
       }`}
     >
       <span>{label}</span>
-      <span className={enabled ? "text-amber-300 font-black" : "text-neutral-500"}>
+      <span
+        className={enabled ? "text-amber-300 font-black" : "text-neutral-500"}
+      >
         {enabled ? "ON" : "OFF"}
       </span>
     </button>

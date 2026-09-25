@@ -82,7 +82,8 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
 
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
-  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const telemetryRef = useRef<HTMLDivElement>(null);
@@ -303,7 +304,9 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
               </div>
             ) : (
               <div className="p-6 text-center text-neutral-400 font-mono text-xs select-none">
-                <p className="text-neutral-300 font-bold">No results found for &ldquo;{searchQuery}&rdquo;</p>
+                <p className="text-neutral-300 font-bold">
+                  No results found for &ldquo;{searchQuery}&rdquo;
+                </p>
               </div>
             )}
           </div>
@@ -314,7 +317,10 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
       <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
         {/* Server Status Indicator - Hidden on ultra-small screens (<480px) */}
         <div className="hidden min-[480px]:block">
-          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+          <ServerStatusIndicator
+            status={backendStatus}
+            onClick={recheckBackend}
+          />
         </div>
 
         {/* 🤖 Global AI Model Selector */}
@@ -331,11 +337,15 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
                 }}
                 aria-label="Your credit balance & daily rewards"
                 className={`h-10 flex items-center gap-2 px-3.5 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs sm:text-[13px] font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
-                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+                  showCreditsPopover
+                    ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]"
+                    : ""
                 }`}
               >
                 <Zap className="h-4 w-4 fill-amber-400 text-amber-400 shrink-0" />
-                <span className="font-bold text-amber-300 font-mono text-xs sm:text-[12.5px]">{credits.toLocaleString()}</span>
+                <span className="font-bold text-amber-300 font-mono text-xs sm:text-[12.5px]">
+                  {credits.toLocaleString()}
+                </span>
               </button>
             </Tooltip>
 
@@ -365,7 +375,9 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
                 setShowCreditsPopover(false);
               }}
               className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
-                showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
+                showNotifications
+                  ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]"
+                  : ""
               }`}
               aria-label="Notifications"
             >
@@ -408,7 +420,9 @@ const AdminHeaderPage: React.FC<AdminHeaderPageProps> = ({
           <Tooltip
             text={
               activeProjectId && activeProjectData
-                ? `Active Project: ${activeProjectData.project?.title || "Active"}`
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  }`
                 : "Select Active Project"
             }
             placement="bottom"

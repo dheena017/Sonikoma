@@ -232,7 +232,13 @@ export const inferModelProviderInfo = (modelId: string = "") => {
   if (id.includes("claude") || id.includes("anthropic")) {
     return { provider: "anthropic", provider_name: "Anthropic Claude" };
   }
-  if (id.includes("gpt") || id.includes("o1") || id.includes("o3") || id.includes("dall") || id.includes("openai")) {
+  if (
+    id.includes("gpt") ||
+    id.includes("o1") ||
+    id.includes("o3") ||
+    id.includes("dall") ||
+    id.includes("openai")
+  ) {
     return { provider: "openai", provider_name: "OpenAI" };
   }
   if (id.includes("gemini") || id.includes("imagen") || id.includes("google")) {
@@ -279,21 +285,21 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const hasUserKey = useMemo(() => {
     return Boolean(
       localStorage.getItem("user_gemini_key") ||
-      localStorage.getItem("sonikoma_key_gemini") ||
-      localStorage.getItem("user_openai_key") ||
-      localStorage.getItem("sonikoma_key_openai") ||
-      localStorage.getItem("user_anthropic_key") ||
-      localStorage.getItem("sonikoma_key_anthropic") ||
-      localStorage.getItem("user_groq_key") ||
-      localStorage.getItem("sonikoma_key_groq") ||
-      localStorage.getItem("user_deepseek_key") ||
-      localStorage.getItem("sonikoma_key_deepseek") ||
-      localStorage.getItem("user_elevenlabs_key") ||
-      localStorage.getItem("sonikoma_key_elevenlabs") ||
-      localStorage.getItem("user_deepl_key") ||
-      localStorage.getItem("sonikoma_key_deepl") ||
-      localStorage.getItem("user_huggingface_key") ||
-      localStorage.getItem("sonikoma_key_huggingface")
+        localStorage.getItem("sonikoma_key_gemini") ||
+        localStorage.getItem("user_openai_key") ||
+        localStorage.getItem("sonikoma_key_openai") ||
+        localStorage.getItem("user_anthropic_key") ||
+        localStorage.getItem("sonikoma_key_anthropic") ||
+        localStorage.getItem("user_groq_key") ||
+        localStorage.getItem("sonikoma_key_groq") ||
+        localStorage.getItem("user_deepseek_key") ||
+        localStorage.getItem("sonikoma_key_deepseek") ||
+        localStorage.getItem("user_elevenlabs_key") ||
+        localStorage.getItem("sonikoma_key_elevenlabs") ||
+        localStorage.getItem("user_deepl_key") ||
+        localStorage.getItem("sonikoma_key_deepl") ||
+        localStorage.getItem("user_huggingface_key") ||
+        localStorage.getItem("sonikoma_key_huggingface")
     );
   }, [keyUpdateTick]);
 
@@ -324,9 +330,15 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
         r.task === task
           ? {
               ...r,
-              primary_model: isModelConfiguredInWebsite(def.default_primary) ? def.default_primary : "",
-              fallback_model: isModelConfiguredInWebsite(def.default_fallback) ? def.default_fallback : "",
-              tertiary_model: isModelConfiguredInWebsite(def.default_tertiary) ? def.default_tertiary : "",
+              primary_model: isModelConfiguredInWebsite(def.default_primary)
+                ? def.default_primary
+                : "",
+              fallback_model: isModelConfiguredInWebsite(def.default_fallback)
+                ? def.default_fallback
+                : "",
+              tertiary_model: isModelConfiguredInWebsite(def.default_tertiary)
+                ? def.default_tertiary
+                : "",
             }
           : r
       )
@@ -343,7 +355,9 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [simResult, setSimResult] = useState<any>(null);
 
   // Return all compatible models from the full catalog for this specific task
-  const getTierModelsForTask = (route: CapabilityRoute): DynamicModelOption[] => {
+  const getTierModelsForTask = (
+    route: CapabilityRoute
+  ): DynamicModelOption[] => {
     const taskCurrentIds = [
       route.default_primary,
       route.default_fallback,
@@ -460,7 +474,9 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
 
     for (const id of taskCurrentIds) {
       if (!existingIds.has(id.toLowerCase())) {
-        const found = availableModels.find((m) => m.id.toLowerCase() === id.toLowerCase());
+        const found = availableModels.find(
+          (m) => m.id.toLowerCase() === id.toLowerCase()
+        );
         if (found) {
           missingModels.push(found);
           existingIds.add(id.toLowerCase());
@@ -537,7 +553,9 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
         // unless custom configured or provider is local / key is present in website vault!
         const initialRoutes: CapabilityRoute[] = CAPABILITY_DEFINITIONS.map(
           (def) => {
-            const localSaved = customLocalRouting?.find((r) => r.task === def.task);
+            const localSaved = customLocalRouting?.find(
+              (r) => r.task === def.task
+            );
             if (localSaved) {
               return {
                 ...def,
@@ -555,9 +573,15 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
             const p2Candidate = serverRoute?.fallback || def.default_fallback;
             const p3Candidate = serverRoute?.tertiary || def.default_tertiary;
 
-            const p1 = isModelConfiguredInWebsite(p1Candidate) ? p1Candidate : "";
-            const p2 = isModelConfiguredInWebsite(p2Candidate) ? p2Candidate : "";
-            const p3 = isModelConfiguredInWebsite(p3Candidate) ? p3Candidate : "";
+            const p1 = isModelConfiguredInWebsite(p1Candidate)
+              ? p1Candidate
+              : "";
+            const p2 = isModelConfiguredInWebsite(p2Candidate)
+              ? p2Candidate
+              : "";
+            const p3 = isModelConfiguredInWebsite(p3Candidate)
+              ? p3Candidate
+              : "";
 
             return {
               ...def,
@@ -595,12 +619,21 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const handleResetDefaults = () => {
     const defaults: CapabilityRoute[] = CAPABILITY_DEFINITIONS.map((def) => ({
       ...def,
-      primary_model: isModelConfiguredInWebsite(def.default_primary) ? def.default_primary : "",
-      fallback_model: isModelConfiguredInWebsite(def.default_fallback) ? def.default_fallback : "",
-      tertiary_model: isModelConfiguredInWebsite(def.default_tertiary) ? def.default_tertiary : "",
+      primary_model: isModelConfiguredInWebsite(def.default_primary)
+        ? def.default_primary
+        : "",
+      fallback_model: isModelConfiguredInWebsite(def.default_fallback)
+        ? def.default_fallback
+        : "",
+      tertiary_model: isModelConfiguredInWebsite(def.default_tertiary)
+        ? def.default_tertiary
+        : "",
     }));
     setRoutes(defaults);
-    addNotification?.("Reset routing rules to configured provider defaults", "info");
+    addNotification?.(
+      "Reset routing rules to configured provider defaults",
+      "info"
+    );
   };
 
   // Check if routes have unsaved edits
@@ -614,10 +647,16 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     localStorage.setItem("sonikoma_ai_routing_custom", JSON.stringify(routes));
 
     // Synchronize active studio/editor model with panel_analysis or storyboard_narrative primary choice
-    const panelRoute = routes.find((r) => r.task === "panel_analysis" || r.task === "storyboard_narrative");
+    const panelRoute = routes.find(
+      (r) => r.task === "panel_analysis" || r.task === "storyboard_narrative"
+    );
     if (panelRoute?.primary_model) {
       localStorage.setItem("ai_comic_model", panelRoute.primary_model);
-      window.dispatchEvent(new CustomEvent("ai-model-changed", { detail: { model: panelRoute.primary_model } }));
+      window.dispatchEvent(
+        new CustomEvent("ai-model-changed", {
+          detail: { model: panelRoute.primary_model },
+        })
+      );
     }
 
     try {
@@ -628,7 +667,10 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
       });
       if (res.ok) {
         setOriginalRoutes(routes);
-        addNotification?.("All AI model routing cascades saved and synchronized successfully!", "success");
+        addNotification?.(
+          "All AI model routing cascades saved and synchronized successfully!",
+          "success"
+        );
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
       } else {
@@ -639,7 +681,10 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           body: JSON.stringify({ routing: routes }),
         });
         setOriginalRoutes(routes);
-        addNotification?.("All AI model routing cascades saved successfully!", "success");
+        addNotification?.(
+          "All AI model routing cascades saved successfully!",
+          "success"
+        );
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
       }
@@ -690,8 +735,10 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
         setSimResult({
           task: simTask.name,
           targetTier: data.tier_used || "Tier 1 · Primary",
-          resolvedModel: data.model_name || primaryModel?.name || simTask.primary_model,
-          provider: data.provider || primaryModel?.provider_name || "Google Gemini",
+          resolvedModel:
+            data.model_name || primaryModel?.name || simTask.primary_model,
+          provider:
+            data.provider || primaryModel?.provider_name || "Google Gemini",
           latency: data.latency || `${data.latency_ms || 120}ms`,
           status: "SUCCESS (200 OK)",
           fallbackChain: [
@@ -786,470 +833,478 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     );
   }
 
-
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto animate-in fade-in duration-200 text-left">
       {/* ── MAIN COVER WRAPPER CARD ── */}
       <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden">
         {/* ── 1. HERO HEADER & TELEMETRY BANNER ──────────────────────────────── */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#2F2F2F] relative z-10">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
-              AI Smart Model{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
-                Routing
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
+                AI Smart Model{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
+                  Routing
+                </span>
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-mono font-bold text-[#3B82F6] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
+                11 ACTIVE PIPELINES
               </span>
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-mono font-bold text-[#3B82F6] flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
-              11 ACTIVE PIPELINES
-            </span>
-          </div>
-          <p className="text-neutral-400 text-xs sm:text-sm max-w-3xl leading-relaxed">
-            Configure specialized 3-tier cascade engines (Primary, High-Speed
-            Fallback, and Emergency Failover) across all comic generation
-            pipelines.
-          </p>
-        </div>
-
-        {/* Action CTAs: Reset Defaults + Save */}
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={handleResetDefaults}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold font-mono text-[#E5E5E5] bg-[#1E1E1E] border border-[#2F2F2F] hover:bg-[#2A2A2A] transition-all cursor-pointer shadow-sm"
-            title="Reset all 11 task routes to default specialized configurations"
-          >
-            <RotateCcw className="w-3.5 h-3.5 text-[#9CA3AF]" />
-            <span>Reset Defaults</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isSaving}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 cursor-pointer disabled:opacity-40 shadow-md ${
-              saved
-                ? "bg-[#10B981] border border-[#10B981]/30"
-                : hasUnsavedChanges
-                ? "bg-[#3B82F6] hover:bg-[#2563EB] border border-[#3B82F6]/30"
-                : "bg-[#3B82F6]/80 hover:bg-[#3B82F6] border border-[#3B82F6]/30"
-            }`}
-          >
-            {saved ? (
-              <>
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Saved!</span>
-              </>
-            ) : isSaving ? (
-              <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>Saving…</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4" />
-                <span>
-                  {hasUnsavedChanges ? "Save Changes *" : "Save Rules"}
-                </span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* ── 1.1 MISSING API KEYS WARNING BANNER ────────────────────────────── */}
-      {!hasUserKey && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in shadow-lg">
-          <div className="flex items-start gap-3.5">
-            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
-              <AlertCircle className="w-5 h-5" />
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-white font-sans">
-                  No API Keys Configured in Website
-                </h3>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300 uppercase">
-                  Setup Required
-                </span>
+            <p className="text-neutral-400 text-xs sm:text-sm max-w-3xl leading-relaxed">
+              Configure specialized 3-tier cascade engines (Primary, High-Speed
+              Fallback, and Emergency Failover) across all comic generation
+              pipelines.
+            </p>
+          </div>
+
+          {/* Action CTAs: Reset Defaults + Save */}
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={handleResetDefaults}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold font-mono text-[#E5E5E5] bg-[#1E1E1E] border border-[#2F2F2F] hover:bg-[#2A2A2A] transition-all cursor-pointer shadow-sm"
+              title="Reset all 11 task routes to default specialized configurations"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-[#9CA3AF]" />
+              <span>Reset Defaults</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 cursor-pointer disabled:opacity-40 shadow-md ${
+                saved
+                  ? "bg-[#10B981] border border-[#10B981]/30"
+                  : hasUnsavedChanges
+                  ? "bg-[#3B82F6] hover:bg-[#2563EB] border border-[#3B82F6]/30"
+                  : "bg-[#3B82F6]/80 hover:bg-[#3B82F6] border border-[#3B82F6]/30"
+              }`}
+            >
+              {saved ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Saved!</span>
+                </>
+              ) : isSaving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Saving…</span>
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>
+                    {hasUnsavedChanges ? "Save Changes *" : "Save Rules"}
+                  </span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* ── 1.1 MISSING API KEYS WARNING BANNER ────────────────────────────── */}
+        {!hasUserKey && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in shadow-lg">
+            <div className="flex items-start gap-3.5">
+              <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+                <AlertCircle className="w-5 h-5" />
               </div>
-              <p className="text-xs text-neutral-300 leading-relaxed max-w-3xl">
-                You need to enter your API key in the website (AI Vault) to activate and select AI models. All default AI models remain empty until an API key is entered in your browser vault.
-              </p>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white font-sans">
+                    No API Keys Configured in Website
+                  </h3>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300 uppercase">
+                    Setup Required
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-300 leading-relaxed max-w-3xl">
+                  You need to enter your API key in the website (AI Vault) to
+                  activate and select AI models. All default AI models remain
+                  empty until an API key is entered in your browser vault.
+                </p>
+              </div>
+            </div>
+
+            <a
+              href="/ai-core/api-keys"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer self-start sm:self-center active:scale-95"
+            >
+              <Key className="w-3.5 h-3.5" />
+              <span>Enter API Key in AI Vault</span>
+            </a>
+          </div>
+        )}
+
+        {/* ── 2. TELEMETRY KPI METRICS GRID ──────────────────────────────────── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {/* KPI 1: Active Pipelines */}
+          <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+            <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+                Routed Pipelines
+              </span>
+              <Cpu className="w-4 h-4 text-[#3B82F6]" />
+            </div>
+            <div className="text-xl font-bold text-[#E5E5E5] font-mono">
+              {routes.length} / 11
+            </div>
+            <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
+              Full comic workflow coverage
             </div>
           </div>
 
-          <a
-            href="/ai-core/api-keys"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer self-start sm:self-center active:scale-95"
-          >
-            <Key className="w-3.5 h-3.5" />
-            <span>Enter API Key in AI Vault</span>
-          </a>
-        </div>
-      )}
+          {/* KPI 2: 3-Tier Redundancy */}
+          <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+            <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+                Cascade Redundancy
+              </span>
+              <ShieldCheck className="w-4 h-4 text-[#10B981]" />
+            </div>
+            <div className="text-xl font-bold text-[#10B981] font-mono">
+              100% 3-Tier
+            </div>
+            <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
+              Auto-failover enabled on rate limit
+            </div>
+          </div>
 
-      {/* ── 2. TELEMETRY KPI METRICS GRID ──────────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* KPI 1: Active Pipelines */}
-        <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-          <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-            <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-              Routed Pipelines
-            </span>
-            <Cpu className="w-4 h-4 text-[#3B82F6]" />
+          {/* KPI 3: Available Models */}
+          <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+            <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+                Model Catalog
+              </span>
+              <Sparkles className="w-4 h-4 text-[#3B82F6]" />
+            </div>
+            <div className="text-xl font-bold text-[#E5E5E5] font-mono">
+              {new Set(
+                routes.flatMap((r) => [
+                  r.primary_model,
+                  r.fallback_model,
+                  r.tertiary_model,
+                ])
+              ).size || 12}{" "}
+              Tier Engines
+            </div>
+            <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
+              Active across 3-tier routing pipelines
+            </div>
           </div>
-          <div className="text-xl font-bold text-[#E5E5E5] font-mono">
-            {routes.length} / 11
-          </div>
-          <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-            Full comic workflow coverage
-          </div>
-        </div>
 
-        {/* KPI 2: 3-Tier Redundancy */}
-        <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-          <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-            <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-              Cascade Redundancy
-            </span>
-            <ShieldCheck className="w-4 h-4 text-[#10B981]" />
-          </div>
-          <div className="text-xl font-bold text-[#10B981] font-mono">
-            100% 3-Tier
-          </div>
-          <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-            Auto-failover enabled on rate limit
-          </div>
-        </div>
-
-        {/* KPI 3: Available Models */}
-        <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-          <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-            <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-              Model Catalog
-            </span>
-            <Sparkles className="w-4 h-4 text-[#3B82F6]" />
-          </div>
-          <div className="text-xl font-bold text-[#E5E5E5] font-mono">
-            {new Set(routes.flatMap((r) => [r.primary_model, r.fallback_model, r.tertiary_model])).size || 12} Tier Engines
-          </div>
-          <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-            Active across 3-tier routing pipelines
+          {/* KPI 4: Orchestrator State */}
+          <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+            <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+                Orchestrator Sync
+              </span>
+              <Activity className="w-4 h-4 text-[#3B82F6]" />
+            </div>
+            <div className="text-xl font-bold text-[#3B82F6] font-mono flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
+              SYNCHRONIZED
+            </div>
+            <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
+              Live Central AI Core binding
+            </div>
           </div>
         </div>
 
-        {/* KPI 4: Orchestrator State */}
-        <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-          <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-            <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-              Orchestrator Sync
-            </span>
-            <Activity className="w-4 h-4 text-[#3B82F6]" />
-          </div>
-          <div className="text-xl font-bold text-[#3B82F6] font-mono flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
-            SYNCHRONIZED
-          </div>
-          <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-            Live Central AI Core binding
-          </div>
-        </div>
-      </div>
+        {/* ── 3. SEARCH & CATEGORY FILTER BAR ────────────────────────────────── */}
+        <div className="p-3.5 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-md">
+          {/* Category Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 flex-wrap">
+            {categories.map((cat) => {
+              const isActive = selectedCategory === cat;
+              const catCfg = CATEGORY_COLORS[cat];
+              const activeColor =
+                cat === "All" ? "#3B82F6" : catCfg?.dot || "#3B82F6";
 
-      {/* ── 3. SEARCH & CATEGORY FILTER BAR ────────────────────────────────── */}
-      <div className="p-3.5 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-md">
-        {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 flex-wrap">
-          {categories.map((cat) => {
-            const isActive = selectedCategory === cat;
-            const catCfg = CATEGORY_COLORS[cat];
-            const activeColor = cat === "All" ? "#3B82F6" : catCfg?.dot || "#3B82F6";
+              const count =
+                cat === "All"
+                  ? routes.length
+                  : routes.filter((r) => r.category === cat).length;
 
-            const count =
-              cat === "All"
-                ? routes.length
-                : routes.filter((r) => r.category === cat).length;
-
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer font-sans"
-                style={{
-                  borderWidth: 1,
-                  borderStyle: "solid",
-                  borderColor: isActive ? activeColor : "#2F2F2F",
-                  backgroundColor: isActive
-                    ? `${activeColor}20`
-                    : "#121212",
-                  color: isActive ? "#ffffff" : "#9CA3AF",
-                }}
-              >
-                {cat !== "All" && (
-                  <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0"
-                    style={{
-                      backgroundColor: isActive ? activeColor : "#6B7280",
-                    }}
-                  />
-                )}
-                <span>{cat}</span>
-                <span
-                  className="px-1.5 py-0.2 rounded-full text-[9px] font-mono"
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer font-sans"
                   style={{
-                    backgroundColor: isActive
-                      ? `${activeColor}33`
-                      : "rgba(255, 255, 255, 0.06)",
-                    color: isActive ? "#ffffff" : "#6b7280",
+                    borderWidth: 1,
+                    borderStyle: "solid",
+                    borderColor: isActive ? activeColor : "#2F2F2F",
+                    backgroundColor: isActive ? `${activeColor}20` : "#121212",
+                    color: isActive ? "#ffffff" : "#9CA3AF",
                   }}
                 >
-                  {count}
-                </span>
+                  {cat !== "All" && (
+                    <span
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{
+                        backgroundColor: isActive ? activeColor : "#6B7280",
+                      }}
+                    />
+                  )}
+                  <span>{cat}</span>
+                  <span
+                    className="px-1.5 py-0.2 rounded-full text-[9px] font-mono"
+                    style={{
+                      backgroundColor: isActive
+                        ? `${activeColor}33`
+                        : "rgba(255, 255, 255, 0.06)",
+                      color: isActive ? "#ffffff" : "#6b7280",
+                    }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search input */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#2F2F2F] bg-[#121212] w-full md:w-64 focus-within:border-[#3B82F6] transition-colors">
+            <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search pipelines..."
+              className="bg-transparent text-xs text-[#E5E5E5] placeholder-[#6B7280] outline-none w-full font-sans"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="text-[10px] text-[#9CA3AF] hover:text-white"
+              >
+                <X className="w-3 h-3" />
               </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── 4. PIPELINE TASK CARDS WITH 3-TIER CASCADE FLOW ───────────────── */}
+        <div className="space-y-4">
+          {filteredRoutes.map((route) => {
+            const tierModels = getTierModelsForTask(route);
+            const catColor =
+              CATEGORY_COLORS[route.category] ||
+              CATEGORY_COLORS["Creative Narration"];
+
+            return (
+              <div
+                key={route.task}
+                className="rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 sm:p-5 transition-all duration-200 relative overflow-visible hover:border-neutral-700 shadow-lg"
+              >
+                {/* Task Header */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+                  <div className="flex items-start gap-3 min-w-0">
+                    {/* Emoji Badge */}
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xl border"
+                      style={{
+                        backgroundColor: catColor.bg,
+                        borderColor: catColor.border,
+                      }}
+                    >
+                      {route.emoji}
+                    </div>
+
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-sm sm:text-base font-bold text-[#E5E5E5] leading-tight">
+                          {route.name}
+                        </h3>
+                        <span
+                          className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border shrink-0"
+                          style={{
+                            backgroundColor: catColor.bg,
+                            borderColor: catColor.border,
+                            color: catColor.text,
+                          }}
+                        >
+                          {route.category}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#9CA3AF] leading-relaxed">
+                        {route.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Header Action Badges: 3 Tier count, slug, and Simulator Button */}
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
+                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] text-[#9CA3AF]">
+                      {tierModels.length} Tier Engines
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => handleStartSimulation(route)}
+                      className="btn-secondary flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-[#3B82F6] hover:text-white border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 cursor-pointer"
+                      title="Simulate / dry-run this routing cascade"
+                    >
+                      <Play className="w-3 h-3 fill-current" />
+                      <span>Test</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── 3-TIER CASCADE MODELS GRID ─────────────────────────────── */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-[#2F2F2F]">
+                  {/* TIER 1: PRIMARY */}
+                  <TierModelCard
+                    tierType="primary"
+                    modelId={route.primary_model}
+                    availableModels={tierModels}
+                    onModelChange={(val) =>
+                      handleModelChange(route.task, "primary_model", val)
+                    }
+                  />
+
+                  {/* TIER 2: FALLBACK */}
+                  <TierModelCard
+                    tierType="fallback"
+                    modelId={route.fallback_model}
+                    availableModels={tierModels}
+                    onModelChange={(val) =>
+                      handleModelChange(route.task, "fallback_model", val)
+                    }
+                  />
+
+                  {/* TIER 3: EMERGENCY */}
+                  <TierModelCard
+                    tierType="tertiary"
+                    modelId={route.tertiary_model}
+                    availableModels={tierModels}
+                    onModelChange={(val) =>
+                      handleModelChange(route.task, "tertiary_model", val)
+                    }
+                  />
+                </div>
+              </div>
             );
           })}
         </div>
 
-        {/* Search input */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#2F2F2F] bg-[#121212] w-full md:w-64 focus-within:border-[#3B82F6] transition-colors">
-          <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search pipelines..."
-            className="bg-transparent text-xs text-[#E5E5E5] placeholder-[#6B7280] outline-none w-full font-sans"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="text-[10px] text-[#9CA3AF] hover:text-white"
-            >
-              <X className="w-3 h-3" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── 4. PIPELINE TASK CARDS WITH 3-TIER CASCADE FLOW ───────────────── */}
-      <div className="space-y-4">
-        {filteredRoutes.map((route) => {
-          const tierModels = getTierModelsForTask(route);
-          const catColor =
-            CATEGORY_COLORS[route.category] || CATEGORY_COLORS["Creative Narration"];
-
-          return (
-            <div
-              key={route.task}
-              className="rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 sm:p-5 transition-all duration-200 relative overflow-visible hover:border-neutral-700 shadow-lg"
-            >
-              {/* Task Header */}
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
-                <div className="flex items-start gap-3 min-w-0">
-                  {/* Emoji Badge */}
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xl border"
-                    style={{
-                      backgroundColor: catColor.bg,
-                      borderColor: catColor.border,
-                    }}
-                  >
-                    {route.emoji}
+        {/* ── 5. CASCADE DRY-RUN SIMULATOR MODAL ─────────────────────────────── */}
+        {simModalOpen && simTask && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
+            <div className="w-full max-w-lg rounded-3xl border border-[#2F2F2F] bg-[#181818] p-6 space-y-5 shadow-2xl relative">
+              {/* Modal Header */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{simTask.emoji}</span>
+                    <h3 className="text-base font-bold text-[#E5E5E5]">
+                      Cascade Simulator: {simTask.name}
+                    </h3>
                   </div>
+                  <p className="text-xs text-[#9CA3AF] font-sans">
+                    Simulate a dispatch request through the 3-tier cascade and
+                    inspect model resolution.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSimModalOpen(false)}
+                  className="btn-secondary p-1.5 rounded-xl text-[#9CA3AF] hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-                  <div className="min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm sm:text-base font-bold text-[#E5E5E5] leading-tight">
-                        {route.name}
-                      </h3>
-                      <span
-                        className="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full border shrink-0"
-                        style={{
-                          backgroundColor: catColor.bg,
-                          borderColor: catColor.border,
-                          color: catColor.text,
-                        }}
-                      >
-                        {route.category}
-                      </span>
-                    </div>
-                    <p className="text-xs text-[#9CA3AF] leading-relaxed">
-                      {route.description}
-                    </p>
+              {/* Cascade Flow Blueprint */}
+              <div className="p-3.5 rounded-2xl border border-[#2F2F2F] bg-[#121212] space-y-2 text-xs font-mono">
+                <div className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-bold">
+                  Configured Execution Path:
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-[#3B82F6]">
+                    <Zap className="w-3.5 h-3.5 shrink-0" />
+                    <span className="font-bold">Tier 1 (Primary):</span>
+                    <span className="text-[#E5E5E5] truncate">
+                      {simTask.primary_model}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-300">
+                    <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+                    <span className="font-bold">Tier 2 (Fallback):</span>
+                    <span className="text-white truncate">
+                      {simTask.fallback_model}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-amber-300">
+                    <Layers className="w-3.5 h-3.5 shrink-0" />
+                    <span className="font-bold">Tier 3 (Emergency):</span>
+                    <span className="text-white truncate">
+                      {simTask.tertiary_model}
+                    </span>
                   </div>
                 </div>
-
-                {/* Header Action Badges: 3 Tier count, slug, and Simulator Button */}
-                <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
-                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] text-[#9CA3AF]">
-                    {tierModels.length} Tier Engines
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={() => handleStartSimulation(route)}
-                    className="btn-secondary flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-[#3B82F6] hover:text-white border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 cursor-pointer"
-                    title="Simulate / dry-run this routing cascade"
-                  >
-                    <Play className="w-3 h-3 fill-current" />
-                    <span>Test</span>
-                  </button>
-                </div>
               </div>
 
-              {/* ── 3-TIER CASCADE MODELS GRID ─────────────────────────────── */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-[#2F2F2F]">
-                {/* TIER 1: PRIMARY */}
-                <TierModelCard
-                  tierType="primary"
-                  modelId={route.primary_model}
-                  availableModels={tierModels}
-                  onModelChange={(val) =>
-                    handleModelChange(route.task, "primary_model", val)
-                  }
-                />
+              {/* Simulation Result */}
+              {simResult && (
+                <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-2 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      {simResult.status}
+                    </span>
+                    <span className="text-neutral-400">
+                      Latency: {simResult.latency}
+                    </span>
+                  </div>
+                  <div className="text-xs text-neutral-200">
+                    Routed cleanly to{" "}
+                    <strong className="text-white font-bold">
+                      {simResult.resolvedModel}
+                    </strong>{" "}
+                    via {simResult.targetTier}.
+                  </div>
+                </div>
+              )}
 
-                {/* TIER 2: FALLBACK */}
-                <TierModelCard
-                  tierType="fallback"
-                  modelId={route.fallback_model}
-                  availableModels={tierModels}
-                  onModelChange={(val) =>
-                    handleModelChange(route.task, "fallback_model", val)
-                  }
-                />
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSimModalOpen(false)}
+                  className="btn-secondary px-4 py-2 rounded-xl text-xs font-semibold"
+                >
+                  Close
+                </button>
 
-                {/* TIER 3: EMERGENCY */}
-                <TierModelCard
-                  tierType="tertiary"
-                  modelId={route.tertiary_model}
-                  availableModels={tierModels}
-                  onModelChange={(val) =>
-                    handleModelChange(route.task, "tertiary_model", val)
-                  }
-                />
+                <button
+                  type="button"
+                  onClick={handleExecuteSimulation}
+                  disabled={simRunning}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] shadow-md border border-[#3B82F6]/30 cursor-pointer disabled:opacity-50 transition-all active:scale-95"
+                >
+                  {simRunning ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Resolving Cascade…</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-3.5 h-3.5 fill-white" />
+                      <span>Execute Dry Run</span>
+                    </>
+                  )}
+                </button>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ── 5. CASCADE DRY-RUN SIMULATOR MODAL ─────────────────────────────── */}
-      {simModalOpen && simTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="w-full max-w-lg rounded-3xl border border-[#2F2F2F] bg-[#181818] p-6 space-y-5 shadow-2xl relative">
-            {/* Modal Header */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{simTask.emoji}</span>
-                  <h3 className="text-base font-bold text-[#E5E5E5]">
-                    Cascade Simulator: {simTask.name}
-                  </h3>
-                </div>
-                <p className="text-xs text-[#9CA3AF] font-sans">
-                  Simulate a dispatch request through the 3-tier cascade and
-                  inspect model resolution.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSimModalOpen(false)}
-                className="btn-secondary p-1.5 rounded-xl text-[#9CA3AF] hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Cascade Flow Blueprint */}
-            <div className="p-3.5 rounded-2xl border border-[#2F2F2F] bg-[#121212] space-y-2 text-xs font-mono">
-              <div className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-bold">
-                Configured Execution Path:
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-[#3B82F6]">
-                  <Zap className="w-3.5 h-3.5 shrink-0" />
-                  <span className="font-bold">Tier 1 (Primary):</span>
-                  <span className="text-[#E5E5E5] truncate">
-                    {simTask.primary_model}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-emerald-300">
-                  <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                  <span className="font-bold">Tier 2 (Fallback):</span>
-                  <span className="text-white truncate">
-                    {simTask.fallback_model}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-amber-300">
-                  <Layers className="w-3.5 h-3.5 shrink-0" />
-                  <span className="font-bold">Tier 3 (Emergency):</span>
-                  <span className="text-white truncate">
-                    {simTask.tertiary_model}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Simulation Result */}
-            {simResult && (
-              <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-2 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    {simResult.status}
-                  </span>
-                  <span className="text-neutral-400">
-                    Latency: {simResult.latency}
-                  </span>
-                </div>
-                <div className="text-xs text-neutral-200">
-                  Routed cleanly to{" "}
-                  <strong className="text-white font-bold">
-                    {simResult.resolvedModel}
-                  </strong>{" "}
-                  via {simResult.targetTier}.
-                </div>
-              </div>
-            )}
-
-            {/* Modal Actions */}
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setSimModalOpen(false)}
-                className="btn-secondary px-4 py-2 rounded-xl text-xs font-semibold"
-              >
-                Close
-              </button>
-
-              <button
-                type="button"
-                onClick={handleExecuteSimulation}
-                disabled={simRunning}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] shadow-md border border-[#3B82F6]/30 cursor-pointer disabled:opacity-50 transition-all active:scale-95"
-              >
-                {simRunning ? (
-                  <>
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span>Resolving Cascade…</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-3.5 h-3.5 fill-white" />
-                    <span>Execute Dry Run</span>
-                  </>
-                )}
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </div>
   );

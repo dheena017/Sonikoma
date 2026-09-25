@@ -1,4 +1,7 @@
-import QuickVideoPreview, { QuickVideoPreview as StudioVideoPreview, QuickVideoPreview as VideoPreviewDeck } from "./components/QuickVideoPreview";
+import QuickVideoPreview, {
+  QuickVideoPreview as StudioVideoPreview,
+  QuickVideoPreview as VideoPreviewDeck,
+} from "./components/QuickVideoPreview";
 export { QuickVideoPreview, StudioVideoPreview, VideoPreviewDeck };
 export default QuickVideoPreview;
 

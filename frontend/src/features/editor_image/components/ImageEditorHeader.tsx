@@ -112,7 +112,8 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
-  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
@@ -166,10 +167,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
       if (creditsRef.current && !creditsRef.current.contains(target)) {
         setShowCreditsPopover(false);
       }
-      if (
-        moreActionsRef.current &&
-        !moreActionsRef.current.contains(target)
-      ) {
+      if (moreActionsRef.current && !moreActionsRef.current.contains(target)) {
         setShowMoreActions(false);
       }
     }
@@ -196,7 +194,11 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
   const hasMultipleImages = scrapedImages.length > 1;
 
   return (
-    <header className={`sticky top-0 left-0 right-0 h-16 w-full min-w-0 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${isSidebarOpen ? "z-0 pointer-events-none" : "z-50"}`}>
+    <header
+      className={`sticky top-0 left-0 right-0 h-16 w-full min-w-0 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl flex items-center justify-between pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+        isSidebarOpen ? "z-0 pointer-events-none" : "z-50"
+      }`}
+    >
       {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
         <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
@@ -264,7 +266,10 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
       <div className="flex items-center gap-1 max-lg:gap-1.5 sm:gap-2 min-w-0 shrink-0 ml-auto">
         {/* 🟢 Server Status Indicator - Hidden on narrow mobile (<580px) */}
         <div className="hidden min-[580px]:flex items-center justify-center max-lg:[&>button]:px-2 max-lg:[&>button]:gap-1">
-          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+          <ServerStatusIndicator
+            status={backendStatus}
+            onClick={recheckBackend}
+          />
         </div>
 
         {/* 🤖 Global AI Model Selector - Hidden on narrow mobile (<640px) */}
@@ -329,7 +334,9 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
               }`}
             >
               <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
-              <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
+              <span className="font-bold text-amber-300 font-mono text-[11px]">
+                {credits.toLocaleString()}
+              </span>
             </button>
 
             {showCreditsPopover && (

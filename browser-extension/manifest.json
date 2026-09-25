@@ -19,9 +19,7 @@
     "scripting",
     "declarativeNetRequest"
   ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background/service-worker.js",
     "type": "module"
@@ -41,15 +39,9 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://*/*"
-      ],
-      "js": [
-        "content/content.js"
-      ],
-      "css": [
-        "content/content.css"
-      ],
+      "matches": ["*://*/*"],
+      "js": ["content/content.js"],
+      "css": ["content/content.css"],
       "run_at": "document_idle"
     }
   ],
@@ -85,15 +77,8 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "icons/*",
-        "content/*",
-        "sidepanel/*",
-        "utils/*"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "resources": ["icons/*", "content/*", "sidepanel/*", "utils/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

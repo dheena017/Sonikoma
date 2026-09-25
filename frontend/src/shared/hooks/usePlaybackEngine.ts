@@ -6,7 +6,10 @@ import {
   stopAmbientBackgroundMusic,
   playComicSoundEffect,
 } from "@/shared/utils/audio";
-import { matchVoice, parseVoiceCharacteristics } from "@/shared/utils/voiceMatcher";
+import {
+  matchVoice,
+  parseVoiceCharacteristics,
+} from "@/shared/utils/voiceMatcher";
 
 let cachedVoices: SpeechSynthesisVoice[] = [];
 if (typeof window !== "undefined" && window.speechSynthesis) {
@@ -61,14 +64,22 @@ export function usePlaybackEngine({
 
   const speakDialogue = useCallback(
     (text?: string, panelDuration?: number) => {
-      if (typeof window === "undefined" || !window.speechSynthesis || isMuted || !text?.trim()) {
+      if (
+        typeof window === "undefined" ||
+        !window.speechSynthesis ||
+        isMuted ||
+        !text?.trim()
+      ) {
         return;
       }
       window.speechSynthesis.cancel();
 
       setTimeout(() => {
         const utterance = new SpeechSynthesisUtterance(text);
-        const voices = cachedVoices.length > 0 ? cachedVoices : window.speechSynthesis.getVoices();
+        const voices =
+          cachedVoices.length > 0
+            ? cachedVoices
+            : window.speechSynthesis.getVoices();
         const selectedVoice = matchVoice(voices, voiceActor);
 
         if (selectedVoice) {
@@ -82,7 +93,7 @@ export function usePlaybackEngine({
 
         if (panelDuration && panelDuration > 0) {
           const words = text.trim().split(/\s+/).filter(Boolean).length;
-          let targetRate = (words / 2.2) / panelDuration;
+          let targetRate = words / 2.2 / panelDuration;
           utterance.rate = Math.max(0.6, Math.min(targetRate, 2.2));
         } else {
           utterance.rate = 0.95;
@@ -128,7 +139,15 @@ export function usePlaybackEngine({
         playComicSoundEffect(activePanel.sfx, sfxVolume / 100);
       }
     },
-    [panels, speakDialogue, isMuted, volume, autoPlayAudio, sfxEnabled, sfxVolume]
+    [
+      panels,
+      speakDialogue,
+      isMuted,
+      volume,
+      autoPlayAudio,
+      sfxEnabled,
+      sfxVolume,
+    ]
   );
 
   useEffect(() => {
@@ -137,7 +156,13 @@ export function usePlaybackEngine({
 
   useEffect(() => {
     if (storyboardPlaying) {
-      startAmbientBackgroundMusic(musicTheme, volume, isMuted, bgmVolume, audioDucking);
+      startAmbientBackgroundMusic(
+        musicTheme,
+        volume,
+        isMuted,
+        bgmVolume,
+        audioDucking
+      );
     } else {
       stopAmbientBackgroundMusic();
     }
@@ -148,12 +173,18 @@ export function usePlaybackEngine({
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("storyboard-time-update", { detail: playbackTime }));
+      window.dispatchEvent(
+        new CustomEvent("storyboard-time-update", { detail: playbackTime })
+      );
     }
   }, [playbackTime]);
 
   useEffect(() => {
-    if (storyboardPlaying && panels.length > 0 && activePreviewTab !== "video") {
+    if (
+      storyboardPlaying &&
+      panels.length > 0 &&
+      activePreviewTab !== "video"
+    ) {
       const activePanel = panels[currentPanelIndex];
       const duration = activePanel?.duration || 3.0;
 
@@ -181,7 +212,13 @@ export function usePlaybackEngine({
         clearTimeout(playTimerRef.current);
       }
     };
-  }, [storyboardPlaying, currentPanelIndex, panels, activePreviewTab, playStoryboardAudio]);
+  }, [
+    storyboardPlaying,
+    currentPanelIndex,
+    panels,
+    activePreviewTab,
+    playStoryboardAudio,
+  ]);
 
   const toggleStoryboardPlayback = useCallback(() => {
     setStoryboardPlaying((prev) => {

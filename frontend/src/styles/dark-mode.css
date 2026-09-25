@@ -9,23 +9,23 @@
 html,
 body {
   color-scheme: dark !important;
-  background-color: #0A0A0A !important;
-  color: #E5E5E5 !important;
+  background-color: #0a0a0a !important;
+  color: #e5e5e5 !important;
 }
 
 /* ── Body & App root ─────────────────────────────────────── */
 body,
 #app_root,
 .min-h-screen {
-  background-color: #0A0A0A !important;
-  color: #E5E5E5 !important;
+  background-color: #0a0a0a !important;
+  color: #e5e5e5 !important;
 }
 
 /* ── Header ──────────────────────────────────────────────── */
 #header_pane,
 header {
   background-color: #121212 !important;
-  border-bottom: 1px solid #2F2F2F !important;
+  border-bottom: 1px solid #2f2f2f !important;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -34,12 +34,12 @@ header {
 #sidebar_pane,
 aside {
   background-color: #121212 !important;
-  border-right: 1px solid #2F2F2F !important;
+  border-right: 1px solid #2f2f2f !important;
 }
 
 /* ── Surface Hierarchy ───────────────────────────────────── */
 .bg-neutral-955 {
-  background-color: #0A0A0A !important;
+  background-color: #0a0a0a !important;
 }
 
 .bg-neutral-950,
@@ -48,7 +48,7 @@ aside {
 }
 
 .bg-neutral-900 {
-  background-color: #1E1E1E !important;
+  background-color: #1e1e1e !important;
 }
 
 .bg-neutral-850 {
@@ -56,33 +56,50 @@ aside {
 }
 
 .bg-neutral-800 {
-  background-color: #2A2A2A !important;
+  background-color: #2a2a2a !important;
 }
 
 /* ── Universal Inputs / Selects / Textareas Hover & Focus ──── */
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
     [type="color"]
   ):not(.border-0):not(.border-none):not(.seamless-input):not(.bg-transparent),
-select:not(.border-0):not(.border-none):not(.seamless-select):not(.bg-transparent),
-textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transparent) {
-  background-color: #1E1E1E !important;
-  color: #E5E5E5 !important;
-  border: 1px solid #2F2F2F !important;
-  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+select:not(.border-0):not(.border-none):not(.seamless-select):not(
+    .bg-transparent
+  ),
+textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(
+    .bg-transparent
+  ) {
+  background-color: #1e1e1e !important;
+  color: #e5e5e5 !important;
+  border: 1px solid #2f2f2f !important;
+  transition: border-color 0.2s ease, background-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
     [type="color"]
-  ):not(.border-0):not(.border-none):not(.seamless-input):not(.bg-transparent):hover,
-select:not(.border-0):not(.border-none):not(.seamless-select):not(.bg-transparent):hover,
-textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transparent):hover {
+  ):not(.border-0):not(.border-none):not(.seamless-input):not(
+    .bg-transparent
+  ):hover,
+select:not(.border-0):not(.border-none):not(.seamless-select):not(
+    .bg-transparent
+  ):hover,
+textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(
+    .bg-transparent
+  ):hover {
   background-color: #242424 !important;
-  border-color: #4A4A4A !important;
+  border-color: #4a4a4a !important;
 }
 
-input:not(.border-0):not(.border-none):not(.seamless-input):not(.bg-transparent):focus,
-select:not(.border-0):not(.border-none):not(.seamless-select):not(.bg-transparent):focus,
-textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transparent):focus {
+input:not(.border-0):not(.border-none):not(.seamless-input):not(
+    .bg-transparent
+  ):focus,
+select:not(.border-0):not(.border-none):not(.seamless-select):not(
+    .bg-transparent
+  ):focus,
+textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(
+    .bg-transparent
+  ):focus {
   background-color: #262626 !important;
   border-color: #525252 !important;
   outline: none !important;
@@ -90,7 +107,7 @@ textarea:not(.border-0):not(.border-none):not(.seamless-textarea):not(.bg-transp
 
 input::placeholder,
 textarea::placeholder {
-  color: #6B7280 !important; /* Dim Gray */
+  color: #6b7280 !important; /* Dim Gray */
 }
 
 /* ── Navigation Links & Action Items Hover State ─────────── */
@@ -99,9 +116,9 @@ nav button:hover,
 aside nav a:hover,
 aside nav button:hover {
   background-color: #262626 !important;
-  color: #FFFFFF !important;
-  border-color: #4A4A4A !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
+  border-color: #4a4a4a !important;
+  color: #ffffff !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
   transition: all 0.15s ease-in-out;
 }
@@ -120,11 +137,11 @@ tr:hover,
 }
 
 ::-webkit-scrollbar-track {
-  background: #0A0A0A;
+  background: #0a0a0a;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2F2F2F;
+  background: #2f2f2f;
   border-radius: 9999px;
   transition: background 0.2s ease;
 }
@@ -136,7 +153,7 @@ tr:hover,
 /* ── Terminal / Code Output ───────────────────────────────── */
 code,
 pre {
-  background-color: #0A0A0A !important;
-  color: #E5E5E5 !important;
-  border-color: #2F2F2F !important;
+  background-color: #0a0a0a !important;
+  color: #e5e5e5 !important;
+  border-color: #2f2f2f !important;
 }

@@ -20,7 +20,10 @@ export interface YouTubeThumbnailModalProps {
   initialTitle?: string;
   initialSynopsis?: string;
   onThumbnailSelected: (file: File, previewUrl: string) => void;
-  addNotification?: (msg: string, type: "info" | "success" | "error" | "warning") => void;
+  addNotification?: (
+    msg: string,
+    type: "info" | "success" | "error" | "warning"
+  ) => void;
 }
 
 interface StylePreset {
@@ -35,7 +38,8 @@ const STYLE_PRESETS: StylePreset[] = [
   {
     id: "cinematic_anime",
     label: "Cinematic Anime",
-    description: "High-budget cinematic anime, Makoto Shinkai / Ufotable lighting",
+    description:
+      "High-budget cinematic anime, Makoto Shinkai / Ufotable lighting",
     badgeColor: "from-blue-600 to-indigo-600",
     icon: "🎬",
   },
@@ -70,11 +74,41 @@ const STYLE_PRESETS: StylePreset[] = [
 ];
 
 const HEADLINE_STYLES = [
-  { id: "bold_red_badge", label: "Red Impact Badge", bg: "#EF4444", text: "#FFFFFF", stroke: "#000000" },
-  { id: "yellow_glow", label: "Yellow Neon Glow", bg: "transparent", text: "#FACC15", stroke: "#000000" },
-  { id: "neon_cyan", label: "Cyan Hologram", bg: "transparent", text: "#22D3EE", stroke: "#000000" },
-  { id: "gold_impact", label: "Gold Luxury", bg: "#F59E0B", text: "#000000", stroke: "#FFFFFF" },
-  { id: "clean_white", label: "Clean Minimalist", bg: "#000000B3", text: "#FFFFFF", stroke: "transparent" },
+  {
+    id: "bold_red_badge",
+    label: "Red Impact Badge",
+    bg: "#EF4444",
+    text: "#FFFFFF",
+    stroke: "#000000",
+  },
+  {
+    id: "yellow_glow",
+    label: "Yellow Neon Glow",
+    bg: "transparent",
+    text: "#FACC15",
+    stroke: "#000000",
+  },
+  {
+    id: "neon_cyan",
+    label: "Cyan Hologram",
+    bg: "transparent",
+    text: "#22D3EE",
+    stroke: "#000000",
+  },
+  {
+    id: "gold_impact",
+    label: "Gold Luxury",
+    bg: "#F59E0B",
+    text: "#000000",
+    stroke: "#FFFFFF",
+  },
+  {
+    id: "clean_white",
+    label: "Clean Minimalist",
+    bg: "#000000B3",
+    text: "#FFFFFF",
+    stroke: "transparent",
+  },
 ];
 
 export default function YouTubeThumbnailModal({
@@ -90,24 +124,32 @@ export default function YouTubeThumbnailModal({
   const [synopsis, setSynopsis] = useState(initialSynopsis);
   const [selectedStyle, setSelectedStyle] = useState<string>("cinematic_anime");
   const [customPrompt, setCustomPrompt] = useState("");
-  const [negativePrompt, setNegativePrompt] = useState("blurry, bad anatomy, low resolution, watermark, deformed, cropped");
+  const [negativePrompt, setNegativePrompt] = useState(
+    "blurry, bad anatomy, low resolution, watermark, deformed, cropped"
+  );
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16">("16:9");
 
   // AI Generation State
   const [isSynthesizingConcept, setIsSynthesizingConcept] = useState(false);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
-  const [activeTab, setActiveTab] = useState<"ai_creator" | "overlay_studio" | "upload_custom">("ai_creator");
+  const [activeTab, setActiveTab] = useState<
+    "ai_creator" | "overlay_studio" | "upload_custom"
+  >("ai_creator");
 
   // Overlay Studio State
   const [headlineText, setHeadlineText] = useState("EPIC RECAP!");
   const [showHeadline, setShowHeadline] = useState(true);
   const [headlineStyle, setHeadlineStyle] = useState("bold_red_badge");
-  const [textPosition, setTextPosition] = useState<"top_left" | "bottom_left" | "top_banner" | "bottom_banner" | "center">("top_left");
+  const [textPosition, setTextPosition] = useState<
+    "top_left" | "bottom_left" | "top_banner" | "bottom_banner" | "center"
+  >("top_left");
   const [fontSize, setFontSize] = useState<number>(44);
 
   // Background Image State
   const [currentBaseImage, setCurrentBaseImage] = useState<string | null>(null);
-  const [previewDevice, setPreviewDevice] = useState<"canvas" | "desktop" | "mobile">("canvas");
+  const [previewDevice, setPreviewDevice] = useState<
+    "canvas" | "desktop" | "mobile"
+  >("canvas");
 
   // Canvas Reference
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -138,20 +180,26 @@ export default function YouTubeThumbnailModal({
   const handleAutoSynthesizeConcept = async () => {
     setIsSynthesizingConcept(true);
     try {
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
-      const res = await fetch("/api/v1/export/youtube/thumbnail/generate-concept", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: videoTitle || "Epic Webtoon Recap",
-          synopsis: synopsis || "",
-          style: selectedStyle,
-          aspect_ratio: aspectRatio,
-        }),
-      });
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
+      const res = await fetch(
+        "/api/v1/export/youtube/thumbnail/generate-concept",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: videoTitle || "Epic Webtoon Recap",
+            synopsis: synopsis || "",
+            style: selectedStyle,
+            aspect_ratio: aspectRatio,
+          }),
+        }
+      );
 
       if (res.ok) {
         const data = await res.json();
@@ -159,11 +207,18 @@ export default function YouTubeThumbnailModal({
         if (data.negative_prompt) setNegativePrompt(data.negative_prompt);
         if (data.headline_text) setHeadlineText(data.headline_text);
         if (data.headline_style) setHeadlineStyle(data.headline_style);
-        addNotification?.("✨ Synthesized AI thumbnail concept & headline!", "success");
+        addNotification?.(
+          "✨ Synthesized AI thumbnail concept & headline!",
+          "success"
+        );
       }
     } catch {
       // Graceful fallback prompt
-      setCustomPrompt(`Masterpiece anime illustration of ${videoTitle || "anime hero"}, highly detailed, dramatic lighting, 8k resolution`);
+      setCustomPrompt(
+        `Masterpiece anime illustration of ${
+          videoTitle || "anime hero"
+        }, highly detailed, dramatic lighting, 8k resolution`
+      );
     } finally {
       setIsSynthesizingConcept(false);
     }
@@ -173,29 +228,39 @@ export default function YouTubeThumbnailModal({
   const handleGenerateAIImage = async () => {
     setIsGeneratingImage(true);
     try {
-      const promptToUse = customPrompt || `${videoTitle || "Epic Webtoon Series"}, cinematic anime wallpaper, dramatic lighting, 8k`;
-      
+      const promptToUse =
+        customPrompt ||
+        `${
+          videoTitle || "Epic Webtoon Series"
+        }, cinematic anime wallpaper, dramatic lighting, 8k`;
+
       // Call SD / AI Image endpoint if available or synthesize placeholder
-      const token = localStorage.getItem("sonikoma_token") || localStorage.getItem("token") || "";
+      const token =
+        localStorage.getItem("sonikoma_token") ||
+        localStorage.getItem("token") ||
+        "";
       const width = aspectRatio === "16:9" ? 1280 : 720;
       const height = aspectRatio === "16:9" ? 720 : 1280;
 
       let generatedUrl: string | null = null;
 
       try {
-        const res = await fetch("/api/v1/export/youtube/thumbnail/generate-image", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            prompt: promptToUse,
-            negative_prompt: negativePrompt,
-            style: selectedStyle,
-            aspect_ratio: aspectRatio,
-          }),
-        });
+        const res = await fetch(
+          "/api/v1/export/youtube/thumbnail/generate-image",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              prompt: promptToUse,
+              negative_prompt: negativePrompt,
+              style: selectedStyle,
+              aspect_ratio: aspectRatio,
+            }),
+          }
+        );
         if (res.ok) {
           const data = await res.json();
           if (data.image_url) {
@@ -239,7 +304,13 @@ export default function YouTubeThumbnailModal({
           ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
           for (let i = 0; i < 40; i++) {
             ctx.beginPath();
-            ctx.arc(Math.random() * width, Math.random() * height, Math.random() * 4 + 1, 0, Math.PI * 2);
+            ctx.arc(
+              Math.random() * width,
+              Math.random() * height,
+              Math.random() * 4 + 1,
+              0,
+              Math.PI * 2
+            );
             ctx.fill();
           }
 
@@ -252,7 +323,10 @@ export default function YouTubeThumbnailModal({
         addNotification?.("🎨 AI Thumbnail backdrop generated!", "success");
       }
     } catch {
-      addNotification?.("Failed to generate AI thumbnail image. Please retry.", "error");
+      addNotification?.(
+        "Failed to generate AI thumbnail image. Please retry.",
+        "error"
+      );
     } finally {
       setIsGeneratingImage(false);
     }
@@ -311,7 +385,9 @@ export default function YouTubeThumbnailModal({
       if (showHeadline && headlineText.trim()) {
         ctx.save();
         const text = headlineText.toUpperCase();
-        const activeStyle = HEADLINE_STYLES.find((s) => s.id === headlineStyle) || HEADLINE_STYLES[0];
+        const activeStyle =
+          HEADLINE_STYLES.find((s) => s.id === headlineStyle) ||
+          HEADLINE_STYLES[0];
 
         ctx.font = `900 ${fontSize * 1.5}px "Impact", "Montserrat", sans-serif`;
         ctx.textBaseline = "middle";
@@ -351,7 +427,13 @@ export default function YouTubeThumbnailModal({
           ctx.shadowOffsetY = 6;
 
           ctx.beginPath();
-          ctx.roundRect(posX - padX, posY - textHeight / 2 - padY / 2, textWidth + padX * 2, textHeight + padY, 16);
+          ctx.roundRect(
+            posX - padX,
+            posY - textHeight / 2 - padY / 2,
+            textWidth + padX * 2,
+            textHeight + padY,
+            16
+          );
           ctx.fill();
         }
 
@@ -359,7 +441,8 @@ export default function YouTubeThumbnailModal({
         ctx.shadowColor = "rgba(0,0,0,0.9)";
         ctx.shadowBlur = 16;
         ctx.lineWidth = 10;
-        ctx.strokeStyle = activeStyle.stroke === "transparent" ? "#000000" : activeStyle.stroke;
+        ctx.strokeStyle =
+          activeStyle.stroke === "transparent" ? "#000000" : activeStyle.stroke;
         ctx.strokeText(text, posX, posY);
 
         // Draw Core Text
@@ -389,7 +472,14 @@ export default function YouTubeThumbnailModal({
     } else {
       renderComposite();
     }
-  }, [currentBaseImage, showHeadline, headlineText, headlineStyle, textPosition, fontSize]);
+  }, [
+    currentBaseImage,
+    showHeadline,
+    headlineText,
+    headlineStyle,
+    textPosition,
+    fontSize,
+  ]);
 
   // ── Step 5: Export & Apply as YouTube Video Thumbnail ──────────────────────
   const handleApplyToStudio = () => {
@@ -402,10 +492,15 @@ export default function YouTubeThumbnailModal({
           addNotification?.("Failed to process thumbnail canvas", "error");
           return;
         }
-        const file = new File([blob], `youtube_thumbnail_${Date.now()}.jpg`, { type: "image/jpeg" });
+        const file = new File([blob], `youtube_thumbnail_${Date.now()}.jpg`, {
+          type: "image/jpeg",
+        });
         const previewUrl = URL.createObjectURL(blob);
         onThumbnailSelected(file, previewUrl);
-        addNotification?.("✅ AI Thumbnail applied to video details!", "success");
+        addNotification?.(
+          "✅ AI Thumbnail applied to video details!",
+          "success"
+        );
         onClose();
       },
       "image/jpeg",
@@ -418,7 +513,9 @@ export default function YouTubeThumbnailModal({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const link = document.createElement("a");
-    link.download = `youtube_thumbnail_${(videoTitle || "webtoon").replace(/\s+/g, "_").toLowerCase()}.jpg`;
+    link.download = `youtube_thumbnail_${(videoTitle || "webtoon")
+      .replace(/\s+/g, "_")
+      .toLowerCase()}.jpg`;
     link.href = canvas.toDataURL("image/jpeg", 0.95);
     link.click();
     addNotification?.("📥 Downloaded HD YouTube Thumbnail!", "success");
@@ -458,7 +555,8 @@ export default function YouTubeThumbnailModal({
                 </span>
               </div>
               <p className="text-xs text-neutral-400 font-mono mt-0.5">
-                Generate high-clickthrough rate YouTube thumbnails with AI imagery &amp; bold typography
+                Generate high-clickthrough rate YouTube thumbnails with AI
+                imagery &amp; bold typography
               </p>
             </div>
           </div>
@@ -529,7 +627,9 @@ export default function YouTubeThumbnailModal({
                       className="text-[10px] font-mono text-red-400 hover:text-red-300 flex items-center gap-1 cursor-pointer disabled:opacity-50"
                     >
                       <Sparkles className="w-3 h-3" />
-                      {isSynthesizingConcept ? "Synthesizing..." : "Auto-Synthesize Idea"}
+                      {isSynthesizingConcept
+                        ? "Synthesizing..."
+                        : "Auto-Synthesize Idea"}
                     </button>
                   </div>
                   <input
@@ -558,7 +658,9 @@ export default function YouTubeThumbnailModal({
                         }`}
                       >
                         <div className="text-base mb-1">{style.icon}</div>
-                        <div className="text-xs font-bold font-sans truncate">{style.label}</div>
+                        <div className="text-xs font-bold font-sans truncate">
+                          {style.label}
+                        </div>
                         <div className="text-[9px] font-mono text-neutral-500 line-clamp-2 mt-0.5">
                           {style.description}
                         </div>
@@ -640,8 +742,12 @@ export default function YouTubeThumbnailModal({
               <div className="space-y-4 animate-in fade-in duration-150">
                 <div className="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-800 rounded-2xl">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-white font-mono">Show Text Overlay</span>
-                    <p className="text-[10px] text-neutral-500 font-mono">Display high-contrast headline sticker</p>
+                    <span className="text-xs font-bold text-white font-mono">
+                      Show Text Overlay
+                    </span>
+                    <p className="text-[10px] text-neutral-500 font-mono">
+                      Display high-contrast headline sticker
+                    </p>
                   </div>
                   <input
                     type="checkbox"
@@ -684,7 +790,10 @@ export default function YouTubeThumbnailModal({
                         <span>{st.label}</span>
                         <span
                           className="w-4 h-4 rounded-md border border-white/20"
-                          style={{ backgroundColor: st.bg === "transparent" ? st.text : st.bg }}
+                          style={{
+                            backgroundColor:
+                              st.bg === "transparent" ? st.text : st.bg,
+                          }}
                         />
                       </button>
                     ))}
@@ -751,8 +860,12 @@ export default function YouTubeThumbnailModal({
                     <UploadCloud className="w-8 h-8" />
                   </div>
                   <div className="text-center space-y-1 font-mono">
-                    <div className="text-xs font-bold text-white">Click to upload custom artwork / scene</div>
-                    <div className="text-[10px] text-neutral-500">Supports PNG, JPG, WEBP (Up to 10MB)</div>
+                    <div className="text-xs font-bold text-white">
+                      Click to upload custom artwork / scene
+                    </div>
+                    <div className="text-[10px] text-neutral-500">
+                      Supports PNG, JPG, WEBP (Up to 10MB)
+                    </div>
                   </div>
                 </label>
               </div>
@@ -773,7 +886,9 @@ export default function YouTubeThumbnailModal({
                   <button
                     onClick={() => setPreviewDevice("canvas")}
                     className={`px-2 py-1 rounded cursor-pointer ${
-                      previewDevice === "canvas" ? "bg-neutral-800 text-white font-bold" : "text-neutral-400"
+                      previewDevice === "canvas"
+                        ? "bg-neutral-800 text-white font-bold"
+                        : "text-neutral-400"
                     }`}
                   >
                     HD Raw
@@ -781,7 +896,9 @@ export default function YouTubeThumbnailModal({
                   <button
                     onClick={() => setPreviewDevice("desktop")}
                     className={`px-2 py-1 rounded cursor-pointer ${
-                      previewDevice === "desktop" ? "bg-neutral-800 text-white font-bold" : "text-neutral-400"
+                      previewDevice === "desktop"
+                        ? "bg-neutral-800 text-white font-bold"
+                        : "text-neutral-400"
                     }`}
                   >
                     Desktop Feed
@@ -789,7 +906,9 @@ export default function YouTubeThumbnailModal({
                   <button
                     onClick={() => setPreviewDevice("mobile")}
                     className={`px-2 py-1 rounded cursor-pointer ${
-                      previewDevice === "mobile" ? "bg-neutral-800 text-white font-bold" : "text-neutral-400"
+                      previewDevice === "mobile"
+                        ? "bg-neutral-800 text-white font-bold"
+                        : "text-neutral-400"
                     }`}
                   >
                     Mobile Feed
@@ -870,7 +989,9 @@ export default function YouTubeThumbnailModal({
                         <div className="text-[11px] font-bold line-clamp-2 leading-tight">
                           {videoTitle || "Untitled Video Title"}
                         </div>
-                        <div className="text-[9px] text-neutral-400">Sonikoma • 24K views</div>
+                        <div className="text-[9px] text-neutral-400">
+                          Sonikoma • 24K views
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -885,11 +1006,15 @@ export default function YouTubeThumbnailModal({
                 </div>
                 <div>
                   <span className="text-neutral-500 block">Format</span>
-                  <span className="text-emerald-400 font-bold">JPEG (Max 2MB)</span>
+                  <span className="text-emerald-400 font-bold">
+                    JPEG (Max 2MB)
+                  </span>
                 </div>
                 <div>
                   <span className="text-neutral-500 block">CTR Score</span>
-                  <span className="text-amber-400 font-bold">94 / 100 Viral</span>
+                  <span className="text-amber-400 font-bold">
+                    94 / 100 Viral
+                  </span>
                 </div>
               </div>
             </div>

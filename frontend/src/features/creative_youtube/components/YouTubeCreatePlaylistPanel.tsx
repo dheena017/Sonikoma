@@ -105,9 +105,12 @@ export default function YouTubeCreatePlaylistPanel({
     const fetchVideos = async () => {
       setLoadingVideos(true);
       try {
-        const res = await fetch("/api/v1/export/youtube/videos?max_results=50", {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
+        const res = await fetch(
+          "/api/v1/export/youtube/videos?max_results=50",
+          {
+            headers: { Authorization: `Bearer ${getToken()}` },
+          }
+        );
         if (res.ok) {
           const data = await res.json();
           const vids: YouTubeVideoItem[] = data.videos || [];

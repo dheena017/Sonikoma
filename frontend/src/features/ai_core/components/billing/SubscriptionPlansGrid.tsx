@@ -69,7 +69,9 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
             )}
           </div>
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-black text-white">{formatPrice(19)}</span>
+            <span className="text-2xl font-black text-white">
+              {formatPrice(19)}
+            </span>
             <span className="text-xs text-neutral-400 font-mono">/ mo</span>
           </div>
           <ul className="text-[11px] text-neutral-300 space-y-2 leading-relaxed font-semibold">

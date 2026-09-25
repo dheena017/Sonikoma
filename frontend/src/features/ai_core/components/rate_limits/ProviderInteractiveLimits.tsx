@@ -64,7 +64,8 @@ export default function ProviderInteractiveLimits({
       ) : (
         <div className="p-8 rounded-2xl border border-[#2F2F2F] bg-[#181818] text-center space-y-2">
           <p className="text-sm font-bold text-neutral-300">
-            No models found matching "{searchQuery}" under {currentProvider.name}
+            No models found matching "{searchQuery}" under{" "}
+            {currentProvider.name}
           </p>
           <span className="text-xs text-neutral-500">
             Try searching another model name or clearing the search query.

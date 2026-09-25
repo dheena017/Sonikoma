@@ -82,7 +82,9 @@ export const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
         }`}
       >
         {showLabel && (
-          <span className="hidden sm:inline text-white font-medium">Server:</span>
+          <span className="hidden sm:inline text-white font-medium">
+            Server:
+          </span>
         )}
         <span
           className={`font-bold uppercase tracking-wider font-mono text-[11px] ${colors.textColor}`}

@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page } from "@playwright/test";
 
 /**
  * Renders a visual card onto the Playwright page canvas so Trace Viewer displays
@@ -8,14 +8,17 @@ export async function renderTraceCard(
   page: Page,
   title: string,
   meta: {
-    type: 'API Endpoint' | 'Unit Function';
+    type: "API Endpoint" | "Unit Function";
     target: string;
     status: number | string;
     input?: any;
     output?: any;
   }
 ) {
-  const isSuccess = typeof meta.status === 'number' ? [200, 201, 400, 401, 404, 422, 503].includes(meta.status) : meta.status === 'PASSED';
+  const isSuccess =
+    typeof meta.status === "number"
+      ? [200, 201, 400, 401, 404, 422, 503].includes(meta.status)
+      : meta.status === "PASSED";
 
   const html = `
     <!DOCTYPE html>
@@ -61,9 +64,13 @@ export async function renderTraceCard(
             font-weight: bold;
           }
           .status {
-            background: ${isSuccess ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)'};
-            color: ${isSuccess ? '#6ee7b7' : '#fda4af'};
-            border: 1px solid ${isSuccess ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)'};
+            background: ${
+              isSuccess ? "rgba(16, 185, 129, 0.2)" : "rgba(244, 63, 94, 0.2)"
+            };
+            color: ${isSuccess ? "#6ee7b7" : "#fda4af"};
+            border: 1px solid ${
+              isSuccess ? "rgba(16, 185, 129, 0.4)" : "rgba(244, 63, 94, 0.4)"
+            };
             padding: 4px 12px;
             border-radius: 999px;
             font-family: monospace;
@@ -98,20 +105,38 @@ export async function renderTraceCard(
             <div>
               <span class="badge">${meta.type}</span>
               <h2 style="margin: 8px 0 0 0; font-size: 18px; color: #fff;">${title}</h2>
-              <div style="font-family: monospace; font-size: 13px; color: #a1a1aa; margin-top: 4px;">${meta.target}</div>
+              <div style="font-family: monospace; font-size: 13px; color: #a1a1aa; margin-top: 4px;">${
+                meta.target
+              }</div>
             </div>
             <div class="status">✓ STATUS: ${meta.status}</div>
           </div>
           
-          ${meta.input ? `
+          ${
+            meta.input
+              ? `
             <div class="section-title">Input Parameters / Payload</div>
-            <pre>${typeof meta.input === 'string' ? meta.input : JSON.stringify(meta.input, null, 2)}</pre>
-          ` : ''}
+            <pre>${
+              typeof meta.input === "string"
+                ? meta.input
+                : JSON.stringify(meta.input, null, 2)
+            }</pre>
+          `
+              : ""
+          }
 
-          ${meta.output ? `
+          ${
+            meta.output
+              ? `
             <div class="section-title">Response / Calculated Result</div>
-            <pre>${typeof meta.output === 'string' ? meta.output : JSON.stringify(meta.output, null, 2)}</pre>
-          ` : ''}
+            <pre>${
+              typeof meta.output === "string"
+                ? meta.output
+                : JSON.stringify(meta.output, null, 2)
+            }</pre>
+          `
+              : ""
+          }
         </div>
       </body>
     </html>

@@ -46,7 +46,8 @@ export default function ProviderTierMetrics({
       {/* ── CARD 2: SPEND LIMIT ──────────────────────────────────────── */}
       <div className="p-4 rounded-2xl bg-[#181818] border border-[#2F2F2F] space-y-1">
         <span className="text-[11px] text-neutral-400 uppercase font-bold tracking-wider flex items-center gap-1">
-          <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> Spend Rate Limit
+          <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> Spend Rate
+          Limit
         </span>
         <p className="text-xl font-black text-emerald-400 font-mono">
           {activeTier ? activeTier.spend10Min : "N/A"}
@@ -78,7 +79,9 @@ export default function ProviderTierMetrics({
           {isPriorityInference ? "Fast Priority Queue" : "Standard Speed Queue"}
         </p>
         <span className="text-xs text-neutral-400 font-medium block truncate">
-          {isPriorityInference ? "Faster processing enabled" : "Normal processing speed"}
+          {isPriorityInference
+            ? "Faster processing enabled"
+            : "Normal processing speed"}
         </span>
       </div>
 

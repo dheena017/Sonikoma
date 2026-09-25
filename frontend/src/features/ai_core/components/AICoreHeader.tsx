@@ -56,10 +56,10 @@ export default function AICoreHeader({
   fetchWithInterceptor,
   onToggleSidebar,
   notifications = [],
-  markNotificationAsRead = () => { },
-  markAllNotificationsAsRead = () => { },
-  deleteNotification = () => { },
-  clearAllNotifications = () => { },
+  markNotificationAsRead = () => {},
+  markAllNotificationsAsRead = () => {},
+  deleteNotification = () => {},
+  clearAllNotifications = () => {},
   notificationsMuted = false,
   setNotificationsMuted,
   isSidebarOpen = false,
@@ -74,8 +74,10 @@ export default function AICoreHeader({
     user?.credits !== undefined ? user.credits : null
   );
 
-  const { activeProjectId, activeProjectData, setDrawerOpen } = useProjectStore();
-  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
+  const { activeProjectId, activeProjectData, setDrawerOpen } =
+    useProjectStore();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
@@ -207,13 +209,14 @@ export default function AICoreHeader({
         />
       </div>
 
-
-
       {/* Right side: Standardized Controls Suite */}
       <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0 overflow-x-visible">
         {/* Server Status Indicator - Hidden on ultra-small screens (<480px) */}
         <div className="hidden min-[480px]:block">
-          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+          <ServerStatusIndicator
+            status={backendStatus}
+            onClick={recheckBackend}
+          />
         </div>
 
         {/* 🤖 Global AI Model Selector */}
@@ -229,11 +232,15 @@ export default function AICoreHeader({
               }}
               title="Your credit balance & daily rewards — click to view"
               className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
-                showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+                showCreditsPopover
+                  ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]"
+                  : ""
               }`}
             >
               <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
-              <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
+              <span className="font-bold text-amber-300 font-mono text-[11px]">
+                {credits.toLocaleString()}
+              </span>
             </button>
 
             {showCreditsPopover && (
@@ -261,7 +268,9 @@ export default function AICoreHeader({
               setShowCreditsPopover(false);
             }}
             className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
-              showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
+              showNotifications
+                ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]"
+                : ""
             }`}
             title="Notifications"
           >
@@ -321,8 +330,8 @@ export default function AICoreHeader({
         {/* User Profile Pill at Far Right End */}
         <button
           onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
-            data-no-transform
+          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+          data-no-transform
           title="View Profile & Account Settings"
           aria-label="Open User profile"
         >

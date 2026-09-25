@@ -9,8 +9,8 @@
     "limit_rpm": 500,
     "limit_tpm": 300000,
     "limit_rpd": 10000,
-    "prompt_price_per_1m": 2.50,
-    "completion_price_per_1m": 10.00,
+    "prompt_price_per_1m": 2.5,
+    "completion_price_per_1m": 10.0,
     "speed_rating": "Fast (~450ms)",
     "capabilities": ["vision", "json_mode", "structured_outputs", "text"],
     "recommended_for": ["Nuanced Script Polishing", "Character Dialogue"]
@@ -26,10 +26,14 @@
     "limit_tpm": 2000000,
     "limit_rpd": 10000,
     "prompt_price_per_1m": 0.15,
-    "completion_price_per_1m": 0.60,
+    "completion_price_per_1m": 0.6,
     "speed_rating": "Ultra Fast (~300ms)",
     "capabilities": ["vision", "json_mode", "speed_optimized", "text"],
-    "recommended_for": ["High-volume metadata", "Summary Generation", "Cross-Provider Fallback"]
+    "recommended_for": [
+      "High-volume metadata",
+      "Summary Generation",
+      "Cross-Provider Fallback"
+    ]
   },
   {
     "id": "o1",
@@ -41,8 +45,8 @@
     "limit_rpm": 100,
     "limit_tpm": 100000,
     "limit_rpd": 1000,
-    "prompt_price_per_1m": 15.00,
-    "completion_price_per_1m": 60.00,
+    "prompt_price_per_1m": 15.0,
+    "completion_price_per_1m": 60.0,
     "speed_rating": "Deliberate (~2.5s)",
     "capabilities": ["complex_reasoning", "deep_thinking", "text"],
     "recommended_for": ["Complex Plot Mechanics", "Worldbuilding Architecture"]
@@ -57,8 +61,8 @@
     "limit_rpm": 200,
     "limit_tpm": 200000,
     "limit_rpd": 2000,
-    "prompt_price_per_1m": 1.10,
-    "completion_price_per_1m": 4.40,
+    "prompt_price_per_1m": 1.1,
+    "completion_price_per_1m": 4.4,
     "speed_rating": "Fast (~700ms)",
     "capabilities": ["reasoning", "json_mode", "text"],
     "recommended_for": ["Storyboard Episode Breakdown", "Dialogue Logic Polish"]
@@ -75,7 +79,7 @@
     "limit_rpd": 500,
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
-    "price_per_image": 0.040,
+    "price_per_image": 0.04,
     "speed_rating": "GPU (~3.5s)",
     "capabilities": ["image_generation", "high_res_image"],
     "recommended_for": ["Thumbnail Generation", "Poster Art"]
@@ -92,7 +96,7 @@
     "limit_rpd": 5000,
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
-    "price_per_1k_chars": 0.030,
+    "price_per_1k_chars": 0.03,
     "speed_rating": "Fast Audio (~300ms)",
     "capabilities": ["tts", "multilingual_audio", "high_fidelity"],
     "recommended_for": ["Expressive Voiceover", "Character Lines"]

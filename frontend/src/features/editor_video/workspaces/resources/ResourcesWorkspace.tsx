@@ -85,14 +85,18 @@ export const ResourcesWorkspace: React.FC<ResourcesWorkspaceProps> = ({
                     <p className="text-xs font-bold text-white group-hover:text-[#93C5FD] transition-colors">
                       {lut.name}
                     </p>
-                    <p className="text-[9px] text-neutral-400 font-mono mt-0.5">{lut.desc}</p>
+                    <p className="text-[9px] text-neutral-400 font-mono mt-0.5">
+                      {lut.desc}
+                    </p>
                   </div>
 
-                  <span className={`px-2 py-1 rounded-lg text-[9px] font-mono font-bold shrink-0 flex items-center gap-1 ${
-                    activeLutId === lut.id
-                      ? "bg-[#2A2A2A] text-white"
-                      : "bg-neutral-800 text-neutral-300 group-hover:bg-[#2A2A35] group-hover:text-white"
-                  }`}>
+                  <span
+                    className={`px-2 py-1 rounded-lg text-[9px] font-mono font-bold shrink-0 flex items-center gap-1 ${
+                      activeLutId === lut.id
+                        ? "bg-[#2A2A2A] text-white"
+                        : "bg-neutral-800 text-neutral-300 group-hover:bg-[#2A2A35] group-hover:text-white"
+                    }`}
+                  >
                     {activeLutId === lut.id && <Check className="h-3 w-3" />}
                     {activeLutId === lut.id ? "Active" : "Apply LUT"}
                   </span>

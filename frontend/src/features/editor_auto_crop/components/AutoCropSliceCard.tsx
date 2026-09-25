@@ -56,7 +56,11 @@ export function AutoCropSliceCard({
         isSelected
           ? "border-emerald-400 ring-2 ring-emerald-500/30 shadow-lg shadow-emerald-500/15 scale-[1.01]"
           : "border-neutral-800 hover:border-neutral-700"
-      } ${viewMode === "reel" ? "w-[260px] sm:w-[300px] shrink-0 snap-center shadow-2xl" : "w-full"}`}
+      } ${
+        viewMode === "reel"
+          ? "w-[260px] sm:w-[300px] shrink-0 snap-center shadow-2xl"
+          : "w-full"
+      }`}
     >
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-black/50">
         <SafeImage

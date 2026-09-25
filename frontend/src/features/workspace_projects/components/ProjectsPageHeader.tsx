@@ -23,7 +23,8 @@ export default function ProjectsPageHeader({
           </span>
         </h1>
         <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-xl">
-          Browse, organize, and manage your manga, webtoon, and video storyboard productions.
+          Browse, organize, and manage your manga, webtoon, and video storyboard
+          productions.
         </p>
       </div>
 

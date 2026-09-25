@@ -35,9 +35,7 @@ export const AudioTrackCard: React.FC<AudioTrackCardProps> = ({
         <p className="text-xs font-bold text-white truncate">{track.title}</p>
         <div className="flex items-center gap-2 text-[9px] font-mono text-neutral-400">
           <span>{track.duration}</span>
-          {track.mood && (
-            <span className="text-[#3B82F6]">• {track.mood}</span>
-          )}
+          {track.mood && <span className="text-[#3B82F6]">• {track.mood}</span>}
           {track.badge && (
             <span className="text-amber-400">• {track.badge}</span>
           )}

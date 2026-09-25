@@ -20,7 +20,13 @@ interface StoryboardDialogueViewProps {
   onTriggerFeedback?: (msg: string) => void;
 }
 
-const COMMON_SPEAKERS = ["Narrator", "Protagonist", "Antagonist", "System AI", "Supporting Cast"];
+const COMMON_SPEAKERS = [
+  "Narrator",
+  "Protagonist",
+  "Antagonist",
+  "System AI",
+  "Supporting Cast",
+];
 
 export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
   panels,
@@ -36,11 +42,16 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
       <div className="p-2.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/20 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[10px] font-mono text-[#3B82F6]">
           <MessageSquare className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
-          <span>Script & Dialogue Director — Edit lines & narration across all panels</span>
+          <span>
+            Script & Dialogue Director — Edit lines & narration across all
+            panels
+          </span>
         </div>
         <button
           type="button"
-          onClick={() => onTriggerFeedback?.("AI Generated dialogue for all empty panels")}
+          onClick={() =>
+            onTriggerFeedback?.("AI Generated dialogue for all empty panels")
+          }
           className="px-2 py-0.5 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white text-[9px] font-mono font-bold flex items-center gap-1 shrink-0 cursor-pointer shadow-sm shadow-blue-500/25 transition active:scale-95"
         >
           <Wand2 className="h-2.5 w-2.5" />
@@ -52,8 +63,12 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
         const isSelected = selectedIndices.includes(index);
         const imgUrl = panel.image_url || (panel as any).imageUrl || "";
         const displayUrl = getProxiedImageUrl(imgUrl);
-        const text = panel.speech_text || panel.narrative || (panel as any).dialogue || "";
-        const speaker = panel.speaker_name || panel.character_name || (index % 2 === 0 ? "Narrator" : "Protagonist");
+        const text =
+          panel.speech_text || panel.narrative || (panel as any).dialogue || "";
+        const speaker =
+          panel.speaker_name ||
+          panel.character_name ||
+          (index % 2 === 0 ? "Narrator" : "Protagonist");
 
         return (
           <div
@@ -69,7 +84,11 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-white/10">
-                  <img src={displayUrl} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={displayUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                   <span className="absolute bottom-0 right-0 text-[7px] font-black font-mono bg-black/80 text-[#3B82F6] px-0.5 rounded">
                     #{index + 1}
                   </span>
@@ -91,9 +110,13 @@ export const StoryboardDialogueView: React.FC<StoryboardDialogueViewProps> = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    const newText = text ? `[Dramatic] ${text}` : "Look out! Behind you!";
+                    const newText = text
+                      ? `[Dramatic] ${text}`
+                      : "Look out! Behind you!";
                     onUpdateDialogue(index, newText);
-                    onTriggerFeedback?.(`AI Enhanced line for Panel #${index + 1}`);
+                    onTriggerFeedback?.(
+                      `AI Enhanced line for Panel #${index + 1}`
+                    );
                   }}
                   className="px-2 py-0.5 rounded-md bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white text-[8px] font-mono flex items-center gap-1"
                   title="AI Polish Line"

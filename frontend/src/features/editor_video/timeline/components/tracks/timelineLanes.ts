@@ -2,7 +2,7 @@
 // Shared utility for multi-lane no-overlap clip assignment across timeline tracks.
 
 export const STORY_PANEL_LANE_HEIGHT = 56; // px per story panel lane row
-export const AUDIO_FX_LANE_HEIGHT = 38;    // px per audio/fx lane row
+export const AUDIO_FX_LANE_HEIGHT = 38; // px per audio/fx lane row
 export const LANE_HEIGHT = AUDIO_FX_LANE_HEIGHT; // default backwards compatibility alias
 
 export interface LaneClip {
@@ -27,10 +27,15 @@ export function assignLanes(clips: LaneClip[]): Record<string, number> {
     let lane = 0;
     while (true) {
       const occupants = sorted.filter(
-        (c) => lanes[c.key] !== undefined && lanes[c.key] === lane && c.key !== clip.key
+        (c) =>
+          lanes[c.key] !== undefined &&
+          lanes[c.key] === lane &&
+          c.key !== clip.key
       );
       const hasOverlap = occupants.some(
-        (c) => clip.left < c.left + c.width - EPSILON && clip.left + clip.width > c.left + EPSILON
+        (c) =>
+          clip.left < c.left + c.width - EPSILON &&
+          clip.left + clip.width > c.left + EPSILON
       );
       if (!hasOverlap) {
         lanes[clip.key] = lane;
@@ -52,4 +57,3 @@ export function trackInnerHeight(
 ): number {
   return (maxLane + 1) * laneHeight;
 }
-

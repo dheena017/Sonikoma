@@ -62,11 +62,21 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
               ))
             ) : (
               <>
-                <option value="en-US-GuyNeural">🇺🇸 Guy (Neural Action Narrator)</option>
-                <option value="en-US-AriaNeural">🇺🇸 Aria (Neural Female Lead)</option>
-                <option value="en-US-ChristopherNeural">🇺🇸 Christopher (Deep Anime Voice)</option>
-                <option value="ja-JP-NanamiNeural">🇯🇵 Nanami (Japanese Shonen Female)</option>
-                <option value="ja-JP-KeitaNeural">🇯🇵 Keita (Japanese Shonen Male)</option>
+                <option value="en-US-GuyNeural">
+                  🇺🇸 Guy (Neural Action Narrator)
+                </option>
+                <option value="en-US-AriaNeural">
+                  🇺🇸 Aria (Neural Female Lead)
+                </option>
+                <option value="en-US-ChristopherNeural">
+                  🇺🇸 Christopher (Deep Anime Voice)
+                </option>
+                <option value="ja-JP-NanamiNeural">
+                  🇯🇵 Nanami (Japanese Shonen Female)
+                </option>
+                <option value="ja-JP-KeitaNeural">
+                  🇯🇵 Keita (Japanese Shonen Male)
+                </option>
               </>
             )}
           </select>
@@ -121,7 +131,9 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
         <div className="flex items-center gap-2">
           <Music size={15} className="text-emerald-400" />
           <div>
-            <h3 className="text-xs font-bold text-white">Cinematic BGM Soundtrack</h3>
+            <h3 className="text-xs font-bold text-white">
+              Cinematic BGM Soundtrack
+            </h3>
             <p className="text-[10px] text-slate-400">
               Procedural mood scoring synced with scene transitions
             </p>
@@ -150,7 +162,9 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
 
         <div className="flex flex-col gap-1 pt-1 border-t border-[#182236]">
           <div className="flex justify-between text-[10px] text-slate-400">
-            <span className="font-bold uppercase text-[9px]">BGM Master Volume</span>
+            <span className="font-bold uppercase text-[9px]">
+              BGM Master Volume
+            </span>
             <span className="font-mono text-emerald-400">{bgmVolume}%</span>
           </div>
           <input

@@ -4,13 +4,13 @@
    ========================================================================== */
 
 #app_root {
-  background-color: #0A0A0A !important;
-  color: #E5E5E5;
+  background-color: #0a0a0a !important;
+  color: #e5e5e5;
 }
 
 #main-content-layout,
 #main-scrollable-area {
-  background-color: #0A0A0A !important;
+  background-color: #0a0a0a !important;
 }
 
 /* ── 1. Top Header Glass ────────────────────────────────────────────────── */
@@ -18,7 +18,7 @@
 #app_root #header_pane,
 header {
   background-color: #121212 !important;
-  border-bottom: 1px solid #2F2F2F !important;
+  border-bottom: 1px solid #2f2f2f !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -27,7 +27,7 @@ aside,
 #app_root aside,
 #sidebar_pane {
   background-color: #121212 !important;
-  border-right: 1px solid #2F2F2F !important;
+  border-right: 1px solid #2f2f2f !important;
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.4) !important;
 }
 
@@ -37,8 +37,8 @@ aside,
 .modal-container,
 [role="dialog"],
 [role="menu"] {
-  background-color: #1E1E1E !important;
-  border: 1px solid #2F2F2F !important;
+  background-color: #1e1e1e !important;
+  border: 1px solid #2f2f2f !important;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7) !important;
 }
 

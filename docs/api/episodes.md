@@ -144,14 +144,17 @@ asyncio.run(scrape_webtoon())
 
 ```javascript
 async function scrapeWebtoon() {
-  const response = await fetch("http://localhost:8000/api/v1/scraper/scrape-episodes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title_no: "10411",
-      max_episodes: 50,
-    }),
-  });
+  const response = await fetch(
+    "http://localhost:8000/api/v1/scraper/scrape-episodes",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title_no: "10411",
+        max_episodes: 50,
+      }),
+    }
+  );
 
   const result = await response.json();
   console.log(`Series: ${result.series.title}`);

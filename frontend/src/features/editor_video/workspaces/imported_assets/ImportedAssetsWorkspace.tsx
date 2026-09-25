@@ -17,10 +17,9 @@ export interface ImportedAssetsWorkspaceProps {
   panels?: any[];
 }
 
-export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = ({
-  onTriggerFeedback,
-  appLogic,
-}) => {
+export const ImportedAssetsWorkspace: React.FC<
+  ImportedAssetsWorkspaceProps
+> = ({ onTriggerFeedback, appLogic }) => {
   const projectStore = useProjectStore();
   const activeData = projectStore?.activeProjectData;
 
@@ -50,7 +49,9 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
+    null
+  );
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
   const [mergingIndex, setMergingIndex] = useState<number | null>(null);
 
@@ -187,7 +188,13 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
     }
 
     setDeleteModalState(null);
-  }, [deleteModalState, scrapedImages, selectedUrls, setScrapedImages, onTriggerFeedback]);
+  }, [
+    deleteModalState,
+    scrapedImages,
+    selectedUrls,
+    setScrapedImages,
+    onTriggerFeedback,
+  ]);
 
   const handleMergeWithNext = useCallback(
     async (idx: number, e: React.MouseEvent) => {
@@ -225,7 +232,9 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
     }
     if (appLogic?.handleAutoCropSelected) {
       appLogic.handleAutoCropSelected();
-      onTriggerFeedback?.(`Auto Crop triggered for ${selectedUrls.length} frames`);
+      onTriggerFeedback?.(
+        `Auto Crop triggered for ${selectedUrls.length} frames`
+      );
     } else {
       onTriggerFeedback?.("Auto Crop triggered");
     }
@@ -237,7 +246,9 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
     }
     if (appLogic?.handleCleanBubblesSelected) {
       appLogic.handleCleanBubblesSelected();
-      onTriggerFeedback?.(`Clean Bubbles triggered for ${selectedUrls.length} frames`);
+      onTriggerFeedback?.(
+        `Clean Bubbles triggered for ${selectedUrls.length} frames`
+      );
     } else {
       onTriggerFeedback?.("Clean Bubbles triggered");
     }
@@ -260,8 +271,7 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
       const q = searchQuery.toLowerCase();
       list = list.filter(
         (i) =>
-          `frame #${i.index + 1}`.includes(q) ||
-          String(i.index + 1).includes(q)
+          `frame #${i.index + 1}`.includes(q) || String(i.index + 1).includes(q)
       );
     }
 
@@ -270,7 +280,15 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
     }
 
     return list;
-  }, [scrapedImages, panelUrls, selectedUrls, activeTab, searchQuery, sortOrder, favorites]);
+  }, [
+    scrapedImages,
+    panelUrls,
+    selectedUrls,
+    activeTab,
+    searchQuery,
+    sortOrder,
+    favorites,
+  ]);
 
   const isAllSelected =
     scrapedImages.length > 0 && selectedUrls.length === scrapedImages.length;
@@ -291,7 +309,9 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         sortOrder={sortOrder}
-        onToggleSort={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+        onToggleSort={() =>
+          setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+        }
         selectedCount={selectedUrls.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={handleSelectAllToggle}
@@ -315,39 +335,43 @@ export const ImportedAssetsWorkspace: React.FC<ImportedAssetsWorkspaceProps> = (
         {filteredAssets.length === 0 ? (
           <ImportedAssetsUploadZone
             isEmpty={true}
-            onOpenBrowser={() => onTriggerFeedback?.("Upload file browser opened")}
+            onOpenBrowser={() =>
+              onTriggerFeedback?.("Upload file browser opened")
+            }
           />
         ) : (
           <div className="grid grid-cols-2 gap-2.5 pt-1 pb-4">
-            {filteredAssets.map(({ url, index, isAssigned, isSelected, isFav }) => {
-              const isCardCropping =
-                croppingImgUrl === url ||
-                (isBatchCropping && selectedUrls.includes(url));
-              const isCardCleaning =
-                bubbleCroppingImgUrl === url ||
-                (isCleaningBubbles && selectedUrls.includes(url));
+            {filteredAssets.map(
+              ({ url, index, isAssigned, isSelected, isFav }) => {
+                const isCardCropping =
+                  croppingImgUrl === url ||
+                  (isBatchCropping && selectedUrls.includes(url));
+                const isCardCleaning =
+                  bubbleCroppingImgUrl === url ||
+                  (isCleaningBubbles && selectedUrls.includes(url));
 
-              return (
-                <ImportedAssetsCard
-                  key={`${url}-${index}`}
-                  url={url}
-                  index={index}
-                  isAssigned={isAssigned}
-                  isSelected={isSelected}
-                  isFav={isFav}
-                  isMerging={mergingIndex === index}
-                  isCropping={isCardCropping}
-                  isCleaning={isCardCleaning}
-                  totalImagesCount={scrapedImages.length}
-                  onSelect={handleCardSelect}
-                  onToggleFavorite={toggleFavorite}
-                  onAddToTimeline={handleAddToTimelineSingle}
-                  onMergeWithNext={handleMergeWithNext}
-                  onOpenEditor={handleOpenEditor}
-                  onDelete={handleDeleteSingle}
-                />
-              );
-            })}
+                return (
+                  <ImportedAssetsCard
+                    key={`${url}-${index}`}
+                    url={url}
+                    index={index}
+                    isAssigned={isAssigned}
+                    isSelected={isSelected}
+                    isFav={isFav}
+                    isMerging={mergingIndex === index}
+                    isCropping={isCardCropping}
+                    isCleaning={isCardCleaning}
+                    totalImagesCount={scrapedImages.length}
+                    onSelect={handleCardSelect}
+                    onToggleFavorite={toggleFavorite}
+                    onAddToTimeline={handleAddToTimelineSingle}
+                    onMergeWithNext={handleMergeWithNext}
+                    onOpenEditor={handleOpenEditor}
+                    onDelete={handleDeleteSingle}
+                  />
+                );
+              }
+            )}
           </div>
         )}
       </WorkspaceLayout.Content>

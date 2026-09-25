@@ -70,7 +70,8 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
           Creative Tools Workspace
         </h1>
         <p className="text-xs text-neutral-400 mt-0.5">
-          Access AI-assisted video editing, neural voice acting, translations, and publisher tools
+          Access AI-assisted video editing, neural voice acting, translations,
+          and publisher tools
         </p>
       </div>
 
@@ -137,9 +138,7 @@ const CreativeSuiteLayout: React.FC<CreativeSuiteLayoutProps> = ({
       {/* Main page offset container */}
       <div className="flex-1 flex flex-col pt-16 lg:pl-20 min-h-screen transition-all duration-300">
         <main className="flex-1 px-4 sm:px-6 pb-6 pt-4 md:px-8 md:pb-8">
-          <div className="w-full animate-fade-in">
-            {children}
-          </div>
+          <div className="w-full animate-fade-in">{children}</div>
         </main>
 
         <footer className="py-6 px-8 border-t border-[#2F2F2F] text-center bg-[#121212] mt-auto">

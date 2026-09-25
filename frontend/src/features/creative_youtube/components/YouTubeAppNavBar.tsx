@@ -73,7 +73,14 @@ export default function YouTubeAppNavBar({
           <div className="h-5 w-px bg-white/10 hidden sm:block shrink-0" />
 
           {/* Connected Channel Pill */}
-          <Tooltip text={isConnected ? `Active: ${channelTitle} — Click to switch` : "Connect YouTube channel"} placement="bottom">
+          <Tooltip
+            text={
+              isConnected
+                ? `Active: ${channelTitle} — Click to switch`
+                : "Connect YouTube channel"
+            }
+            placement="bottom"
+          >
             <button
               onClick={onOpenChannelModal}
               className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/8 hover:border-red-500/40 transition-all cursor-pointer group shadow-inner shrink-0"
@@ -103,7 +110,8 @@ export default function YouTubeAppNavBar({
                   {isConnected ? channelTitle : "Select Channel"}
                 </div>
                 <div className="text-[9.5px] text-neutral-400 font-mono leading-tight truncate">
-                  {channelHandle || (isConnected ? "Active" : "Click to connect")}
+                  {channelHandle ||
+                    (isConnected ? "Active" : "Click to connect")}
                 </div>
               </div>
 
@@ -145,8 +153,10 @@ export default function YouTubeAppNavBar({
 
         {/* ── RIGHT: PUBLISH CTA ── */}
         <div className="flex items-center gap-2.5 shrink-0">
-
-          <Tooltip text="Publish or schedule video to connected YouTube channel" placement="bottom">
+          <Tooltip
+            text="Publish or schedule video to connected YouTube channel"
+            placement="bottom"
+          >
             <button
               onClick={onPublish}
               className="group relative flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black font-mono rounded-xl shadow-[0_0_18px_rgba(239,68,68,0.35)] hover:shadow-[0_0_24px_rgba(239,68,68,0.55)] border border-red-400/40 transition-all duration-300 cursor-pointer active:scale-98 overflow-hidden shrink-0"

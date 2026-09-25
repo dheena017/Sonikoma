@@ -84,7 +84,9 @@ function buildSubdividedTicks(totalDuration: number): RulerTick[] {
     const t = Math.min(parseFloat((i * minorStep).toFixed(3)), totalDuration);
     const pct = (t / totalDuration) * 100;
 
-    const isMajor = Math.abs(t % majorStep) < 0.001 || Math.abs((t % majorStep) - majorStep) < 0.001;
+    const isMajor =
+      Math.abs(t % majorStep) < 0.001 ||
+      Math.abs((t % majorStep) - majorStep) < 0.001;
     const isMedium =
       !isMajor &&
       (Math.abs(t % mediumStep) < 0.001 ||
@@ -175,9 +177,10 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
         <div
           ref={trackRef}
           className="relative h-full timeline-ruler-track flex-1"
-          style={{ minWidth: `${Math.max(1200, rulerExtendedDuration * pxPerSec)}px` }}
+          style={{
+            minWidth: `${Math.max(1200, rulerExtendedDuration * pxPerSec)}px`,
+          }}
         >
-
           {/* Hover Time Scrubber Line & Tooltip */}
           {hoverPct !== null && hoverTime !== null && (
             <div
@@ -194,7 +197,11 @@ const TimelineRuler = forwardRef<HTMLDivElement, TimelineRulerProps>(
           {ticks.map((tick, idx) => {
             const isFirst = tick.time === 0;
             const isLast = Math.abs(tick.time - totalDuration) < 0.001;
-            const translateX = isFirst ? "translateX(4px)" : isLast ? "translateX(-100%)" : "translateX(-50%)";
+            const translateX = isFirst
+              ? "translateX(4px)"
+              : isLast
+              ? "translateX(-100%)"
+              : "translateX(-50%)";
             const tickPx = tick.time * pxPerSec;
 
             if (tick.type === "major") {

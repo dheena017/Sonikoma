@@ -31,7 +31,9 @@ export const SidepanelFooter: React.FC<SidepanelFooterProps> = ({
         <div className="flex flex-col gap-1">
           <div className="flex justify-between text-[10px] text-slate-300 font-medium">
             <span>Rendering Motion Comic ({renderProgress}%)...</span>
-            <span className="animate-pulse text-sky-400 font-mono">Synthesizing FFmpeg</span>
+            <span className="animate-pulse text-sky-400 font-mono">
+              Synthesizing FFmpeg
+            </span>
           </div>
           <div className="w-full bg-[#1e293b] h-1.5 rounded-full overflow-hidden">
             <div
@@ -56,7 +58,9 @@ export const SidepanelFooter: React.FC<SidepanelFooterProps> = ({
               {isRendering
                 ? "Rendering Video..."
                 : totalDuration > 0
-                ? `Export Video (${enabledCount} Scenes • ~${Math.round(totalDuration)}s)`
+                ? `Export Video (${enabledCount} Scenes • ~${Math.round(
+                    totalDuration
+                  )}s)`
                 : `Export Video (${enabledCount} Scenes)`}
             </span>
           </button>
@@ -79,7 +83,11 @@ export const SidepanelFooter: React.FC<SidepanelFooterProps> = ({
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
         >
           <RefreshCw size={13} className={isScanning ? "animate-spin" : ""} />
-          <span>{isScanning ? "Scanning Reader DOM..." : "Scan Active Tab for Panels"}</span>
+          <span>
+            {isScanning
+              ? "Scanning Reader DOM..."
+              : "Scan Active Tab for Panels"}
+          </span>
         </button>
       )}
     </footer>

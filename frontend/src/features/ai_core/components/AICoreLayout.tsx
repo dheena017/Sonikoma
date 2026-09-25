@@ -74,9 +74,7 @@ export default function AICoreLayout({
       {/* 4. MAIN SCROLLABLE CONTENT VIEWPORT WITH HEADER & MINI-SIDEBAR OFFSETS */}
       <div className="pt-16 lg:pl-20 min-h-screen flex flex-col bg-gradient-to-b from-[#07080c] via-[#090a10] to-[#050608]">
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto space-y-6">{children}</div>
         </main>
       </div>
     </div>

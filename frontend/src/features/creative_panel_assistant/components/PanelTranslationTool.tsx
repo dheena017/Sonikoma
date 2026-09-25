@@ -147,22 +147,86 @@ export default function PanelTranslationTool({
               searchable
               className="flex-1 min-w-0"
               options={[
-                { value: "Tamil", label: "Tamil (தமிழ்)", description: "Direct native localization" },
-                { value: "Hindi", label: "Hindi (हिन्दी)", description: "Devanagari localization" },
-                { value: "Japanese", label: "Japanese (日本語)", description: "Authentic manga style" },
-                { value: "Korean", label: "Korean (한국어)", description: "Authentic webtoon style" },
-                { value: "Chinese", label: "Chinese (Simplified / 简体中文)", description: "Manhua localization" },
-                { value: "Spanish", label: "Spanish (Español)", description: "Neutral Spanish" },
-                { value: "French", label: "French (Français)", description: "Standard French" },
-                { value: "German", label: "German (Deutsch)", description: "Standard German" },
-                { value: "Portuguese", label: "Portuguese (Português)", description: "BR/PT localization" },
-                { value: "Arabic", label: "Arabic (العربية)", description: "Modern standard Arabic" },
-                { value: "Russian", label: "Russian (Русский)", description: "Standard Russian" },
-                { value: "Italian", label: "Italian (Italiano)", description: "Standard Italian" },
-                { value: "Indonesian", label: "Indonesian (Bahasa Indonesia)", description: "Standard Indonesian" },
-                { value: "Vietnamese", label: "Vietnamese (Tiếng Việt)", description: "Standard Vietnamese" },
-                { value: "Thai", label: "Thai (ไทย)", description: "Standard Thai" },
-                { value: "English", label: "English", description: "Standard English" },
+                {
+                  value: "Tamil",
+                  label: "Tamil (தமிழ்)",
+                  description: "Direct native localization",
+                },
+                {
+                  value: "Hindi",
+                  label: "Hindi (हिन्दी)",
+                  description: "Devanagari localization",
+                },
+                {
+                  value: "Japanese",
+                  label: "Japanese (日本語)",
+                  description: "Authentic manga style",
+                },
+                {
+                  value: "Korean",
+                  label: "Korean (한국어)",
+                  description: "Authentic webtoon style",
+                },
+                {
+                  value: "Chinese",
+                  label: "Chinese (Simplified / 简体中文)",
+                  description: "Manhua localization",
+                },
+                {
+                  value: "Spanish",
+                  label: "Spanish (Español)",
+                  description: "Neutral Spanish",
+                },
+                {
+                  value: "French",
+                  label: "French (Français)",
+                  description: "Standard French",
+                },
+                {
+                  value: "German",
+                  label: "German (Deutsch)",
+                  description: "Standard German",
+                },
+                {
+                  value: "Portuguese",
+                  label: "Portuguese (Português)",
+                  description: "BR/PT localization",
+                },
+                {
+                  value: "Arabic",
+                  label: "Arabic (العربية)",
+                  description: "Modern standard Arabic",
+                },
+                {
+                  value: "Russian",
+                  label: "Russian (Русский)",
+                  description: "Standard Russian",
+                },
+                {
+                  value: "Italian",
+                  label: "Italian (Italiano)",
+                  description: "Standard Italian",
+                },
+                {
+                  value: "Indonesian",
+                  label: "Indonesian (Bahasa Indonesia)",
+                  description: "Standard Indonesian",
+                },
+                {
+                  value: "Vietnamese",
+                  label: "Vietnamese (Tiếng Việt)",
+                  description: "Standard Vietnamese",
+                },
+                {
+                  value: "Thai",
+                  label: "Thai (ไทย)",
+                  description: "Standard Thai",
+                },
+                {
+                  value: "English",
+                  label: "English",
+                  description: "Standard English",
+                },
               ]}
             />
             <div className="flex items-center gap-2">
@@ -229,7 +293,10 @@ export default function PanelTranslationTool({
             </span>
           </div>
 
-          <Tooltip text="Scan speech dialogue against safety policies" placement="top">
+          <Tooltip
+            text="Scan speech dialogue against safety policies"
+            placement="top"
+          >
             <button
               onClick={handleScrub}
               disabled={scrubbing || !panel.speech_text}

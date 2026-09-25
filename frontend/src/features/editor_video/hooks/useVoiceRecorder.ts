@@ -17,9 +17,13 @@ export const useVoiceRecorder = () => {
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [recordedAudio, setRecordedAudio] = useState<RecordedAudioItem | null>(null);
+  const [recordedAudio, setRecordedAudio] = useState<RecordedAudioItem | null>(
+    null
+  );
   const [permissionError, setPermissionError] = useState<string | null>(null);
-  const [audioLevels, setAudioLevels] = useState<number[]>(new Array(24).fill(10));
+  const [audioLevels, setAudioLevels] = useState<number[]>(
+    new Array(24).fill(10)
+  );
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -48,7 +52,8 @@ export const useVoiceRecorder = () => {
   // Live real-time audio visualization level meter
   const startVisualizer = (stream: MediaStream) => {
     try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       audioCtxRef.current = ctx;
@@ -62,8 +67,8 @@ export const useVoiceRecorder = () => {
       const updateLevels = () => {
         if (!analyserRef.current) return;
         analyserRef.current.getByteFrequencyData(dataArray);
-        const levels = Array.from(dataArray.slice(0, 24)).map(
-          (val) => Math.max(10, Math.round((val / 255) * 100))
+        const levels = Array.from(dataArray.slice(0, 24)).map((val) =>
+          Math.max(10, Math.round((val / 255) * 100))
         );
         setAudioLevels(levels);
         animFrameRef.current = requestAnimationFrame(updateLevels);
@@ -85,7 +90,9 @@ export const useVoiceRecorder = () => {
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error("Microphone recording is not supported in this browser.");
+        throw new Error(
+          "Microphone recording is not supported in this browser."
+        );
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -121,8 +128,11 @@ export const useVoiceRecorder = () => {
         const finalType = mimeType || "audio/webm";
         const blob = new Blob(audioChunksRef.current, { type: finalType });
         const url = URL.createObjectURL(blob);
-        const durationSecs = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000));
-        
+        const durationSecs = Math.max(
+          1,
+          Math.round((Date.now() - startTimeRef.current) / 1000)
+        );
+
         setAudioBlob(blob);
         setAudioUrl(url);
         setRecordedAudio({

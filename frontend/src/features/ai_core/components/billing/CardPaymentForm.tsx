@@ -34,7 +34,8 @@ export const CardPaymentForm: React.FC<CardPaymentFormProps> = ({
           Saved Payment Method
         </h4>
         <p className="text-xs text-neutral-400 font-semibold">
-          Add a credit card for instant one-click compute top-ups and priority queue allocations.
+          Add a credit card for instant one-click compute top-ups and priority
+          queue allocations.
         </p>
       </div>
 

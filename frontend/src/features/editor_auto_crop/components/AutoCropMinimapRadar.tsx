@@ -1,4 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   ChevronUp,
   ChevronDown,
@@ -75,8 +81,10 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
   className = "",
 }) => {
   const [internalExpanded, setInternalExpanded] = useState<boolean>(false);
-  const isExpanded = externalExpanded !== undefined ? externalExpanded : internalExpanded;
-  const toggleExpanded = onToggleExpanded || (() => setInternalExpanded((prev) => !prev));
+  const isExpanded =
+    externalExpanded !== undefined ? externalExpanded : internalExpanded;
+  const toggleExpanded =
+    onToggleExpanded || (() => setInternalExpanded((prev) => !prev));
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [hoverPanelIndex, setHoverPanelIndex] = useState<number | null>(null);
   const [zoomMultiplier, setZoomMultiplier] = useState<number>(0.45);
@@ -109,7 +117,11 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
 
   // Compute currently in-view active panel from scroll progress or selection
   const inViewPanelIndex = useMemo(() => {
-    if (selectedPanelIndex !== null && selectedPanelIndex >= 0 && boxes[selectedPanelIndex]) {
+    if (
+      selectedPanelIndex !== null &&
+      selectedPanelIndex >= 0 &&
+      boxes[selectedPanelIndex]
+    ) {
       return selectedPanelIndex;
     }
     const currentY = (scrollProgress.scrollRatio || 0) * (totalHeight || 1);
@@ -141,8 +153,12 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
   // Maintain proportional scroll position on zoom without jumping/animating
   useEffect(() => {
     if (!trackRef.current) return;
-    if (prevNaturalHeightRef.current > 0 && prevNaturalHeightRef.current !== naturalMinimapHeight) {
-      const scrollRatio = trackRef.current.scrollTop / prevNaturalHeightRef.current;
+    if (
+      prevNaturalHeightRef.current > 0 &&
+      prevNaturalHeightRef.current !== naturalMinimapHeight
+    ) {
+      const scrollRatio =
+        trackRef.current.scrollTop / prevNaturalHeightRef.current;
       trackRef.current.scrollTop = scrollRatio * naturalMinimapHeight;
     }
     prevNaturalHeightRef.current = naturalMinimapHeight;
@@ -153,22 +169,38 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
     if (isDragging || !trackRef.current) return;
     const currentScrollRatio = scrollProgress.scrollRatio ?? 0;
     const isPanelChanged = selectedPanelIndex !== lastSyncedPanel.current;
-    const isScrollChanged = Math.abs((lastSyncedScrollRatio.current ?? -1) - currentScrollRatio) > 0.001;
+    const isScrollChanged =
+      Math.abs((lastSyncedScrollRatio.current ?? -1) - currentScrollRatio) >
+      0.001;
 
     if (isPanelChanged || isScrollChanged) {
       lastSyncedPanel.current = selectedPanelIndex;
       lastSyncedScrollRatio.current = currentScrollRatio;
 
       let targetScroll = 0;
-      if (isPanelChanged && selectedPanelIndex !== null && boxes[selectedPanelIndex] && totalHeight > 0) {
+      if (
+        isPanelChanged &&
+        selectedPanelIndex !== null &&
+        boxes[selectedPanelIndex] &&
+        totalHeight > 0
+      ) {
         const b = boxes[selectedPanelIndex];
-        const panelCenterRatio = ((b.y ?? 0) + (b.height ?? (totalHeight / boxes.length)) / 2) / totalHeight;
-        targetScroll = panelCenterRatio * naturalMinimapHeight - trackRef.current.clientHeight / 2;
+        const panelCenterRatio =
+          ((b.y ?? 0) + (b.height ?? totalHeight / boxes.length) / 2) /
+          totalHeight;
+        targetScroll =
+          panelCenterRatio * naturalMinimapHeight -
+          trackRef.current.clientHeight / 2;
       } else {
-        targetScroll = currentScrollRatio * naturalMinimapHeight - trackRef.current.clientHeight / 2;
+        targetScroll =
+          currentScrollRatio * naturalMinimapHeight -
+          trackRef.current.clientHeight / 2;
       }
 
-      const maxScroll = Math.max(0, trackRef.current.scrollHeight - trackRef.current.clientHeight);
+      const maxScroll = Math.max(
+        0,
+        trackRef.current.scrollHeight - trackRef.current.clientHeight
+      );
       if (maxScroll > 0) {
         trackRef.current.scrollTo({
           top: Math.max(0, Math.min(maxScroll, targetScroll)),
@@ -176,13 +208,21 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         });
       }
     }
-  }, [selectedPanelIndex, scrollProgress.scrollRatio, naturalMinimapHeight, totalHeight, boxes, isDragging]);
+  }, [
+    selectedPanelIndex,
+    scrollProgress.scrollRatio,
+    naturalMinimapHeight,
+    totalHeight,
+    boxes,
+    isDragging,
+  ]);
 
   const rafScrubRef = useRef<number | null>(null);
 
   const handlePointerScrub = useCallback(
     (clientY: number) => {
-      if (!trackRef.current || !scrollViewportRef?.current || totalHeight <= 0) return;
+      if (!trackRef.current || !scrollViewportRef?.current || totalHeight <= 0)
+        return;
       if (rafScrubRef.current) cancelAnimationFrame(rafScrubRef.current);
 
       rafScrubRef.current = requestAnimationFrame(() => {
@@ -191,12 +231,18 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         const clickY = Math.max(0, Math.min(rect.height, clientY - rect.top));
 
         const scrollYInMinimap = clickY + trackRef.current.scrollTop;
-        const targetRatio = Math.max(0, Math.min(1, scrollYInMinimap / (naturalMinimapHeight || 1)));
+        const targetRatio = Math.max(
+          0,
+          Math.min(1, scrollYInMinimap / (naturalMinimapHeight || 1))
+        );
 
         const scrollH = scrollViewportRef.current.scrollHeight;
         const clientH = scrollViewportRef.current.clientHeight;
         const maxScroll = Math.max(0, scrollH - clientH);
-        scrollViewportRef.current.scrollTo({ top: targetRatio * maxScroll, behavior: "auto" });
+        scrollViewportRef.current.scrollTo({
+          top: targetRatio * maxScroll,
+          behavior: "auto",
+        });
       });
     },
     [naturalMinimapHeight, scrollViewportRef, totalHeight]
@@ -205,7 +251,12 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
   // Global overview rail scrubbing (Jump anywhere from 0% to 100% of the entire strip)
   const handleOverviewRailScrub = useCallback(
     (clientY: number) => {
-      if (!overviewRailRef.current || !scrollViewportRef?.current || totalHeight <= 0) return;
+      if (
+        !overviewRailRef.current ||
+        !scrollViewportRef?.current ||
+        totalHeight <= 0
+      )
+        return;
       if (rafScrubRef.current) cancelAnimationFrame(rafScrubRef.current);
 
       rafScrubRef.current = requestAnimationFrame(() => {
@@ -217,7 +268,10 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         const scrollH = scrollViewportRef.current.scrollHeight;
         const clientH = scrollViewportRef.current.clientHeight;
         const maxScroll = Math.max(0, scrollH - clientH);
-        scrollViewportRef.current.scrollTo({ top: targetRatio * maxScroll, behavior: "auto" });
+        scrollViewportRef.current.scrollTo({
+          top: targetRatio * maxScroll,
+          behavior: "auto",
+        });
       });
     },
     [scrollViewportRef]
@@ -250,10 +304,19 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
 
   const activeBox = boxes[inViewPanelIndex];
   const activeBoxWidth = Math.round(activeBox?.width ?? totalWidth);
-  const activeBoxHeight = Math.round(activeBox?.height ?? (totalHeight / boxes.length));
-  const activeRatio = activeBoxWidth > 0 ? (activeBoxHeight / activeBoxWidth).toFixed(2) : "1.0";
+  const activeBoxHeight = Math.round(
+    activeBox?.height ?? totalHeight / boxes.length
+  );
+  const activeRatio =
+    activeBoxWidth > 0 ? (activeBoxHeight / activeBoxWidth).toFixed(2) : "1.0";
   const activeRatioTag =
-    +activeRatio > 1.8 ? "Tall Strip" : +activeRatio > 1.3 ? "Portrait" : +activeRatio < 0.8 ? "Wide" : "Square";
+    +activeRatio > 1.8
+      ? "Tall Strip"
+      : +activeRatio > 1.3
+      ? "Portrait"
+      : +activeRatio < 0.8
+      ? "Wide"
+      : "Square";
 
   if (!boxes.length || totalHeight <= 0) return null;
 
@@ -287,11 +350,15 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setZoomMultiplier((prev) => Math.max(0.2, +(prev - 0.1).toFixed(2)));
+              setZoomMultiplier((prev) =>
+                Math.max(0.2, +(prev - 0.1).toFixed(2))
+              );
             }}
             disabled={zoomMultiplier <= 0.2}
             className="text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:text-neutral-400 p-1 rounded-md hover:bg-neutral-800/80 transition-colors !cursor-pointer active:scale-90"
-            title={`Zoom Out (Show More Panels) (${Math.round(zoomMultiplier * 100)}%)`}
+            title={`Zoom Out (Show More Panels) (${Math.round(
+              zoomMultiplier * 100
+            )}%)`}
           >
             <ZoomOut className="h-3.5 w-3.5" />
           </button>
@@ -299,7 +366,9 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setZoomMultiplier((prev) => Math.min(1.5, +(prev + 0.1).toFixed(2)));
+              setZoomMultiplier((prev) =>
+                Math.min(1.5, +(prev + 0.1).toFixed(2))
+              );
             }}
             disabled={zoomMultiplier >= 1.5}
             className="text-neutral-400 hover:text-white disabled:opacity-30 disabled:hover:text-neutral-400 p-1 rounded-md hover:bg-neutral-800/80 transition-colors !cursor-pointer active:scale-90"
@@ -325,8 +394,12 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
         <div className="w-full px-2.5 py-1.5 flex items-center justify-between text-[10px] font-mono bg-neutral-900/90 rounded-lg border border-neutral-800 text-neutral-300 shadow-sm">
           <div className="flex items-center gap-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span className="text-emerald-400 font-bold">Panel #{inViewPanelIndex + 1}</span>
-            <span className="text-[8px] px-1 py-0.2 rounded bg-neutral-800 text-neutral-400">{activeRatioTag}</span>
+            <span className="text-emerald-400 font-bold">
+              Panel #{inViewPanelIndex + 1}
+            </span>
+            <span className="text-[8px] px-1 py-0.2 rounded bg-neutral-800 text-neutral-400">
+              {activeRatioTag}
+            </span>
           </div>
           <span className="text-neutral-400 font-medium text-[9px] bg-neutral-950 px-1.5 py-0.5 rounded border border-neutral-800">
             {activeBoxWidth}×{activeBoxHeight}px
@@ -350,7 +423,10 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
             const clickY = e.clientY - rect.top;
 
             const scrollYInMinimap = clickY + (trackRef.current.scrollTop || 0);
-            const targetRatio = Math.max(0, Math.min(1, scrollYInMinimap / (naturalMinimapHeight || 1)));
+            const targetRatio = Math.max(
+              0,
+              Math.min(1, scrollYInMinimap / (naturalMinimapHeight || 1))
+            );
 
             const targetPixelY = targetRatio * totalHeight;
             let closestIdx = 0;
@@ -393,8 +469,17 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
             {boxes.map((b, i) => {
               const topPct = ((b.y ?? 0) / totalHeight) * 100;
               const leftPct = ((b.x ?? 0) / totalWidth) * 100;
-              const widthPct = Math.max(3, Math.min(100 - leftPct, ((b.width ?? totalWidth) / totalWidth) * 100));
-              const heightPct = Math.max(0.4, ((b.height ?? (totalHeight / boxes.length)) / totalHeight) * 100);
+              const widthPct = Math.max(
+                3,
+                Math.min(
+                  100 - leftPct,
+                  ((b.width ?? totalWidth) / totalWidth) * 100
+                )
+              );
+              const heightPct = Math.max(
+                0.4,
+                ((b.height ?? totalHeight / boxes.length) / totalHeight) * 100
+              );
               const isSel = selectedPanelIndex === i;
               const isHov = hoverPanelIndex === i;
 
@@ -409,8 +494,13 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                       const boxH = b.height ?? 200;
                       const scrollH = scrollViewportRef.current.scrollHeight;
                       const clientH = scrollViewportRef.current.clientHeight;
-                      const targetScroll = ((boxTop + boxH / 2) / totalHeight) * scrollH - clientH / 2;
-                      scrollViewportRef.current.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+                      const targetScroll =
+                        ((boxTop + boxH / 2) / totalHeight) * scrollH -
+                        clientH / 2;
+                      scrollViewportRef.current.scrollTo({
+                        top: Math.max(0, targetScroll),
+                        behavior: "smooth",
+                      });
                     }
                   }}
                   onMouseEnter={() => setHoverPanelIndex(i)}
@@ -451,7 +541,13 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
           {hoverPanelIndex !== null && boxes[hoverPanelIndex] && (
             <div
               style={{
-                top: `${Math.max(6, Math.min(94, ((boxes[hoverPanelIndex]?.y ?? 0) / totalHeight) * 100))}%`,
+                top: `${Math.max(
+                  6,
+                  Math.min(
+                    94,
+                    ((boxes[hoverPanelIndex]?.y ?? 0) / totalHeight) * 100
+                  )
+                )}%`,
               }}
               className="absolute right-full mr-2 z-50 p-2.5 rounded-xl bg-neutral-950/98 border border-neutral-700 text-white text-[10px] font-mono shadow-2xl pointer-events-none -translate-y-1/2 min-w-[155px] backdrop-blur-xl animate-in fade-in zoom-in-95 duration-100 space-y-1.5"
             >
@@ -461,7 +557,10 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                   Panel #{hoverPanelIndex + 1}
                 </span>
                 <span className="text-[8px] px-1 py-0.2 rounded bg-neutral-900 text-neutral-400 border border-neutral-800">
-                  {Math.round(((boxes[hoverPanelIndex]?.y ?? 0) / totalHeight) * 100)}%
+                  {Math.round(
+                    ((boxes[hoverPanelIndex]?.y ?? 0) / totalHeight) * 100
+                  )}
+                  %
                 </span>
               </div>
               <div className="space-y-0.5 text-[9px] text-neutral-300">
@@ -474,7 +573,9 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-neutral-500">Offset Y:</span>
-                  <span className="text-neutral-300 font-mono">{Math.round(boxes[hoverPanelIndex]?.y ?? 0)}px</span>
+                  <span className="text-neutral-300 font-mono">
+                    {Math.round(boxes[hoverPanelIndex]?.y ?? 0)}px
+                  </span>
                 </div>
                 <div className="text-[8px] text-emerald-400 pt-1 border-t border-neutral-800/80 font-medium">
                   Click / Drag to jump
@@ -506,8 +607,11 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
           {/* Active viewport indicator thumb on rail */}
           <div
             style={{
-              top: `${Math.max(0, Math.min(94, (scrollProgress.topPct || 0)))}%`,
-              height: `${Math.max(6, Math.min(40, (scrollProgress.heightPct || 10)))}%`,
+              top: `${Math.max(0, Math.min(94, scrollProgress.topPct || 0))}%`,
+              height: `${Math.max(
+                6,
+                Math.min(40, scrollProgress.heightPct || 10)
+              )}%`,
             }}
             className="absolute inset-x-0.5 rounded-sm bg-emerald-400/80 border border-emerald-300 shadow-[0_0_6px_rgba(52,211,153,0.8)] pointer-events-none group-hover/rail:bg-emerald-300 transition-all"
           />
@@ -521,7 +625,10 @@ export const AutoCropMinimapRadar: React.FC<AutoCropMinimapRadarProps> = ({
             type="button"
             onClick={() => {
               if (scrollViewportRef?.current) {
-                scrollViewportRef.current.scrollTo({ top: 0, behavior: "smooth" });
+                scrollViewportRef.current.scrollTo({
+                  top: 0,
+                  behavior: "smooth",
+                });
               }
             }}
             className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors !cursor-pointer"

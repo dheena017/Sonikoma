@@ -115,12 +115,16 @@ export const detectSmallPanels = async (
   data: DetectSmallPanelsPayload,
   options?: RequestInit
 ): Promise<ApiResponse<DetectSmallPanelsResponse>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/small-panels", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    "/api/v1/panels/detect/small-panels",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      ...options,
+    }
+  );
 };
 
 /**
@@ -147,12 +151,16 @@ export const detectUltraLongPanels = async (
   data: DetectLongPanelsPayload,
   options?: RequestInit
 ): Promise<ApiResponse<DetectLongPanelsResponse>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/panels/detect/ultra-long-panels", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    "/api/v1/panels/detect/ultra-long-panels",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      ...options,
+    }
+  );
 };
 
 /**
@@ -226,8 +234,13 @@ export const detectPanelsByUrl = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  const isAIVision = data.engine_mode === "ai_vision" || data.strategy === "ai-vision" || data.strategy === "cloud-ai";
-  const endpoint = isAIVision ? "/api/v1/panels/detect/ai-vision" : "/api/v1/panels/detect/cv-yolo";
+  const isAIVision =
+    data.engine_mode === "ai_vision" ||
+    data.strategy === "ai-vision" ||
+    data.strategy === "cloud-ai";
+  const endpoint = isAIVision
+    ? "/api/v1/panels/detect/ai-vision"
+    : "/api/v1/panels/detect/cv-yolo";
   return apiRequest(fetchWithInterceptor, endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

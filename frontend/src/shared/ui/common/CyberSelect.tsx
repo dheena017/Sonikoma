@@ -12,7 +12,10 @@ export interface CyberSelectOption {
 export interface CyberSelectProps {
   value: string;
   onChange: (value: string) => void;
-  options: (CyberSelectOption | { value: string; label: string; description?: string; disabled?: boolean })[];
+  options: (
+    | CyberSelectOption
+    | { value: string; label: string; description?: string; disabled?: boolean }
+  )[];
   placeholder?: string;
   label?: string;
   disabled?: boolean;
@@ -73,9 +76,10 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
 
   // Filter options if searchable
   const filteredOptions = searchQuery
-    ? options.filter((opt) =>
-        opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        opt.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    ? options.filter(
+        (opt) =>
+          opt.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          opt.description?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : options;
 
@@ -115,12 +119,17 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
         }`}
       >
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          {"icon" in (selectedOption || {}) && (selectedOption as CyberSelectOption)?.icon && (
-            <span className="shrink-0 text-red-400">
-              {(selectedOption as CyberSelectOption).icon}
-            </span>
-          )}
-          <span className={`truncate ${!selectedOption ? "text-neutral-500" : "text-white font-medium"}`}>
+          {"icon" in (selectedOption || {}) &&
+            (selectedOption as CyberSelectOption)?.icon && (
+              <span className="shrink-0 text-red-400">
+                {(selectedOption as CyberSelectOption).icon}
+              </span>
+            )}
+          <span
+            className={`truncate ${
+              !selectedOption ? "text-neutral-500" : "text-white font-medium"
+            }`}
+          >
             {selectedOption ? selectedOption.label : placeholder}
           </span>
         </div>

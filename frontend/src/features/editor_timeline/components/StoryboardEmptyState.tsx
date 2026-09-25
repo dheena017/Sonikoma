@@ -46,7 +46,10 @@ export default function StoryboardEmptyState({
             className="mt-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-semibold flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] cursor-pointer active:scale-95"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Add All Assets to Storyboard {scrapedCount ? `(${scrapedCount} Frames)` : ""}</span>
+            <span>
+              Add All Assets to Storyboard{" "}
+              {scrapedCount ? `(${scrapedCount} Frames)` : ""}
+            </span>
           </button>
         )}
       </div>

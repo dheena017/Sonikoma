@@ -96,9 +96,12 @@ export default function ForgotPasswordPage({
                   <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                   </div>
-                  <h3 className="text-lg font-bold text-white">Password Updated!</h3>
+                  <h3 className="text-lg font-bold text-white">
+                    Password Updated!
+                  </h3>
                   <p className="text-xs text-neutral-400 leading-relaxed">
-                    Your password has been reset successfully. You can now log in with your new password.
+                    Your password has been reset successfully. You can now log
+                    in with your new password.
                   </p>
                   <Tooltip text="Go to Sign In" placement="bottom">
                     <button
@@ -110,7 +113,11 @@ export default function ForgotPasswordPage({
                   </Tooltip>
                 </div>
               ) : isCodeSent ? (
-                <form noValidate className="space-y-4" onSubmit={handleNewPasswordSubmit}>
+                <form
+                  noValidate
+                  className="space-y-4"
+                  onSubmit={handleNewPasswordSubmit}
+                >
                   {error && (
                     <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
                       {error}
@@ -148,14 +155,25 @@ export default function ForgotPasswordPage({
                         placeholder="Enter new password"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
-                        <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
+                        <Tooltip
+                          text={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                          placement="top"
+                        >
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
                             className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={
+                              showPassword ? "Hide password" : "Show password"
+                            }
                           >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            {showPassword ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
                           </button>
                         </Tooltip>
                       </div>
@@ -181,7 +199,10 @@ export default function ForgotPasswordPage({
                     </div>
                   </div>
 
-                  <Tooltip text="Save new password and sign in" placement="bottom">
+                  <Tooltip
+                    text="Save new password and sign in"
+                    placement="bottom"
+                  >
                     <button
                       type="submit"
                       disabled={isLoading}
@@ -236,7 +257,10 @@ export default function ForgotPasswordPage({
                     </div>
                   </div>
 
-                  <Tooltip text="Send password recovery code to your email" placement="bottom">
+                  <Tooltip
+                    text="Send password recovery code to your email"
+                    placement="bottom"
+                  >
                     <button
                       type="submit"
                       disabled={isLoading || !isEmailValid}

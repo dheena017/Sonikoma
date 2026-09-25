@@ -38,7 +38,10 @@ export interface InteractiveCutBoxItemProps {
   showCornerHandles: boolean;
   lastDragEndTimeRef: React.RefObject<number>;
   onSelectPanel: (idx: number) => void;
-  handleBoxMoveStart: (boxIdx: number, e: React.MouseEvent | React.TouchEvent) => void;
+  handleBoxMoveStart: (
+    boxIdx: number,
+    e: React.MouseEvent | React.TouchEvent
+  ) => void;
   handleBoxResizeStart: (
     boxIdx: number,
     handle: "n" | "s" | "e" | "w" | "nw" | "ne" | "sw" | "se",
@@ -91,19 +94,17 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
   const curX = isBeingMoved
     ? dragAction.currentX
     : isBeingResized
-      ? dragAction.currentX
-      : (box.x ?? 0);
+    ? dragAction.currentX
+    : box.x ?? 0;
   const curY = isBeingMoved
     ? dragAction.currentY
     : isBeingResized
-      ? dragAction.currentY
-      : (box.y ?? 0);
-  const curW = isBeingResized
-    ? dragAction.currentW
-    : (box.width ?? totalWidth);
+    ? dragAction.currentY
+    : box.y ?? 0;
+  const curW = isBeingResized ? dragAction.currentW : box.width ?? totalWidth;
   const curH = isBeingResized
     ? dragAction.currentH
-    : (box.height ?? Math.round(totalHeight / Math.max(1, boxesCount)));
+    : box.height ?? Math.round(totalHeight / Math.max(1, boxesCount));
 
   const leftPercent = (curX / totalWidth) * 100;
   const topPercent = (curY / totalHeight) * 100;
@@ -123,8 +124,16 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
     : undefined;
 
   const [isHovered, setIsHovered] = useState(false);
-  const [toolbarDragOffset, setToolbarDragOffset] = useState<{ x: number; y: number } | null>(null);
-  const toolbarDragStartRef = useRef<{ startX: number; startY: number; initX: number; initY: number } | null>(null);
+  const [toolbarDragOffset, setToolbarDragOffset] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const toolbarDragStartRef = useRef<{
+    startX: number;
+    startY: number;
+    initX: number;
+    initY: number;
+  } | null>(null);
 
   const handleToolbarDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation();
@@ -194,7 +203,8 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
         width: `${widthPercent}%`,
         height: `${heightPercent}%`,
         backgroundColor: bgFillStyle,
-        boxShadow: isSelected && showPanelBoxes ? activeTheme.glowShadow : undefined,
+        boxShadow:
+          isSelected && showPanelBoxes ? activeTheme.glowShadow : undefined,
       }}
       className={`absolute pointer-events-auto transition-[border-color,box-shadow,background-color] select-none ${
         showPanelBoxes
@@ -231,8 +241,7 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
               ? `translate(${toolbarDragOffset.x}px, ${toolbarDragOffset.y}px)`
               : "translateX(-100%)",
           }}
-          className={`absolute -left-2.5 top-2 z-40 flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-950/95 border ${activeTheme.borderActive
-            }/90 shadow-2xl backdrop-blur-md transition-[box-shadow,border-color] duration-150 pointer-events-auto whitespace-nowrap animate-in fade-in slide-in-from-right-1 duration-150`}
+          className={`absolute -left-2.5 top-2 z-40 flex items-center gap-1 px-2 py-1 rounded-xl bg-neutral-950/95 border ${activeTheme.borderActive}/90 shadow-2xl backdrop-blur-md transition-[box-shadow,border-color] duration-150 pointer-events-auto whitespace-nowrap animate-in fade-in slide-in-from-right-1 duration-150`}
           onClick={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
@@ -410,114 +419,116 @@ export const InteractiveCutBoxItem: React.FC<InteractiveCutBoxItemProps> = ({
       />
 
       {/* ── 4-SIDED EDGE RESIZE HANDLES (Contextual: Selected or Hovered) ── */}
-      {(isSelected || isBeingMoved || isBeingResized || isHovered) && showEdgeHandles && (
-        <>
-          {/* Top Edge */}
-          <div
-            onMouseDown={(e) => handleBoxResizeStart(idx, "n", e)}
-            onTouchStart={(e) => handleBoxResizeStart(idx, "n", e)}
-            style={{ touchAction: "none" }}
-            className="absolute -top-3 inset-x-6 h-6 !cursor-ns-resize z-30 flex items-center justify-center group/h-top pointer-events-auto"
-          >
+      {(isSelected || isBeingMoved || isBeingResized || isHovered) &&
+        showEdgeHandles && (
+          <>
+            {/* Top Edge */}
             <div
-              style={{ backgroundColor: activeTheme.hex }}
-              className="w-16 h-1 rounded-full border border-black/40 group-hover/h-top:h-1.5 group-hover/h-top:w-24 shadow-sm transition-all"
-            />
-          </div>
+              onMouseDown={(e) => handleBoxResizeStart(idx, "n", e)}
+              onTouchStart={(e) => handleBoxResizeStart(idx, "n", e)}
+              style={{ touchAction: "none" }}
+              className="absolute -top-3 inset-x-6 h-6 !cursor-ns-resize z-30 flex items-center justify-center group/h-top pointer-events-auto"
+            >
+              <div
+                style={{ backgroundColor: activeTheme.hex }}
+                className="w-16 h-1 rounded-full border border-black/40 group-hover/h-top:h-1.5 group-hover/h-top:w-24 shadow-sm transition-all"
+              />
+            </div>
 
-          {/* Bottom Edge */}
-          <div
-            onMouseDown={(e) => handleBoxResizeStart(idx, "s", e)}
-            onTouchStart={(e) => handleBoxResizeStart(idx, "s", e)}
-            style={{ touchAction: "none" }}
-            className="absolute -bottom-3 inset-x-6 h-6 !cursor-ns-resize z-30 flex items-center justify-center group/h-bottom pointer-events-auto"
-          >
+            {/* Bottom Edge */}
             <div
-              style={{ backgroundColor: activeTheme.hex }}
-              className="w-16 h-1 rounded-full border border-black/40 group-hover/h-bottom:h-1.5 group-hover/h-bottom:w-24 shadow-sm transition-all"
-            />
-          </div>
+              onMouseDown={(e) => handleBoxResizeStart(idx, "s", e)}
+              onTouchStart={(e) => handleBoxResizeStart(idx, "s", e)}
+              style={{ touchAction: "none" }}
+              className="absolute -bottom-3 inset-x-6 h-6 !cursor-ns-resize z-30 flex items-center justify-center group/h-bottom pointer-events-auto"
+            >
+              <div
+                style={{ backgroundColor: activeTheme.hex }}
+                className="w-16 h-1 rounded-full border border-black/40 group-hover/h-bottom:h-1.5 group-hover/h-bottom:w-24 shadow-sm transition-all"
+              />
+            </div>
 
-          {/* Left Edge */}
-          <div
-            onMouseDown={(e) => handleBoxResizeStart(idx, "w", e)}
-            onTouchStart={(e) => handleBoxResizeStart(idx, "w", e)}
-            style={{ touchAction: "none" }}
-            className="absolute -left-3 inset-y-6 w-6 !cursor-ew-resize z-30 flex items-center justify-center group/h-left pointer-events-auto"
-          >
+            {/* Left Edge */}
             <div
-              style={{ backgroundColor: activeTheme.hex }}
-              className="h-16 w-1 rounded-full border border-black/40 group-hover/h-left:w-1.5 group-hover/h-left:h-24 shadow-sm transition-all"
-            />
-          </div>
+              onMouseDown={(e) => handleBoxResizeStart(idx, "w", e)}
+              onTouchStart={(e) => handleBoxResizeStart(idx, "w", e)}
+              style={{ touchAction: "none" }}
+              className="absolute -left-3 inset-y-6 w-6 !cursor-ew-resize z-30 flex items-center justify-center group/h-left pointer-events-auto"
+            >
+              <div
+                style={{ backgroundColor: activeTheme.hex }}
+                className="h-16 w-1 rounded-full border border-black/40 group-hover/h-left:w-1.5 group-hover/h-left:h-24 shadow-sm transition-all"
+              />
+            </div>
 
-          {/* Right Edge */}
-          <div
-            onMouseDown={(e) => handleBoxResizeStart(idx, "e", e)}
-            onTouchStart={(e) => handleBoxResizeStart(idx, "e", e)}
-            style={{ touchAction: "none" }}
-            className="absolute -right-3 inset-y-6 w-6 !cursor-ew-resize z-30 flex items-center justify-center group/h-right pointer-events-auto"
-          >
+            {/* Right Edge */}
             <div
-              style={{ backgroundColor: activeTheme.hex }}
-              className="h-16 w-1 rounded-full border border-black/40 group-hover/h-right:w-1.5 group-hover/h-right:h-24 shadow-sm transition-all"
-            />
-          </div>
-        </>
-      )}
+              onMouseDown={(e) => handleBoxResizeStart(idx, "e", e)}
+              onTouchStart={(e) => handleBoxResizeStart(idx, "e", e)}
+              style={{ touchAction: "none" }}
+              className="absolute -right-3 inset-y-6 w-6 !cursor-ew-resize z-30 flex items-center justify-center group/h-right pointer-events-auto"
+            >
+              <div
+                style={{ backgroundColor: activeTheme.hex }}
+                className="h-16 w-1 rounded-full border border-black/40 group-hover/h-right:w-1.5 group-hover/h-right:h-24 shadow-sm transition-all"
+              />
+            </div>
+          </>
+        )}
 
       {/* ── 4 CORNER RESIZE HANDLES (Contextual: Sleek Circular Precision Points) ── */}
-      {(isSelected || isBeingMoved || isBeingResized || isHovered) && showCornerHandles && (
-        <>
-          <div
-            onMouseDown={(e) => handleBoxResizeStart(idx, "nw", e)}
-            onTouchStart={(e) => handleBoxResizeStart(idx, "nw", e)}
-            style={{ touchAction: "none" }}
-            className="absolute -top-3 -left-3 w-6 h-6 !cursor-nwse-resize z-40 flex items-center justify-center pointer-events-auto group/c-nw"
-          >
+      {(isSelected || isBeingMoved || isBeingResized || isHovered) &&
+        showCornerHandles && (
+          <>
             <div
-              style={{ backgroundColor: activeTheme.hex }}
-              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-nw:scale-125"
-            />
-          </div>
+              onMouseDown={(e) => handleBoxResizeStart(idx, "nw", e)}
+              onTouchStart={(e) => handleBoxResizeStart(idx, "nw", e)}
+              style={{ touchAction: "none" }}
+              className="absolute -top-3 -left-3 w-6 h-6 !cursor-nwse-resize z-40 flex items-center justify-center pointer-events-auto group/c-nw"
+            >
+              <div
+                style={{ backgroundColor: activeTheme.hex }}
+                className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-nw:scale-125"
+              />
+            </div>
 
-          <div
-            onMouseDown={(e) => handleBoxResizeStart(idx, "ne", e)}
-            onTouchStart={(e) => handleBoxResizeStart(idx, "ne", e)}
-            style={{ touchAction: "none" }}
-            className="absolute -top-3 -right-3 w-6 h-6 !cursor-nesw-resize z-40 flex items-center justify-center pointer-events-auto group/c-ne"
-          >
             <div
-              style={{ backgroundColor: activeTheme.hex }}
-              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-ne:scale-125"
-            />
-          </div>
+              onMouseDown={(e) => handleBoxResizeStart(idx, "ne", e)}
+              onTouchStart={(e) => handleBoxResizeStart(idx, "ne", e)}
+              style={{ touchAction: "none" }}
+              className="absolute -top-3 -right-3 w-6 h-6 !cursor-nesw-resize z-40 flex items-center justify-center pointer-events-auto group/c-ne"
+            >
+              <div
+                style={{ backgroundColor: activeTheme.hex }}
+                className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-ne:scale-125"
+              />
+            </div>
 
-          <div
-            onMouseDown={(e) => handleBoxResizeStart(idx, "sw", e)}
-            onTouchStart={(e) => handleBoxResizeStart(idx, "sw", e)}
-            style={{ touchAction: "none" }}
-            className="absolute -bottom-3 -left-3 w-6 h-6 !cursor-nesw-resize z-40 flex items-center justify-center pointer-events-auto group/c-sw"
-          >
             <div
-              style={{ backgroundColor: activeTheme.hex }}
-              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-sw:scale-125"
-            />
-          </div>
+              onMouseDown={(e) => handleBoxResizeStart(idx, "sw", e)}
+              onTouchStart={(e) => handleBoxResizeStart(idx, "sw", e)}
+              style={{ touchAction: "none" }}
+              className="absolute -bottom-3 -left-3 w-6 h-6 !cursor-nesw-resize z-40 flex items-center justify-center pointer-events-auto group/c-sw"
+            >
+              <div
+                style={{ backgroundColor: activeTheme.hex }}
+                className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-sw:scale-125"
+              />
+            </div>
 
-          <div
-            onMouseDown={(e) => handleBoxResizeStart(idx, "se", e)}
-            onTouchStart={(e) => handleBoxResizeStart(idx, "se", e)}
-            style={{ touchAction: "none" }}
-            className="absolute -bottom-3 -right-3 w-6 h-6 !cursor-nwse-resize z-40 flex items-center justify-center pointer-events-auto group/c-se"
-          >
             <div
-              style={{ backgroundColor: activeTheme.hex }}
-              className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-se:scale-125"
-            />
-          </div>
-        </>
-      )}
+              onMouseDown={(e) => handleBoxResizeStart(idx, "se", e)}
+              onTouchStart={(e) => handleBoxResizeStart(idx, "se", e)}
+              style={{ touchAction: "none" }}
+              className="absolute -bottom-3 -right-3 w-6 h-6 !cursor-nwse-resize z-40 flex items-center justify-center pointer-events-auto group/c-se"
+            >
+              <div
+                style={{ backgroundColor: activeTheme.hex }}
+                className="w-3.5 h-3.5 rounded-full border-2 border-white shadow-md transition-transform group-hover/c-se:scale-125"
+              />
+            </div>
+          </>
+        )}
     </div>
   );
 };

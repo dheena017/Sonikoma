@@ -21,7 +21,8 @@ export const TemplatesWorkspace: React.FC<TemplatesWorkspaceProps> = ({
   const filtered = PRESET_TEMPLATES.filter((t) => {
     const matchTab =
       activeTab === "All" ||
-      t.category.toLowerCase().replace("-", " ") === activeTab.toLowerCase().replace("-", " ");
+      t.category.toLowerCase().replace("-", " ") ===
+        activeTab.toLowerCase().replace("-", " ");
     const matchSearch =
       !searchQuery.trim() ||
       t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||

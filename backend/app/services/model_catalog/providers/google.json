@@ -59,10 +59,7 @@
       "tier2": 400000000,
       "tier3": 1000000000
     },
-    "recommended_for": [
-      "Everyday Comic Tasks",
-      "Fast Panel Narration"
-    ]
+    "recommended_for": ["Everyday Comic Tasks", "Fast Panel Narration"]
   },
   {
     "id": "gemini-3.5-flash",
@@ -198,12 +195,7 @@
     "prompt_price_per_1m": 0.075,
     "completion_price_per_1m": 0.3,
     "speed_rating": "Ultra Fast (<220ms)",
-    "capabilities": [
-      "vision",
-      "json_mode",
-      "text",
-      "batch_api"
-    ],
+    "capabilities": ["vision", "json_mode", "text", "batch_api"],
     "batch_enqueued_tokens": {
       "tier1": 3000000,
       "tier2": 400000000,
@@ -304,10 +296,7 @@
       "inpainting",
       "character_consistency"
     ],
-    "recommended_for": [
-      "High-Volume Manga Art",
-      "Panel Scene Generation"
-    ]
+    "recommended_for": ["High-Volume Manga Art", "Panel Scene Generation"]
   },
   {
     "id": "gemini-3.1-flash-lite-image",
@@ -373,15 +362,8 @@
     "completion_price_per_1m": 0.0,
     "price_per_image": 0.03,
     "speed_rating": "Visual GPU (~2.1s)",
-    "capabilities": [
-      "image_generation",
-      "image_editing",
-      "creative_workflows"
-    ],
-    "recommended_for": [
-      "Comic Visuals",
-      "Panel Background Replacement"
-    ]
+    "capabilities": ["image_generation", "image_editing", "creative_workflows"],
+    "recommended_for": ["Comic Visuals", "Panel Background Replacement"]
   },
   {
     "id": "veo-3.1-generate-preview",
@@ -404,10 +386,7 @@
       "text_to_video",
       "image_to_video"
     ],
-    "recommended_for": [
-      "Animated Manga Trailers",
-      "Cinematic Scene Motion"
-    ]
+    "recommended_for": ["Animated Manga Trailers", "Cinematic Scene Motion"]
   },
   {
     "id": "veo-3.1-lite-generate-preview",
@@ -423,15 +402,8 @@
     "completion_price_per_1m": 0.0,
     "price_per_video_second": 0.075,
     "speed_rating": "Video GPU (~12s)",
-    "capabilities": [
-      "video_generation",
-      "fast_preview",
-      "developer_first"
-    ],
-    "recommended_for": [
-      "Short Social Teasers",
-      "Fast Video Previews"
-    ]
+    "capabilities": ["video_generation", "fast_preview", "developer_first"],
+    "recommended_for": ["Short Social Teasers", "Fast Video Previews"]
   },
   {
     "id": "gemini-omni-flash",
@@ -545,10 +517,7 @@
       "tier2": 100000000,
       "tier3": 500000000
     },
-    "recommended_for": [
-      "Complex Plot Outlining",
-      "Nuanced Character Dialogue"
-    ]
+    "recommended_for": ["Complex Plot Outlining", "Nuanced Character Dialogue"]
   },
   {
     "id": "gemini-2.5-flash-native-audio-preview-12-2025",
@@ -587,11 +556,7 @@
     "prompt_price_per_1m": 0.1,
     "completion_price_per_1m": 0.4,
     "speed_rating": "Voice Fast (<190ms)",
-    "capabilities": [
-      "tts",
-      "controllable_style",
-      "pacing_control"
-    ],
+    "capabilities": ["tts", "controllable_style", "pacing_control"],
     "recommended_for": [
       "Fast Chapter Voiceover",
       "Cost-Efficient Speech Assistants"
@@ -635,15 +600,8 @@
     "completion_price_per_1m": 0.0,
     "price_per_audio_minute": 0.05,
     "speed_rating": "Music GPU (~5.5s)",
-    "capabilities": [
-      "music_generation",
-      "full_songs",
-      "structural_coherence"
-    ],
-    "recommended_for": [
-      "Manga Theme Music",
-      "Episodic BGM Generation"
-    ]
+    "capabilities": ["music_generation", "full_songs", "structural_coherence"],
+    "recommended_for": ["Manga Theme Music", "Episodic BGM Generation"]
   },
   {
     "id": "lyria-3-clip-preview",
@@ -659,15 +617,8 @@
     "completion_price_per_1m": 0.0,
     "price_per_audio_minute": 0.025,
     "speed_rating": "Music GPU (~2.8s)",
-    "capabilities": [
-      "music_generation",
-      "short_loops",
-      "audio_previews"
-    ],
-    "recommended_for": [
-      "Background Action SFX Beats",
-      "Short Scene Jingles"
-    ]
+    "capabilities": ["music_generation", "short_loops", "audio_previews"],
+    "recommended_for": ["Background Action SFX Beats", "Short Scene Jingles"]
   },
   {
     "id": "lyria-realtime-exp",
@@ -706,16 +657,8 @@
     "prompt_price_per_1m": 1.25,
     "completion_price_per_1m": 5.0,
     "speed_rating": "Agentic (~1.2s)",
-    "capabilities": [
-      "computer_use",
-      "screen_ocr",
-      "ui_automation",
-      "vision"
-    ],
-    "recommended_for": [
-      "Automated Comic Scraping",
-      "Browser UI Automation"
-    ]
+    "capabilities": ["computer_use", "screen_ocr", "ui_automation", "vision"],
+    "recommended_for": ["Automated Comic Scraping", "Browser UI Automation"]
   },
   {
     "id": "deep-research-preview-04-2026",
@@ -831,19 +774,13 @@
     "prompt_price_per_1m": 0.01,
     "completion_price_per_1m": 0.0,
     "speed_rating": "Ultra Fast (<50ms)",
-    "capabilities": [
-      "embedding",
-      "text_search"
-    ],
+    "capabilities": ["embedding", "text_search"],
     "batch_enqueued_tokens": {
       "tier1": 500000,
       "tier2": 5000000,
       "tier3": 10000000
     },
-    "recommended_for": [
-      "Text Semantic Search",
-      "Tag Indexing"
-    ]
+    "recommended_for": ["Text Semantic Search", "Tag Indexing"]
   },
   {
     "id": "gemini-robotics-er-2-preview",
@@ -887,9 +824,6 @@
       "instrument_reading",
       "spatial_reasoning"
     ],
-    "recommended_for": [
-      "Instrument Reading",
-      "Physical Space Planning"
-    ]
+    "recommended_for": ["Instrument Reading", "Physical Space Planning"]
   }
 ]

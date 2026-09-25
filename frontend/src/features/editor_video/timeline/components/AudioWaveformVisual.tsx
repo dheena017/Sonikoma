@@ -17,14 +17,18 @@ interface AudioWaveformVisualProps {
 const audioPeaksCache = new Map<string, number[]>();
 
 /** Extracts real acoustic PCM amplitude peaks from an audio file using Web Audio API */
-async function extractRealPeaks(url: string, numBuckets = 300): Promise<number[]> {
+async function extractRealPeaks(
+  url: string,
+  numBuckets = 300
+): Promise<number[]> {
   if (audioPeaksCache.has(url)) {
     return audioPeaksCache.get(url)!;
   }
 
   const tryDecode = async (targetUrl: string): Promise<number[]> => {
     const response = await fetch(targetUrl);
-    if (!response.ok) throw new Error(`Failed to load audio: ${response.status}`);
+    if (!response.ok)
+      throw new Error(`Failed to load audio: ${response.status}`);
     const arrayBuffer = await response.arrayBuffer();
 
     const AudioContextClass =
@@ -105,13 +109,15 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
     }
 
     let isMounted = true;
-    extractRealPeaks(audioUrl).then((peaks) => {
-      if (isMounted && peaks.length > 0) {
-        setRealPeaks(peaks);
-      }
-    }).catch(() => {
-      if (isMounted) setRealPeaks(null);
-    });
+    extractRealPeaks(audioUrl)
+      .then((peaks) => {
+        if (isMounted && peaks.length > 0) {
+          setRealPeaks(peaks);
+        }
+      })
+      .catch(() => {
+        if (isMounted) setRealPeaks(null);
+      });
 
     return () => {
       isMounted = false;
@@ -164,8 +170,9 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
           // Continuous rhythmic musical waveform with beat bars and harmonic density
           const beat = (progress * 28) % 1;
           const kick = Math.exp(-beat * 4) * 0.45;
-          const bass = Math.sin(progress * Math.PI * 14 + (hash % 4)) * 0.25 + 0.45;
-          const hihat = (pseudoRandom(x) > 0.7 ? 0.25 : 0);
+          const bass =
+            Math.sin(progress * Math.PI * 14 + (hash % 4)) * 0.25 + 0.45;
+          const hihat = pseudoRandom(x) > 0.7 ? 0.25 : 0;
           const noise = pseudoRandom(x) * 0.2;
           const val = Math.min(1.0, (bass + kick + hihat + noise) * 0.9);
           amp = Math.max(1.2, val * maxAmp);
@@ -174,16 +181,19 @@ export const AudioWaveformVisual: React.FC<AudioWaveformVisualProps> = ({
           const decay = Math.exp(-progress * 3.2);
           const transient = Math.sin(progress * Math.PI * 18) * 0.45 + 0.55;
           const noise = pseudoRandom(x) * 0.35 + 0.65;
-          amp = Math.max(0.8, (transient * decay * noise) * maxAmp);
+          amp = Math.max(0.8, transient * decay * noise * maxAmp);
         } else {
           // Natural speech packets (syllables, words, short conversational pauses)
           const wordEnvelope =
-            Math.sin(progress * Math.PI * 10 + hash % 3) * 0.45 +
+            Math.sin(progress * Math.PI * 10 + (hash % 3)) * 0.45 +
             Math.sin(progress * Math.PI * 22) * 0.25 +
             0.4;
-          const naturalPause = Math.sin(progress * Math.PI * 4 + 1.2) > 0.4 ? 1 : 0.2;
+          const naturalPause =
+            Math.sin(progress * Math.PI * 4 + 1.2) > 0.4 ? 1 : 0.2;
           const vocalNoise = pseudoRandom(x) * 0.5 + 0.5;
-          const edgeTaper = Math.sin(Math.min(1, Math.max(0, progress)) * Math.PI);
+          const edgeTaper = Math.sin(
+            Math.min(1, Math.max(0, progress)) * Math.PI
+          );
           const speechAmp = Math.max(
             0.08,
             wordEnvelope * naturalPause * vocalNoise * Math.pow(edgeTaper, 0.4)

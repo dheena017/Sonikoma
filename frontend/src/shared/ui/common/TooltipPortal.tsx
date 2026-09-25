@@ -65,7 +65,13 @@ export interface TooltipPortalProps {
   /** Optional status / feature badge (e.g. 'PRO', 'BETA', 'NEW') */
   badge?: React.ReactNode;
   /** Badge color scheme */
-  badgeVariant?: "default" | "primary" | "success" | "warning" | "danger" | "purple";
+  badgeVariant?:
+    | "default"
+    | "primary"
+    | "success"
+    | "warning"
+    | "danger"
+    | "purple";
   /** Whether to render a pointer arrow pointing to the anchor */
   showArrow?: boolean;
   /** Add subtle atmospheric glow */
@@ -87,14 +93,20 @@ export interface TooltipPortalProps {
 // --------------------------------------------------------------------------
 const VARIANT_STYLES: Record<TooltipVariant, string> = {
   dark: "bg-[#111116]/95 border-[#282832] text-neutral-100 shadow-[0_12px_36px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)]",
-  glass: "bg-neutral-900/85 backdrop-blur-xl border-white/15 text-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.6)]",
+  glass:
+    "bg-neutral-900/85 backdrop-blur-xl border-white/15 text-neutral-100 shadow-[0_8px_32px_rgba(0,0,0,0.6)]",
   neon: "bg-[#0c1017]/95 border-neutral-700 text-neutral-100 shadow-xl",
   cyber: "bg-[#110d1f]/95 border-neutral-700 text-neutral-100 shadow-black/50",
-  gradient: "bg-gradient-to-r from-neutral-900/95 via-[#2A2A2A] to-neutral-900/95 border-neutral-700 text-white shadow-2xl shadow-black/50",
-  primary: "bg-neutral-900/95 border-neutral-700 text-neutral-100 shadow-2xl shadow-black/50",
-  success: "bg-emerald-950/95 border-emerald-500/50 text-emerald-50 shadow-2xl shadow-emerald-950/60",
-  warning: "bg-amber-950/95 border-amber-500/50 text-amber-50 shadow-2xl shadow-amber-950/60",
-  danger: "bg-rose-950/95 border-rose-500/50 text-rose-50 shadow-2xl shadow-rose-950/60",
+  gradient:
+    "bg-gradient-to-r from-neutral-900/95 via-[#2A2A2A] to-neutral-900/95 border-neutral-700 text-white shadow-2xl shadow-black/50",
+  primary:
+    "bg-neutral-900/95 border-neutral-700 text-neutral-100 shadow-2xl shadow-black/50",
+  success:
+    "bg-emerald-950/95 border-emerald-500/50 text-emerald-50 shadow-2xl shadow-emerald-950/60",
+  warning:
+    "bg-amber-950/95 border-amber-500/50 text-amber-50 shadow-2xl shadow-amber-950/60",
+  danger:
+    "bg-rose-950/95 border-rose-500/50 text-rose-50 shadow-2xl shadow-rose-950/60",
 };
 
 const GLOW_COLORS: Record<TooltipVariant, string> = {
@@ -121,11 +133,34 @@ const ARROW_STYLES: Record<TooltipVariant, string> = {
   danger: "bg-rose-950 border-rose-500/50",
 };
 
-const SIZE_STYLES: Record<TooltipSize, { root: string; text: string; shortcut: string; desc: string }> = {
-  xs: { root: "px-2 py-0.5 gap-1 text-[11px] rounded-lg", text: "text-[11px] font-medium", shortcut: "text-[9px] px-1 py-0.5", desc: "text-[10px]" },
-  sm: { root: "px-2.5 py-1.5 gap-1.5 text-xs rounded-xl", text: "text-xs font-medium tracking-normal text-neutral-200", shortcut: "text-[10px] px-1.5 py-0.5", desc: "text-[11px] text-neutral-400" },
-  md: { root: "px-3.5 py-2 gap-2 text-xs rounded-xl", text: "text-xs font-semibold", shortcut: "text-[11px] px-1.5 py-0.5", desc: "text-xs" },
-  lg: { root: "px-4.5 py-2.5 gap-2.5 text-sm rounded-2xl", text: "text-sm font-semibold", shortcut: "text-xs px-2 py-0.5", desc: "text-xs" },
+const SIZE_STYLES: Record<
+  TooltipSize,
+  { root: string; text: string; shortcut: string; desc: string }
+> = {
+  xs: {
+    root: "px-2 py-0.5 gap-1 text-[11px] rounded-lg",
+    text: "text-[11px] font-medium",
+    shortcut: "text-[9px] px-1 py-0.5",
+    desc: "text-[10px]",
+  },
+  sm: {
+    root: "px-2.5 py-1.5 gap-1.5 text-xs rounded-xl",
+    text: "text-xs font-medium tracking-normal text-neutral-200",
+    shortcut: "text-[10px] px-1.5 py-0.5",
+    desc: "text-[11px] text-neutral-400",
+  },
+  md: {
+    root: "px-3.5 py-2 gap-2 text-xs rounded-xl",
+    text: "text-xs font-semibold",
+    shortcut: "text-[11px] px-1.5 py-0.5",
+    desc: "text-xs",
+  },
+  lg: {
+    root: "px-4.5 py-2.5 gap-2.5 text-sm rounded-2xl",
+    text: "text-sm font-semibold",
+    shortcut: "text-xs px-2 py-0.5",
+    desc: "text-xs",
+  },
 };
 
 const BADGE_STYLES: Record<string, string> = {
@@ -180,143 +215,218 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
   }, [shortcut]);
 
   // Compute positioning CSS directly and reliably
-  const { calculatedStyle, resolvedPlacement, arrowPlacement, arrowDeltaX } = useMemo(() => {
-    if (!anchorRect) {
-      return { calculatedStyle: {}, resolvedPlacement: placement, arrowPlacement: "left", arrowDeltaX: 0 };
-    }
+  const { calculatedStyle, resolvedPlacement, arrowPlacement, arrowDeltaX } =
+    useMemo(() => {
+      if (!anchorRect) {
+        return {
+          calculatedStyle: {},
+          resolvedPlacement: placement,
+          arrowPlacement: "left",
+          arrowDeltaX: 0,
+        };
+      }
 
-    const { top, left, right, bottom, width, height } = anchorRect;
-    const vpWidth = typeof window !== "undefined" ? window.innerWidth : 1920;
-    const vpHeight = typeof window !== "undefined" ? window.innerHeight : 1080;
+      const { top, left, right, bottom, width, height } = anchorRect;
+      const vpWidth = typeof window !== "undefined" ? window.innerWidth : 1920;
+      const vpHeight =
+        typeof window !== "undefined" ? window.innerHeight : 1080;
 
-    let finalPlacement = placement;
+      let finalPlacement = placement;
 
-    // Smart safe flipping only when necessary and when there is ample space on the other side
-    if (finalPlacement.startsWith("right") && right + offset + 120 > vpWidth && left - offset > 120) {
-      finalPlacement = finalPlacement.replace("right", "left") as TooltipPlacement;
-    } else if (finalPlacement.startsWith("left") && left - offset - 120 < 0 && vpWidth - right > 120) {
-      finalPlacement = finalPlacement.replace("left", "right") as TooltipPlacement;
-    } else if (finalPlacement.startsWith("top") && top - offset - 36 < 0 && vpHeight - bottom > 60) {
-      finalPlacement = finalPlacement.replace("top", "bottom") as TooltipPlacement;
-    } else if (finalPlacement.startsWith("bottom") && bottom + offset + 36 > vpHeight && top - offset > 60) {
-      finalPlacement = finalPlacement.replace("bottom", "top") as TooltipPlacement;
-    }
+      // Smart safe flipping only when necessary and when there is ample space on the other side
+      if (
+        finalPlacement.startsWith("right") &&
+        right + offset + 120 > vpWidth &&
+        left - offset > 120
+      ) {
+        finalPlacement = finalPlacement.replace(
+          "right",
+          "left"
+        ) as TooltipPlacement;
+      } else if (
+        finalPlacement.startsWith("left") &&
+        left - offset - 120 < 0 &&
+        vpWidth - right > 120
+      ) {
+        finalPlacement = finalPlacement.replace(
+          "left",
+          "right"
+        ) as TooltipPlacement;
+      } else if (
+        finalPlacement.startsWith("top") &&
+        top - offset - 36 < 0 &&
+        vpHeight - bottom > 60
+      ) {
+        finalPlacement = finalPlacement.replace(
+          "top",
+          "bottom"
+        ) as TooltipPlacement;
+      } else if (
+        finalPlacement.startsWith("bottom") &&
+        bottom + offset + 36 > vpHeight &&
+        top - offset > 60
+      ) {
+        finalPlacement = finalPlacement.replace(
+          "bottom",
+          "top"
+        ) as TooltipPlacement;
+      }
 
-    const anchorCenterX = left + width / 2 + crossOffset;
-    const estHalfWidth = 100;
-    const clampedLeft = Math.max(estHalfWidth + 12, Math.min(vpWidth - estHalfWidth - 12, anchorCenterX));
-    const deltaX = anchorCenterX - clampedLeft;
+      const anchorCenterX = left + width / 2 + crossOffset;
+      const estHalfWidth = 100;
+      const clampedLeft = Math.max(
+        estHalfWidth + 12,
+        Math.min(vpWidth - estHalfWidth - 12, anchorCenterX)
+      );
+      const deltaX = anchorCenterX - clampedLeft;
 
-    const posStyle: React.CSSProperties = {
-      position: "fixed",
-      zIndex: 9900,
-      pointerEvents: "none",
-    };
+      const posStyle: React.CSSProperties = {
+        position: "fixed",
+        zIndex: 9900,
+        pointerEvents: "none",
+      };
 
-    let arrowPos = "left";
+      let arrowPos = "left";
 
-    switch (finalPlacement) {
-      case "right":
-        posStyle.left = right + offset;
-        posStyle.top = top + height / 2 + crossOffset;
-        posStyle.transform = "translateY(-50%)";
-        arrowPos = "left";
-        break;
-      case "right-start":
-        posStyle.left = right + offset;
-        posStyle.top = top + crossOffset;
-        arrowPos = "left-start";
-        break;
-      case "right-end":
-        posStyle.left = right + offset;
-        posStyle.top = bottom + crossOffset;
-        posStyle.transform = "translateY(-100%)";
-        arrowPos = "left-end";
-        break;
-      case "left":
-        posStyle.left = left - offset;
-        posStyle.top = top + height / 2 + crossOffset;
-        posStyle.transform = "translate(-100%, -50%)";
-        arrowPos = "right";
-        break;
-      case "left-start":
-        posStyle.left = left - offset;
-        posStyle.top = top + crossOffset;
-        posStyle.transform = "translateX(-100%)";
-        arrowPos = "right-start";
-        break;
-      case "left-end":
-        posStyle.left = left - offset;
-        posStyle.top = bottom + crossOffset;
-        posStyle.transform = "translate(-100%, -100%)";
-        arrowPos = "right-end";
-        break;
-      case "top":
-      case "top-start":
-      case "top-end":
-        posStyle.left = clampedLeft;
-        posStyle.top = top - offset;
-        posStyle.transform = "translate(-50%, -100%)";
-        arrowPos = "bottom";
-        break;
-      case "bottom":
-      case "bottom-start":
-      case "bottom-end":
-        posStyle.left = clampedLeft;
-        posStyle.top = bottom + offset;
-        posStyle.transform = "translateX(-50%)";
-        arrowPos = "top";
-        break;
-    }
+      switch (finalPlacement) {
+        case "right":
+          posStyle.left = right + offset;
+          posStyle.top = top + height / 2 + crossOffset;
+          posStyle.transform = "translateY(-50%)";
+          arrowPos = "left";
+          break;
+        case "right-start":
+          posStyle.left = right + offset;
+          posStyle.top = top + crossOffset;
+          arrowPos = "left-start";
+          break;
+        case "right-end":
+          posStyle.left = right + offset;
+          posStyle.top = bottom + crossOffset;
+          posStyle.transform = "translateY(-100%)";
+          arrowPos = "left-end";
+          break;
+        case "left":
+          posStyle.left = left - offset;
+          posStyle.top = top + height / 2 + crossOffset;
+          posStyle.transform = "translate(-100%, -50%)";
+          arrowPos = "right";
+          break;
+        case "left-start":
+          posStyle.left = left - offset;
+          posStyle.top = top + crossOffset;
+          posStyle.transform = "translateX(-100%)";
+          arrowPos = "right-start";
+          break;
+        case "left-end":
+          posStyle.left = left - offset;
+          posStyle.top = bottom + crossOffset;
+          posStyle.transform = "translate(-100%, -100%)";
+          arrowPos = "right-end";
+          break;
+        case "top":
+        case "top-start":
+        case "top-end":
+          posStyle.left = clampedLeft;
+          posStyle.top = top - offset;
+          posStyle.transform = "translate(-50%, -100%)";
+          arrowPos = "bottom";
+          break;
+        case "bottom":
+        case "bottom-start":
+        case "bottom-end":
+          posStyle.left = clampedLeft;
+          posStyle.top = bottom + offset;
+          posStyle.transform = "translateX(-50%)";
+          arrowPos = "top";
+          break;
+      }
 
-    return { calculatedStyle: posStyle, resolvedPlacement: finalPlacement, arrowPlacement: arrowPos, arrowDeltaX: deltaX };
-  }, [anchorRect, placement, offset, crossOffset]);
+      return {
+        calculatedStyle: posStyle,
+        resolvedPlacement: finalPlacement,
+        arrowPlacement: arrowPos,
+        arrowDeltaX: deltaX,
+      };
+    }, [anchorRect, placement, offset, crossOffset]);
 
   if (!mounted || !visible || !anchorRect || (!content && !description)) {
     return null;
   }
 
-  const isLongText = typeof content === "string" ? content.length > 25 : Boolean(description);
+  const isLongText =
+    typeof content === "string" ? content.length > 25 : Boolean(description);
   const sizeConfig = SIZE_STYLES[size] || SIZE_STYLES.sm;
   const variantClass = VARIANT_STYLES[variant] || VARIANT_STYLES.dark;
   const glowClass = glow ? GLOW_COLORS[variant] || "" : "";
 
   // Animation origin class based on placement
   const getAnimationClass = (place: TooltipPlacement) => {
-    if (place.startsWith("right")) return "animate-in fade-in-0 zoom-in-95 duration-150";
-    if (place.startsWith("left")) return "animate-in fade-in-0 zoom-in-95 duration-150";
-    if (place.startsWith("top")) return "animate-in fade-in-0 zoom-in-95 duration-150";
+    if (place.startsWith("right"))
+      return "animate-in fade-in-0 zoom-in-95 duration-150";
+    if (place.startsWith("left"))
+      return "animate-in fade-in-0 zoom-in-95 duration-150";
+    if (place.startsWith("top"))
+      return "animate-in fade-in-0 zoom-in-95 duration-150";
     return "animate-in fade-in-0 zoom-in-95 duration-150";
   };
 
-  const getArrowStyle = (): { className: string; style: React.CSSProperties } => {
+  const getArrowStyle = (): {
+    className: string;
+    style: React.CSSProperties;
+  } => {
     const arrowVariantTheme = ARROW_STYLES[variant] || ARROW_STYLES.dark;
     const base = `absolute w-2 h-2 pointer-events-none rotate-45 ${arrowVariantTheme}`;
     switch (arrowPlacement) {
       case "left":
-        return { className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`, style: {} };
+        return {
+          className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`,
+          style: {},
+        };
       case "left-start":
-        return { className: `${base} -left-1 top-2.5 border-t-0 border-r-0`, style: {} };
+        return {
+          className: `${base} -left-1 top-2.5 border-t-0 border-r-0`,
+          style: {},
+        };
       case "left-end":
-        return { className: `${base} -left-1 bottom-2.5 border-t-0 border-r-0`, style: {} };
+        return {
+          className: `${base} -left-1 bottom-2.5 border-t-0 border-r-0`,
+          style: {},
+        };
       case "right":
-        return { className: `${base} -right-1 top-1/2 -translate-y-1/2 border-b-0 border-l-0`, style: {} };
+        return {
+          className: `${base} -right-1 top-1/2 -translate-y-1/2 border-b-0 border-l-0`,
+          style: {},
+        };
       case "right-start":
-        return { className: `${base} -right-1 top-2.5 border-b-0 border-l-0`, style: {} };
+        return {
+          className: `${base} -right-1 top-2.5 border-b-0 border-l-0`,
+          style: {},
+        };
       case "right-end":
-        return { className: `${base} -right-1 bottom-2.5 border-b-0 border-l-0`, style: {} };
+        return {
+          className: `${base} -right-1 bottom-2.5 border-b-0 border-l-0`,
+          style: {},
+        };
       case "top":
         return {
           className: `${base} -top-1 -translate-x-1/2 border-b-0 border-r-0`,
-          style: { left: `calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)` }
+          style: {
+            left: `calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)`,
+          },
         };
       case "bottom":
         return {
           className: `${base} -bottom-1 -translate-x-1/2 border-t-0 border-l-0`,
-          style: { left: `calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)` }
+          style: {
+            left: `calc(50% + ${Math.max(-70, Math.min(70, arrowDeltaX))}px)`,
+          },
         };
       default:
-        return { className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`, style: {} };
+        return {
+          className: `${base} -left-1 top-1/2 -translate-y-1/2 border-t-0 border-r-0`,
+          style: {},
+        };
     }
   };
 
@@ -351,10 +461,18 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
 
       {/* Main Content Row */}
       <div className="flex items-center justify-center gap-1.5 w-fit">
-        {icon && <span className="shrink-0 flex items-center opacity-90">{icon}</span>}
+        {icon && (
+          <span className="shrink-0 flex items-center opacity-90">{icon}</span>
+        )}
 
         {content && (
-          <span className={`font-medium tracking-normal break-words text-center ${isLongText ? "whitespace-normal leading-snug" : "whitespace-nowrap"} ${sizeConfig.text}`}>
+          <span
+            className={`font-medium tracking-normal break-words text-center ${
+              isLongText
+                ? "whitespace-normal leading-snug"
+                : "whitespace-nowrap"
+            } ${sizeConfig.text}`}
+          >
             {content}
           </span>
         )}
@@ -391,14 +509,17 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
 
       {/* Optional Description */}
       {description && (
-        <div className={`mt-0.5 text-neutral-400 font-normal leading-relaxed break-words whitespace-normal ${sizeConfig.desc}`}>
+        <div
+          className={`mt-0.5 text-neutral-400 font-normal leading-relaxed break-words whitespace-normal ${sizeConfig.desc}`}
+        >
           {description}
         </div>
       )}
     </div>
   );
 
-  const mountContainer = container || (typeof document !== "undefined" ? document.body : null);
+  const mountContainer =
+    container || (typeof document !== "undefined" ? document.body : null);
   if (!mountContainer) return null;
 
   return ReactDOM.createPortal(node, mountContainer);
@@ -407,7 +528,8 @@ export const TooltipPortal: React.FC<TooltipPortalProps> = ({
 // --------------------------------------------------------------------------
 // Tooltip Wrapper Component (Declarative Usage)
 // --------------------------------------------------------------------------
-export interface TooltipProps extends Omit<TooltipPortalProps, "visible" | "anchorRect"> {
+export interface TooltipProps
+  extends Omit<TooltipPortalProps, "visible" | "anchorRect"> {
   /** The interactive trigger element (e.g. <button>, <a>, <div>) */
   children: ReactElement;
   /** Delay in milliseconds before showing tooltip */
@@ -447,13 +569,15 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const triggerRef = useRef<HTMLElement | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  const isChildDisabled = isValidElement(children) && Boolean(
-    (children.props as any)?.disabled ||
-    (children.props as any)?.['aria-disabled'] ||
-    (children.props as any)?.isLoading ||
-    (children.props as any)?.loading ||
-    (children.props as any)?.isScraping
-  );
+  const isChildDisabled =
+    isValidElement(children) &&
+    Boolean(
+      (children.props as any)?.disabled ||
+        (children.props as any)?.["aria-disabled"] ||
+        (children.props as any)?.isLoading ||
+        (children.props as any)?.loading ||
+        (children.props as any)?.isScraping
+    );
 
   const isDisabled = disabled || isChildDisabled;
 
@@ -484,7 +608,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
       setAnchorRect(rect);
       if (delay > 0) {
         timerRef.current = window.setTimeout(() => {
-          if (triggerRef.current && !document.body.contains(triggerRef.current)) {
+          if (
+            triggerRef.current &&
+            !document.body.contains(triggerRef.current)
+          ) {
             hideTooltip();
             return;
           }
@@ -512,12 +639,15 @@ export const Tooltip: React.FC<TooltipProps> = ({
     hideTooltip();
   }, [hideTooltip]);
 
-  const handleFocus = useCallback((e: React.FocusEvent<HTMLElement>) => {
-    if (isDisabled) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    setAnchorRect(rect);
-    setVisible(true);
-  }, [isDisabled]);
+  const handleFocus = useCallback(
+    (e: React.FocusEvent<HTMLElement>) => {
+      if (isDisabled) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      setAnchorRect(rect);
+      setVisible(true);
+    },
+    [isDisabled]
+  );
 
   const handleBlur = useCallback(() => {
     hideTooltip();
@@ -528,16 +658,27 @@ export const Tooltip: React.FC<TooltipProps> = ({
       hideTooltip();
     };
 
-    window.addEventListener("scroll", handleGlobalHide, { capture: true, passive: true });
-    window.addEventListener("resize", handleGlobalHide, { capture: true, passive: true });
-    window.addEventListener("pointerdown", handleGlobalHide, { capture: true, passive: true });
+    window.addEventListener("scroll", handleGlobalHide, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("resize", handleGlobalHide, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("pointerdown", handleGlobalHide, {
+      capture: true,
+      passive: true,
+    });
     window.addEventListener("popstate", handleGlobalHide);
 
     return () => {
       hideTooltip();
       window.removeEventListener("scroll", handleGlobalHide, { capture: true });
       window.removeEventListener("resize", handleGlobalHide, { capture: true });
-      window.removeEventListener("pointerdown", handleGlobalHide, { capture: true });
+      window.removeEventListener("pointerdown", handleGlobalHide, {
+        capture: true,
+      });
       window.removeEventListener("popstate", handleGlobalHide);
     };
   }, [hideTooltip]);

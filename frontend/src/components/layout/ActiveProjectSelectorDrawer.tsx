@@ -303,10 +303,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
         {/* ─── Website Logo & Header ─── */}
         <div className="p-4 border-b border-[#2F2F2F] flex items-center justify-between bg-[#181818]">
           <div className="flex items-center gap-3.5">
-            <SonikomaLogo
-              size="sm"
-              iconOnly={true}
-            />
+            <SonikomaLogo size="sm" iconOnly={true} />
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-base text-[#E5E5E5] font-sans tracking-tight">
@@ -666,9 +663,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
               {activePanelsCount > 0 && (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px] font-mono">
-                    <span className="text-[#9CA3AF]">
-                      Composition Progress
-                    </span>
+                    <span className="text-[#9CA3AF]">Composition Progress</span>
                     <span className="text-[#3B82F6] font-bold">
                       {activeProgressPct}% · ~
                       {formatDuration(activeDurationSeconds)}
@@ -725,9 +720,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
                   </span>
                   <span
                     className={`font-bold font-mono text-sm ${
-                      activeAudioCount > 0
-                        ? "text-[#F59E0B]"
-                        : "text-[#6B7280]"
+                      activeAudioCount > 0 ? "text-[#F59E0B]" : "text-[#6B7280]"
                     }`}
                   >
                     {activeAudioCount}
@@ -740,7 +733,8 @@ export const ActiveProjectSelectorDrawer: React.FC<
                 <div className="space-y-1.5 pt-1">
                   <div className="flex items-center justify-between text-[10px] font-mono">
                     <span className="text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1">
-                      <Film className="w-3 h-3 text-[#3B82F6]" /> Storyboard Panels
+                      <Film className="w-3 h-3 text-[#3B82F6]" /> Storyboard
+                      Panels
                     </span>
                     <span className="text-[#3B82F6] font-bold">
                       {activePanels.length} panels

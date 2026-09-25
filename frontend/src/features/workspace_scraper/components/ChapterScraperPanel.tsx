@@ -90,7 +90,8 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
 
   const [inputMode, setInputMode] = React.useState<"url" | "upload">("url");
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
-  const [separatedData, setSeparatedData] = React.useState<SeparateUrlResult | null>(null);
+  const [separatedData, setSeparatedData] =
+    React.useState<SeparateUrlResult | null>(null);
 
   return (
     <div
@@ -120,7 +121,10 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2F2F2F] pb-4">
           <div className="grid grid-cols-2 w-full sm:w-fit p-1 rounded-2xl bg-[#121212] border border-[#2F2F2F] gap-1.5 shadow-inner">
-            <Tooltip text="Import panels via online webtoon, manga, or comic reader URL" placement="bottom">
+            <Tooltip
+              text="Import panels via online webtoon, manga, or comic reader URL"
+              placement="bottom"
+            >
               <button
                 type="button"
                 onClick={() => setInputMode("url")}
@@ -131,12 +135,19 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 }`}
                 aria-label="Scrape Comic / Manhwa URL"
               >
-                <Book className={`w-4 h-4 ${inputMode === "url" ? "text-white" : "text-neutral-400"}`} />
+                <Book
+                  className={`w-4 h-4 ${
+                    inputMode === "url" ? "text-white" : "text-neutral-400"
+                  }`}
+                />
                 <span className="min-w-0">Scrape Comic / Manhwa URL</span>
               </button>
             </Tooltip>
 
-            <Tooltip text="Upload raw PNG/JPG image files from your computer" placement="bottom">
+            <Tooltip
+              text="Upload raw PNG/JPG image files from your computer"
+              placement="bottom"
+            >
               <button
                 type="button"
                 onClick={() => setInputMode("upload")}
@@ -147,7 +158,11 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 }`}
                 aria-label="Upload Local Images"
               >
-                <UploadCloud className={`w-4 h-4 ${inputMode === "upload" ? "text-white" : "text-neutral-400"}`} />
+                <UploadCloud
+                  className={`w-4 h-4 ${
+                    inputMode === "upload" ? "text-white" : "text-neutral-400"
+                  }`}
+                />
                 <span className="min-w-0">Upload Local Images</span>
                 {selectedFiles.length > 0 && (
                   <span className="px-2 py-0.5 text-[9px] font-black bg-white/20 text-white rounded-full font-mono">
@@ -173,7 +188,9 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               <span className="text-neutral-500 font-bold">•</span>
               <span className="text-white font-medium text-[11px]">
                 {separatedData.is_chapter_url
-                  ? (separatedData.chapter_number ? `Chapter ${separatedData.chapter_number}` : "Chapter Viewer")
+                  ? separatedData.chapter_number
+                    ? `Chapter ${separatedData.chapter_number}`
+                    : "Chapter Viewer"
                   : "Series Catalog"}
               </span>
             </div>

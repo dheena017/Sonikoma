@@ -21,7 +21,9 @@ interface AIUsageAnalyticsPageProps {
   addNotification?: (msg: string, type?: string) => void;
 }
 
-export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyticsPageProps) {
+export default function AIUsageAnalyticsPage({
+  addNotification,
+}: AIUsageAnalyticsPageProps) {
   const [timeframe, setTimeframe] = useState<string>("24h");
   const [selectedModel, setSelectedModel] = useState<string>("All Models");
   const [summaryData, setSummaryData] = useState<any>(null);
@@ -34,7 +36,11 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
     try {
       const [resSummary, resMetrics] = await Promise.all([
         fetch(`/api/v1/ai/usage/summary?timeframe=${timeframe}`),
-        fetch(`/api/v1/ai/usage/metrics?time_range=${timeframe}&model=${encodeURIComponent(selectedModel)}`),
+        fetch(
+          `/api/v1/ai/usage/metrics?time_range=${timeframe}&model=${encodeURIComponent(
+            selectedModel
+          )}`
+        ),
       ]);
 
       if (resSummary.ok) {
@@ -71,7 +77,10 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        addNotification?.(`Exported usage data as ${format.toUpperCase()}`, "success");
+        addNotification?.(
+          `Exported usage data as ${format.toUpperCase()}`,
+          "success"
+        );
       }
     } catch {
       addNotification?.("Failed to export usage data", "error");
@@ -91,9 +100,12 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
     success_rate_percent: summaryData?.success_rate_percent || 100,
   };
 
-  const timestamps = timeseriesData?.timestamps || summaryData?.timestamps || [];
-  const inputTokens = timeseriesData?.input_tokens || summaryData?.input_tokens || [];
-  const outputTokens = timeseriesData?.output_tokens || summaryData?.output_tokens || [];
+  const timestamps =
+    timeseriesData?.timestamps || summaryData?.timestamps || [];
+  const inputTokens =
+    timeseriesData?.input_tokens || summaryData?.input_tokens || [];
+  const outputTokens =
+    timeseriesData?.output_tokens || summaryData?.output_tokens || [];
 
   const maxVal = Math.max(...inputTokens, ...outputTokens, 1);
 
@@ -114,11 +126,12 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
               </span>
             </h1>
             <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
-              Track token consumption, response latencies, estimated costs in USD, and credit burn rates across all features.
+              Track token consumption, response latencies, estimated costs in
+              USD, and credit burn rates across all features.
             </p>
           </div>
 
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
             {/* Timeframe Selector */}
             <div className="flex items-center bg-neutral-900 p-1 rounded-xl border border-neutral-800">
               {["24h", "7d", "30d", "all"].map((tf) => (
@@ -160,157 +173,201 @@ export default function AIUsageAnalyticsPage({ addNotification }: AIUsageAnalyti
           </div>
         </div>
 
-      {/* ── KPI METRICS CARDS ─────────────────────────────────────────────── */}
-      {isLoading ? (
-        <DashboardStatsSkeleton count={4} />
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-            <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Total Tokens</span>
-            <p className="text-2xl font-black text-white font-mono">
-              {kpis.total_tokens?.toLocaleString() || 0}
-            </p>
-            <span className="text-[10px] text-[#3B82F6] font-mono">
-              {kpis.prompt_tokens?.toLocaleString() || 0} in / {kpis.completion_tokens?.toLocaleString() || 0} out
-            </span>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-            <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Total Spend ($ USD)</span>
-            <p className="text-2xl font-black text-emerald-400 font-mono">
-              ${Number(kpis.total_cost_usd || 0).toFixed(4)}
-            </p>
-            <span className="text-[10px] text-neutral-400 font-mono">Estimated API usage cost</span>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-            <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Available Credits</span>
-            <p className="text-2xl font-black text-[#3B82F6] font-mono flex items-center gap-1">
-              <Coins className="w-5 h-5" />
-              {kpis.available_credits?.toLocaleString() || 0}
-            </p>
-            <span className="text-[10px] text-emerald-400 font-mono">Wallet Active</span>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
-            <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">Success Rate / Latency</span>
-            <p className="text-2xl font-black text-white font-mono">
-              {kpis.success_rate_percent}%
-            </p>
-            <span className="text-[10px] text-neutral-400 font-mono">Avg {kpis.avg_latency_ms}ms</span>
-          </div>
-        </div>
-      )}
-
-      {/* ── VISUAL TIMESERIES CHART ───────────────────────────────────────── */}
-      <div className="rounded-2xl border border-neutral-850 bg-[#161616] p-6 space-y-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#3B82F6]" />
-            <h2 className="text-sm font-bold text-white font-sans">Token Volume Over Time</h2>
-          </div>
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <span className="flex items-center gap-1.5 text-[#3B82F6]">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#2A2A2A]" /> Input Tokens
-            </span>
-            <span className="flex items-center gap-1.5 text-indigo-400">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Output Tokens
-            </span>
-          </div>
-        </div>
-
-        {/* Dynamic Bar / Timeseries Graph */}
-        {timestamps.length > 0 ? (
-          <div className="h-48 flex items-end gap-3 pt-6 pb-2 border-b border-neutral-800">
-            {timestamps.map((ts: string, idx: number) => {
-              const inTok = inputTokens[idx] || 0;
-              const outTok = outputTokens[idx] || 0;
-              const inH = Math.max(8, Math.round((inTok / maxVal) * 100));
-              const outH = Math.max(8, Math.round((outTok / maxVal) * 100));
-
-              return (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-1 h-full justify-end group">
-                  <div className="w-full max-w-[28px] flex items-end gap-1 h-full justify-center">
-                    <div
-                      className="w-1/2 bg-[#2A2A2A] rounded-t group-hover:bg-[#2A2A2A] transition-all duration-300"
-                      style={{ height: `${inH}%` }}
-                      title={`Input: ${inTok} tokens`}
-                    />
-                    <div
-                      className="w-1/2 bg-indigo-600 rounded-t group-hover:bg-indigo-400 transition-all duration-300"
-                      style={{ height: `${outH}%` }}
-                      title={`Output: ${outTok} tokens`}
-                    />
-                  </div>
-                  <span className="text-[9px] font-mono text-neutral-400">{ts}</span>
-                </div>
-              );
-            })}
-          </div>
+        {/* ── KPI METRICS CARDS ─────────────────────────────────────────────── */}
+        {isLoading ? (
+          <DashboardStatsSkeleton count={4} />
         ) : (
-          <div className="h-32 flex flex-col items-center justify-center text-neutral-500 text-xs font-mono border-b border-neutral-800">
-            No token activity recorded in this timeframe
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+              <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">
+                Total Tokens
+              </span>
+              <p className="text-2xl font-black text-white font-mono">
+                {kpis.total_tokens?.toLocaleString() || 0}
+              </p>
+              <span className="text-[10px] text-[#3B82F6] font-mono">
+                {kpis.prompt_tokens?.toLocaleString() || 0} in /{" "}
+                {kpis.completion_tokens?.toLocaleString() || 0} out
+              </span>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+              <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">
+                Total Spend ($ USD)
+              </span>
+              <p className="text-2xl font-black text-emerald-400 font-mono">
+                ${Number(kpis.total_cost_usd || 0).toFixed(4)}
+              </p>
+              <span className="text-[10px] text-neutral-400 font-mono">
+                Estimated API usage cost
+              </span>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+              <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">
+                Available Credits
+              </span>
+              <p className="text-2xl font-black text-[#3B82F6] font-mono flex items-center gap-1">
+                <Coins className="w-5 h-5" />
+                {kpis.available_credits?.toLocaleString() || 0}
+              </p>
+              <span className="text-[10px] text-emerald-400 font-mono">
+                Wallet Active
+              </span>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-neutral-900/90 border border-neutral-800 space-y-1">
+              <span className="text-[10px] text-neutral-400 font-mono uppercase font-bold">
+                Success Rate / Latency
+              </span>
+              <p className="text-2xl font-black text-white font-mono">
+                {kpis.success_rate_percent}%
+              </p>
+              <span className="text-[10px] text-neutral-400 font-mono">
+                Avg {kpis.avg_latency_ms}ms
+              </span>
+            </div>
           </div>
         )}
-      </div>
 
-      {/* ── BREAKDOWNS (PROVIDER & FEATURE) ───────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Provider Breakdown */}
-        <div className="rounded-2xl border border-neutral-850 bg-[#161616] p-5 space-y-3">
-          <h3 className="text-xs font-bold text-white font-sans uppercase tracking-wider text-neutral-400">
-            Provider Breakdown
-          </h3>
-          <div className="space-y-2">
-            {providerBreakdown.length > 0 ? (
-              providerBreakdown.map((p: any) => (
-                <div key={p.provider} className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/80 border border-neutral-800">
-                  <div className="flex items-center gap-2.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
-                    <span className="text-xs font-bold text-white">{p.provider_name || p.provider}</span>
+        {/* ── VISUAL TIMESERIES CHART ───────────────────────────────────────── */}
+        <div className="rounded-2xl border border-neutral-850 bg-[#161616] p-6 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-[#3B82F6]" />
+              <h2 className="text-sm font-bold text-white font-sans">
+                Token Volume Over Time
+              </h2>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono">
+              <span className="flex items-center gap-1.5 text-[#3B82F6]">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#2A2A2A]" /> Input
+                Tokens
+              </span>
+              <span className="flex items-center gap-1.5 text-indigo-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />{" "}
+                Output Tokens
+              </span>
+            </div>
+          </div>
+
+          {/* Dynamic Bar / Timeseries Graph */}
+          {timestamps.length > 0 ? (
+            <div className="h-48 flex items-end gap-3 pt-6 pb-2 border-b border-neutral-800">
+              {timestamps.map((ts: string, idx: number) => {
+                const inTok = inputTokens[idx] || 0;
+                const outTok = outputTokens[idx] || 0;
+                const inH = Math.max(8, Math.round((inTok / maxVal) * 100));
+                const outH = Math.max(8, Math.round((outTok / maxVal) * 100));
+
+                return (
+                  <div
+                    key={idx}
+                    className="flex-1 flex flex-col items-center gap-1 h-full justify-end group"
+                  >
+                    <div className="w-full max-w-[28px] flex items-end gap-1 h-full justify-center">
+                      <div
+                        className="w-1/2 bg-[#2A2A2A] rounded-t group-hover:bg-[#2A2A2A] transition-all duration-300"
+                        style={{ height: `${inH}%` }}
+                        title={`Input: ${inTok} tokens`}
+                      />
+                      <div
+                        className="w-1/2 bg-indigo-600 rounded-t group-hover:bg-indigo-400 transition-all duration-300"
+                        style={{ height: `${outH}%` }}
+                        title={`Output: ${outTok} tokens`}
+                      />
+                    </div>
+                    <span className="text-[9px] font-mono text-neutral-400">
+                      {ts}
+                    </span>
                   </div>
-                  <div className="text-right text-xs font-mono">
-                    <span className="text-white font-bold block">{p.total_tokens?.toLocaleString()} tok</span>
-                    <span className="text-[10px] text-neutral-400">${Number(p.cost_usd || 0).toFixed(4)}</span>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="h-32 flex flex-col items-center justify-center text-neutral-500 text-xs font-mono border-b border-neutral-800">
+              No token activity recorded in this timeframe
+            </div>
+          )}
+        </div>
+
+        {/* ── BREAKDOWNS (PROVIDER & FEATURE) ───────────────────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Provider Breakdown */}
+          <div className="rounded-2xl border border-neutral-850 bg-[#161616] p-5 space-y-3">
+            <h3 className="text-xs font-bold text-white font-sans uppercase tracking-wider text-neutral-400">
+              Provider Breakdown
+            </h3>
+            <div className="space-y-2">
+              {providerBreakdown.length > 0 ? (
+                providerBreakdown.map((p: any) => (
+                  <div
+                    key={p.provider}
+                    className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/80 border border-neutral-800"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+                      <span className="text-xs font-bold text-white">
+                        {p.provider_name || p.provider}
+                      </span>
+                    </div>
+                    <div className="text-right text-xs font-mono">
+                      <span className="text-white font-bold block">
+                        {p.total_tokens?.toLocaleString()} tok
+                      </span>
+                      <span className="text-[10px] text-neutral-400">
+                        ${Number(p.cost_usd || 0).toFixed(4)}
+                      </span>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="p-6 text-center text-xs text-neutral-500 font-mono">
+                  No provider activity recorded for this timeframe
                 </div>
-              ))
-            ) : (
-              <div className="p-6 text-center text-xs text-neutral-500 font-mono">
-                No provider activity recorded for this timeframe
-              </div>
-            )}
+              )}
+            </div>
+          </div>
+
+          {/* Feature Breakdown */}
+          <div className="rounded-2xl border border-neutral-850 bg-[#161616] p-5 space-y-3">
+            <h3 className="text-xs font-bold text-white font-sans uppercase tracking-wider text-neutral-400">
+              Feature Breakdown
+            </h3>
+            <div className="space-y-2">
+              {featuresBreakdown.length > 0 ? (
+                featuresBreakdown.map((f: any) => (
+                  <div
+                    key={f.feature}
+                    className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/80 border border-neutral-800"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-white block">
+                        {f.feature}
+                      </span>
+                      <span className="text-[10px] text-neutral-400 font-mono">
+                        {f.calls} calls
+                      </span>
+                    </div>
+                    <div className="text-right text-xs font-mono">
+                      <span className="text-[#3B82F6] font-bold block">
+                        {f.tokens?.toLocaleString()} tok
+                      </span>
+                      <span className="text-[10px] text-neutral-400">
+                        {f.percentage}% share
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-6 text-center text-xs text-neutral-500 font-mono">
+                  No feature calls recorded for this timeframe
+                </div>
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Feature Breakdown */}
-        <div className="rounded-2xl border border-neutral-850 bg-[#161616] p-5 space-y-3">
-          <h3 className="text-xs font-bold text-white font-sans uppercase tracking-wider text-neutral-400">
-            Feature Breakdown
-          </h3>
-          <div className="space-y-2">
-            {featuresBreakdown.length > 0 ? (
-              featuresBreakdown.map((f: any) => (
-                <div key={f.feature} className="flex items-center justify-between p-3 rounded-xl bg-neutral-900/80 border border-neutral-800">
-                  <div>
-                    <span className="text-xs font-bold text-white block">{f.feature}</span>
-                    <span className="text-[10px] text-neutral-400 font-mono">{f.calls} calls</span>
-                  </div>
-                  <div className="text-right text-xs font-mono">
-                    <span className="text-[#3B82F6] font-bold block">{f.tokens?.toLocaleString()} tok</span>
-                    <span className="text-[10px] text-neutral-400">{f.percentage}% share</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-6 text-center text-xs text-neutral-500 font-mono">
-                No feature calls recorded for this timeframe
-              </div>
-            )}
-          </div>
-        </div>
       </div>
-        </div>
-      </div>
+    </div>
   );
 }

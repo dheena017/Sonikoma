@@ -62,9 +62,14 @@ export function timeAgo(dateStr?: string | null): string {
  */
 export function formatDetailedTime(dateStr?: string | null): string {
   if (!dateStr) return "Just now";
-  
+
   // If already relative formatted by backend, check if it's already clean
-  if (typeof dateStr === "string" && (dateStr.includes("ago") || dateStr === "Just now" || dateStr === "Yesterday")) {
+  if (
+    typeof dateStr === "string" &&
+    (dateStr.includes("ago") ||
+      dateStr === "Just now" ||
+      dateStr === "Yesterday")
+  ) {
     return dateStr;
   }
 
@@ -92,4 +97,3 @@ export function formatDetailedTime(dateStr?: string | null): string {
   }
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
-

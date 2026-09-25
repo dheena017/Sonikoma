@@ -134,7 +134,11 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
         action: onDuplicate,
       },
       { divider: true },
-      { icon: Sliders, label: "Adjust Camera Speed / Intensity", action: onCopy },
+      {
+        icon: Sliders,
+        label: "Adjust Camera Speed / Intensity",
+        action: onCopy,
+      },
       {
         icon: Clock,
         label: "Edit Motion Timing",
@@ -184,7 +188,12 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
     items = [
       { icon: RefreshCw, label: "Change Music Theme", action: onCopy },
       { icon: Sliders, label: "Adjust BGM Volume & Fade", action: onCopy },
-      { icon: VolumeX, label: "Mute Soundtrack", shortcut: "M", action: onSplit },
+      {
+        icon: VolumeX,
+        label: "Mute Soundtrack",
+        shortcut: "M",
+        action: onSplit,
+      },
       { divider: true },
       {
         icon: Clock,
@@ -207,7 +216,12 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
     trackColor = "text-blue-400";
     items = [
       { icon: RefreshCw, label: "Browse / Replace SFX", action: onCopy },
-      { icon: CopyPlus, label: "Duplicate SFX Clip", shortcut: "Ctrl+D", action: onDuplicate },
+      {
+        icon: CopyPlus,
+        label: "Duplicate SFX Clip",
+        shortcut: "Ctrl+D",
+        action: onDuplicate,
+      },
       { divider: true },
       { icon: Sliders, label: "SFX Gain & Volume", action: onCopy },
       { icon: Clock, label: "Adjust SFX Timing", action: onApplyDurationToAll },
@@ -226,7 +240,11 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
     trackIcon = Mic;
     trackColor = "text-[#60A5FA]";
     items = [
-      { icon: RefreshCw, label: "Regenerate Voice Audio (TTS)", action: onCopy },
+      {
+        icon: RefreshCw,
+        label: "Regenerate Voice Audio (TTS)",
+        action: onCopy,
+      },
       { icon: Mic, label: "Change Character Voice Actor", action: onCopy },
       { divider: true },
       { icon: Volume2, label: "Voice Gain & Pitch Shifter", action: onCopy },
@@ -249,8 +267,19 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
     // Generic Fallback
     items = [
       { icon: Copy, label: "Copy", shortcut: "Ctrl+C", action: onCopy },
-      { icon: CopyPlus, label: "Duplicate", shortcut: "Ctrl+D", action: onDuplicate },
-      { icon: Trash2, label: "Delete", shortcut: "DELETE", action: onRemoveDuration, danger: true },
+      {
+        icon: CopyPlus,
+        label: "Duplicate",
+        shortcut: "Ctrl+D",
+        action: onDuplicate,
+      },
+      {
+        icon: Trash2,
+        label: "Delete",
+        shortcut: "DELETE",
+        action: onRemoveDuration,
+        danger: true,
+      },
     ];
   }
 
@@ -312,53 +341,60 @@ const ContextMenuPopup: React.FC<ContextMenuPopupProps> = ({
       >
         {/* Track Category Header */}
         <div className="px-3 py-1.5 flex items-center justify-between border-b border-white/[0.08] mb-1 bg-white/[0.02]">
-        <div className="flex items-center gap-2 min-w-0">
-          <HeaderIcon className={`h-3.5 w-3.5 ${trackColor} shrink-0`} />
-          <span className="text-[11px] font-mono font-bold text-white truncate">
-            {trackTitle}
+          <div className="flex items-center gap-2 min-w-0">
+            <HeaderIcon className={`h-3.5 w-3.5 ${trackColor} shrink-0`} />
+            <span className="text-[11px] font-mono font-bold text-white truncate">
+              {trackTitle}
+            </span>
+          </div>
+          <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider">
+            Actions
           </span>
         </div>
-        <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider">
-          Actions
-        </span>
-      </div>
 
-      {/* Action Items List */}
-      <div className="overflow-y-auto max-h-[calc(100vh-80px)] flex flex-col gap-[1px]">
-        {items.map((item, i) => {
-          if ("divider" in item)
-            return <div key={i} className="h-px bg-white/[0.08] mx-2 my-1" />;
-          const { icon: Icon, label, shortcut, action, disabled, danger } = item;
-          return (
-            <button
-              key={`${label}-${i}`}
-              onClick={disabled ? undefined : action}
-              className={`w-full flex items-center justify-between px-3 py-[6px] text-xs transition-colors ${
-                disabled
-                  ? "text-neutral-500 cursor-not-allowed opacity-40"
-                  : danger
-                  ? "text-rose-400 hover:bg-rose-950/50 hover:text-rose-300 cursor-pointer"
-                  : "text-neutral-300 hover:bg-white/[0.08] hover:text-white cursor-pointer"
-              }`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Icon
-                  className={`h-3.5 w-3.5 shrink-0 ${
-                    danger ? "text-rose-400" : "text-neutral-400"
-                  }`}
-                />
-                <span className="font-medium truncate">{label}</span>
-              </div>
-              {shortcut && (
-                <span className="text-[10px] text-neutral-400 font-mono shrink-0 ml-2 bg-black/40 px-1 py-0.2 rounded border border-white/5">
-                  {shortcut}
-                </span>
-              )}
-            </button>
-          );
-        })}
+        {/* Action Items List */}
+        <div className="overflow-y-auto max-h-[calc(100vh-80px)] flex flex-col gap-[1px]">
+          {items.map((item, i) => {
+            if ("divider" in item)
+              return <div key={i} className="h-px bg-white/[0.08] mx-2 my-1" />;
+            const {
+              icon: Icon,
+              label,
+              shortcut,
+              action,
+              disabled,
+              danger,
+            } = item;
+            return (
+              <button
+                key={`${label}-${i}`}
+                onClick={disabled ? undefined : action}
+                className={`w-full flex items-center justify-between px-3 py-[6px] text-xs transition-colors ${
+                  disabled
+                    ? "text-neutral-500 cursor-not-allowed opacity-40"
+                    : danger
+                    ? "text-rose-400 hover:bg-rose-950/50 hover:text-rose-300 cursor-pointer"
+                    : "text-neutral-300 hover:bg-white/[0.08] hover:text-white cursor-pointer"
+                }`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Icon
+                    className={`h-3.5 w-3.5 shrink-0 ${
+                      danger ? "text-rose-400" : "text-neutral-400"
+                    }`}
+                  />
+                  <span className="font-medium truncate">{label}</span>
+                </div>
+                {shortcut && (
+                  <span className="text-[10px] text-neutral-400 font-mono shrink-0 ml-2 bg-black/40 px-1 py-0.2 rounded border border-white/5">
+                    {shortcut}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
     </>
   );
 };

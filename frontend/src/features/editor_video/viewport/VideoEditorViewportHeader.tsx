@@ -1,12 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Sparkles,
-  Save,
-  Video,
-  ZoomIn,
-  ZoomOut,
-  Tv,
-} from "lucide-react";
+import { Sparkles, Save, Video, ZoomIn, ZoomOut, Tv } from "lucide-react";
 import MetadataPanel from "@/shared/ui/video/MetadataPanel";
 
 export interface VideoEditorViewportHeaderProps {
@@ -35,7 +28,9 @@ export interface VideoEditorViewportHeaderProps {
   setAspectRatio?: (ratio: string) => void;
 }
 
-export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps> = ({
+export const VideoEditorViewportHeader: React.FC<
+  VideoEditorViewportHeaderProps
+> = ({
   monitorTab,
   setMonitorTab,
   panelsCount,
@@ -82,17 +77,28 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
   }, []);
 
   return (
-    <div ref={headerRef} className="rounded-none border-b border-[#2F2F2F] bg-[#121212] h-11 px-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 shrink-0 z-20 overflow-hidden">
+    <div
+      ref={headerRef}
+      className="rounded-none border-b border-[#2F2F2F] bg-[#121212] h-11 px-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 shrink-0 z-20 overflow-hidden"
+    >
       {/* Left: Viewport Name & Live Pill */}
       <div className="min-w-0 flex items-center gap-2">
         <div className="h-6 w-6 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 shadow-sm shadow-blue-500/25 flex items-center justify-center shrink-0 transition-all cursor-pointer">
           <Sparkles className="h-3.5 w-3.5 text-white" />
         </div>
         <div className="min-w-0 flex items-center gap-2">
-          <span className={`${isNarrow ? "hidden" : "block"} truncate whitespace-nowrap text-xs font-bold font-mono tracking-wider text-white uppercase`}>
+          <span
+            className={`${
+              isNarrow ? "hidden" : "block"
+            } truncate whitespace-nowrap text-xs font-bold font-mono tracking-wider text-white uppercase`}
+          >
             {isCompact ? "Video Preview" : "Video Editor Preview"}
           </span>
-          <span className={`${isNarrow ? "hidden" : "inline-flex"} items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400`}>
+          <span
+            className={`${
+              isNarrow ? "hidden" : "inline-flex"
+            } items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/15 border border-emerald-500/30 text-emerald-400`}
+          >
             <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" />
             Live
           </span>
@@ -111,7 +117,9 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
           }`}
         >
           <Tv className="h-3 w-3" />
-          <span className={isNarrow ? "hidden" : "inline"}>{isCompact ? "Live" : "Live Video Preview"}</span>
+          <span className={isNarrow ? "hidden" : "inline"}>
+            {isCompact ? "Live" : "Live Video Preview"}
+          </span>
         </button>
 
         <button
@@ -124,10 +132,18 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
           }`}
         >
           <Video className="h-3 w-3" />
-          <span className={isNarrow ? "hidden" : "inline"}>{isCompact ? "Final" : "Final Video"}</span>
-          <span className={`${isCompact ? "hidden" : "inline"} text-[8px] font-mono px-1 py-0.2 rounded border uppercase ${
-            monitorTab === "video" ? "bg-black/30 border-blue-400/40 text-white" : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
-          }`}>
+          <span className={isNarrow ? "hidden" : "inline"}>
+            {isCompact ? "Final" : "Final Video"}
+          </span>
+          <span
+            className={`${
+              isCompact ? "hidden" : "inline"
+            } text-[8px] font-mono px-1 py-0.2 rounded border uppercase ${
+              monitorTab === "video"
+                ? "bg-black/30 border-blue-400/40 text-white"
+                : "bg-[#2A2A2A] border-[#2F2F2F] text-[#60A5FA]"
+            }`}
+          >
             MP4
           </span>
         </button>
@@ -179,7 +195,9 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
             title="Save Project"
           >
             <Save className="h-3 w-3 text-[#3B82F6]" />
-            <span className={isCompact ? "hidden" : "hidden sm:inline"}>{isSaving ? "Saving..." : "Save"}</span>
+            <span className={isCompact ? "hidden" : "hidden sm:inline"}>
+              {isSaving ? "Saving..." : "Save"}
+            </span>
           </button>
         )}
 
@@ -192,7 +210,13 @@ export const VideoEditorViewportHeader: React.FC<VideoEditorViewportHeaderProps>
             title="Export and render final video"
           >
             <Video className="h-3 w-3" />
-            <span className={isNarrow ? "hidden" : "inline"}>{isCompact ? "Export" : isRendering ? "Rendering..." : "Export Video"}</span>
+            <span className={isNarrow ? "hidden" : "inline"}>
+              {isCompact
+                ? "Export"
+                : isRendering
+                ? "Rendering..."
+                : "Export Video"}
+            </span>
           </button>
         )}
       </div>

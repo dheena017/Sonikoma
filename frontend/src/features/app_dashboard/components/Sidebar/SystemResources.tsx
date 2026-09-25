@@ -6,9 +6,7 @@ interface SystemResourcesProps {
   analytics: any;
 }
 
-export default function SystemResources({
-  metrics,
-}: SystemResourcesProps) {
+export default function SystemResources({ metrics }: SystemResourcesProps) {
   return (
     <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 shadow-md hover:border-[#2F2F2F]/80 transition-all duration-200 text-left">
       <h3 className="text-sm font-bold text-[#E5E5E5] mb-6 uppercase tracking-wider font-mono flex items-center gap-2">

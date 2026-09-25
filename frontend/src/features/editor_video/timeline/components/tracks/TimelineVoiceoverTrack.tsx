@@ -7,7 +7,11 @@ import { Mic, Volume2, Plus, MoreHorizontal, GripVertical } from "lucide-react";
 import { PanelTiming } from "./TimelineStoryPanelsTrack";
 import AudioWaveformVisual from "../AudioWaveformVisual";
 import ClipTrimHandles from "../ClipTrimHandles";
-import { AUDIO_FX_LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
+import {
+  AUDIO_FX_LANE_HEIGHT,
+  assignLanes,
+  trackInnerHeight,
+} from "./timelineLanes";
 
 export interface TimelineVoiceoverTrackProps {
   panels: any[];
@@ -56,9 +60,17 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
 
   // per-clip offsets to persist moved positions
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
-  const [movingInfo, setMovingInfo] = useState<{ key: string; idx: number; baseLeftPx: number; widthPx: number; deltaPx: number } | null>(null);
+  const [movingInfo, setMovingInfo] = useState<{
+    key: string;
+    idx: number;
+    baseLeftPx: number;
+    widthPx: number;
+    deltaPx: number;
+  } | null>(null);
   const movingInfoRef = React.useRef(movingInfo);
-  React.useEffect(() => { movingInfoRef.current = movingInfo; }, [movingInfo]);
+  React.useEffect(() => {
+    movingInfoRef.current = movingInfo;
+  }, [movingInfo]);
 
   const handleMoveStart = (
     e: React.MouseEvent,
@@ -78,7 +90,9 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
 
     const onMouseMove = (mv: MouseEvent) => {
       const deltaPx = mv.clientX - startX;
-      if (Math.abs(deltaPx) > 2) { hasMoved = true; }
+      if (Math.abs(deltaPx) > 2) {
+        hasMoved = true;
+      }
       setMovingInfo({ key, idx, baseLeftPx, widthPx, deltaPx });
     };
 
@@ -123,7 +137,10 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
-      const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
+      const nextDuration = Math.max(
+        0.5,
+        Math.min(60, initialDuration + deltaSecs)
+      );
       const rounded = parseFloat(nextDuration.toFixed(1));
       latestDuration = rounded;
       setResizingInfo({
@@ -183,7 +200,8 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
         const t: PanelTiming | undefined = panelTimings[i];
         const k = `a3-${i}`;
         const dur = p.voice_duration ?? t?.duration ?? p.duration ?? 0;
-        const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * pxPerSec;
+        const baseLeft =
+          t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * pxPerSec;
         const offset = clipOffsets[k] ?? 0;
         const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
         const isResizingThis = resizingInfo?.key === k;
@@ -192,11 +210,16 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
             ? (dur - resizingInfo.initialDuration) * pxPerSec
             : 0;
 
-        const left = Math.max(0, baseLeft + offset + moveDelta - resizeLeftDelta);
+        const left = Math.max(
+          0,
+          baseLeft + offset + moveDelta - resizeLeftDelta
+        );
         const width = dur * pxPerSec;
         return { key: k, left, width };
       })
-      .filter((c): c is { key: string; left: number; width: number } => c !== null);
+      .filter(
+        (c): c is { key: string; left: number; width: number } => c !== null
+      );
     return assignLanes(allClips);
   }, [panels, panelTimings, clipOffsets, movingInfo, resizingInfo, pxPerSec]);
 
@@ -207,7 +230,12 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
   const innerHeightPx = trackInnerHeight(maxLane, AUDIO_FX_LANE_HEIGHT);
   const outerHeightPx = innerHeightPx + 8;
 
-  const calcTotalDuration = useMemo(() => totalDuration ?? (panelTimings?.reduce((sum, p) => sum + (p.duration || 0), 0) || 3), [totalDuration, panelTimings]);
+  const calcTotalDuration = useMemo(
+    () =>
+      totalDuration ??
+      (panelTimings?.reduce((sum, p) => sum + (p.duration || 0), 0) || 3),
+    [totalDuration, panelTimings]
+  );
 
   return (
     <div
@@ -228,7 +256,13 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
         onAdd={onAddVoice}
       />
 
-      <div className="flex-1 relative overflow-hidden" style={{ height: `${Math.max(38, innerHeightPx)}px`, clipPath: "inset(0)" }}>
+      <div
+        className="flex-1 relative overflow-hidden"
+        style={{
+          height: `${Math.max(38, innerHeightPx)}px`,
+          clipPath: "inset(0)",
+        }}
+      >
         {!hasAnyVoice ? (
           <div className="w-full h-full p-1 pointer-events-none select-none">
             <div className="w-full h-full rounded border border-dashed border-white/[0.04] bg-white/[0.01] flex items-center px-3">
@@ -245,10 +279,7 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
               panel.audio_url
             );
             const dialogue =
-              panel.speech_text ||
-              panel.narrative ||
-              panel.dialogue ||
-              "";
+              panel.speech_text || panel.narrative || panel.dialogue || "";
 
             if (!hasVoiceAudio && !dialogue) return null;
 
@@ -277,13 +308,20 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
             const label = `${speaker} #${idx + 1}`;
             const key = `a3-${idx}`;
             const isResizing = resizingInfo?.key === key;
-            
-            const baseLeftPx = timing.startPx !== undefined ? timing.startPx : timing.startTime * pxPerSec;
+
+            const baseLeftPx =
+              timing.startPx !== undefined
+                ? timing.startPx
+                : timing.startTime * pxPerSec;
             const offsetPx = clipOffsets[key] ?? 0;
 
-            const activeDur = isResizing && resizingInfo
-              ? Math.max(0.5, resizingInfo.initialDuration + resizingInfo.deltaSecs)
-              : dur;
+            const activeDur =
+              isResizing && resizingInfo
+                ? Math.max(
+                    0.5,
+                    resizingInfo.initialDuration + resizingInfo.deltaSecs
+                  )
+                : dur;
 
             let displayLeftPx = baseLeftPx + offsetPx;
             let displayWidthPx = activeDur * pxPerSec;
@@ -328,7 +366,11 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                   width: `${displayWidthPx}px`,
                   top: `${clipTop}px`,
                   height: `${clipHeight}px`,
-                  cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
+                  cursor: isMoving
+                    ? "grabbing"
+                    : isResizing
+                    ? "col-resize"
+                    : "grab",
                   transition: "none",
                 }}
                 title={`VO #${idx + 1} (${speaker}): ${dialogue}`}
@@ -336,7 +378,11 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                 {/* Audio Waveform Envelope */}
                 <div className="absolute inset-0 flex items-center px-1 pointer-events-none">
                   <AudioWaveformVisual
-                    audioUrl={panel.speech_audio_url || panel.narrative_audio_url || panel.audio_url}
+                    audioUrl={
+                      panel.speech_audio_url ||
+                      panel.narrative_audio_url ||
+                      panel.audio_url
+                    }
                     seed={`vo-${idx}-${speaker}-${dialogue}`}
                     color="#93C5FD"
                     opacity={0.92}
@@ -353,7 +399,10 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-0.5 z-20 pointer-events-auto shrink-0" style={{ cursor: "inherit" }}>
+                  <div
+                    className="flex items-center gap-0.5 z-20 pointer-events-auto shrink-0"
+                    style={{ cursor: "inherit" }}
+                  >
                     {/* Live Drag Delta Display */}
                     {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1 py-0.2 rounded border border-[#2F2F2F]  animate-pulse">
@@ -365,28 +414,30 @@ export const TimelineVoiceoverTrack: React.FC<TimelineVoiceoverTrackProps> = ({
 
                     {isResizing && resizingInfo.deltaSecs !== 0 && (
                       <span className="text-[7px] font-mono font-bold text-[#3B82F6] bg-[#2A2A2A] px-1 py-0.2 rounded-sm border border-[#60A5FA]/50 animate-pulse">
-                        {resizingInfo.deltaSecs > 0 ? `+${resizingInfo.deltaSecs.toFixed(1)}s` : `${resizingInfo.deltaSecs.toFixed(1)}s`}
+                        {resizingInfo.deltaSecs > 0
+                          ? `+${resizingInfo.deltaSecs.toFixed(1)}s`
+                          : `${resizingInfo.deltaSecs.toFixed(1)}s`}
                       </span>
                     )}
                     {displayWidthPx >= 45 && (
-                    <span className="text-[7.5px] font-mono font-bold text-[#3B82F6] bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
-                      {activeDur.toFixed(1)}s
-                    </span>
+                      <span className="text-[7.5px] font-mono font-bold text-[#3B82F6] bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 shrink-0">
+                        {activeDur.toFixed(1)}s
+                      </span>
                     )}
 
                     {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
                     {displayWidthPx >= 90 && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onContextMenu(e, key, idx);
-                      }}
-                      className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
-                      title="Voiceover Options"
-                    >
-                      <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onContextMenu(e, key, idx);
+                        }}
+                        className="group/btn h-4 px-1 flex items-center justify-center rounded-[4px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                        title="Voiceover Options"
+                      >
+                        <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
+                      </button>
                     )}
                   </div>
                 </div>

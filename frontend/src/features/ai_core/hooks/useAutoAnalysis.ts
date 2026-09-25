@@ -44,7 +44,8 @@ export function useAutoAnalysis({
         const data = await api.analyzeImage(fetchWithInterceptor, {
           url: imageUrl,
           model: selectedModel,
-          voice: voiceActor || localStorage.getItem("ai_comic_voice") || undefined,
+          voice:
+            voiceActor || localStorage.getItem("ai_comic_voice") || undefined,
           narrationStyle,
           story_memory: currentMemory || undefined,
         });
@@ -53,8 +54,10 @@ export function useAutoAnalysis({
           data
         );
         if (data.success && data.analysis) {
-          const modelUsed = (data as any).model || selectedModel || "gemini-2.5-flash";
-          const returnedAudioUrl = data.audio_url || data.analysis.audio_url || null;
+          const modelUsed =
+            (data as any).model || selectedModel || "gemini-2.5-flash";
+          const returnedAudioUrl =
+            data.audio_url || data.analysis.audio_url || null;
 
           if (data.story_memory) {
             useProjectStore.getState().updateStoryMemory(data.story_memory);
@@ -66,7 +69,8 @@ export function useAutoAnalysis({
                 ? {
                     ...p,
                     speech_text: data.analysis.speech_text || p.speech_text,
-                    narrative: data.narrative || data.analysis.narrative || p.narrative,
+                    narrative:
+                      data.narrative || data.analysis.narrative || p.narrative,
                     sfx: data.analysis.sfx || p.sfx,
                     duration:
                       data.analysis.duration !== undefined
@@ -78,13 +82,29 @@ export function useAutoAnalysis({
                         : p.motion_type,
                     visual_description:
                       data.analysis.visual_description || p.visual_description,
-                    speaker_name: data.analysis.speaker_name || data.speaker_name || p.speaker_name,
-                    speaker_gender: data.analysis.speaker_gender || data.speaker_gender || p.speaker_gender,
+                    speaker_name:
+                      data.analysis.speaker_name ||
+                      data.speaker_name ||
+                      p.speaker_name,
+                    speaker_gender:
+                      data.analysis.speaker_gender ||
+                      data.speaker_gender ||
+                      p.speaker_gender,
                     emotion: data.analysis.emotion || data.emotion || p.emotion,
-                    scene_context: data.analysis.scene_context || data.scene_context || p.scene_context,
-                    is_scene_transition: data.analysis.is_scene_transition ?? p.is_scene_transition,
-                    is_internal_thought: data.analysis.is_internal_thought ?? p.is_internal_thought,
-                    dialogue_turns: data.dialogue_turns || data.analysis.dialogue_turns || p.dialogue_turns,
+                    scene_context:
+                      data.analysis.scene_context ||
+                      data.scene_context ||
+                      p.scene_context,
+                    is_scene_transition:
+                      data.analysis.is_scene_transition ??
+                      p.is_scene_transition,
+                    is_internal_thought:
+                      data.analysis.is_internal_thought ??
+                      p.is_internal_thought,
+                    dialogue_turns:
+                      data.dialogue_turns ||
+                      data.analysis.dialogue_turns ||
+                      p.dialogue_turns,
                     audio_url: returnedAudioUrl || p.audio_url,
                     speech_audio_url: returnedAudioUrl || p.speech_audio_url,
                     isAnalyzing: false,
@@ -95,9 +115,16 @@ export function useAutoAnalysis({
           const memInfo = data.story_memory?.current_scene
             ? ` | Scene: "${data.story_memory.current_scene.slice(0, 35)}..."`
             : "";
-          const speakerInfo = (data.analysis.speaker_name || data.speaker_name)
-            ? ` | Speaker: ${data.analysis.speaker_name || data.speaker_name} (${data.analysis.speaker_gender || data.speaker_gender || 'neutral'})`
-            : "";
+          const speakerInfo =
+            data.analysis.speaker_name || data.speaker_name
+              ? ` | Speaker: ${
+                  data.analysis.speaker_name || data.speaker_name
+                } (${
+                  data.analysis.speaker_gender ||
+                  data.speaker_gender ||
+                  "neutral"
+                })`
+              : "";
           setConsoleLogs((prev) => [
             `[Story Memory] [SYNC] Panel #${panelId}${speakerInfo}${memInfo}`,
             `[Smart Auto-Analysis] [SUCCESS] Model: ${modelUsed} | Panel #${panelId} transcribed & fully mapped!`,
@@ -133,7 +160,9 @@ export function useAutoAnalysis({
           "error"
         );
         setConsoleLogs((prev) => [
-          `[Smart Auto-Analysis] [ERROR] Panel #${panelId} failed: ${err.message || err}`,
+          `[Smart Auto-Analysis] [ERROR] Panel #${panelId} failed: ${
+            err.message || err
+          }`,
           ...prev,
         ]);
       } finally {
@@ -165,7 +194,9 @@ export function useAutoAnalysis({
     async (panelIds: number[], imageUrls: string[]) => {
       if (panelIds.length === 0) return;
       const activeModel = selectedModel || undefined;
-      const modelDisplay = activeModel ? `Model: ${activeModel}` : "AI Core Routing (Dynamic)";
+      const modelDisplay = activeModel
+        ? `Model: ${activeModel}`
+        : "AI Core Routing (Dynamic)";
       console.log(
         `[Smart Sequence Analysis] Starting for ${imageUrls.length} panels (${modelDisplay})`
       );
@@ -197,22 +228,47 @@ export function useAutoAnalysis({
             useProjectStore.getState().updateStoryMemory(data.story_memory);
           }
 
-          const tierLabel = (data as any).tier_label || (data.results?.[0] as any)?.tier_label || "Tier 1: Primary";
-          const modelUsed = (data as any).model || (data.results?.[0] as any)?.model || activeModel || "Dynamic AI Model";
-          const attempt = (data as any).attempt || (data.results?.[0] as any)?.attempt || 1;
-          const totalCandidates = (data as any).total_candidates || (data.results?.[0] as any)?.total_candidates || 1;
+          const tierLabel =
+            (data as any).tier_label ||
+            (data.results?.[0] as any)?.tier_label ||
+            "Tier 1: Primary";
+          const modelUsed =
+            (data as any).model ||
+            (data.results?.[0] as any)?.model ||
+            activeModel ||
+            "Dynamic AI Model";
+          const attempt =
+            (data as any).attempt || (data.results?.[0] as any)?.attempt || 1;
+          const totalCandidates =
+            (data as any).total_candidates ||
+            (data.results?.[0] as any)?.total_candidates ||
+            1;
 
           setPanels((prev) =>
             prev.map((p) => {
               if (!panelIds.map(String).includes(String(p.id))) return p;
               // Map result by position in panelIds/imageUrls array
-              const chunkIndex = panelIds.findIndex((id) => String(id) === String(p.id));
-              const result = chunkIndex !== -1 ? data.results[chunkIndex] : undefined;
+              const chunkIndex = panelIds.findIndex(
+                (id) => String(id) === String(p.id)
+              );
+              const result =
+                chunkIndex !== -1 ? data.results[chunkIndex] : undefined;
               const analysis = result?.analysis || result;
-              if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
-                const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
+              if (
+                result &&
+                (result.analysis ||
+                  analysis?.speech_text !== undefined ||
+                  analysis?.visual_description !== undefined)
+              ) {
+                const speech =
+                  analysis.speech_text !== undefined
+                    ? analysis.speech_text
+                    : p.speech_text;
                 const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
-                const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
+                const visual =
+                  analysis.visual_description !== undefined
+                    ? analysis.visual_description
+                    : p.visual_description;
                 const aiDuration = Number(analysis.duration);
                 const aiMotion = String(analysis.motion_type || "").trim();
                 const narrative =
@@ -238,13 +294,31 @@ export function useAutoAnalysis({
                   camMotion: aiMotion.length > 0 ? aiMotion : p.motion_type,
                   visual_description: visual,
                   visual_scene_description: visual,
-                  speaker_name: analysis.speaker_name || result.speaker_name || p.speaker_name,
-                  speaker_gender: analysis.speaker_gender || result.speaker_gender || p.speaker_gender,
+                  speaker_name:
+                    analysis.speaker_name ||
+                    result.speaker_name ||
+                    p.speaker_name,
+                  speaker_gender:
+                    analysis.speaker_gender ||
+                    result.speaker_gender ||
+                    p.speaker_gender,
                   emotion: analysis.emotion || result.emotion || p.emotion,
-                  scene_context: analysis.scene_context || result.scene_context || p.scene_context,
-                  is_scene_transition: analysis.is_scene_transition ?? result.is_scene_transition ?? p.is_scene_transition,
-                  is_internal_thought: analysis.is_internal_thought ?? result.is_internal_thought ?? p.is_internal_thought,
-                  dialogue_turns: result.dialogue_turns || analysis.dialogue_turns || p.dialogue_turns,
+                  scene_context:
+                    analysis.scene_context ||
+                    result.scene_context ||
+                    p.scene_context,
+                  is_scene_transition:
+                    analysis.is_scene_transition ??
+                    result.is_scene_transition ??
+                    p.is_scene_transition,
+                  is_internal_thought:
+                    analysis.is_internal_thought ??
+                    result.is_internal_thought ??
+                    p.is_internal_thought,
+                  dialogue_turns:
+                    result.dialogue_turns ||
+                    analysis.dialogue_turns ||
+                    p.dialogue_turns,
                   audio_url: result.audio_url || p.audio_url,
                   narrative,
                   narrative_audio_url: narrativeAudioUrl,
@@ -261,7 +335,8 @@ export function useAutoAnalysis({
           const charNames = data.story_memory?.characters
             ? Object.keys(data.story_memory.characters)
             : [];
-          const activeChars = charNames.length > 0 ? ` | Cast: ${charNames.join(", ")}` : "";
+          const activeChars =
+            charNames.length > 0 ? ` | Cast: ${charNames.join(", ")}` : "";
 
           setConsoleLogs((prev) => [
             `[Story Memory] [ROLLING UPDATE] Handled ${panelIds.length} panels${activeScene}${activeChars}`,

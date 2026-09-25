@@ -28,7 +28,12 @@ export interface StoryboardCardProps {
   onMove: (index: number, direction: "up" | "down") => void;
   onDuplicate: (panel: StoryboardPanel, index: number) => void;
   onDelete: (id: string) => void;
-  onAudition: (panelId: string, text: string, voice?: string, audioUrl?: string) => void;
+  onAudition: (
+    panelId: string,
+    text: string,
+    voice?: string,
+    audioUrl?: string
+  ) => void;
   onAnalyze?: (panelId: string, imageUrl: string) => void;
   onPreviewImage: (imageUrl: string) => void;
   onOpenAssistant?: (panelIndex: number, imageUrl: string) => void;
@@ -46,7 +51,9 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
   onAnalyze,
   onPreviewImage,
 }) => {
-  const [activeTab, setActiveTab] = useState<"speech" | "narrative" | "sfx" | "scene">("speech");
+  const [activeTab, setActiveTab] = useState<
+    "speech" | "narrative" | "sfx" | "scene"
+  >("speech");
 
   return (
     <div
@@ -65,7 +72,11 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
             type="button"
             onClick={() => onUpdate(panel.id, { enabled: !panel.enabled })}
             className="cursor-pointer text-slate-400 hover:text-sky-400 transition-colors shrink-0"
-            title={panel.enabled ? "Exclude from video render" : "Include in video render"}
+            title={
+              panel.enabled
+                ? "Exclude from video render"
+                : "Include in video render"
+            }
           >
             {panel.enabled ? (
               <CheckSquare size={14} className="text-sky-400" />
@@ -253,7 +264,9 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
               {/* Create Voice button (matches website) */}
               <button
                 type="button"
-                onClick={() => onAudition(panel.id, panel.dialogueText, panel.voiceOverride)}
+                onClick={() =>
+                  onAudition(panel.id, panel.dialogueText, panel.voiceOverride)
+                }
                 disabled={isAuditioning || panel.isAnalyzing}
                 className="flex items-center gap-1 px-2 py-0.5 rounded-lg border border-neutral-700/80 bg-neutral-800/90 hover:bg-neutral-750 text-neutral-200 hover:text-white text-[9.5px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
                 title="Synthesize dialogue voice"
@@ -265,7 +278,14 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
               {/* Play Audio button */}
               <button
                 type="button"
-                onClick={() => onAudition(panel.id, panel.dialogueText, panel.voiceOverride, panel.audioUrl)}
+                onClick={() =>
+                  onAudition(
+                    panel.id,
+                    panel.dialogueText,
+                    panel.voiceOverride,
+                    panel.audioUrl
+                  )
+                }
                 disabled={isAuditioning || panel.isAnalyzing}
                 className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#162134] hover:bg-sky-600 hover:text-white text-sky-300 border border-[#253752] text-[9.5px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
                 title="Audition voice synthesis"
@@ -280,10 +300,14 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
             rows={2}
             disabled={panel.isAnalyzing}
             value={panel.dialogueText}
-            onChange={(e) => onUpdate(panel.id, { dialogueText: e.target.value })}
+            onChange={(e) =>
+              onUpdate(panel.id, { dialogueText: e.target.value })
+            }
             placeholder="Text from speech bubbles in image..."
             className={`w-full bg-[#0a0d16] border border-[#1e293b] focus:border-sky-500 rounded-xl p-2 text-[11px] text-slate-100 placeholder-slate-500 focus:outline-none resize-none shadow-inner ${
-              panel.isAnalyzing ? "opacity-60 cursor-not-allowed text-[#60A5FA]" : ""
+              panel.isAnalyzing
+                ? "opacity-60 cursor-not-allowed text-[#60A5FA]"
+                : ""
             }`}
           />
         </div>
@@ -300,7 +324,13 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => onAudition(panel.id, panel.narrativeText || panel.dialogueText, panel.voiceOverride)}
+                onClick={() =>
+                  onAudition(
+                    panel.id,
+                    panel.narrativeText || panel.dialogueText,
+                    panel.voiceOverride
+                  )
+                }
                 disabled={isAuditioning || panel.isAnalyzing}
                 className="flex items-center gap-1 px-2 py-0.5 rounded-lg border border-purple-800/60 bg-purple-950/50 hover:bg-purple-900/70 text-purple-200 hover:text-white text-[9.5px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
                 title="Synthesize story narration voice"
@@ -311,7 +341,14 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
 
               <button
                 type="button"
-                onClick={() => onAudition(panel.id, panel.narrativeText || panel.dialogueText, panel.voiceOverride, panel.narrativeAudioUrl)}
+                onClick={() =>
+                  onAudition(
+                    panel.id,
+                    panel.narrativeText || panel.dialogueText,
+                    panel.voiceOverride,
+                    panel.narrativeAudioUrl
+                  )
+                }
                 disabled={isAuditioning || panel.isAnalyzing}
                 className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-950/60 hover:bg-purple-600 hover:text-white text-purple-300 border border-purple-800/60 text-[9.5px] font-semibold transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
                 title="Play narration audio"
@@ -326,10 +363,14 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
             rows={2}
             disabled={panel.isAnalyzing}
             value={panel.narrativeText || ""}
-            onChange={(e) => onUpdate(panel.id, { narrativeText: e.target.value })}
+            onChange={(e) =>
+              onUpdate(panel.id, { narrativeText: e.target.value })
+            }
             placeholder="Story narration explaining actions, atmosphere, and context..."
             className={`w-full bg-[#0a0d16] border border-[#1e293b] focus:border-purple-500 rounded-xl p-2 text-[11px] text-slate-100 placeholder-slate-500 focus:outline-none resize-none shadow-inner ${
-              panel.isAnalyzing ? "opacity-60 cursor-not-allowed text-purple-300" : ""
+              panel.isAnalyzing
+                ? "opacity-60 cursor-not-allowed text-purple-300"
+                : ""
             }`}
           />
         </div>
@@ -364,7 +405,9 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
             type="text"
             disabled={panel.isAnalyzing}
             value={panel.visualDescription || ""}
-            onChange={(e) => onUpdate(panel.id, { visualDescription: e.target.value })}
+            onChange={(e) =>
+              onUpdate(panel.id, { visualDescription: e.target.value })
+            }
             placeholder="Scene context description or prompt cues..."
             className={`w-full bg-[#0a0d16] border border-[#1e293b] focus:border-amber-500 rounded-xl p-2 text-[11px] text-slate-100 placeholder-slate-500 focus:outline-none shadow-inner ${
               panel.isAnalyzing ? "opacity-60 cursor-not-allowed" : ""
@@ -380,11 +423,17 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
           <select
             disabled={panel.isAnalyzing}
             value={panel.motionPreset || ""}
-            onChange={(e) => onUpdate(panel.id, { motionPreset: e.target.value })}
+            onChange={(e) =>
+              onUpdate(panel.id, { motionPreset: e.target.value })
+            }
             className="w-full bg-transparent text-[10px] font-semibold text-slate-200 outline-none cursor-pointer truncate disabled:opacity-50"
           >
             {MOTION_PRESETS.map((m) => (
-              <option key={m.id} value={m.id} className="bg-[#0b0f19] text-slate-200">
+              <option
+                key={m.id}
+                value={m.id}
+                className="bg-[#0b0f19] text-slate-200"
+              >
                 {m.label.split(" (")[0]}
               </option>
             ))}
@@ -413,7 +462,9 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
               placeholder="Auto"
               className="bg-transparent border-none p-0 text-[10px] font-mono font-bold text-slate-100 w-full outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder-slate-500"
             />
-            <span className="text-[9px] font-mono text-slate-400 shrink-0">sec</span>
+            <span className="text-[9px] font-mono text-slate-400 shrink-0">
+              sec
+            </span>
           </div>
 
           <div className="flex items-center gap-0.5 border-l border-[#1e293b] pl-1 shrink-0">
@@ -421,8 +472,12 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
               type="button"
               disabled={panel.isAnalyzing}
               onClick={() => {
-                const current = panel.duration && panel.duration > 0 ? panel.duration : 3.0;
-                const next = Math.max(0.5, Math.round((current - 0.5) * 10) / 10);
+                const current =
+                  panel.duration && panel.duration > 0 ? panel.duration : 3.0;
+                const next = Math.max(
+                  0.5,
+                  Math.round((current - 0.5) * 10) / 10
+                );
                 onUpdate(panel.id, { duration: next });
               }}
               className="w-4 h-4 rounded hover:bg-[#1e293b] text-slate-400 hover:text-white flex items-center justify-center text-[11px] font-bold cursor-pointer transition-colors active:scale-90 disabled:opacity-30"
@@ -434,8 +489,12 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
               type="button"
               disabled={panel.isAnalyzing}
               onClick={() => {
-                const current = panel.duration && panel.duration > 0 ? panel.duration : 3.0;
-                const next = Math.min(60.0, Math.round((current + 0.5) * 10) / 10);
+                const current =
+                  panel.duration && panel.duration > 0 ? panel.duration : 3.0;
+                const next = Math.min(
+                  60.0,
+                  Math.round((current + 0.5) * 10) / 10
+                );
                 onUpdate(panel.id, { duration: next });
               }}
               className="w-4 h-4 rounded hover:bg-[#1e293b] text-slate-400 hover:text-white flex items-center justify-center text-[11px] font-bold cursor-pointer transition-colors active:scale-90 disabled:opacity-30"

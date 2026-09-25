@@ -19,11 +19,21 @@ const DEFAULT_CONFIG: ExtensionConfig = {
 
 async function getApiBaseUrl(): Promise<string> {
   return new Promise((resolve) => {
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.storage &&
+      chrome.storage.sync
+    ) {
       chrome.storage.sync.get(["sonikoma_config"], (result) => {
-        const stored = result && result.sonikoma_config ? result.sonikoma_config : {};
+        const stored =
+          result && result.sonikoma_config ? result.sonikoma_config : {};
         let base = stored.apiBaseUrl || DEFAULT_CONFIG.apiBaseUrl;
-        if (!base || base.includes("sonikoma.com") || base.includes("8000") || base.includes("localhost:5173")) {
+        if (
+          !base ||
+          base.includes("sonikoma.com") ||
+          base.includes("8000") ||
+          base.includes("localhost:5173")
+        ) {
           base = "http://127.0.0.1:5173";
         }
         resolve(base);
@@ -36,9 +46,14 @@ async function getApiBaseUrl(): Promise<string> {
 
 async function getWebBaseUrl(): Promise<string> {
   return new Promise((resolve) => {
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.sync) {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.storage &&
+      chrome.storage.sync
+    ) {
       chrome.storage.sync.get(["sonikoma_config"], (result) => {
-        const stored = result && result.sonikoma_config ? result.sonikoma_config : {};
+        const stored =
+          result && result.sonikoma_config ? result.sonikoma_config : {};
         let base = stored.webBaseUrl || DEFAULT_CONFIG.webBaseUrl;
         if (!base || base.includes("sonikoma.com") || base.includes("5173")) {
           base = "http://localhost:3000";
@@ -88,80 +103,91 @@ async function fetchWithFallback(
 // Dynamic Referer & Hotlink Rules for Manga CDNs (Webtoons pstatic.net, MangaDex, etc.)
 function setupDeclarativeRules() {
   try {
-    if (chrome.declarativeNetRequest && chrome.declarativeNetRequest.updateDynamicRules) {
-      chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: [1001, 1002, 1003],
-        addRules: [
-          {
-            id: 1001,
-            priority: 1,
-            action: {
-              type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
-              requestHeaders: [
-                {
-                  header: "Referer",
-                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
-                  value: "https://www.webtoons.com/",
-                },
-                {
-                  header: "Origin",
-                  operation: chrome.declarativeNetRequest.HeaderOperation.REMOVE,
-                },
-              ],
+    if (
+      chrome.declarativeNetRequest &&
+      chrome.declarativeNetRequest.updateDynamicRules
+    ) {
+      chrome.declarativeNetRequest
+        .updateDynamicRules({
+          removeRuleIds: [1001, 1002, 1003],
+          addRules: [
+            {
+              id: 1001,
+              priority: 1,
+              action: {
+                type: chrome.declarativeNetRequest.RuleActionType
+                  .MODIFY_HEADERS,
+                requestHeaders: [
+                  {
+                    header: "Referer",
+                    operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                    value: "https://www.webtoons.com/",
+                  },
+                  {
+                    header: "Origin",
+                    operation:
+                      chrome.declarativeNetRequest.HeaderOperation.REMOVE,
+                  },
+                ],
+              },
+              condition: {
+                urlFilter: "pstatic.net",
+                resourceTypes: [
+                  chrome.declarativeNetRequest.ResourceType.IMAGE,
+                  chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+                  chrome.declarativeNetRequest.ResourceType.OTHER,
+                ],
+              },
             },
-            condition: {
-              urlFilter: "pstatic.net",
-              resourceTypes: [
-                chrome.declarativeNetRequest.ResourceType.IMAGE,
-                chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-                chrome.declarativeNetRequest.ResourceType.OTHER,
-              ],
+            {
+              id: 1002,
+              priority: 1,
+              action: {
+                type: chrome.declarativeNetRequest.RuleActionType
+                  .MODIFY_HEADERS,
+                requestHeaders: [
+                  {
+                    header: "Referer",
+                    operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                    value: "https://mangadex.org/",
+                  },
+                ],
+              },
+              condition: {
+                urlFilter: "mangadex.org",
+                resourceTypes: [
+                  chrome.declarativeNetRequest.ResourceType.IMAGE,
+                  chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+                ],
+              },
             },
-          },
-          {
-            id: 1002,
-            priority: 1,
-            action: {
-              type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
-              requestHeaders: [
-                {
-                  header: "Referer",
-                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
-                  value: "https://mangadex.org/",
-                },
-              ],
+            {
+              id: 1003,
+              priority: 1,
+              action: {
+                type: chrome.declarativeNetRequest.RuleActionType
+                  .MODIFY_HEADERS,
+                requestHeaders: [
+                  {
+                    header: "Referer",
+                    operation: chrome.declarativeNetRequest.HeaderOperation.SET,
+                    value: "https://comic-action.com/",
+                  },
+                ],
+              },
+              condition: {
+                urlFilter: "comic-action.com",
+                resourceTypes: [
+                  chrome.declarativeNetRequest.ResourceType.IMAGE,
+                  chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
+                ],
+              },
             },
-            condition: {
-              urlFilter: "mangadex.org",
-              resourceTypes: [
-                chrome.declarativeNetRequest.ResourceType.IMAGE,
-                chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-              ],
-            },
-          },
-          {
-            id: 1003,
-            priority: 1,
-            action: {
-              type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
-              requestHeaders: [
-                {
-                  header: "Referer",
-                  operation: chrome.declarativeNetRequest.HeaderOperation.SET,
-                  value: "https://comic-action.com/",
-                },
-              ],
-            },
-            condition: {
-              urlFilter: "comic-action.com",
-              resourceTypes: [
-                chrome.declarativeNetRequest.ResourceType.IMAGE,
-                chrome.declarativeNetRequest.ResourceType.XMLHTTPREQUEST,
-              ],
-            },
-          },
-        ],
-      }).catch((err) => console.warn("[Sonikoma] declarativeNetRequest setup warning:", err));
+          ],
+        })
+        .catch((err) =>
+          console.warn("[Sonikoma] declarativeNetRequest setup warning:", err)
+        );
     }
   } catch (err) {
     console.warn("[Sonikoma] declarativeNetRequest exception:", err);
@@ -178,7 +204,9 @@ chrome.runtime.onInstalled.addListener(() => {
     setupDeclarativeRules();
 
     if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
-      chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => {});
+      chrome.sidePanel
+        .setPanelBehavior({ openPanelOnActionClick: false })
+        .catch(() => {});
     }
 
     if (chrome.contextMenus && chrome.contextMenus.removeAll) {
@@ -223,18 +251,26 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     } else if (info.menuItemId === "sonikoma-animate-chapter") {
       const base = await getWebBaseUrl();
       const webBase = base.replace(/\/+$/, "");
-      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const tempId = `temp_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 7)}`;
       const url = new URL(`${webBase}/editor`);
       url.searchParams.set("id", tempId);
       url.searchParams.set("url", tab.url);
       url.searchParams.set("importUrl", tab.url);
       chrome.tabs.create({ url: url.toString() }, () => {
-        if (chrome.runtime.lastError) {}
+        if (chrome.runtime.lastError) {
+        }
       });
     } else if (info.menuItemId === "sonikoma-download-chapter") {
-      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CHAPTER_DOWNLOAD" }, () => {
-        if (chrome.runtime.lastError) {}
-      });
+      chrome.tabs.sendMessage(
+        tab.id,
+        { type: "TRIGGER_CHAPTER_DOWNLOAD" },
+        () => {
+          if (chrome.runtime.lastError) {
+          }
+        }
+      );
     }
   } catch (err) {
     console.error("[Sonikoma Background] contextMenu error:", err);
@@ -251,12 +287,18 @@ chrome.commands.onCommand.addListener(async (command, tab) => {
       }
     } else if (command === "snip-panel") {
       chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CINEMA_MODE" }, () => {
-        if (chrome.runtime.lastError) {}
+        if (chrome.runtime.lastError) {
+        }
       });
     } else if (command === "download-chapter") {
-      chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CHAPTER_DOWNLOAD" }, () => {
-        if (chrome.runtime.lastError) {}
-      });
+      chrome.tabs.sendMessage(
+        tab.id,
+        { type: "TRIGGER_CHAPTER_DOWNLOAD" },
+        () => {
+          if (chrome.runtime.lastError) {
+          }
+        }
+      );
     }
   } catch (err) {
     console.error("[Sonikoma Background] onCommand error:", err);
@@ -293,13 +335,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // In-flight scrape request deduplication cache to prevent concurrent identical backend calls
 const inFlightScrapes = new Map<string, Promise<any>>();
 
-async function handleIncomingMessage(message: any, _sender: chrome.runtime.MessageSender) {
+async function handleIncomingMessage(
+  message: any,
+  _sender: chrome.runtime.MessageSender
+) {
   const { type, payload } = message || {};
 
   switch (type) {
     case "API_CHECK_HEALTH": {
       try {
-        const configuredUrl = `${(await getApiBaseUrl()).replace(/\/+$/, "")}/api/v1/system/health`;
+        const configuredUrl = `${(await getApiBaseUrl()).replace(
+          /\/+$/,
+          ""
+        )}/api/v1/system/health`;
         const candidates = [
           configuredUrl,
           "http://localhost:5173/api/v1/system/health",
@@ -333,7 +381,10 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     case "API_GET_VOICES": {
       try {
         const base = await getApiBaseUrl();
-        const res = await fetch(`${base.replace(/\/+$/, "")}/api/v1/audio/list-tts-voices`, { method: "GET" });
+        const res = await fetch(
+          `${base.replace(/\/+$/, "")}/api/v1/audio/list-tts-voices`,
+          { method: "GET" }
+        );
         if (!res.ok) return { success: false, isOffline: true, voices: [] };
         const data = await res.json();
         return { success: true, voices: data.voices || [] };
@@ -345,21 +396,27 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     case "API_GENERATE_TTS": {
       try {
         const base = await getApiBaseUrl();
-        const res = await fetch(`${base.replace(/\/+$/, "")}/api/v1/audio/synthesize-panel-audio`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            dialogue_list: payload.dialogue_list || [payload.text || ""],
-            voice: payload.voice || "en-US-GuyNeural",
-            speech_rate: payload.speech_rate || 1.0,
-            speech_pitch: payload.speech_pitch || 1.0,
-            target_duration: payload.target_duration,
-            return_base64: true,
-          }),
-        });
+        const res = await fetch(
+          `${base.replace(/\/+$/, "")}/api/v1/audio/synthesize-panel-audio`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              dialogue_list: payload.dialogue_list || [payload.text || ""],
+              voice: payload.voice || "en-US-GuyNeural",
+              speech_rate: payload.speech_rate || 1.0,
+              speech_pitch: payload.speech_pitch || 1.0,
+              target_duration: payload.target_duration,
+              return_base64: true,
+            }),
+          }
+        );
         if (!res.ok) {
           const errText = await res.text().catch(() => "");
-          return { success: false, error: `TTS synthesis error (${res.status}): ${errText}` };
+          return {
+            success: false,
+            error: `TTS synthesis error (${res.status}): ${errText}`,
+          };
         }
         const data = await res.json();
         return { success: true, data };
@@ -371,7 +428,9 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     case "API_ANALYZE_PANEL": {
       try {
         const base = await getApiBaseUrl();
-        const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
+        const apiBase = base
+          ? base.replace(/\/+$/, "")
+          : "http://localhost:5173";
         const endpoint = `${apiBase}/api/v1/ai/analyze-single-image`;
 
         let resultData: any = null;
@@ -382,7 +441,10 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
           const timeout = setTimeout(() => controller.abort(), 90000);
           const res = await fetch(endpoint, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
             body: JSON.stringify({
               url: payload.imageUrl,
               image_url: payload.imageUrl,
@@ -398,8 +460,13 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
             resultData = await res.json();
           } else {
             const errBody = await res.json().catch(() => null);
-            fetchError = errBody?.detail || errBody?.error || `HTTP ${res.status}`;
-            console.warn("[API_ANALYZE_PANEL] Server returned error:", res.status, errBody);
+            fetchError =
+              errBody?.detail || errBody?.error || `HTTP ${res.status}`;
+            console.warn(
+              "[API_ANALYZE_PANEL] Server returned error:",
+              res.status,
+              errBody
+            );
           }
         } catch (fErr: any) {
           fetchError = fErr?.message || String(fErr);
@@ -416,36 +483,69 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
             resultData.dialogue ||
             resultData.text ||
             (Array.isArray(resultData.segments)
-              ? resultData.segments.map((s: any) => s.text).filter(Boolean).join(" ")
+              ? resultData.segments
+                  .map((s: any) => s.text)
+                  .filter(Boolean)
+                  .join(" ")
               : "") ||
             "";
 
           // If speech_text is empty, check if sfx contains visible onomatopoeia words like "[Whoooosh]"
           if (!detectedText && (analysis.sfx || resultData.sfx)) {
-            const rawSfx = String(analysis.sfx || resultData.sfx).replace(/^\[|\]$/g, "").trim();
-            if (rawSfx && rawSfx.length <= 40 && !rawSfx.toLowerCase().includes("ambient")) {
+            const rawSfx = String(analysis.sfx || resultData.sfx)
+              .replace(/^\[|\]$/g, "")
+              .trim();
+            if (
+              rawSfx &&
+              rawSfx.length <= 40 &&
+              !rawSfx.toLowerCase().includes("ambient")
+            ) {
               detectedText = rawSfx;
             }
           }
 
           // Format audio URL if relative path
           let audioUrl = resultData.audio_url || analysis.audio_url || null;
-          if (audioUrl && typeof audioUrl === "string" && audioUrl.startsWith("/")) {
+          if (
+            audioUrl &&
+            typeof audioUrl === "string" &&
+            audioUrl.startsWith("/")
+          ) {
             audioUrl = `${apiBase}${audioUrl}`;
           }
 
-          let narrativeAudioUrl = resultData.narrative_audio_url || analysis.narrative_audio_url || null;
-          if (narrativeAudioUrl && typeof narrativeAudioUrl === "string" && narrativeAudioUrl.startsWith("/")) {
+          let narrativeAudioUrl =
+            resultData.narrative_audio_url ||
+            analysis.narrative_audio_url ||
+            null;
+          if (
+            narrativeAudioUrl &&
+            typeof narrativeAudioUrl === "string" &&
+            narrativeAudioUrl.startsWith("/")
+          ) {
             narrativeAudioUrl = `${apiBase}${narrativeAudioUrl}`;
           }
 
           return {
             success: true,
             speech_text: detectedText,
-            motion_type: analysis.motion_type || analysis.motionPreset || resultData.motion_type || "zoom_in",
-            duration: Number(analysis.duration) || Number(resultData.duration) || 0,
-            visual_description: analysis.visual_description || resultData.visual_description || "",
-            narrative: resultData.narrative || resultData.narrativeText || analysis.narrative || analysis.narrativeText || "",
+            motion_type:
+              analysis.motion_type ||
+              analysis.motionPreset ||
+              resultData.motion_type ||
+              "zoom_in",
+            duration:
+              Number(analysis.duration) || Number(resultData.duration) || 0,
+            visual_description:
+              analysis.visual_description ||
+              resultData.visual_description ||
+              "",
+            narrative:
+              resultData.narrative ||
+              resultData.narrativeText ||
+              analysis.narrative ||
+              analysis.narrativeText ||
+              "",
             sfx: analysis.sfx || resultData.sfx || "",
             audio_url: audioUrl,
             narrative_audio_url: narrativeAudioUrl,
@@ -454,7 +554,9 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
 
         return {
           success: false,
-          error: fetchError || "AI Analysis request failed to return data from backend.",
+          error:
+            fetchError ||
+            "AI Analysis request failed to return data from backend.",
         };
       } catch (err: any) {
         return {
@@ -467,14 +569,19 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     case "API_ANALYZE_ALL_PANELS": {
       try {
         const base = await getApiBaseUrl();
-        const apiBase = base ? base.replace(/\/+$/, "") : "http://localhost:5173";
+        const apiBase = base
+          ? base.replace(/\/+$/, "")
+          : "http://localhost:5173";
         const endpoint = `${apiBase}/api/v1/ai/analyze-all-panels`;
 
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 180000);
         const res = await fetch(endpoint, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
           body: JSON.stringify({
             panels: payload.panels,
             model: payload.model || "gemini-2.5-flash",
@@ -498,16 +605,30 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
           data.results.forEach((r: any) => {
             const analysis = r.analysis || r;
             if (!analysis.speech_text && (analysis.sfx || r.sfx)) {
-              const rawSfx = String(analysis.sfx || r.sfx).replace(/^\[|\]$/g, "").trim();
-              if (rawSfx && rawSfx.length <= 40 && !rawSfx.toLowerCase().includes("ambient")) {
+              const rawSfx = String(analysis.sfx || r.sfx)
+                .replace(/^\[|\]$/g, "")
+                .trim();
+              if (
+                rawSfx &&
+                rawSfx.length <= 40 &&
+                !rawSfx.toLowerCase().includes("ambient")
+              ) {
                 analysis.speech_text = rawSfx;
                 r.speech_text = rawSfx;
               }
             }
-            if (r.audio_url && typeof r.audio_url === "string" && r.audio_url.startsWith("/")) {
+            if (
+              r.audio_url &&
+              typeof r.audio_url === "string" &&
+              r.audio_url.startsWith("/")
+            ) {
               r.audio_url = `${apiBase}${r.audio_url}`;
             }
-            if (r.narrative_audio_url && typeof r.narrative_audio_url === "string" && r.narrative_audio_url.startsWith("/")) {
+            if (
+              r.narrative_audio_url &&
+              typeof r.narrative_audio_url === "string" &&
+              r.narrative_audio_url.startsWith("/")
+            ) {
               r.narrative_audio_url = `${apiBase}${r.narrative_audio_url}`;
             }
           });
@@ -532,13 +653,17 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
 
         const rawPanels = Array.isArray(payload?.panels) ? payload.panels : [];
         const normalizedPanels = rawPanels.map((p: any, idx: number) => {
-          let panelId = typeof p.id === "number" ? p.id : parseInt(String(p.id).replace(/\D/g, ""), 10);
+          let panelId =
+            typeof p.id === "number"
+              ? p.id
+              : parseInt(String(p.id).replace(/\D/g, ""), 10);
           if (isNaN(panelId)) panelId = idx + 1;
           return {
             id: panelId,
             image_url: p.image_url || p.imageUrl || "",
             duration: typeof p.duration === "number" ? p.duration : 3.0,
-            speech_text: p.speech_text || p.dialogueText || p.narrativeText || "",
+            speech_text:
+              p.speech_text || p.dialogueText || p.narrativeText || "",
             sfx: p.sfx || "",
             audio_url: p.audio_url || p.audioUrl || p.narrativeAudioUrl || "",
             motion_type: p.motion_type || p.motionPreset || "",
@@ -546,7 +671,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
         });
 
         const renderPayload = {
-          project_id: payload?.project_id || ("ext-" + Date.now()),
+          project_id: payload?.project_id || "ext-" + Date.now(),
           panels: normalizedPanels,
           voice: payload?.voice || "en-US-GuyNeural",
           music_theme: payload?.music_theme || payload?.bgm_mood || "none",
@@ -554,10 +679,17 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
           frame_rate: payload?.frame_rate || 24,
           video_format: payload?.video_format || "mp4",
           background_style: payload?.background_style || "black",
-          subtitles_style: payload?.subtitles_style || (payload?.show_subtitles ? "burn-in" : "none"),
+          subtitles_style:
+            payload?.subtitles_style ||
+            (payload?.show_subtitles ? "burn-in" : "none"),
           master_volume: payload?.master_volume ?? 1.0,
           narration_volume: payload?.narration_volume ?? 1.0,
-          bgm_volume: typeof payload?.bgm_volume === "number" ? (payload.bgm_volume > 1 ? payload.bgm_volume / 100 : payload.bgm_volume) : 0.65,
+          bgm_volume:
+            typeof payload?.bgm_volume === "number"
+              ? payload.bgm_volume > 1
+                ? payload.bgm_volume / 100
+                : payload.bgm_volume
+              : 0.65,
           speech_rate: payload?.speech_rate ?? 1.0,
           speech_pitch: payload?.speech_pitch ?? 1.0,
         };
@@ -574,12 +706,19 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
             const errJson = JSON.parse(errText);
             errDetail = errJson.detail || errJson.error || errText;
           } catch {}
-          return { success: false, error: errDetail || `Backend HTTP ${res.status}` };
+          return {
+            success: false,
+            error: errDetail || `Backend HTTP ${res.status}`,
+          };
         }
         const data = await res.json();
         return { success: true, ...data };
       } catch (err: any) {
-        return { success: false, isOffline: true, error: err.message || "Failed to contact backend render engine" };
+        return {
+          success: false,
+          isOffline: true,
+          error: err.message || "Failed to contact backend render engine",
+        };
       }
     }
 
@@ -591,10 +730,13 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
         }
         const base = await getApiBaseUrl();
         const cleanBase = base.replace(/\/+$/, "");
-        const res = await fetch(`${cleanBase}/api/v1/jobs/${encodeURIComponent(jobId)}`, {
-          method: "GET",
-          headers: { "Accept": "application/json" },
-        });
+        const res = await fetch(
+          `${cleanBase}/api/v1/jobs/${encodeURIComponent(jobId)}`,
+          {
+            method: "GET",
+            headers: { Accept: "application/json" },
+          }
+        );
         if (!res.ok) {
           const errText = await res.text().catch(() => "");
           return { success: false, error: errText || `HTTP ${res.status}` };
@@ -661,42 +803,57 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
           let effectiveBaseUrl = "http://127.0.0.1:5173";
 
           try {
-            const { res, baseUrl } = await fetchWithFallback("/api/v1/scraper/reader-chapter", {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Accept: "application/json" },
-              body: JSON.stringify({
-                url: targetUrl,
-                force_refresh: forceRefresh,
-              }),
-              signal: controller.signal,
-            });
+            const { res, baseUrl } = await fetchWithFallback(
+              "/api/v1/scraper/reader-chapter",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
+                body: JSON.stringify({
+                  url: targetUrl,
+                  force_refresh: forceRefresh,
+                }),
+                signal: controller.signal,
+              }
+            );
             effectiveBaseUrl = baseUrl;
 
             if (res.ok) {
               data = await res.json();
             } else {
-              console.warn(`[API_SCRAPE_CHAPTER] /reader-chapter returned ${res.status}, attempting /chapter/sync fallback`);
+              console.warn(
+                `[API_SCRAPE_CHAPTER] /reader-chapter returned ${res.status}, attempting /chapter/sync fallback`
+              );
             }
           } catch (rErr: any) {
-            console.warn("[API_SCRAPE_CHAPTER] /reader-chapter fetch error:", rErr?.message || rErr);
+            console.warn(
+              "[API_SCRAPE_CHAPTER] /reader-chapter fetch error:",
+              rErr?.message || rErr
+            );
             fetchError = rErr?.message || String(rErr);
           }
 
           // If reader-chapter didn't succeed, fallback to synchronous chapter scrape endpoint
           if (!data || !data.success) {
             try {
-              const { res: syncRes, baseUrl: syncBase } = await fetchWithFallback("/api/v1/scraper/chapter/sync", {
-                method: "POST",
-                headers: { "Content-Type": "application/json", Accept: "application/json" },
-                body: JSON.stringify({
-                  url: targetUrl,
-                  force_refresh: forceRefresh,
-                  bypass_cache: forceRefresh,
-                  proxy_images: true,
-                  filter_banners: true,
-                }),
-                signal: controller.signal,
-              });
+              const { res: syncRes, baseUrl: syncBase } =
+                await fetchWithFallback("/api/v1/scraper/chapter/sync", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                  },
+                  body: JSON.stringify({
+                    url: targetUrl,
+                    force_refresh: forceRefresh,
+                    bypass_cache: forceRefresh,
+                    proxy_images: true,
+                    filter_banners: true,
+                  }),
+                  signal: controller.signal,
+                });
               effectiveBaseUrl = syncBase;
 
               if (syncRes.ok) {
@@ -706,18 +863,34 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
                     success: true,
                     url: syncData.url || targetUrl,
                     series_title: syncData.series?.title || "",
-                    chapter_title: syncData.chapter?.title || (syncData.chapter?.number ? `Chapter ${syncData.chapter.number}` : ""),
+                    chapter_title:
+                      syncData.chapter?.title ||
+                      (syncData.chapter?.number
+                        ? `Chapter ${syncData.chapter.number}`
+                        : ""),
                     chapter_number: syncData.chapter?.number || null,
-                    total_panels: syncData.total_images || (syncData.images ? syncData.images.length : 0),
-                    panels: (syncData.images || []).map((img: any, idx: number) => ({
-                      index: idx,
-                      url: img.url || (typeof img === "string" ? img : ""),
-                      proxied_url: img.proxied_url || img.url || "",
-                      width: img.width || 800,
-                      height: img.height || 1200,
-                    })),
-                    images: (syncData.images || []).map((img: any) => img.proxied_url || img.url || (typeof img === "string" ? img : "")),
-                    raw_images: (syncData.images || []).map((img: any) => img.url || (typeof img === "string" ? img : "")),
+                    total_panels:
+                      syncData.total_images ||
+                      (syncData.images ? syncData.images.length : 0),
+                    panels: (syncData.images || []).map(
+                      (img: any, idx: number) => ({
+                        index: idx,
+                        url: img.url || (typeof img === "string" ? img : ""),
+                        proxied_url: img.proxied_url || img.url || "",
+                        width: img.width || 800,
+                        height: img.height || 1200,
+                      })
+                    ),
+                    images: (syncData.images || []).map(
+                      (img: any) =>
+                        img.proxied_url ||
+                        img.url ||
+                        (typeof img === "string" ? img : "")
+                    ),
+                    raw_images: (syncData.images || []).map(
+                      (img: any) =>
+                        img.url || (typeof img === "string" ? img : "")
+                    ),
                   };
                 }
               } else {
@@ -730,7 +903,12 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
           }
           clearTimeout(timeout);
 
-          if (data && data.success && Array.isArray(data.panels) && data.panels.length > 0) {
+          if (
+            data &&
+            data.success &&
+            Array.isArray(data.panels) &&
+            data.panels.length > 0
+          ) {
             // Normalize all image URLs: prefix relative proxy URLs with effectiveBaseUrl
             const normalizeUrl = (u: string) => {
               if (!u) return "";
@@ -751,7 +929,9 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
               };
             });
 
-            const normalizedImages = (data.images || []).map((u: string) => normalizeUrl(u));
+            const normalizedImages = (data.images || []).map((u: string) =>
+              normalizeUrl(u)
+            );
 
             return {
               success: true,
@@ -767,7 +947,9 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
 
           return {
             success: false,
-            error: fetchError || "Backend scraper did not return any panels for this URL.",
+            error:
+              fetchError ||
+              "Backend scraper did not return any panels for this URL.",
           };
         })();
 
@@ -792,9 +974,13 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
       const cleanApi = apiBase.replace(/\/+$/, "");
 
       const tabUrl = payload?.url?.trim();
-      const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const tempId = `temp_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 7)}`;
       const panels = Array.isArray(payload?.panels) ? payload.panels : [];
-      const scrapedImages = Array.isArray(payload?.scrapedImages) ? payload.scrapedImages : [];
+      const scrapedImages = Array.isArray(payload?.scrapedImages)
+        ? payload.scrapedImages
+        : [];
 
       if (panels.length > 0) {
         const transferBody = JSON.stringify({
@@ -819,7 +1005,10 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
           });
           if (res.ok) saved = true;
         } catch (e) {
-          console.warn("[Service Worker] Direct API transfer failed, will try web base:", e);
+          console.warn(
+            "[Service Worker] Direct API transfer failed, will try web base:",
+            e
+          );
         }
 
         if (!saved && webBase && webBase !== cleanApi) {
@@ -850,7 +1039,11 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     }
 
     case "TRACK_CHAPTER_READ": {
-      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.local
+      ) {
         chrome.storage.local.get(["sonikoma_reading_history"], (result) => {
           const current = (result && result.sonikoma_reading_history) || [];
           const updated = [
@@ -870,7 +1063,11 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     }
 
     case "TRIGGER_ACTIVE_SCENE_SNIP": {
-      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.local
+      ) {
         chrome.storage.local.get(["sonikoma_captured_scenes"], (result) => {
           const current = (result && result.sonikoma_captured_scenes) || [];
           const updated = [

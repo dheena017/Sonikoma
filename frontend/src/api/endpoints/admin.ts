@@ -12,20 +12,28 @@ export const adminUpdateUser = async (
   userId: string,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/auth/admin/users/${userId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/auth/admin/users/${userId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }
+  );
 };
 
 export const adminDeleteUser = async (
   fetchWithInterceptor: FetchClient,
   userId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/auth/admin/users/${userId}`, {
-    method: "DELETE",
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/auth/admin/users/${userId}`,
+    {
+      method: "DELETE",
+    }
+  );
 };
 
 export const adminGetSettings = async (

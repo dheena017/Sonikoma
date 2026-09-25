@@ -188,10 +188,10 @@ export default function ImportedAssetsHeader({
               {isBatchCropping && batchProgress
                 ? `Cropping ${batchProgress.current}/${batchProgress.total}`
                 : isCleaningBubbles && cleanProgress
-                  ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
-                  : isBatchMerging
-                    ? "Stitching..."
-                    : "Processing..."}
+                ? `Cleaning ${cleanProgress.current}/${cleanProgress.total}`
+                : isBatchMerging
+                ? "Stitching..."
+                : "Processing..."}
             </span>
           </div>
         )}
@@ -318,8 +318,16 @@ export default function ImportedAssetsHeader({
           </span>
           {viewLayout === "scroll" && scrapedImagesLength > 1 && (
             <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-indigo-500/30 text-[10px] text-indigo-200 font-mono shadow-sm">
-              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-indigo-500/20 text-indigo-300 text-[9px] font-bold">⇧</span>
-              <span>Hold <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">Shift</kbd> + Scroll to move horizontally</span>
+              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-indigo-500/20 text-indigo-300 text-[9px] font-bold">
+                ⇧
+              </span>
+              <span>
+                Hold{" "}
+                <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">
+                  Shift
+                </kbd>{" "}
+                + Scroll to move horizontally
+              </span>
             </span>
           )}
         </div>

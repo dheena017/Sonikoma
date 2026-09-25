@@ -189,9 +189,12 @@ const AdminDashboardPage = React.memo(
     const handleClearCache = async () => {
       setProcessingAction("cache");
       try {
-        const res = await fetchWithInterceptor("/api/v1/system/metrics/purge-cache", {
-          method: "POST",
-        });
+        const res = await fetchWithInterceptor(
+          "/api/v1/system/metrics/purge-cache",
+          {
+            method: "POST",
+          }
+        );
         if (res.ok) {
           if (addNotification)
             addNotification(
@@ -217,9 +220,12 @@ const AdminDashboardPage = React.memo(
         return;
       setProcessingAction("flush");
       try {
-        const res = await fetchWithInterceptor("/api/v1/system/metrics/flush-temp", {
-          method: "POST",
-        });
+        const res = await fetchWithInterceptor(
+          "/api/v1/system/metrics/flush-temp",
+          {
+            method: "POST",
+          }
+        );
         if (res.ok) {
           const data = await res.json();
           if (addNotification)
@@ -247,9 +253,12 @@ const AdminDashboardPage = React.memo(
         return;
       setProcessingAction("stop");
       try {
-        const res = await fetchWithInterceptor("/api/v1/system/metrics/emergency-stop", {
-          method: "POST",
-        });
+        const res = await fetchWithInterceptor(
+          "/api/v1/system/metrics/emergency-stop",
+          {
+            method: "POST",
+          }
+        );
         if (res.ok) {
           if (addNotification)
             addNotification("Emergency compilation halt executed!", "warning");
@@ -678,512 +687,525 @@ const AdminDashboardPage = React.memo(
                 Admin Console
               </h1>
               <p className="text-[#9CA3AF] text-xs mt-0.5">
-                Monitor system health, database latency, active worker jobs, and user accounts
+                Monitor system health, database latency, active worker jobs, and
+                user accounts
               </p>
             </div>
 
-          {/* Header Right Action Toolbar */}
-          <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-center shrink-0">
-            <button
-              type="button"
-              onClick={handleClearCache}
-              disabled={processingAction === "cache"}
-              className="btn-secondary flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold disabled:opacity-40"
-            >
-              <Wind className="w-3.5 h-3.5 text-[#3B82F6]" />
-              <span>
-                {processingAction === "cache" ? "Purging..." : "Purge Cache"}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleFlushTemp}
-              disabled={processingAction === "flush"}
-              className="btn-secondary flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold disabled:opacity-40"
-            >
-              <Trash2 className="w-3.5 h-3.5 text-[#F59E0B]" />
-              <span>Flush Temp</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={refreshData}
-              disabled={loadingStats}
-              className="btn-primary flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-mono font-black uppercase tracking-wider shadow-sm"
-            >
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${loadingStats ? "animate-spin" : ""}`}
-              />
-              <span>Refresh</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Header Banner */}
-        {cpuLoad > 85 && (
-          <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 flex items-center gap-3 text-rose-400 animate-pulse">
-            <AlertCircle className="w-5 h-5" />
-            <div className="text-xs font-semibold">
-              Critical resource notice: Host CPU load exceeds 85%. Rendering
-              pipelines may trigger latency.
-            </div>
-          </div>
-        )}
-
-        {/* Backend Status Panel */}
-        <BackendStatusPanel
-          online={backendOnline}
-          metrics={backendMetrics}
-          lastChecked={lastChecked}
-          onRefresh={refreshData}
-        />
-
-        {/* Stats Ribbon */}
-        {loadingStats ? (
-          <DashboardStatsSkeleton count={4} />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Users className="w-16 h-16 text-[#3B82F6]" />
-              </div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
-                  <Users className="w-4 h-4" />
-                </div>
-                <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
-                  Total Creators
-                </h3>
-              </div>
-              <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
-                {stats.users?.toLocaleString() || "0"}
-              </div>
-              <p className="text-[10px] text-[#3B82F6] font-bold flex items-center gap-1 font-mono">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Active platform subscription tier</span>
-              </p>
-            </div>
-
-            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <FolderGit2 className="w-16 h-16 text-[#3B82F6]" />
-              </div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
-                  <FolderGit2 className="w-4 h-4" />
-                </div>
-                <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
-                  Total Projects
-                </h3>
-              </div>
-              <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
-                {stats.projects?.toLocaleString() || "0"}
-              </div>
-              <p className="text-[10px] text-[#10B981] font-bold flex items-center gap-1 font-mono">
-                <TrendingUp className="w-3.5 h-3.5" />
-                <span>Storyboards compiled</span>
-              </p>
-            </div>
-
-            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#10B981]/50 transition-all shadow-sm text-left">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <DollarSign className="w-16 h-16 text-[#10B981]" />
-              </div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#10B981]/10 rounded-xl text-[#10B981] border border-[#10B981]/20">
-                  <DollarSign className="w-4 h-4" />
-                </div>
-                <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
-                  Revenue MRR
-                </h3>
-              </div>
-              <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
-                ${(analytics?.mrr || 0).toLocaleString()}
-              </div>
-              <p className="text-[10px] text-[#10B981] font-bold flex items-center gap-1 font-mono">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>
-                  {analytics?.active_subscriptions || 0} active paying plans
-                </span>
-              </p>
-            </div>
-
-            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                <Activity className="w-16 h-16 text-[#3B82F6]" />
-              </div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
-                  <Activity className="w-4 h-4" />
-                </div>
-                <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
-                  Pipeline Health
-                </h3>
-              </div>
-              <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
-                {analytics?.success_rate || 100}%
-              </div>
-              <p className="text-[10px] text-[#3B82F6] font-bold flex items-center gap-1 font-mono">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Process compilation rate</span>
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Core Analytics SVG Trends Chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between shadow-sm text-left">
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-md font-extrabold text-[#E5E5E5] flex items-center gap-2 font-mono">
-                  <TrendingUp className="w-4 h-4 text-[#3B82F6]" /> Platform
-                  Signups & Project Activity
-                </h3>
-                <button
-                  onClick={refreshData}
-                  className="btn-secondary p-1.5 rounded-lg cursor-pointer"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              <div className="w-full relative py-2">{renderedChart}</div>
-            </div>
-          </div>
-
-          {/* Performance status & Telemetry details */}
-          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-sm text-left">
-            <div>
-              <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2 font-mono">
-                <Server className="w-4 h-4 text-[#3B82F6]" /> Infrastructure
-                Pulse
-              </h3>
-              <div className="space-y-4">
-                {/* CPU Load bar */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-[11px] font-bold">
-                    <span className="text-neutral-500 uppercase tracking-widest">
-                      CPU LOAD
-                    </span>
-                    <span className="text-neutral-300">{cpuLoad}%</span>
-                  </div>
-                  <div className="w-full bg-[#040406] h-1.5 rounded-full overflow-hidden border border-neutral-900">
-                    <div
-                      className={`h-full transition-all duration-1000 ${
-                        cpuLoad > 80
-                          ? "bg-rose-500"
-                          : cpuLoad > 50
-                          ? "bg-amber-500"
-                          : "bg-[#3B82F6]"
-                      }`}
-                      style={{ width: `${cpuLoad}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* RAM usage bar */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-[11px] font-bold">
-                    <span className="text-neutral-500 uppercase tracking-widest">
-                      RSS MEMORY
-                    </span>
-                    <span className="text-neutral-300">
-                      {stats.memory || "0MB"}
-                    </span>
-                  </div>
-                  <div className="w-full bg-[#040406] h-1.5 rounded-full overflow-hidden border border-neutral-900">
-                    <div
-                      className="bg-[#3B82F6] h-full transition-all duration-1000"
-                      style={{ width: `${Math.min(((parseFloat(stats.memory) || 0) / 512) * 100, 100)}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-neutral-800/60 space-y-2 text-xs font-medium">
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-500">System Uptime</span>
-                    <span className="text-neutral-300 font-mono font-bold">
-                      {stats.uptime || "Online"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-500">Active Compiles</span>
-                    <span className="text-[#3B82F6] font-mono font-bold">
-                      {activeJobsCount} jobs in queue
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-500">DB Host Status</span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold ${
-                        dbStatus === "Healthy"
-                          ? "bg-emerald-500/10 text-emerald-400"
-                          : "bg-rose-500/10 text-rose-400"
-                      }`}
-                    >
-                      {dbStatus}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-500">DB IO Latency</span>
-                    <span className="text-blue-400 font-mono font-bold">
-                      {stats.dbLatencyMs || 0}ms
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions Panel & Announcements Broadcaster */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 lg:col-span-2 shadow-xl text-left">
-            <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
-              <Zap className="w-4 h-4 text-[#3B82F6]" /> Executive Actions
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Header Right Action Toolbar */}
+            <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-center shrink-0">
               <button
+                type="button"
                 onClick={handleClearCache}
                 disabled={processingAction === "cache"}
-                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                className="btn-secondary flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold disabled:opacity-40"
               >
-                <div className="flex items-center justify-between">
-                  <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
-                    {processingAction === "cache"
-                      ? "Clearing..."
-                      : "Purge RAM Cache"}
-                  </h4>
-                  <Trash2 className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
-                </div>
-                <p className="text-[10px] text-[#9CA3AF] mt-1">
-                  Force garbage collect and invalidate platform key caches.
-                </p>
+                <Wind className="w-3.5 h-3.5 text-[#3B82F6]" />
+                <span>
+                  {processingAction === "cache" ? "Purging..." : "Purge Cache"}
+                </span>
               </button>
 
               <button
+                type="button"
                 onClick={handleFlushTemp}
                 disabled={processingAction === "flush"}
-                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#F59E0B] hover:bg-[#F59E0B]/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                className="btn-secondary flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold disabled:opacity-40"
               >
-                <div className="flex items-center justify-between">
-                  <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#F59E0B] transition-colors">
-                    {processingAction === "flush"
-                      ? "Flushing..."
-                      : "Flush Temporary Files"}
-                  </h4>
-                  <Wind className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#F59E0B]" />
-                </div>
-                <p className="text-[10px] text-[#9CA3AF] mt-1">
-                  Remove intermediate frame logs, cached audio slices, and
-                  exports.
-                </p>
+                <Trash2 className="w-3.5 h-3.5 text-[#F59E0B]" />
+                <span>Flush Temp</span>
               </button>
 
               <button
-                onClick={handleExportLogs}
-                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
+                type="button"
+                onClick={refreshData}
+                disabled={loadingStats}
+                className="btn-primary flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-mono font-black uppercase tracking-wider shadow-sm"
               >
-                <div className="flex items-center justify-between">
-                  <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
-                    Export Audit Log CSV
-                  </h4>
-                  <Download className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
-                </div>
-                <p className="text-[10px] text-[#9CA3AF] mt-1">
-                  Download the complete security audit events history as a file.
-                </p>
-              </button>
-
-              <button
-                onClick={() => navigateTo("/admin/jobs")}
-                className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
-                    Manage Background Jobs
-                  </h4>
-                  <Activity className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
-                </div>
-                <p className="text-[10px] text-[#9CA3AF] mt-1">
-                  Monitor live tasks, cancel queued workers, and purge completed jobs.
-                </p>
-              </button>
-
-              <button
-                onClick={handleEmergencyStop}
-                disabled={processingAction === "stop"}
-                className="p-4 bg-[#EF4444]/5 border border-[#EF4444]/20 rounded-xl hover:bg-[#EF4444]/10 hover:border-[#EF4444]/40 transition-all text-left group disabled:opacity-50 cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <h4 className="text-[#EF4444] font-bold text-xs">
-                    {processingAction === "stop"
-                      ? "STOPPING..."
-                      : "EMERGENCY SHUTDOWN"}
-                  </h4>
-                  <Flame className="w-3.5 h-3.5 text-[#EF4444]/70 group-hover:scale-110 transition-transform" />
-                </div>
-                <p className="text-[10px] text-[#EF4444]/80 mt-1">
-                  Halt and kill all active child process compilation routines.
-                </p>
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${
+                    loadingStats ? "animate-spin" : ""
+                  }`}
+                />
+                <span>Refresh</span>
               </button>
             </div>
           </div>
 
-          {/* Broadcast announcements */}
-          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 shadow-xl text-left">
-            <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
-              <Mail className="w-4 h-4 text-[#3B82F6]" /> Push Broadcast
-            </h3>
-            <form onSubmit={handleBroadcastAnnouncement} className="space-y-3">
-              <input
-                type="text"
-                placeholder="Headline/Title"
-                value={announcementTitle}
-                onChange={(e) => setAnnouncementTitle(e.target.value)}
-                className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600"
-              />
-              <textarea
-                placeholder="Announcement message..."
-                rows={2}
-                value={announcementMsg}
-                onChange={(e) => setAnnouncementMsg(e.target.value)}
-                className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600 resize-none"
-              />
-              <div className="flex gap-2">
-                <select
-                  value={announcementType}
-                  onChange={(e: any) => setAnnouncementType(e.target.value)}
-                  className="px-2.5 py-1.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] focus:outline-none focus:border-neutral-600"
-                >
-                  <option value="info">💡 Info</option>
-                  <option value="warning">⚠️ Warning</option>
-                  <option value="success">✅ Success</option>
-                  <option value="error">🚨 Alert</option>
-                </select>
-                <button
-                  type="submit"
-                  disabled={processingAction === "broadcast"}
-                  className="btn-primary flex-1 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                >
-                  {processingAction === "broadcast"
-                    ? "Broadcasting..."
-                    : "Publish Banner"}
-                </button>
+          {/* Header Banner */}
+          {cpuLoad > 85 && (
+            <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 flex items-center gap-3 text-rose-400 animate-pulse">
+              <AlertCircle className="w-5 h-5" />
+              <div className="text-xs font-semibold">
+                Critical resource notice: Host CPU load exceeds 85%. Rendering
+                pipelines may trigger latency.
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
+          )}
 
-        {/* Audit Logs and Users Impersonation Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* User Impersonation Table */}
-          <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-md font-extrabold text-[#E5E5E5] flex items-center gap-2">
-                  <Users className="w-4 h-4 text-[#3B82F6]" /> Creator
-                  Switchboard
+          {/* Backend Status Panel */}
+          <BackendStatusPanel
+            online={backendOnline}
+            metrics={backendMetrics}
+            lastChecked={lastChecked}
+            onRefresh={refreshData}
+          />
+
+          {/* Stats Ribbon */}
+          {loadingStats ? (
+            <DashboardStatsSkeleton count={4} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Users className="w-16 h-16 text-[#3B82F6]" />
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
+                    Total Creators
+                  </h3>
+                </div>
+                <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
+                  {stats.users?.toLocaleString() || "0"}
+                </div>
+                <p className="text-[10px] text-[#3B82F6] font-bold flex items-center gap-1 font-mono">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Active platform subscription tier</span>
+                </p>
+              </div>
+
+              <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <FolderGit2 className="w-16 h-16 text-[#3B82F6]" />
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
+                    <FolderGit2 className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
+                    Total Projects
+                  </h3>
+                </div>
+                <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
+                  {stats.projects?.toLocaleString() || "0"}
+                </div>
+                <p className="text-[10px] text-[#10B981] font-bold flex items-center gap-1 font-mono">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>Storyboards compiled</span>
+                </p>
+              </div>
+
+              <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-[#10B981]/50 transition-all shadow-sm text-left">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <DollarSign className="w-16 h-16 text-[#10B981]" />
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-[#10B981]/10 rounded-xl text-[#10B981] border border-[#10B981]/20">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
+                    Revenue MRR
+                  </h3>
+                </div>
+                <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
+                  ${(analytics?.mrr || 0).toLocaleString()}
+                </div>
+                <p className="text-[10px] text-[#10B981] font-bold flex items-center gap-1 font-mono">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>
+                    {analytics?.active_subscriptions || 0} active paying plans
+                  </span>
+                </p>
+              </div>
+
+              <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 relative overflow-hidden group hover:border-neutral-700 transition-all shadow-sm text-left">
+                <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Activity className="w-16 h-16 text-[#3B82F6]" />
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-[#1E1E1E] rounded-xl text-[#3B82F6] border border-[#2F2F2F]">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-[#9CA3AF] font-bold text-xs uppercase tracking-wider font-mono">
+                    Pipeline Health
+                  </h3>
+                </div>
+                <div className="text-3xl font-extrabold text-[#E5E5E5] font-mono leading-none mb-2">
+                  {analytics?.success_rate || 100}%
+                </div>
+                <p className="text-[10px] text-[#3B82F6] font-bold flex items-center gap-1 font-mono">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Process compilation rate</span>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Core Analytics SVG Trends Chart */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between shadow-sm text-left">
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-md font-extrabold text-[#E5E5E5] flex items-center gap-2 font-mono">
+                    <TrendingUp className="w-4 h-4 text-[#3B82F6]" /> Platform
+                    Signups & Project Activity
+                  </h3>
+                  <button
+                    onClick={refreshData}
+                    className="btn-secondary p-1.5 rounded-lg cursor-pointer"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="w-full relative py-2">{renderedChart}</div>
+              </div>
+            </div>
+
+            {/* Performance status & Telemetry details */}
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-sm text-left">
+              <div>
+                <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2 font-mono">
+                  <Server className="w-4 h-4 text-[#3B82F6]" /> Infrastructure
+                  Pulse
                 </h3>
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-[#6B7280] absolute left-2.5 top-2.5" />
-                  <input
-                    type="text"
-                    placeholder="Search users..."
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
-                    className="bg-[#121212] border border-[#2F2F2F] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600 w-44"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
-                {loadingUsers ? (
-                  <div className="text-center py-6 text-xs text-[#6B7280] italic">
-                    Fetching creators community...
-                  </div>
-                ) : filteredUsers.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-[#6B7280] italic">
-                    No creators match search.
-                  </div>
-                ) : (
-                  filteredUsers.map((u) => (
-                    <div
-                      key={u.id}
-                      className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-center justify-between group hover:border-neutral-700 transition-all"
-                    >
-                      <div className="space-y-0.5 min-w-0 flex-1 pr-2">
-                        <div className="font-bold text-xs text-[#E5E5E5]">
-                          {u.full_name || "Anonymous"}
-                        </div>
-                        <div className="text-[10px] text-[#9CA3AF] font-mono truncate">
-                          {u.email}
-                        </div>
-                        <div className="text-[9px] text-[#6B7280] font-mono flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5" />
-                          Joined {formatDate(u.created_at)}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleImpersonate(u.id)}
-                        className="btn-secondary flex-shrink-0 flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold text-[#3B82F6] hover:text-white border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 rounded-lg"
-                      >
-                        Impersonate <ArrowRight className="w-3 h-3" />
-                      </button>
+                <div className="space-y-4">
+                  {/* CPU Load bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-[11px] font-bold">
+                      <span className="text-neutral-500 uppercase tracking-widest">
+                        CPU LOAD
+                      </span>
+                      <span className="text-neutral-300">{cpuLoad}%</span>
                     </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Audit Logs list */}
-          <div className="self-start h-fit bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
-            <div>
-              <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#3B82F6]" /> Security
-                Audit Events
-              </h3>
-              <div className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1">
-                {recentLogs.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-[#6B7280] italic">
-                    No security audit events logs found.
-                  </div>
-                ) : (
-                  recentLogs.map((log) => (
-                    <div
-                      key={log.id}
-                      className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-start justify-between text-xs hover:border-neutral-700 transition-all gap-2"
-                    >
-                      <div className="space-y-0.5 min-w-0 flex-1">
-                        <div className="font-bold text-[#E5E5E5] text-xs">
-                          {log.action}
-                        </div>
-                        <div className="text-[10px] text-[#9CA3AF]">
-                          {log.email || "System"} · {log.ip_address}
-                        </div>
-                        <div className="text-[9px] text-[#6B7280] font-mono flex items-center gap-1">
-                          <Clock className="w-2.5 h-2.5 inline" />
-                          {formatDate(log.created_at)}
-                        </div>
-                      </div>
-                      <span
-                        className={`flex-shrink-0 px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
-                          log.status === "Success"
-                            ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
-                            : "bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30"
+                    <div className="w-full bg-[#040406] h-1.5 rounded-full overflow-hidden border border-neutral-900">
+                      <div
+                        className={`h-full transition-all duration-1000 ${
+                          cpuLoad > 80
+                            ? "bg-rose-500"
+                            : cpuLoad > 50
+                            ? "bg-amber-500"
+                            : "bg-[#3B82F6]"
                         }`}
-                      >
-                        {log.status}
+                        style={{ width: `${cpuLoad}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* RAM usage bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between text-[11px] font-bold">
+                      <span className="text-neutral-500 uppercase tracking-widest">
+                        RSS MEMORY
+                      </span>
+                      <span className="text-neutral-300">
+                        {stats.memory || "0MB"}
                       </span>
                     </div>
-                  ))
-                )}
+                    <div className="w-full bg-[#040406] h-1.5 rounded-full overflow-hidden border border-neutral-900">
+                      <div
+                        className="bg-[#3B82F6] h-full transition-all duration-1000"
+                        style={{
+                          width: `${Math.min(
+                            ((parseFloat(stats.memory) || 0) / 512) * 100,
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-neutral-800/60 space-y-2 text-xs font-medium">
+                    <div className="flex justify-between items-center">
+                      <span className="text-neutral-500">System Uptime</span>
+                      <span className="text-neutral-300 font-mono font-bold">
+                        {stats.uptime || "Online"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-neutral-500">Active Compiles</span>
+                      <span className="text-[#3B82F6] font-mono font-bold">
+                        {activeJobsCount} jobs in queue
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-neutral-500">DB Host Status</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold ${
+                          dbStatus === "Healthy"
+                            ? "bg-emerald-500/10 text-emerald-400"
+                            : "bg-rose-500/10 text-rose-400"
+                        }`}
+                      >
+                        {dbStatus}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-neutral-500">DB IO Latency</span>
+                      <span className="text-blue-400 font-mono font-bold">
+                        {stats.dbLatencyMs || 0}ms
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+
+          {/* Quick Actions Panel & Announcements Broadcaster */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 lg:col-span-2 shadow-xl text-left">
+              <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-[#3B82F6]" /> Executive Actions
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={handleClearCache}
+                  disabled={processingAction === "cache"}
+                  className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
+                      {processingAction === "cache"
+                        ? "Clearing..."
+                        : "Purge RAM Cache"}
+                    </h4>
+                    <Trash2 className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
+                  </div>
+                  <p className="text-[10px] text-[#9CA3AF] mt-1">
+                    Force garbage collect and invalidate platform key caches.
+                  </p>
+                </button>
+
+                <button
+                  onClick={handleFlushTemp}
+                  disabled={processingAction === "flush"}
+                  className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-[#F59E0B] hover:bg-[#F59E0B]/5 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#F59E0B] transition-colors">
+                      {processingAction === "flush"
+                        ? "Flushing..."
+                        : "Flush Temporary Files"}
+                    </h4>
+                    <Wind className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#F59E0B]" />
+                  </div>
+                  <p className="text-[10px] text-[#9CA3AF] mt-1">
+                    Remove intermediate frame logs, cached audio slices, and
+                    exports.
+                  </p>
+                </button>
+
+                <button
+                  onClick={handleExportLogs}
+                  className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
+                      Export Audit Log CSV
+                    </h4>
+                    <Download className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
+                  </div>
+                  <p className="text-[10px] text-[#9CA3AF] mt-1">
+                    Download the complete security audit events history as a
+                    file.
+                  </p>
+                </button>
+
+                <button
+                  onClick={() => navigateTo("/admin/jobs")}
+                  className="p-4 border border-[#2F2F2F] bg-[#181818] rounded-xl hover:border-neutral-700 hover:bg-[#3B82F6]/5 transition-all text-left group cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[#E5E5E5] font-bold text-xs group-hover:text-[#3B82F6] transition-colors">
+                      Manage Background Jobs
+                    </h4>
+                    <Activity className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
+                  </div>
+                  <p className="text-[10px] text-[#9CA3AF] mt-1">
+                    Monitor live tasks, cancel queued workers, and purge
+                    completed jobs.
+                  </p>
+                </button>
+
+                <button
+                  onClick={handleEmergencyStop}
+                  disabled={processingAction === "stop"}
+                  className="p-4 bg-[#EF4444]/5 border border-[#EF4444]/20 rounded-xl hover:bg-[#EF4444]/10 hover:border-[#EF4444]/40 transition-all text-left group disabled:opacity-50 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[#EF4444] font-bold text-xs">
+                      {processingAction === "stop"
+                        ? "STOPPING..."
+                        : "EMERGENCY SHUTDOWN"}
+                    </h4>
+                    <Flame className="w-3.5 h-3.5 text-[#EF4444]/70 group-hover:scale-110 transition-transform" />
+                  </div>
+                  <p className="text-[10px] text-[#EF4444]/80 mt-1">
+                    Halt and kill all active child process compilation routines.
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            {/* Broadcast announcements */}
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 shadow-xl text-left">
+              <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#3B82F6]" /> Push Broadcast
+              </h3>
+              <form
+                onSubmit={handleBroadcastAnnouncement}
+                className="space-y-3"
+              >
+                <input
+                  type="text"
+                  placeholder="Headline/Title"
+                  value={announcementTitle}
+                  onChange={(e) => setAnnouncementTitle(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600"
+                />
+                <textarea
+                  placeholder="Announcement message..."
+                  rows={2}
+                  value={announcementMsg}
+                  onChange={(e) => setAnnouncementMsg(e.target.value)}
+                  className="w-full px-3 py-2 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600 resize-none"
+                />
+                <div className="flex gap-2">
+                  <select
+                    value={announcementType}
+                    onChange={(e: any) => setAnnouncementType(e.target.value)}
+                    className="px-2.5 py-1.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] focus:outline-none focus:border-neutral-600"
+                  >
+                    <option value="info">💡 Info</option>
+                    <option value="warning">⚠️ Warning</option>
+                    <option value="success">✅ Success</option>
+                    <option value="error">🚨 Alert</option>
+                  </select>
+                  <button
+                    type="submit"
+                    disabled={processingAction === "broadcast"}
+                    className="btn-primary flex-1 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                  >
+                    {processingAction === "broadcast"
+                      ? "Broadcasting..."
+                      : "Publish Banner"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Audit Logs and Users Impersonation Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* User Impersonation Table */}
+            <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-md font-extrabold text-[#E5E5E5] flex items-center gap-2">
+                    <Users className="w-4 h-4 text-[#3B82F6]" /> Creator
+                    Switchboard
+                  </h3>
+                  <div className="relative">
+                    <Search className="w-3.5 h-3.5 text-[#6B7280] absolute left-2.5 top-2.5" />
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                      className="bg-[#121212] border border-[#2F2F2F] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#E5E5E5] placeholder-[#6B7280] focus:outline-none focus:border-neutral-600 w-44"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+                  {loadingUsers ? (
+                    <div className="text-center py-6 text-xs text-[#6B7280] italic">
+                      Fetching creators community...
+                    </div>
+                  ) : filteredUsers.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-[#6B7280] italic">
+                      No creators match search.
+                    </div>
+                  ) : (
+                    filteredUsers.map((u) => (
+                      <div
+                        key={u.id}
+                        className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-center justify-between group hover:border-neutral-700 transition-all"
+                      >
+                        <div className="space-y-0.5 min-w-0 flex-1 pr-2">
+                          <div className="font-bold text-xs text-[#E5E5E5]">
+                            {u.full_name || "Anonymous"}
+                          </div>
+                          <div className="text-[10px] text-[#9CA3AF] font-mono truncate">
+                            {u.email}
+                          </div>
+                          <div className="text-[9px] text-[#6B7280] font-mono flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" />
+                            Joined {formatDate(u.created_at)}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleImpersonate(u.id)}
+                          className="btn-secondary flex-shrink-0 flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold text-[#3B82F6] hover:text-white border-[#3B82F6]/30 hover:bg-[#3B82F6]/10 rounded-lg"
+                        >
+                          Impersonate <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Audit Logs list */}
+            <div className="self-start h-fit bg-[#141414] border border-[#2F2F2F] rounded-2xl p-6 flex flex-col justify-between shadow-xl text-left">
+              <div>
+                <h3 className="text-md font-extrabold text-[#E5E5E5] mb-4 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#3B82F6]" /> Security
+                  Audit Events
+                </h3>
+                <div className="space-y-2.5 max-h-[280px] overflow-y-auto pr-1">
+                  {recentLogs.length === 0 ? (
+                    <div className="text-center py-6 text-xs text-[#6B7280] italic">
+                      No security audit events logs found.
+                    </div>
+                  ) : (
+                    recentLogs.map((log) => (
+                      <div
+                        key={log.id}
+                        className="p-3 bg-[#181818] border border-[#2F2F2F] rounded-xl flex items-start justify-between text-xs hover:border-neutral-700 transition-all gap-2"
+                      >
+                        <div className="space-y-0.5 min-w-0 flex-1">
+                          <div className="font-bold text-[#E5E5E5] text-xs">
+                            {log.action}
+                          </div>
+                          <div className="text-[10px] text-[#9CA3AF]">
+                            {log.email || "System"} · {log.ip_address}
+                          </div>
+                          <div className="text-[9px] text-[#6B7280] font-mono flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5 inline" />
+                            {formatDate(log.created_at)}
+                          </div>
+                        </div>
+                        <span
+                          className={`flex-shrink-0 px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase ${
+                            log.status === "Success"
+                              ? "bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30"
+                              : "bg-[#EF4444]/15 text-[#EF4444] border border-[#EF4444]/30"
+                          }`}
+                        >
+                          {log.status}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

@@ -2,7 +2,11 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { GeneratedPanel, CharacterBio } from "@/types";
 import { createFetchWithInterceptor } from "@/api/client/fetchWithInterceptor";
 import * as api from "@/api";
-import { useProjectStore, WorkspaceContext, scheduleAutoSave } from "./useProjectStore";
+import {
+  useProjectStore,
+  WorkspaceContext,
+  scheduleAutoSave,
+} from "./useProjectStore";
 import { useAppAuth } from "./useAppAuth";
 import { useAppNotifications } from "./useAppNotifications";
 import { useAppAutoCrop } from "./useAppAutoCrop";
@@ -53,7 +57,9 @@ export function useAppState() {
   );
 
   const setPanels = useCallback(
-    (val: GeneratedPanel[] | ((prev: GeneratedPanel[]) => GeneratedPanel[])) => {
+    (
+      val: GeneratedPanel[] | ((prev: GeneratedPanel[]) => GeneratedPanel[])
+    ) => {
       const cur = useProjectStore.getState().activeProjectData;
       const currentPanels = (cur?.panels as unknown as GeneratedPanel[]) ?? [];
       const nextPanels = typeof val === "function" ? val(currentPanels) : val;
@@ -129,14 +135,18 @@ export function useAppState() {
 
   // ── 3. Additional Local Canvas & Editing States ───────────────────────────
   const [characters, setCharacters] = useState<CharacterBio[]>([]);
-  const [activePreviewTab, setActivePreviewTab] = useState<"video" | "timeline">("timeline");
+  const [activePreviewTab, setActivePreviewTab] = useState<
+    "video" | "timeline"
+  >("timeline");
   const [editingImageIdx, setEditingImageIdx] = useState<number | null>(null);
   const [editCropTop, setEditCropTop] = useState<number>(0);
   const [editCropBottom, setEditCropBottom] = useState<number>(0);
   const [editCropLeft, setEditCropLeft] = useState<number>(0);
   const [editCropRight, setEditCropRight] = useState<number>(0);
   const [editAutoTrim, setEditAutoTrim] = useState<boolean>(true);
-  const [imageEditStates, setImageEditStates] = useState<Record<string, any>>({});
+  const [imageEditStates, setImageEditStates] = useState<Record<string, any>>(
+    {}
+  );
   const [isSavingEdit, setIsSavingEdit] = useState<boolean>(false);
 
   // ── 4. Project Fields Direct Setters ──────────────────────────────────────
@@ -150,7 +160,8 @@ export function useAppState() {
     });
   }, []);
 
-  const scrapedTitle = activeProjectData?.project?.title || "Overpowered S-Rank Recap";
+  const scrapedTitle =
+    activeProjectData?.project?.title || "Overpowered S-Rank Recap";
   const setScrapedTitle = useCallback((val: string) => {
     const cur = useProjectStore.getState().activeProjectData;
     useProjectStore.getState().setActiveProject({
@@ -290,7 +301,8 @@ export function useAppState() {
 
       const hasToken = Boolean(
         typeof window !== "undefined" &&
-        (localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token"))
+          (localStorage.getItem("sonikoma_token") ||
+            sessionStorage.getItem("sonikoma_token"))
       );
 
       if (!hasToken) {
@@ -315,7 +327,8 @@ export function useAppState() {
     } catch {
       const hasLocalToken = Boolean(
         typeof window !== "undefined" &&
-        (localStorage.getItem("sonikoma_token") || sessionStorage.getItem("sonikoma_token"))
+          (localStorage.getItem("sonikoma_token") ||
+            sessionStorage.getItem("sonikoma_token"))
       );
       if (!hasLocalToken) {
         setUser(null);
@@ -348,9 +361,7 @@ export function useAppState() {
           (res as any)?.data?.access_token ||
           (res as any)?.data?.token;
         const user =
-          (res as any)?.user ||
-          (res as any)?.data?.user ||
-          (res as any)?.data;
+          (res as any)?.user || (res as any)?.data?.user || (res as any)?.data;
         if (token) {
           auth.handleLoginSuccess(token, user);
           notifs.addNotification("Successfully logged in!", "success");
@@ -382,9 +393,7 @@ export function useAppState() {
           (res as any)?.data?.access_token ||
           (res as any)?.data?.token;
         const user =
-          (res as any)?.user ||
-          (res as any)?.data?.user ||
-          (res as any)?.data;
+          (res as any)?.user || (res as any)?.data?.user || (res as any)?.data;
         if (token) {
           auth.handleLoginSuccess(token, user);
           notifs.addNotification("Account created successfully!", "success");
@@ -417,7 +426,10 @@ export function useAppState() {
         notifs.addNotification("Password reset email sent", "info");
         return res;
       } catch (err: any) {
-        notifs.addNotification(err?.message || "Password reset failed", "error");
+        notifs.addNotification(
+          err?.message || "Password reset failed",
+          "error"
+        );
         throw err;
       }
     },

@@ -11,7 +11,11 @@ function playSynthesizedSfx(type: string = "impact") {
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
 
-    if (type.includes("punch") || type.includes("impact") || type.includes("boom")) {
+    if (
+      type.includes("punch") ||
+      type.includes("impact") ||
+      type.includes("boom")
+    ) {
       // Cinematic low boom / punch impact
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -26,7 +30,11 @@ function playSynthesizedSfx(type: string = "impact") {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.35);
-    } else if (type.includes("slash") || type.includes("swoosh") || type.includes("whoosh")) {
+    } else if (
+      type.includes("slash") ||
+      type.includes("swoosh") ||
+      type.includes("whoosh")
+    ) {
       // White noise blade whoosh
       const bufferSize = ctx.sampleRate * 0.25;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
@@ -40,7 +48,10 @@ function playSynthesizedSfx(type: string = "impact") {
       const filter = ctx.createBiquadFilter();
       filter.type = "bandpass";
       filter.frequency.setValueAtTime(1200, ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.25);
+      filter.frequency.exponentialRampToValueAtTime(
+        300,
+        ctx.currentTime + 0.25
+      );
 
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(0.7, ctx.currentTime);
@@ -88,8 +99,13 @@ export const useAudioPreview = () => {
   }, []);
 
   const updateProgress = useCallback(() => {
-    if (audioRef.current && !audioRef.current.paused && audioRef.current.duration) {
-      const pct = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+    if (
+      audioRef.current &&
+      !audioRef.current.paused &&
+      audioRef.current.duration
+    ) {
+      const pct =
+        (audioRef.current.currentTime / audioRef.current.duration) * 100;
       setPlaybackProgress(pct);
       animFrameRef.current = requestAnimationFrame(updateProgress);
     }
@@ -111,23 +127,32 @@ export const useAudioPreview = () => {
         setPlayingTrackId(trackId);
         setPlaybackProgress(0);
 
-        if (audioUrl && (audioUrl.startsWith("http") || audioUrl.startsWith("blob:") || audioUrl.startsWith("/"))) {
+        if (
+          audioUrl &&
+          (audioUrl.startsWith("http") ||
+            audioUrl.startsWith("blob:") ||
+            audioUrl.startsWith("/"))
+        ) {
           const audio = new Audio(audioUrl);
           audioRef.current = audio;
           audio.volume = 0.85;
 
-          audio.play().then(() => {
-            animFrameRef.current = requestAnimationFrame(updateProgress);
-          }).catch(() => {
-            // If network fails, use Web Audio synthesis fallback
-            playSynthesizedSfx(trackId);
-            setTimeout(() => setPlayingTrackId(null), 800);
-          });
+          audio
+            .play()
+            .then(() => {
+              animFrameRef.current = requestAnimationFrame(updateProgress);
+            })
+            .catch(() => {
+              // If network fails, use Web Audio synthesis fallback
+              playSynthesizedSfx(trackId);
+              setTimeout(() => setPlayingTrackId(null), 800);
+            });
 
           audio.onended = () => {
             setPlayingTrackId(null);
             setPlaybackProgress(0);
-            if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+            if (animFrameRef.current)
+              cancelAnimationFrame(animFrameRef.current);
           };
         } else {
           // Play Web Audio synthesized SFX

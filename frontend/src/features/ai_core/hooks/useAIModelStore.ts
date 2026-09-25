@@ -5,7 +5,17 @@ export type SelectionMode = "system" | "manual";
 export interface AIModelInfo {
   id: string;
   name: string;
-  provider: "gemini" | "openai" | "anthropic" | "groq" | "deepseek" | "elevenlabs" | "deepl" | "huggingface" | "local" | string;
+  provider:
+    | "gemini"
+    | "openai"
+    | "anthropic"
+    | "groq"
+    | "deepseek"
+    | "elevenlabs"
+    | "deepl"
+    | "huggingface"
+    | "local"
+    | string;
   capabilities: string[];
   speedRating: "ultra-fast" | "fast" | "medium" | "slow";
   badge?: string;
@@ -22,7 +32,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     capabilities: ["Vision", "OCR", "JSON", "Multimodal", "Fast"],
     speedRating: "ultra-fast",
     badge: "Recommended (Free Tier: 1,500/day)",
-    description: "Google's most resilient high-throughput model with generous 1,500 free daily requests.",
+    description:
+      "Google's most resilient high-throughput model with generous 1,500 free daily requests.",
   },
   {
     id: "gemini-2.5-flash-lite",
@@ -40,7 +51,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     capabilities: ["Vision", "Coding", "Agentic", "Deep-Reasoning", "Fast"],
     speedRating: "ultra-fast",
     badge: "Advanced Reasoning (Paid / 20 Free)",
-    description: "Google's flagship reasoning model for complex agentic workflows.",
+    description:
+      "Google's flagship reasoning model for complex agentic workflows.",
   },
   {
     id: "gemini-3.5-flash-lite",
@@ -75,7 +87,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     provider: "gemini",
     capabilities: ["Vision", "JSON", "Fast", "Long-Context"],
     speedRating: "ultra-fast",
-    description: "Google price-performance workhorse model with 1M token context.",
+    description:
+      "Google price-performance workhorse model with 1M token context.",
   },
   {
     id: "gemini-1.5-pro",
@@ -92,7 +105,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     capabilities: ["Agentic", "Multi-Source", "Research", "Synthesis"],
     speedRating: "slow",
     badge: "Agentic",
-    description: "Autonomous multi-step research agent across hundreds of sources.",
+    description:
+      "Autonomous multi-step research agent across hundreds of sources.",
   },
   {
     id: "gpt-4o",
@@ -100,7 +114,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     provider: "openai",
     capabilities: ["Vision", "Dialogue", "Reasoning"],
     speedRating: "fast",
-    description: "OpenAI flagship omni-model for expressive script dramatization.",
+    description:
+      "OpenAI flagship omni-model for expressive script dramatization.",
   },
   {
     id: "gpt-4o-mini",
@@ -125,7 +140,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     provider: "anthropic",
     capabilities: ["Vision", "Creative-Writing", "Nuance"],
     speedRating: "fast",
-    description: "Anthropic's leading model for sophisticated comic storytelling.",
+    description:
+      "Anthropic's leading model for sophisticated comic storytelling.",
   },
   {
     id: "claude-3-5-haiku-20241022",
@@ -142,7 +158,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     capabilities: ["Ultra-Fast", "LPU", "Dialogue", "Script"],
     speedRating: "ultra-fast",
     badge: "750 Tok/s",
-    description: "Groq ultra-fast 750 tokens/sec inference for real-time script adaptation.",
+    description:
+      "Groq ultra-fast 750 tokens/sec inference for real-time script adaptation.",
   },
   {
     id: "deepseek-chat",
@@ -160,7 +177,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     capabilities: ["Deep-Thinking", "Reasoning", "Math", "Logic"],
     speedRating: "medium",
     badge: "Chain of Thought",
-    description: "DeepSeek open reasoning model with explicit chain of thought.",
+    description:
+      "DeepSeek open reasoning model with explicit chain of thought.",
   },
   {
     id: "eleven_multilingual_v2",
@@ -178,7 +196,8 @@ export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
     capabilities: ["Translation", "Localization", "Multi-Language"],
     speedRating: "ultra-fast",
     badge: "Neural Translate",
-    description: "Industry standard neural comic dialogue translation and localization.",
+    description:
+      "Industry standard neural comic dialogue translation and localization.",
   },
   {
     id: "edge-tts-neural",
@@ -315,15 +334,24 @@ export const useAIModelStore = create<AIModelState>((set, get) => {
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.models_breakdown)) {
-            const mapped: AIModelInfo[] = data.models_breakdown.map((m: any) => ({
-              id: m.id,
-              name: m.name,
-              provider: m.provider,
-              capabilities: m.capabilities || ["Text"],
-              speedRating: m.speed_rating?.includes("<200ms") ? "ultra-fast" : m.speed_rating?.includes("Deliberate") ? "medium" : "fast",
-              badge: m.provider === "gemini" && m.id.includes("3.7") ? "Flagship" : m.speed_rating,
-              description: m.category,
-            }));
+            const mapped: AIModelInfo[] = data.models_breakdown.map(
+              (m: any) => ({
+                id: m.id,
+                name: m.name,
+                provider: m.provider,
+                capabilities: m.capabilities || ["Text"],
+                speedRating: m.speed_rating?.includes("<200ms")
+                  ? "ultra-fast"
+                  : m.speed_rating?.includes("Deliberate")
+                  ? "medium"
+                  : "fast",
+                badge:
+                  m.provider === "gemini" && m.id.includes("3.7")
+                    ? "Flagship"
+                    : m.speed_rating,
+                description: m.category,
+              })
+            );
             set({ dynamicModels: mapped });
           }
         }
@@ -340,7 +368,11 @@ export const useAIModelStore = create<AIModelState>((set, get) => {
       if (typeof window !== "undefined") {
         localStorage.setItem(STORAGE_KEY_MODEL, modelId);
         localStorage.setItem(STORAGE_KEY_MODE, mode);
-        window.dispatchEvent(new CustomEvent("sonikoma_model_changed", { detail: { modelId, mode } }));
+        window.dispatchEvent(
+          new CustomEvent("sonikoma_model_changed", {
+            detail: { modelId, mode },
+          })
+        );
       }
       set({ selectedModel: modelId, selectionMode: mode });
     },
@@ -356,14 +388,21 @@ export const useAIModelStore = create<AIModelState>((set, get) => {
       if (typeof window !== "undefined") {
         localStorage.setItem(STORAGE_KEY_MODEL, SYSTEM_DEFAULT_MODEL);
         localStorage.setItem(STORAGE_KEY_MODE, "system");
-        window.dispatchEvent(new CustomEvent("sonikoma_model_changed", { detail: { modelId: SYSTEM_DEFAULT_MODEL, mode: "system" } }));
+        window.dispatchEvent(
+          new CustomEvent("sonikoma_model_changed", {
+            detail: { modelId: SYSTEM_DEFAULT_MODEL, mode: "system" },
+          })
+        );
       }
       set({ selectedModel: SYSTEM_DEFAULT_MODEL, selectionMode: "system" });
     },
 
     getCurrentModelInfo: () => {
       const state = get();
-      const allList = state.dynamicModels.length > 0 ? state.dynamicModels : AVAILABLE_AI_MODELS;
+      const allList =
+        state.dynamicModels.length > 0
+          ? state.dynamicModels
+          : AVAILABLE_AI_MODELS;
       const found = allList.find((m) => m.id === state.selectedModel);
       return (
         found ||
@@ -374,7 +413,10 @@ export const useAIModelStore = create<AIModelState>((set, get) => {
 
     getAvailableModels: () => {
       const state = get();
-      const allList = state.dynamicModels.length > 0 ? state.dynamicModels : AVAILABLE_AI_MODELS;
+      const allList =
+        state.dynamicModels.length > 0
+          ? state.dynamicModels
+          : AVAILABLE_AI_MODELS;
       return allList;
     },
   };

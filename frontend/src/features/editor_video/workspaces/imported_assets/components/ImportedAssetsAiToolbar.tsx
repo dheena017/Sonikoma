@@ -5,9 +5,9 @@ interface ImportedAssetsAiToolbarProps {
   onTriggerFeedback: (msg: string) => void;
 }
 
-export const ImportedAssetsAiToolbar: React.FC<ImportedAssetsAiToolbarProps> = ({
-  onTriggerFeedback,
-}) => {
+export const ImportedAssetsAiToolbar: React.FC<
+  ImportedAssetsAiToolbarProps
+> = ({ onTriggerFeedback }) => {
   return (
     <div className="px-3.5 py-2 border-b border-[#2F2F2F] bg-black/40 flex items-center gap-1.5 overflow-x-auto mini-sidebar-scrollbar">
       <div className="flex items-center gap-1 text-[10px] text-[#60A5FA]/80 font-mono pr-2 shrink-0">

@@ -190,10 +190,7 @@ export default function SeriesCard({
           </div>
 
           {/* 3-dot menu */}
-          <div
-            className="relative z-30"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative z-30" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               onClick={(e) => {

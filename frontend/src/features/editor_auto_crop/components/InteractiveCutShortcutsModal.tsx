@@ -7,10 +7,9 @@ export interface InteractiveCutShortcutsModalProps {
   onClose: () => void;
 }
 
-export const InteractiveCutShortcutsModal: React.FC<InteractiveCutShortcutsModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
+export const InteractiveCutShortcutsModal: React.FC<
+  InteractiveCutShortcutsModalProps
+> = ({ isOpen, onClose }) => {
   if (!isOpen || typeof document === "undefined") return null;
 
   return createPortal(
@@ -106,7 +105,11 @@ export const InteractiveCutShortcutsModal: React.FC<InteractiveCutShortcutsModal
         </div>
 
         <div className="pt-2 text-center text-[10px] text-neutral-500">
-          Tip: Press <kbd className="px-1.5 py-0.5 bg-neutral-800 rounded text-neutral-300 font-mono">?</kbd> at any time to toggle this cheatsheet.
+          Tip: Press{" "}
+          <kbd className="px-1.5 py-0.5 bg-neutral-800 rounded text-neutral-300 font-mono">
+            ?
+          </kbd>{" "}
+          at any time to toggle this cheatsheet.
         </div>
       </div>
     </div>,

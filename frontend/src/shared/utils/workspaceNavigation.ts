@@ -94,11 +94,22 @@ export function parseWorkspaceParams(
   return { projectId, jobId };
 }
 
-export function getHumanEditorPath(options: WorkspaceReturnPathOptions = {}): string {
-  const { projectId, seriesSlug, chapterSlug, seriesTitle, chapterNumber, jobId } = options;
+export function getHumanEditorPath(
+  options: WorkspaceReturnPathOptions = {}
+): string {
+  const {
+    projectId,
+    seriesSlug,
+    chapterSlug,
+    seriesTitle,
+    chapterNumber,
+    jobId,
+  } = options;
 
-  const activeSeries = seriesSlug || (seriesTitle ? slugify(seriesTitle) : null);
-  const activeChapter = chapterSlug || (chapterNumber ? `chapter-${chapterNumber}` : null);
+  const activeSeries =
+    seriesSlug || (seriesTitle ? slugify(seriesTitle) : null);
+  const activeChapter =
+    chapterSlug || (chapterNumber ? `chapter-${chapterNumber}` : null);
 
   const queryParams = new URLSearchParams();
   if (projectId) {
@@ -107,19 +118,24 @@ export function getHumanEditorPath(options: WorkspaceReturnPathOptions = {}): st
   if (jobId) {
     queryParams.set("job_id", jobId);
   }
-  const queryString = queryParams.toString() ? `?${queryParams.toString()}` : "";
+  const queryString = queryParams.toString()
+    ? `?${queryParams.toString()}`
+    : "";
 
   if (activeSeries && activeChapter) {
-    const cleanChapter = activeChapter.startsWith("chapter-") || activeChapter.startsWith("ch-")
-      ? activeChapter
-      : `chapter-${activeChapter}`;
+    const cleanChapter =
+      activeChapter.startsWith("chapter-") || activeChapter.startsWith("ch-")
+        ? activeChapter
+        : `chapter-${activeChapter}`;
     return `/scraper/editor/series/${activeSeries}/chapters/${cleanChapter}${queryString}`;
   }
 
   if (projectId) {
     if (projectId.startsWith("temp_") || projectId.startsWith("draft_")) {
       const jobQueryParam = jobId ? `&job_id=${encodeURIComponent(jobId)}` : "";
-      return `/scraper/editor?id=${encodeURIComponent(projectId)}${jobQueryParam}`;
+      return `/scraper/editor?id=${encodeURIComponent(
+        projectId
+      )}${jobQueryParam}`;
     }
     return `/scraper/editor${queryString}`;
   }
@@ -155,4 +171,3 @@ export function resolveWorkspaceReturnPath(
     storage,
   });
 }
-

@@ -338,13 +338,17 @@ export function useBatchImageActions({
                 );
               }
             } catch (typeErr) {
-              console.warn("[Auto Cropper] detectPanelCropType warning:", typeErr);
+              console.warn(
+                "[Auto Cropper] detectPanelCropType warning:",
+                typeErr
+              );
             }
 
             const isTallStrip =
               detectedLayout?.crop_type === "long_panels" ||
               detectedLayout?.crop_type === "ultra_long_panels" ||
-              (detectedLayout?.aspect_ratio != null && detectedLayout.aspect_ratio >= 2.0);
+              (detectedLayout?.aspect_ratio != null &&
+                detectedLayout.aspect_ratio >= 2.0);
 
             let croppedUrls: string[] = [];
 
@@ -357,7 +361,10 @@ export function useBatchImageActions({
                   fetchWithInterceptor,
                   {
                     url: url,
-                    aspect_ratio: aspectRatioLock && aspectRatioLock !== "free" ? aspectRatioLock : "free",
+                    aspect_ratio:
+                      aspectRatioLock && aspectRatioLock !== "free"
+                        ? aspectRatioLock
+                        : "free",
                     auto_trim: true,
                     snap_to_frame: true,
                     merge_speech_bubbles: true,
@@ -370,22 +377,31 @@ export function useBatchImageActions({
                 if (detectRes && detectRes.success && detectRes.margins) {
                   appliedMargins = detectRes.margins;
                   console.log(
-                    `[Auto Cropper: Small] Detected frame with ${detectRes.bound_speech_bubbles_count || 0} bound dialogue bubbles:`,
+                    `[Auto Cropper: Small] Detected frame with ${
+                      detectRes.bound_speech_bubbles_count || 0
+                    } bound dialogue bubbles:`,
                     appliedMargins
                   );
                 }
               } catch (detErr) {
-                console.warn("[Auto Cropper] detectSmallPanels fallback:", detErr);
+                console.warn(
+                  "[Auto Cropper] detectSmallPanels fallback:",
+                  detErr
+                );
               }
 
               // Check if multiple panels or distinct panel frames were detected
-              const detectedPanels = Array.isArray(detectRes?.panels) ? detectRes.panels : [];
+              const detectedPanels = Array.isArray(detectRes?.panels)
+                ? detectRes.panels
+                : [];
               if (detectedPanels.length > 0) {
-                const sortedPanels = [...detectedPanels].sort((a: any, b: any) => {
-                  const dy = (a.y ?? 0) - (b.y ?? 0);
-                  if (Math.abs(dy) > 30) return dy;
-                  return (a.x ?? 0) - (b.x ?? 0);
-                });
+                const sortedPanels = [...detectedPanels].sort(
+                  (a: any, b: any) => {
+                    const dy = (a.y ?? 0) - (b.y ?? 0);
+                    if (Math.abs(dy) > 30) return dy;
+                    return (a.x ?? 0) - (b.x ?? 0);
+                  }
+                );
 
                 try {
                   const sliceRes = await api.cropLongPanels(
@@ -415,7 +431,10 @@ export function useBatchImageActions({
                     );
                   }
                 } catch (sliceErr) {
-                  console.warn("[Auto Cropper] multi-panel slicing fallback:", sliceErr);
+                  console.warn(
+                    "[Auto Cropper] multi-panel slicing fallback:",
+                    sliceErr
+                  );
                 }
               }
 
@@ -431,7 +450,10 @@ export function useBatchImageActions({
                       crop_left: appliedMargins.crop_left || 0,
                       crop_right: appliedMargins.crop_right || 0,
                       unit: appliedMargins.unit || "pixels",
-                      aspect_ratio: aspectRatioLock && aspectRatioLock !== "free" ? (aspectRatioLock as any) : "free",
+                      aspect_ratio:
+                        aspectRatioLock && aspectRatioLock !== "free"
+                          ? (aspectRatioLock as any)
+                          : "free",
                       auto_trim: true,
                       padding_px: cropPaddingPx,
                       output_format: "webp",
@@ -449,13 +471,20 @@ export function useBatchImageActions({
                     croppedUrls = [url];
                   }
                 } catch (smallErr) {
-                  console.warn("[Auto Cropper] cropSmallPanels fallback:", smallErr);
+                  console.warn(
+                    "[Auto Cropper] cropSmallPanels fallback:",
+                    smallErr
+                  );
                   croppedUrls = [url];
                 }
               }
 
               setConsoleLogs((prev) => [
-                `[Auto Cropper] ✓ Image processed into ${croppedUrls.length} panel(s) (${detectedLayout?.width || "auto"}x${detectedLayout?.height || "auto"}px)`,
+                `[Auto Cropper] ✓ Image processed into ${
+                  croppedUrls.length
+                } panel(s) (${detectedLayout?.width || "auto"}x${
+                  detectedLayout?.height || "auto"
+                }px)`,
                 ...prev,
               ]);
             } else {
@@ -478,22 +507,31 @@ export function useBatchImageActions({
                   { signal: controller.signal }
                 );
 
-                if (longDetectRes && longDetectRes.success && Array.isArray(longDetectRes.panels)) {
+                if (
+                  longDetectRes &&
+                  longDetectRes.success &&
+                  Array.isArray(longDetectRes.panels)
+                ) {
                   detectedPanelsList = longDetectRes.panels;
                   console.log(
                     `[Auto Cropper: Long] Detected ${detectedPanelsList.length} panels down tall strip.`
                   );
                 }
               } catch (longDetErr) {
-                console.warn("[Auto Cropper] detectLongPanels fallback:", longDetErr);
+                console.warn(
+                  "[Auto Cropper] detectLongPanels fallback:",
+                  longDetErr
+                );
               }
 
               if (detectedPanelsList.length > 0) {
-                const sortedPanels = [...detectedPanelsList].sort((a: any, b: any) => {
-                  const dy = (a.y ?? 0) - (b.y ?? 0);
-                  if (dy !== 0) return dy;
-                  return (a.x ?? 0) - (b.x ?? 0);
-                });
+                const sortedPanels = [...detectedPanelsList].sort(
+                  (a: any, b: any) => {
+                    const dy = (a.y ?? 0) - (b.y ?? 0);
+                    if (dy !== 0) return dy;
+                    return (a.x ?? 0) - (b.x ?? 0);
+                  }
+                );
 
                 try {
                   const sliceRes = await api.cropLongPanels(
@@ -522,11 +560,18 @@ export function useBatchImageActions({
                       `[Auto Cropper] ✓ Batch sliced ${croppedUrls.length} panels from tall strip via long-panels`
                     );
                   } else {
-                    croppedUrls = sortedPanels.map((p: any) => p.croppedUrl || url);
+                    croppedUrls = sortedPanels.map(
+                      (p: any) => p.croppedUrl || url
+                    );
                   }
                 } catch (sliceErr: any) {
-                  console.warn("[Auto Cropper] cropLongPanels fallback:", sliceErr);
-                  croppedUrls = sortedPanels.map((p: any) => p.croppedUrl || url);
+                  console.warn(
+                    "[Auto Cropper] cropLongPanels fallback:",
+                    sliceErr
+                  );
+                  croppedUrls = sortedPanels.map(
+                    (p: any) => p.croppedUrl || url
+                  );
                 }
 
                 setConsoleLogs((prev) => [
@@ -536,7 +581,10 @@ export function useBatchImageActions({
               } else {
                 croppedUrls = [url];
                 setConsoleLogs((prev) => [
-                  `[Auto Cropper Warning] No panels detected for tall strip ${url.substring(0, 40)}...`,
+                  `[Auto Cropper Warning] No panels detected for tall strip ${url.substring(
+                    0,
+                    40
+                  )}...`,
                   ...prev,
                 ]);
               }

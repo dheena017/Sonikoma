@@ -11,7 +11,7 @@ export interface CreditCalculatorProps {
 export const CreditCalculator: React.FC<CreditCalculatorProps> = ({
   customCredits,
   onCreditsChange,
-  formatCustomPrice = (credits) => `$${((credits * 0.02)).toFixed(2)}`,
+  formatCustomPrice = (credits) => `$${(credits * 0.02).toFixed(2)}`,
   onPurchase,
 }) => {
   return (

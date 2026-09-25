@@ -58,7 +58,10 @@ interface ChapterCardProps {
 
 const formatLikesCount = (likesStr?: string): string => {
   if (!likesStr) return "";
-  const cleaned = likesStr.replace(/likes?/gi, "").replace(/,/g, "").trim();
+  const cleaned = likesStr
+    .replace(/likes?/gi, "")
+    .replace(/,/g, "")
+    .trim();
   if (!cleaned) return "";
   if (/[0-9.]+[KMB]$/i.test(cleaned)) {
     return cleaned.toUpperCase();
@@ -113,7 +116,12 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     setImageError(false);
     const cover = chapter.cover_image || getFirstPanel() || "";
     setImgSrc(getProxiedImageUrl(cover, chapter.url));
-  }, [chapter.cover_image, chapter.first_panel_image, chapter.images, chapter.url]);
+  }, [
+    chapter.cover_image,
+    chapter.first_panel_image,
+    chapter.images,
+    chapter.url,
+  ]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -194,7 +202,9 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
   // Format Display Title
   const renderTitle = () => {
     const rawNum = (chapter.number || "").trim();
-    const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim();
+    const cleanNum = rawNum
+      .replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "")
+      .trim();
     const rawTitle = (chapter.title || "")
       .replace(
         /(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}.*$/i,
@@ -206,9 +216,16 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
       .replace(/^[-:–—\s]+|[-:–—\s]+$/g, "")
       .trim();
 
-    const displayNum = cleanNum || rawNum || (chapter.index !== undefined ? String(chapter.index + 1) : "");
+    const displayNum =
+      cleanNum ||
+      rawNum ||
+      (chapter.index !== undefined ? String(chapter.index + 1) : "");
 
-    if (!rawTitle || rawTitle.toLowerCase() === displayNum.toLowerCase() || rawTitle.toLowerCase() === `chapter ${displayNum}`.toLowerCase()) {
+    if (
+      !rawTitle ||
+      rawTitle.toLowerCase() === displayNum.toLowerCase() ||
+      rawTitle.toLowerCase() === `chapter ${displayNum}`.toLowerCase()
+    ) {
       return (
         <h3
           className="text-sm font-bold text-white line-clamp-2 leading-snug flex-1 tracking-tight"
@@ -234,21 +251,29 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
     );
   };
 
-  const isPopular = (chapter.rating && chapter.rating >= 4.0) || (chapter.likes && chapter.likes.toLowerCase().includes("m"));
+  const isPopular =
+    (chapter.rating && chapter.rating >= 4.0) ||
+    (chapter.likes && chapter.likes.toLowerCase().includes("m"));
   const rawNum = (chapter.number || "").trim();
-  const cleanBadgeNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() || (chapter.index !== undefined ? String(chapter.index + 1) : "");
+  const cleanBadgeNum =
+    rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() ||
+    (chapter.index !== undefined ? String(chapter.index + 1) : "");
 
   const panelCount =
     chapter.page_count ||
     chapter.images_count ||
-    (chapter.images && chapter.images.length > 0 ? chapter.images.length : undefined);
+    (chapter.images && chapter.images.length > 0
+      ? chapter.images.length
+      : undefined);
 
   const formattedLikes = formatLikesCount(chapter.likes);
   const formattedViews = formatViewsCount(chapter.views);
 
   const estReadingTime =
     chapter.duration ||
-    (panelCount ? `~${Math.max(1, Math.round((panelCount * 12) / 60))}m read` : undefined);
+    (panelCount
+      ? `~${Math.max(1, Math.round((panelCount * 12) / 60))}m read`
+      : undefined);
 
   return (
     <div
@@ -286,10 +311,20 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
             }`}
             onError={() => {
               const firstP = getFirstPanel();
-              const proxiedFirstP = firstP ? getProxiedImageUrl(firstP, chapter.url) : "";
-              if (imgSrc.includes("/api/v1/proxy/image") && chapter.cover_image && imgSrc !== chapter.cover_image) {
+              const proxiedFirstP = firstP
+                ? getProxiedImageUrl(firstP, chapter.url)
+                : "";
+              if (
+                imgSrc.includes("/api/v1/proxy/image") &&
+                chapter.cover_image &&
+                imgSrc !== chapter.cover_image
+              ) {
                 setImgSrc(chapter.cover_image);
-              } else if (firstP && imgSrc !== proxiedFirstP && imgSrc !== firstP) {
+              } else if (
+                firstP &&
+                imgSrc !== proxiedFirstP &&
+                imgSrc !== firstP
+              ) {
                 setImgSrc(proxiedFirstP || firstP);
               } else {
                 setImageError(true);
@@ -405,7 +440,9 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               <Layers size={10} className="text-sky-400" />
               <span>{panelCount} Panels</span>
             </div>
-          ) : <div />}
+          ) : (
+            <div />
+          )}
 
           {estReadingTime && (
             <div
@@ -533,20 +570,26 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
               </div>
             ) : null}
 
-            {chapter.comment_count !== undefined && chapter.comment_count > 0 && (
-              <div
-                className="flex items-center gap-1 text-xs font-bold text-neutral-400 font-mono truncate shrink-0"
-                title={`${chapter.comment_count} Comments`}
-              >
-                <MessageSquare size={12} className="text-purple-400 shrink-0" />
-                <span className="truncate">{chapter.comment_count}</span>
-              </div>
-            )}
+            {chapter.comment_count !== undefined &&
+              chapter.comment_count > 0 && (
+                <div
+                  className="flex items-center gap-1 text-xs font-bold text-neutral-400 font-mono truncate shrink-0"
+                  title={`${chapter.comment_count} Comments`}
+                >
+                  <MessageSquare
+                    size={12}
+                    className="text-purple-400 shrink-0"
+                  />
+                  <span className="truncate">{chapter.comment_count}</span>
+                </div>
+              )}
 
             {!formattedLikes && !formattedViews && !chapter.comment_count && (
               <div className="text-[10px] font-mono text-neutral-500 flex items-center gap-1 truncate">
                 <Tag size={10} className="text-neutral-600 shrink-0" />
-                <span>{cleanBadgeNum ? `Chapter ${cleanBadgeNum}` : "Ready"}</span>
+                <span>
+                  {cleanBadgeNum ? `Chapter ${cleanBadgeNum}` : "Ready"}
+                </span>
               </div>
             )}
           </div>
@@ -667,4 +710,3 @@ export const ChapterCard: React.FC<ChapterCardProps> = ({
 };
 
 export const EpisodeCard = ChapterCard;
-

@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  Scissors,
-  AlertCircle,
-  Search,
-} from "lucide-react";
+import { Scissors, AlertCircle, Search } from "lucide-react";
 import * as api from "@/api";
 import { AutoCropSliceCard } from "./AutoCropSliceCard";
 
@@ -34,10 +30,13 @@ export function AutoCropSlicesTab({
   onSplitHalf,
   onMergeNext,
 }: AutoCropSlicesTabProps) {
-  const [gridDensity, setGridDensity] = useState<"compact" | "normal" | "large">(() => {
+  const [gridDensity, setGridDensity] = useState<
+    "compact" | "normal" | "large"
+  >(() => {
     try {
       const saved = localStorage.getItem("sonikoma_autocrop_grid_density");
-      if (saved === "compact" || saved === "normal" || saved === "large") return saved;
+      if (saved === "compact" || saved === "normal" || saved === "large")
+        return saved;
     } catch {}
     return "compact";
   });
@@ -83,7 +82,10 @@ export function AutoCropSlicesTab({
           <div className="flex items-center gap-1.5 shrink-0 ml-auto">
             {/* Quick Panel # Jump */}
             {panelUrls.length > 5 && (
-              <form onSubmit={handleJumpToPanel} className="relative flex items-center">
+              <form
+                onSubmit={handleJumpToPanel}
+                className="relative flex items-center"
+              >
                 <input
                   type="text"
                   placeholder="Go to #..."
@@ -175,7 +177,10 @@ export function AutoCropSlicesTab({
         {panelUrls.length === 0 && (
           <div className="col-span-full py-12 text-center text-xs text-neutral-500 flex flex-col items-center justify-center gap-2">
             <AlertCircle className="h-6 w-6 text-neutral-600" />
-            <span>No panel boxes detected. Switch to "Compare" tab to draw or add boxes.</span>
+            <span>
+              No panel boxes detected. Switch to "Compare" tab to draw or add
+              boxes.
+            </span>
           </div>
         )}
       </div>

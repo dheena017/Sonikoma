@@ -90,7 +90,9 @@ export function CinematicRenderDemo({
           </div>
           <div className="relative w-full aspect-video bg-gradient-to-br from-neutral-900 to-black rounded-xl border border-white/10 flex items-center justify-center overflow-hidden">
             <div className="w-28 h-44 bg-gradient-to-br from-[#2A2A2A] to-indigo-900 rounded-lg border border-white/20 shadow-xl relative overflow-hidden flex flex-col items-center justify-center text-center p-2">
-              <span className="text-white text-xs font-bold">Panel 1 Motion</span>
+              <span className="text-white text-xs font-bold">
+                Panel 1 Motion
+              </span>
               <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 text-emerald-400 text-[9px] font-mono font-bold">
                 {aspect}
               </div>
@@ -219,4 +221,3 @@ export function CinematicRenderDemo({
     </div>
   );
 }
-

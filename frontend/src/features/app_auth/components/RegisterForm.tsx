@@ -229,12 +229,17 @@ export default function RegisterForm({
                     placeholder="Create password (8+ characters)"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
-                    <Tooltip text={showPassword ? "Hide password" : "Show password"} placement="top">
+                    <Tooltip
+                      text={showPassword ? "Hide password" : "Show password"}
+                      placement="top"
+                    >
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer flex items-center justify-center rounded-lg hover:bg-neutral-800"
-                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
                       >
                         {showPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -249,7 +254,10 @@ export default function RegisterForm({
 
               {/* Terms Checkbox */}
               <div className="flex items-start ml-0.5 pt-1">
-                <Tooltip text="Click to accept terms and conditions" placement="top">
+                <Tooltip
+                  text="Click to accept terms and conditions"
+                  placement="top"
+                >
                   <label className="flex items-center gap-2.5 cursor-pointer group select-none">
                     <div className="relative flex items-center justify-center mt-0.5">
                       <input
@@ -278,7 +286,10 @@ export default function RegisterForm({
               </div>
 
               {/* Submit Button */}
-              <Tooltip text="Complete registration and start creating" placement="bottom">
+              <Tooltip
+                text="Complete registration and start creating"
+                placement="bottom"
+              >
                 <button
                   type="submit"
                   disabled={isLoading || !isFormValid}

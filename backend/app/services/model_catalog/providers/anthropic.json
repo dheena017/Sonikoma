@@ -9,8 +9,8 @@
     "limit_rpm": 50,
     "limit_tpm": 100000,
     "limit_rpd": 5000,
-    "prompt_price_per_1m": 3.00,
-    "completion_price_per_1m": 15.00,
+    "prompt_price_per_1m": 3.0,
+    "completion_price_per_1m": 15.0,
     "speed_rating": "Standard (~650ms)",
     "capabilities": ["creative_writing", "vision", "complex_narrative", "text"],
     "recommended_for": ["Creative Manga Dramatization", "Epic Script Writing"]
@@ -25,8 +25,8 @@
     "limit_rpm": 100,
     "limit_tpm": 100000,
     "limit_rpd": 5000,
-    "prompt_price_per_1m": 0.80,
-    "completion_price_per_1m": 4.00,
+    "prompt_price_per_1m": 0.8,
+    "completion_price_per_1m": 4.0,
     "speed_rating": "Ultra Fast (~280ms)",
     "capabilities": ["fast_reasoning", "creative_dialogue", "text"],
     "recommended_for": ["Fast Narration Iterations", "Quick Fallback"]

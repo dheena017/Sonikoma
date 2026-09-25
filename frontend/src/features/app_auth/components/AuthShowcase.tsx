@@ -1,14 +1,6 @@
 import React from "react";
-import {
-  Sparkles,
-  Film,
-  Volume2,
-  Cpu,
-  Play,
-} from "lucide-react";
-import {
-  ThemeKey,
-} from "@/features/app_auth/components/constants";
+import { Sparkles, Film, Volume2, Cpu, Play } from "lucide-react";
+import { ThemeKey } from "@/features/app_auth/components/constants";
 import { LandingAnimeScene } from "@/features/app_landing/components/LandingAnimeScene";
 import { SonikomaLogo } from "@/shared/ui/branding";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
@@ -23,25 +15,29 @@ const SIMPLE_SLIDES = [
     icon: Sparkles,
     badge: "Step 1",
     title: "Auto-Crop Comic Panels",
-    description: "Automatically slice long webtoon strips into independent, perfectly cropped storyboard panels in seconds.",
+    description:
+      "Automatically slice long webtoon strips into independent, perfectly cropped storyboard panels in seconds.",
   },
   {
     icon: Film,
     badge: "Step 2",
     title: "Smooth Camera Motion",
-    description: "Bring static panels to life with automatic camera zooms, pan effects, and smooth vertical scrolling.",
+    description:
+      "Bring static panels to life with automatic camera zooms, pan effects, and smooth vertical scrolling.",
   },
   {
     icon: Volume2,
     badge: "Step 3",
     title: "Character Voice Narration",
-    description: "Generate realistic character dialogue voiceovers and sync background music and sound effects automatically.",
+    description:
+      "Generate realistic character dialogue voiceovers and sync background music and sound effects automatically.",
   },
   {
     icon: Cpu,
     badge: "Step 4",
     title: "Export Ready Videos",
-    description: "Download high-definition vertical MP4 videos ready to post on TikTok, YouTube Shorts, and Instagram Reels.",
+    description:
+      "Download high-definition vertical MP4 videos ready to post on TikTok, YouTube Shorts, and Instagram Reels.",
   },
 ];
 

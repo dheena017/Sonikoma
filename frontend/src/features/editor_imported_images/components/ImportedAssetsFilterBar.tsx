@@ -43,7 +43,9 @@ export interface ImportedAssetsFilterBarProps {
   inStoryboardCount: number;
 }
 
-export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = ({
+export const ImportedAssetsFilterBar: React.FC<
+  ImportedAssetsFilterBarProps
+> = ({
   searchQuery,
   setSearchQuery,
   filterStatus,
@@ -325,7 +327,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
           }`}
         >
           <Rows className="w-3.5 h-3.5" />
-            <span className="hidden 2xl:inline">Scroll</span>
+          <span className="hidden 2xl:inline">Scroll</span>
         </button>
         <button
           type="button"
@@ -338,7 +340,7 @@ export const ImportedAssetsFilterBar: React.FC<ImportedAssetsFilterBarProps> = (
           }`}
         >
           <LayoutGrid className="w-3.5 h-3.5" />
-            <span className="hidden 2xl:inline">Grid</span>
+          <span className="hidden 2xl:inline">Grid</span>
         </button>
       </div>
     </div>

@@ -35,7 +35,9 @@ export const getBackendStatus = async (
   if (fetchWithInterceptor) {
     return apiRequest(fetchWithInterceptor, "/api/v1/system/status");
   }
-  const res = await fetch("/api/v1/system/status", { headers: getAuthHeaders() });
+  const res = await fetch("/api/v1/system/status", {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error("Failed to fetch backend status");
   return res.json();
 };
@@ -43,7 +45,9 @@ export const getBackendStatus = async (
 export const getSystemLogs = async (
   since?: string
 ): Promise<ApiResponse<any>> => {
-  const url = since ? `/api/v1/system/logs?since=${since}` : "/api/v1/system/logs";
+  const url = since
+    ? `/api/v1/system/logs?since=${since}`
+    : "/api/v1/system/logs";
   const res = await fetch(url, { headers: getAuthHeaders() });
   if (!res.ok) throw new Error("Failed to fetch system logs");
   return res.json();
@@ -63,7 +67,9 @@ export const getMetrics = async (
   if (fetchWithInterceptor) {
     return apiRequest(fetchWithInterceptor, "/api/v1/system/metrics");
   }
-  const res = await fetch("/api/v1/system/metrics", { headers: getAuthHeaders() });
+  const res = await fetch("/api/v1/system/metrics", {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error("Failed to fetch metrics");
   return res.json();
 };

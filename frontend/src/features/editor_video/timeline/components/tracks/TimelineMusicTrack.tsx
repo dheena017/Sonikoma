@@ -44,17 +44,23 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
   onDurationChange,
   onAddMusic,
 }) => {
-  const [resizingSide, setResizingSide] = useState<"left" | "right" | null>(null);
+  const [resizingSide, setResizingSide] = useState<"left" | "right" | null>(
+    null
+  );
   const [deltaSecs, setDeltaSecs] = useState<number>(0);
   // per-clip offsets to persist moved positions (only one clip currently)
   const [clipOffsets, setClipOffsets] = useState<Record<string, number>>({});
-  const [movingInfo, setMovingInfo] = useState<{ key: string; deltaPx: number } | null>(null);
+  const [movingInfo, setMovingInfo] = useState<{
+    key: string;
+    deltaPx: number;
+  } | null>(null);
   const movingInfoRef = React.useRef(movingInfo);
   React.useEffect(() => {
     movingInfoRef.current = movingInfo;
   }, [movingInfo]);
 
-  const clipDuration = (duration && duration > 0 ? duration : (totalDuration > 0 ? totalDuration : 0));
+  const clipDuration =
+    duration && duration > 0 ? duration : totalDuration > 0 ? totalDuration : 0;
 
   const handleMoveStart = (
     e: React.MouseEvent,
@@ -150,25 +156,36 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 
   const hasMusic =
     duration !== 0 &&
-    ((!!musicTheme && musicTheme !== "none" && musicTheme !== "No Music" && musicTheme.trim() !== "") ||
-    !!musicUrl);
+    ((!!musicTheme &&
+      musicTheme !== "none" &&
+      musicTheme !== "No Music" &&
+      musicTheme.trim() !== "") ||
+      !!musicUrl);
 
   const displayTheme =
-    (musicTheme &&
+    musicTheme &&
     musicTheme !== "none" &&
     musicTheme !== "No Music" &&
     musicTheme.trim() !== "" &&
     !musicTheme.startsWith("http") &&
     !musicTheme.startsWith("blob:") &&
-    !musicTheme.startsWith("/"))
+    !musicTheme.startsWith("/")
       ? musicTheme
-      : (musicUrl ? musicUrl.split("/").pop() || musicUrl : musicTheme || "");
+      : musicUrl
+      ? musicUrl.split("/").pop() || musicUrl
+      : musicTheme || "";
 
   const pxPerSec = zoomLevel ?? 30;
 
   const displayWidthPx = Math.max(
     30,
-    (clipDuration + (resizingSide === "right" ? deltaSecs : resizingSide === "left" ? -deltaSecs : 0)) * pxPerSec
+    (clipDuration +
+      (resizingSide === "right"
+        ? deltaSecs
+        : resizingSide === "left"
+        ? -deltaSecs
+        : 0)) *
+      pxPerSec
   );
 
   return (
@@ -190,7 +207,10 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
         onToggleHide={onToggleHide}
         onAdd={onAddMusic}
       />
-      <div className="flex-1 relative h-[38px] overflow-hidden" style={{ clipPath: "inset(0)" }}>
+      <div
+        className="flex-1 relative h-[38px] overflow-hidden"
+        style={{ clipPath: "inset(0)" }}
+      >
         {!hasMusic ? (
           <div className="w-full h-full p-1 pointer-events-none select-none">
             <div className="w-full h-full rounded border border-dashed border-white/[0.04] bg-white/[0.01] flex items-center px-3">
@@ -264,7 +284,10 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
                 </span>
               </div>
 
-              <div className="flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
+              <div
+                className="flex items-center gap-1 z-20 pointer-events-auto"
+                style={{ cursor: "inherit" }}
+              >
                 {/* Live Drag Delta Display */}
                 {movingInfo && movingInfo.deltaPx !== 0 && (
                   <span className="text-[7.5px] font-mono font-bold text-emerald-100 bg-emerald-900/90 px-1.5 py-0.5 rounded-md border border-emerald-300 shadow-[0_0_8px_rgba(52,211,153,0.7)] animate-pulse">
@@ -276,7 +299,9 @@ export const TimelineMusicTrack: React.FC<TimelineMusicTrackProps> = ({
 
                 {resizingSide !== null && deltaSecs !== 0 && (
                   <span className="text-[7px] font-mono font-bold text-emerald-200 bg-emerald-950 px-1.5 py-0.5 rounded-md border border-emerald-400/50 animate-pulse">
-                    {deltaSecs > 0 ? `+${deltaSecs.toFixed(1)}s` : `${deltaSecs.toFixed(1)}s`}
+                    {deltaSecs > 0
+                      ? `+${deltaSecs.toFixed(1)}s`
+                      : `${deltaSecs.toFixed(1)}s`}
                   </span>
                 )}
                 <span className="text-[8px] font-mono text-emerald-100 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-md border border-white/15 shrink-0 font-bold">

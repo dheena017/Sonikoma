@@ -37,7 +37,12 @@ export function createFetchWithInterceptor({
     input: RequestInfo | URL,
     init?: RequestInit
   ): Promise<Response> => {
-    const inputStr = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as any)?.url || "";
+    const inputStr =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+        ? input.toString()
+        : (input as any)?.url || "";
     const isQuiet =
       inputStr.includes("/auth/credits") ||
       inputStr.includes("/metrics") ||
@@ -122,7 +127,12 @@ export function createFetchWithInterceptor({
               }
 
               if (response.status === 401) {
-                const inputUrl = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
+                const inputUrl =
+                  typeof input === "string"
+                    ? input
+                    : input instanceof URL
+                    ? input.toString()
+                    : (input as Request).url;
                 const isAuthEndpoint =
                   inputUrl.includes("/auth/login") ||
                   inputUrl.includes("/auth/register") ||
@@ -245,7 +255,9 @@ export function createFetchWithInterceptor({
               if (contentType.includes("application/json")) {
                 const errorData = await response.json().catch(() => ({}));
                 if (Array.isArray(errorData.detail)) {
-                  errMsg = errorData.detail.map((d: any) => d.msg || d.message).join(", ");
+                  errMsg = errorData.detail
+                    .map((d: any) => d.msg || d.message)
+                    .join(", ");
                 } else {
                   errMsg =
                     errorData.message ||
@@ -254,7 +266,12 @@ export function createFetchWithInterceptor({
                     errMsg;
                 }
               }
-              const inputUrl = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
+              const inputUrl =
+                typeof input === "string"
+                  ? input
+                  : input instanceof URL
+                  ? input.toString()
+                  : (input as Request).url;
               const isAuthEndpoint =
                 inputUrl.includes("/auth/login") ||
                 inputUrl.includes("/auth/register") ||

@@ -71,9 +71,7 @@ const ClipBlock: React.FC<ClipBlockProps> = ({
       onContextMenu={(e) => onContextMenu(e, clipKey, panelIdx)}
       style={style}
       className={`group/clip absolute flex items-center justify-between cursor-pointer truncate rounded-lg border text-[10px] font-semibold px-2 ${baseColorClass} ${
-        selected
-          ? "border-white/60 shadow-lg z-10"
-          : "hover:border-white/30"
+        selected ? "border-white/60 shadow-lg z-10" : "hover:border-white/30"
       } ${isResizing ? "border-[#60A5FA] " : ""}`}
     >
       <div className="flex items-center gap-1.5 min-w-0 truncate">

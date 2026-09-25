@@ -30,7 +30,10 @@ export default function useLoginForm(props: LoginFormProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [errorType, setErrorType] = React.useState<AuthErrorType>(null);
-  const [fieldErrors, setFieldErrors] = React.useState<{ email?: string; password?: string }>({});
+  const [fieldErrors, setFieldErrors] = React.useState<{
+    email?: string;
+    password?: string;
+  }>({});
   const [infoMessage, setInfoMessage] = React.useState<string | null>(null);
   const [showPassword, setShowPassword] = React.useState(false);
   const [rememberMe, setRememberMe] = React.useState(false);
@@ -39,8 +42,12 @@ export default function useLoginForm(props: LoginFormProps) {
   const [isCapsLockOn, setIsCapsLockOn] = React.useState(false);
   const [isTourOpen, setIsTourOpen] = React.useState(false);
   const [tourStep, setTourStep] = React.useState(0);
-  const [socialProviderLoading, setSocialProviderLoading] = React.useState<string | null>(null);
-  const [isOnline, setIsOnline] = React.useState(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [socialProviderLoading, setSocialProviderLoading] = React.useState<
+    string | null
+  >(null);
+  const [isOnline, setIsOnline] = React.useState(
+    typeof navigator !== "undefined" ? navigator.onLine : true
+  );
 
   // Online / Offline monitor
   React.useEffect(() => {
@@ -53,7 +60,9 @@ export default function useLoginForm(props: LoginFormProps) {
     };
     const handleOffline = () => {
       setIsOnline(false);
-      setError("You appear to be offline. Please check your internet connection.");
+      setError(
+        "You appear to be offline. Please check your internet connection."
+      );
       setErrorType("network");
     };
 
@@ -91,16 +100,25 @@ export default function useLoginForm(props: LoginFormProps) {
     const params = new URLSearchParams(window.location.search);
     const urlError = params.get("error") || params.get("error_description");
     const urlMsg = params.get("msg") || params.get("message");
-    const isRegistered = params.get("registered") === "true" || params.get("registered") === "1";
-    const isReset = params.get("reset") === "true" || params.get("reset") === "1";
-    const isVerified = params.get("verified") === "true" || params.get("verified") === "1";
+    const isRegistered =
+      params.get("registered") === "true" || params.get("registered") === "1";
+    const isReset =
+      params.get("reset") === "true" || params.get("reset") === "1";
+    const isVerified =
+      params.get("verified") === "true" || params.get("verified") === "1";
 
     if (isRegistered) {
-      setInfoMessage("Account created successfully! Please sign in with your credentials.");
+      setInfoMessage(
+        "Account created successfully! Please sign in with your credentials."
+      );
     } else if (isReset) {
-      setInfoMessage("Your password has been reset successfully. Please sign in with your new password.");
+      setInfoMessage(
+        "Your password has been reset successfully. Please sign in with your new password."
+      );
     } else if (isVerified) {
-      setInfoMessage("Your email has been verified! You can now access your studio account.");
+      setInfoMessage(
+        "Your email has been verified! You can now access your studio account."
+      );
     } else if (urlMsg) {
       setInfoMessage(decodeURIComponent(urlMsg));
     }
@@ -109,8 +127,13 @@ export default function useLoginForm(props: LoginFormProps) {
       if (urlError === "session_expired") {
         setError("Your session has expired. Please sign in again to continue.");
         setErrorType("general");
-      } else if (urlError === "oauth_cancelled" || urlError === "access_denied") {
-        setError("Social login was cancelled or permission was denied. Please try again.");
+      } else if (
+        urlError === "oauth_cancelled" ||
+        urlError === "access_denied"
+      ) {
+        setError(
+          "Social login was cancelled or permission was denied. Please try again."
+        );
         setErrorType("general");
       } else {
         setError(decodeURIComponent(urlError));
@@ -146,10 +169,14 @@ export default function useLoginForm(props: LoginFormProps) {
     setError(null);
     setErrorType(null);
     setFieldErrors({});
-    setInfoMessage("Demo creator account credentials filled. Click 'Sign In' to enter.");
+    setInfoMessage(
+      "Demo creator account credentials filled. Click 'Sign In' to enter."
+    );
   };
 
-  const parseErrorMessage = (rawError: any): { message: string; type: AuthErrorType } => {
+  const parseErrorMessage = (
+    rawError: any
+  ): { message: string; type: AuthErrorType } => {
     let rawMsg = "";
     if (typeof rawError === "string") {
       rawMsg = rawError;
@@ -166,39 +193,71 @@ export default function useLoginForm(props: LoginFormProps) {
     }
     const lower = rawMsg.toLowerCase();
 
-    if (!navigator.onLine || lower.includes("network") || lower.includes("failed to fetch") || lower.includes("econnrefused")) {
+    if (
+      !navigator.onLine ||
+      lower.includes("network") ||
+      lower.includes("failed to fetch") ||
+      lower.includes("econnrefused")
+    ) {
       return {
-        message: "Unable to connect to the authentication server. Please check your internet connection or verify the backend is running.",
+        message:
+          "Unable to connect to the authentication server. Please check your internet connection or verify the backend is running.",
         type: "network",
       };
     }
-    if (lower.includes("rate") || lower.includes("too many") || lower.includes("429")) {
+    if (
+      lower.includes("rate") ||
+      lower.includes("too many") ||
+      lower.includes("429")
+    ) {
       return {
-        message: "Too many login attempts. Please wait 60 seconds before trying again.",
+        message:
+          "Too many login attempts. Please wait 60 seconds before trying again.",
         type: "rate_limited",
       };
     }
-    if (lower.includes("not found") || lower.includes("no user") || lower.includes("user does not exist") || lower.includes("account not found")) {
+    if (
+      lower.includes("not found") ||
+      lower.includes("no user") ||
+      lower.includes("user does not exist") ||
+      lower.includes("account not found")
+    ) {
       return {
-        message: "No account found with this email. Would you like to create a free account?",
+        message:
+          "No account found with this email. Would you like to create a free account?",
         type: "user_not_found",
       };
     }
-    if (lower.includes("unverified") || lower.includes("verify email") || lower.includes("not confirmed")) {
+    if (
+      lower.includes("unverified") ||
+      lower.includes("verify email") ||
+      lower.includes("not confirmed")
+    ) {
       return {
-        message: "Your email address is not verified yet. Please check your inbox for the confirmation link.",
+        message:
+          "Your email address is not verified yet. Please check your inbox for the confirmation link.",
         type: "unverified",
       };
     }
-    if (lower.includes("invalid") || lower.includes("password") || lower.includes("credentials") || lower.includes("401") || lower.includes("unauthorized") || lower.includes("incorrect")) {
+    if (
+      lower.includes("invalid") ||
+      lower.includes("password") ||
+      lower.includes("credentials") ||
+      lower.includes("401") ||
+      lower.includes("unauthorized") ||
+      lower.includes("incorrect")
+    ) {
       return {
-        message: "Incorrect email or password. Please verify your credentials or reset your password.",
+        message:
+          "Incorrect email or password. Please verify your credentials or reset your password.",
         type: "invalid_credentials",
       };
     }
 
     return {
-      message: rawMsg.trim() || "Sign in failed. Please check your credentials and try again.",
+      message:
+        rawMsg.trim() ||
+        "Sign in failed. Please check your credentials and try again.",
       type: "general",
     };
   };
@@ -212,7 +271,8 @@ export default function useLoginForm(props: LoginFormProps) {
     if (!email.trim()) {
       errors.email = "Email address is required.";
     } else if (!isEmailValid) {
-      errors.email = "Please enter a valid email address (e.g. name@example.com).";
+      errors.email =
+        "Please enter a valid email address (e.g. name@example.com).";
     }
 
     if (!password) {
@@ -260,7 +320,9 @@ export default function useLoginForm(props: LoginFormProps) {
 
   const handleSocialLogin = (provider: string) => {
     if (!navigator.onLine) {
-      setError("You appear to be offline. Cannot connect to social authentication.");
+      setError(
+        "You appear to be offline. Cannot connect to social authentication."
+      );
       setErrorType("network");
       return;
     }
@@ -331,4 +393,3 @@ export default function useLoginForm(props: LoginFormProps) {
     onNavigateHome: props.onNavigateHome,
   };
 }
-

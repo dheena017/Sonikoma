@@ -1,11 +1,6 @@
 import React from "react";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
-import {
-  Check,
-  RotateCw,
-  FlipHorizontal,
-  Undo2,
-} from "lucide-react";
+import { Check, RotateCw, FlipHorizontal, Undo2 } from "lucide-react";
 import {
   PanelProcessingOverlay,
   getPanelProcessingLabel,
@@ -84,7 +79,11 @@ export function PanelCardThumbnail({
 
   // Check if image is already cached/loaded when mounted or src changes
   React.useEffect(() => {
-    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+    if (
+      imgRef.current &&
+      imgRef.current.complete &&
+      imgRef.current.naturalWidth > 0
+    ) {
       setIsLoaded(true);
       const dims = {
         width: imgRef.current.naturalWidth,
@@ -103,7 +102,8 @@ export function PanelCardThumbnail({
       setRetryKey((prev) => prev + 1);
     };
     window.addEventListener("scraped-assets-reload", handleReloadAll);
-    return () => window.removeEventListener("scraped-assets-reload", handleReloadAll);
+    return () =>
+      window.removeEventListener("scraped-assets-reload", handleReloadAll);
   }, []);
 
   const resolvedDisplayIdx = displayIdx ?? idx;
@@ -185,7 +185,9 @@ export function PanelCardThumbnail({
               return;
             }
 
-            img.src = `/api/v1/proxy/image?url=${encodeURIComponent(currentSrc)}`;
+            img.src = `/api/v1/proxy/image?url=${encodeURIComponent(
+              currentSrc
+            )}`;
           }}
         />
       )}

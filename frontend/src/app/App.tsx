@@ -21,7 +21,6 @@ import * as api from "@/api";
 import AppRouter from "@/app/router/AppRouter";
 import { NotificationProvider } from "@/features/app_notification";
 
-
 export default function App() {
   // --------------------------------------------------------------------------
   // SUB-SECTION 2.1: INITIALIZE CUSTOM & CORE HOOKS
@@ -516,11 +515,17 @@ export default function App() {
       localStorage.removeItem("auto_import_batch");
     }
 
-    const isTempOrImport = Boolean(projId && projId.startsWith("temp_")) || Boolean(importUrl) || isTransfer;
-    if (!isTempOrImport && (!isAuthenticated || authLoading || isInitializing)) return;
+    const isTempOrImport =
+      Boolean(projId && projId.startsWith("temp_")) ||
+      Boolean(importUrl) ||
+      isTransfer;
+    if (!isTempOrImport && (!isAuthenticated || authLoading || isInitializing))
+      return;
 
     if (!projId && importUrl) {
-      projId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      projId = `temp_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 7)}`;
     }
 
     if (!projId || !projId.startsWith("temp_")) return;
@@ -570,43 +575,59 @@ export default function App() {
 
     // Check if complete storyboard panels, images, and texts were transferred from extension
     const checkAndLoadTransfer = async () => {
-        let transferData: any = null;
+      let transferData: any = null;
 
-        // 1. Try local storage first if set
-        const localRaw = localStorage.getItem("sonikoma_import_project");
-        if (localRaw) {
-          try {
-            const parsed = JSON.parse(localRaw);
-            if (parsed && (parsed.project_id === projId || !parsed.project_id)) {
-              transferData = parsed;
-              localStorage.removeItem("sonikoma_import_project");
-            }
-          } catch (_) {}
-        }
+      // 1. Try local storage first if set
+      const localRaw = localStorage.getItem("sonikoma_import_project");
+      if (localRaw) {
+        try {
+          const parsed = JSON.parse(localRaw);
+          if (parsed && (parsed.project_id === projId || !parsed.project_id)) {
+            transferData = parsed;
+            localStorage.removeItem("sonikoma_import_project");
+          }
+        } catch (_) {}
+      }
 
-        // 2. Fetch from backend transfer endpoint only if initiated as a transfer
-        if (!transferData && isTransfer && projId) {
-          try {
-            const res = await fetch(`/api/v1/projects/transfer/${encodeURIComponent(projId)}`);
-            if (res.ok) {
-              const resData = await res.json();
-              if (resData && resData.success && Array.isArray(resData.panels) && resData.panels.length > 0) {
-                transferData = resData;
-              }
-            }
-          } catch (_) {}
-        }
-
-        // 3. If transfer data exists, populate the entire workspace immediately!
-        if (transferData && Array.isArray(transferData.panels) && transferData.panels.length > 0) {
-          console.log(
-            `[Storyboard Transfer] Loading ${transferData.panels.length} panels into workspace:`,
-            transferData
+      // 2. Fetch from backend transfer endpoint only if initiated as a transfer
+      if (!transferData && isTransfer && projId) {
+        try {
+          const res = await fetch(
+            `/api/v1/projects/transfer/${encodeURIComponent(projId)}`
           );
+          if (res.ok) {
+            const resData = await res.json();
+            if (
+              resData &&
+              resData.success &&
+              Array.isArray(resData.panels) &&
+              resData.panels.length > 0
+            ) {
+              transferData = resData;
+            }
+          }
+        } catch (_) {}
+      }
 
-          const transferredPanels = transferData.panels.map((p: any, idx: number) => ({
+      // 3. If transfer data exists, populate the entire workspace immediately!
+      if (
+        transferData &&
+        Array.isArray(transferData.panels) &&
+        transferData.panels.length > 0
+      ) {
+        console.log(
+          `[Storyboard Transfer] Loading ${transferData.panels.length} panels into workspace:`,
+          transferData
+        );
+
+        const transferredPanels = transferData.panels.map(
+          (p: any, idx: number) => ({
             id: p.id || idx + 1,
-            prompt: p.prompt || p.visual_description || p.speech_text || `Scene ${idx + 1}`,
+            prompt:
+              p.prompt ||
+              p.visual_description ||
+              p.speech_text ||
+              `Scene ${idx + 1}`,
             image_url: p.image_url || p.imageUrl || "",
             original_url: p.original_url || p.imageUrl || p.image_url || "",
             speech_text: p.speech_text || p.dialogueText || "",
@@ -614,83 +635,86 @@ export default function App() {
             sfx: p.sfx || "",
             duration: p.duration || 0,
             motion_type: p.motion_type || p.motionPreset || "",
-            visual_description: p.visual_description || p.visualDescription || "",
+            visual_description:
+              p.visual_description || p.visualDescription || "",
             audio_url: p.audio_url || p.audioUrl || "",
-            narrative_audio_url: p.narrative_audio_url || p.narrativeAudioUrl || "",
+            narrative_audio_url:
+              p.narrative_audio_url || p.narrativeAudioUrl || "",
             speech_audio_url: p.speech_audio_url || p.audioUrl || "",
-          }));
+          })
+        );
 
-          const transferredImages =
-            Array.isArray(transferData.scraped_images) && transferData.scraped_images.length > 0
-              ? transferData.scraped_images
-              : transferredPanels.map((p: any) => p.image_url).filter(Boolean);
+        const transferredImages =
+          Array.isArray(transferData.scraped_images) &&
+          transferData.scraped_images.length > 0
+            ? transferData.scraped_images
+            : transferredPanels.map((p: any) => p.image_url).filter(Boolean);
 
-          const title = transferData.title || transferData.series_title || "Imported Comic";
+        const title =
+          transferData.title || transferData.series_title || "Imported Comic";
 
-          useProjectStore.getState().setActiveProject({
-            project: {
-              project_id: projId,
-              title: title,
-              url: transferData.url || importUrl || "",
-              cover_image: transferredImages[0] || "",
-            },
-            panels: transferredPanels,
-            scrapedImages: transferredImages,
-          });
+        useProjectStore.getState().setActiveProject({
+          project: {
+            project_id: projId,
+            title: title,
+            url: transferData.url || importUrl || "",
+            cover_image: transferredImages[0] || "",
+          },
+          panels: transferredPanels,
+          scrapedImages: transferredImages,
+        });
 
-          setPanels(transferredPanels);
-          setScrapedImages(transferredImages);
-          setProjectId(projId);
-          if (transferData.url || importUrl) setTargetUrl(transferData.url || importUrl);
-          if (title) setSeriesTitle(title);
-          if (transferData.chapter_title) setChapterTitle(transferData.chapter_title);
-          if (transferData.voice) setVoiceActor(transferData.voice);
-          if (transferData.music_theme) setMusicTheme(transferData.music_theme);
-          if (transferData.aspect_ratio) setAspectRatio(transferData.aspect_ratio);
+        setPanels(transferredPanels);
+        setScrapedImages(transferredImages);
+        setProjectId(projId);
+        if (transferData.url || importUrl)
+          setTargetUrl(transferData.url || importUrl);
+        if (title) setSeriesTitle(title);
+        if (transferData.chapter_title)
+          setChapterTitle(transferData.chapter_title);
+        if (transferData.voice) setVoiceActor(transferData.voice);
+        if (transferData.music_theme) setMusicTheme(transferData.music_theme);
+        if (transferData.aspect_ratio)
+          setAspectRatio(transferData.aspect_ratio);
 
-          notifyStoryboardLoaded(projId, transferredPanels.length);
-          return true;
-        }
+        notifyStoryboardLoaded(projId, transferredPanels.length);
+        return true;
+      }
 
-        return false;
-      };
+      return false;
+    };
 
-      checkAndLoadTransfer().then((loaded) => {
-        if (loaded) return;
+    checkAndLoadTransfer().then((loaded) => {
+      if (loaded) return;
 
-        if (importBatchRaw) {
-          try {
-            const episodesList = JSON.parse(importBatchRaw);
-            if (Array.isArray(episodesList) && episodesList.length > 0) {
-              console.log(
-                `[Auto Scrape] Triggering batch import for ${episodesList.length} episodes on project: ${projId}`
-              );
-              if (scrapeBatchEpisodes) {
-                scrapeBatchEpisodes(episodesList, projId);
-              }
-              return;
+      if (importBatchRaw) {
+        try {
+          const episodesList = JSON.parse(importBatchRaw);
+          if (Array.isArray(episodesList) && episodesList.length > 0) {
+            console.log(
+              `[Auto Scrape] Triggering batch import for ${episodesList.length} episodes on project: ${projId}`
+            );
+            if (scrapeBatchEpisodes) {
+              scrapeBatchEpisodes(episodesList, projId);
             }
-          } catch (e) {
-            console.error("[Auto Scrape] Error parsing auto_import_batch:", e);
+            return;
           }
+        } catch (e) {
+          console.error("[Auto Scrape] Error parsing auto_import_batch:", e);
         }
+      }
 
-        if (importUrl) {
-          console.log(
-            `[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`
-          );
-          setTargetUrl(importUrl);
-          scrapeImages(importUrl, projId).catch((err) => {
-            console.error("[Auto Scrape] Failed to scrape images:", err);
-          });
-        }
-      });
-  }, [
-    isAuthenticated,
-    authLoading,
-    isInitializing,
-    currentPath,
-  ]);
+      if (importUrl) {
+        console.log(
+          `[Auto Scrape] Triggering import for URL: ${importUrl} on project: ${projId}`
+        );
+        setTargetUrl(importUrl);
+        scrapeImages(importUrl, projId).catch((err) => {
+          console.error("[Auto Scrape] Failed to scrape images:", err);
+        });
+      }
+    });
+  }, [isAuthenticated, authLoading, isInitializing, currentPath]);
 
   // --- Global Keyboard Shortcuts Hook ---
   const { shortcuts, setShortcuts } = useGlobalShortcuts({
@@ -753,7 +777,10 @@ export default function App() {
             chapterTitle: details.chapterTitle,
             genre: details.scrapedGenre,
             author: details.seriesAuthor,
-            cover_image: details.seriesCoverImage || details.localCoverImage || cur.project.cover_image,
+            cover_image:
+              details.seriesCoverImage ||
+              details.localCoverImage ||
+              cur.project.cover_image,
             synopsis: details.seriesSynopsis,
             status: details.status,
           },
@@ -785,11 +812,13 @@ export default function App() {
       }
 
       // 🌟 Dynamically update browser address bar to clean human URL on save
-      const activeProjId = cur?.project?.id || cur?.project?.project_id || undefined;
+      const activeProjId =
+        cur?.project?.id || cur?.project?.project_id || undefined;
       const humanPath = getHumanEditorPath({
         projectId: activeProjId,
         seriesSlug: cur?.project?.series_slug || (seriesSlugState ?? undefined),
-        chapterSlug: cur?.project?.chapter_slug || (chapterSlugState ?? undefined),
+        chapterSlug:
+          cur?.project?.chapter_slug || (chapterSlugState ?? undefined),
         seriesTitle: details.seriesTitle,
         chapterNumber: details.chapterNumber,
       });
@@ -1009,222 +1038,222 @@ export default function App() {
   return (
     <NotificationProvider addNotification={addNotification}>
       <AppRouter
-      currentPath={currentPath}
-      lastEditorPath={lastEditorPath}
-      activeTheme={activeTheme}
-      setActiveTheme={setActiveTheme}
-      isPipMode={isPipMode}
-      setIsPipMode={setIsPipMode}
-      navigateTo={navigateTo}
-      isAuthenticated={isAuthenticated}
-      authLoading={authLoading}
-      isInitializing={isInitializing}
-      user={user}
-      projectId={projectId}
-      seriesSlugState={seriesSlugState}
-      chapterSlugState={chapterSlugState}
-      themeMode={themeMode}
-      toggleThemeMode={toggleThemeMode}
-      login={login}
-      register={register}
-      logout={logout}
-      forgotPassword={forgotPassword}
-      checkAuth={checkAuth}
-      scrapedImages={scrapedImages}
-      panels={panels}
-      setEditingImageIdx={setEditingImageIdx}
-      setShowAutoCropModal={setShowAutoCropModal}
-      setShowBubbleModal={setShowBubbleModal}
-      setTargetUrl={setTargetUrl}
-      setSelectedModel={setSelectedModel}
-      setSelectedSource={setSelectedSource}
-      setVoiceActor={setVoiceActor}
-      setMusicTheme={setMusicTheme}
-      setAspectRatio={setAspectRatio}
-      addNotification={addNotification}
-      voiceActor={voiceActor}
-      musicTheme={musicTheme}
-      aspectRatio={aspectRatio}
-      frameRate={frameRate}
-      isWorkspaceDirty={isWorkspaceDirty}
-      appLogic={appLogic}
-      totalCalculatedDuration={totalCalculatedDuration}
-      autoPlayAudio={autoPlayAudio}
-      setAutoPlayAudio={setAutoPlayAudio}
-      saveProject={saveProject}
-      videoUrl={videoUrl}
-      setVideoUrl={setVideoUrl}
-      consoleLogs={consoleLogs}
-      setConsoleLogs={setConsoleLogs}
-      selectedScraped={selectedScraped}
-      setSelectedScraped={setSelectedScraped}
-      activePreviewTab={activePreviewTab}
-      setActivePreviewTab={setActivePreviewTab}
-      setEditCropTop={setEditCropTop}
-      setEditCropBottom={setEditCropBottom}
-      setEditCropLeft={setEditCropLeft}
-      setEditCropRight={setEditCropRight}
-      isRendering={isRendering}
-      renderProgress={renderProgress}
-      handleRenderFinalVideo={handleRenderFinalVideo}
-      setEditAutoTrim={setEditAutoTrim}
-      showBubbleModal={showBubbleModal}
-      playStoryboardAudio={playStoryboardAudio}
-      isCleaningBubbles={isCleaningBubbles}
-      cleanProgress={cleanProgress}
-      showAutoCropModal={showAutoCropModal}
-      isBatchCropping={isBatchCropping}
-      batchProgress={batchProgress}
-      resetWorkspace={resetWorkspace}
-      handleAutoCropSelected={handleAutoCropSelected}
-      handleCleanBubblesSelected={handleCleanBubblesSelected}
-      scrapeImages={scrapeImages}
-      videoPlayerRef={videoPlayerRef}
-      setErrorPopup={setErrorPopup}
-      fetchWithInterceptor={fetchWithInterceptor}
-      targetUrl={targetUrl}
-      selectedSource={selectedSource}
-      seriesTitle={seriesTitle}
-      setSeriesTitle={setSeriesTitle}
-      chapterNumber={chapterNumber}
-      setChapterNumber={setChapterNumber}
-      chapterTitle={chapterTitle}
-      setChapterTitle={setChapterTitle}
-      scrapedGenre={scrapedGenre}
-      setScrapedGenre={setScrapedGenre}
-      seriesAuthor={seriesAuthor}
-      setSeriesAuthor={setSeriesAuthor}
-      seriesCoverImage={seriesCoverImage}
-      setSeriesCoverImage={setSeriesCoverImage}
-      seriesSynopsis={seriesSynopsis}
-      setSeriesSynopsis={setSeriesSynopsis}
-      selectedModel={selectedModel}
-      isProcessing={isProcessing}
-      handleGenerateVideo={handleGenerateVideo}
-      isScraping={isScraping}
-      mergingIndices={mergingIndices}
-      handleStitchWithNext={handleStitchWithNext}
-      addPanelsToStoryboard={addPanelsToStoryboard}
-      progressStatus={progressStatus}
-      currentPanelIndex={currentPanelIndex}
-      setCurrentPanelIndex={setCurrentPanelIndex}
-      playbackTime={playbackTime}
-      setPlaybackTime={setPlaybackTime}
-      reprocessingPanelId={reprocessingPanelId}
-      storyboardPlaying={storyboardPlaying}
-      toggleStoryboardPlayback={toggleStoryboardPlayback}
-      resetStoryboardPlayback={resetStoryboardPlayback}
-      isMuted={isMuted}
-      setIsMuted={setIsMuted}
-      volume={volume}
-      setVolume={setVolume}
-      narrationStyle={narrationStyle}
-      setNarrationStyle={setNarrationStyle}
-      smartSlice={smartSlice}
-      setSmartSlice={setSmartSlice}
-      bubbleSensitivity={bubbleSensitivity}
-      bubbleDetectionStyle={bubbleDetectionStyle}
-      bubbleEraseMethod={bubbleEraseMethod}
-      bubbleDilation={bubbleDilation}
-      bubbleInpaintRadius={bubbleInpaintRadius}
-      cropSensitivity={cropSensitivity}
-      setCropSensitivity={setCropSensitivity}
-      cropBackgroundMode={cropBackgroundMode}
-      setCropBackgroundMode={setCropBackgroundMode}
-      aspectRatioLock={aspectRatioLock}
-      setAspectRatioLock={setAspectRatioLock}
-      minPanelAreaPct={minPanelAreaPct}
-      setMinPanelAreaPct={setMinPanelAreaPct}
-      overlapMergeThreshold={overlapMergeThreshold}
-      setOverlapMergeThreshold={setOverlapMergeThreshold}
-      useLocalCV={useLocalCV}
-      setUseLocalCV={setUseLocalCV}
-      autoSplitTallStrips={autoSplitTallStrips}
-      setAutoSplitTallStrips={setAutoSplitTallStrips}
-      cropModel={cropModel}
-      setCropModel={setCropModel}
-      cropMinHeightPx={cropMinHeightPx}
-      setCropMinHeightPx={setCropMinHeightPx}
-      cropCannyLow={cropCannyLow}
-      setCropCannyLow={setCropCannyLow}
-      cropCannyHigh={cropCannyHigh}
-      setCropCannyHigh={setCropCannyHigh}
-      cropCloseKernelSize={cropCloseKernelSize}
-      setCropCloseKernelSize={setCropCloseKernelSize}
-      showScrapeConfirmModal={showScrapeConfirmModal}
-      setShowScrapeConfirmModal={setShowScrapeConfirmModal}
-      audioFeedback={audioFeedback}
-      setPanels={setPanels}
-      narrationVolume={appLogic.narrationVolume}
-      setNarrationVolume={appLogic.setNarrationVolume}
-      bgmVolume={appLogic.bgmVolume}
-      setBgmVolume={appLogic.setBgmVolume}
-      sfxVolume={appLogic.sfxVolume}
-      setSfxVolume={appLogic.setSfxVolume}
-      speechRate={appLogic.speechRate}
-      setSpeechRate={appLogic.setSpeechRate}
-      speechPitch={appLogic.speechPitch}
-      setSpeechPitch={appLogic.setSpeechPitch}
-      audioDucking={appLogic.audioDucking}
-      setAudioDucking={appLogic.setAudioDucking}
-      audioReactiveShake={appLogic.audioReactiveShake}
-      setAudioReactiveShake={appLogic.setAudioReactiveShake}
-      shakeIntensity={appLogic.shakeIntensity}
-      setShakeIntensity={appLogic.setShakeIntensity}
-      videoFormat={appLogic.videoFormat}
-      setVideoFormat={appLogic.setVideoFormat}
-      backgroundStyle={appLogic.backgroundStyle}
-      setBackgroundStyle={appLogic.setBackgroundStyle}
-      subtitlesStyle={appLogic.subtitlesStyle}
-      setSubtitlesStyle={appLogic.setSubtitlesStyle}
-      shortcuts={shortcuts}
-      setShortcuts={setShortcuts}
-      notifications={notifications}
-      notificationsMuted={notificationsMuted}
-      setNotificationsMuted={setNotificationsMuted}
-      markNotificationAsRead={markNotificationAsRead}
-      markAllNotificationsAsRead={markAllNotificationsAsRead}
-      deleteNotification={deleteNotification}
-      clearAllNotifications={clearAllNotifications}
-      removeNotification={removeNotification}
-      scrapedRating={scrapedRating}
-      scrapedLikes={scrapedLikes}
-      scrapedViews={scrapedViews}
-      isStartingBackend={isStartingBackend}
-      setIsStartingBackend={setIsStartingBackend}
-      startBackendError={startBackendError}
-      setStartBackendError={setStartBackendError}
-      startBackend={startBackend}
-      recheckBackend={recheckBackend}
-      backendStatus={backendStatus}
-      alertDialog={alertDialog}
-      setAlertDialog={setAlertDialog}
-      confirmDialog={confirmDialog}
-      setConfirmDialog={setConfirmDialog}
-      handleProjectConfirm={handleProjectConfirm}
-      cropPaddingPx={cropPaddingPx}
-      setCropPaddingPx={setCropPaddingPx}
-      activeAutoCropTab={activeAutoCropTab}
-      setActiveAutoCropTab={setActiveAutoCropTab}
-      cropGuidance={cropGuidance}
-      setCropGuidance={setCropGuidance}
-      cropFocusMode={cropFocusMode}
-      setCropFocusMode={setCropFocusMode}
-      handleAutoCropClose={handleAutoCropClose}
-      handleAutoCropApply={handleAutoCropApply}
-      projectDetailsDirty={projectDetailsDirty}
-      projectDetailsSaveStatus={projectDetailsSaveStatus}
-      registerProjectDetailsSaveHandler={registerProjectDetailsSaveHandler}
-      projectDetailsSaveRef={projectDetailsSaveRef}
-      saveStatus={saveStatus}
-      isDirty={isDirty}
-      editingImageIdx={0}
-      setFrameRate={function (rate: number | null): void {
-        throw new Error("Function not implemented.");
-      }}
-      bubbleCroppingImgUrl={""}
-      croppingImgUrl={""}
-    />
+        currentPath={currentPath}
+        lastEditorPath={lastEditorPath}
+        activeTheme={activeTheme}
+        setActiveTheme={setActiveTheme}
+        isPipMode={isPipMode}
+        setIsPipMode={setIsPipMode}
+        navigateTo={navigateTo}
+        isAuthenticated={isAuthenticated}
+        authLoading={authLoading}
+        isInitializing={isInitializing}
+        user={user}
+        projectId={projectId}
+        seriesSlugState={seriesSlugState}
+        chapterSlugState={chapterSlugState}
+        themeMode={themeMode}
+        toggleThemeMode={toggleThemeMode}
+        login={login}
+        register={register}
+        logout={logout}
+        forgotPassword={forgotPassword}
+        checkAuth={checkAuth}
+        scrapedImages={scrapedImages}
+        panels={panels}
+        setEditingImageIdx={setEditingImageIdx}
+        setShowAutoCropModal={setShowAutoCropModal}
+        setShowBubbleModal={setShowBubbleModal}
+        setTargetUrl={setTargetUrl}
+        setSelectedModel={setSelectedModel}
+        setSelectedSource={setSelectedSource}
+        setVoiceActor={setVoiceActor}
+        setMusicTheme={setMusicTheme}
+        setAspectRatio={setAspectRatio}
+        addNotification={addNotification}
+        voiceActor={voiceActor}
+        musicTheme={musicTheme}
+        aspectRatio={aspectRatio}
+        frameRate={frameRate}
+        isWorkspaceDirty={isWorkspaceDirty}
+        appLogic={appLogic}
+        totalCalculatedDuration={totalCalculatedDuration}
+        autoPlayAudio={autoPlayAudio}
+        setAutoPlayAudio={setAutoPlayAudio}
+        saveProject={saveProject}
+        videoUrl={videoUrl}
+        setVideoUrl={setVideoUrl}
+        consoleLogs={consoleLogs}
+        setConsoleLogs={setConsoleLogs}
+        selectedScraped={selectedScraped}
+        setSelectedScraped={setSelectedScraped}
+        activePreviewTab={activePreviewTab}
+        setActivePreviewTab={setActivePreviewTab}
+        setEditCropTop={setEditCropTop}
+        setEditCropBottom={setEditCropBottom}
+        setEditCropLeft={setEditCropLeft}
+        setEditCropRight={setEditCropRight}
+        isRendering={isRendering}
+        renderProgress={renderProgress}
+        handleRenderFinalVideo={handleRenderFinalVideo}
+        setEditAutoTrim={setEditAutoTrim}
+        showBubbleModal={showBubbleModal}
+        playStoryboardAudio={playStoryboardAudio}
+        isCleaningBubbles={isCleaningBubbles}
+        cleanProgress={cleanProgress}
+        showAutoCropModal={showAutoCropModal}
+        isBatchCropping={isBatchCropping}
+        batchProgress={batchProgress}
+        resetWorkspace={resetWorkspace}
+        handleAutoCropSelected={handleAutoCropSelected}
+        handleCleanBubblesSelected={handleCleanBubblesSelected}
+        scrapeImages={scrapeImages}
+        videoPlayerRef={videoPlayerRef}
+        setErrorPopup={setErrorPopup}
+        fetchWithInterceptor={fetchWithInterceptor}
+        targetUrl={targetUrl}
+        selectedSource={selectedSource}
+        seriesTitle={seriesTitle}
+        setSeriesTitle={setSeriesTitle}
+        chapterNumber={chapterNumber}
+        setChapterNumber={setChapterNumber}
+        chapterTitle={chapterTitle}
+        setChapterTitle={setChapterTitle}
+        scrapedGenre={scrapedGenre}
+        setScrapedGenre={setScrapedGenre}
+        seriesAuthor={seriesAuthor}
+        setSeriesAuthor={setSeriesAuthor}
+        seriesCoverImage={seriesCoverImage}
+        setSeriesCoverImage={setSeriesCoverImage}
+        seriesSynopsis={seriesSynopsis}
+        setSeriesSynopsis={setSeriesSynopsis}
+        selectedModel={selectedModel}
+        isProcessing={isProcessing}
+        handleGenerateVideo={handleGenerateVideo}
+        isScraping={isScraping}
+        mergingIndices={mergingIndices}
+        handleStitchWithNext={handleStitchWithNext}
+        addPanelsToStoryboard={addPanelsToStoryboard}
+        progressStatus={progressStatus}
+        currentPanelIndex={currentPanelIndex}
+        setCurrentPanelIndex={setCurrentPanelIndex}
+        playbackTime={playbackTime}
+        setPlaybackTime={setPlaybackTime}
+        reprocessingPanelId={reprocessingPanelId}
+        storyboardPlaying={storyboardPlaying}
+        toggleStoryboardPlayback={toggleStoryboardPlayback}
+        resetStoryboardPlayback={resetStoryboardPlayback}
+        isMuted={isMuted}
+        setIsMuted={setIsMuted}
+        volume={volume}
+        setVolume={setVolume}
+        narrationStyle={narrationStyle}
+        setNarrationStyle={setNarrationStyle}
+        smartSlice={smartSlice}
+        setSmartSlice={setSmartSlice}
+        bubbleSensitivity={bubbleSensitivity}
+        bubbleDetectionStyle={bubbleDetectionStyle}
+        bubbleEraseMethod={bubbleEraseMethod}
+        bubbleDilation={bubbleDilation}
+        bubbleInpaintRadius={bubbleInpaintRadius}
+        cropSensitivity={cropSensitivity}
+        setCropSensitivity={setCropSensitivity}
+        cropBackgroundMode={cropBackgroundMode}
+        setCropBackgroundMode={setCropBackgroundMode}
+        aspectRatioLock={aspectRatioLock}
+        setAspectRatioLock={setAspectRatioLock}
+        minPanelAreaPct={minPanelAreaPct}
+        setMinPanelAreaPct={setMinPanelAreaPct}
+        overlapMergeThreshold={overlapMergeThreshold}
+        setOverlapMergeThreshold={setOverlapMergeThreshold}
+        useLocalCV={useLocalCV}
+        setUseLocalCV={setUseLocalCV}
+        autoSplitTallStrips={autoSplitTallStrips}
+        setAutoSplitTallStrips={setAutoSplitTallStrips}
+        cropModel={cropModel}
+        setCropModel={setCropModel}
+        cropMinHeightPx={cropMinHeightPx}
+        setCropMinHeightPx={setCropMinHeightPx}
+        cropCannyLow={cropCannyLow}
+        setCropCannyLow={setCropCannyLow}
+        cropCannyHigh={cropCannyHigh}
+        setCropCannyHigh={setCropCannyHigh}
+        cropCloseKernelSize={cropCloseKernelSize}
+        setCropCloseKernelSize={setCropCloseKernelSize}
+        showScrapeConfirmModal={showScrapeConfirmModal}
+        setShowScrapeConfirmModal={setShowScrapeConfirmModal}
+        audioFeedback={audioFeedback}
+        setPanels={setPanels}
+        narrationVolume={appLogic.narrationVolume}
+        setNarrationVolume={appLogic.setNarrationVolume}
+        bgmVolume={appLogic.bgmVolume}
+        setBgmVolume={appLogic.setBgmVolume}
+        sfxVolume={appLogic.sfxVolume}
+        setSfxVolume={appLogic.setSfxVolume}
+        speechRate={appLogic.speechRate}
+        setSpeechRate={appLogic.setSpeechRate}
+        speechPitch={appLogic.speechPitch}
+        setSpeechPitch={appLogic.setSpeechPitch}
+        audioDucking={appLogic.audioDucking}
+        setAudioDucking={appLogic.setAudioDucking}
+        audioReactiveShake={appLogic.audioReactiveShake}
+        setAudioReactiveShake={appLogic.setAudioReactiveShake}
+        shakeIntensity={appLogic.shakeIntensity}
+        setShakeIntensity={appLogic.setShakeIntensity}
+        videoFormat={appLogic.videoFormat}
+        setVideoFormat={appLogic.setVideoFormat}
+        backgroundStyle={appLogic.backgroundStyle}
+        setBackgroundStyle={appLogic.setBackgroundStyle}
+        subtitlesStyle={appLogic.subtitlesStyle}
+        setSubtitlesStyle={appLogic.setSubtitlesStyle}
+        shortcuts={shortcuts}
+        setShortcuts={setShortcuts}
+        notifications={notifications}
+        notificationsMuted={notificationsMuted}
+        setNotificationsMuted={setNotificationsMuted}
+        markNotificationAsRead={markNotificationAsRead}
+        markAllNotificationsAsRead={markAllNotificationsAsRead}
+        deleteNotification={deleteNotification}
+        clearAllNotifications={clearAllNotifications}
+        removeNotification={removeNotification}
+        scrapedRating={scrapedRating}
+        scrapedLikes={scrapedLikes}
+        scrapedViews={scrapedViews}
+        isStartingBackend={isStartingBackend}
+        setIsStartingBackend={setIsStartingBackend}
+        startBackendError={startBackendError}
+        setStartBackendError={setStartBackendError}
+        startBackend={startBackend}
+        recheckBackend={recheckBackend}
+        backendStatus={backendStatus}
+        alertDialog={alertDialog}
+        setAlertDialog={setAlertDialog}
+        confirmDialog={confirmDialog}
+        setConfirmDialog={setConfirmDialog}
+        handleProjectConfirm={handleProjectConfirm}
+        cropPaddingPx={cropPaddingPx}
+        setCropPaddingPx={setCropPaddingPx}
+        activeAutoCropTab={activeAutoCropTab}
+        setActiveAutoCropTab={setActiveAutoCropTab}
+        cropGuidance={cropGuidance}
+        setCropGuidance={setCropGuidance}
+        cropFocusMode={cropFocusMode}
+        setCropFocusMode={setCropFocusMode}
+        handleAutoCropClose={handleAutoCropClose}
+        handleAutoCropApply={handleAutoCropApply}
+        projectDetailsDirty={projectDetailsDirty}
+        projectDetailsSaveStatus={projectDetailsSaveStatus}
+        registerProjectDetailsSaveHandler={registerProjectDetailsSaveHandler}
+        projectDetailsSaveRef={projectDetailsSaveRef}
+        saveStatus={saveStatus}
+        isDirty={isDirty}
+        editingImageIdx={0}
+        setFrameRate={function (rate: number | null): void {
+          throw new Error("Function not implemented.");
+        }}
+        bubbleCroppingImgUrl={""}
+        croppingImgUrl={""}
+      />
     </NotificationProvider>
   );
 }

@@ -29,7 +29,8 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
       const matchesSearch =
         (log.action || "").toLowerCase().includes(search.toLowerCase()) ||
         (log.email || "").toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = statusFilter === "ALL" || log.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "ALL" || log.status === statusFilter;
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
@@ -48,7 +49,8 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
             System Audit &amp; Security Logs
           </h2>
           <p className="text-xs text-[#9CA3AF] mt-1">
-            Real-time administrative actions, authentication attempts, and event trail
+            Real-time administrative actions, authentication attempts, and event
+            trail
           </p>
         </div>
         <button
@@ -56,7 +58,9 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
           disabled={loading}
           className="btn-secondary flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold self-start sm:self-auto"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+          />
           Refresh
         </button>
       </div>
@@ -84,7 +88,9 @@ export function AdminActivityTab({ fetchWithInterceptor }: any) {
         </div>
         <button
           onClick={() => {
-            const res = fetchWithInterceptor("/api/v1/auth/admin/activity/export");
+            const res = fetchWithInterceptor(
+              "/api/v1/auth/admin/activity/export"
+            );
             res.then((r: any) => {
               if (r.ok) {
                 r.blob().then((blob: any) => {

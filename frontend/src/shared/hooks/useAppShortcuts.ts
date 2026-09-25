@@ -20,9 +20,7 @@ export function loadAppShortcuts(): Record<string, string> {
 
 export function notifyShortcutsChanged(updated: Record<string, string>) {
   if (typeof window !== "undefined") {
-    window.dispatchEvent(
-      new CustomEvent(SHORTCUTS_EVENT, { detail: updated })
-    );
+    window.dispatchEvent(new CustomEvent(SHORTCUTS_EVENT, { detail: updated }));
   }
 }
 

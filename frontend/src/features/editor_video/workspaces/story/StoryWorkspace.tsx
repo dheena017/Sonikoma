@@ -1,1 +1,4 @@
-export { StoryboardWorkspace as StoryWorkspace, default } from "../storyboard/StoryboardWorkspace";
+export {
+  StoryboardWorkspace as StoryWorkspace,
+  default,
+} from "../storyboard/StoryboardWorkspace";

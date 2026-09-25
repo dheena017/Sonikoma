@@ -9,9 +9,7 @@ interface DashboardSidebarProps {
   onNavigate?: (path: string) => void;
 }
 
-export default function DashboardSidebar({
-  latency,
-}: DashboardSidebarProps) {
+export default function DashboardSidebar({ latency }: DashboardSidebarProps) {
   return (
     <div className="space-y-6">
       <EngineStatus latency={latency} />

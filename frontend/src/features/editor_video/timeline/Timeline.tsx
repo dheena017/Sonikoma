@@ -4,7 +4,13 @@
 //
 // All state lives in useTimelineState, and visual sections are modularized.
 
-import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { TimelineProps } from "./types";
 import { useTimelineState } from "./useTimelineState";
 import { useAIPacing } from "./hooks/useAIPacing";
@@ -48,7 +54,8 @@ const Timeline: React.FC<TimelineProps> = ({
       if (explicit !== undefined && explicit > 0) return explicit;
       return p.duration || (p as any).duration_sec || p.voice_duration || 3.0;
     });
-    const total = durations.reduce((acc, d) => acc + d, 0) || panels.length * 3.0 || 1;
+    const total =
+      durations.reduce((acc, d) => acc + d, 0) || panels.length * 3.0 || 1;
 
     const pxPerSec = 30;
     return panels.map((panel, index) => {
@@ -103,26 +110,23 @@ const Timeline: React.FC<TimelineProps> = ({
           3.0);
       const a2End =
         baseStart +
-        (s.clipDurations[`a2-${idx}`] ??
-          p.sfx_duration ??
-          t.duration ??
-          2.0);
+        (s.clipDurations[`a2-${idx}`] ?? p.sfx_duration ?? t.duration ?? 2.0);
       const a3End =
         baseStart +
-        (s.clipDurations[`a3-${idx}`] ??
-          p.voice_duration ??
-          t.duration ??
-          3.0);
+        (s.clipDurations[`a3-${idx}`] ?? p.voice_duration ?? t.duration ?? 3.0);
       max = Math.max(max, v1End, v2End, v3End, a2End, a3End);
     });
 
     // Check music track duration only if music is present and not deleted
     const hasMusic =
       s.clipDurations["a1-0"] !== 0 &&
-      ((!!musicTheme && musicTheme !== "none" && musicTheme !== "No Music" && musicTheme.trim() !== "") ||
-      !!(projectStore?.activeProjectData as any)?.bgm_url ||
-      !!(projectStore?.activeProjectData as any)?.music_url ||
-      !!(projectStore?.activeProjectData as any)?.music_theme);
+      ((!!musicTheme &&
+        musicTheme !== "none" &&
+        musicTheme !== "No Music" &&
+        musicTheme.trim() !== "") ||
+        !!(projectStore?.activeProjectData as any)?.bgm_url ||
+        !!(projectStore?.activeProjectData as any)?.music_url ||
+        !!(projectStore?.activeProjectData as any)?.music_theme);
 
     if (hasMusic) {
       const musicDur = s.clipDurations["a1-0"];
@@ -132,7 +136,14 @@ const Timeline: React.FC<TimelineProps> = ({
     }
 
     return Math.max(max + 2, 1); // +2s buffer at the end
-  }, [panelTimings, panels, s.clipDurations, s.clipOffsets, musicTheme, projectStore?.activeProjectData]);
+  }, [
+    panelTimings,
+    panels,
+    s.clipDurations,
+    s.clipOffsets,
+    musicTheme,
+    projectStore?.activeProjectData,
+  ]);
 
   const getPanelIndexAtTime = useCallback(
     (time: number): number => {
@@ -164,9 +175,15 @@ const Timeline: React.FC<TimelineProps> = ({
     if (!scrollArea) return;
 
     const trackHeaderWidth = 224;
-    const visibleTrackWidth = Math.max(1, scrollArea.clientWidth - trackHeaderWidth);
+    const visibleTrackWidth = Math.max(
+      1,
+      scrollArea.clientWidth - trackHeaderWidth
+    );
     const fitDuration = Math.max(60, totalDuration + 30);
-    const fitZoom = Math.max(10, Math.min(120, visibleTrackWidth / fitDuration));
+    const fitZoom = Math.max(
+      10,
+      Math.min(120, visibleTrackWidth / fitDuration)
+    );
 
     s.setZoomLevel(fitZoom);
     scrollArea.scrollLeft = 0;
@@ -192,7 +209,7 @@ const Timeline: React.FC<TimelineProps> = ({
       const target = e.target as HTMLElement | null;
       const isOverTrackHeader = Boolean(
         target?.closest('[data-track-header="true"]') ||
-        target?.closest('.w-48')
+          target?.closest(".w-48")
       );
 
       if (isOverTrackHeader) {
@@ -244,7 +261,10 @@ const Timeline: React.FC<TimelineProps> = ({
         const curTime = timelineTime;
         const targetPanel = panelTimings[currentPanelIndex];
         // Only jump time if current time is completely outside the selected panel
-        if (targetPanel && (curTime < targetPanel.startTime || curTime >= targetPanel.endTime)) {
+        if (
+          targetPanel &&
+          (curTime < targetPanel.startTime || curTime >= targetPanel.endTime)
+        ) {
           setTimelineTime(targetPanel.startTime);
         }
       }
@@ -355,7 +375,12 @@ const Timeline: React.FC<TimelineProps> = ({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [totalDuration, getPanelIndexAtTime, setCurrentPanelIndex, panelTimings.length]);
+  }, [
+    totalDuration,
+    getPanelIndexAtTime,
+    setCurrentPanelIndex,
+    panelTimings.length,
+  ]);
 
   const seekToPosition = (clientX: number) => {
     if (!rulerRef.current && !s.trackAreaRef.current) return;
@@ -368,7 +393,10 @@ const Timeline: React.FC<TimelineProps> = ({
     const relativeX = Math.max(0, clientX - rect.left);
     const maxSeekDuration = Math.max(60, totalDuration + 30);
     const pxPerSec = s.zoomLevel || 30;
-    const nextTime = Math.max(0, Math.min(maxSeekDuration, relativeX / pxPerSec));
+    const nextTime = Math.max(
+      0,
+      Math.min(maxSeekDuration, relativeX / pxPerSec)
+    );
     const nextPanelIndex = getPanelIndexAtTime(nextTime);
 
     currentPanelIndexRef.current = nextPanelIndex;
@@ -468,7 +496,11 @@ const Timeline: React.FC<TimelineProps> = ({
               if (trackPrefix === "v1") {
                 return { ...p, duration: newDuration };
               } else if (trackPrefix === "v2") {
-                return { ...p, camera_duration: newDuration, fx_duration: newDuration };
+                return {
+                  ...p,
+                  camera_duration: newDuration,
+                  fx_duration: newDuration,
+                };
               } else if (trackPrefix === "v3") {
                 return { ...p, subtitle_duration: newDuration };
               } else if (trackPrefix === "a2") {
@@ -586,7 +618,10 @@ const Timeline: React.FC<TimelineProps> = ({
               }
             }}
             style={{
-              minWidth: `${Math.max(1800, Math.max(60, totalDuration + 30) * s.zoomLevel + 224 + 60)}px`,
+              minWidth: `${Math.max(
+                1800,
+                Math.max(60, totalDuration + 30) * s.zoomLevel + 224 + 60
+              )}px`,
             }}
           >
             {/* Sticky Synchronized Top Ruler */}
@@ -712,7 +747,9 @@ const Timeline: React.FC<TimelineProps> = ({
                 musicUrl={
                   (projectStore?.activeProjectData as any)?.bgm_url ||
                   (projectStore?.activeProjectData as any)?.music_url ||
-                  (musicTheme?.startsWith("http") || musicTheme?.startsWith("/") || musicTheme?.startsWith("blob:")
+                  (musicTheme?.startsWith("http") ||
+                  musicTheme?.startsWith("/") ||
+                  musicTheme?.startsWith("blob:")
                     ? musicTheme
                     : undefined)
                 }
@@ -782,7 +819,6 @@ const Timeline: React.FC<TimelineProps> = ({
         onSplit={s.handleSplit}
         onClose={s.closeContextMenu}
       />
-
     </div>
   );
 };

@@ -20,7 +20,10 @@ import {
   Globe,
   MessageSquare,
 } from "lucide-react";
-import { MUSIC_THEMES_CATALOG, DEFAULT_TTS_VOICES } from "@/features/editor_studio/types/settings";
+import {
+  MUSIC_THEMES_CATALOG,
+  DEFAULT_TTS_VOICES,
+} from "@/features/editor_studio/types/settings";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
 const MUSIC_THEMES = MUSIC_THEMES_CATALOG;
@@ -63,7 +66,13 @@ interface AudioSettingsPageProps {
 }
 
 // Animated waveform bars for visual feedback
-function WaveformBars({ active, color = "#3b82f6" }: { active: boolean; color?: string }) {
+function WaveformBars({
+  active,
+  color = "#3b82f6",
+}: {
+  active: boolean;
+  color?: string;
+}) {
   return (
     <div className="flex items-end gap-[2px] h-4">
       {[3, 5, 8, 6, 9, 5, 7, 4, 8, 5, 3].map((h, i) => (
@@ -124,9 +133,13 @@ function VolumeSlider({
             />
           </div>
           <div>
-            <span className="text-xs font-bold text-neutral-100 tracking-wide">{label}</span>
+            <span className="text-xs font-bold text-neutral-100 tracking-wide">
+              {label}
+            </span>
             {sublabel && (
-              <span className="block text-[10px] text-neutral-400 mt-0.5">{sublabel}</span>
+              <span className="block text-[10px] text-neutral-400 mt-0.5">
+                {sublabel}
+              </span>
             )}
           </div>
         </div>
@@ -184,7 +197,12 @@ function VoiceCard({
   isSelected,
   onSelect,
 }: {
-  voice: { code: string; label: string; gender?: "Male" | "Female"; lang?: string };
+  voice: {
+    code: string;
+    label: string;
+    gender?: "Male" | "Female";
+    lang?: string;
+  };
   isSelected: boolean;
   onSelect: () => void;
 }) {
@@ -225,7 +243,8 @@ function VoiceCard({
               )}
             </div>
             <div className="text-[10px] text-[#3B82F6]/80 truncate mt-0.5">
-              {lang} • <span className="font-mono text-neutral-500">{voice.code}</span>
+              {lang} •{" "}
+              <span className="font-mono text-neutral-500">{voice.code}</span>
             </div>
           </div>
         </div>
@@ -270,34 +289,56 @@ export default function AudioSettingsPage({
   setEnableNarrativeAudio: propSetEnableNarrativeAudio,
   onSave,
 }: AudioSettingsPageProps) {
-  const [internalEnableDialogueAudio, setInternalEnableDialogueAudio] = useState<boolean>(() =>
-    localStorage.getItem("ai_comic_enable_dialogue_audio") === "true"
-  );
-  const [internalEnableNarrativeAudio, setInternalEnableNarrativeAudio] = useState<boolean>(() =>
-    localStorage.getItem("ai_comic_enable_narrative_audio") !== "false"
-  );
+  const [internalEnableDialogueAudio, setInternalEnableDialogueAudio] =
+    useState<boolean>(
+      () => localStorage.getItem("ai_comic_enable_dialogue_audio") === "true"
+    );
+  const [internalEnableNarrativeAudio, setInternalEnableNarrativeAudio] =
+    useState<boolean>(
+      () => localStorage.getItem("ai_comic_enable_narrative_audio") !== "false"
+    );
 
-  const enableDialogueAudio = propEnableDialogueAudio !== undefined ? propEnableDialogueAudio : internalEnableDialogueAudio;
-  const setEnableDialogueAudio = propSetEnableDialogueAudio || ((val: boolean) => {
-    setInternalEnableDialogueAudio(val);
-    localStorage.setItem("ai_comic_enable_dialogue_audio", String(val));
-  });
+  const enableDialogueAudio =
+    propEnableDialogueAudio !== undefined
+      ? propEnableDialogueAudio
+      : internalEnableDialogueAudio;
+  const setEnableDialogueAudio =
+    propSetEnableDialogueAudio ||
+    ((val: boolean) => {
+      setInternalEnableDialogueAudio(val);
+      localStorage.setItem("ai_comic_enable_dialogue_audio", String(val));
+    });
 
-  const enableNarrativeAudio = propEnableNarrativeAudio !== undefined ? propEnableNarrativeAudio : internalEnableNarrativeAudio;
-  const setEnableNarrativeAudio = propSetEnableNarrativeAudio || ((val: boolean) => {
-    setInternalEnableNarrativeAudio(val);
-    localStorage.setItem("ai_comic_enable_narrative_audio", String(val));
-  });
+  const enableNarrativeAudio =
+    propEnableNarrativeAudio !== undefined
+      ? propEnableNarrativeAudio
+      : internalEnableNarrativeAudio;
+  const setEnableNarrativeAudio =
+    propSetEnableNarrativeAudio ||
+    ((val: boolean) => {
+      setInternalEnableNarrativeAudio(val);
+      localStorage.setItem("ai_comic_enable_narrative_audio", String(val));
+    });
 
   const [projectId, setProjectId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<"mixer" | "voice" | "music">("mixer");
-  const [availableVoices, setAvailableVoices] = useState<Array<{ code: string; label: string; gender?: "Male" | "Female"; lang?: string }>>([]);
+  const [activeTab, setActiveTab] = useState<"mixer" | "voice" | "music">(
+    "mixer"
+  );
+  const [availableVoices, setAvailableVoices] = useState<
+    Array<{
+      code: string;
+      label: string;
+      gender?: "Male" | "Female";
+      lang?: string;
+    }>
+  >([]);
   const [loadingVoices, setLoadingVoices] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const [voiceSearch, setVoiceSearch] = useState<string>("");
-  const [isVoiceDropdownOpen, setIsVoiceDropdownOpen] = useState<boolean>(false);
+  const [isVoiceDropdownOpen, setIsVoiceDropdownOpen] =
+    useState<boolean>(false);
   const [localNarratorVoice, setLocalNarratorVoice] = useState<string>(
     () => localStorage.getItem("ai_comic_narrator_voice") || "en-US-GuyNeural"
   );
@@ -326,11 +367,14 @@ export default function AudioSettingsPage({
       }
     };
     loadVoices();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [fetchWithInterceptor]);
 
   const defaultVoices = DEFAULT_TTS_VOICES;
-  const displayVoices = availableVoices.length > 0 ? availableVoices : defaultVoices;
+  const displayVoices =
+    availableVoices.length > 0 ? availableVoices : defaultVoices;
 
   const distinctLanguages = useMemo(() => {
     const langs = new Set<string>();
@@ -343,7 +387,20 @@ export default function AudioSettingsPage({
         langs.add(langName);
       }
     });
-    const order = ["Tamil", "English", "Japanese", "Korean", "Spanish", "French", "German", "Chinese", "Hindi", "Telugu", "Kannada", "Malayalam"];
+    const order = [
+      "Tamil",
+      "English",
+      "Japanese",
+      "Korean",
+      "Spanish",
+      "French",
+      "German",
+      "Chinese",
+      "Hindi",
+      "Telugu",
+      "Kannada",
+      "Malayalam",
+    ];
     const ordered = order.filter((l) => langs.has(l));
     const rest = Array.from(langs).filter((l) => !order.includes(l));
     return ["All", ...ordered, ...rest];
@@ -351,8 +408,14 @@ export default function AudioSettingsPage({
 
   const filteredVoices = useMemo(() => {
     return displayVoices.filter((v) => {
-      const lang = v.lang || v.label?.split("—")?.[0]?.split("(")?.[0]?.trim() || "English";
-      const matchLang = selectedLanguage === "All" || lang.toLowerCase() === selectedLanguage.toLowerCase() || v.label.toLowerCase().includes(selectedLanguage.toLowerCase());
+      const lang =
+        v.lang ||
+        v.label?.split("—")?.[0]?.split("(")?.[0]?.trim() ||
+        "English";
+      const matchLang =
+        selectedLanguage === "All" ||
+        lang.toLowerCase() === selectedLanguage.toLowerCase() ||
+        v.label.toLowerCase().includes(selectedLanguage.toLowerCase());
       const query = voiceSearch.trim().toLowerCase();
       const matchQuery =
         !query ||
@@ -410,9 +473,13 @@ export default function AudioSettingsPage({
       onSave();
     }
 
-    const isTemp = !projectId || projectId.startsWith("temp_") || projectId.startsWith("draft_");
+    const isTemp =
+      !projectId ||
+      projectId.startsWith("temp_") ||
+      projectId.startsWith("draft_");
     if (isTemp) {
-      if (addNotification) addNotification("Audio settings saved to workspace!", "success");
+      if (addNotification)
+        addNotification("Audio settings saved to workspace!", "success");
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
       return;
@@ -420,40 +487,51 @@ export default function AudioSettingsPage({
 
     setSaving(true);
     try {
-      localStorage.setItem("ai_comic_enable_dialogue_audio", String(enableDialogueAudio));
-      localStorage.setItem("ai_comic_enable_narrative_audio", String(enableNarrativeAudio));
+      localStorage.setItem(
+        "ai_comic_enable_dialogue_audio",
+        String(enableDialogueAudio)
+      );
+      localStorage.setItem(
+        "ai_comic_enable_narrative_audio",
+        String(enableNarrativeAudio)
+      );
 
       const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
-      const res = await fetchFn(`/api/v1/projects/${projectId}/settings/audio`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          audio_settings: {
-            volume,
-            narrationVolume,
-            bgmVolume,
-            sfxVolume,
-            speechRate,
-            speechPitch,
-            voiceActor,
-            narratorVoice: voiceActor,
-            musicTheme,
-            audioDucking,
-            enableDialogueAudio,
-            enableNarrativeAudio,
-          },
-        }),
-      });
+      const res = await fetchFn(
+        `/api/v1/projects/${projectId}/settings/audio`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            audio_settings: {
+              volume,
+              narrationVolume,
+              bgmVolume,
+              sfxVolume,
+              speechRate,
+              speechPitch,
+              voiceActor,
+              narratorVoice: voiceActor,
+              musicTheme,
+              audioDucking,
+              enableDialogueAudio,
+              enableNarrativeAudio,
+            },
+          }),
+        }
+      );
       const data = await res.json();
       if (data?.success) {
-        if (addNotification) addNotification("Audio settings saved!", "success");
+        if (addNotification)
+          addNotification("Audio settings saved!", "success");
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
       } else {
         throw new Error(data?.detail || "Save failed");
       }
     } catch (e: any) {
-      if (addNotification) addNotification(`Save failed: ${e.message}`, "error");
+      if (addNotification)
+        addNotification(`Save failed: ${e.message}`, "error");
     } finally {
       setSaving(false);
     }
@@ -482,7 +560,9 @@ export default function AudioSettingsPage({
   const currentVoiceObj = useMemo(() => {
     return (
       displayVoices.find((v) => v.code === voiceActor) ||
-      displayVoices.find((v) => v.code.toLowerCase() === voiceActor?.toLowerCase()) ||
+      displayVoices.find(
+        (v) => v.code.toLowerCase() === voiceActor?.toLowerCase()
+      ) ||
       displayVoices.find((v) => v.code === "en-US-ChristopherNeural") ||
       displayVoices[0]
     );
@@ -502,7 +582,6 @@ export default function AudioSettingsPage({
 
   return (
     <div className={isEmbed ? "w-full" : "w-full max-w-4xl mx-auto py-4"}>
-
       {/* ── Tab Bar Navigation ────────────────────────────────────────── */}
       <div className="mb-6">
         <div className="flex gap-1 p-1 bg-neutral-900 rounded-2xl border border-neutral-800 w-fit shadow-md">
@@ -533,7 +612,6 @@ export default function AudioSettingsPage({
 
       {/* ── Tab Content ────────────────────────────────────────────────── */}
       <div className="space-y-4">
-
         {/* MIXER TAB */}
         {activeTab === "mixer" && (
           <div
@@ -595,24 +673,34 @@ export default function AudioSettingsPage({
             >
               <Zap className="h-3.5 w-3.5 text-yellow-500 flex-shrink-0" />
               <p className="text-[11px] text-neutral-400">
-                <span className="text-neutral-200 font-semibold">Auto-Ducking</span>{" "}
+                <span className="text-neutral-200 font-semibold">
+                  Auto-Ducking
+                </span>{" "}
                 is{" "}
                 <span
                   className="font-semibold"
                   style={{ color: audioDucking ? "#3b82f6" : "#6b7280" }}
                 >
                   {audioDucking ? "enabled" : "disabled"}
-                </span>
-                {" "}— BGM will {audioDucking ? "drop automatically" : "stay constant"} during dialogue.
+                </span>{" "}
+                — BGM will{" "}
+                {audioDucking ? "drop automatically" : "stay constant"} during
+                dialogue.
               </p>
               <button
                 onClick={() => setAudioDucking(!audioDucking)}
                 className="ml-auto flex-shrink-0 relative inline-flex h-5 w-10 rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none"
-                style={{ backgroundColor: audioDucking ? "#7c3aed" : "#374151" }}
+                style={{
+                  backgroundColor: audioDucking ? "#7c3aed" : "#374151",
+                }}
               >
                 <span
                   className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ease-in-out"
-                  style={{ transform: audioDucking ? "translateX(20px)" : "translateX(0)" }}
+                  style={{
+                    transform: audioDucking
+                      ? "translateX(20px)"
+                      : "translateX(0)",
+                  }}
                 />
               </button>
             </div>
@@ -639,7 +727,8 @@ export default function AudioSettingsPage({
                     </span>
                   </h3>
                   <p className="text-[11px] text-neutral-400 mt-0.5">
-                    Choose what audio gets automatically synthesized during storyboard analysis
+                    Choose what audio gets automatically synthesized during
+                    storyboard analysis
                   </p>
                 </div>
               </div>
@@ -649,15 +738,21 @@ export default function AudioSettingsPage({
                 <div
                   className="p-4 rounded-xl border flex items-center justify-between transition-all"
                   style={{
-                    backgroundColor: enableNarrativeAudio ? "rgba(99, 102, 241, 0.08)" : "#0d0d1a",
-                    borderColor: enableNarrativeAudio ? "rgba(99, 102, 241, 0.4)" : "#1e1e30",
+                    backgroundColor: enableNarrativeAudio
+                      ? "rgba(99, 102, 241, 0.08)"
+                      : "#0d0d1a",
+                    borderColor: enableNarrativeAudio
+                      ? "rgba(99, 102, 241, 0.4)"
+                      : "#1e1e30",
                   }}
                 >
                   <div className="flex items-start gap-3">
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
                       style={{
-                        backgroundColor: enableNarrativeAudio ? "rgba(99, 102, 241, 0.2)" : "#1a1a2e",
+                        backgroundColor: enableNarrativeAudio
+                          ? "rgba(99, 102, 241, 0.2)"
+                          : "#1a1a2e",
                         color: enableNarrativeAudio ? "#818cf8" : "#6b7280",
                       }}
                     >
@@ -665,26 +760,39 @@ export default function AudioSettingsPage({
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">Recap Narratives Voice</span>
+                        <span className="text-xs font-bold text-white">
+                          Recap Narratives Voice
+                        </span>
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono font-semibold">
                           Default ON
                         </span>
                       </div>
                       <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">
-                        Synthesizes cinematic third-person YouTube manga recap voiceover narration for each panel.
+                        Synthesizes cinematic third-person YouTube manga recap
+                        voiceover narration for each panel.
                       </p>
                     </div>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => setEnableNarrativeAudio(!enableNarrativeAudio)}
+                    onClick={() =>
+                      setEnableNarrativeAudio(!enableNarrativeAudio)
+                    }
                     className="ml-4 flex-shrink-0 relative inline-flex h-6 w-11 rounded-full border-2 border-transparent transition-all duration-200 cursor-pointer focus:outline-none"
-                    style={{ backgroundColor: enableNarrativeAudio ? "#6366f1" : "#374151" }}
+                    style={{
+                      backgroundColor: enableNarrativeAudio
+                        ? "#6366f1"
+                        : "#374151",
+                    }}
                   >
                     <span
                       className="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ease-in-out"
-                      style={{ transform: enableNarrativeAudio ? "translateX(20px)" : "translateX(0)" }}
+                      style={{
+                        transform: enableNarrativeAudio
+                          ? "translateX(20px)"
+                          : "translateX(0)",
+                      }}
                     />
                   </button>
                 </div>
@@ -693,15 +801,21 @@ export default function AudioSettingsPage({
                 <div
                   className="p-4 rounded-xl border flex items-center justify-between transition-all"
                   style={{
-                    backgroundColor: enableDialogueAudio ? "rgba(59, 130, 246, 0.08)" : "#0d0d1a",
-                    borderColor: enableDialogueAudio ? "rgba(59, 130, 246, 0.4)" : "#1e1e30",
+                    backgroundColor: enableDialogueAudio
+                      ? "rgba(59, 130, 246, 0.08)"
+                      : "#0d0d1a",
+                    borderColor: enableDialogueAudio
+                      ? "rgba(59, 130, 246, 0.4)"
+                      : "#1e1e30",
                   }}
                 >
                   <div className="flex items-start gap-3">
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
                       style={{
-                        backgroundColor: enableDialogueAudio ? "rgba(59, 130, 246, 0.2)" : "#1a1a2e",
+                        backgroundColor: enableDialogueAudio
+                          ? "rgba(59, 130, 246, 0.2)"
+                          : "#1a1a2e",
                         color: enableDialogueAudio ? "#60a5fa" : "#6b7280",
                       }}
                     >
@@ -709,13 +823,16 @@ export default function AudioSettingsPage({
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-white">Character Dialogues Voice</span>
+                        <span className="text-xs font-bold text-white">
+                          Character Dialogues Voice
+                        </span>
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 font-mono">
                           Optional (OFF)
                         </span>
                       </div>
                       <p className="text-[11px] text-neutral-400 mt-1 leading-relaxed">
-                        Synthesizes character speech bubble lines with character-assigned voice casting.
+                        Synthesizes character speech bubble lines with
+                        character-assigned voice casting.
                       </p>
                     </div>
                   </div>
@@ -724,11 +841,19 @@ export default function AudioSettingsPage({
                     type="button"
                     onClick={() => setEnableDialogueAudio(!enableDialogueAudio)}
                     className="ml-4 flex-shrink-0 relative inline-flex h-6 w-11 rounded-full border-2 border-transparent transition-all duration-200 cursor-pointer focus:outline-none"
-                    style={{ backgroundColor: enableDialogueAudio ? "#3b82f6" : "#374151" }}
+                    style={{
+                      backgroundColor: enableDialogueAudio
+                        ? "#3b82f6"
+                        : "#374151",
+                    }}
                   >
                     <span
                       className="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ease-in-out"
-                      style={{ transform: enableDialogueAudio ? "translateX(20px)" : "translateX(0)" }}
+                      style={{
+                        transform: enableDialogueAudio
+                          ? "translateX(20px)"
+                          : "translateX(0)",
+                      }}
                     />
                   </button>
                 </div>
@@ -746,9 +871,12 @@ export default function AudioSettingsPage({
                     <Mic className="h-4 w-4 text-[#60A5FA]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">AI Voice Actor</h3>
+                    <h3 className="text-sm font-bold text-white">
+                      AI Voice Actor
+                    </h3>
                     <p className="text-[11px] text-neutral-400 mt-0.5">
-                      Unified neural voice model for character dialogues, speech & narration
+                      Unified neural voice model for character dialogues, speech
+                      & narration
                     </p>
                   </div>
                 </div>
@@ -810,7 +938,10 @@ export default function AudioSettingsPage({
                   {/* Language Filter & Search Toolbar */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
                     {/* Language Pills */}
-                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 flex-1" style={{ scrollbarWidth: "none" }}>
+                    <div
+                      className="flex items-center gap-1.5 overflow-x-auto pb-1 flex-1"
+                      style={{ scrollbarWidth: "none" }}
+                    >
                       {distinctLanguages.map((lang) => {
                         const isSelected = selectedLanguage === lang;
                         return (
@@ -820,9 +951,13 @@ export default function AudioSettingsPage({
                             onClick={() => setSelectedLanguage(lang)}
                             className="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer"
                             style={{
-                              backgroundColor: isSelected ? "#3b82f6" : "#141420",
+                              backgroundColor: isSelected
+                                ? "#3b82f6"
+                                : "#141420",
                               color: isSelected ? "#ffffff" : "#9ca3af",
-                              border: `1px solid ${isSelected ? "#3b82f6" : "#222233"}`,
+                              border: `1px solid ${
+                                isSelected ? "#3b82f6" : "#222233"
+                              }`,
                             }}
                           >
                             {lang}
@@ -856,40 +991,61 @@ export default function AudioSettingsPage({
                   {/* Scrollable Voice Grid List */}
                   {filteredVoices.length === 0 ? (
                     <div className="text-center py-6 text-xs text-neutral-500 bg-neutral-950/60 rounded-xl border border-neutral-800">
-                      No voice matches &quot;{voiceSearch}&quot; in {selectedLanguage}.
+                      No voice matches &quot;{voiceSearch}&quot; in{" "}
+                      {selectedLanguage}.
                     </div>
                   ) : (
                     <div
                       className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1 bg-neutral-950/40 p-2 rounded-xl border border-neutral-800/80"
-                      style={{ scrollbarWidth: "thin", scrollbarColor: "#3b82f6 transparent" }}
+                      style={{
+                        scrollbarWidth: "thin",
+                        scrollbarColor: "#3b82f6 transparent",
+                      }}
                     >
                       {filteredVoices.map((voice) => (
                         <VoiceCard
                           key={voice.code}
                           voice={voice}
-                          isSelected={voiceActor === voice.code || (!voiceActor && currentVoiceObj?.code === voice.code)}
+                          isSelected={
+                            voiceActor === voice.code ||
+                            (!voiceActor &&
+                              currentVoiceObj?.code === voice.code)
+                          }
                           onSelect={() => {
                             setVoiceActor(voice.code);
                             setLocalNarratorVoice(voice.code);
                             localStorage.setItem("ai_comic_voice", voice.code);
-                            localStorage.setItem("ai_comic_voice_actor", voice.code);
-                            localStorage.setItem("ai_comic_narrator_voice", voice.code);
+                            localStorage.setItem(
+                              "ai_comic_voice_actor",
+                              voice.code
+                            );
+                            localStorage.setItem(
+                              "ai_comic_narrator_voice",
+                              voice.code
+                            );
                             try {
-                              const raw = localStorage.getItem("global_audio_settings");
+                              const raw = localStorage.getItem(
+                                "global_audio_settings"
+                              );
                               const parsed = raw ? JSON.parse(raw) : {};
                               parsed.voiceActor = voice.code;
                               parsed.narratorVoice = voice.code;
-                              localStorage.setItem("global_audio_settings", JSON.stringify(parsed));
+                              localStorage.setItem(
+                                "global_audio_settings",
+                                JSON.stringify(parsed)
+                              );
                             } catch {}
 
-                            const activeProjectData = useProjectStore.getState().activeProjectData;
+                            const activeProjectData =
+                              useProjectStore.getState().activeProjectData;
                             if (activeProjectData) {
                               useProjectStore.getState().setActiveProject({
                                 ...activeProjectData,
                                 project: {
                                   ...activeProjectData.project,
                                   audio_settings: {
-                                    ...(activeProjectData.project.audio_settings || {}),
+                                    ...(activeProjectData.project
+                                      .audio_settings || {}),
                                     volume,
                                     narrationVolume,
                                     bgmVolume,
@@ -906,7 +1062,10 @@ export default function AudioSettingsPage({
                             }
                             setIsVoiceDropdownOpen(false);
                             if (addNotification) {
-                              addNotification(`Selected voice: ${voice.label || voice.code}`, "info");
+                              addNotification(
+                                `Selected voice: ${voice.label || voice.code}`,
+                                "info"
+                              );
                             }
                           }}
                         />
@@ -927,7 +1086,9 @@ export default function AudioSettingsPage({
                   <Activity className="h-4 w-4 text-violet-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Speech Properties</h3>
+                  <h3 className="text-sm font-bold text-white">
+                    Speech Properties
+                  </h3>
                   <p className="text-[11px] text-neutral-500 mt-0.5">
                     Tune delivery speed and vocal resonance
                   </p>
@@ -973,7 +1134,9 @@ export default function AudioSettingsPage({
                   <Disc className="h-4 w-4 text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Soundtrack Theme</h3>
+                  <h3 className="text-sm font-bold text-white">
+                    Soundtrack Theme
+                  </h3>
                   <p className="text-[11px] text-neutral-500 mt-0.5">
                     Choose the atmospheric BGM loop for this chapter
                   </p>
@@ -1009,10 +1172,14 @@ export default function AudioSettingsPage({
                         className="w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
                         style={{
                           borderColor: isSelected ? "#6366f1" : "#374151",
-                          backgroundColor: isSelected ? "#6366f1" : "transparent",
+                          backgroundColor: isSelected
+                            ? "#6366f1"
+                            : "transparent",
                         }}
                       >
-                        {isSelected && <Check className="h-2.5 w-2.5 text-white" />}
+                        {isSelected && (
+                          <Check className="h-2.5 w-2.5 text-white" />
+                        )}
                       </div>
                     </button>
                   );
@@ -1030,7 +1197,9 @@ export default function AudioSettingsPage({
                   <Zap className="h-4 w-4 text-amber-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Intelligent Audio Ducking</h3>
+                  <h3 className="text-sm font-bold text-white">
+                    Intelligent Audio Ducking
+                  </h3>
                   <p className="text-[11px] text-neutral-500 mt-0.5">
                     Auto-reduce BGM volume during spoken dialogue
                   </p>
@@ -1038,21 +1207,43 @@ export default function AudioSettingsPage({
                 <button
                   onClick={() => setAudioDucking(!audioDucking)}
                   className="ml-auto relative inline-flex h-6 w-12 rounded-full border-2 border-transparent transition-all duration-200 focus:outline-none"
-                  style={{ backgroundColor: audioDucking ? "#7c3aed" : "#374151" }}
+                  style={{
+                    backgroundColor: audioDucking ? "#7c3aed" : "#374151",
+                  }}
                 >
                   <span
                     className="inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ease-in-out"
-                    style={{ transform: audioDucking ? "translateX(24px)" : "translateX(0px)" }}
+                    style={{
+                      transform: audioDucking
+                        ? "translateX(24px)"
+                        : "translateX(0px)",
+                    }}
                   />
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Dialogue Detection", value: "Whisper STT", active: audioDucking },
-                  { label: "Duck Amount", value: "−12 dB", active: audioDucking },
-                  { label: "Attack Time", value: "80 ms", active: audioDucking },
-                  { label: "Release Time", value: "320 ms", active: audioDucking },
+                  {
+                    label: "Dialogue Detection",
+                    value: "Whisper STT",
+                    active: audioDucking,
+                  },
+                  {
+                    label: "Duck Amount",
+                    value: "−12 dB",
+                    active: audioDucking,
+                  },
+                  {
+                    label: "Attack Time",
+                    value: "80 ms",
+                    active: audioDucking,
+                  },
+                  {
+                    label: "Release Time",
+                    value: "320 ms",
+                    active: audioDucking,
+                  },
                 ].map((stat) => (
                   <div
                     key={stat.label}
@@ -1062,7 +1253,9 @@ export default function AudioSettingsPage({
                       backgroundColor: stat.active ? "#7c3aed0a" : "#0d0d1a",
                     }}
                   >
-                    <div className="text-[10px] text-neutral-500 mb-1">{stat.label}</div>
+                    <div className="text-[10px] text-neutral-500 mb-1">
+                      {stat.label}
+                    </div>
                     <div
                       className="text-xs font-bold font-mono"
                       style={{ color: stat.active ? "#c4b5fd" : "#6b7280" }}
@@ -1107,17 +1300,22 @@ export default function AudioSettingsPage({
             background: saved
               ? "linear-gradient(135deg, #16a34a, #15803d)"
               : "linear-gradient(135deg, #7c3aed, #4f46e5)",
-            boxShadow: saved
-              ? "0 0 16px #16a34a44"
-              : "0 0 16px #7c3aed44",
+            boxShadow: saved ? "0 0 16px #16a34a44" : "0 0 16px #7c3aed44",
           }}
         >
           {saved ? (
-            <><Check className="h-3.5 w-3.5" /> Saved!</>
+            <>
+              <Check className="h-3.5 w-3.5" /> Saved!
+            </>
           ) : saving ? (
-            <><div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" /> Saving...</>
+            <>
+              <div className="h-3.5 w-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />{" "}
+              Saving...
+            </>
           ) : (
-            <><Save className="h-3.5 w-3.5" /> Save Settings</>
+            <>
+              <Save className="h-3.5 w-3.5" /> Save Settings
+            </>
           )}
         </button>
       </div>

@@ -57,7 +57,9 @@ export interface InteractiveCutSettingsMenuProps {
   setAllCustomizations: (state: boolean) => void;
 }
 
-export const InteractiveCutSettingsMenu: React.FC<InteractiveCutSettingsMenuProps> = ({
+export const InteractiveCutSettingsMenu: React.FC<
+  InteractiveCutSettingsMenuProps
+> = ({
   isOpen,
   onClose,
   themeColor,
@@ -186,7 +188,9 @@ export const InteractiveCutSettingsMenu: React.FC<InteractiveCutSettingsMenuProp
                       }`}
                       title={t.name}
                     >
-                      {isCurrent && <Check className="h-3 w-3 text-black stroke-[3]" />}
+                      {isCurrent && (
+                        <Check className="h-3 w-3 text-black stroke-[3]" />
+                      )}
                     </button>
                   );
                 })}
@@ -200,27 +204,31 @@ export const InteractiveCutSettingsMenu: React.FC<InteractiveCutSettingsMenuProp
                   Border Style
                 </span>
                 <div className="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800">
-                  {(["solid", "dashed", "dotted"] as BorderStyle[]).map((st) => (
-                    <button
-                      key={st}
-                      type="button"
-                      onClick={() => setBorderStyle(st)}
-                      className={`px-2 py-0.5 rounded text-[10px] font-mono capitalize transition-colors !cursor-pointer ${
-                        borderStyle === st
-                          ? "bg-neutral-800 text-white font-bold"
-                          : "text-neutral-500 hover:text-white"
-                      }`}
-                    >
-                      {st}
-                    </button>
-                  ))}
+                  {(["solid", "dashed", "dotted"] as BorderStyle[]).map(
+                    (st) => (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => setBorderStyle(st)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono capitalize transition-colors !cursor-pointer ${
+                          borderStyle === st
+                            ? "bg-neutral-800 text-white font-bold"
+                            : "text-neutral-500 hover:text-white"
+                        }`}
+                      >
+                        {st}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-[10px] font-mono">
                   <span className="text-neutral-400">Fill Opacity</span>
-                  <span className="text-white font-bold">{boxFillOpacity}%</span>
+                  <span className="text-white font-bold">
+                    {boxFillOpacity}%
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -257,7 +265,9 @@ export const InteractiveCutSettingsMenu: React.FC<InteractiveCutSettingsMenuProp
               <label className="flex items-center justify-between p-1 rounded-lg hover:bg-neutral-900/80 !cursor-pointer transition-colors">
                 <div className="flex items-center gap-1.5">
                   <Focus className="h-3 w-3 text-violet-400" />
-                  <span className="text-neutral-300">Dim Inactive (Cinema)</span>
+                  <span className="text-neutral-300">
+                    Dim Inactive (Cinema)
+                  </span>
                 </div>
                 <input
                   type="checkbox"
@@ -289,7 +299,9 @@ export const InteractiveCutSettingsMenu: React.FC<InteractiveCutSettingsMenuProp
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <Search className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-neutral-200 font-medium">Magnifier Lens</span>
+                  <span className="text-neutral-200 font-medium">
+                    Magnifier Lens
+                  </span>
                 </div>
                 <input
                   type="checkbox"
@@ -300,7 +312,9 @@ export const InteractiveCutSettingsMenu: React.FC<InteractiveCutSettingsMenuProp
               </div>
               {showMagnifierLoupe && (
                 <div className="flex items-center justify-between pt-1 pl-2">
-                  <span className="text-[10px] font-mono text-neutral-400">Power</span>
+                  <span className="text-[10px] font-mono text-neutral-400">
+                    Power
+                  </span>
                   <div className="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg border border-neutral-800">
                     {[1.5, 2.0, 2.5, 3.0].map((zoom) => (
                       <button
@@ -408,7 +422,9 @@ export const InteractiveCutSettingsMenu: React.FC<InteractiveCutSettingsMenuProp
               </label>
 
               <label className="flex items-center justify-between p-1 rounded-lg hover:bg-neutral-900/80 !cursor-pointer transition-colors">
-                <span className="text-neutral-300">Floating Action Toolbar</span>
+                <span className="text-neutral-300">
+                  Floating Action Toolbar
+                </span>
                 <input
                   type="checkbox"
                   checked={showQuickToolbar}

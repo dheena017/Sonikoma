@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { StoryboardPanel, VoiceOption, SAMPLE_PANELS } from "./types";
 import { SidepanelHeader } from "./components/SidepanelHeader";
 import { StoryboardView } from "./components/StoryboardView";
@@ -24,7 +30,9 @@ export interface ToastInfo {
 
 export const SidepanelApp: React.FC = () => {
   // Navigation tabs: "storyboard" | "mixer" | "export"
-  const [activeTab, setActiveTab] = useState<"storyboard" | "mixer" | "export">("storyboard");
+  const [activeTab, setActiveTab] = useState<"storyboard" | "mixer" | "export">(
+    "storyboard"
+  );
 
   // Status & Connectivity
   const [isBackendOnline, setIsBackendOnline] = useState<boolean>(false);
@@ -55,7 +63,9 @@ export const SidepanelApp: React.FC = () => {
   const [speechPitch, setSpeechPitch] = useState<number>(1.0);
   const [bgmMood, setBgmMood] = useState<string>("action");
   const [bgmVolume, setBgmVolume] = useState<number>(65);
-  const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">("16:9");
+  const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "1:1">(
+    "16:9"
+  );
   const [showSubtitles, setShowSubtitles] = useState<boolean>(true);
   const [globalMotion, setGlobalMotion] = useState<string>("");
   const globalMotionRef = useRef(globalMotion);
@@ -67,8 +77,12 @@ export const SidepanelApp: React.FC = () => {
   const lastScannedUrlRef = useRef<{ url: string; time: number } | null>(null);
 
   // Audio Audition State
-  const [activeAuditioningId, setActiveAuditioningId] = useState<string | null>(null);
-  const [previewImageModal, setPreviewImageModal] = useState<string | null>(null);
+  const [activeAuditioningId, setActiveAuditioningId] = useState<string | null>(
+    null
+  );
+  const [previewImageModal, setPreviewImageModal] = useState<string | null>(
+    null
+  );
 
   const showToast = useCallback(
     (msg: string, type: "info" | "success" | "error" | "warning" = "info") => {
@@ -117,9 +131,16 @@ export const SidepanelApp: React.FC = () => {
   const loadVoices = useCallback(() => {
     if (typeof chrome !== "undefined" && chrome.runtime) {
       chrome.runtime.sendMessage({ type: "API_GET_VOICES" }, (res) => {
-        if (res && res.success && Array.isArray(res.voices) && res.voices.length > 0) {
+        if (
+          res &&
+          res.success &&
+          Array.isArray(res.voices) &&
+          res.voices.length > 0
+        ) {
           setVoices(res.voices);
-          setSelectedVoice(res.voices[0].code || res.voices[0].name || "en-US-GuyNeural");
+          setSelectedVoice(
+            res.voices[0].code || res.voices[0].name || "en-US-GuyNeural"
+          );
         }
       });
     }
@@ -224,15 +245,20 @@ export const SidepanelApp: React.FC = () => {
           hasDetectedChapter: true,
         });
 
-        const mapped: StoryboardPanel[] = res.images.map((img: any, idx: number) => ({
-          id: `panel-${idx + 1}-${Date.now()}`,
-          index: idx + 1,
-          imageUrl: typeof img === "string" ? img : (img.proxied_url || img.src || img.url),
-          motionPreset: globalMotionRef.current || "",
-          dialogueText: "",
-          duration: 0,
-          enabled: true,
-        }));
+        const mapped: StoryboardPanel[] = res.images.map(
+          (img: any, idx: number) => ({
+            id: `panel-${idx + 1}-${Date.now()}`,
+            index: idx + 1,
+            imageUrl:
+              typeof img === "string"
+                ? img
+                : img.proxied_url || img.src || img.url,
+            motionPreset: globalMotionRef.current || "",
+            dialogueText: "",
+            duration: 0,
+            enabled: true,
+          })
+        );
         setPanels(mapped);
         showToast(
           sourceLabel === "endpoint"
@@ -243,86 +269,119 @@ export const SidepanelApp: React.FC = () => {
 
       // Fallback: in-tab DOM extraction via content script or inline DOM script
       const runDomFallbackScan = () => {
-        chrome.tabs.sendMessage(tab.id!, { type: "GET_READER_STATS" }, (res) => {
-          if (!chrome.runtime.lastError && res && res.images && res.images.length > 0) {
-            processResults(res, "dom");
-            return;
-          }
+        chrome.tabs.sendMessage(
+          tab.id!,
+          { type: "GET_READER_STATS" },
+          (res) => {
+            if (
+              !chrome.runtime.lastError &&
+              res &&
+              res.images &&
+              res.images.length > 0
+            ) {
+              processResults(res, "dom");
+              return;
+            }
 
-          if (chrome.scripting && chrome.scripting.executeScript) {
-            chrome.scripting.executeScript(
-              {
-                target: { tabId: tab.id! },
-                files: ["content/content.js"],
-              },
-              () => {
-                if (chrome.runtime.lastError) {
-                  // Inline DOM fallback extraction
-                  chrome.scripting.executeScript(
-                    {
-                      target: { tabId: tab.id! },
-                      func: () => {
-                        const imgs = Array.from(
-                          document.querySelectorAll<HTMLImageElement>("img, picture source, [style*='background-image']")
-                        );
-                        const collected: { index: number; src: string; width: number; height: number }[] = [];
-                        const seen = new Set<string>();
+            if (chrome.scripting && chrome.scripting.executeScript) {
+              chrome.scripting.executeScript(
+                {
+                  target: { tabId: tab.id! },
+                  files: ["content/content.js"],
+                },
+                () => {
+                  if (chrome.runtime.lastError) {
+                    // Inline DOM fallback extraction
+                    chrome.scripting.executeScript(
+                      {
+                        target: { tabId: tab.id! },
+                        func: () => {
+                          const imgs = Array.from(
+                            document.querySelectorAll<HTMLImageElement>(
+                              "img, picture source, [style*='background-image']"
+                            )
+                          );
+                          const collected: {
+                            index: number;
+                            src: string;
+                            width: number;
+                            height: number;
+                          }[] = [];
+                          const seen = new Set<string>();
 
-                        imgs.forEach((el) => {
-                          let src =
-                            el.getAttribute("data-src") ||
-                            el.getAttribute("data-original") ||
-                            el.getAttribute("data-url") ||
-                            el.getAttribute("data-lazy-src") ||
-                            (el as HTMLImageElement).src ||
-                            "";
+                          imgs.forEach((el) => {
+                            let src =
+                              el.getAttribute("data-src") ||
+                              el.getAttribute("data-original") ||
+                              el.getAttribute("data-url") ||
+                              el.getAttribute("data-lazy-src") ||
+                              (el as HTMLImageElement).src ||
+                              "";
 
-                          if (!src && (el as HTMLElement).style?.backgroundImage) {
-                            const m = (el as HTMLElement).style.backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
-                            if (m) src = m[1];
-                          }
-
-                          if (src && src.length > 5 && !src.startsWith("data:image/svg") && !src.startsWith("data:image/gif")) {
-                            if (src.startsWith("//")) src = `https:${src}`;
-                            if (!seen.has(src)) {
-                              seen.add(src);
-                              collected.push({
-                                index: collected.length + 1,
-                                src,
-                                width: (el as HTMLElement).clientWidth || 800,
-                                height: (el as HTMLElement).clientHeight || 1200,
-                              });
+                            if (
+                              !src &&
+                              (el as HTMLElement).style?.backgroundImage
+                            ) {
+                              const m = (
+                                el as HTMLElement
+                              ).style.backgroundImage.match(
+                                /url\(['"]?([^'"]+)['"]?\)/
+                              );
+                              if (m) src = m[1];
                             }
-                          }
-                        });
 
-                        return {
-                          seriesTitle: document.title,
-                          chapterTitle: window.location.hostname,
-                          images: collected,
-                          panelCount: collected.length,
-                        };
+                            if (
+                              src &&
+                              src.length > 5 &&
+                              !src.startsWith("data:image/svg") &&
+                              !src.startsWith("data:image/gif")
+                            ) {
+                              if (src.startsWith("//")) src = `https:${src}`;
+                              if (!seen.has(src)) {
+                                seen.add(src);
+                                collected.push({
+                                  index: collected.length + 1,
+                                  src,
+                                  width: (el as HTMLElement).clientWidth || 800,
+                                  height:
+                                    (el as HTMLElement).clientHeight || 1200,
+                                });
+                              }
+                            }
+                          });
+
+                          return {
+                            seriesTitle: document.title,
+                            chapterTitle: window.location.hostname,
+                            images: collected,
+                            panelCount: collected.length,
+                          };
+                        },
                       },
-                    },
-                    (results) => {
-                      const fallbackData = results?.[0]?.result;
-                      processResults(fallbackData, "dom");
-                    }
-                  );
-                  return;
-                }
+                      (results) => {
+                        const fallbackData = results?.[0]?.result;
+                        processResults(fallbackData, "dom");
+                      }
+                    );
+                    return;
+                  }
 
-                setTimeout(() => {
-                  chrome.tabs.sendMessage(tab.id!, { type: "GET_READER_STATS" }, (secondRes) => {
-                    processResults(secondRes, "dom");
-                  });
-                }, 120);
-              }
-            );
-          } else {
-            processResults(null);
+                  setTimeout(() => {
+                    chrome.tabs.sendMessage(
+                      tab.id!,
+                      { type: "GET_READER_STATS" },
+                      (secondRes) => {
+                        processResults(secondRes, "dom");
+                      }
+                    );
+                  }, 120);
+                }
+              );
+            } else {
+              processResults(null);
+            }
           }
-        });
+        );
       };
 
       // ── Step 1: Use Website Scraper Endpoint First ──
@@ -336,7 +395,13 @@ export const SidepanelApp: React.FC = () => {
             },
           },
           (apiRes) => {
-            if (!chrome.runtime.lastError && apiRes && apiRes.success && Array.isArray(apiRes.panels) && apiRes.panels.length > 0) {
+            if (
+              !chrome.runtime.lastError &&
+              apiRes &&
+              apiRes.success &&
+              Array.isArray(apiRes.panels) &&
+              apiRes.panels.length > 0
+            ) {
               processResults(apiRes, "endpoint");
               return;
             }
@@ -355,7 +420,10 @@ export const SidepanelApp: React.FC = () => {
           }
         );
       } catch (err) {
-        console.warn("[Sonikoma Sidebar] Error invoking API_SCRAPE_CHAPTER, falling back to DOM scanner:", err);
+        console.warn(
+          "[Sonikoma Sidebar] Error invoking API_SCRAPE_CHAPTER, falling back to DOM scanner:",
+          err
+        );
         runDomFallbackScan();
       }
     });
@@ -387,9 +455,19 @@ export const SidepanelApp: React.FC = () => {
   const handleApplyGlobalMotion = (preset: string) => {
     setGlobalMotion(preset);
     if (preset === "auto_cinematic") {
-      const sequence = ["pan_up", "zoom_in", "pan_down", "dolly_shake", "zoom_out", "ken_burns"];
+      const sequence = [
+        "pan_up",
+        "zoom_in",
+        "pan_down",
+        "dolly_shake",
+        "zoom_out",
+        "ken_burns",
+      ];
       setPanels((prev) =>
-        prev.map((p, idx) => ({ ...p, motionPreset: sequence[idx % sequence.length] }))
+        prev.map((p, idx) => ({
+          ...p,
+          motionPreset: sequence[idx % sequence.length],
+        }))
       );
       showToast("Applied Auto Cinematic Director Pacing!");
     } else {
@@ -411,7 +489,9 @@ export const SidepanelApp: React.FC = () => {
 
   const handleDeletePanel = (id: string) => {
     setPanels((prev) =>
-      prev.filter((p) => p.id !== id).map((p, idx) => ({ ...p, index: idx + 1 }))
+      prev
+        .filter((p) => p.id !== id)
+        .map((p, idx) => ({ ...p, index: idx + 1 }))
     );
     showToast("Scene removed");
   };
@@ -477,24 +557,34 @@ export const SidepanelApp: React.FC = () => {
               const target = panels.find((p) => p.id === panelId);
               handleUpdatePanel(panelId, {
                 isAnalyzing: false,
-                dialogueText: res.speech_text ? res.speech_text : (target?.dialogueText || ""),
-                motionPreset: res.motion_type || target?.motionPreset || "zoom_in",
-                duration: res.duration ? Number(res.duration) : (target?.duration || 0),
-                visualDescription: res.visual_description || target?.visualDescription || "",
+                dialogueText: res.speech_text
+                  ? res.speech_text
+                  : target?.dialogueText || "",
+                motionPreset:
+                  res.motion_type || target?.motionPreset || "zoom_in",
+                duration: res.duration
+                  ? Number(res.duration)
+                  : target?.duration || 0,
+                visualDescription:
+                  res.visual_description || target?.visualDescription || "",
                 narrativeText: res.narrative || target?.narrativeText || "",
                 sfx: res.sfx || target?.sfx || "",
                 audioUrl: res.audio_url || target?.audioUrl,
-                narrativeAudioUrl: res.narrative_audio_url || target?.narrativeAudioUrl,
+                narrativeAudioUrl:
+                  res.narrative_audio_url || target?.narrativeAudioUrl,
               });
               showToast("✨ Smart Scanner analysis completed!", "success");
             } else {
-              const errMsg = res?.error || "AI analysis failed to extract storyboard data";
+              const errMsg =
+                res?.error || "AI analysis failed to extract storyboard data";
               handleUpdatePanel(panelId, { isAnalyzing: false });
               showToast(`Analysis error: ${errMsg}`, "error");
               showErrorModal(
                 "Scene Analysis Failed",
                 errMsg,
-                typeof res === "object" ? JSON.stringify(res, null, 2) : String(errMsg),
+                typeof res === "object"
+                  ? JSON.stringify(res, null, 2)
+                  : String(errMsg),
                 "Verify your backend server is running on http://localhost:5173 with valid Gemini AI credentials.",
                 () => handleAnalyzePanel(panelId, imageUrl)
               );
@@ -528,7 +618,10 @@ export const SidepanelApp: React.FC = () => {
     setPanels((prev) =>
       prev.map((p) => (p.enabled ? { ...p, isAnalyzing: true } : p))
     );
-    showToast(`AI analyzing sequence for all ${activePanels.length} panels...`, "info");
+    showToast(
+      `AI analyzing sequence for all ${activePanels.length} panels...`,
+      "info"
+    );
 
     try {
       if (typeof chrome !== "undefined" && chrome.runtime) {
@@ -583,10 +676,16 @@ export const SidepanelApp: React.FC = () => {
                   return {
                     ...p,
                     isAnalyzing: false,
-                    dialogueText: analysis.speech_text ? analysis.speech_text : p.dialogueText,
-                    motionPreset: analysis.motion_type || p.motionPreset || "zoom_in",
-                    duration: analysis.duration ? Number(analysis.duration) : (p.duration || 0),
-                    visualDescription: analysis.visual_description || p.visualDescription,
+                    dialogueText: analysis.speech_text
+                      ? analysis.speech_text
+                      : p.dialogueText,
+                    motionPreset:
+                      analysis.motion_type || p.motionPreset || "zoom_in",
+                    duration: analysis.duration
+                      ? Number(analysis.duration)
+                      : p.duration || 0,
+                    visualDescription:
+                      analysis.visual_description || p.visualDescription,
                     narrativeText:
                       result.narrative ||
                       result.narrativeText ||
@@ -594,7 +693,8 @@ export const SidepanelApp: React.FC = () => {
                       analysis.narrativeText ||
                       p.narrativeText,
                     sfx: analysis.sfx || p.sfx,
-                    audioUrl: result.audio_url || analysis.audio_url || p.audioUrl,
+                    audioUrl:
+                      result.audio_url || analysis.audio_url || p.audioUrl,
                     narrativeAudioUrl:
                       result.narrative_audio_url ||
                       analysis.narrative_audio_url ||
@@ -615,7 +715,9 @@ export const SidepanelApp: React.FC = () => {
               showErrorModal(
                 "Full Sequence Analysis Failed",
                 errMsg,
-                typeof res === "object" ? JSON.stringify(res, null, 2) : String(errMsg),
+                typeof res === "object"
+                  ? JSON.stringify(res, null, 2)
+                  : String(errMsg),
                 "Verify your backend server is online at http://localhost:5173 with access to the manga images.",
                 () => handleAnalyzeAllPanels()
               );
@@ -643,7 +745,12 @@ export const SidepanelApp: React.FC = () => {
   };
 
   // Audio Auditioning
-  const handleAuditionPanel = (panelId: string, text: string, voice?: string, audioUrl?: string) => {
+  const handleAuditionPanel = (
+    panelId: string,
+    text: string,
+    voice?: string,
+    audioUrl?: string
+  ) => {
     if (!text.trim() && !audioUrl) {
       showToast("Please enter dialogue to audition");
       return;
@@ -659,12 +766,18 @@ export const SidepanelApp: React.FC = () => {
         audio.onerror = () => {
           synthesizeAudioFallback();
         };
-        audio.play().then(() => {
-          showToast("Playing generated scene audio...");
-        }).catch((err) => {
-          console.warn("[Sonikoma] Audio play failed, falling back to TTS:", err);
-          synthesizeAudioFallback();
-        });
+        audio
+          .play()
+          .then(() => {
+            showToast("Playing generated scene audio...");
+          })
+          .catch((err) => {
+            console.warn(
+              "[Sonikoma] Audio play failed, falling back to TTS:",
+              err
+            );
+            synthesizeAudioFallback();
+          });
         return;
       } catch (_) {
         synthesizeAudioFallback();
@@ -690,9 +803,17 @@ export const SidepanelApp: React.FC = () => {
             },
             (res) => {
               setActiveAuditioningId(null);
-              if (!chrome.runtime.lastError && res && res.success && res.data && res.data.audio_base64) {
+              if (
+                !chrome.runtime.lastError &&
+                res &&
+                res.success &&
+                res.data &&
+                res.data.audio_base64
+              ) {
                 try {
-                  const audio = new Audio(`data:audio/mp3;base64,${res.data.audio_base64}`);
+                  const audio = new Audio(
+                    `data:audio/mp3;base64,${res.data.audio_base64}`
+                  );
                   audio.play().catch((playErr) => {
                     console.warn("[Sonikoma] Audio play failed:", playErr);
                     fallbackLocalSpeech(text);
@@ -743,33 +864,43 @@ export const SidepanelApp: React.FC = () => {
         const tab = tabs[0];
         if (!tab?.id || !tab.url || !tab.url.startsWith("http")) return;
 
-        chrome.tabs.sendMessage(tab.id, { type: "TRIGGER_CINEMA_MODE" }, (res) => {
-          if (chrome.runtime.lastError || !res) {
-            if (chrome.scripting && chrome.scripting.insertCSS) {
-              chrome.scripting.insertCSS({
-                target: { tabId: tab.id! },
-                files: ["content/content.css"],
-              }).catch(() => {});
+        chrome.tabs.sendMessage(
+          tab.id,
+          { type: "TRIGGER_CINEMA_MODE" },
+          (res) => {
+            if (chrome.runtime.lastError || !res) {
+              if (chrome.scripting && chrome.scripting.insertCSS) {
+                chrome.scripting
+                  .insertCSS({
+                    target: { tabId: tab.id! },
+                    files: ["content/content.css"],
+                  })
+                  .catch(() => {});
+              }
+              if (chrome.scripting && chrome.scripting.executeScript) {
+                chrome.scripting.executeScript(
+                  {
+                    target: { tabId: tab.id! },
+                    files: ["content/content.js"],
+                  },
+                  () => {
+                    setTimeout(() => {
+                      chrome.tabs.sendMessage(
+                        tab.id!,
+                        { type: "TRIGGER_CINEMA_MODE" },
+                        () => {
+                          showToast("Immersive Cinema Mode launched!");
+                        }
+                      );
+                    }, 150);
+                  }
+                );
+              }
+            } else {
+              showToast("Immersive Cinema Mode launched!");
             }
-            if (chrome.scripting && chrome.scripting.executeScript) {
-              chrome.scripting.executeScript(
-                {
-                  target: { tabId: tab.id! },
-                  files: ["content/content.js"],
-                },
-                () => {
-                  setTimeout(() => {
-                    chrome.tabs.sendMessage(tab.id!, { type: "TRIGGER_CINEMA_MODE" }, () => {
-                      showToast("Immersive Cinema Mode launched!");
-                    });
-                  }, 150);
-                }
-              );
-            }
-          } else {
-            showToast("Immersive Cinema Mode launched!");
           }
-        });
+        );
       });
     }
   };
@@ -779,12 +910,17 @@ export const SidepanelApp: React.FC = () => {
     const buildPayload = (activeTab?: chrome.tabs.Tab) => {
       const tabUrl =
         chapterInfo.url ||
-        (activeTab && activeTab.url && activeTab.url.startsWith("http") ? activeTab.url : "");
-      const tabTitle = chapterInfo.title || activeTab?.title || "Imported Comic";
+        (activeTab && activeTab.url && activeTab.url.startsWith("http")
+          ? activeTab.url
+          : "");
+      const tabTitle =
+        chapterInfo.title || activeTab?.title || "Imported Comic";
       const chapterTitle = chapterInfo.chapterName || "";
 
       const enabledPanels = panels.filter((p) => p.enabled);
-      const panelsToTransfer = (enabledPanels.length > 0 ? enabledPanels : panels).map((p, idx) => ({
+      const panelsToTransfer = (
+        enabledPanels.length > 0 ? enabledPanels : panels
+      ).map((p, idx) => ({
         id: idx + 1,
         prompt: p.visualDescription || p.dialogueText || `Scene ${idx + 1}`,
         image_url: p.imageUrl,
@@ -800,7 +936,9 @@ export const SidepanelApp: React.FC = () => {
         speech_audio_url: p.audioUrl || "",
       }));
 
-      const scrapedImages = panelsToTransfer.map((p) => p.image_url).filter(Boolean);
+      const scrapedImages = panelsToTransfer
+        .map((p) => p.image_url)
+        .filter(Boolean);
 
       return {
         url: tabUrl,
@@ -879,7 +1017,9 @@ export const SidepanelApp: React.FC = () => {
             showErrorModal(
               "Video Render Error",
               errMsg,
-              typeof res === "object" ? JSON.stringify(res, null, 2) : String(errMsg),
+              typeof res === "object"
+                ? JSON.stringify(res, null, 2)
+                : String(errMsg),
               "Ensure the backend server is running and FFmpeg is available.",
               () => handleRenderVideo()
             );
@@ -897,12 +1037,18 @@ export const SidepanelApp: React.FC = () => {
                 payload: { job_id: jobId },
               },
               (statusRes) => {
-                if (chrome.runtime.lastError || !statusRes || !statusRes.success) {
+                if (
+                  chrome.runtime.lastError ||
+                  !statusRes ||
+                  !statusRes.success
+                ) {
                   return;
                 }
 
                 if (typeof statusRes.progress === "number") {
-                  setRenderProgress(Math.max(5, Math.min(99, Math.round(statusRes.progress))));
+                  setRenderProgress(
+                    Math.max(5, Math.min(99, Math.round(statusRes.progress)))
+                  );
                 }
 
                 const status = (statusRes.status || "").toUpperCase();
@@ -915,9 +1061,7 @@ export const SidepanelApp: React.FC = () => {
                   }, 800);
 
                   const videoUrl =
-                    statusRes.result?.video_url ||
-                    statusRes.url ||
-                    "";
+                    statusRes.result?.video_url || statusRes.url || "";
 
                   showToast("Video rendered successfully!", "success");
 
@@ -937,7 +1081,9 @@ export const SidepanelApp: React.FC = () => {
                   showErrorModal(
                     "Video Render Failed",
                     failMsg,
-                    typeof statusRes === "object" ? JSON.stringify(statusRes, null, 2) : String(failMsg),
+                    typeof statusRes === "object"
+                      ? JSON.stringify(statusRes, null, 2)
+                      : String(failMsg),
                     "Check server terminal logs for FFmpeg compilation details.",
                     () => handleRenderVideo()
                   );
@@ -959,9 +1105,13 @@ export const SidepanelApp: React.FC = () => {
     if (typeof chrome !== "undefined" && chrome.tabs) {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]?.id) {
-          chrome.tabs.sendMessage(tabs[0].id, { type: "TRIGGER_CHAPTER_DOWNLOAD" }, () => {
-            showToast("Downloading clean ZIP archive...", "info");
-          });
+          chrome.tabs.sendMessage(
+            tabs[0].id,
+            { type: "TRIGGER_CHAPTER_DOWNLOAD" },
+            () => {
+              showToast("Downloading clean ZIP archive...", "info");
+            }
+          );
         }
       });
     }
@@ -999,7 +1149,9 @@ export const SidepanelApp: React.FC = () => {
         <div className="bg-amber-950/80 border-b border-amber-800/80 px-3 py-1.5 flex items-center justify-between text-[11px] text-amber-200">
           <div className="flex items-center gap-1.5 min-w-0">
             <AlertTriangle size={13} className="text-amber-400 shrink-0" />
-            <span className="truncate">Backend offline (localhost:5173). Some AI features unavailable.</span>
+            <span className="truncate">
+              Backend offline (localhost:5173). Some AI features unavailable.
+            </span>
           </div>
           <button
             type="button"
@@ -1066,10 +1218,24 @@ export const SidepanelApp: React.FC = () => {
               : "bg-[#0f172a]/95 border-sky-600/80 text-sky-100 shadow-sky-950/60"
           }`}
         >
-          {toast.type === "error" && <AlertCircle size={15} className="text-rose-400 shrink-0 mt-0.5" />}
-          {toast.type === "success" && <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />}
-          {toast.type === "warning" && <AlertTriangle size={15} className="text-amber-400 shrink-0 mt-0.5" />}
-          {toast.type === "info" && <Info size={15} className="text-sky-400 shrink-0 mt-0.5" />}
+          {toast.type === "error" && (
+            <AlertCircle size={15} className="text-rose-400 shrink-0 mt-0.5" />
+          )}
+          {toast.type === "success" && (
+            <CheckCircle2
+              size={15}
+              className="text-emerald-400 shrink-0 mt-0.5"
+            />
+          )}
+          {toast.type === "warning" && (
+            <AlertTriangle
+              size={15}
+              className="text-amber-400 shrink-0 mt-0.5"
+            />
+          )}
+          {toast.type === "info" && (
+            <Info size={15} className="text-sky-400 shrink-0 mt-0.5" />
+          )}
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-semibold leading-tight">
               {toast.type === "error"
@@ -1138,7 +1304,10 @@ export const SidepanelApp: React.FC = () => {
             onBgmMoodChange={setBgmMood}
             onBgmVolumeChange={setBgmVolume}
             onTestVoice={() =>
-              handleAuditionPanel("global-test", "Welcome to Sonikoma motion comic studio!")
+              handleAuditionPanel(
+                "global-test",
+                "Welcome to Sonikoma motion comic studio!"
+              )
             }
           />
         )}
@@ -1192,10 +1361,7 @@ export const SidepanelApp: React.FC = () => {
       )}
 
       {/* ── 6. Full Dedicated System & Pipeline Error Modal ── */}
-      <ErrorModal
-        error={errorModal}
-        onClose={() => setErrorModal(null)}
-      />
+      <ErrorModal error={errorModal} onClose={() => setErrorModal(null)} />
     </div>
   );
 };

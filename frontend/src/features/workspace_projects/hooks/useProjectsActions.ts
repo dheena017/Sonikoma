@@ -182,7 +182,11 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
           const data = await res.json();
           if (data.success || res.ok) {
             onDeleteSuccess(projectId);
-            showNotification("Project deleted successfully.", "Deleted", "emerald");
+            showNotification(
+              "Project deleted successfully.",
+              "Deleted",
+              "emerald"
+            );
           } else {
             throw new Error(data.detail || "Failed to delete");
           }
@@ -235,7 +239,9 @@ export function useProjectsActions(): UseProjectsActionsHandlers {
           if (data.success || res.ok) {
             onDeleteSuccess(selectedIds);
             showNotification(
-              `Successfully deleted ${data.deleted_count || selectedIds.length} projects.`,
+              `Successfully deleted ${
+                data.deleted_count || selectedIds.length
+              } projects.`,
               "Deleted",
               "emerald"
             );

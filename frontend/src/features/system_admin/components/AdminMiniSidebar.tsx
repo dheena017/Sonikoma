@@ -59,7 +59,12 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
     {
       name: "Monitoring",
       items: [
-        { id: "jobs", label: "Background Jobs", icon: ActivitySquare, path: "/admin/jobs" },
+        {
+          id: "jobs",
+          label: "Background Jobs",
+          icon: ActivitySquare,
+          path: "/admin/jobs",
+        },
         { id: "health", label: "Health", icon: Server, path: "/admin/health" },
         {
           id: "activity",
@@ -159,7 +164,9 @@ const AdminMiniSidebarInner: React.FC<AdminMiniSidebarProps> = ({
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                active ? "text-white" : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                active
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>

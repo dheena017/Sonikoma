@@ -13,7 +13,12 @@
     "completion_price_per_1m": 0.0,
     "price_per_image": 0.0,
     "speed_rating": "Local GPU (~2.5s)",
-    "capabilities": ["image_generation", "inpainting", "upscaling", "style_transfer"],
+    "capabilities": [
+      "image_generation",
+      "inpainting",
+      "upscaling",
+      "style_transfer"
+    ],
     "recommended_for": ["Offline Artwork Generation", "Panel Inpainting"]
   }
 ]

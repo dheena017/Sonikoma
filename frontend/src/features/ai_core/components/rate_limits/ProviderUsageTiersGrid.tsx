@@ -21,7 +21,8 @@ export default function ProviderUsageTiersGrid({
             {currentProvider.name} Usage Tiers &amp; Upgrade Path
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            Official qualifications, deposit milestones, and billing caps for {currentProvider.name}.
+            Official qualifications, deposit milestones, and billing caps for{" "}
+            {currentProvider.name}.
           </p>
         </div>
         {currentProvider.docsUrl !== "#" && (
@@ -49,7 +50,9 @@ export default function ProviderUsageTiersGrid({
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white font-mono">{t.label}</span>
+              <span className="text-xs font-bold text-white font-mono">
+                {t.label}
+              </span>
               {selectedTierId === t.id && (
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#3B82F6]" />
               )}

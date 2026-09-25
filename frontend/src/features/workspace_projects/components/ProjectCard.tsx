@@ -97,9 +97,7 @@ export default function ProjectCard({
     <div
       onClick={() => onOpenProject(project)}
       className={`group relative overflow-hidden rounded-3xl border border-[#2F2F2F] bg-[#1E1E1E] hover:bg-[#252525] shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:border-neutral-700 hover:shadow-xl flex flex-col h-full ${
-        isSelected
-          ? "border-neutral-600 bg-neutral-900/90 shadow-md"
-          : ""
+        isSelected ? "border-neutral-600 bg-neutral-900/90 shadow-md" : ""
       }`}
     >
       {/* Selection checkbox */}
@@ -135,7 +133,10 @@ export default function ProjectCard({
                 isSelected ? "scale-105 opacity-90" : "group-hover:scale-105"
               }`}
               onError={() => {
-                if (imgSrc.includes("/api/v1/proxy/image") && project.cover_image) {
+                if (
+                  imgSrc.includes("/api/v1/proxy/image") &&
+                  project.cover_image
+                ) {
                   setImgSrc(project.cover_image);
                 } else {
                   setImageError(true);
@@ -151,7 +152,9 @@ export default function ProjectCard({
               <Sparkles className="w-5 h-5 text-[#3B82F6]" />
             </div>
             <span className="text-[11px] text-[#E5E5E5] font-bold font-mono tracking-wider text-center line-clamp-1">
-              {formatEpisodeLabel(project.episode) || project.title || "CHAPTER PROJECT"}
+              {formatEpisodeLabel(project.episode) ||
+                project.title ||
+                "CHAPTER PROJECT"}
             </span>
             <span className="text-[9px] text-[#9CA3AF] font-mono">
               Ready for Creative Studio
@@ -176,10 +179,7 @@ export default function ProjectCard({
           </div>
 
           {/* 3-dot menu */}
-          <div
-            className="relative z-30"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative z-30" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               onClick={(e) => {
@@ -306,9 +306,9 @@ export default function ProjectCard({
               if (onCopyLink) {
                 onCopyLink(e, project);
               } else {
-                const url = `${window.location.origin}/scraper?id=${encodeURIComponent(
-                  project.project_id
-                )}`;
+                const url = `${
+                  window.location.origin
+                }/scraper?id=${encodeURIComponent(project.project_id)}`;
                 navigator.clipboard.writeText(url);
                 if (typeof (window as any).alertAsync === "function") {
                   (window as any).alertAsync(
@@ -402,7 +402,9 @@ export default function ProjectCard({
             {/* Storyboard Count */}
             <div
               className="flex items-center gap-1 text-[#3B82F6]"
-              title={`${project.panels_count || project.imported_assets_count || 0} Storyboard Panels`}
+              title={`${
+                project.panels_count || project.imported_assets_count || 0
+              } Storyboard Panels`}
             >
               <Film className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
               <span className="font-bold text-neutral-200">
@@ -414,7 +416,9 @@ export default function ProjectCard({
             {/* Imported Assets Count */}
             <div
               className="flex items-center gap-1 text-blue-400"
-              title={`${project.imported_assets_count || project.panels_count || 0} Imported Assets`}
+              title={`${
+                project.imported_assets_count || project.panels_count || 0
+              } Imported Assets`}
             >
               <Layers className="h-3.5 w-3.5 shrink-0 text-blue-400" />
               <span className="font-bold text-neutral-200">

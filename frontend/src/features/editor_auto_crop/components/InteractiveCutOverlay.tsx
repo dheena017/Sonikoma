@@ -17,7 +17,13 @@ import { InteractiveCutShortcutsModal } from "./InteractiveCutShortcutsModal";
 import { AutoCropMinimapRadar } from "./AutoCropMinimapRadar";
 
 export { THEME_CONFIG };
-export type { ThemeColor, BorderStyle, ToolMode, DragAction, InteractiveCutOverlayProps };
+export type {
+  ThemeColor,
+  BorderStyle,
+  ToolMode,
+  DragAction,
+  InteractiveCutOverlayProps,
+};
 
 export function InteractiveCutOverlay({
   imageUrl,
@@ -83,7 +89,10 @@ export function InteractiveCutOverlay({
       const visibleTopInImg = Math.max(0, scrollTop - imgTop);
       const scrollRatio = Math.max(0, Math.min(1, visibleTopInImg / imgHeight));
       const visibleHeightInImg = Math.min(imgHeight, clientHeight);
-      const heightPct = Math.max(5, Math.min(100, (visibleHeightInImg / imgHeight) * 100));
+      const heightPct = Math.max(
+        5,
+        Math.min(100, (visibleHeightInImg / imgHeight) * 100)
+      );
       const topPct = scrollRatio * 100;
       setScrollProgress({ topPct, heightPct, scrollRatio });
 
@@ -96,7 +105,10 @@ export function InteractiveCutOverlay({
         Date.now() - lastDirectInteractionRef.current > 500
       ) {
         const viewportCenterY = scrollTop + clientHeight / 2;
-        const visibleCenterInImg = Math.max(0, Math.min(imgHeight, viewportCenterY - imgTop));
+        const visibleCenterInImg = Math.max(
+          0,
+          Math.min(imgHeight, viewportCenterY - imgTop)
+        );
         const centerRatio = visibleCenterInImg / imgHeight;
         const centerPixelY = centerRatio * totalHeight;
 
@@ -104,7 +116,7 @@ export function InteractiveCutOverlay({
         let minDiff = Infinity;
         boxes.forEach((b, i) => {
           const boxTop = b.y ?? 0;
-          const boxH = b.height ?? (totalHeight / boxes.length);
+          const boxH = b.height ?? totalHeight / boxes.length;
           const boxCenter = boxTop + boxH / 2;
           const diff = Math.abs(boxCenter - centerPixelY);
           if (diff < minDiff) {
@@ -285,7 +297,9 @@ export function InteractiveCutOverlay({
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
         const delta = e.deltaY > 0 ? -0.15 : 0.15;
-        setZoomScale((prev) => Math.max(0.4, Math.min(3.0, +(prev + delta).toFixed(2))));
+        setZoomScale((prev) =>
+          Math.max(0.4, Math.min(3.0, +(prev + delta).toFixed(2)))
+        );
       }
     };
 
@@ -415,9 +429,7 @@ export function InteractiveCutOverlay({
   };
 
   // Start drawing a new 2D box on empty canvas
-  const handleCanvasPointerDown = (
-    e: React.MouseEvent | React.TouchEvent
-  ) => {
+  const handleCanvasPointerDown = (e: React.MouseEvent | React.TouchEvent) => {
     if (toolMode !== "box" || !containerRef.current) return;
     lastDirectInteractionRef.current = Date.now();
     const rect = containerRef.current.getBoundingClientRect();
@@ -647,7 +659,15 @@ export function InteractiveCutOverlay({
       window.removeEventListener("touchend", handlePointerUp);
       window.removeEventListener("touchcancel", handlePointerUp);
     };
-  }, [dragAction, totalWidth, totalHeight, snapToGrid, boxes, onAddBox, onUpdateBox]);
+  }, [
+    dragAction,
+    totalWidth,
+    totalHeight,
+    snapToGrid,
+    boxes,
+    onAddBox,
+    onUpdateBox,
+  ]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
@@ -669,9 +689,7 @@ export function InteractiveCutOverlay({
   // Quick Append Box Helper
   const handleQuickAddBoxAtEnd = () => {
     const lastBox = boxes[boxes.length - 1];
-    const newY = lastBox
-      ? (lastBox.y ?? 0) + (lastBox.height ?? 0) + 10
-      : 0;
+    const newY = lastBox ? (lastBox.y ?? 0) + (lastBox.height ?? 0) + 10 : 0;
     const defaultH = 260;
     onAddBox?.({
       x: 0,
@@ -740,10 +758,7 @@ export function InteractiveCutOverlay({
     const sortedIndices = boxes
       .map((_, i) => i)
       .sort((a, b) => (boxes[a].y ?? 0) - (boxes[b].y ?? 0));
-    const totalBoxHeight = boxes.reduce(
-      (acc, b) => acc + (b.height ?? 200),
-      0
-    );
+    const totalBoxHeight = boxes.reduce((acc, b) => acc + (b.height ?? 200), 0);
     const remainingSpace = Math.max(0, totalHeight - totalBoxHeight);
     const gutterGap = Math.round(
       remainingSpace / Math.max(1, boxes.length + 1)
@@ -1071,7 +1086,10 @@ export function InteractiveCutOverlay({
                           left: `${(loupeCoords.focusX / totalWidth) * 100}%`,
                           top: `${Math.max(
                             4,
-                            Math.min(96, (loupeCoords.focusY / totalHeight) * 100)
+                            Math.min(
+                              96,
+                              (loupeCoords.focusY / totalHeight) * 100
+                            )
                           )}%`,
                           transform: `translate(-50%, ${
                             isNearTop ? "30px" : "-150px"
@@ -1149,28 +1167,36 @@ export function InteractiveCutOverlay({
                 {dragAction?.type === "draw-box" && (
                   <div
                     style={{
-                      left: `${(Math.min(
-                        dragAction.startPointerX,
-                        dragAction.currentPointerX
-                      ) /
-                        totalWidth) *
-                        100}%`,
-                      top: `${(Math.min(
-                        dragAction.startPointerY,
-                        dragAction.currentPointerY
-                      ) /
-                        totalHeight) *
-                        100}%`,
-                      width: `${(Math.abs(
-                        dragAction.currentPointerX - dragAction.startPointerX
-                      ) /
-                        totalWidth) *
-                        100}%`,
-                      height: `${(Math.abs(
-                        dragAction.currentPointerY - dragAction.startPointerY
-                      ) /
-                        totalHeight) *
-                        100}%`,
+                      left: `${
+                        (Math.min(
+                          dragAction.startPointerX,
+                          dragAction.currentPointerX
+                        ) /
+                          totalWidth) *
+                        100
+                      }%`,
+                      top: `${
+                        (Math.min(
+                          dragAction.startPointerY,
+                          dragAction.currentPointerY
+                        ) /
+                          totalHeight) *
+                        100
+                      }%`,
+                      width: `${
+                        (Math.abs(
+                          dragAction.currentPointerX - dragAction.startPointerX
+                        ) /
+                          totalWidth) *
+                        100
+                      }%`,
+                      height: `${
+                        (Math.abs(
+                          dragAction.currentPointerY - dragAction.startPointerY
+                        ) /
+                          totalHeight) *
+                        100
+                      }%`,
                     }}
                     className={`absolute border-2 ${activeTheme.borderActive} ${activeTheme.badgeBg} ring-4 ${activeTheme.ring}/40 z-50 pointer-events-none flex items-center justify-center`}
                   >

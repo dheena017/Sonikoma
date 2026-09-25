@@ -265,7 +265,8 @@ function PanelCard({
       aria-pressed={isSelected}
       style={{
         contentVisibility: "auto",
-        containIntrinsicSize: viewLayout === "grid" ? "320px 460px" : "300px 460px",
+        containIntrinsicSize:
+          viewLayout === "grid" ? "320px 460px" : "300px 460px",
       }}
       className={[
         "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-colors duration-150 text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-neutral-700 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950",

@@ -177,7 +177,9 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   });
 
   const handleOpenProject = (project: Project) => {
-    const targetPath = `/scraper/editor?id=${encodeURIComponent(project.project_id)}`;
+    const targetPath = `/scraper/editor?id=${encodeURIComponent(
+      project.project_id
+    )}`;
     if (props.navigateTo) {
       props.navigateTo(targetPath);
     } else {
@@ -402,7 +404,8 @@ const ScraperPageInner = (props: ScraperPageProps) => {
     if (!urlStr || !urlStr.trim()) return false;
     try {
       const formatted =
-        urlStr.trim().startsWith("http://") || urlStr.trim().startsWith("https://")
+        urlStr.trim().startsWith("http://") ||
+        urlStr.trim().startsWith("https://")
           ? urlStr.trim()
           : `https://${urlStr.trim()}`;
       const parsed = new URL(formatted);
@@ -685,16 +688,35 @@ const ScraperPageInner = (props: ScraperPageProps) => {
                   );
                   const segments = u.pathname.split("/").filter(Boolean);
                   const ignored = new Set([
-                    "list", "viewer", "chapter", "episode", "detail", "read", "index",
-                    "comic", "comics", "manga", "series", "en", "ko", "id", "zh", "webtoon"
+                    "list",
+                    "viewer",
+                    "chapter",
+                    "episode",
+                    "detail",
+                    "read",
+                    "index",
+                    "comic",
+                    "comics",
+                    "manga",
+                    "series",
+                    "en",
+                    "ko",
+                    "id",
+                    "zh",
+                    "webtoon",
                   ]);
-                  while (segments.length > 0 && ignored.has(segments[segments.length - 1].toLowerCase())) {
+                  while (
+                    segments.length > 0 &&
+                    ignored.has(segments[segments.length - 1].toLowerCase())
+                  ) {
                     segments.pop();
                   }
                   if (
                     segments.length > 1 &&
-                    (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(segments[segments.length - 1]) ||
-                     /^\d+$/.test(segments[segments.length - 1]))
+                    (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(
+                      segments[segments.length - 1]
+                    ) ||
+                      /^\d+$/.test(segments[segments.length - 1]))
                   ) {
                     segments.pop();
                   }
@@ -725,16 +747,35 @@ const ScraperPageInner = (props: ScraperPageProps) => {
                   );
                   const segments = u.pathname.split("/").filter(Boolean);
                   const ignored = new Set([
-                    "list", "viewer", "chapter", "episode", "detail", "read", "index",
-                    "comic", "comics", "manga", "series", "en", "ko", "id", "zh", "webtoon"
+                    "list",
+                    "viewer",
+                    "chapter",
+                    "episode",
+                    "detail",
+                    "read",
+                    "index",
+                    "comic",
+                    "comics",
+                    "manga",
+                    "series",
+                    "en",
+                    "ko",
+                    "id",
+                    "zh",
+                    "webtoon",
                   ]);
-                  while (segments.length > 0 && ignored.has(segments[segments.length - 1].toLowerCase())) {
+                  while (
+                    segments.length > 0 &&
+                    ignored.has(segments[segments.length - 1].toLowerCase())
+                  ) {
                     segments.pop();
                   }
                   if (
                     segments.length > 1 &&
-                    (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(segments[segments.length - 1]) ||
-                     /^\d+$/.test(segments[segments.length - 1]))
+                    (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(
+                      segments[segments.length - 1]
+                    ) ||
+                      /^\d+$/.test(segments[segments.length - 1]))
                   ) {
                     segments.pop();
                   }

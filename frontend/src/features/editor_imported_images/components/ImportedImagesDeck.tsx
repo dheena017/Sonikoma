@@ -352,9 +352,9 @@ const ChapterScraperDeck = React.memo(
       window.dispatchEvent(new Event("scraped-assets-reload"));
     }, []);
 
-    const imageDimensionsRef = useRef<Map<string, { width: number; height: number }>>(
-      new Map()
-    );
+    const imageDimensionsRef = useRef<
+      Map<string, { width: number; height: number }>
+    >(new Map());
 
     useEffect(() => {
       scrapedImages.forEach((imgUrl) => {
@@ -428,9 +428,7 @@ const ChapterScraperDeck = React.memo(
               `page ${frameNum}`,
               `#${localNum}`,
             ];
-            const matchesTextTerm = searchTerms.some((t) =>
-              t.includes(cleanQ)
-            );
+            const matchesTextTerm = searchTerms.some((t) => t.includes(cleanQ));
             const filename = imgUrl.split("/").pop()?.toLowerCase() || "";
             const matchesFilename = filename.includes(cleanQ);
 
@@ -976,17 +974,17 @@ const ChapterScraperDeck = React.memo(
                   const visibleGroups =
                     selectedEpisodeIdx === "all"
                       ? sortedGroups.map(({ grp, originalIdx }) => ({
-                        grp,
-                        gIdx: originalIdx,
-                      }))
+                          grp,
+                          gIdx: originalIdx,
+                        }))
                       : episodeGroups[selectedEpisodeIdx]
-                        ? [
+                      ? [
                           {
                             grp: episodeGroups[selectedEpisodeIdx],
                             gIdx: selectedEpisodeIdx as number,
                           },
                         ]
-                        : sortedGroups.map(({ grp, originalIdx }) => ({
+                      : sortedGroups.map(({ grp, originalIdx }) => ({
                           grp,
                           gIdx: originalIdx,
                         }));
@@ -1034,7 +1032,8 @@ const ChapterScraperDeck = React.memo(
                                 if (processedGrp.length === 0) {
                                   return (
                                     <div className="p-4 text-center text-xs font-mono text-neutral-500 bg-neutral-950/40 rounded-xl border border-neutral-900">
-                                      No frames match the active filter in this episode.
+                                      No frames match the active filter in this
+                                      episode.
                                     </div>
                                   );
                                 }
@@ -1166,7 +1165,9 @@ const ChapterScraperDeck = React.memo(
                 if (processedFlat.length === 0 && scrapedImages.length > 0) {
                   return (
                     <div className="p-8 text-center text-xs font-mono text-neutral-400 bg-neutral-950/40 rounded-2xl border border-neutral-850 space-y-2">
-                      <p className="text-neutral-300 font-bold">No assets match your search/filter criteria.</p>
+                      <p className="text-neutral-300 font-bold">
+                        No assets match your search/filter criteria.
+                      </p>
                       <button
                         type="button"
                         onClick={() => {
@@ -1188,7 +1189,9 @@ const ChapterScraperDeck = React.memo(
                       const isSelected = selectedScraped.includes(imgUrl);
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
-                        : `/api/v1/proxy/image?url=${encodeURIComponent(imgUrl)}`;
+                        : `/api/v1/proxy/image?url=${encodeURIComponent(
+                            imgUrl
+                          )}`;
                       const isInTimeline = activePanelsList.some(
                         (p) =>
                           p.image_url === imgUrl ||
@@ -1237,7 +1240,9 @@ const ChapterScraperDeck = React.memo(
                       const isSelected = selectedScraped.includes(imgUrl);
                       const proxiedUrl = imgUrl?.startsWith("/api/")
                         ? imgUrl
-                        : `/api/v1/proxy/image?url=${encodeURIComponent(imgUrl)}`;
+                        : `/api/v1/proxy/image?url=${encodeURIComponent(
+                            imgUrl
+                          )}`;
                       const isInTimeline = activePanelsList.some(
                         (p) =>
                           p.image_url === imgUrl ||

@@ -32,8 +32,7 @@ export const THEMES: Record<
     accentText: "text-blue-400",
     accentBg: "bg-blue-500/10",
     accentBorder: "border-blue-500/20",
-    button:
-      "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md",
+    button: "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md",
     focus: "focus:border-neutral-600 focus:ring-blue-600/20",
     dot: "bg-blue-500",
     cardBorder: "from-blue-500/30 via-indigo-500/20 to-transparent",
@@ -45,8 +44,7 @@ export const THEMES: Record<
     accentText: "text-[#3B82F6]",
     accentBg: "bg-[#3B82F6]/10",
     accentBorder: "border-[#3B82F6]/20",
-    button:
-      "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md",
+    button: "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md",
     focus: "focus:border-neutral-600 focus:ring-blue-600/20",
     dot: "bg-blue-500",
     cardBorder: "from-blue-500/30 via-indigo-500/20 to-transparent",
@@ -71,8 +69,7 @@ export const THEMES: Record<
     accentText: "text-amber-400",
     accentBg: "bg-amber-500/10",
     accentBorder: "border-amber-500/20",
-    button:
-      "bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-md",
+    button: "bg-amber-600 hover:bg-amber-500 text-white font-bold shadow-md",
     focus: "focus:border-amber-500/50 focus:ring-amber-600/20",
     dot: "bg-amber-500",
     cardBorder: "from-amber-500/30 via-orange-500/20 to-transparent",
@@ -149,7 +146,8 @@ export const TOUR_STEPS = [
 export const TRANSLATIONS = {
   en: {
     welcome: "Welcome to Sonikoma Studio",
-    subtitle: "Log in to access your dashboard, projects, and production tools.",
+    subtitle:
+      "Log in to access your dashboard, projects, and production tools.",
     email: "Email Address",
     emailPlaceholder: "name@example.com",
     password: "Password",

@@ -177,10 +177,20 @@ export function useVideoPreviewGeneration({
       mangadex: ["mangadex.org", "mangadex.com"],
       toomics: ["toomics.com"],
       linewebtoon: ["webtoon.com", "webtoons.com"],
-      asurascans: ["asuracomic.net", "asurascans.com", "asura.gg", "asuratoon.com"],
+      asurascans: [
+        "asuracomic.net",
+        "asurascans.com",
+        "asura.gg",
+        "asuratoon.com",
+      ],
       manhuato: ["manhuato.com"],
       reaperscans: ["reaperscans.com"],
-      flamecomics: ["flamecomics.xyz", "flamecomics.com", "flamecomics.me", "flamescans.org"],
+      flamecomics: [
+        "flamecomics.xyz",
+        "flamecomics.com",
+        "flamecomics.me",
+        "flamescans.org",
+      ],
       voidscans: ["voidscans.com", "void-scans.com"],
       luminousscans: ["luminousscans.com"],
       tapas: ["tapas.io"],
@@ -193,9 +203,23 @@ export function useVideoPreviewGeneration({
       webnovel: ["webnovel.com"],
       manhuaplus: ["manhuaplus.com", "manhuaplus.org"],
       manhwaclan: ["manhwaclan.com"],
-      "1stkissmanga": ["1stkissmanga.io", "1stkissmanga.com", "1stkissmanga.me"],
-      mangakakalot: ["mangakakalot.com", "mangakakalot.tv", "readmangakakalot.com"],
-      batoto: ["bato.to", "mangatoto.com", "battwo.com", "batocomic.com", "readtoto.com"],
+      "1stkissmanga": [
+        "1stkissmanga.io",
+        "1stkissmanga.com",
+        "1stkissmanga.me",
+      ],
+      mangakakalot: [
+        "mangakakalot.com",
+        "mangakakalot.tv",
+        "readmangakakalot.com",
+      ],
+      batoto: [
+        "bato.to",
+        "mangatoto.com",
+        "battwo.com",
+        "batocomic.com",
+        "readtoto.com",
+      ],
       custom: [],
     };
 
@@ -448,10 +472,24 @@ export function useVideoPreviewGeneration({
         bgm_volume: bgmVolume / 100,
         speech_rate: speechRate,
         speech_pitch: speechPitch,
-        enable_dialogue_audio: typeof window !== "undefined" ? localStorage.getItem("ai_comic_enable_dialogue_audio") === "true" : false,
-        enable_narrative_audio: typeof window !== "undefined" ? localStorage.getItem("ai_comic_enable_narrative_audio") !== "false" : true,
-        enableDialogueAudio: typeof window !== "undefined" ? localStorage.getItem("ai_comic_enable_dialogue_audio") === "true" : false,
-        enableNarrativeAudio: typeof window !== "undefined" ? localStorage.getItem("ai_comic_enable_narrative_audio") !== "false" : true,
+        enable_dialogue_audio:
+          typeof window !== "undefined"
+            ? localStorage.getItem("ai_comic_enable_dialogue_audio") === "true"
+            : false,
+        enable_narrative_audio:
+          typeof window !== "undefined"
+            ? localStorage.getItem("ai_comic_enable_narrative_audio") !==
+              "false"
+            : true,
+        enableDialogueAudio:
+          typeof window !== "undefined"
+            ? localStorage.getItem("ai_comic_enable_dialogue_audio") === "true"
+            : false,
+        enableNarrativeAudio:
+          typeof window !== "undefined"
+            ? localStorage.getItem("ai_comic_enable_narrative_audio") !==
+              "false"
+            : true,
       });
       if (!data.success || !data.job_id) {
         throw new Error(

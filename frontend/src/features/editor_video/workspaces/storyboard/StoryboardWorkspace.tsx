@@ -28,8 +28,7 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
   const projectStore = useProjectStore();
   const activeData = projectStore?.activeProjectData;
 
-  const panels: GeneratedPanel[] =
-    appLogic?.panels ?? activeData?.panels ?? [];
+  const panels: GeneratedPanel[] = appLogic?.panels ?? activeData?.panels ?? [];
   const setPanels =
     appLogic?.setPanels ??
     ((updater: any) => {
@@ -65,7 +64,9 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
     const ctrlOrMeta = e.ctrlKey || e.metaKey;
     setSelectedIndices((prev) => {
       if (ctrlOrMeta) {
-        return prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx];
+        return prev.includes(idx)
+          ? prev.filter((i) => i !== idx)
+          : [...prev, idx];
       }
       return prev.includes(idx) && prev.length === 1 ? [] : [idx];
     });
@@ -127,9 +128,7 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
 
   const handleUpdateSfx = useCallback(
     (idx: number, sfx: string) => {
-      const updated = panels.map((p, i) =>
-        i === idx ? { ...p, sfx } : p
-      );
+      const updated = panels.map((p, i) => (i === idx ? { ...p, sfx } : p));
       setPanels(updated);
     },
     [panels, setPanels]
@@ -222,8 +221,7 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
           String(i.index + 1).includes(q) ||
           (i.panel.speech_text &&
             i.panel.speech_text.toLowerCase().includes(q)) ||
-          (i.panel.narrative &&
-            i.panel.narrative.toLowerCase().includes(q))
+          (i.panel.narrative && i.panel.narrative.toLowerCase().includes(q))
       );
     }
 
@@ -248,15 +246,23 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         sortOrder={sortOrder}
-        onToggleSort={() => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))}
+        onToggleSort={() =>
+          setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+        }
         selectedCount={selectedIndices.length}
         isAllSelected={isAllSelected}
         onToggleSelectAll={handleToggleSelectAll}
-        onAutoVoiceover={() => onTriggerFeedback?.("AI Voiceover batch triggered")}
-        onAutoCameraPan={() => onTriggerFeedback?.("AI Camera motions assigned")}
+        onAutoVoiceover={() =>
+          onTriggerFeedback?.("AI Voiceover batch triggered")
+        }
+        onAutoCameraPan={() =>
+          onTriggerFeedback?.("AI Camera motions assigned")
+        }
         onDeleteSelected={handleDeleteSelected}
         onClearSelection={handleClearSelection}
-        onPlayStoryboard={() => onTriggerFeedback?.("Storyboard playback started")}
+        onPlayStoryboard={() =>
+          onTriggerFeedback?.("Storyboard playback started")
+        }
       />
 
       {/* ── 2. AI Toolbar ─────────────────────────────────────────────────── */}
@@ -313,7 +319,9 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
             onUpdateSfx={handleUpdateSfx}
             onUpdateBgm={handleUpdateBgm}
             onTriggerVoiceGen={(idx) =>
-              onTriggerFeedback?.(`AI Voice Generator opened for Panel #${idx + 1}`)
+              onTriggerFeedback?.(
+                `AI Voice Generator opened for Panel #${idx + 1}`
+              )
             }
             onTriggerFeedback={onTriggerFeedback}
           />
@@ -333,7 +341,9 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
                 onDelete={handleDeleteSingle}
                 onUpdateDialogue={handleUpdateDialogue}
                 onGenerateVoice={(idx) =>
-                  onTriggerFeedback?.(`AI Voice Generator opened for Panel #${idx + 1}`)
+                  onTriggerFeedback?.(
+                    `AI Voice Generator opened for Panel #${idx + 1}`
+                  )
                 }
               />
             ))}

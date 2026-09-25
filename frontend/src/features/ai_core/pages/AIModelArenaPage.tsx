@@ -8,7 +8,9 @@ export interface AIModelArenaPageProps {
 /**
  * @deprecated AIModelArenaPage has been consolidated into the AI Smart Model Routing page (/ai-core/routing).
  */
-export default function AIModelArenaPage({ navigateTo }: AIModelArenaPageProps) {
+export default function AIModelArenaPage({
+  navigateTo,
+}: AIModelArenaPageProps) {
   useEffect(() => {
     if (navigateTo) {
       navigateTo("/ai-core/routing");

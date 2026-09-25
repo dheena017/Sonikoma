@@ -27,7 +27,12 @@ export interface StoryboardViewProps {
   onMovePanel: (index: number, direction: "up" | "down") => void;
   onDuplicatePanel: (panel: StoryboardPanel, index: number) => void;
   onDeletePanel: (id: string) => void;
-  onAuditionPanel: (panelId: string, text: string, voice?: string, audioUrl?: string) => void;
+  onAuditionPanel: (
+    panelId: string,
+    text: string,
+    voice?: string,
+    audioUrl?: string
+  ) => void;
   onAnalyzePanel?: (panelId: string, imageUrl: string) => void;
   onAnalyzeAllPanels?: () => void;
   onPreviewImage: (imageUrl: string) => void;
@@ -66,7 +71,8 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
             <p className="font-bold text-white truncate text-[11px] leading-tight">
               {chapterInfo.title}
               {chapterInfo.chapterName &&
-                chapterInfo.chapterName.toLowerCase() !== chapterInfo.title.toLowerCase() && (
+                chapterInfo.chapterName.toLowerCase() !==
+                  chapterInfo.title.toLowerCase() && (
                   <span className="text-slate-400 font-normal ml-1.5 text-[10px]">
                     • {chapterInfo.chapterName}
                   </span>
@@ -83,8 +89,17 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 disabled:opacity-50 text-white text-[10px] font-bold shadow-md transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
                 title="AI Auto-Analyze All Scenes (OCR Dialogue & Smart Motions)"
               >
-                <Sparkles size={11} className={isAnalyzingAll ? "animate-spin text-sky-200" : "text-sky-100"} />
-                <span>{isAnalyzingAll ? "Analyzing All..." : "✨ AI Analyze All"}</span>
+                <Sparkles
+                  size={11}
+                  className={
+                    isAnalyzingAll
+                      ? "animate-spin text-sky-200"
+                      : "text-sky-100"
+                  }
+                />
+                <span>
+                  {isAnalyzingAll ? "Analyzing All..." : "✨ AI Analyze All"}
+                </span>
               </button>
             )}
 
@@ -94,7 +109,10 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
               disabled={isScanning}
               className="flex items-center gap-1 px-2 py-0.5 rounded bg-[#162134] hover:bg-[#202e48] disabled:opacity-50 border border-[#283955] text-sky-300 text-[9px] font-semibold transition-colors cursor-pointer shrink-0"
             >
-              <RefreshCw size={9} className={isScanning ? "animate-spin" : ""} />
+              <RefreshCw
+                size={9}
+                className={isScanning ? "animate-spin" : ""}
+              />
               <span>{isScanning ? "Scanning..." : "Rescan"}</span>
             </button>
           </div>
@@ -104,7 +122,10 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
         {panels.length > 0 && (
           <div className="flex items-center gap-1.5 min-w-0">
             <div className="relative flex-1 min-w-0">
-              <Search size={10} className="absolute left-2 top-2 text-slate-500" />
+              <Search
+                size={10}
+                className="absolute left-2 top-2 text-slate-500"
+              />
               <input
                 type="text"
                 value={searchQuery}
@@ -124,7 +145,9 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
               ) : (
                 <Square size={10} />
               )}
-              <span>{enabledCount === panels.length ? "All Selected" : "Select All"}</span>
+              <span>
+                {enabledCount === panels.length ? "All Selected" : "Select All"}
+              </span>
             </button>
           </div>
         )}

@@ -342,7 +342,10 @@ export const ActiveProjectWorkspaceBar: React.FC<
         <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 border-t md:border-t-0 border-white/5 pt-2 md:pt-0">
           <div className="flex items-center gap-2">
             {isTemp && (
-              <Tooltip text="Save this workspace as a permanent project" placement="bottom">
+              <Tooltip
+                text="Save this workspace as a permanent project"
+                placement="bottom"
+              >
                 <button
                   onClick={handleSaveProject}
                   disabled={isSaving}
@@ -381,7 +384,10 @@ export const ActiveProjectWorkspaceBar: React.FC<
               </button>
             </Tooltip>
 
-            <Tooltip text="Switch or Activate another Project" placement="bottom">
+            <Tooltip
+              text="Switch or Activate another Project"
+              placement="bottom"
+            >
               <button
                 onClick={() => setDrawerOpen(true)}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-white font-medium shadow-sm transition-all text-xs cursor-pointer"

@@ -303,7 +303,8 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
-                filterStatus === "with_narration" || filterStatus === "with_narrative"
+                filterStatus === "with_narration" ||
+                filterStatus === "with_narrative"
                   ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
@@ -326,7 +327,8 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setIsDropdownOpen(false);
               }}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
-                filterStatus === "without_narration" || filterStatus === "without_narrative"
+                filterStatus === "without_narration" ||
+                filterStatus === "without_narrative"
                   ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}

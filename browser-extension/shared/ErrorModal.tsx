@@ -29,11 +29,11 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ error, onClose }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const textToCopy = `[Sonikoma Error Diagnosis]\nTitle: ${error.title}\nMessage: ${
-      error.message
-    }\nTechnical Logs: ${error.technicalDetails || "None"}\nSuggestion: ${
-      error.suggestion || "None"
-    }`;
+    const textToCopy = `[Sonikoma Error Diagnosis]\nTitle: ${
+      error.title
+    }\nMessage: ${error.message}\nTechnical Logs: ${
+      error.technicalDetails || "None"
+    }\nSuggestion: ${error.suggestion || "None"}`;
     navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -124,7 +124,11 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ error, onClose }) => {
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium transition-colors cursor-pointer border border-slate-700/50"
             title="Copy error diagnosis to clipboard"
           >
-            {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+            {copied ? (
+              <Check size={12} className="text-emerald-400" />
+            ) : (
+              <Copy size={12} />
+            )}
             <span>{copied ? "Copied" : "Copy"}</span>
           </button>
 

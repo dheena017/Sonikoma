@@ -18,7 +18,10 @@ import {
   AlertCircle,
   Key,
 } from "lucide-react";
-import { useAIModelStore, AIModelInfo } from "@/features/ai_core/hooks/useAIModelStore";
+import {
+  useAIModelStore,
+  AIModelInfo,
+} from "@/features/ai_core/hooks/useAIModelStore";
 
 export interface AISmartRoutingDrawerProps {
   className?: string;
@@ -146,7 +149,9 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem("sonikoma_routing_favorites");
-      return stored ? JSON.parse(stored) : ["storyboard_narrative", "panel_analysis", "speech_synthesis"];
+      return stored
+        ? JSON.parse(stored)
+        : ["storyboard_narrative", "panel_analysis", "speech_synthesis"];
     } catch {
       return ["storyboard_narrative", "panel_analysis", "speech_synthesis"];
     }
@@ -155,21 +160,21 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
   const hasUserKey = useMemo(() => {
     return Boolean(
       localStorage.getItem("user_gemini_key") ||
-      localStorage.getItem("sonikoma_key_gemini") ||
-      localStorage.getItem("user_openai_key") ||
-      localStorage.getItem("sonikoma_key_openai") ||
-      localStorage.getItem("user_anthropic_key") ||
-      localStorage.getItem("sonikoma_key_anthropic") ||
-      localStorage.getItem("user_groq_key") ||
-      localStorage.getItem("sonikoma_key_groq") ||
-      localStorage.getItem("user_deepseek_key") ||
-      localStorage.getItem("sonikoma_key_deepseek") ||
-      localStorage.getItem("user_elevenlabs_key") ||
-      localStorage.getItem("sonikoma_key_elevenlabs") ||
-      localStorage.getItem("user_deepl_key") ||
-      localStorage.getItem("sonikoma_key_deepl") ||
-      localStorage.getItem("user_huggingface_key") ||
-      localStorage.getItem("sonikoma_key_huggingface")
+        localStorage.getItem("sonikoma_key_gemini") ||
+        localStorage.getItem("user_openai_key") ||
+        localStorage.getItem("sonikoma_key_openai") ||
+        localStorage.getItem("user_anthropic_key") ||
+        localStorage.getItem("sonikoma_key_anthropic") ||
+        localStorage.getItem("user_groq_key") ||
+        localStorage.getItem("sonikoma_key_groq") ||
+        localStorage.getItem("user_deepseek_key") ||
+        localStorage.getItem("sonikoma_key_deepseek") ||
+        localStorage.getItem("user_elevenlabs_key") ||
+        localStorage.getItem("sonikoma_key_elevenlabs") ||
+        localStorage.getItem("user_deepl_key") ||
+        localStorage.getItem("sonikoma_key_deepl") ||
+        localStorage.getItem("user_huggingface_key") ||
+        localStorage.getItem("sonikoma_key_huggingface")
     );
   }, []);
 
@@ -209,7 +214,9 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setFavoriteIds((prev) => {
-      const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+      const next = prev.includes(id)
+        ? prev.filter((item) => item !== id)
+        : [...prev, id];
       localStorage.setItem("sonikoma_routing_favorites", JSON.stringify(next));
       return next;
     });
@@ -229,9 +236,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
     const found = modelLookup.get(modelId);
     if (found) return found.name;
     // Pretty print raw ID fallback
-    return modelId
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    return modelId.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
   const categories = [
@@ -262,8 +267,10 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
           t.name.toLowerCase().includes(q) ||
           t.desc.toLowerCase().includes(q) ||
           t.category.toLowerCase().includes(q) ||
-          (routingMap[t.id]?.primary && routingMap[t.id].primary.toLowerCase().includes(q)) ||
-          (routingMap[t.id]?.fallback && routingMap[t.id].fallback?.toLowerCase().includes(q))
+          (routingMap[t.id]?.primary &&
+            routingMap[t.id].primary.toLowerCase().includes(q)) ||
+          (routingMap[t.id]?.fallback &&
+            routingMap[t.id].fallback?.toLowerCase().includes(q))
       );
     }
 
@@ -275,7 +282,9 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
   }, [selectedFilter, favoriteIds, searchQuery, sortBy, routingMap]);
 
   return (
-    <div className={`relative inline-flex items-center select-none ${className}`}>
+    <div
+      className={`relative inline-flex items-center select-none ${className}`}
+    >
       {/* ── Studio Multi-Engine Switcher Trigger Button ── */}
       <button
         type="button"
@@ -289,16 +298,26 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
         title="AI Smart Routing: Open Multi-Model Cascades Matrix"
       >
         <Workflow className="w-3.5 h-3.5 text-white shrink-0" />
-        <span className={compact ? "font-semibold text-white tracking-tight max-lg:hidden" : "font-semibold text-white tracking-tight"}>AI Routing</span>
-        <span className={`px-1.5 py-0.5 rounded-md bg-[#1E1E1E] text-neutral-300 border border-[#2F2F2F] font-mono text-[10px] font-bold ${compact ? "hidden lg:inline" : "hidden sm:inline"}`}>
+        <span
+          className={
+            compact
+              ? "font-semibold text-white tracking-tight max-lg:hidden"
+              : "font-semibold text-white tracking-tight"
+          }
+        >
+          AI Routing
+        </span>
+        <span
+          className={`px-1.5 py-0.5 rounded-md bg-[#1E1E1E] text-neutral-300 border border-[#2F2F2F] font-mono text-[10px] font-bold ${
+            compact ? "hidden lg:inline" : "hidden sm:inline"
+          }`}
+        >
           11 Tasks
         </span>
         <ChevronDown
           className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 shrink-0 ${
             compact ? "max-lg:hidden" : ""
-          } ${
-            isOpen ? "rotate-180 text-[#3B82F6]" : ""
-          }`}
+          } ${isOpen ? "rotate-180 text-[#3B82F6]" : ""}`}
         />
       </button>
 
@@ -314,7 +333,6 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
 
             {/* Right Side Drawer Container */}
             <div className="relative w-full sm:w-[500px] lg:w-[540px] h-full bg-[#141414] border-l border-[#2F2F2F] shadow-2xl flex flex-col z-10 text-left overflow-hidden animate-in slide-in-from-right duration-300">
-              
               {/* 1. Header Bar */}
               <div className="p-4 sm:p-5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-3">
@@ -380,7 +398,8 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                         API Keys Required in Website
                       </h4>
                       <p className="text-xs text-neutral-300 leading-relaxed max-w-xs">
-                        Enter your API key in AI Vault to activate models and configure pipelines.
+                        Enter your API key in AI Vault to activate models and
+                        configure pipelines.
                       </p>
                     </div>
                     <a
@@ -398,7 +417,8 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                         Automatic Model Cascades Active
                       </h4>
                       <p className="text-xs text-neutral-400 mt-1 leading-relaxed max-w-xs">
-                        Tasks route to Tier 1 engines with instant Tier 2 fallback protection.
+                        Tasks route to Tier 1 engines with instant Tier 2
+                        fallback protection.
                       </p>
                     </div>
                     <a
@@ -470,7 +490,9 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                     const primaryId = route?.primary;
                     const fallbackId = route?.fallback;
                     const primaryName = formatModelName(primaryId);
-                    const fallbackName = fallbackId ? formatModelName(fallbackId) : null;
+                    const fallbackName = fallbackId
+                      ? formatModelName(fallbackId)
+                      : null;
                     const isFav = favoriteIds.includes(task.id);
 
                     return (
@@ -505,14 +527,19 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                             <div className="text-xs text-neutral-400 font-mono space-y-0.5 pt-0.5">
                               <p className="flex items-center gap-1.5 text-neutral-200 truncate">
                                 <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse shrink-0" />
-                                <span className="text-neutral-200 font-bold">{primaryName}</span>
+                                <span className="text-neutral-200 font-bold">
+                                  {primaryName}
+                                </span>
                                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#121212] text-neutral-400 border border-[#2F2F2F]">
                                   Tier 1
                                 </span>
                               </p>
                               {fallbackName && (
                                 <p className="text-[11px] text-neutral-500 truncate">
-                                  ↳ Fallback: <span className="text-neutral-400">{fallbackName}</span>
+                                  ↳ Fallback:{" "}
+                                  <span className="text-neutral-400">
+                                    {fallbackName}
+                                  </span>
                                 </p>
                               )}
                             </div>
@@ -525,11 +552,21 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                             type="button"
                             onClick={(e) => toggleFavorite(task.id, e)}
                             className={`p-2 rounded-xl border border-transparent hover:border-[#2F2F2F] transition-colors cursor-pointer ${
-                              isFav ? "text-amber-400" : "text-neutral-500 hover:text-white"
+                              isFav
+                                ? "text-amber-400"
+                                : "text-neutral-500 hover:text-white"
                             }`}
-                            title={isFav ? "Remove from Favorites" : "Add to Favorites"}
+                            title={
+                              isFav
+                                ? "Remove from Favorites"
+                                : "Add to Favorites"
+                            }
                           >
-                            <Star className={`w-4 h-4 ${isFav ? "fill-amber-400" : ""}`} />
+                            <Star
+                              className={`w-4 h-4 ${
+                                isFav ? "fill-amber-400" : ""
+                              }`}
+                            />
                           </button>
 
                           <a
@@ -558,7 +595,11 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                     onClick={fetchRoutingConfig}
                     className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1 font-semibold cursor-pointer"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-[#3B82F6]" : ""}`} />
+                    <RefreshCw
+                      className={`w-3.5 h-3.5 ${
+                        isLoading ? "animate-spin text-[#3B82F6]" : ""
+                      }`}
+                    />
                     <span>Sync</span>
                   </button>
                   <span className="text-white/20">•</span>
@@ -571,7 +612,6 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                   </a>
                 </div>
               </div>
-
             </div>
           </div>,
           document.body

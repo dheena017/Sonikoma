@@ -35,30 +35,42 @@ const ROUTE_PREFETCH_MAP: Record<string, () => Promise<any>> = {
   "/landing": () => import("@/features/app_landing/pages/LandingPage"),
   "/login": () => import("@/features/app_auth/pages/LoginPage"),
   "/register": () => import("@/features/app_auth/pages/RegisterPage"),
-  "/forgot-password": () => import("@/features/app_auth/pages/ForgotPasswordPage"),
+  "/forgot-password": () =>
+    import("@/features/app_auth/pages/ForgotPasswordPage"),
   "/auth-success": () => import("@/features/app_auth/pages/AuthSuccessPage"),
   "/auth/callback": () => import("@/features/app_auth/pages/AuthSuccessPage"),
   "/auth/redirect": () => import("@/features/app_auth/pages/AuthSuccessPage"),
-  "/auth/google/callback": () => import("@/features/app_auth/pages/AuthSuccessPage"),
+  "/auth/google/callback": () =>
+    import("@/features/app_auth/pages/AuthSuccessPage"),
   "/auth/launch": () => import("@/features/app_auth/pages/AuthSuccessPage"),
   "/dashboard": () => import("@/features/app_dashboard/pages/DashboardPage"),
   "/projects": () => import("@/features/workspace_projects/pages/ProjectsPage"),
   "/scraper": () => import("@/features/workspace_scraper/pages/ScraperPage"),
   "/editor": () => import("@/features/editor_studio/pages/EditorPage"),
   "/shortcuts": () => import("@/features/app_shortcuts/pages/ShortcutsPage"),
-  "/creative-suite": () => import("@/features/creative_suite/components/CreativeSuiteLayout"),
-  "/creative-suite/ai-voice": () => import("@/features/creative_voice/pages/VoiceStudioPage"),
-  "/creative-suite/ai-optimizer": () => import("@/features/creative_optimizer/pages/AIOptimizerPage"),
-  "/creative-suite/panel-assistant": () => import("@/features/creative_panel_assistant/pages/PanelAssistantPage"),
-  "/creative-suite/youtube": () => import("@/features/creative_youtube/pages/YouTubePage"),
-  "/settings/account": () => import("@/features/user_settings/pages/SettingsAccountPage"),
-  "/settings/audio": () => import("@/features/editor_audio/pages/AudioSettingsPage"),
-  "/notifications": () => import("@/features/app_notification/pages/NotificationsPage"),
+  "/creative-suite": () =>
+    import("@/features/creative_suite/components/CreativeSuiteLayout"),
+  "/creative-suite/ai-voice": () =>
+    import("@/features/creative_voice/pages/VoiceStudioPage"),
+  "/creative-suite/ai-optimizer": () =>
+    import("@/features/creative_optimizer/pages/AIOptimizerPage"),
+  "/creative-suite/panel-assistant": () =>
+    import("@/features/creative_panel_assistant/pages/PanelAssistantPage"),
+  "/creative-suite/youtube": () =>
+    import("@/features/creative_youtube/pages/YouTubePage"),
+  "/settings/account": () =>
+    import("@/features/user_settings/pages/SettingsAccountPage"),
+  "/settings/audio": () =>
+    import("@/features/editor_audio/pages/AudioSettingsPage"),
+  "/notifications": () =>
+    import("@/features/app_notification/pages/NotificationsPage"),
   "/profile": () => import("@/features/user_profile/pages/ProfilePage"),
   "/admin": () => import("@/features/system_admin/pages/AdminPage"),
   "/ai-core": () => import("@/features/ai_core/components/AICoreLayout"),
-  "/video-editor": () => import("@/features/editor_video/pages/VideoEditorPage"),
-  "/image-editor": () => import("@/features/editor_image/pages/ImageEditorPage"),
+  "/video-editor": () =>
+    import("@/features/editor_video/pages/VideoEditorPage"),
+  "/image-editor": () =>
+    import("@/features/editor_image/pages/ImageEditorPage"),
 };
 
 const prefetchedRoutes = new Set<string>();
@@ -67,7 +79,9 @@ export function prefetchRoute(path: string) {
   const cleanPath = path.split("?")[0].split("#")[0].toLowerCase();
   const loader =
     ROUTE_PREFETCH_MAP[cleanPath] ||
-    Object.entries(ROUTE_PREFETCH_MAP).find(([k]) => cleanPath.startsWith(k))?.[1];
+    Object.entries(ROUTE_PREFETCH_MAP).find(([k]) =>
+      cleanPath.startsWith(k)
+    )?.[1];
   if (loader && !prefetchedRoutes.has(cleanPath)) {
     prefetchedRoutes.add(cleanPath);
     loader().catch(() => {});
@@ -84,7 +98,9 @@ export function useAppRouter(props?: UseAppRouterProps) {
   const propsRef = useRef<UseAppRouterProps | undefined>(props);
   propsRef.current = props;
 
-  const [lastEditorPath, setLastEditorPath] = useState<string>("/editor/adjust?idx=0");
+  const [lastEditorPath, setLastEditorPath] = useState<string>(
+    "/editor/adjust?idx=0"
+  );
   const [activeTheme, setActiveTheme] = useState<string>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("ai_comic_theme") || "obsidian";
@@ -109,9 +125,12 @@ export function useAppRouter(props?: UseAppRouterProps) {
     const modelParam = params.get("model");
     const sourceParam = params.get("source");
 
-    if (urlParam && propsRef.current?.setTargetUrl) propsRef.current.setTargetUrl(urlParam);
-    if (modelParam && propsRef.current?.setSelectedModel) propsRef.current.setSelectedModel(modelParam);
-    if (sourceParam && propsRef.current?.setSelectedSource) propsRef.current.setSelectedSource(sourceParam);
+    if (urlParam && propsRef.current?.setTargetUrl)
+      propsRef.current.setTargetUrl(urlParam);
+    if (modelParam && propsRef.current?.setSelectedModel)
+      propsRef.current.setSelectedModel(modelParam);
+    if (sourceParam && propsRef.current?.setSelectedSource)
+      propsRef.current.setSelectedSource(sourceParam);
   }, []);
 
   // Popstate, pushState, replaceState and navigation listener to ensure 100% sync between browser URL and visual state
@@ -159,40 +178,40 @@ export function useAppRouter(props?: UseAppRouterProps) {
     };
   }, []);
 
-  const navigateTo = useCallback(
-    (path: string) => {
-      if (typeof window === "undefined") return;
+  const navigateTo = useCallback((path: string) => {
+    if (typeof window === "undefined") return;
 
-      // Eagerly prefetch route bundle immediately
-      prefetchRoute(path);
+    // Eagerly prefetch route bundle immediately
+    prefetchRoute(path);
 
-      let targetPath = path;
-      if (propsRef.current?.isAuthenticated && (path === "/" || path === "" || path === "/index.html")) {
-        targetPath = "/dashboard";
+    let targetPath = path;
+    if (
+      propsRef.current?.isAuthenticated &&
+      (path === "/" || path === "" || path === "/index.html")
+    ) {
+      targetPath = "/dashboard";
+    }
+
+    const current = window.location.pathname + window.location.search;
+    if (current === targetPath) return;
+
+    window.history.pushState({}, "", targetPath);
+    const newPath = window.location.pathname;
+
+    setCurrentPath(newPath);
+    window.dispatchEvent(new Event("popstate"));
+    window.dispatchEvent(new Event("locationchange"));
+
+    if (newPath.includes("/editor")) {
+      setLastEditorPath(newPath + window.location.search);
+      const params = new URLSearchParams(window.location.search);
+      const idxVal = params.get("idx");
+      if (idxVal !== null && propsRef.current?.setEditingImageIdx) {
+        const idx = parseInt(idxVal, 10);
+        propsRef.current.setEditingImageIdx(isNaN(idx) ? 0 : idx);
       }
-
-      const current = window.location.pathname + window.location.search;
-      if (current === targetPath) return;
-
-      window.history.pushState({}, "", targetPath);
-      const newPath = window.location.pathname;
-
-      setCurrentPath(newPath);
-      window.dispatchEvent(new Event("popstate"));
-      window.dispatchEvent(new Event("locationchange"));
-
-      if (newPath.includes("/editor")) {
-        setLastEditorPath(newPath + window.location.search);
-        const params = new URLSearchParams(window.location.search);
-        const idxVal = params.get("idx");
-        if (idxVal !== null && propsRef.current?.setEditingImageIdx) {
-          const idx = parseInt(idxVal, 10);
-          propsRef.current.setEditingImageIdx(isNaN(idx) ? 0 : idx);
-        }
-      }
-    },
-    []
-  );
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {

@@ -80,7 +80,8 @@ export default function ProjectsTable({
               project.status?.toLowerCase() === "processing" ||
               project.status?.toLowerCase() === "exporting";
             const SourceIcon = getSourceIcon?.(project.url) || ExternalLink;
-            const openUpward = idx >= projects.length - 2 && projects.length > 2;
+            const openUpward =
+              idx >= projects.length - 2 && projects.length > 2;
 
             return (
               <tr

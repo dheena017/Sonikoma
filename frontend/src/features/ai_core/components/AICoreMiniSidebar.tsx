@@ -134,7 +134,9 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                active ? "text-white" : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                active
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>

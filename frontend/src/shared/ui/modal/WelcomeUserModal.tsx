@@ -1,6 +1,14 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { X, Sparkles, ArrowRight, Wand2, Mic, Film, CheckCircle2 } from "lucide-react";
+import {
+  X,
+  Sparkles,
+  ArrowRight,
+  Wand2,
+  Mic,
+  Film,
+  CheckCircle2,
+} from "lucide-react";
 import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface WelcomeUserModalProps {
@@ -95,9 +103,12 @@ export function WelcomeUserModal({
                 <Wand2 className="h-4 w-4" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-white">Comic Animation</h4>
+                <h4 className="text-xs font-bold text-white">
+                  Comic Animation
+                </h4>
                 <p className="text-[11px] text-neutral-400 leading-normal">
-                  Turn comic panels into smooth animated video scenes effortlessly.
+                  Turn comic panels into smooth animated video scenes
+                  effortlessly.
                 </p>
               </div>
             </div>
@@ -107,7 +118,9 @@ export function WelcomeUserModal({
                 <Mic className="h-4 w-4" />
               </div>
               <div className="space-y-0.5">
-                <h4 className="text-xs font-bold text-white">AI Voice Studio</h4>
+                <h4 className="text-xs font-bold text-white">
+                  AI Voice Studio
+                </h4>
                 <p className="text-[11px] text-neutral-400 leading-normal">
                   Add natural character voiceovers and background music.
                 </p>
@@ -121,7 +134,8 @@ export function WelcomeUserModal({
               <div className="space-y-0.5">
                 <h4 className="text-xs font-bold text-white">Easy HD Export</h4>
                 <p className="text-[11px] text-neutral-400 leading-normal">
-                  Download high-quality videos formatted for YouTube Shorts, TikTok & Reels.
+                  Download high-quality videos formatted for YouTube Shorts,
+                  TikTok & Reels.
                 </p>
               </div>
             </div>

@@ -1,8 +1,5 @@
 import React from "react";
-import {
-  BookOpen,
-  Sliders,
-} from "lucide-react";
+import { BookOpen, Sliders } from "lucide-react";
 
 interface GuidesReferenceProps {
   onNavigate: (path: string) => void;

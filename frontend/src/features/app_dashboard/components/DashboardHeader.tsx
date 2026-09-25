@@ -58,7 +58,10 @@ export default function DashboardHeader({
 
       {/* Right CTA Actions */}
       <div className="flex items-center gap-3 shrink-0">
-        <Tooltip text="Scrape webtoon URL or start a new storyboard series" placement="bottom">
+        <Tooltip
+          text="Scrape webtoon URL or start a new storyboard series"
+          placement="bottom"
+        >
           <button
             type="button"
             onClick={onNewSeries}

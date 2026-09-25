@@ -51,7 +51,8 @@ const SAMPLE_URLS = [
     tag: "Manhwa / Action",
     icon: "⚡",
     platform: "MangaDex",
-    glowColor: "hover:border-neutral-700 hover:shadow-blue-500/20 active:border-blue-400",
+    glowColor:
+      "hover:border-neutral-700 hover:shadow-blue-500/20 active:border-blue-400",
   },
   {
     name: "Lore Olympus",
@@ -59,7 +60,8 @@ const SAMPLE_URLS = [
     tag: "Romance / Drama",
     icon: "🌸",
     platform: "Webtoon",
-    glowColor: "hover:border-pink-500 hover:shadow-pink-500/20 active:border-pink-400",
+    glowColor:
+      "hover:border-pink-500 hover:shadow-pink-500/20 active:border-pink-400",
   },
   {
     name: "Omniscient Reader",
@@ -67,7 +69,8 @@ const SAMPLE_URLS = [
     tag: "Action / Fantasy",
     icon: "🗡️",
     platform: "Webtoon",
-    glowColor: "hover:border-emerald-500 hover:shadow-emerald-500/20 active:border-emerald-400",
+    glowColor:
+      "hover:border-emerald-500 hover:shadow-emerald-500/20 active:border-emerald-400",
   },
   {
     name: "Tower of God",
@@ -75,7 +78,8 @@ const SAMPLE_URLS = [
     tag: "Adventure",
     icon: "🏰",
     platform: "Webtoon",
-    glowColor: "hover:border-amber-500 hover:shadow-amber-500/20 active:border-amber-400",
+    glowColor:
+      "hover:border-amber-500 hover:shadow-amber-500/20 active:border-amber-400",
   },
 ];
 
@@ -157,16 +161,28 @@ export default function LandingPage({
     if (!url) return null;
     const lower = url.toLowerCase();
     if (lower.includes("mangadex.org") || lower.includes("mangadex")) {
-      return { name: "MangaDex", tagClass: "bg-orange-500/15 text-orange-400 border-orange-500/30" };
+      return {
+        name: "MangaDex",
+        tagClass: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+      };
     }
     if (lower.includes("webtoons.com") || lower.includes("webtoon")) {
-      return { name: "Webtoon", tagClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" };
+      return {
+        name: "Webtoon",
+        tagClass: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+      };
     }
     if (lower.includes("tapas.io") || lower.includes("tapas")) {
-      return { name: "Tapas", tagClass: "bg-amber-500/15 text-amber-400 border-amber-500/30" };
+      return {
+        name: "Tapas",
+        tagClass: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+      };
     }
     if (lower.startsWith("http://") || lower.startsWith("https://")) {
-      return { name: "Link Ready", tagClass: "bg-blue-500/15 text-blue-400 border-blue-500/30" };
+      return {
+        name: "Link Ready",
+        tagClass: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+      };
     }
     return null;
   };
@@ -202,10 +218,26 @@ export default function LandingPage({
 
           <div className="hidden md:flex items-center gap-1.5">
             {[
-              { label: "How It Works", target: "how-it-works", tip: "Learn how Sonikoma works in 3 steps" },
-              { label: "Live Demo", target: "demo-showcase", tip: "Interactive transformation preview" },
-              { label: "Pricing", target: "pricing", tip: "View pricing plans & credits" },
-              { label: "FAQ", target: "faq", tip: "Frequently asked questions" },
+              {
+                label: "How It Works",
+                target: "how-it-works",
+                tip: "Learn how Sonikoma works in 3 steps",
+              },
+              {
+                label: "Live Demo",
+                target: "demo-showcase",
+                tip: "Interactive transformation preview",
+              },
+              {
+                label: "Pricing",
+                target: "pricing",
+                tip: "View pricing plans & credits",
+              },
+              {
+                label: "FAQ",
+                target: "faq",
+                tip: "Frequently asked questions",
+              },
             ].map((link) => (
               <Tooltip key={link.target} text={link.tip} placement="bottom">
                 <button
@@ -241,7 +273,10 @@ export default function LandingPage({
               </button>
             </Tooltip>
 
-            <Tooltip text="Start creating comic videos for free" placement="bottom">
+            <Tooltip
+              text="Start creating comic videos for free"
+              placement="bottom"
+            >
               <button
                 disabled={isNavigating}
                 onClick={() => handleAction(onGetStarted)}
@@ -268,7 +303,11 @@ export default function LandingPage({
               }`}
               aria-label="Toggle Navigation Menu"
             >
-              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
@@ -373,7 +412,9 @@ export default function LandingPage({
                 isLight ? "text-slate-600" : "text-neutral-300"
               }`}
             >
-              Paste any chapter link or drop images. Sonikoma auto-cuts panels, removes speech bubbles, generates dynamic AI voice acting, and renders viral TikTok & Shorts in seconds.
+              Paste any chapter link or drop images. Sonikoma auto-cuts panels,
+              removes speech bubbles, generates dynamic AI voice acting, and
+              renders viral TikTok & Shorts in seconds.
             </p>
 
             {/* HERO COMPONENT: ADVANCED OMNIBAR CARD */}
@@ -527,7 +568,10 @@ export default function LandingPage({
                   </div>
 
                   {/* Primary CTA Action Button */}
-                  <Tooltip text="Start AI panel slicing and video generation" placement="top">
+                  <Tooltip
+                    text="Start AI panel slicing and video generation"
+                    placement="top"
+                  >
                     <button
                       disabled={isNavigating}
                       onClick={() => handleAction(onGetStarted)}
@@ -581,7 +625,9 @@ export default function LandingPage({
                               : "bg-[#181a22] hover:bg-[#20232d] border-white/10 hover:border-neutral-700 text-neutral-300 hover:text-white"
                           } ${sample.glowColor}`}
                         >
-                          <span className="text-sm leading-none">{sample.icon}</span>
+                          <span className="text-sm leading-none">
+                            {sample.icon}
+                          </span>
                           <span>{sample.name}</span>
                           {isSelected && (
                             <Check className="w-3 h-3 text-blue-300 ml-0.5" />
@@ -662,7 +708,8 @@ export default function LandingPage({
                   isLight ? "text-slate-700" : "text-neutral-400"
                 }`}
               >
-                No video editing skills needed. Everything is automated from chapter link to finished video.
+                No video editing skills needed. Everything is automated from
+                chapter link to finished video.
               </p>
             </div>
 
@@ -690,7 +737,8 @@ export default function LandingPage({
                     isLight ? "text-slate-700" : "text-neutral-400"
                   }`}
                 >
-                  Paste any chapter link from MangaDex or Webtoon, or upload your own comic image files directly.
+                  Paste any chapter link from MangaDex or Webtoon, or upload
+                  your own comic image files directly.
                 </p>
               </div>
 
@@ -717,7 +765,8 @@ export default function LandingPage({
                     isLight ? "text-slate-700" : "text-neutral-400"
                   }`}
                 >
-                  AI automatically isolates each comic panel, erases dialogue text bubbles, and translates foreign text into English.
+                  AI automatically isolates each comic panel, erases dialogue
+                  text bubbles, and translates foreign text into English.
                 </p>
               </div>
 
@@ -744,7 +793,9 @@ export default function LandingPage({
                     isLight ? "text-slate-700" : "text-neutral-400"
                   }`}
                 >
-                  Select natural character voices and sound effects, preview camera pan animations, and download a ready-to-publish vertical MP4 video.
+                  Select natural character voices and sound effects, preview
+                  camera pan animations, and download a ready-to-publish
+                  vertical MP4 video.
                 </p>
               </div>
             </div>
@@ -915,7 +966,10 @@ export default function LandingPage({
                 >
                   Monthly
                 </span>
-                <Tooltip text="Switch between monthly and yearly billing (Save 20%)" placement="top">
+                <Tooltip
+                  text="Switch between monthly and yearly billing (Save 20%)"
+                  placement="top"
+                >
                   <button
                     onClick={() =>
                       setBillingCycle(
@@ -1117,10 +1171,14 @@ export default function LandingPage({
                 isLight ? "text-slate-600" : "text-neutral-400"
               }`}
             >
-              Turn static webtoon panels into voiced, animated vertical videos in just a few clicks.
+              Turn static webtoon panels into voiced, animated vertical videos
+              in just a few clicks.
             </p>
 
-            <Tooltip text="Create your free account and export videos" placement="top">
+            <Tooltip
+              text="Create your free account and export videos"
+              placement="top"
+            >
               <button
                 disabled={isNavigating}
                 onClick={() => handleAction(onGetStarted)}

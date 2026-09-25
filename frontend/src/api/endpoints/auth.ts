@@ -39,21 +39,29 @@ export const register = async (
 };
 
 let inFlightCurrentUserPromise: Promise<ApiResponse<any>> | null = null;
-let lastCurrentUserCache: { data: ApiResponse<any>; timestamp: number } | null = null;
+let lastCurrentUserCache: { data: ApiResponse<any>; timestamp: number } | null =
+  null;
 
 export const getCurrentUser = async (
   fetchWithInterceptor: FetchClient,
   force = false
 ): Promise<ApiResponse<any>> => {
   const now = Date.now();
-  if (!force && lastCurrentUserCache && now - lastCurrentUserCache.timestamp < 3000) {
+  if (
+    !force &&
+    lastCurrentUserCache &&
+    now - lastCurrentUserCache.timestamp < 3000
+  ) {
     return lastCurrentUserCache.data;
   }
   if (!force && inFlightCurrentUserPromise) {
     return inFlightCurrentUserPromise;
   }
 
-  inFlightCurrentUserPromise = apiRequest(fetchWithInterceptor, "/api/v1/auth/me")
+  inFlightCurrentUserPromise = apiRequest(
+    fetchWithInterceptor,
+    "/api/v1/auth/me"
+  )
     .then((res) => {
       lastCurrentUserCache = { data: res, timestamp: Date.now() };
       return res;
@@ -123,9 +131,13 @@ export const terminateSession = async (
   fetchWithInterceptor: FetchClient,
   sessionId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/auth/sessions/${sessionId}`, {
-    method: "DELETE",
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/auth/sessions/${sessionId}`,
+    {
+      method: "DELETE",
+    }
+  );
 };
 
 export const claimCredits = async (

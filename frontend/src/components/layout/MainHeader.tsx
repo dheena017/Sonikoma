@@ -451,7 +451,11 @@ const HeaderInner = ({
       <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 h-full">
         {/* Wrapper added here to perfectly match the width of the mini sidebar */}
         <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-0.5 sm:mr-4">
-          <Tooltip text="Toggle Navigation Menu" placement="bottom" shortcut="Ctrl+B">
+          <Tooltip
+            text="Toggle Navigation Menu"
+            placement="bottom"
+            shortcut="Ctrl+B"
+          >
             <button
               onClick={onToggleSidebar}
               className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
@@ -462,10 +466,7 @@ const HeaderInner = ({
           </Tooltip>
         </div>
 
-        <SonikomaLogo
-          size="sm"
-          onClick={() => navigateTo("/dashboard")}
-        />
+        <SonikomaLogo size="sm" onClick={() => navigateTo("/dashboard")} />
       </div>
 
       {/* Center Side: Global Search Bar */}
@@ -517,11 +518,15 @@ const HeaderInner = ({
                 }}
                 aria-label="Your credit balance & daily rewards"
                 className={`h-8.5 flex items-center gap-1.5 px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
-                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+                  showCreditsPopover
+                    ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]"
+                    : ""
                 }`}
               >
                 <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
+                <span className="font-bold text-amber-300 font-mono text-[11px]">
+                  {credits.toLocaleString()}
+                </span>
               </button>
             </Tooltip>
 
@@ -551,7 +556,9 @@ const HeaderInner = ({
                 setShowStats(false);
               }}
               className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
-                showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
+                showNotifications
+                  ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]"
+                  : ""
               }`}
               aria-label="Notifications"
             >
@@ -594,11 +601,15 @@ const HeaderInner = ({
           <Tooltip
             text={
               projectState === "missing"
-                ? `Project Unavailable: ${missingProjectInfo?.missingId || activeProjectId}`
+                ? `Project Unavailable: ${
+                    missingProjectInfo?.missingId || activeProjectId
+                  }`
                 : projectState === "loading"
                 ? "Loading project workspace..."
                 : projectState === "active"
-                ? `Active Project: ${activeProjectData?.project?.title || "Active"}`
+                ? `Active Project: ${
+                    activeProjectData?.project?.title || "Active"
+                  }`
                 : "Select Active Project"
             }
             placement="bottom"

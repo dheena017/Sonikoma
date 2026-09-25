@@ -51,7 +51,9 @@ export class DomMangaScanner {
       if (match && match[1]) {
         const chapterId = match[1];
         try {
-          const res = await fetch(`https://api.mangadex.org/at-home/server/${chapterId}`);
+          const res = await fetch(
+            `https://api.mangadex.org/at-home/server/${chapterId}`
+          );
           if (res.ok) {
             const data = await res.json();
             const baseUrl = data.baseUrl;
@@ -76,7 +78,10 @@ export class DomMangaScanner {
             const data = await res.json();
             const images = data.chapter?.images || [];
             if (images.length > 0) {
-              return images.map((img: any) => img.url || `https://meo.comick.pictures/${img.bkey}`);
+              return images.map(
+                (img: any) =>
+                  img.url || `https://meo.comick.pictures/${img.bkey}`
+              );
             }
           }
         } catch (_) {}
@@ -85,11 +90,21 @@ export class DomMangaScanner {
 
     // 3. Scan Embedded Script Tags for Image Arrays (WordPress Manga, Madara, Ts Reader, etc.)
     try {
-      const scripts = Array.from(document.querySelectorAll("script:not([src])"));
+      const scripts = Array.from(
+        document.querySelectorAll("script:not([src])")
+      );
       for (const script of scripts) {
         const txt = script.textContent || "";
-        if (txt.includes("chapter_data") || txt.includes("ts_reader") || txt.includes("pData") || txt.includes("images") || txt.includes("img_data")) {
-          const matches = txt.match(/https?:\\?\/\\?\/[^"'\s\\]+\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'\s\\]*)?/gi);
+        if (
+          txt.includes("chapter_data") ||
+          txt.includes("ts_reader") ||
+          txt.includes("pData") ||
+          txt.includes("images") ||
+          txt.includes("img_data")
+        ) {
+          const matches = txt.match(
+            /https?:\\?\/\\?\/[^"'\s\\]+\.(?:jpg|jpeg|png|webp|avif)(?:\\?[^"'\s\\]*)?/gi
+          );
           if (matches && matches.length >= 3) {
             const cleaned = matches.map((m) => m.replace(/\\\//g, "/"));
             return Array.from(new Set(cleaned));
@@ -148,8 +163,10 @@ export class DomMangaScanner {
         ) {
           const firstUrl = trimmed.split(",")[0].trim().split(" ")[0].trim();
           if (firstUrl.startsWith("//")) return `https:${firstUrl}`;
-          if (firstUrl.startsWith("http://") || firstUrl.startsWith("https://")) return firstUrl;
-          if (firstUrl.startsWith("/")) return `${window.location.origin}${firstUrl}`;
+          if (firstUrl.startsWith("http://") || firstUrl.startsWith("https://"))
+            return firstUrl;
+          if (firstUrl.startsWith("/"))
+            return `${window.location.origin}${firstUrl}`;
           if (firstUrl.startsWith("./") || firstUrl.startsWith("../")) {
             try {
               return new URL(firstUrl, window.location.href).href;
@@ -164,21 +181,39 @@ export class DomMangaScanner {
 
     // Check HTMLImageElement currentSrc or src
     const imgEl = el as HTMLImageElement;
-    if (imgEl.currentSrc && typeof imgEl.currentSrc === "string" && imgEl.currentSrc.startsWith("http")) {
+    if (
+      imgEl.currentSrc &&
+      typeof imgEl.currentSrc === "string" &&
+      imgEl.currentSrc.startsWith("http")
+    ) {
       const s = imgEl.currentSrc.toLowerCase();
-      if (!s.includes("blank.gif") && !s.includes("spacer.gif") && !s.includes("placeholder")) {
+      if (
+        !s.includes("blank.gif") &&
+        !s.includes("spacer.gif") &&
+        !s.includes("placeholder")
+      ) {
         return imgEl.currentSrc;
       }
     }
-    if (imgEl.src && typeof imgEl.src === "string" && imgEl.src.startsWith("http")) {
+    if (
+      imgEl.src &&
+      typeof imgEl.src === "string" &&
+      imgEl.src.startsWith("http")
+    ) {
       const s = imgEl.src.toLowerCase();
-      if (!s.includes("blank.gif") && !s.includes("spacer.gif") && !s.includes("placeholder")) {
+      if (
+        !s.includes("blank.gif") &&
+        !s.includes("spacer.gif") &&
+        !s.includes("placeholder")
+      ) {
         return imgEl.src;
       }
     }
 
     // Check background-image in inline style or computed style
-    const bg = (el as HTMLElement).style?.backgroundImage || window.getComputedStyle(el).backgroundImage;
+    const bg =
+      (el as HTMLElement).style?.backgroundImage ||
+      window.getComputedStyle(el).backgroundImage;
     if (bg && bg.includes("url(")) {
       const match = bg.match(/url\(['"]?([^'"]+)['"]?\)/);
       if (match && match[1]) {
@@ -280,7 +315,9 @@ export class DomMangaScanner {
 
     if (foundElements.length === 0) {
       foundElements = Array.from(
-        document.querySelectorAll("img, picture source, [style*='background-image'], canvas")
+        document.querySelectorAll(
+          "img, picture source, [style*='background-image'], canvas"
+        )
       );
     }
 
@@ -295,20 +332,25 @@ export class DomMangaScanner {
 
       const hasLazyAttr = Boolean(
         el.getAttribute("data-url") ||
-        el.getAttribute("data-src") ||
-        el.getAttribute("data-original") ||
-        el.getAttribute("data-lazy-src") ||
-        el.getAttribute("data-real-src") ||
-        el.getAttribute("data-echo") ||
-        el.getAttribute("data-cdn") ||
-        el.getAttribute("data-full-url") ||
-        el.getAttribute("data-lazy") ||
-        el.getAttribute("data-img-src")
+          el.getAttribute("data-src") ||
+          el.getAttribute("data-original") ||
+          el.getAttribute("data-lazy-src") ||
+          el.getAttribute("data-real-src") ||
+          el.getAttribute("data-echo") ||
+          el.getAttribute("data-cdn") ||
+          el.getAttribute("data-full-url") ||
+          el.getAttribute("data-lazy") ||
+          el.getAttribute("data-img-src")
       );
 
       // Filter out tiny icons
       if (!hasLazyAttr) {
-        if (naturalWidth > 0 && naturalWidth < 70 && naturalHeight > 0 && naturalHeight < 70) {
+        if (
+          naturalWidth > 0 &&
+          naturalWidth < 70 &&
+          naturalHeight > 0 &&
+          naturalHeight < 70
+        ) {
           continue;
         }
       }
@@ -331,7 +373,13 @@ export class DomMangaScanner {
         lowerSrc.includes("analytics");
 
       if (isSystemAsset) {
-        if (!hasLazyAttr || (naturalWidth > 0 && naturalWidth < 100 && naturalHeight > 0 && naturalHeight < 100)) {
+        if (
+          !hasLazyAttr ||
+          (naturalWidth > 0 &&
+            naturalWidth < 100 &&
+            naturalHeight > 0 &&
+            naturalHeight < 100)
+        ) {
           continue;
         }
       }
@@ -348,7 +396,8 @@ export class DomMangaScanner {
 
     // 2. Include any captured network/API images that haven't been added yet
     if (this.capturedNetworkImages.size > 0) {
-      let extraTop = images.length > 0 ? images[images.length - 1].top + 1000 : 0;
+      let extraTop =
+        images.length > 0 ? images[images.length - 1].top + 1000 : 0;
       for (const netUrl of this.capturedNetworkImages) {
         if (!seen.has(netUrl)) {
           seen.add(netUrl);
@@ -393,7 +442,9 @@ export class DomMangaScanner {
     let seriesTitle = "";
     let chapterTitle = "";
 
-    const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute("content");
+    const ogTitle = document
+      .querySelector('meta[property="og:title"]')
+      ?.getAttribute("content");
     const rawTitle = ogTitle || document.title || "";
     if (rawTitle) {
       const parts = rawTitle.split(/[-|–—»•:]/);

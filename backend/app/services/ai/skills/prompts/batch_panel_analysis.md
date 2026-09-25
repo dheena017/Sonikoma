@@ -9,6 +9,7 @@ You are given a chronological sequence of {panel_count} consecutive panels from 
 
 Analyze ALL {panel_count} panels in sequence with extreme precision and generate cinematic production metadata for EACH panel in the `panels` array.
 Because you can see all {panel_count} panels in chronological sequence together, use this multi-panel sequence context to:
+
 1. Maintain perfect character tracking across panels (e.g. if Character A speaks in Panel 1 and Character B replies in Panel 2, accurately identify both speakers).
 2. Distinguish dialogue bubbles accurately for each panel.
 3. Provide rich, cohesive YouTube manga recap narration that flows naturally from one panel to the next.
@@ -16,9 +17,11 @@ Because you can see all {panel_count} panels in chronological sequence together,
 For EACH panel item in `panels`:
 
 ### 1. `panel_index`
+
 - Set to the 1-based index (1, 2, 3...) corresponding to each panel image in the given sequence.
 
 ### 2. `speech_text` & `dialogue_turns` (Character Dialogue / Speech Bubbles)
+
 - STRICT DISTINCTION: Distinguish character speech bubbles from chapter titles, credits, author names, and time/setting captions:
   - DO NOT put cover logos, episode numbers, artist credits, or author names into `speech_text`! Those belong in `visual_description` or `narrative`.
   - DO NOT put time/setting captions (e.g. "The Past", "A DAY IN MAY, OVER 20 YEARS AGO") into `speech_text`! Those are narrative scene setting boxes and belong in `narrative`.
@@ -35,16 +38,19 @@ For EACH panel item in `panels`:
 - If the panel has ABSOLUTELY NO character dialogue or speech bubbles (e.g. cover art, credits, establishing scenery, silent actions), return an empty string `""` for `speech_text` and an empty list `[]` for `dialogue_turns`.
 
 ### 3. `speaker_name`, `speaker_gender`, & `emotion` (Voice Casting & Delivery)
+
 - `speaker_name`: Primary speaking character name, title, or role from the comic. If silent, return `""`.
 - `speaker_gender`: Strictly one of: `"male"`, `"female"`, `"child"`, or `"neutral"`.
 - `emotion`: Strictly one of: `"neutral"`, `"tender"`, `"whisper"`, `"shouting"`, or `"panicked"`.
 
 ### 4. `scene_context`, `is_scene_transition`, & `is_internal_thought`
+
 - `scene_context`: Concise 1-sentence summary of ongoing scene location, mood, and character activity.
 - `is_scene_transition`: Return `true` if this panel shows a distinct location change or time-skip. Otherwise `false`.
 - `is_internal_thought`: Return `true` if the text bubble is an internal thought cloud.
 
 ### 5. `narrative` (Cinematic Story Recap & Voiceover Script)
+
 - Produce a YouTube comic/manhwa recap voiceover narrative for this panel ({narrative_length_hint}).
 - CRITICAL ANTI-DUPLICATION RULE:
   - `narrative` and `speech_text` MUST BE ENTIRELY DIFFERENT AND MUST NEVER DUPLICATE EACH OTHER!
@@ -54,6 +60,7 @@ For EACH panel item in `panels`:
   - Maintain narrative storytelling momentum from one panel to the next across the sequence.
 
 ### 6. `motion_type`, `visual_description`, `sfx`, & `duration`
+
 - `motion_type`: One of: `"pan_left"`, `"pan_right"`, `"pan_up"`, `"pan_down"`, `"zoom_in"`, `"zoom_out"`, `"static"`.
 - `visual_description`: Scene composition description for camera animation (10-25 words).
 - `sfx`: Bracketed sound effect e.g. `"[Footsteps]"`, `"[Rain]"`, `"[Gasp]"`, `"[Thunder]"`.

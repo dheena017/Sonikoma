@@ -127,7 +127,8 @@ export default function StoryboardHeader({
             {selectedCount}
           </div>
           <span className="text-xs font-mono font-bold text-blue-300 whitespace-nowrap">
-            {selectedCount} of {targetCount} {isFiltered ? "Filtered" : ""} Selected
+            {selectedCount} of {targetCount} {isFiltered ? "Filtered" : ""}{" "}
+            Selected
           </span>
           {clearSelection && (
             <button
@@ -299,8 +300,16 @@ export default function StoryboardHeader({
           </span>
           {viewLayout === "scroll" && panelsLength > 1 && (
             <span className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-neutral-900/90 border border-neutral-700 text-[10px] text-neutral-300 font-mono shadow-sm">
-              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-neutral-800 text-neutral-300 text-[9px] font-bold">⇧</span>
-              <span>Hold <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">Shift</kbd> + Scroll to move horizontally</span>
+              <span className="flex items-center justify-center w-3.5 h-3.5 rounded bg-neutral-800 text-neutral-300 text-[9px] font-bold">
+                ⇧
+              </span>
+              <span>
+                Hold{" "}
+                <kbd className="px-1 py-0.5 rounded bg-neutral-800 border border-neutral-700 text-white font-bold text-[9px] leading-none">
+                  Shift
+                </kbd>{" "}
+                + Scroll to move horizontally
+              </span>
             </span>
           )}
         </div>

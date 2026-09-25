@@ -47,9 +47,12 @@ export function useCompileActions({
   enableNarrativeAudio,
 }: UseCompileActionsProps) {
   const activeFetch = fetchWithInterceptor || fetch;
-  const [analyzingPanelId, setAnalyzingPanelId] = useState<number | string | null>(null);
+  const [analyzingPanelId, setAnalyzingPanelId] = useState<
+    number | string | null
+  >(null);
   const [isAnalyzingAll, setIsAnalyzingAll] = useState<boolean>(false);
-  const [isAnalyzingSelected, setIsAnalyzingSelected] = useState<boolean>(false);
+  const [isAnalyzingSelected, setIsAnalyzingSelected] =
+    useState<boolean>(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState<boolean>(false);
   const [isZipping, setIsZipping] = useState<boolean>(false);
   const abortSignalRef = React.useRef({ aborted: false });
@@ -154,10 +157,15 @@ export function useCompileActions({
     }
   };
 
-  const handleAnalyzePanel = async (panelId: number | string, imageUrl: string) => {
+  const handleAnalyzePanel = async (
+    panelId: number | string,
+    imageUrl: string
+  ) => {
     setAnalyzingPanelId(panelId);
     setPanels((prev) =>
-      prev.map((p) => (String(p.id) === String(panelId) ? { ...p, isAnalyzing: true } : p))
+      prev.map((p) =>
+        String(p.id) === String(panelId) ? { ...p, isAnalyzing: true } : p
+      )
     );
     const activeModel = selectedModel;
     const originalPanel = panels.find((p) => String(p.id) === String(panelId));
@@ -171,18 +179,19 @@ export function useCompileActions({
     console.log(`  - Model used: ${activeModel}`);
     console.log(`  - Sent Image: ${imageUrl.substring(0, 60)}...`);
     console.log(`  - Sent Original Dialogue: "${originalText}"`);
-    console.log(`  - Sent Original Motion: "${originalPanel?.motion_type || ""}"`);
+    console.log(
+      `  - Sent Original Motion: "${originalPanel?.motion_type || ""}"`
+    );
 
     if (addNotification) {
-      addNotification(
-        `Starting AI Scanner for Panel #${panelId}...`,
-        "info"
-      );
+      addNotification(`Starting AI Scanner for Panel #${panelId}...`, "info");
     }
 
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[Smart Auto-Analysis] Initiated analysis on Panel #${panelId} (Model: ${activeModel || "gemini-2.5-flash"})`,
+        `[Smart Auto-Analysis] Initiated analysis on Panel #${panelId} (Model: ${
+          activeModel || "gemini-2.5-flash"
+        })`,
         `[Smart Auto-Analysis]   - Sent Dialogue: "${originalText || "None"}"`,
         ...prev,
       ]);
@@ -192,14 +201,23 @@ export function useCompileActions({
       abortControllerRef.current = new AbortController();
       console.log("[API] Analyzing image for panel", panelId);
 
-      const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
-      const panelIndex = panels.findIndex((p) => String(p.id) === String(panelId));
+      const currentMemory =
+        useProjectStore.getState().activeProjectData?.story_memory;
+      const panelIndex = panels.findIndex(
+        (p) => String(p.id) === String(panelId)
+      );
       let precedingContext = "";
       if (panelIndex > 0) {
         const prevPanel = panels[panelIndex - 1];
-        const prevSpeech = prevPanel.speech_text ? `Previous speech: "${prevPanel.speech_text}"` : "";
-        const prevNarrative = prevPanel.narrative ? `Previous scene recap: "${prevPanel.narrative}"` : "";
-        precedingContext = [prevSpeech, prevNarrative].filter(Boolean).join(" | ");
+        const prevSpeech = prevPanel.speech_text
+          ? `Previous speech: "${prevPanel.speech_text}"`
+          : "";
+        const prevNarrative = prevPanel.narrative
+          ? `Previous scene recap: "${prevPanel.narrative}"`
+          : "";
+        precedingContext = [prevSpeech, prevNarrative]
+          .filter(Boolean)
+          .join(" | ");
       }
 
       const data = await api.analyzeSingleImage(
@@ -225,16 +243,39 @@ export function useCompileActions({
       }
 
       const analysis = data.analysis || data;
-      if (data.success && (data.analysis || analysis.speech_text !== undefined || analysis.visual_description !== undefined)) {
+      if (
+        data.success &&
+        (data.analysis ||
+          analysis.speech_text !== undefined ||
+          analysis.visual_description !== undefined)
+      ) {
         const aiDuration = Number(analysis.duration);
         const aiMotion = String(analysis.motion_type || "").trim();
-        const usedModel = (data as any).model || activeModel || "gemini-2.5-flash";
-        const latMs = (data as any).latency_ms ? ` (${(data as any).latency_ms}ms)` : "";
-        const speech = analysis.speech_text !== undefined ? analysis.speech_text : originalPanel?.speech_text;
-        const sfx = analysis.sfx !== undefined ? analysis.sfx : originalPanel?.sfx;
-        const visual = analysis.visual_description !== undefined ? analysis.visual_description : originalPanel?.visual_description;
-        const narrative = data.narrative || data.narrativeText || analysis.narrative || analysis.narrativeText || originalPanel?.narrative;
-        const narrativeAudioUrl = data.narrative_audio_url || analysis.narrative_audio_url || originalPanel?.narrative_audio_url;
+        const usedModel =
+          (data as any).model || activeModel || "gemini-2.5-flash";
+        const latMs = (data as any).latency_ms
+          ? ` (${(data as any).latency_ms}ms)`
+          : "";
+        const speech =
+          analysis.speech_text !== undefined
+            ? analysis.speech_text
+            : originalPanel?.speech_text;
+        const sfx =
+          analysis.sfx !== undefined ? analysis.sfx : originalPanel?.sfx;
+        const visual =
+          analysis.visual_description !== undefined
+            ? analysis.visual_description
+            : originalPanel?.visual_description;
+        const narrative =
+          data.narrative ||
+          data.narrativeText ||
+          analysis.narrative ||
+          analysis.narrativeText ||
+          originalPanel?.narrative;
+        const narrativeAudioUrl =
+          data.narrative_audio_url ||
+          analysis.narrative_audio_url ||
+          originalPanel?.narrative_audio_url;
 
         setPanels((prev) =>
           prev.map((p) =>
@@ -313,16 +354,22 @@ export function useCompileActions({
     } finally {
       setAnalyzingPanelId(null);
       setPanels((prev) =>
-        prev.map((p) => (String(p.id) === String(panelId) ? { ...p, isAnalyzing: false } : p))
+        prev.map((p) =>
+          String(p.id) === String(panelId) ? { ...p, isAnalyzing: false } : p
+        )
       );
     }
   };
 
-  const handleAnalyzeSelectedPanels = async (selectedIds: (number | string)[]) => {
+  const handleAnalyzeSelectedPanels = async (
+    selectedIds: (number | string)[]
+  ) => {
     if (selectedIds.length === 0) return;
     setIsAnalyzingSelected(true);
     const activeModel = selectedModel || undefined;
-    const modelDisplay = activeModel ? `Model: ${activeModel}` : "AI Core Routing (Dynamic)";
+    const modelDisplay = activeModel
+      ? `Model: ${activeModel}`
+      : "AI Core Routing (Dynamic)";
     const selectedIdsSet = new Set(selectedIds.map(String));
 
     if (addNotification) {
@@ -347,7 +394,9 @@ export function useCompileActions({
     );
 
     try {
-      const targetPanels = panels.filter((p) => selectedIdsSet.has(String(p.id)));
+      const targetPanels = panels.filter((p) =>
+        selectedIdsSet.has(String(p.id))
+      );
       abortControllerRef.current = new AbortController();
 
       let totalSuccess = 0;
@@ -360,7 +409,8 @@ export function useCompileActions({
         ]);
       }
 
-      const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
+      const currentMemory =
+        useProjectStore.getState().activeProjectData?.story_memory;
 
       const data = await api.analyzeSelectedPanels(
         activeFetch,
@@ -384,7 +434,10 @@ export function useCompileActions({
       }
 
       if (data.success && Array.isArray(data.results)) {
-        lastModelUsed = (data as any).model || (data.results?.[0] as any)?.model || lastModelUsed;
+        lastModelUsed =
+          (data as any).model ||
+          (data.results?.[0] as any)?.model ||
+          lastModelUsed;
 
         // Map results back to selected panels by order of targetPanels
         setPanels((prev) => {
@@ -395,13 +448,24 @@ export function useCompileActions({
             const result = data.results[targetIdx++];
             const analysis = result?.analysis || result;
 
-            if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
+            if (
+              result &&
+              (result.analysis ||
+                analysis?.speech_text !== undefined ||
+                analysis?.visual_description !== undefined)
+            ) {
               totalSuccess++;
               const aiDuration = Number(analysis.duration);
               const aiMotion = String(analysis.motion_type || "").trim();
-              const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
+              const speech =
+                analysis.speech_text !== undefined
+                  ? analysis.speech_text
+                  : p.speech_text;
               const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
-              const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
+              const visual =
+                analysis.visual_description !== undefined
+                  ? analysis.visual_description
+                  : p.visual_description;
               const narrative =
                 result.narrative ||
                 result.narrativeText ||
@@ -487,7 +551,9 @@ export function useCompileActions({
     setIsAnalyzingAll(true);
     abortSignalRef.current.aborted = false;
     const activeModel = selectedModel || undefined;
-    const modelDisplay = activeModel ? `Model: ${activeModel}` : "AI Core Routing (Dynamic)";
+    const modelDisplay = activeModel
+      ? `Model: ${activeModel}`
+      : "AI Core Routing (Dynamic)";
 
     if (addNotification) {
       addNotification(
@@ -519,7 +585,8 @@ export function useCompileActions({
         ]);
       }
 
-      const currentMemory = useProjectStore.getState().activeProjectData?.story_memory;
+      const currentMemory =
+        useProjectStore.getState().activeProjectData?.story_memory;
 
       const data = await api.analyzeAllPanels(
         activeFetch,
@@ -543,7 +610,10 @@ export function useCompileActions({
       }
 
       if (data.success && Array.isArray(data.results)) {
-        lastModelUsed = (data as any).model || (data.results?.[0] as any)?.model || lastModelUsed;
+        lastModelUsed =
+          (data as any).model ||
+          (data.results?.[0] as any)?.model ||
+          lastModelUsed;
 
         // Map results back to panels by index
         setPanels((prev) =>
@@ -551,13 +621,24 @@ export function useCompileActions({
             const result = data.results[idx];
             const analysis = result?.analysis || result;
 
-            if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
+            if (
+              result &&
+              (result.analysis ||
+                analysis?.speech_text !== undefined ||
+                analysis?.visual_description !== undefined)
+            ) {
               totalSuccess++;
               const aiDuration = Number(analysis.duration);
               const aiMotion = String(analysis.motion_type || "").trim();
-              const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;
+              const speech =
+                analysis.speech_text !== undefined
+                  ? analysis.speech_text
+                  : p.speech_text;
               const sfx = analysis.sfx !== undefined ? analysis.sfx : p.sfx;
-              const visual = analysis.visual_description !== undefined ? analysis.visual_description : p.visual_description;
+              const visual =
+                analysis.visual_description !== undefined
+                  ? analysis.visual_description
+                  : p.visual_description;
               const narrative =
                 result.narrative ||
                 result.narrativeText ||
@@ -624,7 +705,9 @@ export function useCompileActions({
       setIsAnalyzingAll(false);
       setPanels((prev) => {
         if (!prev.some((p) => p.isAnalyzing)) return prev;
-        return prev.map((p) => (p.isAnalyzing ? { ...p, isAnalyzing: false } : p));
+        return prev.map((p) =>
+          p.isAnalyzing ? { ...p, isAnalyzing: false } : p
+        );
       });
     }
   };
@@ -635,7 +718,8 @@ export function useCompileActions({
     const targetPanels = panels.filter(
       (p) =>
         (p.speech_text && p.speech_text.trim()) ||
-        ((p as any).dialogueSubtitleText && (p as any).dialogueSubtitleText.trim()) ||
+        ((p as any).dialogueSubtitleText &&
+          (p as any).dialogueSubtitleText.trim()) ||
         (p.narrative && p.narrative.trim())
     );
 
@@ -682,10 +766,15 @@ export function useCompileActions({
         })),
       };
 
-      const res = await (api as any).batchGenerateAudio(activeFetch, batchPayload);
+      const res = await (api as any).batchGenerateAudio(
+        activeFetch,
+        batchPayload
+      );
 
       if (res && res.success && Array.isArray(res.results)) {
-        const resultMap = new Map<string, any>(res.results.map((r: any) => [String(r.id), r]));
+        const resultMap = new Map<string, any>(
+          res.results.map((r: any) => [String(r.id), r])
+        );
         let updatedCount = 0;
 
         setPanels((prev) =>
@@ -695,7 +784,8 @@ export function useCompileActions({
 
             updatedCount++;
             const newAudioUrl = match.audio_url || p.audio_url;
-            const newNarrAudioUrl = match.narrative_audio_url || p.narrative_audio_url;
+            const newNarrAudioUrl =
+              match.narrative_audio_url || p.narrative_audio_url;
             const actualDur = match.duration ? Number(match.duration) : 0;
 
             return {
@@ -742,14 +832,23 @@ export function useCompileActions({
     const target = panels.find((p) => String(p.id) === String(panelId));
     if (!target) return;
 
-    const textToSay = (target.speech_text || (target as any).dialogueSubtitleText || target.narrative || "").trim();
+    const textToSay = (
+      target.speech_text ||
+      (target as any).dialogueSubtitleText ||
+      target.narrative ||
+      ""
+    ).trim();
     if (!textToSay) {
-      addNotification?.("Please enter dialogue or narrative text for this panel first.", "warning");
+      addNotification?.(
+        "Please enter dialogue or narrative text for this panel first.",
+        "warning"
+      );
       return;
     }
 
     try {
-      const voiceToUse = (target as any).voice || voiceActor || "en-US-GuyNeural";
+      const voiceToUse =
+        (target as any).voice || voiceActor || "en-US-GuyNeural";
       addNotification?.(`Generating audio for panel #${panelId}...`, "info");
 
       const res = await (api as any).generateAudio(activeFetch, {
@@ -757,12 +856,16 @@ export function useCompileActions({
         voice: voiceToUse,
         speech_rate: speechRate,
         speech_pitch: speechPitch,
-        target_duration: Number(target.duration) > 0 ? Number(target.duration) : 4.0,
+        target_duration:
+          Number(target.duration) > 0 ? Number(target.duration) : 4.0,
       });
 
       if (res && (res.audio_url || res.audio_base64)) {
-        const audioUrl = res.audio_url || `data:audio/mpeg;base64,${res.audio_base64}`;
-        const actualDur = res.duration_actual_s ? Number(res.duration_actual_s) : target.duration;
+        const audioUrl =
+          res.audio_url || `data:audio/mpeg;base64,${res.audio_base64}`;
+        const actualDur = res.duration_actual_s
+          ? Number(res.duration_actual_s)
+          : target.duration;
 
         setPanels((prev) =>
           prev.map((p) =>

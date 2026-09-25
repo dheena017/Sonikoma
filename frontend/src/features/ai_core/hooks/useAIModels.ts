@@ -93,32 +93,64 @@ export function useAIModels() {
           // fallback
         }
 
-        const availableProviders: { id: string; name: string; key?: string }[] = [];
+        const availableProviders: { id: string; name: string; key?: string }[] =
+          [];
         if (gemini || env.GEMINI_API_KEY) {
-          availableProviders.push({ id: "gemini", name: "Google", key: gemini || undefined });
+          availableProviders.push({
+            id: "gemini",
+            name: "Google",
+            key: gemini || undefined,
+          });
         }
         if (openai || env.OPENAI_API_KEY) {
-          availableProviders.push({ id: "openai", name: "OpenAI", key: openai || undefined });
+          availableProviders.push({
+            id: "openai",
+            name: "OpenAI",
+            key: openai || undefined,
+          });
         }
         if (anthropic || env.ANTHROPIC_API_KEY) {
-          availableProviders.push({ id: "anthropic", name: "Anthropic", key: anthropic || undefined });
+          availableProviders.push({
+            id: "anthropic",
+            name: "Anthropic",
+            key: anthropic || undefined,
+          });
         }
         if (groq || env.GROQ_API_KEY) {
-          availableProviders.push({ id: "groq", name: "Groq", key: groq || undefined });
+          availableProviders.push({
+            id: "groq",
+            name: "Groq",
+            key: groq || undefined,
+          });
         }
         if (deepseek || env.DEEPSEEK_API_KEY) {
-          availableProviders.push({ id: "deepseek", name: "DeepSeek", key: deepseek || undefined });
+          availableProviders.push({
+            id: "deepseek",
+            name: "DeepSeek",
+            key: deepseek || undefined,
+          });
         }
         if (elevenlabs || env.ELEVENLABS_API_KEY) {
-          availableProviders.push({ id: "elevenlabs", name: "ElevenLabs", key: elevenlabs || undefined });
+          availableProviders.push({
+            id: "elevenlabs",
+            name: "ElevenLabs",
+            key: elevenlabs || undefined,
+          });
         }
         if (deepl || env.DEEPL_API_KEY) {
-          availableProviders.push({ id: "deepl", name: "DeepL", key: deepl || undefined });
+          availableProviders.push({
+            id: "deepl",
+            name: "DeepL",
+            key: deepl || undefined,
+          });
         }
         if (huggingface || env.HUGGINGFACE_API_KEY) {
-          availableProviders.push({ id: "huggingface", name: "Hugging Face", key: huggingface || undefined });
+          availableProviders.push({
+            id: "huggingface",
+            name: "Hugging Face",
+            key: huggingface || undefined,
+          });
         }
-
 
         // If user has not configured any keys for any provider, return empty list
         if (availableProviders.length === 0) {
@@ -142,12 +174,20 @@ export function useAIModels() {
 
             if (res.ok) {
               const data = await res.json();
-              if (data.success && Array.isArray(data.models) && data.models.length > 0) {
+              if (
+                data.success &&
+                Array.isArray(data.models) &&
+                data.models.length > 0
+              ) {
                 const liveMapped: AIModel[] = data.models
                   .filter((m: any) => {
                     const name = (m.name || "").toLowerCase();
                     // Exclude raw embeddings or internal experimental models
-                    if (name.includes("embedding") || name.includes("bimodal") || name.includes("aqa")) {
+                    if (
+                      name.includes("embedding") ||
+                      name.includes("bimodal") ||
+                      name.includes("aqa")
+                    ) {
                       return false;
                     }
                     return true;
@@ -155,29 +195,52 @@ export function useAIModels() {
                   .map((m: any) => ({
                     id: m.name,
                     name: m.displayName || m.name,
-                    type: provider.id === "huggingface" ? ("open-source" as const) : ("paid" as const),
+                    type:
+                      provider.id === "huggingface"
+                        ? ("open-source" as const)
+                        : ("paid" as const),
                     provider: provider.name,
-                    category: m.category || (provider.id === "gemini" ? "Vision & Multimodal" : "Text & Reasoning"),
-                    context_window: m.inputTokenLimit || (m.name.includes("pro") ? 2097152 : 1048576),
+                    category:
+                      m.category ||
+                      (provider.id === "gemini"
+                        ? "Vision & Multimodal"
+                        : "Text & Reasoning"),
+                    context_window:
+                      m.inputTokenLimit ||
+                      (m.name.includes("pro") ? 2097152 : 1048576),
                     max_output_tokens: m.outputTokenLimit || 8192,
-                    speed_rating: m.name.includes("flash") || m.name.includes("mini") ? "Ultra Fast (<300ms)" : "Standard",
-                    capabilities: m.name.includes("flash") || m.name.includes("pro") || m.name.includes("4o") || m.name.includes("vision") || m.name.includes("sonnet")
-                      ? ["vision", "json_mode", "streaming"]
-                      : ["json_mode", "streaming"],
+                    speed_rating:
+                      m.name.includes("flash") || m.name.includes("mini")
+                        ? "Ultra Fast (<300ms)"
+                        : "Standard",
+                    capabilities:
+                      m.name.includes("flash") ||
+                      m.name.includes("pro") ||
+                      m.name.includes("4o") ||
+                      m.name.includes("vision") ||
+                      m.name.includes("sonnet")
+                        ? ["vision", "json_mode", "streaming"]
+                        : ["json_mode", "streaming"],
                   }));
 
                 aggregatedLiveModels = [...aggregatedLiveModels, ...liveMapped];
               }
             }
           } catch (err) {
-            console.warn(`Failed to dynamically list models for ${provider.id}`, err);
+            console.warn(
+              `Failed to dynamically list models for ${provider.id}`,
+              err
+            );
           }
         }
 
         cachedModels = aggregatedLiveModels;
         return aggregatedLiveModels;
       } catch (err) {
-        console.error("Failed to load live AI models for entered API keys", err);
+        console.error(
+          "Failed to load live AI models for entered API keys",
+          err
+        );
         return [];
       } finally {
         isFetching = false;
@@ -213,7 +276,15 @@ export function useAIModels() {
   };
 
   const visionModels = useMemo(
-    () => models.filter((m) => m.capabilities?.includes("vision") || m.id.includes("flash") || m.id.includes("pro") || m.id.includes("4o") || m.id.includes("sonnet")),
+    () =>
+      models.filter(
+        (m) =>
+          m.capabilities?.includes("vision") ||
+          m.id.includes("flash") ||
+          m.id.includes("pro") ||
+          m.id.includes("4o") ||
+          m.id.includes("sonnet")
+      ),
     [models]
   );
 

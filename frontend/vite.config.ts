@@ -319,7 +319,11 @@ export default defineConfig(({ mode, command }) => {
       {
         name: "hmr-file-change-logger",
         handleHotUpdate({ file, server }) {
-          if (file.endsWith(".tsbuildinfo") || file.includes(".git") || file.includes("dist")) {
+          if (
+            file.endsWith(".tsbuildinfo") ||
+            file.includes(".git") ||
+            file.includes("dist")
+          ) {
             return [];
           }
 

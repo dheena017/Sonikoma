@@ -44,7 +44,9 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
       <div className="p-2.5 rounded-xl bg-[#2A2A2A] border border-[#2F2F2F] flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[10px] font-mono text-neutral-200">
           <Camera className="h-3.5 w-3.5 text-[#60A5FA] shrink-0" />
-          <span>Cinematic Camera Director — Assign 3D pans, zooms & timing</span>
+          <span>
+            Cinematic Camera Director — Assign 3D pans, zooms & timing
+          </span>
         </div>
       </div>
 
@@ -52,7 +54,8 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
         const isSelected = selectedIndices.includes(index);
         const imgUrl = panel.image_url || (panel as any).imageUrl || "";
         const displayUrl = getProxiedImageUrl(imgUrl);
-        const currentMotion = panel.motion_type || (panel as any).camera_motion || "Slow Zoom In";
+        const currentMotion =
+          panel.motion_type || (panel as any).camera_motion || "Slow Zoom In";
         const duration = panel.duration || 0;
 
         return (
@@ -69,7 +72,11 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-white/10">
-                  <img src={displayUrl} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={displayUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                   <span className="absolute bottom-0 right-0 text-[7px] font-black font-mono bg-black/80 text-neutral-200 px-0.5 rounded">
                     #{index + 1}
                   </span>
@@ -80,7 +87,10 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
                     Panel #{index + 1}
                   </span>
                   <p className="text-[8px] font-mono text-neutral-400">
-                    Active: <span className="text-white font-bold">{currentMotion}</span>
+                    Active:{" "}
+                    <span className="text-white font-bold">
+                      {currentMotion}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -116,7 +126,9 @@ export const StoryboardCameraView: React.FC<StoryboardCameraViewProps> = ({
                     onClick={(e) => {
                       e.stopPropagation();
                       onUpdateCameraMotion(index, preset.id);
-                      onTriggerFeedback?.(`Assigned ${preset.label} to Panel #${index + 1}`);
+                      onTriggerFeedback?.(
+                        `Assigned ${preset.label} to Panel #${index + 1}`
+                      );
                     }}
                     className={`py-1.5 px-2 rounded-xl border text-[9px] font-mono font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
                       isActive

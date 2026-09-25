@@ -153,7 +153,9 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           >
             <Icon
               className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                active ? "text-white" : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+                active
+                  ? "text-white"
+                  : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
               }`}
             />
           </div>
@@ -165,11 +167,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
             </span>
           )}
         </button>
-        <TooltipPortal
-          text={item.label}
-          visible={hover}
-          anchorRect={rect}
-        />
+        <TooltipPortal text={item.label} visible={hover} anchorRect={rect} />
       </div>
     );
   };

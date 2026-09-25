@@ -46,66 +46,77 @@ import { CinemaPlayer } from "./cinema-player";
   }, 1200);
 
   // Message listener for popup, sidepanel, and keyboard commands
-  chrome.runtime.onMessage.addListener((message: any, _sender: any, sendResponse: any) => {
-    const { type } = message || {};
+  chrome.runtime.onMessage.addListener(
+    (message: any, _sender: any, sendResponse: any) => {
+      const { type } = message || {};
 
-    if (type === "PING") {
-      sendResponse({ status: "PONG" });
-      return true;
-    }
-
-    if (type === "TRIGGER_CINEMA_MODE" || type === "START_CINEMA" || type === "TOGGLE_CINEMA") {
-      try {
-        const player = getCinemaPlayer();
-        player.start();
-        sendResponse({ success: true, isPlaying: true });
-      } catch (err: any) {
-        sendResponse({ success: false, error: err?.message || String(err) });
+      if (type === "PING") {
+        sendResponse({ status: "PONG" });
+        return true;
       }
-      return true;
-    }
 
-    if (type === "STOP_CINEMA") {
-      if (cinemaPlayerInstance) {
-        cinemaPlayerInstance.stop();
-      }
-      sendResponse({ success: true });
-      return true;
-    }
-
-    if (type === "GET_READER_STATS" || type === "GET_CHAPTER_DATA" || type === "GET_IMAGES" || type === "SCAN_CHAPTER") {
-      (async () => {
+      if (
+        type === "TRIGGER_CINEMA_MODE" ||
+        type === "START_CINEMA" ||
+        type === "TOGGLE_CINEMA"
+      ) {
         try {
-          const images = await DomMangaScanner.scanChapterImagesAsync();
-          const meta = DomMangaScanner.extractPageMetadata();
-          sendResponse({
-            success: true,
-            panelCount: images.length,
-            seriesTitle: meta.seriesTitle,
-            chapterTitle: meta.chapterTitle,
-            url: window.location.href,
-            domain: window.location.hostname,
-            images: images.map((img, i) => ({
-              index: i + 1,
-              src: img.src,
-              width: img.width,
-              height: img.height,
-              top: img.top,
-            })),
-            panels: images,
-            meta,
-          });
+          const player = getCinemaPlayer();
+          player.start();
+          sendResponse({ success: true, isPlaying: true });
         } catch (err: any) {
-          sendResponse({
-            success: false,
-            error: err?.message || String(err),
-            images: [],
-            panels: [],
-            panelCount: 0,
-          });
+          sendResponse({ success: false, error: err?.message || String(err) });
         }
-      })();
-      return true;
+        return true;
+      }
+
+      if (type === "STOP_CINEMA") {
+        if (cinemaPlayerInstance) {
+          cinemaPlayerInstance.stop();
+        }
+        sendResponse({ success: true });
+        return true;
+      }
+
+      if (
+        type === "GET_READER_STATS" ||
+        type === "GET_CHAPTER_DATA" ||
+        type === "GET_IMAGES" ||
+        type === "SCAN_CHAPTER"
+      ) {
+        (async () => {
+          try {
+            const images = await DomMangaScanner.scanChapterImagesAsync();
+            const meta = DomMangaScanner.extractPageMetadata();
+            sendResponse({
+              success: true,
+              panelCount: images.length,
+              seriesTitle: meta.seriesTitle,
+              chapterTitle: meta.chapterTitle,
+              url: window.location.href,
+              domain: window.location.hostname,
+              images: images.map((img, i) => ({
+                index: i + 1,
+                src: img.src,
+                width: img.width,
+                height: img.height,
+                top: img.top,
+              })),
+              panels: images,
+              meta,
+            });
+          } catch (err: any) {
+            sendResponse({
+              success: false,
+              error: err?.message || String(err),
+              images: [],
+              panels: [],
+              panelCount: 0,
+            });
+          }
+        })();
+        return true;
+      }
     }
-  });
+  );
 })();

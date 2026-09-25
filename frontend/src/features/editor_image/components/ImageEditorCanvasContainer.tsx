@@ -185,7 +185,9 @@ export default function ImageEditorCanvasContainer({
             <Move className="h-3.5 w-3.5 text-[#3B82F6]" />
           </div>
           <span className="min-w-0 truncate text-[10px] sm:text-[11px] uppercase font-mono font-bold text-[#E5E5E5] tracking-wider whitespace-nowrap">
-            <span className="hidden sm:inline">Interactive Viewport Canvas</span>
+            <span className="hidden sm:inline">
+              Interactive Viewport Canvas
+            </span>
             <span className="sm:hidden">Canvas Viewport</span>
           </span>
         </div>

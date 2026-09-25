@@ -10,7 +10,10 @@ export interface UseGlobalShortcutsProps {
   setVolume?: React.Dispatch<React.SetStateAction<number>>;
   isMuted?: boolean;
   setIsMuted?: React.Dispatch<React.SetStateAction<boolean>>;
-  addNotification?: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  addNotification?: (
+    msg: string,
+    type: "success" | "info" | "warning" | "error"
+  ) => void;
   handleGenerateVideo?: () => void;
   toggleStoryboardPlayback?: () => void;
   resetStoryboardPlayback?: () => void;
@@ -58,7 +61,10 @@ export const DEFAULT_SHORTCUTS: Record<string, string> = {
 };
 
 /** Normalize and check if a keyboard event matches a shortcut string like "Alt+D" or "Ctrl+Z" */
-export function matchesShortcut(e: KeyboardEvent, shortcutStr?: string): boolean {
+export function matchesShortcut(
+  e: KeyboardEvent,
+  shortcutStr?: string
+): boolean {
   if (!shortcutStr) return false;
   const parts = shortcutStr.toLowerCase().split("+");
   const key = parts[parts.length - 1];
@@ -77,7 +83,8 @@ export function matchesShortcut(e: KeyboardEvent, shortcutStr?: string): boolean
   if (key === "arrowleft") return e.key === "ArrowLeft";
   if (key === "arrowright") return e.key === "ArrowRight";
   if (key === "escape") return e.key === "Escape";
-  if (key === "delete" || key === "del") return e.key === "Delete" || e.key === "Backspace";
+  if (key === "delete" || key === "del")
+    return e.key === "Delete" || e.key === "Backspace";
   if (key === "=" || key === "+") return e.key === "=" || e.key === "+";
   if (key === "-" || key === "_") return e.key === "-" || e.key === "_";
 
@@ -99,7 +106,8 @@ export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
   });
 
   const [activePlaybackSpeed, setActivePlaybackSpeed] = useState<number>(1.0);
-  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] = useState<boolean>(false);
+  const [isShortcutsHelpOpen, setIsShortcutsHelpOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -161,7 +169,10 @@ export function useGlobalShortcuts(props: UseGlobalShortcutsProps) {
       } else if (matchesShortcut(e, shortcuts.volume_down) && props.setVolume) {
         e.preventDefault();
         props.setVolume((v) => Math.max(0, v - 10));
-      } else if (matchesShortcut(e, shortcuts.volume_mute) && props.setIsMuted) {
+      } else if (
+        matchesShortcut(e, shortcuts.volume_mute) &&
+        props.setIsMuted
+      ) {
         e.preventDefault();
         props.setIsMuted((m) => !m);
       }

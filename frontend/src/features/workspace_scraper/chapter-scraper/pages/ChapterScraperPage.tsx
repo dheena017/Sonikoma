@@ -27,11 +27,7 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
       const seg = decodeURIComponent(
         path.replace(/^\/scraper\//, "").replace(/\/$/, "")
       );
-      if (
-        seg &&
-        seg !== "editor" &&
-        seg !== "audio-settings"
-      ) {
+      if (seg && seg !== "editor" && seg !== "audio-settings") {
         return seg;
       }
     }
@@ -43,72 +39,16 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
       {/* ── MAIN COVER WRAPPER CARD ── */}
       <div className="rounded-[28px] border border-transparent bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
         <ChapterScraper
-        addNotification={addNotification}
-        fetchWithInterceptor={fetchWithInterceptor}
-        isStandalone={true}
-        initialSeriesName={seriesNameParam}
-        onChapterSelect={(chapter) => {
-          const temporaryProjectId = `temp_${Date.now()}_${Math.random()
-            .toString(36)
-            .substring(2, 10)}`;
-          localStorage.setItem("auto_import_url", chapter.url);
-
-          if (chapter.rating !== undefined && chapter.rating !== null) {
-            localStorage.setItem(
-              "active_chapter_rating",
-              String(chapter.rating)
-            );
-          } else {
-            localStorage.removeItem("active_chapter_rating");
-          }
-          if (chapter.likes !== undefined && chapter.likes !== null) {
-            localStorage.setItem(
-              "active_chapter_likes",
-              String(chapter.likes)
-            );
-          } else {
-            localStorage.removeItem("active_chapter_likes");
-          }
-          if (chapter.views !== undefined && chapter.views !== null) {
-            localStorage.setItem(
-              "active_chapter_views",
-              String(chapter.views)
-            );
-          } else {
-            localStorage.removeItem("active_chapter_views");
-          }
-
-          const sSlug = seriesNameParam
-            ? seriesNameParam
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "-")
-                .replace(/^-+|-+$/g, "")
-            : "";
-          const cSlug = (chapter.title || `chapter-${chapter.number}`)
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "");
-
-          if (sSlug && cSlug) {
-            navigateTo(
-              `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
-            );
-          } else {
-            navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
-          }
-        }}
-        onMultipleChaptersSelect={(chapters) => {
-          if (chapters.length > 0) {
+          addNotification={addNotification}
+          fetchWithInterceptor={fetchWithInterceptor}
+          isStandalone={true}
+          initialSeriesName={seriesNameParam}
+          onChapterSelect={(chapter) => {
             const temporaryProjectId = `temp_${Date.now()}_${Math.random()
               .toString(36)
               .substring(2, 10)}`;
-            localStorage.setItem(
-              "auto_import_batch",
-              JSON.stringify(chapters)
-            );
-            localStorage.setItem("auto_import_url", chapters[0].url);
+            localStorage.setItem("auto_import_url", chapter.url);
 
-            const chapter = chapters[0];
             if (chapter.rating !== undefined && chapter.rating !== null) {
               localStorage.setItem(
                 "active_chapter_rating",
@@ -152,8 +92,64 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
             } else {
               navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
             }
-          }
-        }}
+          }}
+          onMultipleChaptersSelect={(chapters) => {
+            if (chapters.length > 0) {
+              const temporaryProjectId = `temp_${Date.now()}_${Math.random()
+                .toString(36)
+                .substring(2, 10)}`;
+              localStorage.setItem(
+                "auto_import_batch",
+                JSON.stringify(chapters)
+              );
+              localStorage.setItem("auto_import_url", chapters[0].url);
+
+              const chapter = chapters[0];
+              if (chapter.rating !== undefined && chapter.rating !== null) {
+                localStorage.setItem(
+                  "active_chapter_rating",
+                  String(chapter.rating)
+                );
+              } else {
+                localStorage.removeItem("active_chapter_rating");
+              }
+              if (chapter.likes !== undefined && chapter.likes !== null) {
+                localStorage.setItem(
+                  "active_chapter_likes",
+                  String(chapter.likes)
+                );
+              } else {
+                localStorage.removeItem("active_chapter_likes");
+              }
+              if (chapter.views !== undefined && chapter.views !== null) {
+                localStorage.setItem(
+                  "active_chapter_views",
+                  String(chapter.views)
+                );
+              } else {
+                localStorage.removeItem("active_chapter_views");
+              }
+
+              const sSlug = seriesNameParam
+                ? seriesNameParam
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-+|-+$/g, "")
+                : "";
+              const cSlug = (chapter.title || `chapter-${chapter.number}`)
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-+|-+$/g, "");
+
+              if (sSlug && cSlug) {
+                navigateTo(
+                  `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
+                );
+              } else {
+                navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
+              }
+            }
+          }}
         />
       </div>
     </div>

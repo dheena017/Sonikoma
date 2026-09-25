@@ -36,7 +36,9 @@ export interface QuickVideoPreviewHeaderProps {
   advancedSettingsProps?: any;
 }
 
-export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = ({
+export const QuickVideoPreviewHeader: React.FC<
+  QuickVideoPreviewHeaderProps
+> = ({
   monitorTab,
   setMonitorTab,
   panelsCount,
@@ -153,7 +155,11 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
         >
           <Sliders className="h-3.5 w-3.5 text-[#3B82F6]" />
           <span className="hidden sm:inline">Settings</span>
-          <ChevronDown className={`h-3 w-3 transition-transform ${showAdvancedSettings ? "rotate-180" : ""}`} />
+          <ChevronDown
+            className={`h-3 w-3 transition-transform ${
+              showAdvancedSettings ? "rotate-180" : ""
+            }`}
+          />
         </button>
       )}
 
@@ -179,7 +185,9 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           title="Save Storyboard State"
         >
           <Save className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
-          <span className="hidden md:inline">{isSaving ? "Saving..." : "Save"}</span>
+          <span className="hidden md:inline">
+            {isSaving ? "Saving..." : "Save"}
+          </span>
         </button>
       )}
 
@@ -192,7 +200,9 @@ export const QuickVideoPreviewHeader: React.FC<QuickVideoPreviewHeaderProps> = (
           title="Export and render final video"
         >
           <Video className="h-3.5 w-3.5 text-white shrink-0" />
-          <span className="hidden md:inline">{isRendering ? "Rendering..." : "Export Video"}</span>
+          <span className="hidden md:inline">
+            {isRendering ? "Rendering..." : "Export Video"}
+          </span>
           <span className="md:hidden">{isRendering ? "..." : "Export"}</span>
         </button>
       )}

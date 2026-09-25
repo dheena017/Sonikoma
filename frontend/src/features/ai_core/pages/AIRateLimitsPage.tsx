@@ -38,18 +38,45 @@ const ALL_PROVIDER_SPEC: ProviderFullSpec = {
     subtext: "Process multiple chapters in the background at half cost",
   },
   tiers: [
-    { id: "free", label: "Free Plan", qualification: "Default sandbox", spend10Min: "$0", billingCap: "Free Rate Limits" },
-    { id: "tier1", label: "Creator (Tier 1)", qualification: "Active account", spend10Min: "$50", billingCap: "Standard Paid Limits" },
-    { id: "tier2", label: "Pro (Tier 2)", qualification: "Verified creator", spend10Min: "$500", billingCap: "High Concurrency" },
-    { id: "tier3", label: "Studio (Tier 3)", qualification: "Studio tier", spend10Min: "$5,000", billingCap: "Unlimited / Custom" },
+    {
+      id: "free",
+      label: "Free Plan",
+      qualification: "Default sandbox",
+      spend10Min: "$0",
+      billingCap: "Free Rate Limits",
+    },
+    {
+      id: "tier1",
+      label: "Creator (Tier 1)",
+      qualification: "Active account",
+      spend10Min: "$50",
+      billingCap: "Standard Paid Limits",
+    },
+    {
+      id: "tier2",
+      label: "Pro (Tier 2)",
+      qualification: "Verified creator",
+      spend10Min: "$500",
+      billingCap: "High Concurrency",
+    },
+    {
+      id: "tier3",
+      label: "Studio (Tier 3)",
+      qualification: "Studio tier",
+      spend10Min: "$5,000",
+      billingCap: "Unlimited / Custom",
+    },
   ],
 };
 
-export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPageProps) {
+export default function AIRateLimitsPage({
+  addNotification,
+}: AIRateLimitsPageProps) {
   const [selectedProviderId, setSelectedProviderId] = useState<string>("all");
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>("all");
   const [selectedTierId, setSelectedTierId] = useState<string>("tier1");
-  const [isPriorityInference, setIsPriorityInference] = useState<boolean>(false);
+  const [isPriorityInference, setIsPriorityInference] =
+    useState<boolean>(false);
   const [models, setModels] = useState<AIModelCardData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -78,11 +105,14 @@ export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPagePr
   const currentProviderSpec: ProviderFullSpec =
     selectedProviderId === "all"
       ? ALL_PROVIDER_SPEC
-      : PROVIDER_FULL_SPECS.find((p) => p.id === selectedProviderId) || PROVIDER_FULL_SPECS[0];
+      : PROVIDER_FULL_SPECS.find((p) => p.id === selectedProviderId) ||
+        PROVIDER_FULL_SPECS[0];
 
   // Auto-adjust active tier if the new provider has different tier IDs
   useEffect(() => {
-    const exists = currentProviderSpec.tiers.some((t) => t.id === selectedTierId);
+    const exists = currentProviderSpec.tiers.some(
+      (t) => t.id === selectedTierId
+    );
     if (!exists && currentProviderSpec.tiers.length > 0) {
       setSelectedTierId(currentProviderSpec.tiers[0].id);
     }
@@ -118,10 +148,21 @@ export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPagePr
     const target = providerId.toLowerCase();
 
     if (target === "gemini" || target === "google") {
-      return p === "gemini" || p === "google" || id.includes("gemini") || id.includes("imagen");
+      return (
+        p === "gemini" ||
+        p === "google" ||
+        id.includes("gemini") ||
+        id.includes("imagen")
+      );
     }
     if (target === "openai") {
-      return p === "openai" || id.includes("gpt") || id.includes("o1") || id.includes("o3") || id.includes("dall");
+      return (
+        p === "openai" ||
+        id.includes("gpt") ||
+        id.includes("o1") ||
+        id.includes("o3") ||
+        id.includes("dall")
+      );
     }
     if (target === "anthropic") {
       return p === "anthropic" || id.includes("claude");
@@ -148,18 +189,22 @@ export default function AIRateLimitsPage({ addNotification }: AIRateLimitsPagePr
       ? allSpecsList
       : PROVIDER_FULL_SPECS.filter((p) => p.group === selectedGroupFilter);
 
-  const providerModels = models.filter((m) => isMatchProvider(m, selectedProviderId));
+  const providerModels = models.filter((m) =>
+    isMatchProvider(m, selectedProviderId)
+  );
 
   const filteredModels = providerModels.filter((m) =>
     searchQuery
       ? m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (m.provider && m.provider.toLowerCase().includes(searchQuery.toLowerCase()))
+        (m.provider &&
+          m.provider.toLowerCase().includes(searchQuery.toLowerCase()))
       : true
   );
 
   const activeTier =
-    currentProviderSpec.tiers.find((t) => t.id === selectedTierId) || currentProviderSpec.tiers[0];
+    currentProviderSpec.tiers.find((t) => t.id === selectedTierId) ||
+    currentProviderSpec.tiers[0];
 
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-in fade-in duration-200 text-left text-[#E5E5E5]">

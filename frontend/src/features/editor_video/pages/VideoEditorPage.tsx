@@ -198,9 +198,7 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
   const videoUrl = appLogic?.videoUrl ?? null;
   const setVideoUrl = appLogic?.setVideoUrl ?? (() => {});
   const seriesTitle =
-    appLogic?.seriesTitle ||
-    storeActiveProjectData?.project?.title ||
-    "";
+    appLogic?.seriesTitle || storeActiveProjectData?.project?.title || "";
   const chapterTitle =
     appLogic?.chapterTitle ||
     storeActiveProjectData?.project?.chapter_title ||
@@ -281,7 +279,6 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[#0A0A0A] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
-
       {/* ── Top Header Bar ──────────────────────────────────────────────────── */}
       <VideoEditorHeader
         seriesTitle={seriesTitle}
@@ -359,7 +356,10 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
             onMouseDown={handleLeftResizeStart}
             onDoubleClick={() => {
               setLeftWidth(DEFAULT_LEFT_WIDTH);
-              localStorage.setItem("sonikoma_left_panel_w", String(DEFAULT_LEFT_WIDTH));
+              localStorage.setItem(
+                "sonikoma_left_panel_w",
+                String(DEFAULT_LEFT_WIDTH)
+              );
             }}
             className={`hidden md:flex w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-l border-r border-white/5 ${
               isDraggingLeft
@@ -434,7 +434,10 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
                   onMouseDown={handleRightResizeStart}
                   onDoubleClick={() => {
                     setRightWidth(DEFAULT_RIGHT_WIDTH);
-                    localStorage.setItem("sonikoma_right_panel_w", String(DEFAULT_RIGHT_WIDTH));
+                    localStorage.setItem(
+                      "sonikoma_right_panel_w",
+                      String(DEFAULT_RIGHT_WIDTH)
+                    );
                   }}
                   className={`hidden md:flex w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-l border-r border-white/5 ${
                     isDraggingRight
@@ -476,7 +479,10 @@ const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
               onMouseDown={handleTimelineResizeStart}
               onDoubleClick={() => {
                 setTimelineHeight(DEFAULT_TIMELINE_HEIGHT);
-                localStorage.setItem("sonikoma_timeline_h", String(DEFAULT_TIMELINE_HEIGHT));
+                localStorage.setItem(
+                  "sonikoma_timeline_h",
+                  String(DEFAULT_TIMELINE_HEIGHT)
+                );
               }}
               className={`hidden md:flex h-2 w-full relative cursor-row-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-t border-b border-white/[0.06] ${
                 isDraggingTimeline

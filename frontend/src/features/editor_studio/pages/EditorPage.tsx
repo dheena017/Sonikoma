@@ -4,20 +4,8 @@ import StoryboardTimeline from "@/features/editor_timeline/components/Storyboard
 import QuickVideoPreview from "@/features/editor_video_preview/components/QuickVideoPreview";
 import LayoutEditorPage from "@/features/editor_studio/components/EditorPageLayout";
 import { VideoPreviewAdvancedSettings } from "@/shared/ui/video/AdvancedSettings";
-import { useBackendHealth } from "@/shared/hooks/useBackendHealth";
 import { getUserCredits } from "@/api/endpoints/auth";
-import {
-  Sliders,
-  X,
-  Mic,
-  Tv,
-  Eye,
-  Sparkles,
-  Layers,
-  PlaySquare,
-  MonitorPlay,
-  Save,
-} from "lucide-react";
+import { Tv, Eye, Sliders, Save, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
@@ -59,7 +47,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
   void chapterSlug;
   const playerSettings = useImageEditorStore((state) => state.playerSettings);
   // Read loading + dirty state from store
-  const isHydrating = useProjectStore((s) => s.isHydrating || s.projectState === "loading");
+  const isHydrating = useProjectStore(
+    (s) => s.isHydrating || s.projectState === "loading"
+  );
   const isDirtyStore = useProjectStore((s) => s.isDirty);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
   const [currentSection, setCurrentSection] = React.useState("storyboard");
@@ -87,7 +77,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirtyStore) {
         e.preventDefault();
-        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -108,8 +99,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
       window.dispatchEvent(new Event("popstate"));
     }
   };
-
-  const { status: backendStatus } = useBackendHealth();
 
   const {
     projectId,
@@ -394,7 +383,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
         ? selectedScraped.length
         : scrapedImages.length;
     if (targetCount === 0) {
-      addNotification?.("Please select or import comic frames to auto-crop.", "info");
+      addNotification?.(
+        "Please select or import comic frames to auto-crop.",
+        "info"
+      );
       return;
     }
     setShowAutoCropPreview(true);
@@ -432,7 +424,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
           return copy;
         });
         setSelectedScraped([]);
-        addNotification?.("Successfully sliced & auto-cropped panels!", "success");
+        addNotification?.(
+          "Successfully sliced & auto-cropped panels!",
+          "success"
+        );
         audioFeedback?.playSuccess?.();
       } else {
         void handleAutoCropSelected();
@@ -547,22 +542,33 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   <button
                     onClick={async () => {
                       if (projectId) {
-                        const success = await useProjectStore.getState().updateVideoSettings({
-                          aspectRatio,
-                          frameRate,
-                          activeTheme: appLogic.activeTheme || "obsidian",
-                          audioReactiveShake: appLogic.audioReactiveShake,
-                          shakeIntensity: appLogic.shakeIntensity,
-                          videoFormat: appLogic.videoFormat,
-                          backgroundStyle: appLogic.backgroundStyle,
-                          subtitlesStyle: appLogic.subtitlesStyle,
-                          voiceActor,
-                          musicTheme,
-                        }, fetchWithInterceptor);
+                        const success = await useProjectStore
+                          .getState()
+                          .updateVideoSettings(
+                            {
+                              aspectRatio,
+                              frameRate,
+                              activeTheme: appLogic.activeTheme || "obsidian",
+                              audioReactiveShake: appLogic.audioReactiveShake,
+                              shakeIntensity: appLogic.shakeIntensity,
+                              videoFormat: appLogic.videoFormat,
+                              backgroundStyle: appLogic.backgroundStyle,
+                              subtitlesStyle: appLogic.subtitlesStyle,
+                              voiceActor,
+                              musicTheme,
+                            },
+                            fetchWithInterceptor
+                          );
                         if (success) {
-                          addNotification?.("Video settings saved successfully!", "success");
+                          addNotification?.(
+                            "Video settings saved successfully!",
+                            "success"
+                          );
                         } else {
-                          addNotification?.("Failed to save video settings", "error");
+                          addNotification?.(
+                            "Failed to save video settings",
+                            "error"
+                          );
                         }
                       }
                     }}
@@ -699,21 +705,25 @@ const EditorPage: React.FC<EditorPageProps> = ({
                     onClose={handleCloseSettings}
                     onApply={async () => {
                       if (projectId) {
-                        await useProjectStore.getState().updateAutoCropSettings({
-                          sensitivity: cropSensitivity,
-                          padding: cropPaddingPx,
-                          backgroundColorMode: appLogic.cropBackgroundMode,
-                          autoSplitTallStrips: appLogic.autoSplitTallStrips,
-                          aspectRatioLock: appLogic.aspectRatioLock,
-                          minPanelAreaPct: appLogic.minPanelAreaPct,
-                          overlapMergeThreshold: appLogic.overlapMergeThreshold,
-                          useLocalCV: appLogic.useLocalCV,
-                          cropModel,
-                          cropMinHeightPx: appLogic.cropMinHeightPx,
-                          cropCannyLow: appLogic.cropCannyLow,
-                          cropCannyHigh: appLogic.cropCannyHigh,
-                          cropCloseKernelSize: appLogic.cropCloseKernelSize,
-                        }, fetchWithInterceptor);
+                        await useProjectStore.getState().updateAutoCropSettings(
+                          {
+                            sensitivity: cropSensitivity,
+                            padding: cropPaddingPx,
+                            backgroundColorMode: appLogic.cropBackgroundMode,
+                            autoSplitTallStrips: appLogic.autoSplitTallStrips,
+                            aspectRatioLock: appLogic.aspectRatioLock,
+                            minPanelAreaPct: appLogic.minPanelAreaPct,
+                            overlapMergeThreshold:
+                              appLogic.overlapMergeThreshold,
+                            useLocalCV: appLogic.useLocalCV,
+                            cropModel,
+                            cropMinHeightPx: appLogic.cropMinHeightPx,
+                            cropCannyLow: appLogic.cropCannyLow,
+                            cropCannyHigh: appLogic.cropCannyHigh,
+                            cropCloseKernelSize: appLogic.cropCloseKernelSize,
+                          },
+                          fetchWithInterceptor
+                        );
                       }
                       handleCloseSettings();
                       handleAutoCropSelected();
@@ -839,7 +849,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 id="section-storyboard"
                 data-section="section-timeline"
                 className={`w-full scroll-mt-20 min-h-0 ${
-                  currentSection === "storyboard" || currentSection === "timeline"
+                  currentSection === "storyboard" ||
+                  currentSection === "timeline"
                     ? "flex flex-col min-h-0"
                     : "hidden lg:flex lg:flex-col"
                 }`}

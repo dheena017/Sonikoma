@@ -158,8 +158,7 @@ export default function SeriesEditModal({
             {/* Author */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5 font-mono">
-                <User className="w-3.5 h-3.5 text-[#3B82F6]" /> Author /
-                Creator
+                <User className="w-3.5 h-3.5 text-[#3B82F6]" /> Author / Creator
               </label>
               <input
                 type="text"

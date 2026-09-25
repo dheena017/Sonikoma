@@ -20,7 +20,8 @@ export function ImportImagesOverlay({
           {message}
         </h3>
         <p className="text-xs text-neutral-400 font-mono leading-relaxed">
-          Resolving high-resolution Webtoon frames and parsing panel structure...
+          Resolving high-resolution Webtoon frames and parsing panel
+          structure...
         </p>
       </div>
 

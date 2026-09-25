@@ -3,11 +3,22 @@
 
 import React, { useState, useMemo } from "react";
 import TrackLabel from "../TrackLabel";
-import { ImagePlus, Image as ImageIcon, Film, MoreHorizontal, GripVertical, Plus } from "lucide-react";
+import {
+  ImagePlus,
+  Image as ImageIcon,
+  Film,
+  MoreHorizontal,
+  GripVertical,
+  Plus,
+} from "lucide-react";
 import { Keyframe } from "../../types";
 import ClipTrimHandles from "../ClipTrimHandles";
 import { getProxiedImageUrl } from "@/shared/utils/imageProxy";
-import { STORY_PANEL_LANE_HEIGHT, assignLanes, trackInnerHeight } from "./timelineLanes";
+import {
+  STORY_PANEL_LANE_HEIGHT,
+  assignLanes,
+  trackInnerHeight,
+} from "./timelineLanes";
 
 export interface PanelTiming {
   index: number;
@@ -45,7 +56,9 @@ export interface TimelineStoryPanelsTrackProps {
   onOffsetChange?: (key: string, offsetPx: number) => void;
 }
 
-export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> = ({
+export const TimelineStoryPanelsTrack: React.FC<
+  TimelineStoryPanelsTrackProps
+> = ({
   panels = [],
   panelTimings = [],
   currentPanelIndex,
@@ -149,7 +162,10 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaX = moveEvent.clientX - startX;
       const deltaSecs = side === "right" ? deltaX / 30 : -deltaX / 30;
-      const nextDuration = Math.max(0.5, Math.min(60, initialDuration + deltaSecs));
+      const nextDuration = Math.max(
+        0.5,
+        Math.min(60, initialDuration + deltaSecs)
+      );
       const rounded = parseFloat(nextDuration.toFixed(1));
       latestDuration = rounded;
       setResizingInfo({
@@ -182,7 +198,8 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
       const k = `panel-${i}`;
       const t = panelTimings?.[i];
       const dur = t?.duration ?? panel.duration ?? 0;
-      const baseLeft = t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * pxPerSec;
+      const baseLeft =
+        t?.startPx !== undefined ? t.startPx : (t?.startTime ?? 0) * pxPerSec;
       const moveDelta = movingInfo?.key === k ? movingInfo.deltaPx : 0;
       const isResizingThis = resizingInfo?.idx === i;
       const resizeLeftDelta =
@@ -206,7 +223,12 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
   const keyframeRowHeight = keyframesVisible ? 24 : 0;
   const outerHeightPx = innerHeightPx + 8 + keyframeRowHeight;
 
-  const calcTotalDuration = useMemo(() => totalDuration ?? (panelTimings?.reduce((sum, p) => sum + (p.duration || 0), 0) || 3), [totalDuration, panelTimings]);
+  const calcTotalDuration = useMemo(
+    () =>
+      totalDuration ??
+      (panelTimings?.reduce((sum, p) => sum + (p.duration || 0), 0) || 3),
+    [totalDuration, panelTimings]
+  );
 
   return (
     <div
@@ -226,7 +248,12 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
         onToggleMute={() => {}}
         onAdd={onAddPanel}
       />
-      <div className="flex-1 relative" style={{ height: `${Math.max(56, innerHeightPx) + keyframeRowHeight}px` }}>
+      <div
+        className="flex-1 relative"
+        style={{
+          height: `${Math.max(56, innerHeightPx) + keyframeRowHeight}px`,
+        }}
+      >
         {panels.length === 0 ? (
           <div className="w-full h-full p-1 pointer-events-none select-none">
             <div className="w-full h-full rounded border border-dashed border-white/[0.04] bg-white/[0.01] flex items-center px-3">
@@ -277,9 +304,13 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   ? timing.startPx
                   : timing.startTime * pxPerSec;
 
-              const activeDur = isResizing && resizingInfo
-                ? Math.max(0.5, resizingInfo.initialDuration + resizingInfo.deltaSecs)
-                : dur;
+              const activeDur =
+                isResizing && resizingInfo
+                  ? Math.max(
+                      0.5,
+                      resizingInfo.initialDuration + resizingInfo.deltaSecs
+                    )
+                  : dur;
 
               // Story panels are ALWAYS contiguous — no independent offsets.
               // displayLeftPx is authoritative from panelTimings only.
@@ -304,13 +335,7 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                 <div
                   key={key}
                   onMouseDown={(e) =>
-                    handleMoveStart(
-                      e,
-                      key,
-                      idx,
-                      baseLeftPx,
-                      displayWidthPx
-                    )
+                    handleMoveStart(e, key, idx, baseLeftPx, displayWidthPx)
                   }
                   onContextMenu={(e) => onContextMenu(e, key, idx)}
                   className={`group absolute rounded-md border select-none overflow-hidden z-10 ${
@@ -327,7 +352,11 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                     width: `${displayWidthPx}px`,
                     top: `${clipTop}px`,
                     height: `${clipHeight}px`,
-                    cursor: isMoving ? "grabbing" : isResizing ? "col-resize" : "grab",
+                    cursor: isMoving
+                      ? "grabbing"
+                      : isResizing
+                      ? "col-resize"
+                      : "grab",
                     backgroundColor: "#18181B",
                     transition: "none",
                   }}
@@ -353,8 +382,8 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   {/* Panel Number Badge */}
                   <div className="absolute top-1 left-1.5 flex items-center gap-1 z-10 pointer-events-none">
                     <span className="text-[8px] font-mono font-bold text-white bg-black/60 px-1 py-0.2 rounded-sm border border-white/10 flex items-center gap-0.5">
-                      <ImageIcon className="h-2.5 w-2.5 text-[#3B82F6]" />
-                      #{idx + 1}
+                      <ImageIcon className="h-2.5 w-2.5 text-[#3B82F6]" />#
+                      {idx + 1}
                     </span>
                     <span className="text-[8px] font-mono text-white/90 truncate max-w-[50px] font-semibold drop-shadow-sm">
                       {panel.title || `Panel ${idx + 1}`}
@@ -367,7 +396,10 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                   </div>
 
                   {/* Live Duration Badge & Three-Dots Menu */}
-                  <div className="absolute top-1 right-1.5 flex items-center gap-1 z-20 pointer-events-auto" style={{ cursor: "inherit" }}>
+                  <div
+                    className="absolute top-1 right-1.5 flex items-center gap-1 z-20 pointer-events-auto"
+                    style={{ cursor: "inherit" }}
+                  >
                     {/* Live Drag Delta Display */}
                     {isMoving && movingInfo && movingInfo.deltaPx !== 0 && (
                       <span className="text-[7.5px] font-mono font-bold text-white bg-[#3B82F6] px-1.5 py-0.5 rounded border border-[#60A5FA]/40 shadow-xs animate-pulse">
@@ -396,17 +428,17 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
 
                     {/* Prominent Glassmorphic Three-Dots Action Menu Button */}
                     {displayWidthPx >= 55 && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onContextMenu(e, key, idx);
-                      }}
-                      className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
-                      title="Frame Options"
-                    >
-                      <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onContextMenu(e, key, idx);
+                        }}
+                        className="group/btn h-4.5 px-1 flex items-center justify-center rounded-[5px] bg-[#121212]/85 hover:bg-[#3B82F6] text-neutral-300 hover:text-white border border-white/20 hover:border-[#2F2F2F] shadow-[0_2px_6px_rgba(0,0,0,0.7)] hover:shadow-[0_0_12px_rgba(192,132,252,0.7)] backdrop-blur-md transition-all active:scale-90 cursor-pointer"
+                        title="Frame Options"
+                      >
+                        <MoreHorizontal className="h-3 w-3 stroke-[2.5]" />
+                      </button>
                     )}
                   </div>
 
@@ -440,7 +472,9 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                         type="button"
                         onClick={() => onAddKeyframe?.(key, duration / 2)}
                         className="absolute bottom-1 flex h-4 w-4 items-center justify-center rounded text-neutral-500 hover:bg-white/10 hover:text-white cursor-pointer"
-                        style={{ left: `${left + Math.max(2, width / 2 - 8)}px` }}
+                        style={{
+                          left: `${left + Math.max(2, width / 2 - 8)}px`,
+                        }}
                         title={`Add keyframe to panel ${idx + 1}`}
                       >
                         <Plus className="h-3 w-3" />
@@ -450,13 +484,17 @@ export const TimelineStoryPanelsTrack: React.FC<TimelineStoryPanelsTrackProps> =
                           type="button"
                           key={keyframe.id}
                           onClick={() => onSelectKeyframe?.(keyframe.id)}
-                          onDoubleClick={() => onCycleEasing?.(key, keyframe.id)}
+                          onDoubleClick={() =>
+                            onCycleEasing?.(key, keyframe.id)
+                          }
                           className={`absolute bottom-1 h-3 w-3 rotate-45 border cursor-pointer ${
                             selectedKeyframeId === keyframe.id
                               ? "border-[#60A5FA] bg-[#3B82F6]"
                               : "border-neutral-400 bg-neutral-700 hover:border-white"
                           }`}
-                          style={{ left: `${left + keyframe.time * pxPerSec - 6}px` }}
+                          style={{
+                            left: `${left + keyframe.time * pxPerSec - 6}px`,
+                          }}
                           title={`${keyframe.property} keyframe (${keyframe.easing})`}
                         />
                       ))}

@@ -28,7 +28,11 @@ export function useThemeMode() {
   }, []);
 
   return useMemo(
-    () => ({ themeMode: themeMode as ThemeMode, setThemeMode, toggleThemeMode }),
+    () => ({
+      themeMode: themeMode as ThemeMode,
+      setThemeMode,
+      toggleThemeMode,
+    }),
     [themeMode, toggleThemeMode]
   );
 }

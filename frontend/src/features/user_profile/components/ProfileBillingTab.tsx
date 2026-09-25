@@ -32,10 +32,5 @@ export default function ProfileBillingTab({
   fetchWithInterceptor,
   addNotification,
 }: ProfileBillingTabProps) {
-  return (
-    <AICreditWalletPage
-      addNotification={addNotification}
-    />
-  );
+  return <AICreditWalletPage addNotification={addNotification} />;
 }
-

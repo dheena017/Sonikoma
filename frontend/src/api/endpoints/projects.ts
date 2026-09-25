@@ -19,14 +19,20 @@ export const getProject = async (
   jobId?: string | null
 ): Promise<ApiResponse<any>> => {
   const query = jobId ? `?job_id=${encodeURIComponent(jobId)}` : "";
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}${query}`);
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}${query}`
+  );
 };
 
 export const getPublicProject = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/public/${projectId}`);
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/public/${projectId}`
+  );
 };
 
 export const createProject = async (
@@ -76,16 +82,23 @@ export const getSeries = async (
   fetchWithInterceptor: FetchClient,
   seriesSlug: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/series/${seriesSlug}`);
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/series/${seriesSlug}`
+  );
 };
 
 export const deleteSeries = async (
   fetchWithInterceptor: FetchClient,
   seriesId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/series/${seriesId}`, {
-    method: "DELETE",
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/series/${seriesId}`,
+    {
+      method: "DELETE",
+    }
+  );
 };
 
 export const updateProjectPanels = async (
@@ -123,18 +136,25 @@ export const updateProjectTokens = async (
   tokens: number,
   jobId?: string | null
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/tokens`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ tokens, ...(jobId ? { job_id: jobId } : {}) }),
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/tokens`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tokens, ...(jobId ? { job_id: jobId } : {}) }),
+    }
+  );
 };
 
 export const getProjectSettings = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings`);
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/settings`
+  );
 };
 
 export const updateProjectSettings = async (
@@ -146,11 +166,15 @@ export const updateProjectSettings = async (
     autocrop_settings?: any;
   }
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(settings),
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/settings`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(settings),
+    }
+  );
 };
 
 // 1. Dedicated Video Settings API
@@ -158,7 +182,10 @@ export const getVideoSettings = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/video`);
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/settings/video`
+  );
 };
 
 export const updateVideoSettings = async (
@@ -166,11 +193,15 @@ export const updateVideoSettings = async (
   projectId: string,
   videoSettings: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/video`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ video_settings: videoSettings }),
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/settings/video`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ video_settings: videoSettings }),
+    }
+  );
 };
 
 // 2. Dedicated Audio Settings API
@@ -178,7 +209,10 @@ export const getAudioSettings = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/audio`);
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/settings/audio`
+  );
 };
 
 export const updateAudioSettings = async (
@@ -186,11 +220,15 @@ export const updateAudioSettings = async (
   projectId: string,
   audioSettings: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/audio`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ audio_settings: audioSettings }),
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/settings/audio`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ audio_settings: audioSettings }),
+    }
+  );
 };
 
 // 3. Dedicated AutoCrop Settings API
@@ -198,7 +236,10 @@ export const getAutoCropSettings = async (
   fetchWithInterceptor: FetchClient,
   projectId: string
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/autocrop`);
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/settings/autocrop`
+  );
 };
 
 export const updateAutoCropSettings = async (
@@ -206,9 +247,13 @@ export const updateAutoCropSettings = async (
   projectId: string,
   autoCropSettings: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/projects/${projectId}/settings/autocrop`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ autocrop_settings: autoCropSettings }),
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/projects/${projectId}/settings/autocrop`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ autocrop_settings: autoCropSettings }),
+    }
+  );
 };

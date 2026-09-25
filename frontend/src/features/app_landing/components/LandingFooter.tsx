@@ -26,9 +26,7 @@ export function LandingFooter() {
   return (
     <footer
       className={`py-16 px-6 border-t transition-colors duration-300 ${
-        isLight
-          ? "border-slate-200 bg-white"
-          : "border-[#2F2F2F] bg-[#0D0E12]"
+        isLight ? "border-slate-200 bg-white" : "border-[#2F2F2F] bg-[#0D0E12]"
       }`}
     >
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
@@ -39,7 +37,8 @@ export function LandingFooter() {
               isLight ? "text-slate-700" : "text-neutral-400"
             }`}
           >
-            Turn your favorite webtoon chapters and comics into voiced, animated vertical videos.
+            Turn your favorite webtoon chapters and comics into voiced, animated
+            vertical videos.
           </p>
           <div className="flex items-center gap-2.5 pt-2">
             <FooterSocial icon={<Twitter />} />

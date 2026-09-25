@@ -1,6 +1,14 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { X, Sparkles, ArrowRight, Flame, ShieldCheck, Cloud, Clock } from "lucide-react";
+import {
+  X,
+  Sparkles,
+  ArrowRight,
+  Flame,
+  ShieldCheck,
+  Cloud,
+  Clock,
+} from "lucide-react";
 import { SonikomaLogo } from "@/shared/ui/branding";
 
 export interface ComeBackUserModalProps {
@@ -94,7 +102,9 @@ export function ComeBackUserModal({
               <Cloud className="h-4 w-4 text-emerald-400 shrink-0" />
               <div>
                 <h4 className="font-bold text-white">Cloud Backup</h4>
-                <p className="text-[11px] text-neutral-400">Your work stays safe in your account.</p>
+                <p className="text-[11px] text-neutral-400">
+                  Your work stays safe in your account.
+                </p>
               </div>
             </div>
 
@@ -102,7 +112,9 @@ export function ComeBackUserModal({
               <Clock className="h-4 w-4 text-teal-400 shrink-0" />
               <div>
                 <h4 className="font-bold text-white">Instant Resume</h4>
-                <p className="text-[11px] text-neutral-400">Log back in anytime to continue where you left off.</p>
+                <p className="text-[11px] text-neutral-400">
+                  Log back in anytime to continue where you left off.
+                </p>
               </div>
             </div>
           </div>

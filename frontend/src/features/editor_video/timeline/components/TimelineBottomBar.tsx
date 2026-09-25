@@ -1,5 +1,12 @@
 import React from "react";
-import { Music, Sparkles, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import {
+  Music,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 import { useAppShortcuts } from "@/shared/hooks/useAppShortcuts";
@@ -27,7 +34,9 @@ function formatTime(secs: number): string {
   const m = Math.floor((secs % 3600) / 60);
   const s = Math.floor(secs % 60);
   if (hours > 0) {
-    return `${hours}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    return `${hours}:${m.toString().padStart(2, "0")}:${s
+      .toString()
+      .padStart(2, "0")}`;
   }
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
@@ -91,13 +100,20 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
 
       {/* Right side: Scroll buttons + Snap indicator */}
       <div className="flex items-center gap-2 shrink-0">
-        <span className={`text-[10px] font-mono ${snapEnabled ? "text-[#3B82F6]/70" : "text-neutral-600"}`}>
+        <span
+          className={`text-[10px] font-mono ${
+            snapEnabled ? "text-[#3B82F6]/70" : "text-neutral-600"
+          }`}
+        >
           Snap {snapEnabled ? "ON" : "OFF"}
         </span>
 
         {/* Zoom Controls */}
         <div className="flex items-center gap-1 border-r border-white/10 pr-2 mr-1">
-          <Tooltip text={formatTooltip("Zoom Out", "timeline_zoom_out", "-")} placement="top">
+          <Tooltip
+            text={formatTooltip("Zoom Out", "timeline_zoom_out", "-")}
+            placement="top"
+          >
             <button
               onClick={onZoomOut}
               aria-label="Zoom Out"
@@ -115,7 +131,10 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
               {Math.round((zoomLevel / 30) * 100)}%
             </button>
           )}
-          <Tooltip text={formatTooltip("Zoom In", "timeline_zoom_in", "+")} placement="top">
+          <Tooltip
+            text={formatTooltip("Zoom In", "timeline_zoom_in", "+")}
+            placement="top"
+          >
             <button
               onClick={onZoomIn}
               aria-label="Zoom In"
@@ -128,7 +147,14 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
 
         {/* Left / Right Scroll Navigation Buttons */}
         <div className="flex items-center gap-1">
-          <Tooltip text={formatTooltip("Scroll timeline left", "timeline_scroll_left", "◀")} placement="top">
+          <Tooltip
+            text={formatTooltip(
+              "Scroll timeline left",
+              "timeline_scroll_left",
+              "◀"
+            )}
+            placement="top"
+          >
             <button
               onClick={handleScrollLeft}
               aria-label="Scroll timeline left"
@@ -137,7 +163,14 @@ const TimelineBottomBar: React.FC<TimelineBottomBarProps> = ({
               <ChevronLeft className="h-3.5 w-3.5 stroke-[2.5]" />
             </button>
           </Tooltip>
-          <Tooltip text={formatTooltip("Scroll timeline right", "timeline_scroll_right", "▶")} placement="top">
+          <Tooltip
+            text={formatTooltip(
+              "Scroll timeline right",
+              "timeline_scroll_right",
+              "▶"
+            )}
+            placement="top"
+          >
             <button
               onClick={handleScrollRight}
               aria-label="Scroll timeline right"

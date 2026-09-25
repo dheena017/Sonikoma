@@ -58,7 +58,9 @@ export const SonikomaLogo: React.FC<SonikomaLogoProps> = ({
     <div
       onClick={onClick}
       className={`inline-flex items-center ${config.gap} select-none ${
-        onClick ? "cursor-pointer group hover:opacity-95 transition-opacity" : ""
+        onClick
+          ? "cursor-pointer group hover:opacity-95 transition-opacity"
+          : ""
       } ${className}`}
     >
       {/* Seamless Circular Emblem Frame with Real Sonikoma Logo */}
@@ -69,7 +71,8 @@ export const SonikomaLogo: React.FC<SonikomaLogoProps> = ({
           src={logoSrc}
           onError={(e) => {
             // Fallback to relative or icon if needed
-            (e.currentTarget as HTMLImageElement).src = "../icons/logo-dark.png";
+            (e.currentTarget as HTMLImageElement).src =
+              "../icons/logo-dark.png";
           }}
           alt="Sonikoma"
           className="w-full h-full object-cover scale-[1.20] transition-transform duration-200 group-hover:scale-[1.28]"
@@ -81,7 +84,9 @@ export const SonikomaLogo: React.FC<SonikomaLogoProps> = ({
       {!iconOnly && (
         <div className="flex flex-col text-left leading-tight">
           <div className="flex items-center gap-1.5">
-            <span className={`${config.textSize} text-white font-bold tracking-tight`}>
+            <span
+              className={`${config.textSize} text-white font-bold tracking-tight`}
+            >
               Sonikoma
             </span>
 
@@ -93,7 +98,9 @@ export const SonikomaLogo: React.FC<SonikomaLogoProps> = ({
           </div>
 
           {showSubtitle && (
-            <span className={`${config.subtextSize} font-medium text-slate-400`}>
+            <span
+              className={`${config.subtextSize} font-medium text-slate-400`}
+            >
               {subtitleText}
             </span>
           )}

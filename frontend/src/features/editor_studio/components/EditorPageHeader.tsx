@@ -101,7 +101,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
   );
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
-  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
 
   // Smoothly slide out of view if the mobile/drawer sidebar is open
   const headerVisibilityClass = isSidebarOpen
@@ -190,7 +191,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
       // Dynamically format clean display name from root domain (e.g. webcomicsapp -> Webcomicsapp)
       const domainParts = host.split(".");
-      const mainName = domainParts.length > 1 ? domainParts[domainParts.length - 2] : domainParts[0];
+      const mainName =
+        domainParts.length > 1
+          ? domainParts[domainParts.length - 2]
+          : domainParts[0];
       const displayName = mainName
         .split(/[-_]/)
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
@@ -252,7 +256,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                   title={`Source: ${websiteInfo.domain}`}
                 >
                   <Globe className="w-2.5 h-2.5" />
-                  <span className="truncate max-w-[90px]">{websiteInfo.name}</span>
+                  <span className="truncate max-w-[90px]">
+                    {websiteInfo.name}
+                  </span>
                   <ExternalLink className="w-2 h-2 opacity-60" />
                 </a>
               )}
@@ -260,7 +266,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
               {projectGenre && (
                 <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/50 text-[9px] font-medium text-neutral-300 truncate max-w-[90px]">
                   <Tag className="w-2.5 h-2.5 text-neutral-400 shrink-0" />
-                  <span className="truncate">{projectGenre.split(",")[0].trim()}</span>
+                  <span className="truncate">
+                    {projectGenre.split(",")[0].trim()}
+                  </span>
                 </span>
               )}
             </div>
@@ -291,7 +299,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-nowrap pr-0.5 sm:pr-1">
         {/* 🟢 Server Status Indicator - Hidden on screens (<580px) */}
         <div className="hidden min-[580px]:block">
-          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+          <ServerStatusIndicator
+            status={backendStatus}
+            onClick={recheckBackend}
+          />
         </div>
 
         {/* 🤖 Global AI Model Selector - Hidden on narrow mobile (<640px) */}
@@ -310,7 +321,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
                 className="flex h-8.5 items-center gap-1 px-2.5 sm:px-3 rounded-xl border border-[#33353e] bg-[#202127] hover:bg-[#282a32] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm shrink-0"
               >
                 <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
-                <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
+                <span className="font-bold text-amber-300 font-mono text-[11px]">
+                  {credits.toLocaleString()}
+                </span>
               </button>
             </Tooltip>
 
@@ -357,7 +370,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
         {/* Focus Mode - Hidden on narrow screens (<520px) */}
         <div className="hidden min-[520px]:block">
-          <Tooltip text={isFocusMode ? "Exit Focus Mode" : "Focus Mode"} placement="bottom">
+          <Tooltip
+            text={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
+            placement="bottom"
+          >
             <button
               type="button"
               onClick={() => setIsFocusMode((value) => !value)}
@@ -374,7 +390,10 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         </div>
 
         {/* Save Button */}
-        <Tooltip text={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"} placement="bottom">
+        <Tooltip
+          text={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"}
+          placement="bottom"
+        >
           <button
             type="button"
             onClick={onSave}
@@ -383,7 +402,8 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
             className={`flex items-center gap-1.5 px-2.5 sm:px-3 h-8.5 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border shrink-0 ${
               isSaving
                 ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-[#3B82F6] cursor-wait opacity-80"
-                : isDirty ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border-blue-400/40 shadow-md shadow-blue-900/30 font-bold"
+                : isDirty
+                ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border-blue-400/40 shadow-md shadow-blue-900/30 font-bold"
                 : "bg-[#202127] hover:bg-[#282a32] border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white"
             }`}
           >
@@ -442,7 +462,9 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
           <Tooltip
             text={
               activeProjectId && activeProjectData
-                ? `Active Project: ${activeProjectData.project?.title || "Active"}`
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  }`
                 : "Select Active Project"
             }
             placement="bottom"

@@ -15,7 +15,8 @@
   --sk-accent-emerald: #10b981;
   --sk-text-primary: #f8fafc;
   --sk-text-muted: #8492a6;
-  --sk-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  --sk-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Inter", sans-serif;
   --sk-font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", monospace;
   --sk-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -23,8 +24,6 @@
 .sonikoma-hidden {
   display: none !important;
 }
-
-
 
 /* ─── 2. Speech Bubble Inspector Pill ───────────────────────────────────────── */
 .sonikoma-inspector-pill {
@@ -37,14 +36,21 @@
   padding: 11px 13px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 18px 44px -8px rgba(0, 0, 0, 0.85), 0 0 24px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 18px 44px -8px rgba(0, 0, 0, 0.85),
+    0 0 24px rgba(59, 130, 246, 0.25);
   font-family: var(--sk-font-sans);
   animation: sonikoma-fade-in 0.2s var(--sk-ease-spring);
 }
 
 @keyframes sonikoma-fade-in {
-  from { opacity: 0; transform: scale(0.94) translateY(6px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .sonikoma-pill-header {
@@ -149,7 +155,8 @@
   transform: translateX(-50%) !important;
   z-index: 2147483647 !important;
   font-family: var(--sk-font-sans) !important;
-  transition: top 0.3s var(--sk-ease-spring), bottom 0.3s var(--sk-ease-spring), opacity 0.2s ease !important;
+  transition: top 0.3s var(--sk-ease-spring), bottom 0.3s var(--sk-ease-spring),
+    opacity 0.2s ease !important;
   user-select: none !important;
   pointer-events: auto !important;
   box-sizing: border-box !important;
@@ -187,7 +194,8 @@
   padding: 8px 20px !important;
   backdrop-filter: blur(24px) !important;
   -webkit-backdrop-filter: blur(24px) !important;
-  box-shadow: 0 16px 48px -4px rgba(0, 0, 0, 0.92), 0 0 28px rgba(59, 130, 246, 0.35) !important;
+  box-shadow: 0 16px 48px -4px rgba(0, 0, 0, 0.92),
+    0 0 28px rgba(59, 130, 246, 0.35) !important;
   overflow: hidden !important;
   color: #f8fafc !important;
 }
@@ -210,8 +218,15 @@
 }
 
 @keyframes sonikoma-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.9; }
-  50% { transform: scale(1.3); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
 }
 
 .sonikoma-cinema-badge {
@@ -572,7 +587,12 @@
   position: fixed !important;
   inset: 0 !important;
   z-index: 2147483641 !important;
-  background: radial-gradient(circle at center, transparent 35%, rgba(0, 0, 0, 0.72) 80%, rgba(0, 0, 0, 0.94) 100%) !important;
+  background: radial-gradient(
+    circle at center,
+    transparent 35%,
+    rgba(0, 0, 0, 0.72) 80%,
+    rgba(0, 0, 0, 0.94) 100%
+  ) !important;
   pointer-events: none !important;
   animation: sonikoma-fade-in 0.3s ease-out !important;
 }
@@ -721,7 +741,11 @@
   position: fixed !important;
   inset: 0 !important;
   z-index: 2147483640 !important;
-  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.4) 30%, rgba(0, 0, 0, 0.94) 85%) !important;
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0.4) 30%,
+    rgba(0, 0, 0, 0.94) 85%
+  ) !important;
   backdrop-filter: blur(4px) !important;
   -webkit-backdrop-filter: blur(4px) !important;
   pointer-events: none !important;
@@ -887,4 +911,3 @@
   box-shadow: 0 0 8px #3b82f6 !important;
   cursor: pointer !important;
 }
-

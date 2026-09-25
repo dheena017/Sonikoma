@@ -314,8 +314,9 @@ export default function LayerSeparationPanel({
                     rel="noreferrer"
                     className="text-[#3B82F6] underline hover:text-[#93C5FD]"
                   >
-                    {activeStoryboardPanel?.layers?.text_url?.split("/").pop() ||
-                      "text.png"}
+                    {activeStoryboardPanel?.layers?.text_url
+                      ?.split("/")
+                      .pop() || "text.png"}
                   </a>
                 </div>
               </div>
@@ -340,7 +341,8 @@ export default function LayerSeparationPanel({
                 <div>
                   <span className="text-neutral-450">RMS Peaks: </span>
                   <span className="text-emerald-400">
-                    {activeStoryboardPanel?.syncMap?.audio_peaks?.length || 0} frames
+                    {activeStoryboardPanel?.syncMap?.audio_peaks?.length || 0}{" "}
+                    frames
                   </span>
                 </div>
               </div>

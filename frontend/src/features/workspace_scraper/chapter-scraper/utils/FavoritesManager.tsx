@@ -92,7 +92,9 @@ export class FavoritesManager {
 
   static getBookmarks(): string[] {
     try {
-      const data = localStorage.getItem("sonikoma_bookmarked_chapters") || localStorage.getItem("sonikoma_bookmarked_episodes");
+      const data =
+        localStorage.getItem("sonikoma_bookmarked_chapters") ||
+        localStorage.getItem("sonikoma_bookmarked_episodes");
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
@@ -126,7 +128,9 @@ export class FavoritesManager {
 
   static getReadChapters(): string[] {
     try {
-      const data = localStorage.getItem("sonikoma_read_chapters") || localStorage.getItem("sonikoma_read_episodes");
+      const data =
+        localStorage.getItem("sonikoma_read_chapters") ||
+        localStorage.getItem("sonikoma_read_episodes");
       return data ? JSON.parse(data) : [];
     } catch {
       return [];
@@ -182,10 +186,7 @@ export class FavoritesManager {
 
   static removeEnteredUrl(url: string) {
     const urls = this.getEnteredUrls().filter((u) => u !== url);
-    localStorage.setItem(
-      "sonikoma_entered_urls",
-      JSON.stringify(urls)
-    );
+    localStorage.setItem("sonikoma_entered_urls", JSON.stringify(urls));
     this.notifyUpdated();
   }
 }

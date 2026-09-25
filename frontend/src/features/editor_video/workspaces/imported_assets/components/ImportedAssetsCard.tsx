@@ -24,7 +24,11 @@ export interface ImportedAssetsCardProps {
   totalImagesCount: number;
   onSelect: (index: number, url: string, e: React.MouseEvent) => void;
   onToggleFavorite: (index: number, e: React.MouseEvent) => void;
-  onAddToTimeline: (url: string, index: number, e: React.MouseEvent) => Promise<void> | void;
+  onAddToTimeline: (
+    url: string,
+    index: number,
+    e: React.MouseEvent
+  ) => Promise<void> | void;
   onMergeWithNext: (index: number, e: React.MouseEvent) => Promise<void> | void;
   onOpenEditor: (index: number, e: React.MouseEvent) => void;
   onDelete: (index: number, e: React.MouseEvent) => void;
@@ -88,7 +92,9 @@ export const ImportedAssetsCard: React.FC<ImportedAssetsCardProps> = ({
           alt={title}
           loading="lazy"
           className={`w-full h-full object-cover transition-transform duration-300 ${
-            isProcessing ? "scale-95 blur-[1px] opacity-60" : "group-hover:scale-105"
+            isProcessing
+              ? "scale-95 blur-[1px] opacity-60"
+              : "group-hover:scale-105"
           }`}
         />
 

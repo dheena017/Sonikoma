@@ -21,13 +21,6 @@
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo"
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".venv",
-    "public"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", ".venv", "public"]
 }

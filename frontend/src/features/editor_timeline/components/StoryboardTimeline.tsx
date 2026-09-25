@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { Sparkles } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { useStoryboardOperations } from "@/features/editor_timeline/hooks/useStoryboardOperations";
 import { processWithConcurrency, chunkArray } from "@/shared/utils/batchUtils";
@@ -177,7 +176,9 @@ const StoryboardTimeline = React.memo(
           const q = searchQuery.toLowerCase().trim();
           const matchSpeech = panel.speech_text?.toLowerCase().includes(q);
           const matchNarrative = panel.narrative?.toLowerCase().includes(q);
-          const matchVisual = panel.visual_description?.toLowerCase().includes(q);
+          const matchVisual = panel.visual_description
+            ?.toLowerCase()
+            .includes(q);
           const matchSfx = panel.sfx?.toLowerCase().includes(q);
           const matchIndex = `#${idx + 1}`.includes(q) || `${idx + 1}` === q;
           if (
@@ -203,10 +204,16 @@ const StoryboardTimeline = React.memo(
         if (filterStatus === "without_speech") {
           return !panel.speech_text?.trim();
         }
-        if (filterStatus === "with_narration" || filterStatus === "with_narrative") {
+        if (
+          filterStatus === "with_narration" ||
+          filterStatus === "with_narrative"
+        ) {
           return Boolean(panel.narrative?.trim());
         }
-        if (filterStatus === "without_narration" || filterStatus === "without_narrative") {
+        if (
+          filterStatus === "without_narration" ||
+          filterStatus === "without_narrative"
+        ) {
           return !panel.narrative?.trim();
         }
         if (filterStatus === "with_motion") {
@@ -239,8 +246,8 @@ const StoryboardTimeline = React.memo(
         if (filterStatus === "without_audio") {
           return !(
             (panel as any).audio_url ||
-              (panel as any).dialogue_audio_url ||
-              (panel as any).narrative_audio_url
+            (panel as any).dialogue_audio_url ||
+            (panel as any).narrative_audio_url
           );
         }
 
@@ -257,9 +264,19 @@ const StoryboardTimeline = React.memo(
       for (const p of panels) {
         if (p.speech_text?.trim()) speech++;
         if (p.narrative?.trim()) narration++;
-        if (p.motion_type && p.motion_type !== "none" && p.motion_type !== "static") motion++;
+        if (
+          p.motion_type &&
+          p.motion_type !== "none" &&
+          p.motion_type !== "static"
+        )
+          motion++;
         if (p.sfx?.trim()) sfx++;
-        if ((p as any).audio_url || (p as any).dialogue_audio_url || (p as any).narrative_audio_url) audio++;
+        if (
+          (p as any).audio_url ||
+          (p as any).dialogue_audio_url ||
+          (p as any).narrative_audio_url
+        )
+          audio++;
       }
       const total = panels.length;
       return {
@@ -419,7 +436,9 @@ const StoryboardTimeline = React.memo(
                 if (ttsRes && ttsRes.success && ttsRes.audio_url) {
                   audioUrl = ttsRes.audio_url;
                 } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
-                  audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${ttsRes.audio_base64}`;
+                  audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${
+                    ttsRes.audio_base64
+                  }`;
                 }
 
                 // Capture actual audio duration for precise timing sync
@@ -443,9 +462,7 @@ const StoryboardTimeline = React.memo(
                     {
                       audio_url: audioUrl,
                       ocr_texts:
-                        ocr_texts.length > 0
-                          ? ocr_texts
-                          : [panel.speech_text],
+                        ocr_texts.length > 0 ? ocr_texts : [panel.speech_text],
                     }
                   );
                   if (alignData.success && alignData.dialogue_map) {
@@ -558,7 +575,13 @@ const StoryboardTimeline = React.memo(
           return next;
         });
       }
-    }, [isFilterActive, filteredPanels, panels, areAllFilteredSelected, setSelectedPanelIds]);
+    }, [
+      isFilterActive,
+      filteredPanels,
+      panels,
+      areAllFilteredSelected,
+      setSelectedPanelIds,
+    ]);
 
     const clearSelection = useCallback(() => {
       setSelectedPanelIds(new Set());
@@ -715,13 +738,18 @@ const StoryboardTimeline = React.memo(
 
     const handleAutoCropSelected = () => {
       if (selectedPanelIds.size === 0) {
-        addNotification?.("Please select storyboard panels to auto-crop.", "info");
+        addNotification?.(
+          "Please select storyboard panels to auto-crop.",
+          "info"
+        );
         return;
       }
       setShowAutoCropPreview(true);
     };
 
-    const handleConfirmTimelineAutoCrop = (confirmedMap?: Record<string, string[]>) => {
+    const handleConfirmTimelineAutoCrop = (
+      confirmedMap?: Record<string, string[]>
+    ) => {
       setShowAutoCropPreview(false);
       if (confirmedMap && Object.keys(confirmedMap).length > 0) {
         let nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
@@ -739,7 +767,10 @@ const StoryboardTimeline = React.memo(
         });
         setPanels(updatedPanels);
         clearSelection();
-        addNotification?.("Successfully auto-cropped storyboard panels!", "success");
+        addNotification?.(
+          "Successfully auto-cropped storyboard panels!",
+          "success"
+        );
         audioFeedback?.playSuccess?.();
       } else {
         void handleDirectTimelineAutoCrop();
@@ -818,17 +849,27 @@ const StoryboardTimeline = React.memo(
                         quality: 90,
                       });
 
-                      if (sliceRes && sliceRes.success && Array.isArray(sliceRes.slices) && sliceRes.slices.length > 0) {
+                      if (
+                        sliceRes &&
+                        sliceRes.success &&
+                        Array.isArray(sliceRes.slices) &&
+                        sliceRes.slices.length > 0
+                      ) {
                         sliceUrls = sliceRes.slices
                           .sort((a: any, b: any) => a.index - b.index)
                           .map((s: any) => s.url);
                       }
                     } catch (sliceErr) {
-                      console.warn("[Auto Cropper Timeline] Batch slicing fallback:", sliceErr);
+                      console.warn(
+                        "[Auto Cropper Timeline] Batch slicing fallback:",
+                        sliceErr
+                      );
                     }
 
                     if (sliceUrls.length === 0) {
-                      sliceUrls = rawBoxes.map((b: any) => b.croppedUrl || originalPanel.image_url);
+                      sliceUrls = rawBoxes.map(
+                        (b: any) => b.croppedUrl || originalPanel.image_url
+                      );
                     }
 
                     for (let i = 0; i < sliceUrls.length; i++) {
@@ -1049,23 +1090,29 @@ const StoryboardTimeline = React.memo(
     });
 
     if (panels.length === 0) {
-      const activeScraped = useProjectStore.getState().activeProjectData?.scrapedImages || [];
+      const activeScraped =
+        useProjectStore.getState().activeProjectData?.scrapedImages || [];
       const handleAddAllScraped = () => {
         if (activeScraped.length === 0) return;
-        const initialPanels = activeScraped.map((imgUrl: string, idx: number) => ({
-          id: idx + 1,
-          panel_index: idx,
-          image_url: imgUrl,
-          original_url: imgUrl,
-          prompt: `Scene ${idx + 1}`,
-          speech_text: "",
-          narrative: "",
-          sfx: "",
-          duration: 0,
-          motion_type: "",
-        }));
+        const initialPanels = activeScraped.map(
+          (imgUrl: string, idx: number) => ({
+            id: idx + 1,
+            panel_index: idx,
+            image_url: imgUrl,
+            original_url: imgUrl,
+            prompt: `Scene ${idx + 1}`,
+            speech_text: "",
+            narrative: "",
+            sfx: "",
+            duration: 0,
+            motion_type: "",
+          })
+        );
         setPanels(initialPanels as any);
-        addNotification?.(`Added ${activeScraped.length} scene(s) to timeline!`, "success");
+        addNotification?.(
+          `Added ${activeScraped.length} scene(s) to timeline!`,
+          "success"
+        );
       };
 
       return (
@@ -1084,7 +1131,9 @@ const StoryboardTimeline = React.memo(
             <StoryboardEmptyState
               hasScrapedImages={hasScrapedImages || activeScraped.length > 0}
               scrapedCount={activeScraped.length}
-              onAddAllToStoryboard={activeScraped.length > 0 ? handleAddAllScraped : undefined}
+              onAddAllToStoryboard={
+                activeScraped.length > 0 ? handleAddAllScraped : undefined
+              }
             />
           )}
         </div>
@@ -1175,110 +1224,116 @@ const StoryboardTimeline = React.memo(
               Reset Filters
             </button>
           </div>
-        ) : (() => {
-          const episodeGroups =
-            ((window as any).__scrapeEpisodeGroups as EpisodeGroupRecord[]) ||
-            [];
+        ) : (
+          (() => {
+            const episodeGroups =
+              ((window as any).__scrapeEpisodeGroups as EpisodeGroupRecord[]) ||
+              [];
 
-          if (episodeGroups.length === 0) {
+            if (episodeGroups.length === 0) {
+              return (
+                <div className="w-full min-w-0">
+                  <StoryboardChapterGroup
+                    episodeGroups={[]}
+                    selectedTimelineEp={selectedTimelineEp}
+                    panels={filteredPanels}
+                    currentPanelIndex={currentPanelIndex}
+                    activePreviewTab={activePreviewTab}
+                    setCurrentPanelIndex={setCurrentPanelIndex}
+                    setActivePreviewTab={setActivePreviewTab}
+                    setPlaybackTime={setPlaybackTime}
+                    isAnalyzingAll={isAnalyzingAll}
+                    analyzingPanelId={analyzingPanelId}
+                    selectedPanelIds={selectedPanelIds}
+                    togglePanelSelection={togglePanelSelection}
+                    handlePanelClick={handlePanelClick}
+                    handlePanelDoubleClick={handlePanelDoubleClick}
+                    handleShiftPanel={handleShiftPanel}
+                    handleModifySpeechText={handleModifySpeechText}
+                    handleModifyMotion={handleModifyMotion}
+                    handleModifyDuration={handleModifyDuration}
+                    handleModifySFX={handleModifySFX}
+                    handleModifyVisualDescription={
+                      handleModifyVisualDescription
+                    }
+                    handleModifyNarrative={handleModifyNarrative}
+                    handleAnalyzePanel={handleAnalyzePanel}
+                    handleCancelAnalysis={handleCancelAnalysis}
+                    playStoryboardAudio={playStoryboardAudio}
+                    autoPlayAudio={autoPlayAudio}
+                    addNotification={addNotification}
+                    setPanels={setPanels}
+                    fetchWithInterceptor={fetchWithInterceptor}
+                    voiceActor={voiceActor}
+                    speechRate={speechRate}
+                    speechPitch={speechPitch}
+                    storyboardViewLayout={storyboardViewLayout}
+                  />
+                </div>
+              );
+            }
+
             return (
-              <div className="w-full min-w-0">
-                <StoryboardChapterGroup
-                  episodeGroups={[]}
+              <div className="flex flex-col lg:flex-row gap-6 w-full items-stretch flex-1 min-h-0">
+                <StoryboardSidebar
+                  episodeGroups={episodeGroups}
+                  panels={panels}
                   selectedTimelineEp={selectedTimelineEp}
-                  panels={filteredPanels}
-                  currentPanelIndex={currentPanelIndex}
-                  activePreviewTab={activePreviewTab}
+                  setSelectedTimelineEp={setSelectedTimelineEp}
                   setCurrentPanelIndex={setCurrentPanelIndex}
-                  setActivePreviewTab={setActivePreviewTab}
-                  setPlaybackTime={setPlaybackTime}
-                  isAnalyzingAll={isAnalyzingAll}
-                  analyzingPanelId={analyzingPanelId}
-                  selectedPanelIds={selectedPanelIds}
-                  togglePanelSelection={togglePanelSelection}
-                  handlePanelClick={handlePanelClick}
-                  handlePanelDoubleClick={handlePanelDoubleClick}
-                  handleShiftPanel={handleShiftPanel}
-                  handleModifySpeechText={handleModifySpeechText}
-                  handleModifyMotion={handleModifyMotion}
-                  handleModifyDuration={handleModifyDuration}
-                  handleModifySFX={handleModifySFX}
-                  handleModifyVisualDescription={handleModifyVisualDescription}
-                  handleModifyNarrative={handleModifyNarrative}
-                  handleAnalyzePanel={handleAnalyzePanel}
-                  handleCancelAnalysis={handleCancelAnalysis}
-                  playStoryboardAudio={playStoryboardAudio}
-                  autoPlayAudio={autoPlayAudio}
+                  timelineEpSearchQuery={timelineEpSearchQuery}
+                  setTimelineEpSearchQuery={setTimelineEpSearchQuery}
+                  timelineEpSortAscending={timelineEpSortAscending}
+                  setTimelineEpSortAscending={setTimelineEpSortAscending}
                   addNotification={addNotification}
-                  setPanels={setPanels}
-                  fetchWithInterceptor={fetchWithInterceptor}
-                  voiceActor={voiceActor}
-                  speechRate={speechRate}
-                  speechPitch={speechPitch}
-                  storyboardViewLayout={storyboardViewLayout}
+                  hoveredTimelineEpIdx={hoveredTimelineEpIdx}
+                  setHoveredTimelineEpIdx={setHoveredTimelineEpIdx}
+                  isCollapsed={isTimelineEpCollapsed}
+                  setIsCollapsed={setIsTimelineEpCollapsed}
                 />
+
+                <div className="flex-1 w-full min-w-0">
+                  <StoryboardChapterGroup
+                    episodeGroups={episodeGroups}
+                    selectedTimelineEp={selectedTimelineEp}
+                    panels={filteredPanels}
+                    currentPanelIndex={currentPanelIndex}
+                    activePreviewTab={activePreviewTab}
+                    setCurrentPanelIndex={setCurrentPanelIndex}
+                    setActivePreviewTab={setActivePreviewTab}
+                    setPlaybackTime={setPlaybackTime}
+                    isAnalyzingAll={isAnalyzingAll}
+                    analyzingPanelId={analyzingPanelId}
+                    selectedPanelIds={selectedPanelIds}
+                    togglePanelSelection={togglePanelSelection}
+                    handlePanelClick={handlePanelClick}
+                    handlePanelDoubleClick={handlePanelDoubleClick}
+                    handleShiftPanel={handleShiftPanel}
+                    handleModifySpeechText={handleModifySpeechText}
+                    handleModifyMotion={handleModifyMotion}
+                    handleModifyDuration={handleModifyDuration}
+                    handleModifySFX={handleModifySFX}
+                    handleModifyVisualDescription={
+                      handleModifyVisualDescription
+                    }
+                    handleModifyNarrative={handleModifyNarrative}
+                    handleAnalyzePanel={handleAnalyzePanel}
+                    handleCancelAnalysis={handleCancelAnalysis}
+                    playStoryboardAudio={playStoryboardAudio}
+                    autoPlayAudio={autoPlayAudio}
+                    addNotification={addNotification}
+                    setPanels={setPanels}
+                    fetchWithInterceptor={fetchWithInterceptor}
+                    voiceActor={voiceActor}
+                    speechRate={speechRate}
+                    speechPitch={speechPitch}
+                    storyboardViewLayout={storyboardViewLayout}
+                  />
+                </div>
               </div>
             );
-          }
-
-          return (
-            <div className="flex flex-col lg:flex-row gap-6 w-full items-stretch flex-1 min-h-0">
-              <StoryboardSidebar
-                episodeGroups={episodeGroups}
-                panels={panels}
-                selectedTimelineEp={selectedTimelineEp}
-                setSelectedTimelineEp={setSelectedTimelineEp}
-                setCurrentPanelIndex={setCurrentPanelIndex}
-                timelineEpSearchQuery={timelineEpSearchQuery}
-                setTimelineEpSearchQuery={setTimelineEpSearchQuery}
-                timelineEpSortAscending={timelineEpSortAscending}
-                setTimelineEpSortAscending={setTimelineEpSortAscending}
-                addNotification={addNotification}
-                hoveredTimelineEpIdx={hoveredTimelineEpIdx}
-                setHoveredTimelineEpIdx={setHoveredTimelineEpIdx}
-                isCollapsed={isTimelineEpCollapsed}
-                setIsCollapsed={setIsTimelineEpCollapsed}
-              />
-
-              <div className="flex-1 w-full min-w-0">
-                <StoryboardChapterGroup
-                  episodeGroups={episodeGroups}
-                  selectedTimelineEp={selectedTimelineEp}
-                  panels={filteredPanels}
-                  currentPanelIndex={currentPanelIndex}
-                  activePreviewTab={activePreviewTab}
-                  setCurrentPanelIndex={setCurrentPanelIndex}
-                  setActivePreviewTab={setActivePreviewTab}
-                  setPlaybackTime={setPlaybackTime}
-                  isAnalyzingAll={isAnalyzingAll}
-                  analyzingPanelId={analyzingPanelId}
-                  selectedPanelIds={selectedPanelIds}
-                  togglePanelSelection={togglePanelSelection}
-                  handlePanelClick={handlePanelClick}
-                  handlePanelDoubleClick={handlePanelDoubleClick}
-                  handleShiftPanel={handleShiftPanel}
-                  handleModifySpeechText={handleModifySpeechText}
-                  handleModifyMotion={handleModifyMotion}
-                  handleModifyDuration={handleModifyDuration}
-                  handleModifySFX={handleModifySFX}
-                  handleModifyVisualDescription={handleModifyVisualDescription}
-                  handleModifyNarrative={handleModifyNarrative}
-                  handleAnalyzePanel={handleAnalyzePanel}
-                  handleCancelAnalysis={handleCancelAnalysis}
-                  playStoryboardAudio={playStoryboardAudio}
-                  autoPlayAudio={autoPlayAudio}
-                  addNotification={addNotification}
-                  setPanels={setPanels}
-                  fetchWithInterceptor={fetchWithInterceptor}
-                  voiceActor={voiceActor}
-                  speechRate={speechRate}
-                  speechPitch={speechPitch}
-                  storyboardViewLayout={storyboardViewLayout}
-                />
-              </div>
-            </div>
-          );
-        })()}
+          })()
+        )}
 
         {showDeleteConfirm && (
           <DeleteConfirmModal

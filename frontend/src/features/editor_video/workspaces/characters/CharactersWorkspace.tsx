@@ -33,16 +33,23 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
   // New Character Creator Form State
   const [newCharName, setNewCharName] = useState("");
-  const [newCharRole, setNewCharRole] = useState<"Protagonist" | "Antagonist" | "Sidekick" | "Narrator">("Protagonist");
-  const [newCharVoice, setNewCharVoice] = useState("Hiroshi (Anime Protagonist)");
-  const [newCharStyle, setNewCharStyle] = useState<"adventurer" | "lorelei" | "bottts">("adventurer");
+  const [newCharRole, setNewCharRole] = useState<
+    "Protagonist" | "Antagonist" | "Sidekick" | "Narrator"
+  >("Protagonist");
+  const [newCharVoice, setNewCharVoice] = useState(
+    "Hiroshi (Anime Protagonist)"
+  );
+  const [newCharStyle, setNewCharStyle] = useState<
+    "adventurer" | "lorelei" | "bottts"
+  >("adventurer");
 
   const filteredCharacters = characters.filter((c) => {
     const matchSearch =
       !searchQuery.trim() ||
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.voiceActor && c.voiceActor.toLowerCase().includes(searchQuery.toLowerCase()));
+      (c.voiceActor &&
+        c.voiceActor.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchSearch;
   });
 
@@ -116,7 +123,9 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                     if (appLogic?.setVoiceActor && char.voiceActor) {
                       appLogic.setVoiceActor(char.voiceActor);
                     }
-                    onTriggerFeedback(`Linked voice: ${char.voiceActor} to active timeline`);
+                    onTriggerFeedback(
+                      `Linked voice: ${char.voiceActor} to active timeline`
+                    );
                   }}
                 />
               ))}
@@ -126,7 +135,10 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
         {/* Character Creator with Live DiceBear Avatar Preview */}
         {activeTab === "Character Creator" && (
-          <form onSubmit={handleAddCharacter} className="space-y-3 p-3 bg-neutral-900/80 rounded-2xl border border-[#2F2F2F] shadow-md font-mono text-xs">
+          <form
+            onSubmit={handleAddCharacter}
+            className="space-y-3 p-3 bg-neutral-900/80 rounded-2xl border border-[#2F2F2F] shadow-md font-mono text-xs"
+          >
             <h4 className="font-bold text-white uppercase text-xs flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
               Create Project Character
@@ -140,14 +152,22 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                 className="w-14 h-14 rounded-full border-2 border-[#60A5FA] bg-neutral-800 shrink-0 shadow-md"
               />
               <div className="min-w-0 flex-1">
-                <p className="text-white font-bold text-sm truncate">{newCharName || "Character Name"}</p>
-                <p className="text-[#60A5FA] text-[10px]">{newCharRole} • {newCharVoice}</p>
-                <span className="text-[8px] text-neutral-500 font-mono">Open DiceBear Anime Avatar</span>
+                <p className="text-white font-bold text-sm truncate">
+                  {newCharName || "Character Name"}
+                </p>
+                <p className="text-[#60A5FA] text-[10px]">
+                  {newCharRole} • {newCharVoice}
+                </p>
+                <span className="text-[8px] text-neutral-500 font-mono">
+                  Open DiceBear Anime Avatar
+                </span>
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-neutral-400 text-[10px]">Character Name</label>
+              <label className="text-neutral-400 text-[10px]">
+                Character Name
+              </label>
               <input
                 type="text"
                 placeholder="e.g. Sung Jin-Woo, Kageyama..."
@@ -160,7 +180,9 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
 
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
-                <label className="text-neutral-400 text-[10px]">Story Role</label>
+                <label className="text-neutral-400 text-[10px]">
+                  Story Role
+                </label>
                 <select
                   value={newCharRole}
                   onChange={(e) => setNewCharRole(e.target.value as any)}
@@ -174,7 +196,9 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="text-neutral-400 text-[10px]">Avatar Style</label>
+                <label className="text-neutral-400 text-[10px]">
+                  Avatar Style
+                </label>
                 <select
                   value={newCharStyle}
                   onChange={(e) => setNewCharStyle(e.target.value as any)}
@@ -203,12 +227,17 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
               Voice Cast Mapping
             </h4>
             {characters.map((char) => (
-              <div key={char.id} className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-between">
+              <div
+                key={char.id}
+                className="p-2.5 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-between"
+              >
                 <div className="flex items-center gap-2">
                   <Mic className="h-4 w-4 text-[#3B82F6]" />
                   <div>
                     <p className="text-xs font-bold text-white">{char.name}</p>
-                    <p className="text-[10px] text-neutral-400 font-mono">{char.voiceActor}</p>
+                    <p className="text-[10px] text-neutral-400 font-mono">
+                      {char.voiceActor}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -217,7 +246,9 @@ export const CharactersWorkspace: React.FC<CharactersWorkspaceProps> = ({
                     if (appLogic?.setVoiceActor && char.voiceActor) {
                       appLogic.setVoiceActor(char.voiceActor);
                     }
-                    onTriggerFeedback(`Set active studio voice to ${char.voiceActor}`);
+                    onTriggerFeedback(
+                      `Set active studio voice to ${char.voiceActor}`
+                    );
                   }}
                   className="px-2.5 py-1 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] border border-[#60A5FA]/40 text-white text-[10px] font-mono font-bold cursor-pointer shadow-sm shadow-blue-500/25 active:scale-95"
                 >

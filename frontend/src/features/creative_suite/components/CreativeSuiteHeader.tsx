@@ -83,7 +83,8 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
   const { activeProjectId, activeProjectData, projectState, setDrawerOpen } =
     useProjectStore();
-  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
@@ -210,7 +211,10 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
       <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 shrink-0 overflow-x-visible pr-0.5 sm:pr-1">
         {/* Server Status Indicator - Hidden on ultra-small screens (<480px) */}
         <div className="hidden min-[480px]:block">
-          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+          <ServerStatusIndicator
+            status={backendStatus}
+            onClick={recheckBackend}
+          />
         </div>
 
         {/* 🤖 Global AI Model Selector */}
@@ -227,11 +231,15 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
                 }}
                 aria-label="Your credit balance & daily rewards"
                 className={`h-8.5 flex items-center gap-1 px-2.5 sm:px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
-                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]" : ""
+                  showCreditsPopover
+                    ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#282a32]"
+                    : ""
                 }`}
               >
                 <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
+                <span className="font-bold text-amber-300 font-mono text-[11px]">
+                  {credits.toLocaleString()}
+                </span>
               </button>
             </Tooltip>
 
@@ -261,7 +269,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
                 setShowCreditsPopover(false);
               }}
               className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
-                showNotifications ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]" : ""
+                showNotifications
+                  ? "ring-2 ring-blue-500/40 border-blue-500 bg-[#282a32]"
+                  : ""
               }`}
               aria-label="Notifications"
             >
@@ -304,7 +314,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           <Tooltip
             text={
               activeProjectId && activeProjectData
-                ? `Active Project: ${activeProjectData.project?.title || "Active"}`
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  }`
                 : "Select Active Project"
             }
             placement="bottom"
@@ -332,11 +344,15 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
             <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
               {activeUser?.full_name ||
                 activeUser?.username ||
-                (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
+                (activeUser?.email
+                  ? activeUser.email.split("@")[0]
+                  : "Studio Creator")}
             </span>
             <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
               <img
-                key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
+                key={
+                  activeUser?.avatar_url || activeUser?.full_name || "avatar"
+                }
                 src={getUserAvatarUrl(activeUser)}
                 referrerPolicy="no-referrer"
                 onLoad={(e) => {

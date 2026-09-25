@@ -73,4 +73,3 @@ export function AutoCropCompareTab({
 }
 
 export default AutoCropCompareTab;
-

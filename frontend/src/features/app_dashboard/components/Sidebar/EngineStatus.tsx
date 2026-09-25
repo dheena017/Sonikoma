@@ -25,9 +25,7 @@ export default function EngineStatus({ latency }: EngineStatusProps) {
         </div>
 
         <div className="flex items-center justify-between text-xs font-mono">
-          <span className="text-[#9CA3AF] font-medium">
-            API Health Latency
-          </span>
+          <span className="text-[#9CA3AF] font-medium">API Health Latency</span>
           <span className="text-[#E5E5E5] font-bold">
             {latency !== null ? `${latency}ms` : "Checking..."}
           </span>

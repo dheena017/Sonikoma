@@ -10,7 +10,11 @@ export function useAppEditorSettings() {
       const raw = localStorage.getItem("global_audio_settings");
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed.voiceActor && parsed.voiceActor !== "en_narrator_1" && parsed.voiceActor !== "Epic Trailer Narrator") {
+        if (
+          parsed.voiceActor &&
+          parsed.voiceActor !== "en_narrator_1" &&
+          parsed.voiceActor !== "Epic Trailer Narrator"
+        ) {
           return parsed.voiceActor;
         }
       }
@@ -19,18 +23,28 @@ export function useAppEditorSettings() {
       localStorage.getItem("ai_comic_voice") ||
       localStorage.getItem("ai_comic_voice_actor") ||
       localStorage.getItem("ai_comic_narrator_voice");
-    if (direct && direct !== "en_narrator_1" && direct !== "Epic Trailer Narrator") {
+    if (
+      direct &&
+      direct !== "en_narrator_1" &&
+      direct !== "Epic Trailer Narrator"
+    ) {
       return direct;
     }
     return DEFAULT_AUDIO_SETTINGS.voiceActor || "en-US-ChristopherNeural";
   });
 
   const [musicTheme, setMusicTheme] = useState<string>(
-    () => localStorage.getItem("ai_comic_music") || DEFAULT_AUDIO_SETTINGS.musicTheme || ""
+    () =>
+      localStorage.getItem("ai_comic_music") ||
+      DEFAULT_AUDIO_SETTINGS.musicTheme ||
+      ""
   );
   const [aspectRatio, setAspectRatio] = useState<"auto" | "9:16" | "16:9">(
     () =>
-      (localStorage.getItem("ai_comic_aspectRatio") as "auto" | "9:16" | "16:9") ||
+      (localStorage.getItem("ai_comic_aspectRatio") as
+        | "auto"
+        | "9:16"
+        | "16:9") ||
       (DEFAULT_VIDEO_SETTINGS.aspectRatio as any) ||
       "16:9"
   );
@@ -66,22 +80,35 @@ export function useAppEditorSettings() {
       }
     };
     window.addEventListener("ai-model-changed", handleModelChanged);
-    return () => window.removeEventListener("ai-model-changed", handleModelChanged);
+    return () =>
+      window.removeEventListener("ai-model-changed", handleModelChanged);
   }, []);
   const [selectedSource, setSelectedSource] = useState<string>(
     () => localStorage.getItem("ai_comic_source") || "webtoons"
   );
   const [frameRate, setFrameRate] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_fps") || String(DEFAULT_VIDEO_SETTINGS.frameRate || 30), 10)
+    parseInt(
+      localStorage.getItem("ai_comic_fps") ||
+        String(DEFAULT_VIDEO_SETTINGS.frameRate || 30),
+      10
+    )
   );
   const [volume, setVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_volume") || String(DEFAULT_AUDIO_SETTINGS.volume || 80), 10)
+    parseInt(
+      localStorage.getItem("ai_comic_volume") ||
+        String(DEFAULT_AUDIO_SETTINGS.volume || 80),
+      10
+    )
   );
   const [isMuted, setIsMuted] = useState<boolean>(
     () => localStorage.getItem("ai_comic_muted") === "true"
   );
   const [sfxVolume, setSfxVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_sfx_volume") || String(DEFAULT_AUDIO_SETTINGS.sfxVolume || 70), 10)
+    parseInt(
+      localStorage.getItem("ai_comic_sfx_volume") ||
+        String(DEFAULT_AUDIO_SETTINGS.sfxVolume || 70),
+      10
+    )
   );
   const [sfxEnabled, setSfxEnabled] = useState<boolean>(
     () => localStorage.getItem("ai_comic_sfx_enabled") !== "false"
@@ -90,19 +117,33 @@ export function useAppEditorSettings() {
     () => localStorage.getItem("app-autoplay-audio") === "true"
   );
   const [narrationVolume, setNarrationVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_narration_volume") || String(DEFAULT_AUDIO_SETTINGS.narrationVolume || 100), 10)
+    parseInt(
+      localStorage.getItem("ai_comic_narration_volume") ||
+        String(DEFAULT_AUDIO_SETTINGS.narrationVolume || 100),
+      10
+    )
   );
   const [bgmVolume, setBgmVolume] = useState<number>(() =>
-    parseInt(localStorage.getItem("ai_comic_bgm_volume") || String(DEFAULT_AUDIO_SETTINGS.bgmVolume || 35), 10)
+    parseInt(
+      localStorage.getItem("ai_comic_bgm_volume") ||
+        String(DEFAULT_AUDIO_SETTINGS.bgmVolume || 35),
+      10
+    )
   );
   const [audioDucking, setAudioDucking] = useState<boolean>(
     () => localStorage.getItem("ai_comic_audio_ducking") !== "false"
   );
   const [speechRate, setSpeechRate] = useState<number>(() =>
-    parseFloat(localStorage.getItem("ai_comic_speech_rate") || String(DEFAULT_AUDIO_SETTINGS.speechRate || 1.0))
+    parseFloat(
+      localStorage.getItem("ai_comic_speech_rate") ||
+        String(DEFAULT_AUDIO_SETTINGS.speechRate || 1.0)
+    )
   );
   const [speechPitch, setSpeechPitch] = useState<number>(() =>
-    parseFloat(localStorage.getItem("ai_comic_speech_pitch") || String(DEFAULT_AUDIO_SETTINGS.speechPitch || 1.0))
+    parseFloat(
+      localStorage.getItem("ai_comic_speech_pitch") ||
+        String(DEFAULT_AUDIO_SETTINGS.speechPitch || 1.0)
+    )
   );
   const [enableDialogueAudio, setEnableDialogueAudio] = useState<boolean>(
     () => localStorage.getItem("ai_comic_enable_dialogue_audio") === "true" // Default: OFF
@@ -112,27 +153,40 @@ export function useAppEditorSettings() {
   );
 
   useEffect(() => {
-    localStorage.setItem("ai_comic_enable_dialogue_audio", String(enableDialogueAudio));
+    localStorage.setItem(
+      "ai_comic_enable_dialogue_audio",
+      String(enableDialogueAudio)
+    );
   }, [enableDialogueAudio]);
 
   useEffect(() => {
-    localStorage.setItem("ai_comic_enable_narrative_audio", String(enableNarrativeAudio));
+    localStorage.setItem(
+      "ai_comic_enable_narrative_audio",
+      String(enableNarrativeAudio)
+    );
   }, [enableNarrativeAudio]);
   const [audioReactiveShake, setAudioReactiveShake] = useState<boolean>(() =>
     localStorage.getItem("ai_video_shake") !== null
       ? localStorage.getItem("ai_video_shake") === "true"
       : Boolean(DEFAULT_VIDEO_SETTINGS.audioReactiveShake)
   );
-  const [shakeIntensity, setShakeIntensity] = useState<"low" | "medium" | "high" | "extreme">(
+  const [shakeIntensity, setShakeIntensity] = useState<
+    "low" | "medium" | "high" | "extreme"
+  >(
     () => (localStorage.getItem("ai_video_shake_intensity") as any) || "medium"
   );
   const [videoFormat, setVideoFormat] = useState<"mp4" | "webm" | "mkv">(
-    () => (localStorage.getItem("ai_video_format") as any) || DEFAULT_VIDEO_SETTINGS.videoFormat || "mp4"
+    () =>
+      (localStorage.getItem("ai_video_format") as any) ||
+      DEFAULT_VIDEO_SETTINGS.videoFormat ||
+      "mp4"
   );
-  const [backgroundStyle, setBackgroundStyle] = useState<"black" | "white" | "transparent" | "blurred">(
-    () => (localStorage.getItem("ai_video_bg_style") as any) || "black"
-  );
-  const [subtitlesStyle, setSubtitlesStyle] = useState<"none" | "burn-in" | "soft">(
+  const [backgroundStyle, setBackgroundStyle] = useState<
+    "black" | "white" | "transparent" | "blurred"
+  >(() => (localStorage.getItem("ai_video_bg_style") as any) || "black");
+  const [subtitlesStyle, setSubtitlesStyle] = useState<
+    "none" | "burn-in" | "soft"
+  >(
     () => (localStorage.getItem("ai_video_subtitles_style") as any) || "burn-in"
   );
   const [narrationStyle, setNarrationStyle] = useState<string>(

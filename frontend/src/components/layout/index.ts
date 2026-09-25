@@ -1,4 +1,7 @@
-export { default as GlobalSearchBar, GlobalSearchBar as QuickFindCommandBar } from "./GlobalSearchBar";
+export {
+  default as GlobalSearchBar,
+  GlobalSearchBar as QuickFindCommandBar,
+} from "./GlobalSearchBar";
 export * from "./GlobalSearchBar";
 export { default as MainHeader } from "./MainHeader";
 export { default as MainLayout } from "./MainLayout";

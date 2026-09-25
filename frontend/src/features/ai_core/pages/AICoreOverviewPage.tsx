@@ -22,7 +22,10 @@ interface AICoreOverviewPageProps {
   addNotification?: (msg: string, type?: string) => void;
 }
 
-export default function AICoreOverviewPage({ navigateTo, addNotification }: AICoreOverviewPageProps) {
+export default function AICoreOverviewPage({
+  navigateTo,
+  addNotification,
+}: AICoreOverviewPageProps) {
   const [providers, setProviders] = useState<any[]>([]);
   const [summary, setSummary] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -79,7 +82,8 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
               </span>
             </h1>
             <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-2xl">
-              Unified control center for AI providers, live rate limits, token telemetry, and smart model routing.
+              Unified control center for AI providers, live rate limits, token
+              telemetry, and smart model routing.
             </p>
           </div>
 
@@ -105,7 +109,10 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
               </div>
               <div>
                 <div className="text-3xl font-black text-[#E5E5E5] font-mono leading-none">
-                  {activeProvidersCount} <span className="text-[#6B7280] text-sm font-normal">/ {providers.length || 10}</span>
+                  {activeProvidersCount}{" "}
+                  <span className="text-[#6B7280] text-sm font-normal">
+                    / {providers.length || 10}
+                  </span>
                 </div>
                 <div className="text-xs text-[#9CA3AF] font-mono tracking-wide mt-1.5">
                   Active Providers
@@ -133,7 +140,9 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
               </div>
               <div>
                 <div className="text-3xl font-black text-[#E5E5E5] font-mono leading-none">
-                  {totalTokens > 1000 ? `${(totalTokens / 1000).toFixed(1)}k` : totalTokens}
+                  {totalTokens > 1000
+                    ? `${(totalTokens / 1000).toFixed(1)}k`
+                    : totalTokens}
                 </div>
                 <div className="text-xs text-[#9CA3AF] font-mono tracking-wide mt-1.5">
                   Total Tokens
@@ -171,7 +180,8 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
                 Smart Model Routing
               </h3>
               <p className="text-xs text-[#9CA3AF] mt-2 leading-relaxed">
-                Configure primary, fallback, and tertiary models across all 11 storyboard, OCR, translation, and TTS tasks.
+                Configure primary, fallback, and tertiary models across all 11
+                storyboard, OCR, translation, and TTS tasks.
               </p>
             </div>
             <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-[#3B82F6] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
@@ -192,7 +202,8 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
                 Usage Analytics
               </h3>
               <p className="text-xs text-[#9CA3AF] mt-2 leading-relaxed">
-                Inspect real-time token consumption, cost breakdown per model, and task-by-task generation logs.
+                Inspect real-time token consumption, cost breakdown per model,
+                and task-by-task generation logs.
               </p>
             </div>
             <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-[#10B981] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
@@ -213,7 +224,8 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
                 Rate Limits & Quotas
               </h3>
               <p className="text-xs text-[#9CA3AF] mt-2 leading-relaxed">
-                Live monitoring of RPM (requests per minute) and TPM (tokens per minute) limits across active providers.
+                Live monitoring of RPM (requests per minute) and TPM (tokens per
+                minute) limits across active providers.
               </p>
             </div>
             <div className="mt-6 flex items-center gap-2 text-xs font-bold font-mono text-[#3B82F6] uppercase tracking-wider group-hover:translate-x-1 transition-transform">
@@ -231,7 +243,8 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
                 Integrated AI Providers
               </h3>
               <p className="text-xs text-[#9CA3AF] mt-0.5">
-                Current status and configuration health of connected AI services.
+                Current status and configuration health of connected AI
+                services.
               </p>
             </div>
             <button
@@ -243,38 +256,43 @@ export default function AICoreOverviewPage({ navigateTo, addNotification }: AICo
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-2">
-            {isLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="flex items-center justify-between p-3.5 rounded-xl bg-[#121212] border border-[#2F2F2F]">
-                  <div className="space-y-1.5">
-                    <Skeleton className="h-3 w-24 rounded-md" />
-                    <Skeleton className="h-2.5 w-16 rounded-md" />
-                  </div>
-                  <Skeleton className="h-5 w-12 rounded-full" />
-                </div>
-              ))
-            ) : (
-              providers.map((p) => (
-                <div
-                  key={p.id}
-                  className="flex items-center justify-between p-3.5 rounded-xl bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 transition-all"
-                >
-                  <div>
-                    <span className="text-xs font-bold text-[#E5E5E5] block">{p.name}</span>
-                    <span className="text-[10px] text-[#9CA3AF] font-mono">{p.category}</span>
-                  </div>
-                  <span
-                    className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${
-                      p.is_configured
-                        ? "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30"
-                        : "bg-[#1E1E1E] text-[#6B7280] border-[#2F2F2F]"
-                    }`}
+            {isLoading
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-[#121212] border border-[#2F2F2F]"
                   >
-                    {p.is_configured ? "ONLINE" : "KEY REQ"}
-                  </span>
-                </div>
-              ))
-            )}
+                    <div className="space-y-1.5">
+                      <Skeleton className="h-3 w-24 rounded-md" />
+                      <Skeleton className="h-2.5 w-16 rounded-md" />
+                    </div>
+                    <Skeleton className="h-5 w-12 rounded-full" />
+                  </div>
+                ))
+              : providers.map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-[#121212] border border-[#2F2F2F] hover:border-neutral-700 transition-all"
+                  >
+                    <div>
+                      <span className="text-xs font-bold text-[#E5E5E5] block">
+                        {p.name}
+                      </span>
+                      <span className="text-[10px] text-[#9CA3AF] font-mono">
+                        {p.category}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                        p.is_configured
+                          ? "bg-[#10B981]/15 text-[#10B981] border-[#10B981]/30"
+                          : "bg-[#1E1E1E] text-[#6B7280] border-[#2F2F2F]"
+                      }`}
+                    >
+                      {p.is_configured ? "ONLINE" : "KEY REQ"}
+                    </span>
+                  </div>
+                ))}
           </div>
         </div>
       </div>

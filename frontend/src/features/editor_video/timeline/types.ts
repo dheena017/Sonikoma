@@ -62,7 +62,6 @@ export const WAVEFORM: number[] = [
   60, 45, 85, 52, 100, 40, 74, 32, 90, 56, 70,
 ];
 
-
 /** Colour map for keyframe properties — used by diamonds and panel badges. */
 export const KEYFRAME_COLORS: Record<KeyframeProperty, string> = {
   opacity: "bg-amber-400  border-amber-300",

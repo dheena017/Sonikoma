@@ -21,7 +21,9 @@ export function BubblesBefore() {
           <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-400 flex items-center justify-center text-2xl shadow-lg border border-white/20">
             🦸‍♂️
           </div>
-          <span className="text-[10px] font-black text-white uppercase tracking-wider mt-1.5">Jin-Woo</span>
+          <span className="text-[10px] font-black text-white uppercase tracking-wider mt-1.5">
+            Jin-Woo
+          </span>
         </div>
 
         {/* Speech Bubble Covering Artwork */}

@@ -37,7 +37,10 @@ export default function ScraperConnectionErrorCard({
   };
 
   const handleLoadDemo = () => {
-    localStorage.setItem("auto_import_url", "https://www.webtoons.com/sample/solo-leveling");
+    localStorage.setItem(
+      "auto_import_url",
+      "https://www.webtoons.com/sample/solo-leveling"
+    );
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") nav("/scraper");
     else {
@@ -98,15 +101,24 @@ export default function ScraperConnectionErrorCard({
           <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-rose-200">
-              {errorMessage || "Connection error: The requested source server could not be reached or returned an error."}
+              {errorMessage ||
+                "Connection error: The requested source server could not be reached or returned an error."}
             </h4>
             <p className="text-xs text-rose-300/80 leading-relaxed font-sans">
-              The external source server blocked or could not resolve the requested series identifier. This commonly happens when:
+              The external source server blocked or could not resolve the
+              requested series identifier. This commonly happens when:
             </p>
             <ul className="text-xs text-[#9CA3AF] list-disc list-inside space-y-1 pt-1 font-mono">
-              <li>The series URL or ID is incomplete, mistyped, or not found.</li>
-              <li>The source website has active Cloudflare / anti-crawler protection.</li>
-              <li>The series or chapter has been deleted, renamed, or restricted.</li>
+              <li>
+                The series URL or ID is incomplete, mistyped, or not found.
+              </li>
+              <li>
+                The source website has active Cloudflare / anti-crawler
+                protection.
+              </li>
+              <li>
+                The series or chapter has been deleted, renamed, or restricted.
+              </li>
             </ul>
           </div>
         </div>
@@ -148,7 +160,9 @@ export default function ScraperConnectionErrorCard({
               disabled={isRetrying || !retryUrl.trim()}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] disabled:bg-white/[0.04] disabled:text-[#6B7280] text-white text-xs font-bold shadow-md transition-all cursor-pointer disabled:cursor-not-allowed shrink-0 active:scale-95"
             >
-              <RotateCw className={`w-3.5 h-3.5 ${isRetrying ? "animate-spin" : ""}`} />
+              <RotateCw
+                className={`w-3.5 h-3.5 ${isRetrying ? "animate-spin" : ""}`}
+              />
               <span>Retry Fetch</span>
             </button>
           </div>
@@ -178,7 +192,8 @@ export default function ScraperConnectionErrorCard({
               </h4>
             </div>
             <p className="text-[11px] text-[#9CA3AF] leading-relaxed">
-              Drag and drop raw comic images or a `.zip`/`.cbz` archive directly without scraping.
+              Drag and drop raw comic images or a `.zip`/`.cbz` archive directly
+              without scraping.
             </p>
           </button>
 
@@ -197,7 +212,8 @@ export default function ScraperConnectionErrorCard({
               </h4>
             </div>
             <p className="text-[11px] text-[#9CA3AF] leading-relaxed">
-              Open a pre-loaded sample chapter to test the OCR, voice, and video studio tools.
+              Open a pre-loaded sample chapter to test the OCR, voice, and video
+              studio tools.
             </p>
           </button>
         </div>

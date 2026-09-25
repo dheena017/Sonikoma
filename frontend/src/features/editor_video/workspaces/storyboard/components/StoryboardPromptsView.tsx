@@ -20,7 +20,13 @@ interface StoryboardPromptsViewProps {
   onTriggerFeedback?: (msg: string) => void;
 }
 
-const STYLE_TAGS = ["Manhwa Anime", "Dark Fantasy", "Cyberpunk", "Cinematic Shonen", "Watercolor"];
+const STYLE_TAGS = [
+  "Manhwa Anime",
+  "Dark Fantasy",
+  "Cyberpunk",
+  "Cinematic Shonen",
+  "Watercolor",
+];
 
 export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
   panels,
@@ -31,7 +37,11 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
 }) => {
   const [copiedIdx, setCopiedIdx] = React.useState<number | null>(null);
 
-  const handleCopyPrompt = (index: number, text: string, e: React.MouseEvent) => {
+  const handleCopyPrompt = (
+    index: number,
+    text: string,
+    e: React.MouseEvent
+  ) => {
     e.stopPropagation();
     if (navigator?.clipboard) {
       navigator.clipboard.writeText(text);
@@ -47,7 +57,9 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
       <div className="p-2.5 rounded-xl bg-neutral-900 border border-[#3B82F6]/30 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-[10px] font-mono text-neutral-200">
           <Palette className="h-3.5 w-3.5 text-[#60A5FA] shrink-0" />
-          <span>Visual Prompts — Edit AI image generation prompts & descriptions</span>
+          <span>
+            Visual Prompts — Edit AI image generation prompts & descriptions
+          </span>
         </div>
         <button
           type="button"
@@ -63,7 +75,10 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
         const isSelected = selectedIndices.includes(index);
         const imgUrl = panel.image_url || (panel as any).imageUrl || "";
         const displayUrl = getProxiedImageUrl(imgUrl);
-        const promptText = panel.prompt || panel.visual_description || `High quality webtoon panel, cinematic anime scene, dramatic lighting, 8k resolution, masterpiece`;
+        const promptText =
+          panel.prompt ||
+          panel.visual_description ||
+          `High quality webtoon panel, cinematic anime scene, dramatic lighting, 8k resolution, masterpiece`;
         const visualDesc = panel.visual_description;
         const isCopied = copiedIdx === index;
 
@@ -81,7 +96,11 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-white/10">
-                  <img src={displayUrl} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={displayUrl}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
                   <span className="absolute bottom-0 right-0 text-[7px] font-black font-mono bg-black/80 text-neutral-200 px-0.5 rounded">
                     #{index + 1}
                   </span>
@@ -119,7 +138,9 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
                     e.stopPropagation();
                     const enhanced = `${promptText}, volumetric lighting, ultra-detailed manga linework, dynamic angle`;
                     onUpdatePrompt(index, enhanced);
-                    onTriggerFeedback?.(`Enhanced prompt for Panel #${index + 1}`);
+                    onTriggerFeedback?.(
+                      `Enhanced prompt for Panel #${index + 1}`
+                    );
                   }}
                   className="p-1 px-1.5 rounded-lg bg-[#3B82F6]/20 hover:bg-[#3B82F6]/40 border border-[#3B82F6]/30 text-neutral-200 text-[8px] font-mono flex items-center gap-1 transition-all"
                   title="AI Enhance Prompt"
@@ -141,7 +162,9 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
 
             {/* Style Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto mini-sidebar-scrollbar">
-              <span className="text-[8px] font-mono text-neutral-500 shrink-0">Style:</span>
+              <span className="text-[8px] font-mono text-neutral-500 shrink-0">
+                Style:
+              </span>
               {STYLE_TAGS.map((tag) => (
                 <button
                   key={tag}
@@ -149,7 +172,9 @@ export const StoryboardPromptsView: React.FC<StoryboardPromptsViewProps> = ({
                   onClick={(e) => {
                     e.stopPropagation();
                     onUpdatePrompt(index, `${promptText}, ${tag} style`);
-                    onTriggerFeedback?.(`Added ${tag} style to Panel #${index + 1}`);
+                    onTriggerFeedback?.(
+                      `Added ${tag} style to Panel #${index + 1}`
+                    );
                   }}
                   className="px-2 py-0.5 rounded-lg bg-black/40 hover:bg-neutral-900 border border-white/5 hover:border-neutral-700 text-[8px] font-mono text-neutral-400 hover:text-neutral-200 whitespace-nowrap transition-all"
                 >

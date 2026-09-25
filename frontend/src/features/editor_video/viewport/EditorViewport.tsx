@@ -54,7 +54,9 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
   aspectRatio = "original",
   onAspectRatioChange,
 }) => {
-  const [monitorTab, setMonitorTab] = useState<"timeline" | "video">("timeline");
+  const [monitorTab, setMonitorTab] = useState<"timeline" | "video">(
+    "timeline"
+  );
   const [zoomLevel, setZoomLevel] = useState(1);
   const resetZoom = () => setZoomLevel(1);
   const finalExport = onExportVideo || handleRenderFinalVideo || onExport;
@@ -107,16 +109,26 @@ export const EditorViewport: React.FC<EditorViewportProps> = ({
           if (event.ctrlKey || event.metaKey) {
             event.preventDefault();
             setZoomLevel((current) =>
-              Math.min(2, Math.max(0.5, current + (event.deltaY < 0 ? 0.1 : -0.1)))
+              Math.min(
+                2,
+                Math.max(0.5, current + (event.deltaY < 0 ? 0.1 : -0.1))
+              )
             );
           }
         }}
       >
         <div
           className="w-full h-full flex items-center justify-center transition-transform duration-150"
-          style={{ transform: `scale(${zoomLevel})`, transformOrigin: "center center" }}
+          style={{
+            transform: `scale(${zoomLevel})`,
+            transformOrigin: "center center",
+          }}
         >
-          <div className={`w-full h-full max-w-full max-h-full flex items-center justify-center ${getAspectClass(aspectRatio)}`}>
+          <div
+            className={`w-full h-full max-w-full max-h-full flex items-center justify-center ${getAspectClass(
+              aspectRatio
+            )}`}
+          >
             <PlaybackMonitor
               panels={panels}
               videoUrl={videoUrl}

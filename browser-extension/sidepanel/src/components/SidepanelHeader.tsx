@@ -26,7 +26,9 @@ export const SidepanelHeader: React.FC<SidepanelHeaderProps> = ({
         >
           <span
             className={`w-1.5 h-1.5 rounded-full ${
-              isBackendOnline ? "bg-emerald-400 shadow-[0_0_6px_#10b981]" : "bg-amber-400"
+              isBackendOnline
+                ? "bg-emerald-400 shadow-[0_0_6px_#10b981]"
+                : "bg-amber-400"
             }`}
           />
           <span className="text-[9px] font-medium text-slate-400">

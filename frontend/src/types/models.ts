@@ -23,10 +23,21 @@ export const AI_MODELS: AIModel[] = [
     context_window: 1048576,
     max_output_tokens: 8192,
     prompt_price_per_1m: 0.075,
-    completion_price_per_1m: 0.30,
+    completion_price_per_1m: 0.3,
     speed_rating: "Ultra Fast (<300ms)",
-    capabilities: ["vision", "json_mode", "streaming", "multilingual", "function_calling"],
-    recommended_for: ["YouTube SEO", "Panel Narration", "Story Scripting", "Smart Crop"],
+    capabilities: [
+      "vision",
+      "json_mode",
+      "streaming",
+      "multilingual",
+      "function_calling",
+    ],
+    recommended_for: [
+      "YouTube SEO",
+      "Panel Narration",
+      "Story Scripting",
+      "Smart Crop",
+    ],
   },
   {
     id: "gemini-1.5-pro",
@@ -37,9 +48,14 @@ export const AI_MODELS: AIModel[] = [
     context_window: 2097152,
     max_output_tokens: 8192,
     prompt_price_per_1m: 1.25,
-    completion_price_per_1m: 5.00,
+    completion_price_per_1m: 5.0,
     speed_rating: "High (~800ms)",
-    capabilities: ["vision", "complex_reasoning", "json_mode", "code_generation"],
+    capabilities: [
+      "vision",
+      "complex_reasoning",
+      "json_mode",
+      "code_generation",
+    ],
     recommended_for: ["Deep Story Analysis", "Complex Panel Layout Planning"],
   },
   {
@@ -50,8 +66,8 @@ export const AI_MODELS: AIModel[] = [
     category: "Fast Multimodal Backup",
     context_window: 1048576,
     max_output_tokens: 8192,
-    prompt_price_per_1m: 0.10,
-    completion_price_per_1m: 0.40,
+    prompt_price_per_1m: 0.1,
+    completion_price_per_1m: 0.4,
     speed_rating: "Ultra Fast (~250ms)",
     capabilities: ["vision", "json_mode", "streaming"],
     recommended_for: ["Panel OCR", "Bubble Text Extraction"],
@@ -78,8 +94,8 @@ export const AI_MODELS: AIModel[] = [
     category: "Omni Intelligence",
     context_window: 128000,
     max_output_tokens: 4096,
-    prompt_price_per_1m: 2.50,
-    completion_price_per_1m: 10.00,
+    prompt_price_per_1m: 2.5,
+    completion_price_per_1m: 10.0,
     speed_rating: "Fast (~450ms)",
     capabilities: ["vision", "json_mode", "structured_outputs"],
     recommended_for: ["Nuanced Script Polishing", "Character Dialogue"],
@@ -93,7 +109,7 @@ export const AI_MODELS: AIModel[] = [
     context_window: 128000,
     max_output_tokens: 4096,
     prompt_price_per_1m: 0.15,
-    completion_price_per_1m: 0.60,
+    completion_price_per_1m: 0.6,
     speed_rating: "Ultra Fast (~300ms)",
     capabilities: ["json_mode", "speed_optimized"],
     recommended_for: ["High-volume metadata", "Summary Generation"],
@@ -106,8 +122,8 @@ export const AI_MODELS: AIModel[] = [
     category: "State-of-the-Art Reasoning",
     context_window: 200000,
     max_output_tokens: 8192,
-    prompt_price_per_1m: 3.00,
-    completion_price_per_1m: 15.00,
+    prompt_price_per_1m: 3.0,
+    completion_price_per_1m: 15.0,
     speed_rating: "Standard (~650ms)",
     capabilities: ["creative_writing", "vision", "complex_narrative"],
     recommended_for: ["Creative Manga Dramatization", "Epic Script Writing"],
@@ -120,8 +136,8 @@ export const AI_MODELS: AIModel[] = [
     category: "High Speed Reasoning",
     context_window: 200000,
     max_output_tokens: 8192,
-    prompt_price_per_1m: 0.80,
-    completion_price_per_1m: 4.00,
+    prompt_price_per_1m: 0.8,
+    completion_price_per_1m: 4.0,
     speed_rating: "Ultra Fast (~280ms)",
     capabilities: ["fast_reasoning", "creative_dialogue"],
     recommended_for: ["Fast Narration Iterations"],
@@ -209,7 +225,7 @@ export interface GeneratedPanel {
   episode_label?: string;
   character_name?: string;
   speaker_name?: string;
-  speaker_gender?: 'male' | 'female' | 'child' | 'neutral' | string;
+  speaker_gender?: "male" | "female" | "child" | "neutral" | string;
   emotion?: string;
   scene_context?: string;
   is_scene_transition?: boolean;
@@ -219,14 +235,14 @@ export interface GeneratedPanel {
 
 export interface DialogueTurn {
   speaker_name: string;
-  speaker_gender?: 'male' | 'female' | 'child' | 'neutral' | string;
+  speaker_gender?: "male" | "female" | "child" | "neutral" | string;
   text: string;
   emotion?: string;
   audio_url?: string;
 }
 
 export interface CharacterMemory {
-  gender: 'male' | 'female' | 'child' | 'neutral' | string;
+  gender: "male" | "female" | "child" | "neutral" | string;
   voice: string;
   is_user_locked?: boolean;
   panels_seen?: number[];

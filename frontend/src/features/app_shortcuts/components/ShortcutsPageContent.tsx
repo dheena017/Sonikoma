@@ -107,40 +107,40 @@ const ShortcutsPageContent = React.memo(
             </div>
           </div>
 
-        <div className="flex flex-col md:flex-row gap-6">
-          <ShortcutCategoryTabs
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
-          />
-
-          <div className="flex-1 flex flex-col gap-4">
-            <ShortcutSearch
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+          <div className="flex flex-col md:flex-row gap-6">
+            <ShortcutCategoryTabs
+              activeCategory={activeCategory}
+              onCategoryChange={setActiveCategory}
             />
 
-            <ShortcutList
-              shortcuts={shortcuts}
-              filteredShortcuts={filteredShortcuts}
-              recordingActionId={recordingActionId}
-              searchQuery={searchQuery}
-              defaultShortcuts={defaultShortcuts}
-              onStartRecording={handleStartRecording}
-              onDisableSingle={handleDisableSingle}
-              onResetSingle={handleResetSingle}
-              onClearFilters={handleClearFilters}
-            />
+            <div className="flex-1 flex flex-col gap-4">
+              <ShortcutSearch
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+              />
+
+              <ShortcutList
+                shortcuts={shortcuts}
+                filteredShortcuts={filteredShortcuts}
+                recordingActionId={recordingActionId}
+                searchQuery={searchQuery}
+                defaultShortcuts={defaultShortcuts}
+                onStartRecording={handleStartRecording}
+                onDisableSingle={handleDisableSingle}
+                onResetSingle={handleResetSingle}
+                onClearFilters={handleClearFilters}
+              />
+            </div>
           </div>
-        </div>
 
-        {recordingActionId && (
-          <NewKeyCombinationModal
-            recordingActionId={recordingActionId}
-            details={getActionDetails(recordingActionId)}
-            conflictMsg={conflictMsg}
-            onCancel={handleCancelRecording}
-          />
-        )}
+          {recordingActionId && (
+            <NewKeyCombinationModal
+              recordingActionId={recordingActionId}
+              details={getActionDetails(recordingActionId)}
+              conflictMsg={conflictMsg}
+              onCancel={handleCancelRecording}
+            />
+          )}
         </div>
       </div>
     );

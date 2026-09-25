@@ -21,7 +21,9 @@ export function useAppBubbleCleaner() {
     current: number;
     total: number;
   } | null>(null);
-  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<string | null>(null);
+  const [bubbleCroppingImgUrl, setBubbleCroppingImgUrl] = useState<
+    string | null
+  >(null);
 
   return {
     showBubbleModal,

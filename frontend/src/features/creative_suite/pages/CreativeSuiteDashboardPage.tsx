@@ -190,7 +190,8 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
               </span>
             </h1>
             <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-xl">
-              Fine-tune visual boundaries, compose orchestral backings, cast AI narrators, and translate speech dialogues.
+              Fine-tune visual boundaries, compose orchestral backings, cast AI
+              narrators, and translate speech dialogues.
             </p>
           </div>
         </div>

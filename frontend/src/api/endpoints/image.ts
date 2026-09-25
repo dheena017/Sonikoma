@@ -52,12 +52,16 @@ export const removeSpeechBubbles = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/images/remove-speech-bubbles", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    "/api/v1/images/remove-speech-bubbles",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      ...options,
+    }
+  );
 };
 
 export const splitImage = async (
@@ -141,7 +145,11 @@ export const getProxyImageUrl = (url: string): string => {
 };
 
 export const isProxyUrl = (url: string): boolean => {
-  return !!(url && typeof url === "string" && url.includes("/api/v1/proxy/image"));
+  return !!(
+    url &&
+    typeof url === "string" &&
+    url.includes("/api/v1/proxy/image")
+  );
 };
 
 export const isApiUrl = (url: string): boolean => {
@@ -173,10 +181,14 @@ export const getTrainingDataCount = async (
   fetchWithInterceptor: FetchClient,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/images/training-data-count", {
-    method: "GET",
-    ...options,
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    "/api/v1/images/training-data-count",
+    {
+      method: "GET",
+      ...options,
+    }
+  );
 };
 
 /**
@@ -189,9 +201,12 @@ export const debugYolo = async (
   conf: number = 0.25
 ): Promise<string> => {
   const params = new URLSearchParams({ url: imageUrl, conf: String(conf) });
-  const res = await fetchWithInterceptor(`/api/v1/images/debug-yolo?${params}`, {
-    method: "GET",
-  });
+  const res = await fetchWithInterceptor(
+    `/api/v1/images/debug-yolo?${params}`,
+    {
+      method: "GET",
+    }
+  );
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: "Unknown error" }));
     throw new Error(err.detail ?? "Debug YOLO request failed");

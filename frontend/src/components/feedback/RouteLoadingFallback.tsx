@@ -38,7 +38,11 @@ export default function RouteLoadingFallback({
 
         {/* Sonikoma Logo Brand Header */}
         <div className="relative z-10 pt-1 flex justify-center">
-          <SonikomaLogo size="lg" showSubtitle={true} subtitleText="Comic to Video Studio" />
+          <SonikomaLogo
+            size="lg"
+            showSubtitle={true}
+            subtitleText="Comic to Video Studio"
+          />
         </div>
 
         {/* Spinner & Active Icon Badge */}
@@ -73,4 +77,3 @@ export default function RouteLoadingFallback({
     </div>
   );
 }
-

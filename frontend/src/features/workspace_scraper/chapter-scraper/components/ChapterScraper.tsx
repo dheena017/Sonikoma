@@ -421,16 +421,17 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         const normalizedChapters = rawChapters.map((ch: any, i: number) => ({
           ...ch,
           cover_image: ch.cover_image || fallbackCover,
-          chapter_number: ch.chapter_number ?? ch.number ?? (i + 1),
-          number: String(ch.chapter_number ?? ch.number ?? (i + 1)),
-          title: ch.title || `Chapter ${ch.chapter_number ?? (i + 1)}`,
+          chapter_number: ch.chapter_number ?? ch.number ?? i + 1,
+          number: String(ch.chapter_number ?? ch.number ?? i + 1),
+          title: ch.title || `Chapter ${ch.chapter_number ?? i + 1}`,
           url: ch.url,
           index: ch.index ?? i,
         }));
 
         setChapters(normalizedChapters);
         const seriesData = result.series || result;
-        const resolvedTitle = seriesData.title || result.title || "Comic Series";
+        const resolvedTitle =
+          seriesData.title || result.title || "Comic Series";
 
         setSeriesMetadata({
           title: resolvedTitle,
@@ -460,13 +461,13 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
         // Dynamically update browser URL to /scraper/{series-slug}
         try {
-          const slug = (
+          const slug =
             result.series_slug ||
             resolvedTitle
               .toLowerCase()
               .replace(/[^a-z0-9]+/g, "-")
-              .replace(/^-+|-+$/g, "")
-          ) || "";
+              .replace(/^-+|-+$/g, "") ||
+            "";
 
           if (slug) {
             const newPath = `/scraper/${encodeURIComponent(slug)}`;
@@ -585,7 +586,12 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     );
     localStorage.setItem("auto_import_url", chapter.url);
 
-    const sSlug = (seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput || "")
+    const sSlug = (
+      seriesMetadata?.seriesSlug ||
+      seriesMetadata?.title ||
+      titleNoInput ||
+      ""
+    )
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
@@ -625,7 +631,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         url: urlInput || seriesMetadata.url || "",
       });
       setIsFavorite(true);
-      addNotification(`Added "${seriesMetadata.title}" to favorites`, "success");
+      addNotification(
+        `Added "${seriesMetadata.title}" to favorites`,
+        "success"
+      );
     }
   };
 
@@ -669,7 +678,12 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     localStorage.setItem("auto_import_batch", JSON.stringify(selected));
     localStorage.setItem("auto_import_url", selected[0]?.url || "");
 
-    const sSlug = (seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput || "")
+    const sSlug = (
+      seriesMetadata?.seriesSlug ||
+      seriesMetadata?.title ||
+      titleNoInput ||
+      ""
+    )
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
@@ -708,10 +722,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    const safeSeries = makeSafeFilename(
-      seriesMetadata?.title,
-      "Comic_Series"
-    );
+    const safeSeries = makeSafeFilename(seriesMetadata?.title, "Comic_Series");
     link.download = `${safeSeries}_full_metadata.json`;
     link.click();
     URL.revokeObjectURL(url);
@@ -829,7 +840,14 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
           {(urlInput || titleNoInput) && (
             <button
               type="button"
-              onClick={() => { setError(null); triggerScrape(urlInput || undefined, titleNoInput || undefined, true); }}
+              onClick={() => {
+                setError(null);
+                triggerScrape(
+                  urlInput || undefined,
+                  titleNoInput || undefined,
+                  true
+                );
+              }}
               className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-800/60 hover:bg-red-700/60 border border-red-500/40 text-red-200 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer"
             >
               <RotateCw className="w-3 h-3" />
@@ -857,7 +875,11 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             setSeriesMetadata(null);
             setChapters([]);
             if (newUrl) setUrlInput(newUrl);
-            triggerScrape(newUrl || urlInput || undefined, titleNoInput || undefined, true);
+            triggerScrape(
+              newUrl || urlInput || undefined,
+              titleNoInput || undefined,
+              true
+            );
           }}
         />
       )}
@@ -947,9 +969,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2 text-neutral-400 text-xs font-mono ml-auto">
-                  <span>
-                    Updated: {new Date().toLocaleDateString("en-GB")}
-                  </span>
+                  <span>Updated: {new Date().toLocaleDateString("en-GB")}</span>
                 </div>
               </div>
 
@@ -990,7 +1010,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   onClick={() => {
                     const nav = (window as any).navigateTo;
-                    if (typeof nav === "function") nav("/creative-suite/ai-voice");
+                    if (typeof nav === "function")
+                      nav("/creative-suite/ai-voice");
                   }}
                   className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
                 >
@@ -1015,8 +1036,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 {chapters.length}
               </div>
               <div className="text-xs text-neutral-400 font-mono">
-                Total Chapters ({readChaptersCount} Ready · {unreadChaptersCount}{" "}
-                Draft)
+                Total Chapters ({readChaptersCount} Ready ·{" "}
+                {unreadChaptersCount} Draft)
               </div>
             </div>
           </div>
@@ -1265,7 +1286,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                     </div>
                     <div className="min-w-0">
                       <h4 className="text-sm font-bold text-white group-hover:text-[#93C5FD] transition-colors truncate font-sans">
-                        {chapter.title || `Chapter ${chapter.number || idx + 1}`}
+                        {chapter.title ||
+                          `Chapter ${chapter.number || idx + 1}`}
                       </h4>
                       <div className="flex items-center gap-3 text-xs text-neutral-400 font-mono mt-0.5">
                         <span className="text-[#3B82F6] font-bold">
@@ -1343,7 +1365,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 Paste Comic URL
               </div>
               <p className="text-[11px] text-neutral-500 font-mono">
-                Copy the URL from any supported comic site (Webtoons, Toonily, FlameComics, etc.).
+                Copy the URL from any supported comic site (Webtoons, Toonily,
+                FlameComics, etc.).
               </p>
             </div>
 
@@ -1355,7 +1378,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 Preview &amp; Filter
               </div>
               <p className="text-[11px] text-neutral-500 font-mono">
-                Filter chapters by rating, date, or read panels full screen in reader mode.
+                Filter chapters by rating, date, or read panels full screen in
+                reader mode.
               </p>
             </div>
 
@@ -1367,7 +1391,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 Import to Editor
               </div>
               <p className="text-[11px] text-neutral-500 font-mono">
-                Directly import chapter panels into the timeline video workspace.
+                Directly import chapter panels into the timeline video
+                workspace.
               </p>
             </div>
           </div>

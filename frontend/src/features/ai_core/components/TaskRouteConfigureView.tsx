@@ -19,7 +19,10 @@ import {
   SlidersHorizontal,
   Key,
 } from "lucide-react";
-import TierModelCard, { DynamicModelOption, isProviderKeyConfiguredInVault } from "./TierModelCard";
+import TierModelCard, {
+  DynamicModelOption,
+  isProviderKeyConfiguredInVault,
+} from "./TierModelCard";
 
 export interface CapabilityDefinition {
   task: string;
@@ -45,7 +48,11 @@ interface TaskRouteConfigureViewProps {
   availableModels: DynamicModelOption[];
   onBack: () => void;
   onSelectTask: (taskId: string) => void;
-  onModelChange: (task: string, field: "primary_model" | "fallback_model" | "tertiary_model", modelId: string) => void;
+  onModelChange: (
+    task: string,
+    field: "primary_model" | "fallback_model" | "tertiary_model",
+    modelId: string
+  ) => void;
   onSave: () => void;
   onResetTask: (task: string) => void;
   isSaving: boolean;
@@ -81,7 +88,9 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
             m.provider === "edgetts" ||
             m.provider === "elevenlabs" ||
             m.capabilities?.some((c) =>
-              ["tts", "audio", "voice_cloning", "multilingual_audio"].includes(c.toLowerCase())
+              ["tts", "audio", "voice_cloning", "multilingual_audio"].includes(
+                c.toLowerCase()
+              )
             ) ||
             m.category?.toLowerCase().includes("speech")
         );
@@ -92,7 +101,12 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
             m.provider === "stablediffusion" ||
             m.id.toLowerCase().includes("dall-e") ||
             m.capabilities?.some((c) =>
-              ["image_generation", "high_res_image", "diffusion", "image"].includes(c.toLowerCase())
+              [
+                "image_generation",
+                "high_res_image",
+                "diffusion",
+                "image",
+              ].includes(c.toLowerCase())
             ) ||
             m.category?.toLowerCase().includes("diffusion") ||
             m.category?.toLowerCase().includes("image")
@@ -101,7 +115,9 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
         return availableModels.filter(
           (m) =>
             m.capabilities?.some((c) =>
-              ["vision", "multimodal", "image_understanding", "ocr"].includes(c.toLowerCase())
+              ["vision", "multimodal", "image_understanding", "ocr"].includes(
+                c.toLowerCase()
+              )
             ) ||
             m.category?.toLowerCase().includes("vision") ||
             m.id.includes("flash") ||
@@ -116,21 +132,21 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
   const hasUserKey = useMemo(() => {
     return Boolean(
       localStorage.getItem("user_gemini_key") ||
-      localStorage.getItem("sonikoma_key_gemini") ||
-      localStorage.getItem("user_openai_key") ||
-      localStorage.getItem("sonikoma_key_openai") ||
-      localStorage.getItem("user_anthropic_key") ||
-      localStorage.getItem("sonikoma_key_anthropic") ||
-      localStorage.getItem("user_groq_key") ||
-      localStorage.getItem("sonikoma_key_groq") ||
-      localStorage.getItem("user_deepseek_key") ||
-      localStorage.getItem("sonikoma_key_deepseek") ||
-      localStorage.getItem("user_elevenlabs_key") ||
-      localStorage.getItem("sonikoma_key_elevenlabs") ||
-      localStorage.getItem("user_deepl_key") ||
-      localStorage.getItem("sonikoma_key_deepl") ||
-      localStorage.getItem("user_huggingface_key") ||
-      localStorage.getItem("sonikoma_key_huggingface")
+        localStorage.getItem("sonikoma_key_gemini") ||
+        localStorage.getItem("user_openai_key") ||
+        localStorage.getItem("sonikoma_key_openai") ||
+        localStorage.getItem("user_anthropic_key") ||
+        localStorage.getItem("sonikoma_key_anthropic") ||
+        localStorage.getItem("user_groq_key") ||
+        localStorage.getItem("sonikoma_key_groq") ||
+        localStorage.getItem("user_deepseek_key") ||
+        localStorage.getItem("sonikoma_key_deepseek") ||
+        localStorage.getItem("user_elevenlabs_key") ||
+        localStorage.getItem("sonikoma_key_elevenlabs") ||
+        localStorage.getItem("user_deepl_key") ||
+        localStorage.getItem("sonikoma_key_deepl") ||
+        localStorage.getItem("user_huggingface_key") ||
+        localStorage.getItem("sonikoma_key_huggingface")
     );
   }, []);
 
@@ -218,7 +234,9 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
             disabled={isSimulating}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-blue-400 hover:text-blue-300 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/30 transition-all cursor-pointer disabled:opacity-50"
           >
-            <Play className={`w-3.5 h-3.5 ${isSimulating ? "animate-spin" : ""}`} />
+            <Play
+              className={`w-3.5 h-3.5 ${isSimulating ? "animate-spin" : ""}`}
+            />
             <span>{isSimulating ? "Testing..." : "Test Cascade"}</span>
           </button>
 
@@ -269,7 +287,8 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
                 </span>
               </div>
               <p className="text-xs text-neutral-300 leading-relaxed max-w-3xl">
-                You need to enter your API key in the website (AI Vault) to activate and configure models for this pipeline.
+                You need to enter your API key in the website (AI Vault) to
+                activate and configure models for this pipeline.
               </p>
             </div>
           </div>
@@ -311,9 +330,19 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               </p>
 
               <div className="pt-1 flex items-center gap-3 text-xs font-mono text-neutral-400 flex-wrap">
-                <span>Task Identifier: <code className="text-blue-300 font-bold">{taskRoute.task}</code></span>
+                <span>
+                  Task Identifier:{" "}
+                  <code className="text-blue-300 font-bold">
+                    {taskRoute.task}
+                  </code>
+                </span>
                 <span>•</span>
-                <span>Type: <code className="text-[#60A5FA]">{taskRoute.required_type}</code></span>
+                <span>
+                  Type:{" "}
+                  <code className="text-[#60A5FA]">
+                    {taskRoute.required_type}
+                  </code>
+                </span>
               </div>
             </div>
           </div>
@@ -327,7 +356,8 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               Automatic Failover
             </p>
             <p className="text-[11px] text-neutral-400 font-sans">
-              Auto-switches to Tier 2 if Tier 1 times out in {timeoutMs / 1000}s.
+              Auto-switches to Tier 2 if Tier 1 times out in {timeoutMs / 1000}
+              s.
             </p>
           </div>
         </div>
@@ -352,7 +382,9 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30 font-mono">
                 Tier 1 Primary
               </span>
-              <span className="text-[10px] font-mono text-[#3B82F6] font-bold">100% Traffic Default</span>
+              <span className="text-[10px] font-mono text-[#3B82F6] font-bold">
+                100% Traffic Default
+              </span>
             </div>
             <p className="text-xs text-neutral-400 font-sans leading-relaxed">
               Main engine utilized for all incoming generation requests.
@@ -361,7 +393,9 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               tierType="primary"
               modelId={taskRoute.primary_model}
               availableModels={suitableModels}
-              onModelChange={(modelId) => onModelChange(taskRoute.task, "primary_model", modelId)}
+              onModelChange={(modelId) =>
+                onModelChange(taskRoute.task, "primary_model", modelId)
+              }
             />
           </div>
 
@@ -371,16 +405,21 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono">
                 Tier 2 Fallback
               </span>
-              <span className="text-[10px] font-mono text-blue-400 font-bold">Instant Failover</span>
+              <span className="text-[10px] font-mono text-blue-400 font-bold">
+                Instant Failover
+              </span>
             </div>
             <p className="text-xs text-neutral-400 font-sans leading-relaxed">
-              Engages automatically if Tier 1 experiences rate limits or server errors.
+              Engages automatically if Tier 1 experiences rate limits or server
+              errors.
             </p>
             <TierModelCard
               tierType="fallback"
               modelId={taskRoute.fallback_model}
               availableModels={suitableModels}
-              onModelChange={(modelId) => onModelChange(taskRoute.task, "fallback_model", modelId)}
+              onModelChange={(modelId) =>
+                onModelChange(taskRoute.task, "fallback_model", modelId)
+              }
             />
           </div>
 
@@ -390,16 +429,21 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
                 Tier 3 Failover
               </span>
-              <span className="text-[10px] font-mono text-emerald-400 font-bold">Emergency Backup</span>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                Emergency Backup
+              </span>
             </div>
             <p className="text-xs text-neutral-400 font-sans leading-relaxed">
-              Last-resort lightweight failover ensuring uninterrupted pipeline execution.
+              Last-resort lightweight failover ensuring uninterrupted pipeline
+              execution.
             </p>
             <TierModelCard
               tierType="tertiary"
               modelId={taskRoute.tertiary_model}
               availableModels={suitableModels}
-              onModelChange={(modelId) => onModelChange(taskRoute.task, "tertiary_model", modelId)}
+              onModelChange={(modelId) =>
+                onModelChange(taskRoute.task, "tertiary_model", modelId)
+              }
             />
           </div>
         </div>
@@ -416,7 +460,9 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-mono text-neutral-300">
               <span>Primary Engine Timeout:</span>
-              <span className="font-bold text-blue-400">{timeoutMs / 1000} seconds</span>
+              <span className="font-bold text-blue-400">
+                {timeoutMs / 1000} seconds
+              </span>
             </div>
             <input
               type="range"
@@ -428,14 +474,17 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-blue-500"
             />
             <p className="text-[11px] text-neutral-500 font-sans">
-              If Tier 1 does not return tokens within this window, the pipeline triggers Tier 2 without crashing.
+              If Tier 1 does not return tokens within this window, the pipeline
+              triggers Tier 2 without crashing.
             </p>
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between text-xs font-mono text-neutral-300">
               <span>Max Retry Attempts:</span>
-              <span className="font-bold text-[#3B82F6]">{maxRetries} Retries</span>
+              <span className="font-bold text-[#3B82F6]">
+                {maxRetries} Retries
+              </span>
             </div>
             <input
               type="range"
@@ -462,20 +511,33 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-xs font-mono">
             <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06]">
-              <span className="text-neutral-500 block text-[10px]">Resolved Model</span>
-              <span className="text-white font-bold">{simResult.resolved_model || taskRoute.primary_model}</span>
+              <span className="text-neutral-500 block text-[10px]">
+                Resolved Model
+              </span>
+              <span className="text-white font-bold">
+                {simResult.resolved_model || taskRoute.primary_model}
+              </span>
             </div>
             <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06]">
-              <span className="text-neutral-500 block text-[10px]">Active Tier</span>
-              <span className="text-emerald-400 font-bold">{simResult.tier_used || "Tier 1 Primary"}</span>
+              <span className="text-neutral-500 block text-[10px]">
+                Active Tier
+              </span>
+              <span className="text-emerald-400 font-bold">
+                {simResult.tier_used || "Tier 1 Primary"}
+              </span>
             </div>
             <div className="p-3 rounded-xl bg-black/40 border border-white/[0.06]">
-              <span className="text-neutral-500 block text-[10px]">Latency Benchmark</span>
-              <span className="text-blue-400 font-bold">{simResult.latency_ms || 125}ms</span>
+              <span className="text-neutral-500 block text-[10px]">
+                Latency Benchmark
+              </span>
+              <span className="text-blue-400 font-bold">
+                {simResult.latency_ms || 125}ms
+              </span>
             </div>
           </div>
           <p className="text-xs text-neutral-300 font-sans pt-1">
-            {simResult.message || "Model responded normally. Cascade fallback path verified."}
+            {simResult.message ||
+              "Model responded normally. Cascade fallback path verified."}
           </p>
         </div>
       )}

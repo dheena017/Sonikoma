@@ -21,7 +21,9 @@ export const GOOGLE_FONTS = [
 export function loadGoogleFont(fontName: string) {
   if (typeof document === "undefined" || loadedFonts.has(fontName)) return;
 
-  const font = GOOGLE_FONTS.find((f) => f.name.toLowerCase() === fontName.toLowerCase());
+  const font = GOOGLE_FONTS.find(
+    (f) => f.name.toLowerCase() === fontName.toLowerCase()
+  );
   const weights = font ? font.weights.join(";") : "400;700";
   const formattedName = fontName.replace(/\s+/g, "+");
   const linkId = `google-font-${fontName.toLowerCase().replace(/\s+/g, "-")}`;

@@ -5,7 +5,11 @@ import DashboardQuickLinks from "@/features/app_dashboard/components/DashboardQu
 import DashboardProjectSection from "@/features/app_dashboard/components/DashboardProjectSection";
 import DashboardActivityFeed from "@/features/app_dashboard/components/DashboardActivityFeed";
 import useDashboardPage from "@/features/app_dashboard/hooks/useDashboardPage";
-import { WelcomeUserModal, WelcomeBackUserModal, ComeBackUserModal } from "@/shared/ui/modal";
+import {
+  WelcomeUserModal,
+  WelcomeBackUserModal,
+  ComeBackUserModal,
+} from "@/shared/ui/modal";
 
 export default function DashboardPage() {
   const {
@@ -42,8 +46,10 @@ export default function DashboardPage() {
   });
 
   React.useEffect(() => {
-    const isNew = sessionStorage.getItem("sonikoma_show_welcome_user") === "true";
-    const isBack = sessionStorage.getItem("sonikoma_show_welcome_back") === "true";
+    const isNew =
+      sessionStorage.getItem("sonikoma_show_welcome_user") === "true";
+    const isBack =
+      sessionStorage.getItem("sonikoma_show_welcome_back") === "true";
 
     if (isNew) {
       setShowWelcomeUser(true);
@@ -55,8 +61,10 @@ export default function DashboardPage() {
   }, []);
 
   const [showComeBack, setShowComeBack] = React.useState(() => {
-    const isReturning = localStorage.getItem("sonikoma_returning_user") === "true";
-    const alreadyShown = sessionStorage.getItem("sonikoma_comeback_shown") === "true";
+    const isReturning =
+      localStorage.getItem("sonikoma_returning_user") === "true";
+    const alreadyShown =
+      sessionStorage.getItem("sonikoma_comeback_shown") === "true";
     return isReturning && !alreadyShown && !showWelcomeUser && !showWelcomeBack;
   });
 

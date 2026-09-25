@@ -6,30 +6,30 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   /* 🌑 Base Palette */
-  --color-canvas: #0A0A0A;
+  --color-canvas: #0a0a0a;
   --color-canvas-subtle: #121212;
-  --color-surface-panel: #1E1E1E;
-  --color-surface-elevated: #2A2A2A;
-  --color-border-subtle: #2F2F2F;
+  --color-surface-panel: #1e1e1e;
+  --color-surface-elevated: #2a2a2a;
+  --color-border-subtle: #2f2f2f;
 
   /* 🎨 Accent Colors */
-  --color-accent-blue: #3B82F6;
-  --color-accent-success: #10B981;
-  --color-accent-warning: #F59E0B;
-  --color-accent-error: #EF4444;
+  --color-accent-blue: #3b82f6;
+  --color-accent-success: #10b981;
+  --color-accent-warning: #f59e0b;
+  --color-accent-error: #ef4444;
 
   /* ✨ Typography */
-  --color-text-primary: #E5E5E5;
-  --color-text-secondary: #9CA3AF;
-  --color-text-dim: #6B7280;
+  --color-text-primary: #e5e5e5;
+  --color-text-secondary: #9ca3af;
+  --color-text-dim: #6b7280;
 
   /* Compatibility scale mappings */
-  --color-neutral-800: #2A2A2A;
+  --color-neutral-800: #2a2a2a;
   --color-neutral-850: #222222;
-  --color-neutral-900: #1E1E1E;
+  --color-neutral-900: #1e1e1e;
   --color-neutral-925: #161616;
   --color-neutral-950: #121212;
-  --color-neutral-955: #0A0A0A;
+  --color-neutral-955: #0a0a0a;
 }
 
 :root {
@@ -41,8 +41,8 @@
 html,
 body,
 #root {
-  background-color: #0A0A0A;
-  color: #E5E5E5;
+  background-color: #0a0a0a;
+  color: #e5e5e5;
   font-family: var(--font-sans);
   overflow: hidden !important;
   height: 100% !important;
@@ -60,35 +60,40 @@ body,
 /* ==========================================================================
    ✨ PREMIUM TYPOGRAPHY SYSTEM
    ========================================================================== */
-h1, h2, h3, h4, h5, h6 {
-  color: #E5E5E5;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #e5e5e5;
   letter-spacing: -0.025em;
   font-weight: 800;
   text-wrap: balance;
 }
 
 p {
-  color: #9CA3AF;
+  color: #9ca3af;
   line-height: 1.6;
 }
 
 /* Premium Gradient Heading Tokens */
 .text-gradient-brand {
-  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-silver {
-  background: linear-gradient(180deg, #FFFFFF 0%, #9CA3AF 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #9ca3af 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-accent {
-  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -101,14 +106,14 @@ p {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #9CA3AF;
+  color: #9ca3af;
 }
 
 .text-stat-number {
   font-family: var(--font-mono);
   font-weight: 900;
   letter-spacing: -0.03em;
-  color: #E5E5E5;
+  color: #e5e5e5;
 }
 
 /* ==========================================================================
@@ -120,13 +125,14 @@ p {
 button.btn-primary,
 a.btn-primary,
 [role="button"].btn-primary {
-  background: #3B82F6 !important;
-  background-color: #3B82F6 !important;
-  color: #FFFFFF !important;
+  background: #3b82f6 !important;
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
   border: 1px solid rgba(59, 130, 246, 0.4) !important;
   border-radius: 0.75rem !important;
   font-weight: 700 !important;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   cursor: pointer !important;
 }
@@ -134,7 +140,8 @@ a.btn-primary,
 .btn-primary svg,
 button.btn-primary svg,
 a.btn-primary svg {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.2s ease, color 0.2s ease !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.2s ease,
+    color 0.2s ease !important;
 }
 
 .btn-primary:hover,
@@ -143,10 +150,10 @@ a.btn-primary:hover,
 [role="button"].btn-primary:hover,
 .btn-primary:not(:disabled):hover,
 button.btn-primary:not(:disabled):hover {
-  background: #2563EB !important;
-  background-color: #2563EB !important;
-  border-color: #3B82F6 !important;
-  color: #FFFFFF !important;
+  background: #2563eb !important;
+  background-color: #2563eb !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
   transform: translateY(-1.5px) !important;
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.45), 0 8px 22px rgba(0, 0, 0, 0.4) !important;
   filter: none !important;
@@ -155,8 +162,8 @@ button.btn-primary:not(:disabled):hover {
 .btn-primary:hover svg,
 button.btn-primary:hover svg,
 a.btn-primary:hover svg {
-  color: #FFFFFF !important;
-  stroke: #FFFFFF !important;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
   transform: scale(1.1) !important;
 }
 
@@ -173,9 +180,9 @@ button.btn-primary:disabled,
 button.btn-primary:disabled:hover,
 .btn-primary[aria-disabled="true"],
 button.btn-primary[aria-disabled="true"] {
-  background-color: #2A2A2A !important;
-  background: #2A2A2A !important;
-  border-color: #2F2F2F !important;
+  background-color: #2a2a2a !important;
+  background: #2a2a2a !important;
+  border-color: #2f2f2f !important;
   color: rgba(255, 255, 255, 0.4) !important;
   cursor: not-allowed !important;
   transform: none !important;
@@ -185,9 +192,9 @@ button.btn-primary[aria-disabled="true"] {
 /* ── Secondary Button (Dark Gray Surface) ───────────────── */
 .btn-secondary,
 button.btn-secondary {
-  background-color: #2A2A2A !important;
-  color: #E5E5E5 !important;
-  border: 1px solid #2F2F2F !important;
+  background-color: #2a2a2a !important;
+  color: #e5e5e5 !important;
+  border: 1px solid #2f2f2f !important;
   border-radius: 0.75rem !important;
   font-weight: 600 !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
@@ -198,8 +205,8 @@ button.btn-secondary {
 .btn-secondary:hover,
 button.btn-secondary:hover {
   background-color: #333333 !important;
-  border-color: #4B5563 !important;
-  color: #FFFFFF !important;
+  border-color: #4b5563 !important;
+  color: #ffffff !important;
   transform: translateY(-1px) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
@@ -213,7 +220,7 @@ button.btn-secondary:active {
 .btn-danger,
 button.btn-danger {
   background-color: rgba(239, 68, 68, 0.15) !important;
-  color: #EF4444 !important;
+  color: #ef4444 !important;
   border: 1px solid rgba(239, 68, 68, 0.3) !important;
   border-radius: 0.75rem !important;
   font-weight: 600 !important;
@@ -222,9 +229,9 @@ button.btn-danger {
 
 .btn-danger:hover,
 button.btn-danger:hover {
-  background-color: #EF4444 !important;
-  border-color: #F87171 !important;
-  color: #FFFFFF !important;
+  background-color: #ef4444 !important;
+  border-color: #f87171 !important;
+  color: #ffffff !important;
   transform: translateY(-1px) !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
 }
@@ -232,8 +239,8 @@ button.btn-danger:hover {
 /* ── Success Button (Emerald) ───────────────────────────── */
 .btn-success,
 button.btn-success {
-  background-color: #10B981 !important;
-  color: #FFFFFF !important;
+  background-color: #10b981 !important;
+  color: #ffffff !important;
   border: 1px solid rgba(16, 185, 129, 0.4) !important;
   border-radius: 0.75rem !important;
   font-weight: 700 !important;
@@ -243,20 +250,20 @@ button.btn-success {
 .btn-success:hover,
 button.btn-success:hover {
   background-color: #059669 !important;
-  border-color: #34D399 !important;
-  color: #FFFFFF !important;
+  border-color: #34d399 !important;
+  color: #ffffff !important;
   transform: translateY(-1px) !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35) !important;
 }
 
 /* ── Interactive Card Surface Hover Class ───────────────── */
 .card-interactive {
-  background-color: #1E1E1E;
-  border: 1px solid #2F2F2F;
+  background-color: #1e1e1e;
+  border: 1px solid #2f2f2f;
   transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-interactive:hover {

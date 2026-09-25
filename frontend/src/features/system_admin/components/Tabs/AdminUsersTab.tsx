@@ -548,7 +548,8 @@ export function AdminUsersTab({
             </div>
             <p className="text-sm text-[#9CA3AF] mb-6">
               Are you sure you want to delete{" "}
-              <strong className="text-white">{deletingUser.email}</strong>? This is irreversible.
+              <strong className="text-white">{deletingUser.email}</strong>? This
+              is irreversible.
             </p>
 
             <div className="mb-6">
@@ -592,8 +593,9 @@ export function AdminUsersTab({
               <h3 className="font-bold text-white">Grant / Adjust Credits</h3>
             </div>
             <p className="text-sm text-[#9CA3AF] mb-4">
-              Adjust credits for <strong className="text-white">{grantCreditsUser.email}</strong>. Use
-              positive numbers to add, or negative numbers to deduct.
+              Adjust credits for{" "}
+              <strong className="text-white">{grantCreditsUser.email}</strong>.
+              Use positive numbers to add, or negative numbers to deduct.
             </p>
             <div className="space-y-4">
               <div>

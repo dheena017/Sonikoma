@@ -49,7 +49,11 @@ export default defineConfig({
       input: {
         popup: path.resolve(__dirname, "popup", "index.html"),
         sidepanel: path.resolve(__dirname, "sidepanel", "index.html"),
-        "background/service-worker": path.resolve(__dirname, "background", "service-worker.ts"),
+        "background/service-worker": path.resolve(
+          __dirname,
+          "background",
+          "service-worker.ts"
+        ),
         "content/content": path.resolve(__dirname, "content", "content.ts"),
       },
       output: {

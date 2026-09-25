@@ -25,7 +25,10 @@ export function ChapterScraperSkeleton() {
       {/* Chapter Grid Skeleton */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="rounded-2xl bg-neutral-900/80 border border-neutral-800/60 p-3 space-y-2">
+          <div
+            key={i}
+            className="rounded-2xl bg-neutral-900/80 border border-neutral-800/60 p-3 space-y-2"
+          >
             <Skeleton className="w-full aspect-[3/4] rounded-xl" />
             <Skeleton className="h-4 w-full rounded-md" />
             <Skeleton className="h-3 w-2/3 rounded-md" />

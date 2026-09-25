@@ -100,27 +100,39 @@ const DomainRuleModal = ({
   const isEditing = Boolean(initialData);
 
   // Form tabs
-  const [modalTab, setModalTab] = useState<"general" | "engine" | "headers">("general");
+  const [modalTab, setModalTab] = useState<"general" | "engine" | "headers">(
+    "general"
+  );
 
   // General Fields
   const [domainInput, setDomainInput] = useState(initialData?.domain || "");
   const [status, setStatus] = useState<"approved" | "blocked" | "pending">(
     (initialData?.status as any) || "approved"
   );
-  const [rateLimit, setRateLimit] = useState(initialData?.rate_limit_per_min || 30);
+  const [rateLimit, setRateLimit] = useState(
+    initialData?.rate_limit_per_min || 30
+  );
 
   // Engine & Performance Fields
-  const [engineStrategy, setEngineStrategy] = useState<"auto" | "http_fast" | "browser_playwright">(
-    (initialData?.engine_strategy as any) || "auto"
+  const [engineStrategy, setEngineStrategy] = useState<
+    "auto" | "http_fast" | "browser_playwright"
+  >((initialData?.engine_strategy as any) || "auto");
+  const [proxyRequired, setProxyRequired] = useState(
+    Boolean(initialData?.proxy_required)
   );
-  const [proxyRequired, setProxyRequired] = useState(Boolean(initialData?.proxy_required));
   const [timeoutSec, setTimeoutSec] = useState(initialData?.timeout_sec || 30);
-  const [maxConcurrency, setMaxConcurrency] = useState(initialData?.max_concurrency || 2);
-  const [retryAttempts, setRetryAttempts] = useState(initialData?.retry_attempts || 2);
+  const [maxConcurrency, setMaxConcurrency] = useState(
+    initialData?.max_concurrency || 2
+  );
+  const [retryAttempts, setRetryAttempts] = useState(
+    initialData?.retry_attempts || 2
+  );
 
   // Headers & Notes
   const [notes, setNotes] = useState(initialData?.notes || "");
-  const [customHeaders, setCustomHeaders] = useState(initialData?.custom_headers || "{}");
+  const [customHeaders, setCustomHeaders] = useState(
+    initialData?.custom_headers || "{}"
+  );
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -159,7 +171,9 @@ const DomainRuleModal = ({
       });
 
       addNotification(
-        `Domain rule for '${cleaned}' ${isEditing ? "updated" : "created"} successfully.`,
+        `Domain rule for '${cleaned}' ${
+          isEditing ? "updated" : "created"
+        } successfully.`,
         "success"
       );
       onSuccess();
@@ -192,12 +206,15 @@ const DomainRuleModal = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  {isEditing ? `Edit Rule: ${initialData?.domain}` : "Add New Scraper Domain Rule"}
+                  {isEditing
+                    ? `Edit Rule: ${initialData?.domain}`
+                    : "Add New Scraper Domain Rule"}
                 </h3>
                 {isEditing && <StatusBadge status={status} />}
               </div>
               <p className="text-xs text-neutral-400">
-                Configure rate limits, anti-bot bypass strategies, proxy routing, and timeouts.
+                Configure rate limits, anti-bot bypass strategies, proxy
+                routing, and timeouts.
               </p>
             </div>
           </div>
@@ -252,7 +269,10 @@ const DomainRuleModal = ({
         </div>
 
         {/* Form Body (Scrollable) */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto flex-1 text-xs font-sans">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 space-y-5 overflow-y-auto flex-1 text-xs font-sans"
+        >
           {/* ── TAB 1: GENERAL & RATE LIMITS ── */}
           {modalTab === "general" && (
             <div className="space-y-4">
@@ -304,7 +324,9 @@ const DomainRuleModal = ({
 
               {/* Rate Limit Presets */}
               <div className="flex items-center gap-2 pt-1">
-                <span className="text-[11px] text-neutral-500 font-mono">Quick Presets:</span>
+                <span className="text-[11px] text-neutral-500 font-mono">
+                  Quick Presets:
+                </span>
                 {[15, 30, 60, 120].map((preset) => (
                   <button
                     key={preset}
@@ -322,27 +344,34 @@ const DomainRuleModal = ({
               </div>
 
               {/* Editing historical stats if available */}
-              {isEditing && (initialData?.success_count !== undefined || initialData?.failure_count !== undefined) && (
-                <div className="p-4 bg-black/30 border border-[#2F2F2F] rounded-2xl space-y-2 mt-4">
-                  <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono font-bold block">
-                    Domain Execution History:
-                  </span>
-                  <div className="grid grid-cols-2 gap-3 text-xs font-mono">
-                    <div className="p-2.5 bg-[#181818] rounded-xl border border-[#2F2F2F] flex items-center justify-between">
-                      <span className="text-emerald-400 flex items-center gap-1.5 font-bold">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Successful Runs
-                      </span>
-                      <span className="text-white font-bold">{initialData?.success_count || 0}</span>
-                    </div>
-                    <div className="p-2.5 bg-[#181818] rounded-xl border border-[#2F2F2F] flex items-center justify-between">
-                      <span className="text-red-400 flex items-center gap-1.5 font-bold">
-                        <XCircle className="w-3.5 h-3.5" /> Failures
-                      </span>
-                      <span className="text-white font-bold">{initialData?.failure_count || 0}</span>
+              {isEditing &&
+                (initialData?.success_count !== undefined ||
+                  initialData?.failure_count !== undefined) && (
+                  <div className="p-4 bg-black/30 border border-[#2F2F2F] rounded-2xl space-y-2 mt-4">
+                    <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-mono font-bold block">
+                      Domain Execution History:
+                    </span>
+                    <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+                      <div className="p-2.5 bg-[#181818] rounded-xl border border-[#2F2F2F] flex items-center justify-between">
+                        <span className="text-emerald-400 flex items-center gap-1.5 font-bold">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Successful
+                          Runs
+                        </span>
+                        <span className="text-white font-bold">
+                          {initialData?.success_count || 0}
+                        </span>
+                      </div>
+                      <div className="p-2.5 bg-[#181818] rounded-xl border border-[#2F2F2F] flex items-center justify-between">
+                        <span className="text-red-400 flex items-center gap-1.5 font-bold">
+                          <XCircle className="w-3.5 h-3.5" /> Failures
+                        </span>
+                        <span className="text-white font-bold">
+                          {initialData?.failure_count || 0}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
           )}
 
@@ -358,12 +387,19 @@ const DomainRuleModal = ({
                   onChange={(e) => setEngineStrategy(e.target.value as any)}
                   className="w-full px-3.5 py-2.5 bg-black/50 border border-[#2F2F2F] rounded-xl text-xs text-white focus:outline-none focus:border-neutral-600 font-mono"
                 >
-                  <option value="auto">Adaptive Auto-Detect (AI + Dynamic Browser Fallback)</option>
-                  <option value="http_fast">High-Speed Direct HTTP (Cheerio / Raw HTML Stream)</option>
-                  <option value="browser_playwright">Headless Browser (Playwright / Cloudflare WAF Bypass)</option>
+                  <option value="auto">
+                    Adaptive Auto-Detect (AI + Dynamic Browser Fallback)
+                  </option>
+                  <option value="http_fast">
+                    High-Speed Direct HTTP (Cheerio / Raw HTML Stream)
+                  </option>
+                  <option value="browser_playwright">
+                    Headless Browser (Playwright / Cloudflare WAF Bypass)
+                  </option>
                 </select>
                 <p className="text-[11px] text-neutral-500 mt-1">
-                  Controls whether to parse lightweight HTML directly or spin up a full Chromium session.
+                  Controls whether to parse lightweight HTML directly or spin up
+                  a full Chromium session.
                 </p>
               </div>
 
@@ -371,10 +407,12 @@ const DomainRuleModal = ({
               <div className="p-3.5 bg-black/40 border border-[#2F2F2F] rounded-xl flex items-center justify-between">
                 <div className="space-y-0.5">
                   <span className="text-sm font-semibold text-white flex items-center gap-1.5">
-                    <Shield className="w-4 h-4 text-purple-400" /> Residential Proxy Routing
+                    <Shield className="w-4 h-4 text-purple-400" /> Residential
+                    Proxy Routing
                   </span>
                   <p className="text-[11px] text-neutral-400">
-                    Route requests through residential proxy nodes to evade IP rate limits and geoblocks.
+                    Route requests through residential proxy nodes to evade IP
+                    rate limits and geoblocks.
                   </p>
                 </div>
                 <input
@@ -519,12 +557,16 @@ export function AdminScrapersTab({
   addNotification: any;
 }) {
   // Navigation
-  const [activeSubTab, setActiveSubTab] = useState<"domains" | "adapters">("domains");
+  const [activeSubTab, setActiveSubTab] = useState<"domains" | "adapters">(
+    "domains"
+  );
 
   // Domain records & filters
   const [domains, setDomains] = useState<DomainRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterStatus, setFilterStatus] = useState<"all" | "approved" | "blocked" | "pending">("all");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "approved" | "blocked" | "pending"
+  >("all");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
@@ -573,7 +615,10 @@ export function AdminScrapersTab({
     try {
       const [hRes, aRes] = await Promise.all([
         getScraperHealth(fetchWithInterceptor).catch(() => null),
-        listAdapters(fetchWithInterceptor).catch(() => ({ total: 0, adapters: [] })),
+        listAdapters(fetchWithInterceptor).catch(() => ({
+          total: 0,
+          adapters: [],
+        })),
       ]);
       if (hRes) setHealth(hRes);
       if (aRes?.adapters) setAdapters(aRes.adapters);
@@ -603,7 +648,9 @@ export function AdminScrapersTab({
         retry_attempts: d.retry_attempts || 2,
         notes: d.notes || "",
       });
-      await updateDomainStatus(fetchWithInterceptor, d.domain, { status: nextStatus });
+      await updateDomainStatus(fetchWithInterceptor, d.domain, {
+        status: nextStatus,
+      });
       addNotification(`Domain '${d.domain}' set to ${nextStatus}.`, "success");
       loadDomains();
     } catch {
@@ -632,7 +679,10 @@ export function AdminScrapersTab({
     setClearingCache(true);
     try {
       const res = await clearScraperCache(fetchWithInterceptor);
-      addNotification(res.message || "RAM cache cleared successfully.", "success");
+      addNotification(
+        res.message || "RAM cache cleared successfully.",
+        "success"
+      );
       loadSystemMetrics();
     } catch {
       addNotification("Failed to purge scraper cache.", "error");
@@ -649,8 +699,12 @@ export function AdminScrapersTab({
     setProbeResult(null);
     try {
       const [separated, blockedCheck] = await Promise.all([
-        separateComicUrl(fetchWithInterceptor, probeUrl.trim()).catch(() => null),
-        checkDomainBlocked(fetchWithInterceptor, probeUrl.trim()).catch(() => null),
+        separateComicUrl(fetchWithInterceptor, probeUrl.trim()).catch(
+          () => null
+        ),
+        checkDomainBlocked(fetchWithInterceptor, probeUrl.trim()).catch(
+          () => null
+        ),
       ]);
       setProbeResult({
         separated: separated || undefined,
@@ -703,7 +757,8 @@ export function AdminScrapersTab({
                 </span>
               </div>
               <p className="text-xs text-neutral-400">
-                Manage target domain firewall rules, extraction speed, site adapters, and RAM cache.
+                Manage target domain firewall rules, extraction speed, site
+                adapters, and RAM cache.
               </p>
             </div>
           </div>
@@ -729,7 +784,11 @@ export function AdminScrapersTab({
             className="flex items-center gap-1.5 px-3 py-2 bg-[#181818] hover:bg-neutral-800 border border-[#2F2F2F] hover:border-neutral-500 text-neutral-300 hover:text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 cursor-pointer"
             title="Flush in-memory L1 and L5 scraper cache"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-blue-400 ${clearingCache ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 text-blue-400 ${
+                clearingCache ? "animate-spin" : ""
+              }`}
+            />
             Purge RAM Cache
           </button>
 
@@ -760,7 +819,8 @@ export function AdminScrapersTab({
               </span>
             </div>
             <div className="text-[11px] text-neutral-400 truncate">
-              {health?.active_in_flight_jobs || 0} active scraping tasks in-flight
+              {health?.active_in_flight_jobs || 0} active scraping tasks
+              in-flight
             </div>
           </div>
         </div>
@@ -780,9 +840,13 @@ export function AdminScrapersTab({
               </span>
             </div>
             <div className="text-[11px] text-neutral-400 flex items-center gap-2">
-              <span className="text-red-400 font-semibold">{blockedCount} Blocked</span>
+              <span className="text-red-400 font-semibold">
+                {blockedCount} Blocked
+              </span>
               <span>•</span>
-              <span className="text-amber-400 font-semibold">{pendingCount} Pending</span>
+              <span className="text-amber-400 font-semibold">
+                {pendingCount} Pending
+              </span>
             </div>
           </div>
         </div>
@@ -795,14 +859,17 @@ export function AdminScrapersTab({
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between">
               <span className="text-base font-bold text-white font-mono">
-                {(health?.in_memory_l1_cache_size || 0) + (health?.in_memory_l5_cache_size || 0)} Keys
+                {(health?.in_memory_l1_cache_size || 0) +
+                  (health?.in_memory_l5_cache_size || 0)}{" "}
+                Keys
               </span>
               <span className="text-[10px] text-purple-400 uppercase font-mono font-bold">
                 RAM Cache
               </span>
             </div>
             <div className="text-[11px] text-neutral-400 truncate">
-              {health?.in_memory_l1_cache_size || 0} L1 HTML • {health?.in_memory_l5_cache_size || 0} L5 Panels
+              {health?.in_memory_l1_cache_size || 0} L1 HTML •{" "}
+              {health?.in_memory_l5_cache_size || 0} L5 Panels
             </div>
           </div>
         </div>
@@ -837,7 +904,9 @@ export function AdminScrapersTab({
           <div className="flex items-center justify-between border-b border-[#2F2F2F] pb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-blue-400" />
-              <h3 className="text-sm font-bold text-white">Live Comic URL Inspector & Firewall Probe</h3>
+              <h3 className="text-sm font-bold text-white">
+                Live Comic URL Inspector & Firewall Probe
+              </h3>
             </div>
             <button
               onClick={() => setShowProbe(false)}
@@ -861,7 +930,11 @@ export function AdminScrapersTab({
               disabled={probing || !probeUrl.trim()}
               className="px-5 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer"
             >
-              {probing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+              {probing ? (
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Zap className="w-3.5 h-3.5" />
+              )}
               Inspect Target
             </button>
           </form>
@@ -884,11 +957,13 @@ export function AdminScrapersTab({
                   </span>
                   {probeResult.blockedCheck?.is_blocked ? (
                     <span className="text-red-400 font-bold flex items-center gap-1">
-                      <ShieldAlert className="w-3.5 h-3.5" /> Blocked from Scraping
+                      <ShieldAlert className="w-3.5 h-3.5" /> Blocked from
+                      Scraping
                     </span>
                   ) : (
                     <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5" /> Allowed / Operational
+                      <ShieldCheck className="w-3.5 h-3.5" /> Allowed /
+                      Operational
                     </span>
                   )}
                 </div>
@@ -898,7 +973,8 @@ export function AdminScrapersTab({
                     Recommended Action
                   </span>
                   <span className="text-amber-400 font-bold uppercase">
-                    {probeResult.separated?.recommended_action || "Standard Scrape"}
+                    {probeResult.separated?.recommended_action ||
+                      "Standard Scrape"}
                   </span>
                 </div>
               </div>
@@ -980,22 +1056,24 @@ export function AdminScrapersTab({
 
               {/* Status Filter Tabs */}
               <div className="flex items-center p-1 bg-black/40 border border-[#2F2F2F] rounded-xl">
-                {(["all", "approved", "blocked", "pending"] as const).map((st) => (
-                  <button
-                    key={st}
-                    onClick={() => {
-                      setFilterStatus(st);
-                      setCurrentPage(1);
-                    }}
-                    className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider font-mono transition-all cursor-pointer ${
-                      filterStatus === st
-                        ? "bg-[#3B82F6] text-white shadow-sm"
-                        : "text-neutral-400 hover:text-white"
-                    }`}
-                  >
-                    {st}
-                  </button>
-                ))}
+                {(["all", "approved", "blocked", "pending"] as const).map(
+                  (st) => (
+                    <button
+                      key={st}
+                      onClick={() => {
+                        setFilterStatus(st);
+                        setCurrentPage(1);
+                      }}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider font-mono transition-all cursor-pointer ${
+                        filterStatus === st
+                          ? "bg-[#3B82F6] text-white shadow-sm"
+                          : "text-neutral-400 hover:text-white"
+                      }`}
+                    >
+                      {st}
+                    </button>
+                  )
+                )}
               </div>
             </div>
 
@@ -1026,7 +1104,9 @@ export function AdminScrapersTab({
                 className="p-1.5 bg-[#141414] hover:bg-neutral-800 border border-[#2F2F2F] rounded-lg text-neutral-400 hover:text-white transition-colors cursor-pointer"
                 title="Refresh Table"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+                />
               </button>
             </div>
           </div>
@@ -1059,7 +1139,9 @@ export function AdminScrapersTab({
                   <tr>
                     <td colSpan={7} className="px-5 py-12 text-center">
                       <Globe className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
-                      <div className="text-neutral-300 text-sm font-bold">No domain rules match criteria</div>
+                      <div className="text-neutral-300 text-sm font-bold">
+                        No domain rules match criteria
+                      </div>
                       <div className="text-neutral-500 text-xs mt-1">
                         Try modifying search or add a new domain rule.
                       </div>
@@ -1082,7 +1164,10 @@ export function AdminScrapersTab({
                               {d.domain}
                             </span>
                             {d.notes && (
-                              <div className="text-[10px] text-neutral-500 truncate max-w-[160px]" title={d.notes}>
+                              <div
+                                className="text-[10px] text-neutral-500 truncate max-w-[160px]"
+                                title={d.notes}
+                              >
                                 {d.notes}
                               </div>
                             )}
@@ -1130,11 +1215,14 @@ export function AdminScrapersTab({
                       {/* Created Date */}
                       <td className="px-5 py-3.5 text-neutral-400 font-mono text-[11px]">
                         {d.created_at
-                          ? new Date(d.created_at).toLocaleDateString(undefined, {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })
+                          ? new Date(d.created_at).toLocaleDateString(
+                              undefined,
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )
                           : "Default Rule"}
                       </td>
 
@@ -1145,7 +1233,11 @@ export function AdminScrapersTab({
                           <button
                             onClick={() => handleToggleStatus(d)}
                             disabled={actionLoading === d.domain}
-                            title={d.status === "approved" ? "Block domain" : "Approve domain"}
+                            title={
+                              d.status === "approved"
+                                ? "Block domain"
+                                : "Approve domain"
+                            }
                             className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
                               d.status === "approved"
                                 ? "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
@@ -1203,7 +1295,9 @@ export function AdminScrapersTab({
                   Prev
                 </button>
                 <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="px-3 py-1 bg-black/40 hover:bg-neutral-800 disabled:opacity-40 text-neutral-300 rounded-lg text-xs font-mono border border-[#2F2F2F] cursor-pointer"
                 >
@@ -1225,7 +1319,8 @@ export function AdminScrapersTab({
                 Compiled Engine Site Adapters
               </h3>
               <p className="text-xs text-neutral-400">
-                High-performance custom parsers built specifically for webtoon/manga platforms.
+                High-performance custom parsers built specifically for
+                webtoon/manga platforms.
               </p>
             </div>
             <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -1245,14 +1340,17 @@ export function AdminScrapersTab({
                   className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-5 space-y-3 shadow-sm hover:border-neutral-500 transition-colors"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-white text-sm">{ad.name}</span>
+                    <span className="font-bold text-white text-sm">
+                      {ad.name}
+                    </span>
                     <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                       {ad.speed} Speed
                     </span>
                   </div>
 
                   <p className="text-xs text-neutral-400 line-clamp-2">
-                    {ad.description || "Custom extractor module with automated chapter navigation."}
+                    {ad.description ||
+                      "Custom extractor module with automated chapter navigation."}
                   </p>
 
                   <div className="pt-2 border-t border-[#242424] space-y-2">

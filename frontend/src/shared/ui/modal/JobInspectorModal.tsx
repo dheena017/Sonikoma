@@ -84,7 +84,9 @@ export default function JobInspectorModal({
   const calculateDuration = (j: JobStatusResponse) => {
     if (!j.started_at) return "—";
     const start = new Date(j.started_at).getTime();
-    const end = j.completed_at ? new Date(j.completed_at).getTime() : Date.now();
+    const end = j.completed_at
+      ? new Date(j.completed_at).getTime()
+      : Date.now();
     const sec = Math.max(0, Math.floor((end - start) / 1000));
     if (sec < 60) return `${sec}s`;
     const min = Math.floor(sec / 60);
@@ -235,22 +237,24 @@ export default function JobInspectorModal({
                 </div>
 
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5 max-h-52 overflow-y-auto p-3 bg-neutral-900/60 rounded-2xl border border-neutral-800 custom-scrollbar">
-                  {job.result.images.slice(0, 36).map((img: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="relative group rounded-xl overflow-hidden border border-neutral-800 aspect-[3/4] bg-neutral-950 hover:border-neutral-700 transition-all"
-                    >
-                      <img
-                        src={img.proxy_url || img.url}
-                        alt={`Panel ${idx + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        loading="lazy"
-                      />
-                      <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-md bg-black/80 text-[10px] font-mono text-neutral-300 backdrop-blur-xs">
-                        #{idx + 1}
-                      </span>
-                    </div>
-                  ))}
+                  {job.result.images
+                    .slice(0, 36)
+                    .map((img: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="relative group rounded-xl overflow-hidden border border-neutral-800 aspect-[3/4] bg-neutral-950 hover:border-neutral-700 transition-all"
+                      >
+                        <img
+                          src={img.proxy_url || img.url}
+                          alt={`Panel ${idx + 1}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          loading="lazy"
+                        />
+                        <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded-md bg-black/80 text-[10px] font-mono text-neutral-300 backdrop-blur-xs">
+                          #{idx + 1}
+                        </span>
+                      </div>
+                    ))}
                 </div>
               </div>
             )}

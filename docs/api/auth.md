@@ -2,8 +2,8 @@
 
 Endpoints for user registration, login, and profile management.
 
-| Endpoint                    | Method | Input Parameters                | Description                                   |
-| :-------------------------- | :----- | :------------------------------ | :-------------------------------------------- |
+| Endpoint                       | Method | Input Parameters                | Description                                   |
+| :----------------------------- | :----- | :------------------------------ | :-------------------------------------------- |
 | `/api/v1/auth/register`        | `POST` | `username`, `password`, `email` | Registers a new user account.                 |
 | `/api/v1/auth/login`           | `POST` | `username`, `password`          | Logs in a user, returning a JWT token.        |
 | `/api/v1/auth/google`          | `POST` | `token` (Google ID token)       | Handles federated Google Authentication.      |
@@ -18,8 +18,8 @@ The credits system gates all AI and media-generation features. Every deduction a
 
 ### Endpoints
 
-| Endpoint                                 | Method | Auth Required | Description                                          |
-| :--------------------------------------- | :----- | :------------ | :--------------------------------------------------- |
+| Endpoint                                    | Method | Auth Required | Description                                          |
+| :------------------------------------------ | :----- | :------------ | :--------------------------------------------------- |
 | `/api/v1/auth/credits`                      | `GET`  | ✅ User       | Returns current balance + low_balance flag.          |
 | `/api/v1/auth/transactions`                 | `GET`  | ✅ User       | Returns the paginated ledger (default 100, max 500). |
 | `/api/v1/admin/users/{user_id}/add-credits` | `POST` | ✅ Admin only | Manually grant credits to a user.                    |

@@ -14,7 +14,12 @@ import {
   Play,
 } from "lucide-react";
 
-export type StoryboardFilterTab = "all" | "dialogue" | "prompts" | "camera" | "audio";
+export type StoryboardFilterTab =
+  | "all"
+  | "dialogue"
+  | "prompts"
+  | "camera"
+  | "audio";
 
 export interface StoryboardWorkspaceHeaderProps {
   panelCount: number;
@@ -35,7 +40,9 @@ export interface StoryboardWorkspaceHeaderProps {
   onPlayStoryboard?: () => void;
 }
 
-export const StoryboardWorkspaceHeader: React.FC<StoryboardWorkspaceHeaderProps> = ({
+export const StoryboardWorkspaceHeader: React.FC<
+  StoryboardWorkspaceHeaderProps
+> = ({
   panelCount,
   totalDuration,
   activeTab,

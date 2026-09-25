@@ -50,18 +50,31 @@ export const MOTION_PRESETS: MotionPresetOption[] = [
 
 export const BGM_MOODS: BgmMoodOption[] = [
   { id: "action", label: "⚔️ Action / Battle", desc: "Heavy energetic beat" },
-  { id: "drama", label: "🎭 Emotional Drama", desc: "Piano & orchestral strings" },
+  {
+    id: "drama",
+    label: "🎭 Emotional Drama",
+    desc: "Piano & orchestral strings",
+  },
   { id: "chill", label: "☕ Chill / Lo-Fi", desc: "Relaxing hip-hop beats" },
-  { id: "mystery", label: "🕵️ Dark Mystery", desc: "Suspenseful ambient tones" },
+  {
+    id: "mystery",
+    label: "🕵️ Dark Mystery",
+    desc: "Suspenseful ambient tones",
+  },
   { id: "epic", label: "🌌 Epic Orchestral", desc: "Triumphant choir & horns" },
-  { id: "cyberpunk", label: "⚡ Cyberpunk Synth", desc: "Futuristic synthwave" },
+  {
+    id: "cyberpunk",
+    label: "⚡ Cyberpunk Synth",
+    desc: "Futuristic synthwave",
+  },
 ];
 
 export const SAMPLE_PANELS: StoryboardPanel[] = [
   {
     id: "sample-1",
     index: 1,
-    imageUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80",
+    imageUrl:
+      "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop&q=80",
     motionPreset: "zoom_in",
     dialogueText: "",
     duration: 3.5,
@@ -70,7 +83,8 @@ export const SAMPLE_PANELS: StoryboardPanel[] = [
   {
     id: "sample-2",
     index: 2,
-    imageUrl: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
+    imageUrl:
+      "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop&q=80",
     motionPreset: "dolly_shake",
     dialogueText: "",
     duration: 3.0,
@@ -79,7 +93,8 @@ export const SAMPLE_PANELS: StoryboardPanel[] = [
   {
     id: "sample-3",
     index: 3,
-    imageUrl: "https://images.unsplash.com/photo-1563089145-599997674d42?w=600&auto=format&fit=crop&q=80",
+    imageUrl:
+      "https://images.unsplash.com/photo-1563089145-599997674d42?w=600&auto=format&fit=crop&q=80",
     motionPreset: "pan_up",
     dialogueText: "It doesn't matter what happens next. We fight together!",
     duration: 4.0,

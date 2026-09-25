@@ -36,7 +36,9 @@ export interface ImportedAssetsWorkspaceHeaderProps {
   isAddingSelected?: boolean;
 }
 
-export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHeaderProps> = ({
+export const ImportedAssetsWorkspaceHeader: React.FC<
+  ImportedAssetsWorkspaceHeaderProps
+> = ({
   filteredCount,
   totalCount,
   activeTab,
@@ -170,7 +172,9 @@ export const ImportedAssetsWorkspaceHeader: React.FC<ImportedAssetsWorkspaceHead
                 ) : (
                   <Plus className="h-2.5 w-2.5" />
                 )}
-                <span>{isAddingSelected ? "Adding..." : `Add (${selectedCount})`}</span>
+                <span>
+                  {isAddingSelected ? "Adding..." : `Add (${selectedCount})`}
+                </span>
               </button>
             )}
 

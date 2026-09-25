@@ -535,8 +535,8 @@ export default function YouTubeChannelHome({
             )}
 
           {/* ── 5. TOP PERFORMING STORIES (LEADERBOARD) ── */}
-          {(activeFilter === "all" || activeFilter === "popular") && (
-            topVideos.length > 0 ? (
+          {(activeFilter === "all" || activeFilter === "popular") &&
+            (topVideos.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -614,15 +614,15 @@ export default function YouTubeChannelHome({
                   No Popular Videos Yet
                 </h4>
                 <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
-                  Videos and their performance analytics will rank here as they accumulate views and likes.
+                  Videos and their performance analytics will rank here as they
+                  accumulate views and likes.
                 </p>
               </div>
-            ) : null
-          )}
+            ) : null)}
 
           {/* ── 6. PLAYLISTS & SERIES SHELF ── */}
-          {(activeFilter === "all" || activeFilter === "playlists") && (
-            playlists.length > 0 ? (
+          {(activeFilter === "all" || activeFilter === "playlists") &&
+            (playlists.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -698,7 +698,8 @@ export default function YouTubeChannelHome({
                   No Playlists Found
                 </h4>
                 <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
-                  Create playlists and series to organize your chapters and video episodes.
+                  Create playlists and series to organize your chapters and
+                  video episodes.
                 </p>
                 {onNavigateTab && (
                   <button
@@ -710,12 +711,11 @@ export default function YouTubeChannelHome({
                   </button>
                 )}
               </div>
-            ) : null
-          )}
+            ) : null)}
 
           {/* ── 7. SHORTS SHELF ── */}
-          {(activeFilter === "all" || activeFilter === "shorts") && (
-            shorts.length > 0 ? (
+          {(activeFilter === "all" || activeFilter === "shorts") &&
+            (shorts.length > 0 ? (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
@@ -785,7 +785,8 @@ export default function YouTubeChannelHome({
                   No YouTube Shorts Found
                 </h4>
                 <p className="text-xs text-neutral-400 font-mono max-w-sm mx-auto">
-                  Generate vertical short-form episodes from your comic panels for YouTube Shorts.
+                  Generate vertical short-form episodes from your comic panels
+                  for YouTube Shorts.
                 </p>
                 {onNavigateTab && (
                   <button
@@ -797,8 +798,7 @@ export default function YouTubeChannelHome({
                   </button>
                 )}
               </div>
-            ) : null
-          )}
+            ) : null)}
 
           {/* ── 8. RECENT UPLOADS GRID ── */}
           {activeFilter === "all" && (

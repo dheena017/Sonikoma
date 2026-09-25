@@ -244,7 +244,9 @@ export default function ProjectConfirmModal({
     generateVoice: true,
     generateSFX: true,
   });
-  const [submittingAction, setSubmittingAction] = useState<"draft" | "ai" | null>(null);
+  const [submittingAction, setSubmittingAction] = useState<
+    "draft" | "ai" | null
+  >(null);
   const isSavingDraft = submittingAction === "draft";
   const isLaunchingAI = submittingAction === "ai";
   const isSubmitting = submittingAction !== null;
@@ -287,14 +289,22 @@ export default function ProjectConfirmModal({
     const generated: string[] = [];
     if (scrapedGenre) {
       scrapedGenre.split(",").forEach((g) => {
-        const clean = g.trim().toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "");
+        const clean = g
+          .trim()
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .replace(/\s+/g, "");
         if (clean && !generated.includes(`#${clean}`)) {
           generated.push(`#${clean}`);
         }
       });
     }
     if (seriesTitle) {
-      const titleTag = seriesTitle.trim().toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "");
+      const titleTag = seriesTitle
+        .trim()
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "");
       if (titleTag && !generated.includes(`#${titleTag}`)) {
         generated.push(`#${titleTag}`);
       }
@@ -328,14 +338,30 @@ export default function ProjectConfirmModal({
         activeData?.scrapedImages?.[0] ||
         "";
 
-      setSeriesTitle(initialDetails?.seriesTitle || activeData?.project?.title || "");
-      setChapterNumber(initialDetails?.chapterNumber || activeData?.project?.chapterNumber || "");
-      setChapterTitle(initialDetails?.chapterTitle || activeData?.project?.chapterTitle || "");
-      setScrapedGenre(initialDetails?.scrapedGenre || activeData?.project?.genre || "");
-      setSeriesAuthor(initialDetails?.seriesAuthor || activeData?.project?.author || "");
+      setSeriesTitle(
+        initialDetails?.seriesTitle || activeData?.project?.title || ""
+      );
+      setChapterNumber(
+        initialDetails?.chapterNumber ||
+          activeData?.project?.chapterNumber ||
+          ""
+      );
+      setChapterTitle(
+        initialDetails?.chapterTitle || activeData?.project?.chapterTitle || ""
+      );
+      setScrapedGenre(
+        initialDetails?.scrapedGenre || activeData?.project?.genre || ""
+      );
+      setSeriesAuthor(
+        initialDetails?.seriesAuthor || activeData?.project?.author || ""
+      );
       setSeriesCoverImage(fallbackCover);
-      setSeriesSynopsis(initialDetails?.seriesSynopsis || activeData?.project?.synopsis || "");
-      setProjectStatus(initialDetails?.status || activeData?.project?.status || "Draft");
+      setSeriesSynopsis(
+        initialDetails?.seriesSynopsis || activeData?.project?.synopsis || ""
+      );
+      setProjectStatus(
+        initialDetails?.status || activeData?.project?.status || "Draft"
+      );
       setActiveTab("metadata");
       document.body.style.overflow = "hidden";
       if (container) container.style.overflow = "hidden";
@@ -468,7 +494,11 @@ export default function ProjectConfirmModal({
 
   if (typeof document === "undefined") return null;
 
-  const tabs: { key: TabKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  const tabs: {
+    key: TabKey;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }[] = [
     { key: "metadata", label: "Metadata & Details", icon: BookOpen },
     { key: "ai", label: "AI & Audio Studio", icon: Sparkles },
     { key: "distribution", label: "Distribution & Tags", icon: Globe },
@@ -493,10 +523,7 @@ export default function ProjectConfirmModal({
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06] shrink-0">
           <div className="flex items-center gap-3.5">
-            <SonikomaLogo
-              size="sm"
-              badge="Studio"
-            />
+            <SonikomaLogo size="sm" badge="Studio" />
             <div>
               <h2 className="text-base font-bold text-white tracking-tight">
                 Project Confirmation
@@ -530,7 +557,11 @@ export default function ProjectConfirmModal({
                     : "text-neutral-500 hover:text-neutral-300 hover:bg-white/[0.03] border border-transparent"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#3B82F6]" : "text-neutral-500"}`} />
+                <Icon
+                  className={`w-3.5 h-3.5 ${
+                    isActive ? "text-[#3B82F6]" : "text-neutral-500"
+                  }`}
+                />
                 <span>{tab.label}</span>
               </button>
             );
@@ -539,7 +570,6 @@ export default function ProjectConfirmModal({
 
         {/* ── Tab Content Area ── */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/10 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#3B82F6]/40">
-          
           {/* TAB 1: METADATA & DETAILS */}
           {activeTab === "metadata" && (
             <div className="space-y-4 animate-in fade-in duration-200">
@@ -548,7 +578,9 @@ export default function ProjectConfirmModal({
                   <div className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-xl">
                     <BookOpen className="h-3.5 w-3.5 text-[#3B82F6]" />
                   </div>
-                  <span className="text-xs font-bold text-white">Title &amp; Chapter Information</span>
+                  <span className="text-xs font-bold text-white">
+                    Title &amp; Chapter Information
+                  </span>
                 </div>
 
                 <div className="space-y-1.5">
@@ -570,7 +602,8 @@ export default function ProjectConfirmModal({
                   <div className="space-y-1.5">
                     <label className={labelCls}>
                       <Hash className="h-3 w-3 text-[#3B82F6]" />
-                      Chapter Number <span className="text-rose-500 ml-0.5">*</span>
+                      Chapter Number{" "}
+                      <span className="text-rose-500 ml-0.5">*</span>
                     </label>
                     <input
                       type="text"
@@ -645,7 +678,9 @@ export default function ProjectConfirmModal({
                   <div className="p-1.5 bg-indigo-500/10 border border-[#2F2F2F] rounded-xl">
                     <ImageIcon className="h-3.5 w-3.5 text-indigo-400" />
                   </div>
-                  <span className="text-xs font-bold text-white">Cover Art &amp; Visibility</span>
+                  <span className="text-xs font-bold text-white">
+                    Cover Art &amp; Visibility
+                  </span>
                 </div>
 
                 <div className="flex gap-4 items-start">
@@ -657,7 +692,8 @@ export default function ProjectConfirmModal({
                           alt="Cover"
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.currentTarget as HTMLElement).style.display = "none";
+                            (e.currentTarget as HTMLElement).style.display =
+                              "none";
                           }}
                         />
                         {isExtractingCover && (
@@ -673,7 +709,9 @@ export default function ProjectConfirmModal({
                         ) : (
                           <>
                             <ImageIcon className="h-5 w-5 text-neutral-500" />
-                            <span className="text-[9px] font-mono">No cover</span>
+                            <span className="text-[9px] font-mono">
+                              No cover
+                            </span>
                           </>
                         )}
                       </div>
@@ -731,7 +769,9 @@ export default function ProjectConfirmModal({
                         />
                       </label>
                       {localCoverImage && (
-                        <span className="text-[10px] text-emerald-400 font-mono">✓ File uploaded</span>
+                        <span className="text-[10px] text-emerald-400 font-mono">
+                          ✓ File uploaded
+                        </span>
                       )}
                     </div>
 
@@ -829,7 +869,9 @@ export default function ProjectConfirmModal({
                   <div className="p-1.5 bg-blue-500/10 border border-blue-500/20 rounded-xl">
                     <Video className="h-3.5 w-3.5 text-blue-400" />
                   </div>
-                  <span className="text-xs font-bold text-white">Video Format &amp; Tone</span>
+                  <span className="text-xs font-bold text-white">
+                    Video Format &amp; Tone
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -870,31 +912,39 @@ export default function ProjectConfirmModal({
                   <div className="p-1.5 bg-[#3B82F6]/10 border border-[#3B82F6]/20 rounded-xl">
                     <Sparkles className="h-3.5 w-3.5 text-[#3B82F6]" />
                   </div>
-                  <span className="text-xs font-bold text-white">AI Automation Pipeline</span>
+                  <span className="text-xs font-bold text-white">
+                    AI Automation Pipeline
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
-                  {AI_TASK_DEFINITIONS.map(({ key, icon: Icon, label, sub }) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => toggleTask(key)}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                        aiTasks[key]
-                          ? "bg-[#3B82F6]/15 border-[#3B82F6]/40 text-[#60A5FA]"
-                          : "bg-white/[0.03] border-white/[0.06] text-neutral-600 hover:text-neutral-400"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <Icon className="w-4 h-4" />
-                        {aiTasks[key] && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#3B82F6]" />
-                        )}
-                      </div>
-                      <p className="text-xs font-bold leading-tight">{label}</p>
-                      <p className="text-[10px] text-neutral-500 font-mono mt-1">{sub}</p>
-                    </button>
-                  ))}
+                  {AI_TASK_DEFINITIONS.map(
+                    ({ key, icon: Icon, label, sub }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleTask(key)}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                          aiTasks[key]
+                            ? "bg-[#3B82F6]/15 border-[#3B82F6]/40 text-[#60A5FA]"
+                            : "bg-white/[0.03] border-white/[0.06] text-neutral-600 hover:text-neutral-400"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <Icon className="w-4 h-4" />
+                          {aiTasks[key] && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                          )}
+                        </div>
+                        <p className="text-xs font-bold leading-tight">
+                          {label}
+                        </p>
+                        <p className="text-[10px] text-neutral-500 font-mono mt-1">
+                          {sub}
+                        </p>
+                      </button>
+                    )
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 pt-2">
@@ -946,7 +996,9 @@ export default function ProjectConfirmModal({
                   <div className="p-1.5 bg-teal-500/10 border border-teal-500/20 rounded-xl">
                     <Globe className="h-3.5 w-3.5 text-teal-400" />
                   </div>
-                  <span className="text-xs font-bold text-white">Target Platforms</span>
+                  <span className="text-xs font-bold text-white">
+                    Target Platforms
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
@@ -977,7 +1029,9 @@ export default function ProjectConfirmModal({
                     <div className="p-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl">
                       <Tags className="h-3.5 w-3.5 text-amber-400" />
                     </div>
-                    <span className="text-xs font-bold text-white">Tags &amp; Keywords</span>
+                    <span className="text-xs font-bold text-white">
+                      Tags &amp; Keywords
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -1010,7 +1064,9 @@ export default function ProjectConfirmModal({
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={handleTagKeyDown}
-                    placeholder={customTags.length === 0 ? "Type tag & press Enter..." : ""}
+                    placeholder={
+                      customTags.length === 0 ? "Type tag & press Enter..." : ""
+                    }
                     className="bg-transparent border-none outline-none text-sm text-neutral-300 flex-1 min-w-[120px] placeholder:text-neutral-700"
                   />
                 </div>
@@ -1022,7 +1078,9 @@ export default function ProjectConfirmModal({
                   <div className="p-1.5 bg-rose-500/10 border border-rose-500/20 rounded-xl">
                     <Sliders className="h-3.5 w-3.5 text-rose-400" />
                   </div>
-                  <span className="text-xs font-bold text-white">Processing &amp; Workspace</span>
+                  <span className="text-xs font-bold text-white">
+                    Processing &amp; Workspace
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -1081,7 +1139,6 @@ export default function ProjectConfirmModal({
               </div>
             </div>
           )}
-
         </div>
 
         {/* ── Footer ── */}

@@ -1,5 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Filter, LayoutGrid, List, Search, ChevronDown, Check } from "lucide-react";
+import {
+  Filter,
+  LayoutGrid,
+  List,
+  Search,
+  ChevronDown,
+  Check,
+} from "lucide-react";
 import type { ViewMode } from "@/features/workspace_projects/hooks/ProjectTypes";
 
 interface ProjectsFiltersProps {
@@ -115,7 +122,9 @@ export default function ProjectsFilters({
                       }`}
                     >
                       <span>{g === "All" ? "All Genres" : g}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />}
+                      {isSelected && (
+                        <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                      )}
                     </button>
                   );
                 })}
@@ -169,7 +178,9 @@ export default function ProjectsFilters({
                       }`}
                     >
                       <span>{opt.label}</span>
-                      {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />}
+                      {isSelected && (
+                        <Check className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                      )}
                     </button>
                   );
                 })}

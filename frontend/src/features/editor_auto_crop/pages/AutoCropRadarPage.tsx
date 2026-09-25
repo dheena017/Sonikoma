@@ -44,7 +44,9 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
   );
   const [totalWidth, setTotalWidth] = useState<number>(1200);
   const [totalHeight, setTotalHeight] = useState<number>(18000);
-  const [selectedPanelIndex, setSelectedPanelIndex] = useState<number | null>(0);
+  const [selectedPanelIndex, setSelectedPanelIndex] = useState<number | null>(
+    0
+  );
   const [isRadarExpanded, setIsRadarExpanded] = useState<boolean>(true);
   const [zoomScale, setZoomScale] = useState<number>(1.0);
   const [activeThemeName, setActiveThemeName] = useState<string>("emerald");
@@ -137,10 +139,12 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
 
   // Jump to panel
   const scrollToPanel = (index: number) => {
-    if (index < 0 || index >= panels.length || !scrollViewportRef.current) return;
+    if (index < 0 || index >= panels.length || !scrollViewportRef.current)
+      return;
     setSelectedPanelIndex(index);
     const panel = panels[index];
-    const targetY = (panel.y / totalHeight) * scrollViewportRef.current.scrollHeight;
+    const targetY =
+      (panel.y / totalHeight) * scrollViewportRef.current.scrollHeight;
     scrollViewportRef.current.scrollTo({
       top: Math.max(0, targetY - 100),
       behavior: "smooth",
@@ -173,7 +177,8 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
                 </span>
               </h1>
               <p className="text-[10px] text-neutral-400">
-                Full-height comic navigator, slice telemetry & bird's-eye tracker
+                Full-height comic navigator, slice telemetry & bird's-eye
+                tracker
               </p>
             </div>
           </div>
@@ -205,7 +210,11 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
                 : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
             }`}
           >
-            {isRadarExpanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            {isRadarExpanded ? (
+              <Minimize2 className="h-3.5 w-3.5" />
+            ) : (
+              <Maximize2 className="h-3.5 w-3.5" />
+            )}
             <span>{isRadarExpanded ? "Collapse Radar" : "Expand Radar"}</span>
           </button>
         </div>
@@ -239,7 +248,10 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
             {/* Panel Overlays */}
             {panels.map((panel, idx) => {
               const topPct = ((panel.y ?? 0) / totalHeight) * 100;
-              const heightPct = Math.max(0.5, ((panel.height ?? 200) / totalHeight) * 100);
+              const heightPct = Math.max(
+                0.5,
+                ((panel.height ?? 200) / totalHeight) * 100
+              );
               const isSelected = selectedPanelIndex === idx;
 
               return (
@@ -273,15 +285,21 @@ export const AutoCropRadarPage: React.FC<AutoCropRadarPageProps> = ({
           {/* Floating Canvas Zoom Controls */}
           <div className="fixed bottom-6 left-6 z-40 bg-neutral-950/90 border border-neutral-800 rounded-2xl p-1.5 shadow-2xl backdrop-blur-xl flex items-center gap-1 text-xs font-mono">
             <button
-              onClick={() => setZoomScale((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))}
+              onClick={() =>
+                setZoomScale((z) => Math.max(0.5, +(z - 0.25).toFixed(2)))
+              }
               className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 !cursor-pointer"
               title="Zoom Out"
             >
               <ZoomOut className="h-4 w-4" />
             </button>
-            <span className="px-2 font-bold text-emerald-400">{Math.round(zoomScale * 100)}%</span>
+            <span className="px-2 font-bold text-emerald-400">
+              {Math.round(zoomScale * 100)}%
+            </span>
             <button
-              onClick={() => setZoomScale((z) => Math.min(2.5, +(z + 0.25).toFixed(2)))}
+              onClick={() =>
+                setZoomScale((z) => Math.min(2.5, +(z + 0.25).toFixed(2)))
+              }
               className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 !cursor-pointer"
               title="Zoom In"
             >

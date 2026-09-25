@@ -21,7 +21,8 @@ export default function ProviderBatchLimitsTable({
             {currentProvider.name} Batch API &amp; Async Capacities
           </h2>
           <p className="text-xs text-neutral-400 font-mono mt-0.5">
-            {currentProvider.batchFeature.subtext} · Discount: {currentProvider.batchFeature.discount}
+            {currentProvider.batchFeature.subtext} · Discount:{" "}
+            {currentProvider.batchFeature.discount}
           </p>
         </div>
         <span className="text-xs font-mono font-bold bg-neutral-900 border border-neutral-800 text-[#3B82F6] px-3 py-1 rounded-full">
@@ -46,13 +47,17 @@ export default function ProviderBatchLimitsTable({
               <tr key={m.id} className="hover:bg-neutral-900/40">
                 <td className="py-2.5 px-3 font-bold text-white">{m.name}</td>
                 <td className="py-2.5 px-3 text-neutral-400">{m.category}</td>
-                <td className="py-2.5 px-3 text-[#3B82F6]">{m.limit_rpm} RPM</td>
+                <td className="py-2.5 px-3 text-[#3B82F6]">
+                  {m.limit_rpm} RPM
+                </td>
                 <td className="py-2.5 px-3 text-emerald-400 font-bold">
                   {currentProvider.batchFeature.discount}
                 </td>
                 <td className="py-2.5 px-3 text-indigo-400">
                   {m.batch_enqueued_tokens?.tier2
-                    ? `${(m.batch_enqueued_tokens.tier2 / 1_000_000).toLocaleString()}M Tokens`
+                    ? `${(
+                        m.batch_enqueued_tokens.tier2 / 1_000_000
+                      ).toLocaleString()}M Tokens`
                     : "High-Volume Queue"}
                 </td>
                 <td className="py-2.5 px-3">

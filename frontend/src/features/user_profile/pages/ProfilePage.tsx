@@ -29,7 +29,11 @@ import {
 
 import { useProfileState, ProfileTabId } from "../hooks/useProfileState";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
-import { ConfirmModal, GoodbyeUserModal, ComeBackUserModal } from "@/shared/ui/modal";
+import {
+  ConfirmModal,
+  GoodbyeUserModal,
+  ComeBackUserModal,
+} from "@/shared/ui/modal";
 
 export interface ProfilePageProps {
   user?: any;
@@ -66,7 +70,8 @@ export default function ProfilePage(props: ProfilePageProps) {
   const state = useProfileState(props);
   // Stage 1 Confirmation Modal states
   const [showSignOutConfirm, setShowSignOutConfirm] = React.useState(false);
-  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = React.useState(false);
+  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] =
+    React.useState(false);
 
   // Stage 2 User Lifecycle Modal states
   const [showComeBackModal, setShowComeBackModal] = React.useState(false);
@@ -196,7 +201,10 @@ export default function ProfilePage(props: ProfilePageProps) {
                       target.src = DEFAULT_USER_AVATAR_DATA_URI;
                     }}
                   />
-                  <Tooltip text="Change avatar in Account settings" placement="top">
+                  <Tooltip
+                    text="Change avatar in Account settings"
+                    placement="top"
+                  >
                     <button
                       onClick={() => state.setActiveTab("account")}
                       aria-label="Edit Avatar"

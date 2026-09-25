@@ -5,7 +5,8 @@ export function useAppScraperState() {
 
   const [selectedScraped, setSelectedScraped] = useState<string[]>([]);
   const [isScraping, setIsScraping] = useState<boolean>(false);
-  const [showScrapeConfirmModal, setShowScrapeConfirmModal] = useState<boolean>(false);
+  const [showScrapeConfirmModal, setShowScrapeConfirmModal] =
+    useState<boolean>(false);
   const [accumulatedTokens, setAccumulatedTokens] = useState<number>(0);
 
   return {

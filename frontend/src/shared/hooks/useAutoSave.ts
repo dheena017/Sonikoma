@@ -64,7 +64,10 @@ export function useAutoSave(state?: AutoSaveState, debounceMs = 1500) {
         // Ensure state.scrapedImages (e.g. all 127 imported frames) is synced to activeProjectData before saving
         const curData = useProjectStore.getState().activeProjectData;
         if (state?.scrapedImages && state.scrapedImages.length > 0 && curData) {
-          if (!curData.scrapedImages || curData.scrapedImages.length !== state.scrapedImages.length) {
+          if (
+            !curData.scrapedImages ||
+            curData.scrapedImages.length !== state.scrapedImages.length
+          ) {
             useProjectStore.getState().setActiveProject({
               ...curData,
               scrapedImages: state.scrapedImages,
@@ -76,7 +79,9 @@ export function useAutoSave(state?: AutoSaveState, debounceMs = 1500) {
           }
         }
 
-        const success = await useProjectStore.getState().saveActiveProject(fetchClient);
+        const success = await useProjectStore
+          .getState()
+          .saveActiveProject(fetchClient);
         if (success) {
           setSaveStatus("saved");
           if (options?.successMessage && state?.addNotification) {

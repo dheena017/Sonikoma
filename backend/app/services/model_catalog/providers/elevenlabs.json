@@ -11,9 +11,14 @@
     "limit_rpd": 1000,
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
-    "price_per_1k_chars": 0.30,
+    "price_per_1k_chars": 0.3,
     "speed_rating": "Streaming Audio (~400ms TTFB)",
-    "capabilities": ["voice_cloning", "multilingual_audio", "emotion_control", "tts"],
+    "capabilities": [
+      "voice_cloning",
+      "multilingual_audio",
+      "emotion_control",
+      "tts"
+    ],
     "recommended_for": ["Character Voice Acting", "Studio Narration"]
   }
 ]

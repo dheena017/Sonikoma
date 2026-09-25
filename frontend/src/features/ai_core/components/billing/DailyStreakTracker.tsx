@@ -33,7 +33,8 @@ export const DailyStreakTracker: React.FC<DailyStreakTrackerProps> = ({
             Daily Claim Streak Tracker
           </div>
           <p className="text-xs text-neutral-400 font-semibold font-sans">
-            Claim consecutive daily login rewards to unlock the Mega Claim Bonus on Day 7 (+150 credits).
+            Claim consecutive daily login rewards to unlock the Mega Claim Bonus
+            on Day 7 (+150 credits).
           </p>
         </div>
 
@@ -78,7 +79,9 @@ export const DailyStreakTracker: React.FC<DailyStreakTrackerProps> = ({
                 ) : d.special ? (
                   <Ticket
                     className={`w-5.5 h-5.5 ${
-                      isActive ? "text-amber-400 animate-bounce" : "text-neutral-600"
+                      isActive
+                        ? "text-amber-400 animate-bounce"
+                        : "text-neutral-600"
                     }`}
                   />
                 ) : (

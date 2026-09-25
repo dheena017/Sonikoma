@@ -23,7 +23,9 @@ export default function EditorHeaderFrame({
         {left}
       </div>
       {center && (
-        <div className={`editor-header-frame__center flex shrink-0 items-center justify-center ${centerClassName}`}>
+        <div
+          className={`editor-header-frame__center flex shrink-0 items-center justify-center ${centerClassName}`}
+        >
           {center}
         </div>
       )}

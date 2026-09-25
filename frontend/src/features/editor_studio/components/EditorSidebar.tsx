@@ -161,13 +161,15 @@ const EditorSidebar = ({
 
   return (
     <aside
-      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] overflow-hidden select-none ${isCollapsed ? "w-20" : "w-[280px]"
-        }`}
+      className={`fixed top-0 bottom-0 left-0 h-screen bg-[#06060c]/90 backdrop-blur-3xl border-r border-white/8 flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] z-[120] shadow-[10px_0_40px_rgba(0,0,0,0.7),inset_-1px_0_0_rgba(59,130,246,0.06)] overflow-hidden select-none ${
+        isCollapsed ? "w-20" : "w-[280px]"
+      }`}
     >
       {/* Top Header / Close Area */}
       <div
-        className={`flex items-center border-b border-white/5 transition-all duration-300 shrink-0 ${isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
-          }`}
+        className={`flex items-center border-b border-white/5 transition-all duration-300 shrink-0 ${
+          isCollapsed ? "p-4 justify-center" : "h-16 px-4 justify-between"
+        }`}
       >
         {!isCollapsed && (
           <SonikomaLogo
@@ -221,10 +223,11 @@ const EditorSidebar = ({
                   <div key={item.id} className="relative flex justify-center">
                     {/* Floating Active Indicator Bar */}
                     <div
-                      className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${isActive
+                      className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
+                        isActive
                           ? "h-6 bg-[#3B82F6] opacity-100 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
                           : "h-0 bg-transparent opacity-0"
-                        }`}
+                      }`}
                     />
 
                     <button
@@ -235,8 +238,9 @@ const EditorSidebar = ({
                           if (p.has("tab")) {
                             p.delete("tab");
                             const searchStr = p.toString();
-                            const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""
-                              }`;
+                            const newPath = `${window.location.pathname}${
+                              searchStr ? "?" + searchStr : ""
+                            }`;
                             if (navigateTo) {
                               navigateTo(newPath);
                             } else {
@@ -255,8 +259,9 @@ const EditorSidebar = ({
                             window.dispatchEvent(new Event("popstate"));
                           }
                         } else if (item.id === "image-editor") {
-                          const target = `/image-editor?idx=${editingImageIdx ?? 0
-                            }`;
+                          const target = `/image-editor?idx=${
+                            editingImageIdx ?? 0
+                          }`;
                           if (navigateTo) {
                             navigateTo(target);
                           } else {
@@ -266,8 +271,9 @@ const EditorSidebar = ({
                         } else if (isSettingsTab) {
                           const p = new URLSearchParams(window.location.search);
                           p.set("tab", item.id);
-                          const newPath = `${window.location.pathname
-                            }?${p.toString()}`;
+                          const newPath = `${
+                            window.location.pathname
+                          }?${p.toString()}`;
                           if (navigateTo) {
                             navigateTo(newPath);
                           } else {
@@ -284,17 +290,41 @@ const EditorSidebar = ({
                           requestAnimationFrame(() => {
                             setTimeout(() => {
                               const targetMap: Record<string, string[]> = {
-                                monitor: ["section-monitor", "section-monitor-placeholder"],
-                                storyboard: ["section-storyboard", "section-timeline", "panels_timeline_section"],
-                                timeline: ["section-storyboard", "section-timeline", "panels_timeline_section"],
-                                assets: ["section-assets", "section-raw-images"],
-                                autocrop: ["section-storyboard", "section-timeline", "panels_timeline_section"],
+                                monitor: [
+                                  "section-monitor",
+                                  "section-monitor-placeholder",
+                                ],
+                                storyboard: [
+                                  "section-storyboard",
+                                  "section-timeline",
+                                  "panels_timeline_section",
+                                ],
+                                timeline: [
+                                  "section-storyboard",
+                                  "section-timeline",
+                                  "panels_timeline_section",
+                                ],
+                                assets: [
+                                  "section-assets",
+                                  "section-raw-images",
+                                ],
+                                autocrop: [
+                                  "section-storyboard",
+                                  "section-timeline",
+                                  "panels_timeline_section",
+                                ],
                               };
-                              const candidateIds = targetMap[item.id] || [`section-${item.id}`, item.id];
+                              const candidateIds = targetMap[item.id] || [
+                                `section-${item.id}`,
+                                item.id,
+                              ];
                               for (const id of candidateIds) {
                                 const el = document.getElementById(id);
                                 if (el) {
-                                  el.scrollIntoView({ behavior: "smooth", block: "start" });
+                                  el.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start",
+                                  });
                                   break;
                                 }
                               }
@@ -303,17 +333,24 @@ const EditorSidebar = ({
                         }
                         setIsCollapsed(true);
                       }}
-                      className={`w-full flex items-center ${isCollapsed
+                      className={`w-full flex items-center ${
+                        isCollapsed
                           ? "justify-center p-3"
                           : "justify-between px-4 py-3"
-                        } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${isActive ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-500/25 font-bold border border-[#60A5FA]/40" : "text-[#9CA3AF] hover:text-white hover:bg-[#1E1E1E] hover:border-[#2F2F2F] border border-transparent"
-                        }`}
+                      } rounded-2xl transition-all duration-300 group relative cursor-pointer active:scale-[0.98] ${
+                        isActive
+                          ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-500/25 font-bold border border-[#60A5FA]/40"
+                          : "text-[#9CA3AF] hover:text-white hover:bg-[#1E1E1E] hover:border-[#2F2F2F] border border-transparent"
+                      }`}
                       title={isCollapsed ? item.label : undefined}
                     >
                       <div className="flex items-center gap-3.5">
                         <Icon
-                          className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${isActive ? "text-white" : "group-hover:scale-110 group-hover:text-white"
-                            }`}
+                          className={`w-[18px] h-[18px] shrink-0 transition-transform duration-300 ${
+                            isActive
+                              ? "text-white"
+                              : "group-hover:scale-110 group-hover:text-white"
+                          }`}
                         />
                         {!isCollapsed && (
                           <span className="text-sm font-bold tracking-wide">
@@ -325,13 +362,15 @@ const EditorSidebar = ({
                       {/* Badge Logic */}
                       {item.badge !== undefined && (
                         <span
-                          className={`absolute ${isCollapsed
+                          className={`absolute ${
+                            isCollapsed
                               ? "-top-1 -right-1"
                               : "relative top-0 right-0"
-                            } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${isActive
+                          } flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-lg text-[10px] font-bold font-mono transition-colors border ${
+                            isActive
                               ? "bg-white text-[#3B82F6] border-transparent font-black"
                               : "bg-[#3B82F6] text-white border-transparent"
-                            }`}
+                          }`}
                         >
                           {item.badge}
                         </span>
@@ -340,10 +379,11 @@ const EditorSidebar = ({
                       {/* Processing Ping */}
                       {item.isProcessing && (
                         <span
-                          className={`absolute ${isCollapsed
+                          className={`absolute ${
+                            isCollapsed
                               ? "top-1 right-1"
                               : "top-1/2 -translate-y-1/2 right-3"
-                            } h-2 w-2 rounded-full bg-blue-500 animate-ping`}
+                          } h-2 w-2 rounded-full bg-blue-500 animate-ping`}
                         />
                       )}
                     </button>
@@ -359,8 +399,9 @@ const EditorSidebar = ({
       <div className="p-4 border-t border-[#2F2F2F] bg-gradient-to-t from-black/30 to-transparent flex justify-center w-full">
         <button
           onClick={handleReturnToWorkspace}
-          className={`flex items-center justify-center rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white transition-all active:scale-95 border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.3)] group ${isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
-            }`}
+          className={`flex items-center justify-center rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] text-[#3B82F6] hover:text-white transition-all active:scale-95 border border-[#2F2F2F] hover:border-neutral-700 cursor-pointer shadow-[0_2px_8px_rgba(0,0,0,0.3)] group ${
+            isCollapsed ? "h-12 w-12 p-0" : "w-full py-3 gap-3"
+          }`}
           title="Return to Workspace"
         >
           <Sparkles className="w-5 h-5 shrink-0 transition-colors" />

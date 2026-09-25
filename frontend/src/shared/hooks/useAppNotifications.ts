@@ -15,11 +15,17 @@ function formatHumanReadableMessage(rawMessage: string): string {
     try {
       const parsed = JSON.parse(msg);
       if (parsed.detail) {
-        msg = typeof parsed.detail === "string" ? parsed.detail : JSON.stringify(parsed.detail);
+        msg =
+          typeof parsed.detail === "string"
+            ? parsed.detail
+            : JSON.stringify(parsed.detail);
       } else if (parsed.message) {
         msg = parsed.message;
       } else if (parsed.error) {
-        msg = typeof parsed.error === "string" ? parsed.error : parsed.error.message || JSON.stringify(parsed.error);
+        msg =
+          typeof parsed.error === "string"
+            ? parsed.error
+            : parsed.error.message || JSON.stringify(parsed.error);
       }
     } catch {
       // ignore
@@ -36,8 +42,14 @@ function formatHumanReadableMessage(rawMessage: string): string {
   msg = msg.replace(/^\[.*?Detector\]\s*/i, "");
   msg = msg.replace(/^\[.*?Engine\]\s*/i, "");
   msg = msg.replace(/^\[.*?API\]\s*/i, "");
-  msg = msg.replace(/^(Failed to fetch|NetworkError when attempting to fetch resource\.)/i, "Unable to connect to the server. Please check your network connection.");
-  msg = msg.replace(/^Request failed with status code (\d+)/i, "Server returned status $1.");
+  msg = msg.replace(
+    /^(Failed to fetch|NetworkError when attempting to fetch resource\.)/i,
+    "Unable to connect to the server. Please check your network connection."
+  );
+  msg = msg.replace(
+    /^Request failed with status code (\d+)/i,
+    "Server returned status $1."
+  );
 
   msg = msg.trim();
   if (!msg) return "An unexpected event occurred.";
@@ -56,13 +68,17 @@ export function useAppNotifications(volume = 80, isMuted = false) {
       return false;
     }
   });
-  const [errorModalDetail, setErrorModalDetail] = useState<ErrorModalDetail | null>(null);
+  const [errorModalDetail, setErrorModalDetail] =
+    useState<ErrorModalDetail | null>(null);
   const audioFeedback = useAudioFeedback(volume, isMuted || notificationsMuted);
   const recentNotifsRef = useRef<Map<string, number>>(new Map());
 
   useEffect(() => {
     try {
-      localStorage.setItem("ai_comic_notifications_muted", String(notificationsMuted));
+      localStorage.setItem(
+        "ai_comic_notifications_muted",
+        String(notificationsMuted)
+      );
     } catch {}
   }, [notificationsMuted]);
 
@@ -70,13 +86,15 @@ export function useAppNotifications(volume = 80, isMuted = false) {
     (
       message: string,
       type: NotificationType = "info",
-      options?: {
-        errorCode?: number;
-        retryDelay?: number;
-        onRetry?: () => void;
-        details?: string;
-        link?: string;
-      } | number
+      options?:
+        | {
+            errorCode?: number;
+            retryDelay?: number;
+            onRetry?: () => void;
+            details?: string;
+            link?: string;
+          }
+        | number
     ) => {
       const cleanMsg = formatHumanReadableMessage(message);
       const dedupKey = `${type}:${cleanMsg}`;
@@ -129,7 +147,12 @@ export function useAppNotifications(volume = 80, isMuted = false) {
 
       setNotifications((prev) => {
         // Prevent stacking duplicate active toasts with the same message and type
-        if (prev.some((n) => !n.toastDismissed && n.message === cleanMsg && n.type === type)) {
+        if (
+          prev.some(
+            (n) =>
+              !n.toastDismissed && n.message === cleanMsg && n.type === type
+          )
+        ) {
           return prev;
         }
         return [...prev, newNotif];

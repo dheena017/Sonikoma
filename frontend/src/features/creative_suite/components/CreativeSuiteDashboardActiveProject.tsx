@@ -210,7 +210,10 @@ const CreativeSuiteDashboardActiveProject: React.FC<
             </div>
 
             <div className="space-y-3">
-              <Tooltip text="Resume video editor for this active chapter" placement="top">
+              <Tooltip
+                text="Resume video editor for this active chapter"
+                placement="top"
+              >
                 <button
                   onClick={() => {
                     const seriesSlug =
@@ -233,7 +236,10 @@ const CreativeSuiteDashboardActiveProject: React.FC<
                 </button>
               </Tooltip>
 
-              <Tooltip text="Unload current project and return to clean workspace" placement="bottom">
+              <Tooltip
+                text="Unload current project and return to clean workspace"
+                placement="bottom"
+              >
                 <button
                   onClick={exitActiveProject}
                   className="w-full py-3 rounded-xl border border-neutral-800 bg-neutral-900 hover:border-rose-400 hover:bg-rose-500/10 text-rose-300 text-xs font-bold font-mono tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"

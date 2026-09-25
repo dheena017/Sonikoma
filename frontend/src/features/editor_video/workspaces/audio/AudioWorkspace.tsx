@@ -3,7 +3,16 @@ import { WorkspaceLayout } from "../../shared/WorkspaceLayout";
 import { AUDIO_SUB_TABS, REAL_AUDIO_TRACKS } from "../../data/audioData";
 import { useAudioPreview } from "../../hooks/useAudioPreview";
 import { useVoiceRecorder } from "../../hooks/useVoiceRecorder";
-import { Mic, Square, Wand2, Play, Pause, Plus, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  Mic,
+  Square,
+  Wand2,
+  Play,
+  Pause,
+  Plus,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 import { AudioWorkspaceHeader } from "./components/AudioWorkspaceHeader";
 import { AudioAiToolbar } from "./components/AudioAiToolbar";
 import { AudioTrackCard } from "./components/AudioTrackCard";
@@ -49,7 +58,7 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
     if (track.category === "music" && appLogic?.setMusicTheme) {
       appLogic.setMusicTheme(track.url || track.title);
     }
-    
+
     // Broadcast on EventBus
     editorEventBus.publish("MEDIA_ADDED", {
       assetId: track.id,
@@ -58,7 +67,9 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
       url: track.url,
     });
 
-    onTriggerFeedback(`Added "${track.title}" to ${track.category.toUpperCase()} track`);
+    onTriggerFeedback(
+      `Added "${track.title}" to ${track.category.toUpperCase()} track`
+    );
   };
 
   const handleAddRecordedVoiceToTimeline = () => {
@@ -131,7 +142,9 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                     isRecording ? "bg-red-500 animate-ping" : "bg-neutral-600"
                   }`}
                 />
-                {isRecording ? `Recording... ${recordTime}` : "Ready to record voice dialogue"}
+                {isRecording
+                  ? `Recording... ${recordTime}`
+                  : "Ready to record voice dialogue"}
               </span>
             </div>
 
@@ -166,7 +179,11 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                   </span>
                 </div>
 
-                <audio controls src={recordedAudio.url} className="w-full h-8 rounded-lg" />
+                <audio
+                  controls
+                  src={recordedAudio.url}
+                  className="w-full h-8 rounded-lg"
+                />
 
                 <button
                   type="button"
@@ -188,10 +205,30 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
               Web Speech AI Voice Actors
             </h4>
             {[
-              { id: "voice-1", name: "Hiroshi (Anime Protagonist)", role: "Energetic Male", pitch: 1.2 },
-              { id: "voice-2", name: "Aoi (Cool Heroine)", role: "Clear Female", pitch: 1.0 },
-              { id: "voice-3", name: "Kurogane (Dark Boss)", role: "Deep Cinematic", pitch: 0.7 },
-              { id: "voice-4", name: "Narrator (Storyteller)", role: "Balanced Studio", pitch: 0.9 },
+              {
+                id: "voice-1",
+                name: "Hiroshi (Anime Protagonist)",
+                role: "Energetic Male",
+                pitch: 1.2,
+              },
+              {
+                id: "voice-2",
+                name: "Aoi (Cool Heroine)",
+                role: "Clear Female",
+                pitch: 1.0,
+              },
+              {
+                id: "voice-3",
+                name: "Kurogane (Dark Boss)",
+                role: "Deep Cinematic",
+                pitch: 0.7,
+              },
+              {
+                id: "voice-4",
+                name: "Narrator (Storyteller)",
+                role: "Balanced Studio",
+                pitch: 0.9,
+              },
             ].map((v) => (
               <div
                 key={v.id}
@@ -201,7 +238,9 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                   <Wand2 className="h-4 w-4 text-[#3B82F6] shrink-0" />
                   <div>
                     <p className="text-xs font-bold text-white">{v.name}</p>
-                    <p className="text-[10px] text-neutral-400 font-mono">{v.role}</p>
+                    <p className="text-[10px] text-neutral-400 font-mono">
+                      {v.role}
+                    </p>
                   </div>
                 </div>
 
@@ -211,7 +250,9 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                     onClick={() => {
                       if ("speechSynthesis" in window) {
                         window.speechSynthesis.cancel();
-                        const utt = new SpeechSynthesisUtterance("I will protect this world, no matter what it takes!");
+                        const utt = new SpeechSynthesisUtterance(
+                          "I will protect this world, no matter what it takes!"
+                        );
                         utt.pitch = v.pitch;
                         window.speechSynthesis.speak(utt);
                         onTriggerFeedback(`Previewing ${v.name} voice`);
@@ -248,7 +289,9 @@ export const AudioWorkspace: React.FC<AudioWorkspaceProps> = ({
                 key={track.id}
                 track={track}
                 isPlaying={playingTrackId === track.id}
-                onTogglePlay={() => togglePlayTrack(track.id, track.url, track.category)}
+                onTogglePlay={() =>
+                  togglePlayTrack(track.id, track.url, track.category)
+                }
                 onAddTrack={() => handleAddAudioToTimeline(track)}
               />
             ))}

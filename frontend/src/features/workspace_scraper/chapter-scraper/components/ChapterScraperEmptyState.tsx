@@ -50,8 +50,8 @@ export const ChapterScraperEmptyState: React.FC<
       <div className="space-y-1">
         <p className="text-sm font-bold text-neutral-400">No Chapters Found</p>
         <p className="text-xs text-neutral-600 max-w-sm leading-relaxed">
-          Paste a valid comic or manga series URL above and press Enter to load its
-          chapter list.
+          Paste a valid comic or manga series URL above and press Enter to load
+          its chapter list.
         </p>
       </div>
     </div>

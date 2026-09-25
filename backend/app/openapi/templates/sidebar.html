@@ -1,7 +1,12 @@
 <!-- Left Navigation Sidebar -->
 <aside class="sonikoma-sidebar">
   <div class="sidebar-header">
-    <a href="http://localhost:3000" target="_blank" class="brand-link" title="Open Sonikoma Studio Web App">
+    <a
+      href="http://localhost:3000"
+      target="_blank"
+      class="brand-link"
+      title="Open Sonikoma Studio Web App"
+    >
       <span class="brand-icon">⚡</span>
       <div class="brand-text">
         <span class="brand-title">Sonikoma</span>
@@ -13,27 +18,37 @@
   <div class="sidebar-body">
     <div class="sidebar-nav-section">
       <div class="sidebar-section-title">API MODULES</div>
-      <div class="sidebar-pills">
-        __PILLS_PLACEHOLDER__
-      </div>
+      <div class="sidebar-pills">__PILLS_PLACEHOLDER__</div>
     </div>
 
     <div class="sidebar-nav-section">
       <div class="sidebar-section-title">STUDIO SHORTCUTS</div>
       <div class="sidebar-links">
-        <a href="http://localhost:3000" target="_blank" class="sidebar-nav-item">
+        <a
+          href="http://localhost:3000"
+          target="_blank"
+          class="sidebar-nav-item"
+        >
           <span>🚀 Open Web App</span>
         </a>
         <a href="/tests" class="sidebar-nav-item">
           <span>🧪 Test Portal & E2E</span>
         </a>
-        <a href="/api/v1/system/health" target="_blank" class="sidebar-nav-item">
+        <a
+          href="/api/v1/system/health"
+          target="_blank"
+          class="sidebar-nav-item"
+        >
           <span>💚 Health Check</span>
         </a>
         <a href="/api/v1/redoc" class="sidebar-nav-item">
           <span>📖 ReDoc Reference</span>
         </a>
-        <a href="/api/v1/openapi.json" target="_blank" class="sidebar-nav-item outline">
+        <a
+          href="/api/v1/openapi.json"
+          target="_blank"
+          class="sidebar-nav-item outline"
+        >
           <span>{ } OpenAPI JSON</span>
         </a>
       </div>
@@ -49,32 +64,40 @@
 </aside>
 
 <script>
-(function() {
-  function initSidebarScrollIsolation() {
-    var sidebar = document.querySelector('.sonikoma-sidebar');
-    if (!sidebar) return;
-    var sidebarBody = sidebar.querySelector('.sidebar-body');
-    if (!sidebarBody) return;
+  (function () {
+    function initSidebarScrollIsolation() {
+      var sidebar = document.querySelector(".sonikoma-sidebar");
+      if (!sidebar) return;
+      var sidebarBody = sidebar.querySelector(".sidebar-body");
+      if (!sidebarBody) return;
 
-    sidebar.addEventListener('wheel', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      sidebarBody.scrollTop += e.deltaY;
-    }, { passive: false });
-  }
+      sidebar.addEventListener(
+        "wheel",
+        function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          sidebarBody.scrollTop += e.deltaY;
+        },
+        { passive: false }
+      );
+    }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSidebarScrollIsolation);
-  } else {
-    initSidebarScrollIsolation();
-  }
-})();
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initSidebarScrollIsolation);
+    } else {
+      initSidebarScrollIsolation();
+    }
+  })();
 </script>
 
 <!-- Sticky Top Header Bar -->
 <header class="sonikoma-top-bar">
   <div class="top-bar-left">
-    <button class="header-sidebar-toggle-btn" onclick="window.sonikomaToggleSidebar();" title="Toggle Navigation Sidebar">
+    <button
+      class="header-sidebar-toggle-btn"
+      onclick="window.sonikomaToggleSidebar();"
+      title="Toggle Navigation Sidebar"
+    >
       <span class="toggle-icon">☰</span>
     </button>
     <div class="breadcrumb">
@@ -86,31 +109,58 @@
 
   <div class="top-bar-center">
     <div class="top-search-wrapper">
-      <input type="text" class="top-header-search-input" placeholder="🔍 Search endpoints & schemas... (Ctrl+K or /)" oninput="window.sonikomaFilterEndpoints(this.value);" />
+      <input
+        type="text"
+        class="top-header-search-input"
+        placeholder="🔍 Search endpoints & schemas... (Ctrl+K or /)"
+        oninput="window.sonikomaFilterEndpoints(this.value);"
+      />
     </div>
   </div>
 
   <div class="top-bar-right">
-    <button class="top-bar-btn authorize-btn" onclick="window.sonikomaOpenAuthModal();" title="Authenticate API session via OAuth2 Password Bearer">
+    <button
+      class="top-bar-btn authorize-btn"
+      onclick="window.sonikomaOpenAuthModal();"
+      title="Authenticate API session via OAuth2 Password Bearer"
+    >
       <span class="auth-icon">🔓</span>
       <span>Authorize</span>
     </button>
-    <a href="/api/v1/docs" class="top-bar-link" title="Interactive Swagger UI Console">
+    <a
+      href="/api/v1/docs"
+      class="top-bar-link"
+      title="Interactive Swagger UI Console"
+    >
       <span>⚡ Swagger UI</span>
     </a>
     <a href="/tests" class="top-bar-link" title="Automated E2E Test Portal">
       <span>🧪 Test Portal</span>
     </a>
-    <a href="/api/v1/docs/schemas" class="top-bar-link" title="Data Models & Schema Explorer">
+    <a
+      href="/api/v1/docs/schemas"
+      class="top-bar-link"
+      title="Data Models & Schema Explorer"
+    >
       <span>💎 Schemas</span>
     </a>
     <a href="/api/v1/redoc" class="top-bar-link" title="ReDoc Documentation">
       <span>📖 ReDoc</span>
     </a>
-    <a href="http://localhost:3000" target="_blank" class="top-bar-link" title="Open Web App">
+    <a
+      href="http://localhost:3000"
+      target="_blank"
+      class="top-bar-link"
+      title="Open Web App"
+    >
       <span>🚀 Web App</span>
     </a>
-    <a href="/api/v1/openapi.json" target="_blank" class="top-bar-link outline" title="OpenAPI JSON">
+    <a
+      href="/api/v1/openapi.json"
+      target="_blank"
+      class="top-bar-link outline"
+      title="OpenAPI JSON"
+    >
       <span>{ } JSON</span>
     </a>
   </div>
@@ -118,13 +168,36 @@
 
 <!-- Floating Quick Action Dock -->
 <div class="sonikoma-floating-dock">
-  <button class="dock-btn" onclick="window.sonikomaToggleAll();" title="Expand or collapse all endpoint panels">
+  <button
+    class="dock-btn"
+    onclick="window.sonikomaToggleAll();"
+    title="Expand or collapse all endpoint panels"
+  >
     <span>⤢ Toggle All</span>
   </button>
-  <button class="dock-btn" onclick="var el = document.querySelector('.operation-filter-input'); if (el) { el.focus(); el.scrollIntoView({behavior: 'smooth', block: 'center'}); }" title="Jump to search bar (or press / or Ctrl+K)">
-    <span>🔍 Search <kbd style='background:rgba(255,255,255,0.15); padding:1px 4px; border-radius:3px; font-size:10px;'>/</kbd></span>
+  <button
+    class="dock-btn"
+    onclick="var el = document.querySelector('.operation-filter-input'); if (el) { el.focus(); el.scrollIntoView({behavior: 'smooth', block: 'center'}); }"
+    title="Jump to search bar (or press / or Ctrl+K)"
+  >
+    <span
+      >🔍 Search
+      <kbd
+        style="
+          background: rgba(255, 255, 255, 0.15);
+          padding: 1px 4px;
+          border-radius: 3px;
+          font-size: 10px;
+        "
+        >/</kbd
+      ></span
+    >
   </button>
-  <button class="dock-btn primary" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });" title="Scroll to top of documentation">
+  <button
+    class="dock-btn primary"
+    onclick="window.scrollTo({ top: 0, behavior: 'smooth' });"
+    title="Scroll to top of documentation"
+  >
     <span>↑ Top</span>
   </button>
 </div>

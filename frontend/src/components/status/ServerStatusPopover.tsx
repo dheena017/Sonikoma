@@ -97,11 +97,13 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
       {/* Top Banner Header */}
       <div className="flex items-center justify-between border-b border-neutral-850 pb-3.5 mb-3.5 pt-1">
         <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-2xl border flex items-center justify-center shrink-0 ${
-            isOnline 
-              ? "bg-white/10 border-white/20 text-white" 
-              : "bg-gradient-to-tr from-rose-500/20 to-amber-500/20 border-rose-500/30 text-rose-400"
-          }`}>
+          <div
+            className={`p-2.5 rounded-2xl border flex items-center justify-center shrink-0 ${
+              isOnline
+                ? "bg-white/10 border-white/20 text-white"
+                : "bg-gradient-to-tr from-rose-500/20 to-amber-500/20 border-rose-500/30 text-rose-400"
+            }`}
+          >
             <Server className="w-4.5 h-4.5" />
           </div>
           <div>
@@ -109,16 +111,22 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
               <span className="text-xs font-bold text-white uppercase tracking-wider">
                 {server.service || "Computational Backend"}
               </span>
-              <span className={`px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded-full border ${
-                isOnline
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  : "bg-rose-500/10 text-rose-400 border-rose-500/20"
-              }`}>
+              <span
+                className={`px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded-full border ${
+                  isOnline
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                    : "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                }`}
+              >
                 {status}
               </span>
             </div>
             <div className="text-[11px] text-neutral-400 mt-0.5 font-normal">
-              {isOnline ? `Uptime: ${server.uptime || "0s"} • Port ${server.backend_port || 8000}` : "FastAPI Engine Offline"}
+              {isOnline
+                ? `Uptime: ${server.uptime || "0s"} • Port ${
+                    server.backend_port || 8000
+                  }`
+                : "FastAPI Engine Offline"}
             </div>
           </div>
         </div>
@@ -129,7 +137,11 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
           title="Re-check status"
           className="p-2 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white rounded-xl border border-white/10 transition-all cursor-pointer active:scale-95"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-white" : ""}`} />
+          <RefreshCw
+            className={`w-3.5 h-3.5 ${
+              loading ? "animate-spin text-white" : ""
+            }`}
+          />
         </button>
       </div>
 
@@ -158,8 +170,12 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
           <div className="grid grid-cols-2 gap-2.5">
             <div className="bg-neutral-900/60 border border-white/5 rounded-2xl p-3 space-y-1.5">
               <div className="flex justify-between items-center text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
-                <span className="flex items-center gap-1.5"><Cpu className="w-3.5 h-3.5 text-white" /> CPU Load</span>
-                <span className="font-mono text-white font-bold">{cpu.usage_percent ?? 0}%</span>
+                <span className="flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-white" /> CPU Load
+                </span>
+                <span className="font-mono text-white font-bold">
+                  {cpu.usage_percent ?? 0}%
+                </span>
               </div>
               <div className="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden">
                 <div
@@ -167,21 +183,32 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
                   style={{ width: `${Math.min(cpu.usage_percent || 0, 100)}%` }}
                 />
               </div>
-              <div className="text-[10px] text-neutral-400 font-sans">{cpu.cores_logical || 1} Cores Active</div>
+              <div className="text-[10px] text-neutral-400 font-sans">
+                {cpu.cores_logical || 1} Cores Active
+              </div>
             </div>
 
             <div className="bg-neutral-900/60 border border-white/5 rounded-2xl p-3 space-y-1.5">
               <div className="flex justify-between items-center text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
-                <span className="flex items-center gap-1.5"><Activity className="w-3.5 h-3.5 text-cyan-400" /> RAM (RSS)</span>
-                <span className="font-mono text-white font-bold">{memory.rss_mb ?? 0} MB</span>
+                <span className="flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-cyan-400" /> RAM (RSS)
+                </span>
+                <span className="font-mono text-white font-bold">
+                  {memory.rss_mb ?? 0} MB
+                </span>
               </div>
               <div className="w-full bg-neutral-800 h-1.5 rounded-full overflow-hidden">
                 <div
                   className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(memory.used_percent || 0, 100)}%` }}
+                  style={{
+                    width: `${Math.min(memory.used_percent || 0, 100)}%`,
+                  }}
                 />
               </div>
-              <div className="text-[10px] text-neutral-400 font-sans">System: {Math.round((memory.used_mb || 0) / 1024 * 10) / 10} GB</div>
+              <div className="text-[10px] text-neutral-400 font-sans">
+                System: {Math.round(((memory.used_mb || 0) / 1024) * 10) / 10}{" "}
+                GB
+              </div>
             </div>
           </div>
 
@@ -189,8 +216,12 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
           <div className="grid grid-cols-2 gap-2.5 text-xs">
             <div className="bg-neutral-900/60 border border-white/5 rounded-2xl p-3 flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
-                <span className="flex items-center gap-1.5"><Database className="w-3.5 h-3.5 text-emerald-400" /> SQLite</span>
-                <span className="font-mono text-[11px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">{database.latency_ms ?? 0}ms</span>
+                <span className="flex items-center gap-1.5">
+                  <Database className="w-3.5 h-3.5 text-emerald-400" /> SQLite
+                </span>
+                <span className="font-mono text-[11px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20">
+                  {database.latency_ms ?? 0}ms
+                </span>
               </div>
               <div className="flex justify-between text-[11px] text-neutral-300 font-medium pt-0.5">
                 <span>{counts.panels ?? 0} Panels</span>
@@ -200,13 +231,23 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
 
             <div className="bg-neutral-900/60 border border-white/5 rounded-2xl p-3 flex flex-col justify-between space-y-2">
               <div className="flex items-center justify-between text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
-                <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-amber-400" /> GPU</span>
-                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg border ${gpu.available ? "text-purple-300 bg-purple-500/10 border-purple-500/20" : "text-neutral-400 bg-neutral-800 border-white/5"}`}>
+                <span className="flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" /> GPU
+                </span>
+                <span
+                  className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg border ${
+                    gpu.available
+                      ? "text-purple-300 bg-purple-500/10 border-purple-500/20"
+                      : "text-neutral-400 bg-neutral-800 border-white/5"
+                  }`}
+                >
                   {gpu.available ? "CUDA" : "CPU"}
                 </span>
               </div>
               <div className="text-[11px] text-neutral-400 truncate pt-0.5">
-                {gpu.devices && gpu.devices.length > 0 ? gpu.devices[0].name : "CPU Inference Engine"}
+                {gpu.devices && gpu.devices.length > 0
+                  ? gpu.devices[0].name
+                  : "CPU Inference Engine"}
               </div>
             </div>
           </div>
@@ -214,8 +255,13 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
           {/* AI Providers & Engines Quick Badges */}
           <div className="bg-neutral-900/60 border border-white/5 rounded-2xl p-3.5">
             <div className="text-[10px] font-bold text-neutral-300 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-              <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-purple-400" /> AI & Engines</span>
-              <span className="text-[10px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">{jobQueue.running || 0} active jobs</span>
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" /> AI &
+                Engines
+              </span>
+              <span className="text-[10px] font-mono text-purple-300 bg-purple-500/10 px-2 py-0.5 rounded-full border border-purple-500/20">
+                {jobQueue.running || 0} active jobs
+              </span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {[
@@ -224,7 +270,12 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
                 { name: "FFmpeg", ok: capabilities.ffmpeg?.available },
                 { name: "OpenCV", ok: capabilities.opencv?.available },
                 { name: "PyTorch", ok: capabilities.torch?.available },
-                { name: "YOLO", ok: capabilities.models?.yolov8n_seg?.exists || capabilities.ultralytics?.available },
+                {
+                  name: "YOLO",
+                  ok:
+                    capabilities.models?.yolov8n_seg?.exists ||
+                    capabilities.ultralytics?.available,
+                },
                 { name: "EasyOCR", ok: capabilities.easyocr?.available },
                 { name: "Edge-TTS", ok: capabilities.edge_tts?.available },
               ].map((item) => (
@@ -236,7 +287,13 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
                       : "bg-neutral-900/80 text-neutral-500 border-white/5"
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${item.ok ? "bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)] animate-pulse" : "bg-neutral-600"}`} />
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      item.ok
+                        ? "bg-cyan-400 shadow-[0_0_6px_rgba(34,211,238,0.8)] animate-pulse"
+                        : "bg-neutral-600"
+                    }`}
+                  />
                   {item.name}
                 </span>
               ))}
@@ -248,11 +305,14 @@ export const ServerStatusPopover: React.FC<ServerStatusPopoverProps> = ({
       {/* Footer Link to Full Health Dashboard */}
       <div className="pt-3 border-t border-neutral-850 flex items-center justify-between text-xs">
         <span className="text-[11px] text-neutral-400 font-sans">
-          PID {server.process_id || "N/A"} • Python {server.python_version || "3.12"}
+          PID {server.process_id || "N/A"} • Python{" "}
+          {server.python_version || "3.12"}
         </span>
         <a
           href="/admin/health"
-          onClick={() => { if (onClose) onClose(); }}
+          onClick={() => {
+            if (onClose) onClose();
+          }}
           className="flex items-center gap-1.5 text-white hover:text-neutral-300 font-bold transition-all text-xs hover:underline cursor-pointer"
         >
           Full Diagnostics <ExternalLink className="w-3.5 h-3.5" />

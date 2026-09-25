@@ -53,7 +53,9 @@ export const ExportView: React.FC<ExportViewProps> = ({
             }`}
           >
             <span className="font-mono font-bold text-xs">9:16</span>
-            <span className="text-[8px] text-slate-400 mt-0.5">Shorts/Reels</span>
+            <span className="text-[8px] text-slate-400 mt-0.5">
+              Shorts/Reels
+            </span>
           </button>
 
           <button
@@ -102,11 +104,15 @@ export const ExportView: React.FC<ExportViewProps> = ({
           </div>
           <div className="flex justify-between">
             <span className="text-slate-500">Total Duration:</span>
-            <span className="text-sky-400 font-bold">{totalDuration.toFixed(1)}s</span>
+            <span className="text-sky-400 font-bold">
+              {totalDuration.toFixed(1)}s
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-500">Soundtrack Mood:</span>
-            <span className="text-emerald-400 font-bold capitalize">{bgmMood}</span>
+            <span className="text-emerald-400 font-bold capitalize">
+              {bgmMood}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-500">Video Aspect:</span>

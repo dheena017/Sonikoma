@@ -79,9 +79,7 @@ export default function ProcessBar({ progressStatus }: ProcessBarProps) {
       <div className="relative flex-1 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
         <div
           className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ease-out ${
-            isDone
-              ? "bg-emerald-500"
-              : "bg-[#3B82F6]"
+            isDone ? "bg-emerald-500" : "bg-[#3B82F6]"
           }`}
           style={{ width: `${displayPercent}%` }}
         />

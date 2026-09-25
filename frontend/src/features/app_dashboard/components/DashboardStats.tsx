@@ -100,7 +100,10 @@ export default function DashboardStats({
                   projectsCount > 0
                     ? Math.min(
                         100,
-                        Math.max(10, Math.round((completedCount / projectsCount) * 100))
+                        Math.max(
+                          10,
+                          Math.round((completedCount / projectsCount) * 100)
+                        )
                       )
                     : 100
                 }%`,

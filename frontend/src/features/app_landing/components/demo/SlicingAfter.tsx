@@ -16,11 +16,15 @@ export function SlicingAfter() {
             <Scissors className="w-2.5 h-2.5" />
             PANEL 01 • 1080x1350 (99.8%)
           </span>
-          <span className="text-[9px] font-mono text-emerald-400 font-bold">READY</span>
+          <span className="text-[9px] font-mono text-emerald-400 font-bold">
+            READY
+          </span>
         </div>
         <div className="h-24 rounded-lg bg-gradient-to-r from-[#2A2A2A] to-indigo-800/50 border border-emerald-400/40 flex flex-col items-center justify-center relative">
           <div className="text-2xl">⚡️</div>
-          <span className="text-xs font-black text-white tracking-wide uppercase mt-1">Awakening</span>
+          <span className="text-xs font-black text-white tracking-wide uppercase mt-1">
+            Awakening
+          </span>
           <div className="absolute top-2 right-2 bg-black/70 px-2 py-0.5 rounded text-[9px] text-neutral-200">
             "Is this... my power?"
           </div>
@@ -34,11 +38,15 @@ export function SlicingAfter() {
             <Scissors className="w-2.5 h-2.5" />
             PANEL 02 • 1080x1920 (99.4%)
           </span>
-          <span className="text-[9px] font-mono text-[#60A5FA] font-bold">READY</span>
+          <span className="text-[9px] font-mono text-[#60A5FA] font-bold">
+            READY
+          </span>
         </div>
         <div className="h-28 rounded-lg bg-gradient-to-r from-blue-800/50 to-indigo-800/50 border border-[#60A5FA]/40 flex flex-col items-center justify-center relative">
           <div className="text-3xl">⚔️</div>
-          <span className="text-xs font-black text-white tracking-wide uppercase mt-1">Shadow Strike</span>
+          <span className="text-xs font-black text-white tracking-wide uppercase mt-1">
+            Shadow Strike
+          </span>
           <div className="absolute bottom-2 left-2 bg-rose-950/90 border border-rose-400 px-2 py-0.5 rounded text-[9px] font-mono font-bold text-rose-300">
             *CRASH!*
           </div>

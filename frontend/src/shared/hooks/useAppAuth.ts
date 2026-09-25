@@ -19,7 +19,12 @@ export function useAppAuth() {
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
         if (params.get("mock_auth") === "true") {
-          return { id: 1, email: "admin@sonikoma.io", name: "Administrator", role: "admin" };
+          return {
+            id: 1,
+            email: "admin@sonikoma.io",
+            name: "Administrator",
+            role: "admin",
+          };
         }
         const savedUser = localStorage.getItem("sonikoma_user");
         if (savedUser) {
@@ -67,18 +72,21 @@ export function useAppAuth() {
     setIsInitializing(false);
   }, []);
 
-  const handleLoginSuccess = useCallback((token: string, userData?: AuthUser) => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sonikoma_token", token);
-      if (userData) {
-        localStorage.setItem("sonikoma_user", JSON.stringify(userData));
+  const handleLoginSuccess = useCallback(
+    (token: string, userData?: AuthUser) => {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sonikoma_token", token);
+        if (userData) {
+          localStorage.setItem("sonikoma_user", JSON.stringify(userData));
+        }
       }
-    }
-    if (userData) setUser(userData);
-    setIsAuthenticated(true);
-    setAuthLoading(false);
-    setIsInitializing(false);
-  }, []);
+      if (userData) setUser(userData);
+      setIsAuthenticated(true);
+      setAuthLoading(false);
+      setIsInitializing(false);
+    },
+    []
+  );
 
   return useMemo(
     () => ({

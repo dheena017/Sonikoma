@@ -144,8 +144,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           label: "AI Core & Multi-Engine",
           icon: Brain,
           active:
-            currentPath === "/ai-core" ||
-            currentPath.startsWith("/ai-core/"),
+            currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
           path: "/ai-core",
           onClick: () => navigateTo("/ai-core"),
         },

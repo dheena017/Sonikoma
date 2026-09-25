@@ -49,22 +49,31 @@ export default function AIModelCard({
 
   const factor = isPriorityInference ? 0.3 : 1.0;
   const rpmLimit = Math.round(
-    (tier === "free" ? model.free_tier?.rpm || model.limit_rpm : model.paid_tier?.rpm || model.limit_rpm) * factor
+    (tier === "free"
+      ? model.free_tier?.rpm || model.limit_rpm
+      : model.paid_tier?.rpm || model.limit_rpm) * factor
   );
   const tpmLimit = Math.round(
-    (tier === "free" ? model.free_tier?.tpm || model.limit_tpm : model.paid_tier?.tpm || model.limit_tpm) * factor
+    (tier === "free"
+      ? model.free_tier?.tpm || model.limit_tpm
+      : model.paid_tier?.tpm || model.limit_tpm) * factor
   );
   const rpdLimit = Math.round(
-    (tier === "free" ? model.free_tier?.rpd || model.limit_rpd : model.paid_tier?.rpd || model.limit_rpd) * factor
+    (tier === "free"
+      ? model.free_tier?.rpd || model.limit_rpd
+      : model.paid_tier?.rpd || model.limit_rpd) * factor
   );
 
   const rpmUsed = model.rpm_used || 0;
   const tpmUsed = model.tpm_used || 0;
   const rpdUsed = model.rpd_used || 0;
 
-  const rpmPct = rpmLimit > 0 ? Math.min(100, Math.round((rpmUsed / rpmLimit) * 100)) : 0;
-  const tpmPct = tpmLimit > 0 ? Math.min(100, Math.round((tpmUsed / tpmLimit) * 100)) : 0;
-  const rpdPct = rpdLimit > 0 ? Math.min(100, Math.round((rpdUsed / rpdLimit) * 100)) : 0;
+  const rpmPct =
+    rpmLimit > 0 ? Math.min(100, Math.round((rpmUsed / rpmLimit) * 100)) : 0;
+  const tpmPct =
+    tpmLimit > 0 ? Math.min(100, Math.round((tpmUsed / tpmLimit) * 100)) : 0;
+  const rpdPct =
+    rpdLimit > 0 ? Math.min(100, Math.round((rpdUsed / rpdLimit) * 100)) : 0;
 
   const getUsageColor = (pct: number) => {
     if (pct >= 85) return "bg-rose-500 text-rose-400";
@@ -78,7 +87,6 @@ export default function AIModelCard({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
 
   return (
     <div
@@ -141,18 +149,29 @@ export default function AIModelCard({
           <div>
             <div className="flex items-center justify-between text-[9px] text-neutral-400 font-mono font-bold uppercase mb-0.5">
               <span>Live RPM</span>
-              <span className={rpmPct >= 85 ? "text-rose-400 font-bold" : "text-[#3B82F6] font-bold"}>
+              <span
+                className={
+                  rpmPct >= 85
+                    ? "text-rose-400 font-bold"
+                    : "text-[#3B82F6] font-bold"
+                }
+              >
                 {rpmPct}%
               </span>
             </div>
             <div className="text-xs sm:text-sm font-black text-white font-mono">
               <span className="text-[#60A5FA]">{rpmUsed}</span>
-              <span className="text-neutral-500 text-[10px] font-normal"> / {rpmLimit}</span>
+              <span className="text-neutral-500 text-[10px] font-normal">
+                {" "}
+                / {rpmLimit}
+              </span>
             </div>
           </div>
           <div className="w-full h-1.5 bg-neutral-800 rounded-full mt-2 overflow-hidden">
             <div
-              className={`h-full ${getUsageColor(rpmPct).split(" ")[0]} transition-all duration-300`}
+              className={`h-full ${
+                getUsageColor(rpmPct).split(" ")[0]
+              } transition-all duration-300`}
               style={{ width: `${Math.max(4, rpmPct)}%` }}
             />
           </div>
@@ -163,21 +182,34 @@ export default function AIModelCard({
           <div>
             <div className="flex items-center justify-between text-[9px] text-neutral-400 font-mono font-bold uppercase mb-0.5">
               <span>Live TPM</span>
-              <span className={tpmPct >= 85 ? "text-rose-400 font-bold" : "text-[#3B82F6] font-bold"}>
+              <span
+                className={
+                  tpmPct >= 85
+                    ? "text-rose-400 font-bold"
+                    : "text-[#3B82F6] font-bold"
+                }
+              >
                 {tpmPct}%
               </span>
             </div>
             <div className="text-xs sm:text-sm font-black text-[#3B82F6] font-mono">
-              <span>{tpmUsed >= 1000 ? `${(tpmUsed / 1000).toFixed(1)}k` : tpmUsed}</span>
+              <span>
+                {tpmUsed >= 1000 ? `${(tpmUsed / 1000).toFixed(1)}k` : tpmUsed}
+              </span>
               <span className="text-neutral-500 text-[10px] font-normal">
                 {" "}
-                / {tpmLimit >= 1_000_000 ? `${(tpmLimit / 1_000_000).toFixed(1)}M` : `${(tpmLimit / 1000).toLocaleString()}k`}
+                /{" "}
+                {tpmLimit >= 1_000_000
+                  ? `${(tpmLimit / 1_000_000).toFixed(1)}M`
+                  : `${(tpmLimit / 1000).toLocaleString()}k`}
               </span>
             </div>
           </div>
           <div className="w-full h-1.5 bg-neutral-800 rounded-full mt-2 overflow-hidden">
             <div
-              className={`h-full ${getUsageColor(tpmPct).split(" ")[0]} transition-all duration-300`}
+              className={`h-full ${
+                getUsageColor(tpmPct).split(" ")[0]
+              } transition-all duration-300`}
               style={{ width: `${Math.max(4, tpmPct)}%` }}
             />
           </div>
@@ -188,7 +220,13 @@ export default function AIModelCard({
           <div>
             <div className="flex items-center justify-between text-[9px] text-neutral-400 font-mono font-bold uppercase mb-0.5">
               <span>Live RPD</span>
-              <span className={rpdPct >= 85 ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>
+              <span
+                className={
+                  rpdPct >= 85
+                    ? "text-rose-400 font-bold"
+                    : "text-emerald-400 font-bold"
+                }
+              >
                 {rpdPct}%
               </span>
             </div>
@@ -202,7 +240,9 @@ export default function AIModelCard({
           </div>
           <div className="w-full h-1.5 bg-neutral-800 rounded-full mt-2 overflow-hidden">
             <div
-              className={`h-full ${getUsageColor(rpdPct).split(" ")[0]} transition-all duration-300`}
+              className={`h-full ${
+                getUsageColor(rpdPct).split(" ")[0]
+              } transition-all duration-300`}
               style={{ width: `${Math.max(4, rpdPct)}%` }}
             />
           </div>
@@ -247,28 +287,47 @@ export default function AIModelCard({
         <div className="space-y-0.5">
           {model.cost_per_1m_prompt > 0 ? (
             <div>
-              Prompt: <strong className="text-white">${model.cost_per_1m_prompt}/1M</strong> · Output:{" "}
-              <strong className="text-white">${model.cost_per_1m_completion}/1M</strong>
+              Prompt:{" "}
+              <strong className="text-white">
+                ${model.cost_per_1m_prompt}/1M
+              </strong>{" "}
+              · Output:{" "}
+              <strong className="text-white">
+                ${model.cost_per_1m_completion}/1M
+              </strong>
             </div>
           ) : model.price_per_image ? (
             <div>
-              Cost: <strong className="text-white">${model.price_per_image} / image</strong>
+              Cost:{" "}
+              <strong className="text-white">
+                ${model.price_per_image} / image
+              </strong>
             </div>
           ) : model.price_per_1k_chars ? (
             <div>
-              Cost: <strong className="text-white">${model.price_per_1k_chars} / 1k chars</strong>
+              Cost:{" "}
+              <strong className="text-white">
+                ${model.price_per_1k_chars} / 1k chars
+              </strong>
             </div>
           ) : model.price_per_audio_minute ? (
             <div>
-              Cost: <strong className="text-white">${model.price_per_audio_minute} / audio min</strong>
+              Cost:{" "}
+              <strong className="text-white">
+                ${model.price_per_audio_minute} / audio min
+              </strong>
             </div>
           ) : (
             <div>
-              Cost: <strong className="text-emerald-400">Zero-Cost Free Tier</strong>
+              Cost:{" "}
+              <strong className="text-emerald-400">Zero-Cost Free Tier</strong>
             </div>
           )}
           <span className="text-[9px] text-neutral-400">
-            Context: {typeof model.context_window === "number" ? `${(model.context_window / 1000).toFixed(0)}k` : model.context_window}
+            Context:{" "}
+            {typeof model.context_window === "number"
+              ? `${(model.context_window / 1000).toFixed(0)}k`
+              : model.context_window}
           </span>
         </div>
 

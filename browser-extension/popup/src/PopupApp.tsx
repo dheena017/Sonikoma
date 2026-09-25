@@ -43,7 +43,9 @@ export interface PopupToastInfo {
 }
 
 export const PopupApp: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"studio" | "panels" | "history">("studio");
+  const [activeTab, setActiveTab] = useState<"studio" | "panels" | "history">(
+    "studio"
+  );
   const [isOnline, setIsOnline] = useState<boolean>(false);
   const [isCheckingHealth, setIsCheckingHealth] = useState<boolean>(true);
   const [activePageInfo, setActivePageInfo] = useState<{
@@ -117,7 +119,8 @@ export const PopupApp: React.FC = () => {
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
-        const errMsg = chrome.runtime.lastError.message || "Failed to query active tab";
+        const errMsg =
+          chrome.runtime.lastError.message || "Failed to query active tab";
         showToast(errMsg, "error");
         showErrorModal(
           "Scanner Query Failed",
@@ -180,7 +183,9 @@ export const PopupApp: React.FC = () => {
 
         setActivePageInfo({
           title: res.seriesTitle || tab.title || "Manga Chapter",
-          domain: `${res.chapterTitle ? res.chapterTitle + " • " : ""}${new URL(tab.url).hostname}`,
+          domain: `${res.chapterTitle ? res.chapterTitle + " • " : ""}${
+            new URL(tab.url).hostname
+          }`,
           panelCount: res.panelCount || res.images.length,
           url: tab.url,
           hasDetectedChapter: true,
@@ -188,7 +193,10 @@ export const PopupApp: React.FC = () => {
 
         const mapped = res.images.map((img: any, idx: number) => ({
           index: idx + 1,
-          src: typeof img === "string" ? img : (img.proxied_url || img.src || img.url),
+          src:
+            typeof img === "string"
+              ? img
+              : img.proxied_url || img.src || img.url,
           width: img.width || 800,
           height: img.height || 1200,
         }));
@@ -202,7 +210,12 @@ export const PopupApp: React.FC = () => {
 
       const runDomFallbackScan = () => {
         chrome.tabs.sendMessage(tab.id, { type: "GET_READER_STATS" }, (res) => {
-          if (!chrome.runtime.lastError && res && res.images && res.images.length > 0) {
+          if (
+            !chrome.runtime.lastError &&
+            res &&
+            res.images &&
+            res.images.length > 0
+          ) {
             processResults(res, "dom");
             return;
           }
@@ -221,9 +234,16 @@ export const PopupApp: React.FC = () => {
                       target: { tabId: tab.id! },
                       func: () => {
                         const imgs = Array.from(
-                          document.querySelectorAll<HTMLImageElement>("img, picture source, [style*='background-image']")
+                          document.querySelectorAll<HTMLImageElement>(
+                            "img, picture source, [style*='background-image']"
+                          )
                         );
-                        const collected: { index: number; src: string; width: number; height: number }[] = [];
+                        const collected: {
+                          index: number;
+                          src: string;
+                          width: number;
+                          height: number;
+                        }[] = [];
                         const seen = new Set<string>();
 
                         imgs.forEach((el) => {
@@ -235,12 +255,24 @@ export const PopupApp: React.FC = () => {
                             (el as HTMLImageElement).src ||
                             "";
 
-                          if (!src && (el as HTMLElement).style?.backgroundImage) {
-                            const m = (el as HTMLElement).style.backgroundImage.match(/url\(['"]?([^'"]+)['"]?\)/);
+                          if (
+                            !src &&
+                            (el as HTMLElement).style?.backgroundImage
+                          ) {
+                            const m = (
+                              el as HTMLElement
+                            ).style.backgroundImage.match(
+                              /url\(['"]?([^'"]+)['"]?\)/
+                            );
                             if (m) src = m[1];
                           }
 
-                          if (src && src.length > 5 && !src.startsWith("data:image/svg") && !src.startsWith("data:image/gif")) {
+                          if (
+                            src &&
+                            src.length > 5 &&
+                            !src.startsWith("data:image/svg") &&
+                            !src.startsWith("data:image/gif")
+                          ) {
                             if (src.startsWith("//")) src = `https:${src}`;
                             if (!seen.has(src)) {
                               seen.add(src);
@@ -248,7 +280,8 @@ export const PopupApp: React.FC = () => {
                                 index: collected.length + 1,
                                 src,
                                 width: (el as HTMLElement).clientWidth || 800,
-                                height: (el as HTMLElement).clientHeight || 1200,
+                                height:
+                                  (el as HTMLElement).clientHeight || 1200,
                               });
                             }
                           }
@@ -271,9 +304,13 @@ export const PopupApp: React.FC = () => {
                 }
 
                 setTimeout(() => {
-                  chrome.tabs.sendMessage(tab.id!, { type: "GET_READER_STATS" }, (secondRes) => {
-                    processResults(secondRes, "dom");
-                  });
+                  chrome.tabs.sendMessage(
+                    tab.id!,
+                    { type: "GET_READER_STATS" },
+                    (secondRes) => {
+                      processResults(secondRes, "dom");
+                    }
+                  );
                 }, 120);
               }
             );
@@ -293,7 +330,13 @@ export const PopupApp: React.FC = () => {
             },
           },
           (apiRes) => {
-            if (!chrome.runtime.lastError && apiRes && apiRes.success && Array.isArray(apiRes.panels) && apiRes.panels.length > 0) {
+            if (
+              !chrome.runtime.lastError &&
+              apiRes &&
+              apiRes.success &&
+              Array.isArray(apiRes.panels) &&
+              apiRes.panels.length > 0
+            ) {
               processResults(apiRes, "endpoint");
               return;
             }
@@ -308,7 +351,11 @@ export const PopupApp: React.FC = () => {
 
   // 3. Load Reading History
   const loadHistory = useCallback(() => {
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.storage &&
+      chrome.storage.local
+    ) {
       chrome.storage.local.get(["sonikoma_reading_history"], (result) => {
         if (result && Array.isArray(result.sonikoma_reading_history)) {
           setHistory(result.sonikoma_reading_history);
@@ -343,10 +390,12 @@ export const PopupApp: React.FC = () => {
       chrome.tabs.sendMessage(tab.id, { type: messageType }, (res) => {
         if (chrome.runtime.lastError || !res) {
           if (chrome.scripting && chrome.scripting.insertCSS) {
-            chrome.scripting.insertCSS({
-              target: { tabId: tab.id },
-              files: ["content/content.css"],
-            }).catch(() => {});
+            chrome.scripting
+              .insertCSS({
+                target: { tabId: tab.id },
+                files: ["content/content.css"],
+              })
+              .catch(() => {});
           }
           if (chrome.scripting && chrome.scripting.executeScript) {
             chrome.scripting.executeScript(
@@ -356,22 +405,26 @@ export const PopupApp: React.FC = () => {
               },
               () => {
                 setTimeout(() => {
-                  chrome.tabs.sendMessage(tab.id!, { type: messageType }, () => {
-                    if (chrome.runtime.lastError) {
-                      const errMsg =
-                        chrome.runtime.lastError.message ||
-                        `Failed to inject reader script for ${label}`;
-                      showToast(errMsg, "error");
-                      showErrorModal(
-                        `Failed to Launch ${label}`,
-                        errMsg,
-                        `Message: ${messageType}\nTab ID: ${tab.id}`,
-                        "Refresh the manga tab and try again."
-                      );
-                    } else {
-                      window.close();
+                  chrome.tabs.sendMessage(
+                    tab.id!,
+                    { type: messageType },
+                    () => {
+                      if (chrome.runtime.lastError) {
+                        const errMsg =
+                          chrome.runtime.lastError.message ||
+                          `Failed to inject reader script for ${label}`;
+                        showToast(errMsg, "error");
+                        showErrorModal(
+                          `Failed to Launch ${label}`,
+                          errMsg,
+                          `Message: ${messageType}\nTab ID: ${tab.id}`,
+                          "Refresh the manga tab and try again."
+                        );
+                      } else {
+                        window.close();
+                      }
                     }
-                  });
+                  );
                 }, 150);
               }
             );
@@ -401,7 +454,11 @@ export const PopupApp: React.FC = () => {
   };
 
   const handleOpenSidepanel = () => {
-    if (typeof chrome !== "undefined" && chrome.sidePanel && chrome.sidePanel.open) {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.sidePanel &&
+      chrome.sidePanel.open
+    ) {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]?.id) {
           chrome.sidePanel
@@ -410,7 +467,9 @@ export const PopupApp: React.FC = () => {
               window.close();
             })
             .catch((err: any) => {
-              const errMsg = err?.message || "Chrome side panel could not be opened automatically.";
+              const errMsg =
+                err?.message ||
+                "Chrome side panel could not be opened automatically.";
               showToast("Failed to open side panel", "error");
               showErrorModal(
                 "Side Panel Launch Failed",
@@ -447,13 +506,21 @@ export const PopupApp: React.FC = () => {
     e.stopPropagation();
     const updated = history.filter((h) => h.chapterUrl !== targetUrl);
     setHistory(updated);
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.storage &&
+      chrome.storage.local
+    ) {
       chrome.storage.local.set({ sonikoma_reading_history: updated });
     }
   };
 
   const handleClearHistory = () => {
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.storage &&
+      chrome.storage.local
+    ) {
       chrome.storage.local.set({ sonikoma_reading_history: [] }, () => {
         setHistory([]);
       });
@@ -549,7 +616,9 @@ export const PopupApp: React.FC = () => {
           <span>Panels</span>
           <span
             className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded-full ${
-              activeTab === "panels" ? "bg-black/40 text-white" : "bg-[#182338] text-sky-400"
+              activeTab === "panels"
+                ? "bg-black/40 text-white"
+                : "bg-[#182338] text-sky-400"
             }`}
           >
             {panels.length}
@@ -587,10 +656,18 @@ export const PopupApp: React.FC = () => {
           }`}
         >
           <div className="flex items-center gap-2 truncate">
-            {toast.type === "error" && <AlertCircle size={14} className="text-rose-400 shrink-0" />}
-            {toast.type === "warning" && <AlertTriangle size={14} className="text-amber-400 shrink-0" />}
-            {toast.type === "success" && <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />}
-            {toast.type === "info" && <Info size={14} className="text-sky-400 shrink-0" />}
+            {toast.type === "error" && (
+              <AlertCircle size={14} className="text-rose-400 shrink-0" />
+            )}
+            {toast.type === "warning" && (
+              <AlertTriangle size={14} className="text-amber-400 shrink-0" />
+            )}
+            {toast.type === "success" && (
+              <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+            )}
+            {toast.type === "info" && (
+              <Info size={14} className="text-sky-400 shrink-0" />
+            )}
             <span className="truncate">{toast.message}</span>
           </div>
           <button
@@ -612,7 +689,9 @@ export const PopupApp: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
                 <span className="font-mono text-[9px] font-bold text-sky-400 uppercase tracking-wider">
-                  {activePageInfo.hasDetectedChapter ? "Active Chapter" : "Reader Scanner"}
+                  {activePageInfo.hasDetectedChapter
+                    ? "Active Chapter"
+                    : "Reader Scanner"}
                 </span>
               </div>
               <span className="font-mono text-[10px] font-bold text-sky-300 bg-sky-950/80 border border-sky-800/60 px-2 py-0.5 rounded-full">
@@ -694,7 +773,9 @@ export const PopupApp: React.FC = () => {
 
             {/* Bento Card 2: Cinema Mode */}
             <div
-              onClick={() => dispatchToTab("TRIGGER_CINEMA_MODE", "Cinema Mode")}
+              onClick={() =>
+                dispatchToTab("TRIGGER_CINEMA_MODE", "Cinema Mode")
+              }
               className="group flex flex-col justify-between bg-[#121827] hover:bg-[#182236] border border-[#1e293b] hover:border-amber-500/60 rounded-xl p-2.5 cursor-pointer transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -717,7 +798,9 @@ export const PopupApp: React.FC = () => {
 
             {/* Bento Card 3: Smart Snipper */}
             <div
-              onClick={() => dispatchToTab("TRIGGER_PANEL_SNIPPER", "Panel Snipper")}
+              onClick={() =>
+                dispatchToTab("TRIGGER_PANEL_SNIPPER", "Panel Snipper")
+              }
               className="group flex flex-col justify-between bg-[#121827] hover:bg-[#182236] border border-[#1e293b] hover:border-cyan-500/60 rounded-xl p-2.5 cursor-pointer transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -763,7 +846,12 @@ export const PopupApp: React.FC = () => {
 
             {/* Bento Card 5: Download ZIP */}
             <div
-              onClick={() => dispatchToTab("TRIGGER_CHAPTER_DOWNLOAD", "Chapter ZIP Download")}
+              onClick={() =>
+                dispatchToTab(
+                  "TRIGGER_CHAPTER_DOWNLOAD",
+                  "Chapter ZIP Download"
+                )
+              }
               className="group flex flex-col justify-between bg-[#121827] hover:bg-[#182236] border border-[#1e293b] hover:border-emerald-500/60 rounded-xl p-2.5 cursor-pointer transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
             >
               <div className="flex items-center justify-between mb-1.5">
@@ -835,7 +923,9 @@ export const PopupApp: React.FC = () => {
               <div className="col-span-3 flex flex-col items-center justify-center py-12 text-slate-400 text-xs bg-[#121827]/50 rounded-xl border border-dashed border-[#1e293b]">
                 <BookOpen size={28} className="text-slate-600 mb-2" />
                 <p className="font-bold text-slate-300">No panels detected</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">Open any manga reading tab</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Open any manga reading tab
+                </p>
               </div>
             ) : (
               panels.map((p, idx) => (
@@ -884,8 +974,12 @@ export const PopupApp: React.FC = () => {
             {history.length === 0 ? (
               <div className="text-center text-slate-400 py-12 text-xs bg-[#121827]/50 rounded-xl border border-dashed border-[#1e293b]">
                 <History size={28} className="mx-auto text-slate-600 mb-2" />
-                <p className="font-bold text-slate-300">No reading history yet</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">Chapters are tracked automatically</p>
+                <p className="font-bold text-slate-300">
+                  No reading history yet
+                </p>
+                <p className="text-[10px] text-slate-500 mt-0.5">
+                  Chapters are tracked automatically
+                </p>
               </div>
             ) : (
               history.map((item, idx) => (
@@ -901,7 +995,8 @@ export const PopupApp: React.FC = () => {
                       {item.seriesName}
                     </span>
                     <span className="text-[10px] text-slate-400 truncate mt-0.5">
-                      {item.chapterTitle || "Chapter"} • {item.siteDomain || ""} • {formatRelativeTime(item.timestamp)}
+                      {item.chapterTitle || "Chapter"} • {item.siteDomain || ""}{" "}
+                      • {formatRelativeTime(item.timestamp)}
                     </span>
                   </div>
                   <button
@@ -920,10 +1015,7 @@ export const PopupApp: React.FC = () => {
       )}
 
       {/* ── Full Dedicated Error Modal ── */}
-      <ErrorModal
-        error={errorModal}
-        onClose={() => setErrorModal(null)}
-      />
+      <ErrorModal error={errorModal} onClose={() => setErrorModal(null)} />
     </div>
   );
 };

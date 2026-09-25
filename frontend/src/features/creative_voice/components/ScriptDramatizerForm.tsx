@@ -347,7 +347,14 @@ export default function ScriptDramatizerForm({
                         ENHANCED LINE #{idx + 1}
                       </span>
                       <div className="flex items-center gap-1.5">
-                        <Tooltip text={playingIdx === idx ? "Stop playback" : "Listen to preview TTS"} placement="top">
+                        <Tooltip
+                          text={
+                            playingIdx === idx
+                              ? "Stop playback"
+                              : "Listen to preview TTS"
+                          }
+                          placement="top"
+                        >
                           <button
                             onClick={() => handlePreviewLineTTS(resLine, idx)}
                             className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer ${
@@ -355,20 +362,29 @@ export default function ScriptDramatizerForm({
                                 ? "bg-[#2A2A2A] text-white animate-pulse"
                                 : "bg-neutral-950 text-[#60A5FA] border border-[#3B82F6]/30 hover:text-white"
                             }`}
-                            aria-label={playingIdx === idx ? "Stop playback" : "Listen"}
+                            aria-label={
+                              playingIdx === idx ? "Stop playback" : "Listen"
+                            }
                           >
                             {playingIdx === idx ? (
                               <Square className="w-2.5 h-2.5 fill-current" />
                             ) : (
                               <Play className="w-2.5 h-2.5 fill-current" />
                             )}
-                            <span>{playingIdx === idx ? "Stop" : "Listen"}</span>
+                            <span>
+                              {playingIdx === idx ? "Stop" : "Listen"}
+                            </span>
                           </button>
                         </Tooltip>
                         {setPanels && panels[idx] && (
-                          <Tooltip text={`Apply this text to Panel #${idx + 1}`} placement="top">
+                          <Tooltip
+                            text={`Apply this text to Panel #${idx + 1}`}
+                            placement="top"
+                          >
                             <button
-                              onClick={() => handleApplySingleLine(idx, resLine)}
+                              onClick={() =>
+                                handleApplySingleLine(idx, resLine)
+                              }
                               className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 text-emerald-300 rounded text-[9px] font-mono font-bold transition-all flex items-center gap-1 cursor-pointer"
                               aria-label="Apply to panel timeline"
                             >
@@ -377,7 +393,12 @@ export default function ScriptDramatizerForm({
                             </button>
                           </Tooltip>
                         )}
-                        <Tooltip text={copiedIndex === idx ? "Copied!" : "Copy line text"} placement="top">
+                        <Tooltip
+                          text={
+                            copiedIndex === idx ? "Copied!" : "Copy line text"
+                          }
+                          placement="top"
+                        >
                           <button
                             onClick={() => copyToClipboard(resLine, idx)}
                             className="p-1 text-neutral-400 hover:text-white rounded transition-colors cursor-pointer"

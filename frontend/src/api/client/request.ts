@@ -14,8 +14,14 @@ export async function apiRequest<T = any>(
   const hasBody = options?.body !== undefined && options.body !== null;
 
   // Build merged headers — inject Content-Type for JSON-body requests if not already set
-  const existingHeaders = new Headers(options?.headers as HeadersInit | undefined);
-  if (hasBody && ["POST", "PUT", "PATCH"].includes(method) && !existingHeaders.has("Content-Type")) {
+  const existingHeaders = new Headers(
+    options?.headers as HeadersInit | undefined
+  );
+  if (
+    hasBody &&
+    ["POST", "PUT", "PATCH"].includes(method) &&
+    !existingHeaders.has("Content-Type")
+  ) {
     existingHeaders.set("Content-Type", "application/json");
   }
 

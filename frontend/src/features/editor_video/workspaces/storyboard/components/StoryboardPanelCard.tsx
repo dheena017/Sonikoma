@@ -50,7 +50,8 @@ export const StoryboardPanelCard: React.FC<StoryboardPanelCardProps> = ({
     panel.speech_text || panel.narrative || (panel as any).dialogue || ""
   );
 
-  const imgUrl = panel.image_url || (panel as any).imageUrl || (panel as any).url || "";
+  const imgUrl =
+    panel.image_url || (panel as any).imageUrl || (panel as any).url || "";
   const displayUrl = getProxiedImageUrl(imgUrl);
   const duration = panel.duration || 0;
   const cameraMotion = panel.motion_type || (panel as any).camera_motion || "";

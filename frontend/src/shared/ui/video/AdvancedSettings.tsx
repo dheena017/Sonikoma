@@ -41,7 +41,10 @@ export interface VideoPreviewAdvancedSettingsProps {
   targetUrl?: string;
   selectedModel?: string;
   selectedSource?: string;
-  addNotification?: (msg: string, type: "success" | "info" | "warning" | "error") => void;
+  addNotification?: (
+    msg: string,
+    type: "success" | "info" | "warning" | "error"
+  ) => void;
   fetchWithInterceptor?: any;
   audioReactiveShake: boolean;
   setAudioReactiveShake: (val: boolean) => void;
@@ -50,7 +53,9 @@ export interface VideoPreviewAdvancedSettingsProps {
   videoFormat: "mp4" | "webm" | "mkv";
   setVideoFormat: (val: "mp4" | "webm" | "mkv") => void;
   backgroundStyle: "black" | "white" | "transparent" | "blurred";
-  setBackgroundStyle: (val: "black" | "white" | "transparent" | "blurred") => void;
+  setBackgroundStyle: (
+    val: "black" | "white" | "transparent" | "blurred"
+  ) => void;
   subtitlesStyle: "none" | "burn-in" | "soft";
   setSubtitlesStyle: (val: "none" | "burn-in" | "soft") => void;
   cropSensitivity?: number;
@@ -169,12 +174,15 @@ function SliderRow({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold text-neutral-400">{label}</span>
+        <span className="text-[11px] font-semibold text-neutral-400">
+          {label}
+        </span>
         <span
           className="text-[11px] font-bold font-mono px-1.5 py-0.5 rounded-md"
           style={{ color, backgroundColor: `${color}18` }}
         >
-          {value}{unit}
+          {value}
+          {unit}
         </span>
       </div>
       <div className="relative h-1.5 bg-neutral-800 rounded-full overflow-hidden">
@@ -267,15 +275,23 @@ const VideoPreviewAdvancedSettings = React.memo(
     bubbleDetectionStyle = "hybrid",
     setBubbleDetectionStyle,
   }: VideoPreviewAdvancedSettingsProps) => {
-    const [activeTab, setActiveTab] = React.useState<"render" | "ai" | "themes">("render");
+    const [activeTab, setActiveTab] = React.useState<
+      "render" | "ai" | "themes"
+    >("render");
     const [presetName, setPresetName] = React.useState("");
     const [copied, setCopied] = React.useState(false);
 
     const [localCropSensitivity, setLocalCropSensitivity] = React.useState(() =>
-      parseInt(localStorage.getItem("ai_crop_sensitivity") || String(cropSensitivity), 10)
+      parseInt(
+        localStorage.getItem("ai_crop_sensitivity") || String(cropSensitivity),
+        10
+      )
     );
     const [localCropPaddingPx, setLocalCropPaddingPx] = React.useState(() =>
-      parseInt(localStorage.getItem("ai_crop_padding") || String(cropPaddingPx), 10)
+      parseInt(
+        localStorage.getItem("ai_crop_padding") || String(cropPaddingPx),
+        10
+      )
     );
     const [localCropFocusMode, setLocalCropFocusMode] = React.useState<string>(
       () => localStorage.getItem("ai_crop_focus_mode") || cropFocusMode
@@ -283,49 +299,168 @@ const VideoPreviewAdvancedSettings = React.memo(
     const [localCropModel, setLocalCropModel] = React.useState<string>(
       () => localStorage.getItem("ai_crop_model") || cropModel
     );
-    const [localBubbleSensitivity, setLocalBubbleSensitivity] = React.useState(bubbleSensitivity);
-    const [localBubbleDilation, setLocalBubbleDilation] = React.useState(bubbleDilation > 0 ? bubbleDilation : 5);
-    const [localBubbleEraseMethod, setLocalBubbleEraseMethod] = React.useState<string>(
-      () => localStorage.getItem("ai_bubble_erase_method") || bubbleEraseMethod
+    const [localBubbleSensitivity, setLocalBubbleSensitivity] =
+      React.useState(bubbleSensitivity);
+    const [localBubbleDilation, setLocalBubbleDilation] = React.useState(
+      bubbleDilation > 0 ? bubbleDilation : 5
     );
-    const [localBubbleDetectionStyle, setLocalBubbleDetectionStyle] = React.useState<string>(
-      () => localStorage.getItem("ai_bubble_detection_style") || bubbleDetectionStyle
-    );
+    const [localBubbleEraseMethod, setLocalBubbleEraseMethod] =
+      React.useState<string>(
+        () =>
+          localStorage.getItem("ai_bubble_erase_method") || bubbleEraseMethod
+      );
+    const [localBubbleDetectionStyle, setLocalBubbleDetectionStyle] =
+      React.useState<string>(
+        () =>
+          localStorage.getItem("ai_bubble_detection_style") ||
+          bubbleDetectionStyle
+      );
 
-    React.useEffect(() => { localStorage.setItem("ai_crop_sensitivity", String(localCropSensitivity)); }, [localCropSensitivity]);
-    React.useEffect(() => { localStorage.setItem("ai_crop_padding", String(localCropPaddingPx)); }, [localCropPaddingPx]);
-    React.useEffect(() => { localStorage.setItem("ai_crop_focus_mode", localCropFocusMode); }, [localCropFocusMode]);
-    React.useEffect(() => { localStorage.setItem("ai_crop_model", localCropModel); }, [localCropModel]);
-    React.useEffect(() => { localStorage.setItem("ai_bubble_sensitivity", String(localBubbleSensitivity)); }, [localBubbleSensitivity]);
-    React.useEffect(() => { localStorage.setItem("ai_bubble_dilation", String(localBubbleDilation)); }, [localBubbleDilation]);
-    React.useEffect(() => { localStorage.setItem("ai_bubble_erase_method", localBubbleEraseMethod); }, [localBubbleEraseMethod]);
-    React.useEffect(() => { localStorage.setItem("ai_bubble_detection_style", localBubbleDetectionStyle); }, [localBubbleDetectionStyle]);
+    React.useEffect(() => {
+      localStorage.setItem("ai_crop_sensitivity", String(localCropSensitivity));
+    }, [localCropSensitivity]);
+    React.useEffect(() => {
+      localStorage.setItem("ai_crop_padding", String(localCropPaddingPx));
+    }, [localCropPaddingPx]);
+    React.useEffect(() => {
+      localStorage.setItem("ai_crop_focus_mode", localCropFocusMode);
+    }, [localCropFocusMode]);
+    React.useEffect(() => {
+      localStorage.setItem("ai_crop_model", localCropModel);
+    }, [localCropModel]);
+    React.useEffect(() => {
+      localStorage.setItem(
+        "ai_bubble_sensitivity",
+        String(localBubbleSensitivity)
+      );
+    }, [localBubbleSensitivity]);
+    React.useEffect(() => {
+      localStorage.setItem("ai_bubble_dilation", String(localBubbleDilation));
+    }, [localBubbleDilation]);
+    React.useEffect(() => {
+      localStorage.setItem("ai_bubble_erase_method", localBubbleEraseMethod);
+    }, [localBubbleEraseMethod]);
+    React.useEffect(() => {
+      localStorage.setItem(
+        "ai_bubble_detection_style",
+        localBubbleDetectionStyle
+      );
+    }, [localBubbleDetectionStyle]);
 
-    const handleCropSensitivityChange = (v: number) => { setLocalCropSensitivity(v); setCropSensitivity?.(v); };
-    const handleCropPaddingChange = (v: number) => { setLocalCropPaddingPx(v); setCropPaddingPx?.(v); };
-    const handleCropFocusChange = (v: string) => { setLocalCropFocusMode(v); setCropFocusMode?.(v); };
-    const handleCropModelChange = (v: string) => { setLocalCropModel(v); setCropModel?.(v); };
-    const handleBubbleSensitivityChange = (v: number) => { setLocalBubbleSensitivity(v); setBubbleSensitivity?.(v); };
-    const handleBubbleDilationChange = (v: number) => { setLocalBubbleDilation(v); setBubbleDilation?.(v); };
-    const handleBubbleEraseChange = (v: string) => { setLocalBubbleEraseMethod(v); setBubbleEraseMethod?.(v); };
-    const handleBubbleDetectionChange = (v: string) => { setLocalBubbleDetectionStyle(v); setBubbleDetectionStyle?.(v); };
+    const handleCropSensitivityChange = (v: number) => {
+      setLocalCropSensitivity(v);
+      setCropSensitivity?.(v);
+    };
+    const handleCropPaddingChange = (v: number) => {
+      setLocalCropPaddingPx(v);
+      setCropPaddingPx?.(v);
+    };
+    const handleCropFocusChange = (v: string) => {
+      setLocalCropFocusMode(v);
+      setCropFocusMode?.(v);
+    };
+    const handleCropModelChange = (v: string) => {
+      setLocalCropModel(v);
+      setCropModel?.(v);
+    };
+    const handleBubbleSensitivityChange = (v: number) => {
+      setLocalBubbleSensitivity(v);
+      setBubbleSensitivity?.(v);
+    };
+    const handleBubbleDilationChange = (v: number) => {
+      setLocalBubbleDilation(v);
+      setBubbleDilation?.(v);
+    };
+    const handleBubbleEraseChange = (v: string) => {
+      setLocalBubbleEraseMethod(v);
+      setBubbleEraseMethod?.(v);
+    };
+    const handleBubbleDetectionChange = (v: string) => {
+      setLocalBubbleDetectionStyle(v);
+      setBubbleDetectionStyle?.(v);
+    };
 
     const [presets, setPresets] = React.useState<WorkspacePreset[]>(() => {
       try {
         const stored = localStorage.getItem("ai_comic_presets");
         if (stored) return JSON.parse(stored);
-      } catch { /* empty */ }
+      } catch {
+        /* empty */
+      }
       return [
-        { name: "Action Comic", voiceActor: DEFAULT_TTS_VOICES[0]?.code || "en-US-GuyNeural", musicTheme: MUSIC_THEMES_CATALOG[0]?.id || "orchestral_battle", aspectRatio: "16:9", frameRate: 30, activeTheme: "cyberpunk", audioReactiveShake: true, shakeIntensity: "high", videoFormat: "mp4", backgroundStyle: "black", subtitlesStyle: "burn-in", cropSensitivity: DEFAULT_AUTOCROP_SETTINGS.sensitivity, cropPaddingPx: DEFAULT_AUTOCROP_SETTINGS.padding, cropFocusMode: "standard", cropModel: DEFAULT_AUTOCROP_SETTINGS.cropModel, bubbleSensitivity: 50, bubbleDilation: 5, bubbleEraseMethod: "telea", bubbleDetectionStyle: "hybrid" },
-        { name: "B&W Manga", voiceActor: DEFAULT_TTS_VOICES[1]?.code || "en-US-JennyNeural", musicTheme: MUSIC_THEMES_CATALOG[1]?.id || "mysterious_ambience", aspectRatio: "9:16", frameRate: 24, activeTheme: "obsidian", audioReactiveShake: false, shakeIntensity: "medium", videoFormat: "mp4", backgroundStyle: "white", subtitlesStyle: "none", cropSensitivity: DEFAULT_AUTOCROP_SETTINGS.sensitivity, cropPaddingPx: DEFAULT_AUTOCROP_SETTINGS.padding, cropFocusMode: "face", cropModel: DEFAULT_AUTOCROP_SETTINGS.cropModel, bubbleSensitivity: 60, bubbleDilation: 3, bubbleEraseMethod: "ns", bubbleDetectionStyle: "yolo" },
+        {
+          name: "Action Comic",
+          voiceActor: DEFAULT_TTS_VOICES[0]?.code || "en-US-GuyNeural",
+          musicTheme: MUSIC_THEMES_CATALOG[0]?.id || "orchestral_battle",
+          aspectRatio: "16:9",
+          frameRate: 30,
+          activeTheme: "cyberpunk",
+          audioReactiveShake: true,
+          shakeIntensity: "high",
+          videoFormat: "mp4",
+          backgroundStyle: "black",
+          subtitlesStyle: "burn-in",
+          cropSensitivity: DEFAULT_AUTOCROP_SETTINGS.sensitivity,
+          cropPaddingPx: DEFAULT_AUTOCROP_SETTINGS.padding,
+          cropFocusMode: "standard",
+          cropModel: DEFAULT_AUTOCROP_SETTINGS.cropModel,
+          bubbleSensitivity: 50,
+          bubbleDilation: 5,
+          bubbleEraseMethod: "telea",
+          bubbleDetectionStyle: "hybrid",
+        },
+        {
+          name: "B&W Manga",
+          voiceActor: DEFAULT_TTS_VOICES[1]?.code || "en-US-JennyNeural",
+          musicTheme: MUSIC_THEMES_CATALOG[1]?.id || "mysterious_ambience",
+          aspectRatio: "9:16",
+          frameRate: 24,
+          activeTheme: "obsidian",
+          audioReactiveShake: false,
+          shakeIntensity: "medium",
+          videoFormat: "mp4",
+          backgroundStyle: "white",
+          subtitlesStyle: "none",
+          cropSensitivity: DEFAULT_AUTOCROP_SETTINGS.sensitivity,
+          cropPaddingPx: DEFAULT_AUTOCROP_SETTINGS.padding,
+          cropFocusMode: "face",
+          cropModel: DEFAULT_AUTOCROP_SETTINGS.cropModel,
+          bubbleSensitivity: 60,
+          bubbleDilation: 3,
+          bubbleEraseMethod: "ns",
+          bubbleDetectionStyle: "yolo",
+        },
       ];
     });
 
     const handleSavePreset = (e: React.FormEvent) => {
       e.preventDefault();
       if (!presetName.trim()) return;
-      const newPreset: WorkspacePreset = { name: presetName.trim(), voiceActor, musicTheme, aspectRatio, frameRate, activeTheme, audioReactiveShake, shakeIntensity, videoFormat, backgroundStyle, subtitlesStyle, cropSensitivity: localCropSensitivity, cropPaddingPx: localCropPaddingPx, cropFocusMode: localCropFocusMode, cropModel: localCropModel, bubbleSensitivity: localBubbleSensitivity, bubbleDilation: localBubbleDilation, bubbleEraseMethod: localBubbleEraseMethod, bubbleDetectionStyle: localBubbleDetectionStyle };
-      const updated = [...presets.filter((p) => p.name !== newPreset.name), newPreset];
+      const newPreset: WorkspacePreset = {
+        name: presetName.trim(),
+        voiceActor,
+        musicTheme,
+        aspectRatio,
+        frameRate,
+        activeTheme,
+        audioReactiveShake,
+        shakeIntensity,
+        videoFormat,
+        backgroundStyle,
+        subtitlesStyle,
+        cropSensitivity: localCropSensitivity,
+        cropPaddingPx: localCropPaddingPx,
+        cropFocusMode: localCropFocusMode,
+        cropModel: localCropModel,
+        bubbleSensitivity: localBubbleSensitivity,
+        bubbleDilation: localBubbleDilation,
+        bubbleEraseMethod: localBubbleEraseMethod,
+        bubbleDetectionStyle: localBubbleDetectionStyle,
+      };
+      const updated = [
+        ...presets.filter((p) => p.name !== newPreset.name),
+        newPreset,
+      ];
       setPresets(updated);
       localStorage.setItem("ai_comic_presets", JSON.stringify(updated));
       setPresetName("");
@@ -335,20 +470,32 @@ const VideoPreviewAdvancedSettings = React.memo(
     const handleLoadPreset = (name: string) => {
       const p = presets.find((x) => x.name === name);
       if (!p) return;
-      setVoiceActor(p.voiceActor); setMusicTheme(p.musicTheme); setAspectRatio(p.aspectRatio); setFrameRate(p.frameRate); setActiveTheme(p.activeTheme);
-      if (p.audioReactiveShake !== undefined) setAudioReactiveShake(p.audioReactiveShake);
+      setVoiceActor(p.voiceActor);
+      setMusicTheme(p.musicTheme);
+      setAspectRatio(p.aspectRatio);
+      setFrameRate(p.frameRate);
+      setActiveTheme(p.activeTheme);
+      if (p.audioReactiveShake !== undefined)
+        setAudioReactiveShake(p.audioReactiveShake);
       if (p.shakeIntensity !== undefined) setShakeIntensity(p.shakeIntensity);
       if (p.videoFormat !== undefined) setVideoFormat(p.videoFormat);
-      if (p.backgroundStyle !== undefined) setBackgroundStyle(p.backgroundStyle);
+      if (p.backgroundStyle !== undefined)
+        setBackgroundStyle(p.backgroundStyle);
       if (p.subtitlesStyle !== undefined) setSubtitlesStyle(p.subtitlesStyle);
-      if (p.cropSensitivity !== undefined) handleCropSensitivityChange(p.cropSensitivity);
-      if (p.cropPaddingPx !== undefined) handleCropPaddingChange(p.cropPaddingPx);
+      if (p.cropSensitivity !== undefined)
+        handleCropSensitivityChange(p.cropSensitivity);
+      if (p.cropPaddingPx !== undefined)
+        handleCropPaddingChange(p.cropPaddingPx);
       if (p.cropFocusMode !== undefined) handleCropFocusChange(p.cropFocusMode);
       if (p.cropModel !== undefined) handleCropModelChange(p.cropModel);
-      if (p.bubbleSensitivity !== undefined) handleBubbleSensitivityChange(p.bubbleSensitivity);
-      if (p.bubbleDilation !== undefined) handleBubbleDilationChange(p.bubbleDilation);
-      if (p.bubbleEraseMethod !== undefined) handleBubbleEraseChange(p.bubbleEraseMethod);
-      if (p.bubbleDetectionStyle !== undefined) handleBubbleDetectionChange(p.bubbleDetectionStyle);
+      if (p.bubbleSensitivity !== undefined)
+        handleBubbleSensitivityChange(p.bubbleSensitivity);
+      if (p.bubbleDilation !== undefined)
+        handleBubbleDilationChange(p.bubbleDilation);
+      if (p.bubbleEraseMethod !== undefined)
+        handleBubbleEraseChange(p.bubbleEraseMethod);
+      if (p.bubbleDetectionStyle !== undefined)
+        handleBubbleDetectionChange(p.bubbleDetectionStyle);
       addNotification?.(`Loaded "${name}"`, "info");
     };
 
@@ -361,11 +508,38 @@ const VideoPreviewAdvancedSettings = React.memo(
 
     const handleCopyShareLink = () => {
       try {
-        const hash = btoa(JSON.stringify({ url: targetUrl, voice: voiceActor, music: musicTheme, aspectRatio, fps: frameRate, model: selectedModel, source: selectedSource, audioReactiveShake, shakeIntensity, videoFormat, backgroundStyle, subtitlesStyle, cropSensitivity: localCropSensitivity, cropPaddingPx: localCropPaddingPx, cropFocusMode: localCropFocusMode, cropModel: localCropModel, bubbleSensitivity: localBubbleSensitivity, bubbleDilation: localBubbleDilation, bubbleEraseMethod: localBubbleEraseMethod, bubbleDetectionStyle: localBubbleDetectionStyle }));
+        const hash = btoa(
+          JSON.stringify({
+            url: targetUrl,
+            voice: voiceActor,
+            music: musicTheme,
+            aspectRatio,
+            fps: frameRate,
+            model: selectedModel,
+            source: selectedSource,
+            audioReactiveShake,
+            shakeIntensity,
+            videoFormat,
+            backgroundStyle,
+            subtitlesStyle,
+            cropSensitivity: localCropSensitivity,
+            cropPaddingPx: localCropPaddingPx,
+            cropFocusMode: localCropFocusMode,
+            cropModel: localCropModel,
+            bubbleSensitivity: localBubbleSensitivity,
+            bubbleDilation: localBubbleDilation,
+            bubbleEraseMethod: localBubbleEraseMethod,
+            bubbleDetectionStyle: localBubbleDetectionStyle,
+          })
+        );
         const shareUrl = `${window.location.origin}${window.location.pathname}?state=${hash}`;
         navigator.clipboard.writeText(shareUrl).catch(() => {
-          const t = document.createElement("textarea"); t.value = shareUrl;
-          document.body.appendChild(t); t.select(); document.execCommand("copy"); document.body.removeChild(t);
+          const t = document.createElement("textarea");
+          t.value = shareUrl;
+          document.body.appendChild(t);
+          t.select();
+          document.execCommand("copy");
+          document.body.removeChild(t);
         });
         setCopied(true);
         setTimeout(() => setCopied(false), 2500);
@@ -381,7 +555,10 @@ const VideoPreviewAdvancedSettings = React.memo(
       { id: "themes" as const, label: "Themes & Presets", icon: Palette },
     ];
 
-    const cardStyle: React.CSSProperties = { backgroundColor: "#0a0a12", borderColor: "#1e1e30" };
+    const cardStyle: React.CSSProperties = {
+      backgroundColor: "#0a0a12",
+      borderColor: "#1e1e30",
+    };
 
     return (
       <div className="space-y-4">
@@ -435,7 +612,8 @@ const VideoPreviewAdvancedSettings = React.memo(
                       { id: "9:16" as const, label: "9:16", sub: "Portrait" },
                       { id: "16:9" as const, label: "16:9", sub: "Landscape" },
                     ].map(({ id, label, sub }) => {
-                      const isActive = aspectRatio === id || (!aspectRatio && id === "auto");
+                      const isActive =
+                        aspectRatio === id || (!aspectRatio && id === "auto");
                       return (
                         <button
                           key={id}
@@ -446,8 +624,15 @@ const VideoPreviewAdvancedSettings = React.memo(
                             backgroundColor: isActive ? "#7c3aed18" : "#0d0d14",
                           }}
                         >
-                          <div className="text-xs font-bold font-mono" style={{ color: isActive ? "#c4b5fd" : "#6b7280" }}>{label}</div>
-                          <div className="text-[10px] text-neutral-500">{sub}</div>
+                          <div
+                            className="text-xs font-bold font-mono"
+                            style={{ color: isActive ? "#c4b5fd" : "#6b7280" }}
+                          >
+                            {label}
+                          </div>
+                          <div className="text-[10px] text-neutral-500">
+                            {sub}
+                          </div>
                         </button>
                       );
                     })}
@@ -483,12 +668,23 @@ const VideoPreviewAdvancedSettings = React.memo(
                         onClick={() => setVideoFormat(id as any)}
                         className="py-2.5 px-2 rounded-xl border text-center transition-all duration-150 space-y-0.5 cursor-pointer"
                         style={{
-                          borderColor: videoFormat === id ? "#7c3aed" : "#1e1e30",
-                          backgroundColor: videoFormat === id ? "#7c3aed18" : "#0d0d14",
+                          borderColor:
+                            videoFormat === id ? "#7c3aed" : "#1e1e30",
+                          backgroundColor:
+                            videoFormat === id ? "#7c3aed18" : "#0d0d14",
                         }}
                       >
-                        <div className="text-xs font-bold font-mono" style={{ color: videoFormat === id ? "#c4b5fd" : "#6b7280" }}>{label}</div>
-                        <div className="text-[10px] text-neutral-500">{sub}</div>
+                        <div
+                          className="text-xs font-bold font-mono"
+                          style={{
+                            color: videoFormat === id ? "#c4b5fd" : "#6b7280",
+                          }}
+                        >
+                          {label}
+                        </div>
+                        <div className="text-[10px] text-neutral-500">
+                          {sub}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -515,20 +711,27 @@ const VideoPreviewAdvancedSettings = React.memo(
                         <Zap className="h-3.5 w-3.5 text-yellow-500" />
                         Audio-Reactive Camera Shake
                       </div>
-                      <div className="text-[10px] text-neutral-500 mt-0.5 ml-5">Syncs shake to audio energy peaks</div>
+                      <div className="text-[10px] text-neutral-500 mt-0.5 ml-5">
+                        Syncs shake to audio energy peaks
+                      </div>
                     </div>
-                    <Toggle value={audioReactiveShake} onChange={setAudioReactiveShake} />
+                    <Toggle
+                      value={audioReactiveShake}
+                      onChange={setAudioReactiveShake}
+                    />
                   </div>
                   {audioReactiveShake && (
                     <div className="grid grid-cols-4 gap-1.5 pt-1">
-                      {(["low", "medium", "high", "extreme"] as const).map((intensity) => (
-                        <OptionChip
-                          key={intensity}
-                          label={intensity}
-                          isActive={shakeIntensity === intensity}
-                          onClick={() => setShakeIntensity(intensity)}
-                        />
-                      ))}
+                      {(["low", "medium", "high", "extreme"] as const).map(
+                        (intensity) => (
+                          <OptionChip
+                            key={intensity}
+                            label={intensity}
+                            isActive={shakeIntensity === intensity}
+                            onClick={() => setShakeIntensity(intensity)}
+                          />
+                        )
+                      )}
                     </div>
                   )}
                 </div>
@@ -543,20 +746,40 @@ const VideoPreviewAdvancedSettings = React.memo(
                     {[
                       { id: "black", label: "⬛ Black", sub: "Cinema bars" },
                       { id: "white", label: "⬜ White", sub: "Manga style" },
-                      { id: "transparent", label: "◻️ Clear", sub: "Alpha channel" },
-                      { id: "blurred", label: "🌫️ Blurred", sub: "Extend fill" },
+                      {
+                        id: "transparent",
+                        label: "◻️ Clear",
+                        sub: "Alpha channel",
+                      },
+                      {
+                        id: "blurred",
+                        label: "🌫️ Blurred",
+                        sub: "Extend fill",
+                      },
                     ].map(({ id, label, sub }) => (
                       <button
                         key={id}
                         onClick={() => setBackgroundStyle(id as any)}
                         className="py-2 px-3 rounded-xl border text-left transition-all duration-150 cursor-pointer"
                         style={{
-                          borderColor: backgroundStyle === id ? "#6366f1" : "#1e1e30",
-                          backgroundColor: backgroundStyle === id ? "#6366f118" : "#0d0d14",
+                          borderColor:
+                            backgroundStyle === id ? "#6366f1" : "#1e1e30",
+                          backgroundColor:
+                            backgroundStyle === id ? "#6366f118" : "#0d0d14",
                         }}
                       >
-                        <div className="text-xs font-semibold" style={{ color: backgroundStyle === id ? "#a5b4fc" : "#6b7280" }}>{label}</div>
-                        <div className="text-[10px] text-neutral-500">{sub}</div>
+                        <div
+                          className="text-xs font-semibold"
+                          style={{
+                            color:
+                              backgroundStyle === id ? "#a5b4fc" : "#6b7280",
+                          }}
+                        >
+                          {label}
+                        </div>
+                        <div className="text-[10px] text-neutral-500">
+                          {sub}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -649,7 +872,10 @@ const VideoPreviewAdvancedSettings = React.memo(
                     <Sparkle className="h-3.5 w-3.5 text-emerald-400" />
                     AI Vision Backend
                   </label>
-                  <AIModelSelector value={localCropModel} onChange={handleCropModelChange} />
+                  <AIModelSelector
+                    value={localCropModel}
+                    onChange={handleCropModelChange}
+                  />
                 </div>
               </div>
             </div>
@@ -717,23 +943,59 @@ const VideoPreviewAdvancedSettings = React.memo(
                       onClick={() => handleBubbleEraseChange("telea")}
                       className="py-2.5 px-3 rounded-xl border text-center transition-all cursor-pointer"
                       style={{
-                        borderColor: localBubbleEraseMethod === "telea" ? "#f59e0b" : "#1e1e30",
-                        backgroundColor: localBubbleEraseMethod === "telea" ? "#f59e0b18" : "#0d0d14",
+                        borderColor:
+                          localBubbleEraseMethod === "telea"
+                            ? "#f59e0b"
+                            : "#1e1e30",
+                        backgroundColor:
+                          localBubbleEraseMethod === "telea"
+                            ? "#f59e0b18"
+                            : "#0d0d14",
                       }}
                     >
-                      <div className="text-xs font-bold font-mono" style={{ color: localBubbleEraseMethod === "telea" ? "#fcd34d" : "#6b7280" }}>FMM (Telea)</div>
-                      <div className="text-[10px] text-neutral-500">Fast marching</div>
+                      <div
+                        className="text-xs font-bold font-mono"
+                        style={{
+                          color:
+                            localBubbleEraseMethod === "telea"
+                              ? "#fcd34d"
+                              : "#6b7280",
+                        }}
+                      >
+                        FMM (Telea)
+                      </div>
+                      <div className="text-[10px] text-neutral-500">
+                        Fast marching
+                      </div>
                     </button>
                     <button
                       onClick={() => handleBubbleEraseChange("ns")}
                       className="py-2.5 px-3 rounded-xl border text-center transition-all cursor-pointer"
                       style={{
-                        borderColor: localBubbleEraseMethod === "ns" ? "#f59e0b" : "#1e1e30",
-                        backgroundColor: localBubbleEraseMethod === "ns" ? "#f59e0b18" : "#0d0d14",
+                        borderColor:
+                          localBubbleEraseMethod === "ns"
+                            ? "#f59e0b"
+                            : "#1e1e30",
+                        backgroundColor:
+                          localBubbleEraseMethod === "ns"
+                            ? "#f59e0b18"
+                            : "#0d0d14",
                       }}
                     >
-                      <div className="text-xs font-bold font-mono" style={{ color: localBubbleEraseMethod === "ns" ? "#fcd34d" : "#6b7280" }}>Navier-Stokes</div>
-                      <div className="text-[10px] text-neutral-500">Fluid diffusion</div>
+                      <div
+                        className="text-xs font-bold font-mono"
+                        style={{
+                          color:
+                            localBubbleEraseMethod === "ns"
+                              ? "#fcd34d"
+                              : "#6b7280",
+                        }}
+                      >
+                        Navier-Stokes
+                      </div>
+                      <div className="text-[10px] text-neutral-500">
+                        Fluid diffusion
+                      </div>
                     </button>
                   </div>
                 </div>
@@ -757,10 +1019,30 @@ const VideoPreviewAdvancedSettings = React.memo(
 
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { id: "obsidian", name: "Obsidian", color: "#3b82f6", desc: "Dark purple" },
-                  { id: "cyberpunk", name: "Cyberpunk", color: "#06b6d4", desc: "Neon cyan" },
-                  { id: "slate", name: "Slate", color: "#94a3b8", desc: "Cool grey" },
-                  { id: "indigo", name: "Indigo", color: "#6366f1", desc: "Deep indigo" },
+                  {
+                    id: "obsidian",
+                    name: "Obsidian",
+                    color: "#3b82f6",
+                    desc: "Dark purple",
+                  },
+                  {
+                    id: "cyberpunk",
+                    name: "Cyberpunk",
+                    color: "#06b6d4",
+                    desc: "Neon cyan",
+                  },
+                  {
+                    id: "slate",
+                    name: "Slate",
+                    color: "#94a3b8",
+                    desc: "Cool grey",
+                  },
+                  {
+                    id: "indigo",
+                    name: "Indigo",
+                    color: "#6366f1",
+                    desc: "Deep indigo",
+                  },
                 ].map((theme) => {
                   const isActive = activeTheme === theme.id;
                   return (
@@ -770,21 +1052,36 @@ const VideoPreviewAdvancedSettings = React.memo(
                       className="flex items-center gap-3 p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer"
                       style={{
                         borderColor: isActive ? theme.color : "#1e1e30",
-                        backgroundColor: isActive ? `${theme.color}18` : "#0d0d14",
+                        backgroundColor: isActive
+                          ? `${theme.color}18`
+                          : "#0d0d14",
                       }}
                     >
                       <span
                         className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
                         style={{ backgroundColor: `${theme.color}33` }}
                       >
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.color }} />
+                        <span
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: theme.color }}
+                        />
                       </span>
                       <div>
-                        <div className="text-xs font-bold" style={{ color: isActive ? "#f1f5f9" : "#9ca3af" }}>{theme.name}</div>
-                        <div className="text-[10px] text-neutral-500">{theme.desc}</div>
+                        <div
+                          className="text-xs font-bold"
+                          style={{ color: isActive ? "#f1f5f9" : "#9ca3af" }}
+                        >
+                          {theme.name}
+                        </div>
+                        <div className="text-[10px] text-neutral-500">
+                          {theme.desc}
+                        </div>
                       </div>
                       {isActive && (
-                        <div className="ml-auto w-4 h-4 rounded-full flex items-center justify-center" style={{ backgroundColor: theme.color }}>
+                        <div
+                          className="ml-auto w-4 h-4 rounded-full flex items-center justify-center"
+                          style={{ backgroundColor: theme.color }}
+                        >
                           <Check className="h-2.5 w-2.5 text-white" />
                         </div>
                       )}
@@ -806,14 +1103,25 @@ const VideoPreviewAdvancedSettings = React.memo(
 
               {/* Preset list */}
               {presets.length > 0 && (
-                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-0.5" style={{ scrollbarWidth: "thin", scrollbarColor: "#4b2d7e transparent" }}>
+                <div
+                  className="space-y-1.5 max-h-36 overflow-y-auto pr-0.5"
+                  style={{
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "#4b2d7e transparent",
+                  }}
+                >
                   {presets.map((p) => (
                     <div
                       key={p.name}
                       className="flex items-center justify-between px-3 py-2 rounded-xl border"
-                      style={{ borderColor: "#1e1e30", backgroundColor: "#0d0d14" }}
+                      style={{
+                        borderColor: "#1e1e30",
+                        backgroundColor: "#0d0d14",
+                      }}
                     >
-                      <span className="text-[11px] font-semibold text-neutral-300 font-mono truncate">{p.name}</span>
+                      <span className="text-[11px] font-semibold text-neutral-300 font-mono truncate">
+                        {p.name}
+                      </span>
                       <div className="flex gap-1.5 flex-shrink-0 ml-2">
                         <button
                           onClick={() => handleLoadPreset(p.name)}
@@ -835,7 +1143,9 @@ const VideoPreviewAdvancedSettings = React.memo(
 
               {/* Save new preset */}
               <form onSubmit={handleSavePreset} className="space-y-1.5">
-                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Save Current Config</label>
+                <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                  Save Current Config
+                </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -864,13 +1174,20 @@ const VideoPreviewAdvancedSettings = React.memo(
                     background: copied
                       ? "linear-gradient(135deg, #16a34a, #15803d)"
                       : "linear-gradient(135deg, #7c3aed, #4f46e5)",
-                    boxShadow: copied ? "0 0 16px #16a34a44" : "0 0 16px #7c3aed44",
+                    boxShadow: copied
+                      ? "0 0 16px #16a34a44"
+                      : "0 0 16px #7c3aed44",
                   }}
                 >
                   {copied ? (
-                    <><Check className="h-3.5 w-3.5" /> Copied!</>
+                    <>
+                      <Check className="h-3.5 w-3.5" /> Copied!
+                    </>
                   ) : (
-                    <><Copy className="h-3.5 w-3.5" /> Copy Shareable Session Link</>
+                    <>
+                      <Copy className="h-3.5 w-3.5" /> Copy Shareable Session
+                      Link
+                    </>
                   )}
                 </button>
               </div>

@@ -48,7 +48,9 @@ const SidebarItem: React.FC<{
         >
           <Icon
             className={`w-[18px] h-[18px] transition-colors duration-200 ${
-              isActive ? "text-white" : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
+              isActive
+                ? "text-white"
+                : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
             }`}
           />
         </div>
@@ -114,19 +116,29 @@ export const MiniSidebar: React.FC<MiniSidebarProps> = ({
         ))}
 
         <div className="w-full flex flex-col items-center pb-1">
-          <div className="w-full flex flex-col items-center" style={{ marginTop: "0.6rem", marginBottom: "0.4rem" }}>
+          <div
+            className="w-full flex flex-col items-center"
+            style={{ marginTop: "0.6rem", marginBottom: "0.4rem" }}
+          >
             <div className="w-6 h-[1px] bg-[#2F2F2F] rounded-full mb-1.5" />
             <span className="text-[8.5px] font-mono font-black uppercase tracking-[0.2em] text-[#9CA3AF] select-none text-center w-full px-1">
               Global
             </span>
           </div>
           {[
-            { label: "Main Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+            {
+              label: "Main Dashboard",
+              icon: LayoutDashboard,
+              path: "/dashboard",
+            },
             { label: "Projects Gallery", icon: FolderOpen, path: "/projects" },
           ].map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.path} className="relative group w-full flex justify-center py-0.5">
+              <div
+                key={item.path}
+                className="relative group w-full flex justify-center py-0.5"
+              >
                 <button
                   onClick={() => navigateTo?.(item.path)}
                   aria-label={item.label}

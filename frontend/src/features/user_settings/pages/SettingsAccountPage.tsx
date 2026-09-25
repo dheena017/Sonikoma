@@ -165,7 +165,8 @@ export default function SettingsAccountPage({
               </span>
             </h1>
             <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed">
-              Manage your personal profile, security credentials, and active studio sessions.
+              Manage your personal profile, security credentials, and active
+              studio sessions.
             </p>
           </div>
 
@@ -177,350 +178,358 @@ export default function SettingsAccountPage({
           </button>
         </div>
 
-      {/* Content Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Profile Card */}
-        <div className="lg:col-span-2 space-y-8">
-          <div className="bg-[#0b0b0f] border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5">
-              <User className="w-32 h-32 text-[#3B82F6]" />
-            </div>
+        {/* Content Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Profile Card */}
+          <div className="lg:col-span-2 space-y-8">
+            <div className="bg-[#0b0b0f] border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <User className="w-32 h-32 text-[#3B82F6]" />
+              </div>
 
-            <div className="flex items-center gap-3 border-b border-neutral-800 pb-4">
-              <UserCheck className="w-5 h-5 text-[#3B82F6]" />
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                Personal Details
-              </h2>
-            </div>
+              <div className="flex items-center gap-3 border-b border-neutral-800 pb-4">
+                <UserCheck className="w-5 h-5 text-[#3B82F6]" />
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                  Personal Details
+                </h2>
+              </div>
 
-            <form noValidate onSubmit={handleSaveProfile} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <form
+                noValidate
+                onSubmit={handleSaveProfile}
+                className="space-y-6"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="e.g. John Doe"
+                      className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 transition-all font-semibold"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
+                      Email Address (Read Only)
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600" />
+                      <input
+                        type="email"
+                        value={user?.email || ""}
+                        disabled
+                        className="w-full bg-[#050508]/50 border border-neutral-850/50 rounded-xl pl-11 pr-4 py-3 text-sm text-neutral-500 font-mono cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
+                      Creator Role
+                    </label>
+                    <select
+                      value={role}
+                      onChange={(e) => setRole(e.target.value)}
+                      className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 transition-all font-semibold"
+                    >
+                      <option value="creator">Creator</option>
+                      <option value="writer">Writer / Author</option>
+                      <option value="illustrator">Illustrator / Artist</option>
+                      <option value="producer">Producer</option>
+                      <option value="admin">Administrator</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
+                      Avatar Image URL
+                    </label>
+                    <input
+                      type="text"
+                      value={avatarUrl}
+                      onChange={(e) => setAvatarUrl(e.target.value)}
+                      placeholder="https://example.com/avatar.jpg"
+                      className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 transition-all font-mono text-xs"
+                    />
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
-                    Full Name
+                    Bio / Synopsis
                   </label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. John Doe"
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Tell us about yourself or your webtoon series..."
+                    rows={4}
                     className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 transition-all font-semibold"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
-                    Email Address (Read Only)
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-neutral-400 uppercase tracking-wider flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5 text-neutral-500" /> Default
+                      Language
+                    </label>
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 transition-all font-semibold"
+                    >
+                      <option value="en">English (US)</option>
+                      <option value="ko">Korean (한국어)</option>
+                      <option value="ja">Japanese (日本語)</option>
+                      <option value="zh">Chinese (中文)</option>
+                      <option value="fr">French (Français)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-6">
                     <input
-                      type="email"
-                      value={user?.email || ""}
-                      disabled
-                      className="w-full bg-[#050508]/50 border border-neutral-850/50 rounded-xl pl-11 pr-4 py-3 text-sm text-neutral-500 font-mono cursor-not-allowed"
+                      type="checkbox"
+                      id="newsletter"
+                      checked={newsletter}
+                      onChange={(e) => setNewsletter(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#050508] border-neutral-850 text-[#3B82F6] focus:ring-neutral-700"
                     />
+                    <label
+                      htmlFor="newsletter"
+                      className="text-xs font-bold text-neutral-300 cursor-pointer select-none"
+                    >
+                      Subscribe to platform updates & newsletter
+                    </label>
                   </div>
                 </div>
+
+                <div className="flex justify-end pt-4">
+                  <button
+                    type="submit"
+                    disabled={profileLoading}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                  >
+                    {profileLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" /> Save Profile
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Right Column: Security / Password Card */}
+          <div className="space-y-8">
+            <div className="bg-[#0b0b0f] border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <Shield className="w-32 h-32 text-indigo-500" />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="flex items-center gap-3 border-b border-neutral-800 pb-4">
+                <Key className="w-5 h-5 text-indigo-400" />
+                <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                  Update Password
+                </h2>
+              </div>
+
+              <form
+                noValidate
+                onSubmit={handleChangePassword}
+                className="space-y-6"
+              >
                 <div className="space-y-2">
                   <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
-                    Creator Role
+                    Current Password
                   </label>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 transition-all font-semibold"
-                  >
-                    <option value="creator">Creator</option>
-                    <option value="writer">Writer / Author</option>
-                    <option value="illustrator">Illustrator / Artist</option>
-                    <option value="producer">Producer</option>
-                    <option value="admin">Administrator</option>
-                  </select>
+                  <div className="relative">
+                    <input
+                      type={showCurrent ? "text" : "password"}
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 pr-10 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCurrent(!showCurrent)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300"
+                    >
+                      {showCurrent ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
-                    Avatar Image URL
+                    New Password
                   </label>
-                  <input
-                    type="text"
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    placeholder="https://example.com/avatar.jpg"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 transition-all font-mono text-xs"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNew ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      placeholder="Min. 8 characters"
+                      className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 pr-10 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNew(!showNew)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300"
+                    >
+                      {showNew ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
-                  Bio / Synopsis
-                </label>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell us about yourself or your webtoon series..."
-                  rows={4}
-                  className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 transition-all font-semibold"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-neutral-400 uppercase tracking-wider flex items-center gap-2">
-                    <Globe className="w-3.5 h-3.5 text-neutral-500" /> Default
-                    Language
+                  <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
+                    Confirm New Password
                   </label>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-neutral-600 transition-all font-semibold"
-                  >
-                    <option value="en">English (US)</option>
-                    <option value="ko">Korean (한국어)</option>
-                    <option value="ja">Japanese (日本語)</option>
-                    <option value="zh">Chinese (中文)</option>
-                    <option value="fr">French (Français)</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-3 pt-6">
                   <input
-                    type="checkbox"
-                    id="newsletter"
-                    checked={newsletter}
-                    onChange={(e) => setNewsletter(e.target.checked)}
-                    className="w-4 h-4 rounded bg-[#050508] border-neutral-850 text-[#3B82F6] focus:ring-neutral-700"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
                   />
-                  <label
-                    htmlFor="newsletter"
-                    className="text-xs font-bold text-neutral-300 cursor-pointer select-none"
-                  >
-                    Subscribe to platform updates & newsletter
-                  </label>
                 </div>
-              </div>
 
-              <div className="flex justify-end pt-4">
-                <button
-                  type="submit"
-                  disabled={profileLoading}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
-                >
-                  {profileLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" /> Save Profile
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+                <div className="flex justify-end pt-4">
+                  <button
+                    type="submit"
+                    disabled={passwordLoading}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                  >
+                    {passwordLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Updating...
+                      </>
+                    ) : (
+                      <>
+                        <Key className="w-4 h-4" /> Update Password
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
 
-        {/* Right Column: Security / Password Card */}
-        <div className="space-y-8">
-          <div className="bg-[#0b0b0f] border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5">
-              <Shield className="w-32 h-32 text-indigo-500" />
-            </div>
+        {/* Bottom Section: Active Sessions Table */}
+        <div className="bg-[#0b0b0f] border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Smartphone className="w-32 h-32 text-teal-500" />
+          </div>
 
-            <div className="flex items-center gap-3 border-b border-neutral-800 pb-4">
-              <Key className="w-5 h-5 text-indigo-400" />
+          <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+            <div className="flex items-center gap-3">
+              <Smartphone className="w-5 h-5 text-teal-400" />
               <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                Update Password
+                Active Browser Sessions
               </h2>
             </div>
 
-            <form noValidate onSubmit={handleChangePassword} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
-                  Current Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showCurrent ? "text" : "password"}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    required
-                    placeholder="••••••••"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 pr-10 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowCurrent(!showCurrent)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300"
-                  >
-                    {showCurrent ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
-                  New Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showNew ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    placeholder="Min. 8 characters"
-                    className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 pr-10 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowNew(!showNew)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-300"
-                  >
-                    {showNew ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-black text-neutral-400 uppercase tracking-wider">
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className="w-full bg-[#050508] border border-neutral-850 rounded-xl px-4 py-3 text-sm text-neutral-200 focus:outline-none focus:border-[#2F2F2F] focus:ring-1 focus:ring-indigo-500/20 transition-all font-mono"
-                />
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <button
-                  type="submit"
-                  disabled={passwordLoading}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50"
-                >
-                  {passwordLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" /> Updating...
-                    </>
-                  ) : (
-                    <>
-                      <Key className="w-4 h-4" /> Update Password
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Section: Active Sessions Table */}
-      <div className="bg-[#0b0b0f] border border-neutral-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-8 opacity-5">
-          <Smartphone className="w-32 h-32 text-teal-500" />
-        </div>
-
-        <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
-          <div className="flex items-center gap-3">
-            <Smartphone className="w-5 h-5 text-teal-400" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-              Active Browser Sessions
-            </h2>
-          </div>
-
-          <span className="text-[10px] px-3 py-1 rounded-full bg-teal-950/60 text-teal-300 border border-teal-800/50 font-mono font-bold">
-            {sessions.length} Session{sessions.length !== 1 ? "s" : ""} Active
-          </span>
-        </div>
-
-        {sessionsLoading ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-3 text-neutral-500">
-            <Loader2 className="w-6 h-6 animate-spin text-teal-400" />
-            <span className="text-xs font-semibold uppercase tracking-wider">
-              Retrieving sessions...
+            <span className="text-[10px] px-3 py-1 rounded-full bg-teal-950/60 text-teal-300 border border-teal-800/50 font-mono font-bold">
+              {sessions.length} Session{sessions.length !== 1 ? "s" : ""} Active
             </span>
           </div>
-        ) : sessions.length === 0 ? (
-          <div className="flex items-center gap-3 bg-neutral-900/30 border border-neutral-850 rounded-2xl p-6 text-neutral-400 text-xs">
-            <AlertCircle className="w-5 h-5 text-neutral-500" />
-            <span>
-              No other active sessions detected. Your credentials are secure.
-            </span>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-neutral-400">
-              <thead>
-                <tr className="border-b border-neutral-800/50 text-[10px] uppercase tracking-wider text-neutral-500 font-bold">
-                  <th className="py-4 px-4">Device / User Agent</th>
-                  <th className="py-4 px-4">IP Address</th>
-                  <th className="py-4 px-4">Last Active</th>
-                  <th className="py-4 px-4">Current Session</th>
-                  <th className="py-4 px-4 text-right">Revoke Access</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-900/50">
-                {sessions.map((sess) => {
-                  const isCurrent =
-                    sess.token_jti === user?.jti || sess.is_current === true;
-                  return (
-                    <tr
-                      key={sess.id}
-                      className="hover:bg-neutral-900/10 transition-colors"
-                    >
-                      <td className="py-4 px-4 font-semibold text-neutral-200">
-                        {sess.user_agent || "Unknown Browser / Client"}
-                      </td>
-                      <td className="py-4 px-4 font-mono text-xs text-neutral-400">
-                        {sess.ip_address || "127.0.0.1"}
-                      </td>
-                      <td className="py-4 px-4 text-xs font-medium text-neutral-400">
-                        {sess.last_active || "Just now"}
-                      </td>
-                      <td className="py-4 px-4 text-xs">
-                        {isCurrent ? (
-                          <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30">
-                            This Device
-                          </span>
-                        ) : (
-                          <span className="text-neutral-600">—</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        {!isCurrent && (
-                          <button
-                            onClick={() => handleTerminateSession(sess.id)}
-                            className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+
+          {sessionsLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-3 text-neutral-500">
+              <Loader2 className="w-6 h-6 animate-spin text-teal-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider">
+                Retrieving sessions...
+              </span>
+            </div>
+          ) : sessions.length === 0 ? (
+            <div className="flex items-center gap-3 bg-neutral-900/30 border border-neutral-850 rounded-2xl p-6 text-neutral-400 text-xs">
+              <AlertCircle className="w-5 h-5 text-neutral-500" />
+              <span>
+                No other active sessions detected. Your credentials are secure.
+              </span>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-neutral-400">
+                <thead>
+                  <tr className="border-b border-neutral-800/50 text-[10px] uppercase tracking-wider text-neutral-500 font-bold">
+                    <th className="py-4 px-4">Device / User Agent</th>
+                    <th className="py-4 px-4">IP Address</th>
+                    <th className="py-4 px-4">Last Active</th>
+                    <th className="py-4 px-4">Current Session</th>
+                    <th className="py-4 px-4 text-right">Revoke Access</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-900/50">
+                  {sessions.map((sess) => {
+                    const isCurrent =
+                      sess.token_jti === user?.jti || sess.is_current === true;
+                    return (
+                      <tr
+                        key={sess.id}
+                        className="hover:bg-neutral-900/10 transition-colors"
+                      >
+                        <td className="py-4 px-4 font-semibold text-neutral-200">
+                          {sess.user_agent || "Unknown Browser / Client"}
+                        </td>
+                        <td className="py-4 px-4 font-mono text-xs text-neutral-400">
+                          {sess.ip_address || "127.0.0.1"}
+                        </td>
+                        <td className="py-4 px-4 text-xs font-medium text-neutral-400">
+                          {sess.last_active || "Just now"}
+                        </td>
+                        <td className="py-4 px-4 text-xs">
+                          {isCurrent ? (
+                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/30">
+                              This Device
+                            </span>
+                          ) : (
+                            <span className="text-neutral-600">—</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-4 text-right">
+                          {!isCurrent && (
+                            <button
+                              onClick={() => handleTerminateSession(sess.id)}
+                              className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -128,9 +128,7 @@ const NotificationsPage = React.memo(
               <button
                 onClick={onToggleMute}
                 className={`btn-secondary flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono ${
-                  notificationsMuted
-                    ? "text-[#EF4444] border-[#EF4444]/30"
-                    : ""
+                  notificationsMuted ? "text-[#EF4444] border-[#EF4444]/30" : ""
                 }`}
                 title={notificationsMuted ? "Unmute sounds" : "Mute sounds"}
               >

@@ -6,10 +6,9 @@ export interface ImportedAssetsUploadZoneProps {
   isEmpty?: boolean;
 }
 
-export const ImportedAssetsUploadZone: React.FC<ImportedAssetsUploadZoneProps> = ({
-  onOpenBrowser,
-  isEmpty = false,
-}) => {
+export const ImportedAssetsUploadZone: React.FC<
+  ImportedAssetsUploadZoneProps
+> = ({ onOpenBrowser, isEmpty = false }) => {
   return (
     <div
       onClick={onOpenBrowser}

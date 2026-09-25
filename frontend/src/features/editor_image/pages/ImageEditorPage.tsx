@@ -133,7 +133,9 @@ const ImageEditorPage = React.memo(
       return (
         <ImageEditorCanvasContainer
           key={editorProps.imageUrl || undefined}
-          activeStoryboardPanel={activeStoryboardPanel as unknown as GeneratedPanel}
+          activeStoryboardPanel={
+            activeStoryboardPanel as unknown as GeneratedPanel
+          }
           handleAiCrop={editorProps.handleAiCrop}
           isAiDetecting={editorProps.isAiDetecting}
           editingImageIdx={editingImageIdx}
@@ -183,7 +185,7 @@ const ImageEditorPage = React.memo(
           redoHistoryLength={editorProps.redoHistory.length}
           handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
           isPipMode={false}
-          setIsPipMode={() => { } }
+          setIsPipMode={() => {}}
           isToolsPanelOpen={isToolsPanelOpen}
           setIsToolsPanelOpen={setIsToolsPanelOpen}
           setEditCropRight={appLogic.setEditCropRight}
@@ -318,7 +320,9 @@ const ImageEditorPage = React.memo(
           >
             <div
               className={`w-full lg:w-[min(420px,calc(100vw-80px))] h-full flex flex-col min-h-0 overflow-hidden transition-opacity duration-200 ${
-                !isToolsPanelOpen ? "pointer-events-none opacity-0 invisible" : "opacity-100"
+                !isToolsPanelOpen
+                  ? "pointer-events-none opacity-0 invisible"
+                  : "opacity-100"
               }`}
             >
               <ImageEditorToolsPanel
@@ -543,9 +547,11 @@ const ImageEditorPage = React.memo(
           </aside>
 
           {/* Center Canvas */}
-          <main className={`flex-1 h-full min-h-0 relative overflow-hidden bg-black/30 backdrop-blur-sm flex items-center justify-center ${
-            isToolsPanelOpen ? "hidden lg:flex" : "flex"
-          }`}>
+          <main
+            className={`flex-1 h-full min-h-0 relative overflow-hidden bg-black/30 backdrop-blur-sm flex items-center justify-center ${
+              isToolsPanelOpen ? "hidden lg:flex" : "flex"
+            }`}
+          >
             <div
               className="absolute inset-0 opacity-20 pointer-events-none"
               style={{
@@ -600,7 +606,10 @@ const ImageEditorPage = React.memo(
           <button
             type="button"
             onClick={() => editorProps.handleNextImage()}
-            disabled={editingImageIdx === null || editingImageIdx >= (appLogic.scrapedImages?.length || 1) - 1}
+            disabled={
+              editingImageIdx === null ||
+              editingImageIdx >= (appLogic.scrapedImages?.length || 1) - 1
+            }
             className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] text-neutral-400 hover:text-white disabled:opacity-35 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4 shrink-0" />
@@ -614,7 +623,9 @@ const ImageEditorPage = React.memo(
             className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 active:scale-95"
           >
             <Save className="w-4 h-4 shrink-0" />
-            <span className="leading-none mt-0.5">{appLogic.isSavingEdit ? "Saving" : "Save"}</span>
+            <span className="leading-none mt-0.5">
+              {appLogic.isSavingEdit ? "Saving" : "Save"}
+            </span>
           </button>
         </div>
       </ImageEditorLayout>

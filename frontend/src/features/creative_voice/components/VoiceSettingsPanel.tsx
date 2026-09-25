@@ -27,7 +27,10 @@ interface CastResult {
   match_confidence: number;
 }
 
-import { DEFAULT_TTS_VOICES, TTSVoiceOption } from "@/features/editor_studio/types/settings";
+import {
+  DEFAULT_TTS_VOICES,
+  TTSVoiceOption,
+} from "@/features/editor_studio/types/settings";
 
 type VoiceOption = TTSVoiceOption;
 const DEFAULT_VOICES: VoiceOption[] = DEFAULT_TTS_VOICES;

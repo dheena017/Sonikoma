@@ -82,7 +82,12 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
             force_refresh: true,
             proxy_images: true,
           });
-          if (fallback && fallback.success && fallback.images && fallback.images.length > 0) {
+          if (
+            fallback &&
+            fallback.success &&
+            fallback.images &&
+            fallback.images.length > 0
+          ) {
             setImages(
               fallback.images.map((img: any) =>
                 typeof img === "string" ? img : img.url
@@ -96,7 +101,11 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
         console.error("[Preview Scraper Error] ", err);
         const errorMsg =
           err?.message ||
-          (err?.detail ? (typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail)) : null) ||
+          (err?.detail
+            ? typeof err.detail === "string"
+              ? err.detail
+              : JSON.stringify(err.detail)
+            : null) ||
           (typeof err === "string" ? err : "Failed to fetch chapter panels.");
         setError(errorMsg);
       } finally {
@@ -320,7 +329,10 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
                   onClick={() => fetchPanels(true)}
                   className="px-5 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-black/50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
                 >
-                  <RotateCw size={14} className={loading ? "animate-spin" : ""} />
+                  <RotateCw
+                    size={14}
+                    className={loading ? "animate-spin" : ""}
+                  />
                   Retry Scraping
                 </button>
                 <button
@@ -346,10 +358,9 @@ export const ChapterReaderModal: React.FC<ChapterPreviewModalProps> = ({
               style={{ maxWidth: `${stripWidthPx}px` }}
             >
               {images.map((imgUrl, idx) => {
-                const resolvedSrc =
-                  imgUrl.startsWith("/api/v1/proxy/image")
-                    ? imgUrl
-                    : getProxiedImageUrl(imgUrl, chapter?.url);
+                const resolvedSrc = imgUrl.startsWith("/api/v1/proxy/image")
+                  ? imgUrl
+                  : getProxiedImageUrl(imgUrl, chapter?.url);
 
                 return (
                   <img

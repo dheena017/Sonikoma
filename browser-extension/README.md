@@ -20,14 +20,14 @@
 
 ## 🌟 Key Features & How to Use
 
-| Feature | How to Use |
-| :--- | :--- |
-| **🎛️ SidePanel Mini-Studio** | Press `Alt + S` on any manga chapter or click "Open Mini-Studio" in the extension popup. |
-| **🔊 Live Speech Bubble Dubber** | Hover over any dialogue balloon on the reading page to play instant AI voice acting. |
-| **🍿 Hands-Free Cinema Mode** | Click "Start Cinema Mode" in popup or press `Space` to auto-scroll with dialogue pacing. |
-| **✂️ 9:16 Shorts / Panel Snipper** | Press `Alt + P` and drag a crop box over any hype panel on screen. |
-| **📥 High-Res Chapter Downloader** | Press `Alt + D` or right-click any page -> *"Download High-Res Chapter (ZIP)"*. |
-| **⚡ 1-Click Web Studio Launch** | Click the floating badge on any webtoon to import the whole chapter into Sonikoma Studio. |
+| Feature                            | How to Use                                                                                |
+| :--------------------------------- | :---------------------------------------------------------------------------------------- |
+| **🎛️ SidePanel Mini-Studio**       | Press `Alt + S` on any manga chapter or click "Open Mini-Studio" in the extension popup.  |
+| **🔊 Live Speech Bubble Dubber**   | Hover over any dialogue balloon on the reading page to play instant AI voice acting.      |
+| **🍿 Hands-Free Cinema Mode**      | Click "Start Cinema Mode" in popup or press `Space` to auto-scroll with dialogue pacing.  |
+| **✂️ 9:16 Shorts / Panel Snipper** | Press `Alt + P` and drag a crop box over any hype panel on screen.                        |
+| **📥 High-Res Chapter Downloader** | Press `Alt + D` or right-click any page -> _"Download High-Res Chapter (ZIP)"_.           |
+| **⚡ 1-Click Web Studio Launch**   | Click the floating badge on any webtoon to import the whole chapter into Sonikoma Studio. |
 
 ---
 
@@ -43,6 +43,7 @@
 ## 🔗 Real Backend API Integration
 
 The extension connects directly to Sonikoma's FastAPI backend:
+
 - Neural Voices: `GET /api/v1/audio/list-tts-voices`
 - TTS Synthesis: `POST /api/v1/audio/synthesize-panel-audio`
 - Vision AI & Panel OCR: `POST /api/v1/ai/analyze-image`

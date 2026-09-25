@@ -151,32 +151,62 @@ const PROVIDER_THEMES: Record<
 
 export const isProviderKeyConfiguredInVault = (providerKey: string = "") => {
   const p = providerKey.toLowerCase();
-  if (p === "edgetts" || p === "edge_tts" || p === "stable_diffusion" || p === "stablediffusion" || p === "whisper") {
+  if (
+    p === "edgetts" ||
+    p === "edge_tts" ||
+    p === "stable_diffusion" ||
+    p === "stablediffusion" ||
+    p === "whisper"
+  ) {
     return true;
   }
   if (p === "gemini" || p === "google") {
-    return Boolean(localStorage.getItem("user_gemini_key") || localStorage.getItem("sonikoma_key_gemini"));
+    return Boolean(
+      localStorage.getItem("user_gemini_key") ||
+        localStorage.getItem("sonikoma_key_gemini")
+    );
   }
   if (p === "openai") {
-    return Boolean(localStorage.getItem("user_openai_key") || localStorage.getItem("sonikoma_key_openai"));
+    return Boolean(
+      localStorage.getItem("user_openai_key") ||
+        localStorage.getItem("sonikoma_key_openai")
+    );
   }
   if (p === "anthropic") {
-    return Boolean(localStorage.getItem("user_anthropic_key") || localStorage.getItem("sonikoma_key_anthropic"));
+    return Boolean(
+      localStorage.getItem("user_anthropic_key") ||
+        localStorage.getItem("sonikoma_key_anthropic")
+    );
   }
   if (p === "groq") {
-    return Boolean(localStorage.getItem("user_groq_key") || localStorage.getItem("sonikoma_key_groq"));
+    return Boolean(
+      localStorage.getItem("user_groq_key") ||
+        localStorage.getItem("sonikoma_key_groq")
+    );
   }
   if (p === "deepseek") {
-    return Boolean(localStorage.getItem("user_deepseek_key") || localStorage.getItem("sonikoma_key_deepseek"));
+    return Boolean(
+      localStorage.getItem("user_deepseek_key") ||
+        localStorage.getItem("sonikoma_key_deepseek")
+    );
   }
   if (p === "elevenlabs") {
-    return Boolean(localStorage.getItem("user_elevenlabs_key") || localStorage.getItem("sonikoma_key_elevenlabs"));
+    return Boolean(
+      localStorage.getItem("user_elevenlabs_key") ||
+        localStorage.getItem("sonikoma_key_elevenlabs")
+    );
   }
   if (p === "deepl") {
-    return Boolean(localStorage.getItem("user_deepl_key") || localStorage.getItem("sonikoma_key_deepl"));
+    return Boolean(
+      localStorage.getItem("user_deepl_key") ||
+        localStorage.getItem("sonikoma_key_deepl")
+    );
   }
   if (p === "huggingface" || p === "flux") {
-    return Boolean(localStorage.getItem("user_huggingface_key") || localStorage.getItem("sonikoma_key_huggingface"));
+    return Boolean(
+      localStorage.getItem("user_huggingface_key") ||
+        localStorage.getItem("sonikoma_key_huggingface")
+    );
   }
   return false;
 };
@@ -199,7 +229,8 @@ export default function TierModelCard({
   const inferProvider = (id: string = "") => {
     const lower = id.toLowerCase();
     if (!id || lower === "") return "none";
-    if (lower.includes("claude") || lower.includes("anthropic")) return "anthropic";
+    if (lower.includes("claude") || lower.includes("anthropic"))
+      return "anthropic";
     if (
       lower.includes("gpt") ||
       lower.includes("o1") ||
@@ -223,10 +254,13 @@ export default function TierModelCard({
     if (lower.includes("deepseek")) return "deepseek";
     if (lower.includes("eleven")) return "elevenlabs";
     if (lower.includes("deepl")) return "deepl";
-    if (lower.includes("edgetts") || lower.includes("edge_tts")) return "edgetts";
-    if (lower.includes("stable") || lower.includes("sdxl")) return "stablediffusion";
+    if (lower.includes("edgetts") || lower.includes("edge_tts"))
+      return "edgetts";
+    if (lower.includes("stable") || lower.includes("sdxl"))
+      return "stablediffusion";
     if (lower.includes("whisper")) return "whisper";
-    if (lower.includes("flux") || lower.includes("huggingface")) return "huggingface";
+    if (lower.includes("flux") || lower.includes("huggingface"))
+      return "huggingface";
     return "gemini";
   };
 
@@ -234,7 +268,7 @@ export default function TierModelCard({
   const selectedModel = availableModels.find((m) => m.id === modelId);
   const hasModel = Boolean(modelId && modelId.trim() !== "");
   const providerKey = hasModel
-    ? (selectedModel?.provider?.toLowerCase() || inferProvider(modelId))
+    ? selectedModel?.provider?.toLowerCase() || inferProvider(modelId)
     : "none";
   const provTheme = PROVIDER_THEMES[providerKey] || {
     name: "NO KEY / EMPTY",
@@ -242,7 +276,9 @@ export default function TierModelCard({
     text: "#f59e0b",
     border: "rgba(245, 158, 11, 0.35)",
   };
-  const isKeyConfigured = hasModel ? isProviderKeyConfiguredInVault(providerKey) : false;
+  const isKeyConfigured = hasModel
+    ? isProviderKeyConfiguredInVault(providerKey)
+    : false;
 
   // Close dropdown when clicked outside
   useEffect(() => {
@@ -281,8 +317,7 @@ export default function TierModelCard({
 
   const filteredModels = availableModels.filter((m) => {
     const p = m.provider?.toLowerCase() || inferProvider(m.id);
-    const matchesProvider =
-      providerFilter === "all" || p === providerFilter;
+    const matchesProvider = providerFilter === "all" || p === providerFilter;
     const matchesSearch =
       search === "" ||
       m.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -328,7 +363,12 @@ export default function TierModelCard({
       return m.speed_rating.split("(")[0].trim();
     }
     const idLower = (m.id || "").toLowerCase();
-    if (idLower.includes("flash") || idLower.includes("mini") || idLower.includes("haiku") || idLower.includes("turbo")) {
+    if (
+      idLower.includes("flash") ||
+      idLower.includes("mini") ||
+      idLower.includes("haiku") ||
+      idLower.includes("turbo")
+    ) {
       return "Ultra Fast";
     }
     return "Standard";
@@ -371,7 +411,9 @@ export default function TierModelCard({
           </span>
         </div>
         <span className="text-[10px] text-[#9CA3AF] font-sans truncate font-medium">
-          {hasModel ? (selectedModel?.category || "Specialized Engine") : "Unassigned"}
+          {hasModel
+            ? selectedModel?.category || "Specialized Engine"
+            : "Unassigned"}
         </span>
       </div>
 
@@ -431,8 +473,14 @@ export default function TierModelCard({
           </div>
 
           {/* 2. SELECTED MODEL NAME */}
-          <div className={`text-xs sm:text-sm font-bold truncate tracking-tight ${hasModel ? "text-white" : "text-neutral-400 italic"}`}>
-            {hasModel ? (selectedModel?.name || modelId) : "No Model Selected (Click to choose)"}
+          <div
+            className={`text-xs sm:text-sm font-bold truncate tracking-tight ${
+              hasModel ? "text-white" : "text-neutral-400 italic"
+            }`}
+          >
+            {hasModel
+              ? selectedModel?.name || modelId
+              : "No Model Selected (Click to choose)"}
           </div>
         </button>
 
@@ -441,7 +489,11 @@ export default function TierModelCard({
           {/* Speed */}
           <div
             className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
-            title={hasModel ? (selectedModel?.speed_rating || "Fast inference") : "No active model"}
+            title={
+              hasModel
+                ? selectedModel?.speed_rating || "Fast inference"
+                : "No active model"
+            }
           >
             <Gauge className="w-3 h-3 text-[#F59E0B] shrink-0" />
             <span className="text-[#E5E5E5] truncate">
@@ -524,7 +576,10 @@ export default function TierModelCard({
           {/* Provider Filter Tabs */}
           <div
             className="flex items-center gap-1.5 px-3 py-2 border-b overflow-x-auto no-scrollbar"
-            style={{ backgroundColor: "rgba(10, 10, 10, 0.7)", borderColor: "#2F2F2F" }}
+            style={{
+              backgroundColor: "rgba(10, 10, 10, 0.7)",
+              borderColor: "#2F2F2F",
+            }}
           >
             <button
               type="button"
@@ -552,17 +607,27 @@ export default function TierModelCard({
                   onClick={() => setProviderFilter(p)}
                   className="px-2.5 py-1 rounded-lg text-[9.5px] font-mono font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                   style={{
-                    backgroundColor: isActive ? pTheme.bg : "rgba(255, 255, 255, 0.04)",
+                    backgroundColor: isActive
+                      ? pTheme.bg
+                      : "rgba(255, 255, 255, 0.04)",
                     color: isActive ? pTheme.text : "#9ca3af",
-                    border: `1px solid ${isActive ? pTheme.border : "rgba(255, 255, 255, 0.06)"}`,
+                    border: `1px solid ${
+                      isActive ? pTheme.border : "rgba(255, 255, 255, 0.06)"
+                    }`,
                   }}
                 >
                   <span>{pTheme.name}</span>
                   <span className="opacity-60 text-[8.5px]">({count})</span>
                   {hasKey ? (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Key Configured in Vault" />
+                    <span
+                      className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                      title="Key Configured in Vault"
+                    />
                   ) : (
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" title="API Key Required" />
+                    <span
+                      className="w-1.5 h-1.5 rounded-full bg-amber-400"
+                      title="API Key Required"
+                    />
                   )}
                 </button>
               );
@@ -586,14 +651,20 @@ export default function TierModelCard({
                 setSearch("");
               }}
               className={`w-full flex items-center justify-between gap-3 px-3.5 py-2 text-left transition-all duration-100 cursor-pointer border-b border-white/5 ${
-                !hasModel ? "bg-amber-500/10 text-amber-400" : "text-neutral-400 hover:bg-white/5"
+                !hasModel
+                  ? "bg-amber-500/10 text-amber-400"
+                  : "text-neutral-400 hover:bg-white/5"
               }`}
             >
               <div className="flex items-center gap-2">
                 <X className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-xs font-mono font-bold">None / Keep Empty (No Model)</span>
+                <span className="text-xs font-mono font-bold">
+                  None / Keep Empty (No Model)
+                </span>
               </div>
-              {!hasModel && <Check className="w-3.5 h-3.5 stroke-[3] text-amber-400" />}
+              {!hasModel && (
+                <Check className="w-3.5 h-3.5 stroke-[3] text-amber-400" />
+              )}
             </button>
 
             {filteredModels.length === 0 ? (
@@ -603,7 +674,8 @@ export default function TierModelCard({
             ) : (
               filteredModels.map((m) => {
                 const isSelected = m.id === modelId;
-                const mProvider = m.provider?.toLowerCase() || inferProvider(m.id);
+                const mProvider =
+                  m.provider?.toLowerCase() || inferProvider(m.id);
                 const hasKey = isProviderKeyConfiguredInVault(mProvider);
 
                 return (

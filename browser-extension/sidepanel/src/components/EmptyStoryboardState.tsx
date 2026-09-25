@@ -17,9 +17,12 @@ export const EmptyStoryboardState: React.FC<EmptyStoryboardStateProps> = ({
       <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-3 shadow-inner">
         <Film size={22} className="animate-pulse" />
       </div>
-      <h3 className="font-bold text-white text-sm">Ready to Create Motion Comics</h3>
+      <h3 className="font-bold text-white text-sm">
+        Ready to Create Motion Comics
+      </h3>
       <p className="text-[11px] text-slate-400 mt-1 max-w-xs leading-relaxed">
-        Open any manga, comic, or webtoon chapter in your browser to detect panels, or load our sample demo storyboard below.
+        Open any manga, comic, or webtoon chapter in your browser to detect
+        panels, or load our sample demo storyboard below.
       </p>
 
       <div className="flex flex-col w-full gap-2 mt-4 max-w-xs">
@@ -30,7 +33,9 @@ export const EmptyStoryboardState: React.FC<EmptyStoryboardStateProps> = ({
           className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md transition-all cursor-pointer"
         >
           <RefreshCw size={13} className={isScanning ? "animate-spin" : ""} />
-          <span>{isScanning ? "Scanning Active Tab..." : "Scan Active Tab"}</span>
+          <span>
+            {isScanning ? "Scanning Active Tab..." : "Scan Active Tab"}
+          </span>
         </button>
 
         <button

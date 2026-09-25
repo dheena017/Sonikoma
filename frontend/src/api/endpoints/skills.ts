@@ -55,8 +55,12 @@ const summarizeAudioValue = (value: any, depth = 0): any => {
   }
 
   if (Array.isArray(value)) {
-    const nextItems = value.slice(0, 5).map((item) => summarizeAudioValue(item, depth + 1));
-    return value.length > 5 ? { length: value.length, preview: nextItems } : nextItems;
+    const nextItems = value
+      .slice(0, 5)
+      .map((item) => summarizeAudioValue(item, depth + 1));
+    return value.length > 5
+      ? { length: value.length, preview: nextItems }
+      : nextItems;
   }
 
   if (typeof value === "object") {
@@ -70,11 +74,18 @@ const summarizeAudioValue = (value: any, depth = 0): any => {
 
       if (key === "audio_url" || key === "narrative_audio_url") {
         const url = typeof nestedValue === "string" ? nestedValue : "";
-        summary[key] = url ? `${url.slice(0, 90)}${url.length > 90 ? "…" : ""}` : null;
+        summary[key] = url
+          ? `${url.slice(0, 90)}${url.length > 90 ? "…" : ""}`
+          : null;
         continue;
       }
 
-      if (key === "text" || key === "dialogue" || key === "script" || key === "prompt") {
+      if (
+        key === "text" ||
+        key === "dialogue" ||
+        key === "script" ||
+        key === "prompt"
+      ) {
         summary[key] = truncateText(String(nestedValue));
         continue;
       }
@@ -82,7 +93,9 @@ const summarizeAudioValue = (value: any, depth = 0): any => {
       if (key === "panels" && Array.isArray(nestedValue)) {
         summary[key] = {
           count: nestedValue.length,
-          preview: nestedValue.slice(0, 3).map((panel) => summarizeAudioValue(panel, depth + 1)),
+          preview: nestedValue
+            .slice(0, 3)
+            .map((panel) => summarizeAudioValue(panel, depth + 1)),
         };
         continue;
       }
@@ -90,7 +103,9 @@ const summarizeAudioValue = (value: any, depth = 0): any => {
       if (key === "results" && Array.isArray(nestedValue)) {
         summary[key] = {
           count: nestedValue.length,
-          preview: nestedValue.slice(0, 3).map((result) => summarizeAudioValue(result, depth + 1)),
+          preview: nestedValue
+            .slice(0, 3)
+            .map((result) => summarizeAudioValue(result, depth + 1)),
         };
         continue;
       }
@@ -123,7 +138,13 @@ const buildAudioLogSummary = (label: string, payload: any) => {
   }
 
   const keys = Object.keys(summary);
-  if (keys.includes("voice") || keys.includes("panel_id") || keys.includes("id") || keys.includes("panels") || keys.includes("results")) {
+  if (
+    keys.includes("voice") ||
+    keys.includes("panel_id") ||
+    keys.includes("id") ||
+    keys.includes("panels") ||
+    keys.includes("results")
+  ) {
     derived[label] = summary;
     return derived;
   }
@@ -140,7 +161,9 @@ export const logAudioEndpoint = (
   startedAt?: number,
   error?: unknown
 ) => {
-  const elapsed = startedAt ? ` (${Math.round(performance.now() - startedAt)}ms)` : "";
+  const elapsed = startedAt
+    ? ` (${Math.round(performance.now() - startedAt)}ms)`
+    : "";
   const prefix = `[Audio Endpoint] ${method} ${endpoint}`;
 
   if (error) {
@@ -152,7 +175,10 @@ export const logAudioEndpoint = (
   }
 
   console.log(`${prefix} input:`, buildAudioLogSummary("input", input));
-  console.log(`${prefix} output${elapsed}:`, buildAudioLogSummary("output", output));
+  console.log(
+    `${prefix} output${elapsed}:`,
+    buildAudioLogSummary("output", output)
+  );
 };
 
 export const alignDialogue = async (

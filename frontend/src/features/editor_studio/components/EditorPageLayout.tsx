@@ -85,7 +85,6 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
 
   return (
     <div className="flex flex-col h-screen max-h-screen overflow-hidden bg-[#0A0A0A] text-[#E5E5E5] relative">
-
       {/* Blurred Background Overlay when expanded sidebar is open */}
       {isSidebarOpen && (
         <div
@@ -170,7 +169,9 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
         }`}
       >
         <div className="relative flex-1 w-full min-w-0 flex flex-col">
-          <div className="w-full flex flex-col flex-1 min-h-0 min-w-0 pb-8">{children}</div>
+          <div className="w-full flex flex-col flex-1 min-h-0 min-w-0 pb-8">
+            {children}
+          </div>
         </div>
       </div>
 
@@ -180,9 +181,13 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
           <button
             type="button"
             onClick={() => {
-              useImageEditorStore.getState().setPlayerSettings({ isPlayerOpen: true });
+              useImageEditorStore
+                .getState()
+                .setPlayerSettings({ isPlayerOpen: true });
               setCurrentSection("monitor");
-              const container = document.getElementById("main-scroll-container");
+              const container = document.getElementById(
+                "main-scroll-container"
+              );
               if (container) container.scrollTo({ top: 0, behavior: "smooth" });
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
@@ -200,7 +205,9 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
             type="button"
             onClick={() => {
               setCurrentSection("assets");
-              const container = document.getElementById("main-scroll-container");
+              const container = document.getElementById(
+                "main-scroll-container"
+              );
               if (container) container.scrollTo({ top: 0, behavior: "smooth" });
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
@@ -218,7 +225,9 @@ const LayoutEditorPage: React.FC<LayoutEditorPageProps> = ({
             type="button"
             onClick={() => {
               setCurrentSection("storyboard");
-              const container = document.getElementById("main-scroll-container");
+              const container = document.getElementById(
+                "main-scroll-container"
+              );
               if (container) container.scrollTo({ top: 0, behavior: "smooth" });
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}

@@ -84,7 +84,8 @@ export default function useDashboardPage() {
         console.error("Failed to fetch projects", err);
         if (cachedDashboardProjects.length === 0) {
           setError(
-            err.message || "An unexpected error occurred while loading projects."
+            err.message ||
+              "An unexpected error occurred while loading projects."
           );
         }
       } finally {
@@ -235,9 +236,9 @@ export default function useDashboardPage() {
           }?project_id=${encodeURIComponent(project.project_id)}${
             jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
           }`
-        : `/scraper/editor?project_id=${encodeURIComponent(project.project_id)}${
-            jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
-          }`;
+        : `/scraper/editor?project_id=${encodeURIComponent(
+            project.project_id
+          )}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`;
 
     if (typeof nav === "function") {
       nav(target);

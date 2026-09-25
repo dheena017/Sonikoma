@@ -1,10 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { formatDetailedTime, parseUtcDate } from "@/utils/dateUtils";
-import {
-  Activity,
-  ArrowUpRight,
-  Clock,
-} from "lucide-react";
+import { Activity, ArrowUpRight, Clock } from "lucide-react";
 
 interface ActivityItem {
   id: string;
@@ -47,7 +43,8 @@ export default function DashboardActivityFeed({
           rawTimeVal: parsedD ? parsedD.getTime() : 0,
           type: act.type || "general",
           badge: act.badge || "Live",
-          badgeColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+          badgeColor:
+            "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
         });
       });
     }
@@ -57,7 +54,6 @@ export default function DashboardActivityFeed({
 
     return items;
   }, [analytics]);
-
 
   // Filter activities
   const filteredActivities = useMemo(() => {
@@ -115,7 +111,9 @@ export default function DashboardActivityFeed({
               onClick={() => {
                 if (act.projectId && (window as any).navigateTo) {
                   (window as any).navigateTo(
-                    `/scraper/editor?project_id=${encodeURIComponent(act.projectId)}`
+                    `/scraper/editor?project_id=${encodeURIComponent(
+                      act.projectId
+                    )}`
                   );
                 }
               }}
@@ -130,7 +128,8 @@ export default function DashboardActivityFeed({
                   {act.badge && (
                     <span
                       className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border ${
-                        act.badgeColor || "text-[#9CA3AF] bg-[#121212] border-[#2F2F2F]"
+                        act.badgeColor ||
+                        "text-[#9CA3AF] bg-[#121212] border-[#2F2F2F]"
                       }`}
                     >
                       {act.badge}

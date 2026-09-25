@@ -290,7 +290,9 @@ const StoryboardCard = ({
     "speech" | "narrative" | "sfx" | "visual"
   >("speech");
   const [isGeneratingVoice, setIsGeneratingVoice] = React.useState(false);
-  const [generatingVoiceMode, setGeneratingVoiceMode] = React.useState<"speech" | "narrative" | null>(null);
+  const [generatingVoiceMode, setGeneratingVoiceMode] = React.useState<
+    "speech" | "narrative" | null
+  >(null);
   const [isTracksExpanded, setIsTracksExpanded] = React.useState(false);
   const [isMagicProcessing, setIsMagicProcessing] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -298,9 +300,9 @@ const StoryboardCard = ({
 
   const hasExtraDetails = Boolean(
     panel.speech_text?.trim() ||
-    panel.sfx?.trim() ||
-    panel.visual_description?.trim() ||
-    panel.layers
+      panel.sfx?.trim() ||
+      panel.visual_description?.trim() ||
+      panel.layers
   );
 
   React.useEffect(() => {
@@ -337,7 +339,11 @@ const StoryboardCard = ({
   const handleOpenAssistant = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsMenuOpen(false);
-    window.history.pushState({}, "", `/creative-suite/panel-assistant?idx=${idx}`);
+    window.history.pushState(
+      {},
+      "",
+      `/creative-suite/panel-assistant?idx=${idx}`
+    );
     window.dispatchEvent(new Event("popstate"));
   };
 
@@ -356,7 +362,9 @@ const StoryboardCard = ({
   // Unified Playback state for Speech / Voice Audio
   const [isDialoguePlaying, setIsDialoguePlaying] = React.useState(false);
   const [isDialoguePaused, setIsDialoguePaused] = React.useState(false);
-  const [playingAudioType, setPlayingAudioType] = React.useState<"speech" | "narrative" | null>(null);
+  const [playingAudioType, setPlayingAudioType] = React.useState<
+    "speech" | "narrative" | null
+  >(null);
   const dialogueAudioRef = React.useRef<HTMLAudioElement | null>(null);
   const dialogueUtteranceRef = React.useRef<SpeechSynthesisUtterance | null>(
     null
@@ -487,10 +495,15 @@ const StoryboardCard = ({
 
   // Toggle Dialogue / Narrator Audio
   const handleToggleDialogueAudio = async (mode?: "speech" | "narrative") => {
-    const currentMode = mode || (activeTab === "narrative" ? "narrative" : "speech");
+    const currentMode =
+      mode || (activeTab === "narrative" ? "narrative" : "speech");
 
     // Scenario 1: Currently Playing THIS specific audio -> Pause
-    if (isDialoguePlaying && !isDialoguePaused && playingAudioType === currentMode) {
+    if (
+      isDialoguePlaying &&
+      !isDialoguePaused &&
+      playingAudioType === currentMode
+    ) {
       if (dialogueAudioRef.current) {
         dialogueAudioRef.current.pause();
       } else if (typeof window !== "undefined" && "speechSynthesis" in window) {
@@ -501,7 +514,11 @@ const StoryboardCard = ({
     }
 
     // Scenario 2: Currently Paused on THIS specific audio -> Resume
-    if (isDialoguePlaying && isDialoguePaused && playingAudioType === currentMode) {
+    if (
+      isDialoguePlaying &&
+      isDialoguePaused &&
+      playingAudioType === currentMode
+    ) {
       if (dialogueAudioRef.current) {
         dialogueAudioRef.current
           .play()
@@ -522,7 +539,7 @@ const StoryboardCard = ({
     const targetAudioUrl =
       currentMode === "narrative"
         ? panel.narrative_audio_url
-        : (panel.speech_audio_url || panel.audio_url);
+        : panel.speech_audio_url || panel.audio_url;
 
     if (targetAudioUrl) {
       const audio = new Audio(targetAudioUrl);
@@ -560,7 +577,9 @@ const StoryboardCard = ({
         handleGenerateVoice(true, currentMode);
       } else {
         addNotification?.(
-          `Please enter ${currentMode === "narrative" ? "narrator" : "dialogue"} text first.`,
+          `Please enter ${
+            currentMode === "narrative" ? "narrator" : "dialogue"
+          } text first.`,
           "info"
         );
       }
@@ -571,7 +590,8 @@ const StoryboardCard = ({
     autoPlayAfterGenerate = false,
     mode?: "speech" | "narrative"
   ) => {
-    const currentMode = mode || (activeTab === "narrative" ? "narrative" : "speech");
+    const currentMode =
+      mode || (activeTab === "narrative" ? "narrative" : "speech");
     const textToSpeak =
       currentMode === "narrative"
         ? (panel.narrative || "").trim()
@@ -579,7 +599,9 @@ const StoryboardCard = ({
 
     if (!textToSpeak) {
       addNotification?.(
-        `Please enter ${currentMode === "narrative" ? "narrator" : "dialogue"} text first.`,
+        `Please enter ${
+          currentMode === "narrative" ? "narrator" : "dialogue"
+        } text first.`,
         "warning"
       );
       return;
@@ -588,14 +610,18 @@ const StoryboardCard = ({
     setGeneratingVoiceMode(currentMode);
     try {
       addNotification?.(
-        `Synthesizing ${currentMode === "narrative" ? "narrator" : "dialogue"} voice...`,
+        `Synthesizing ${
+          currentMode === "narrative" ? "narrator" : "dialogue"
+        } voice...`,
         "info"
       );
       const chosenVoice =
         voiceActor ||
         localStorage.getItem("ai_comic_voice") ||
         localStorage.getItem("ai_comic_voice_actor") ||
-        (currentMode === "narrative" ? localStorage.getItem("ai_comic_narrator_voice") : null) ||
+        (currentMode === "narrative"
+          ? localStorage.getItem("ai_comic_narrator_voice")
+          : null) ||
         selectedVoiceModel ||
         "en-US-ChristopherNeural";
 
@@ -614,7 +640,9 @@ const StoryboardCard = ({
       if (ttsRes && ttsRes.success && ttsRes.audio_url) {
         audioUrl = ttsRes.audio_url;
       } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
-        audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${ttsRes.audio_base64}`;
+        audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${
+          ttsRes.audio_base64
+        }`;
       }
 
       const audioDuration: number =
@@ -628,18 +656,27 @@ const StoryboardCard = ({
             prev.map((p) =>
               p.id === panel.id
                 ? {
-                  ...p,
-                  narrative_audio_url: currentMode === "narrative" ? audioUrl : p.narrative_audio_url,
-                  speech_audio_url: currentMode === "speech" ? audioUrl : p.speech_audio_url,
-                  audio_url: currentMode === "speech" ? audioUrl : (p.audio_url || audioUrl),
-                  duration: audioDuration > 0 ? audioDuration : p.duration,
-                }
+                    ...p,
+                    narrative_audio_url:
+                      currentMode === "narrative"
+                        ? audioUrl
+                        : p.narrative_audio_url,
+                    speech_audio_url:
+                      currentMode === "speech" ? audioUrl : p.speech_audio_url,
+                    audio_url:
+                      currentMode === "speech"
+                        ? audioUrl
+                        : p.audio_url || audioUrl,
+                    duration: audioDuration > 0 ? audioDuration : p.duration,
+                  }
                 : p
             )
           );
         }
         addNotification?.(
-          `${currentMode === "narrative" ? "Narrator" : "Dialogue"} voice generated successfully!`,
+          `${
+            currentMode === "narrative" ? "Narrator" : "Dialogue"
+          } voice generated successfully!`,
           "success"
         );
 
@@ -728,7 +765,9 @@ const StoryboardCard = ({
       if (ttsRes && ttsRes.success && ttsRes.audio_url) {
         audioUrl = ttsRes.audio_url;
       } else if (ttsRes && ttsRes.success && ttsRes.audio_base64) {
-        audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${ttsRes.audio_base64}`;
+        audioUrl = `data:${ttsRes.mime_type || "audio/mpeg"};base64,${
+          ttsRes.audio_base64
+        }`;
       }
 
       // Capture the actual audio duration from TTS (precise timing)
@@ -775,18 +814,18 @@ const StoryboardCard = ({
           prev.map((p) =>
             p.id === panel.id
               ? {
-                ...p,
-                // Preserve AI-decided motion; only default if completely unset
-                motion_type:
-                  p.motion_type && p.motion_type.trim().length > 0
-                    ? p.motion_type
-                    : "",
-                // Sync timing to actual audio length
-                duration: audioDuration > 0 ? audioDuration : p.duration,
-                audio_url: audioUrl || p.audio_url,
-                layers: layersObj || p.layers,
-                syncMap: syncMapObj || p.syncMap,
-              }
+                  ...p,
+                  // Preserve AI-decided motion; only default if completely unset
+                  motion_type:
+                    p.motion_type && p.motion_type.trim().length > 0
+                      ? p.motion_type
+                      : "",
+                  // Sync timing to actual audio length
+                  duration: audioDuration > 0 ? audioDuration : p.duration,
+                  audio_url: audioUrl || p.audio_url,
+                  layers: layersObj || p.layers,
+                  syncMap: syncMapObj || p.syncMap,
+                }
               : p
           )
         );
@@ -869,7 +908,8 @@ const StoryboardCard = ({
 
   const isThisPanelAnalyzing =
     Boolean(panel.isAnalyzing) ||
-    (analyzingPanelId !== null && String(analyzingPanelId) === String(panel.id));
+    (analyzingPanelId !== null &&
+      String(analyzingPanelId) === String(panel.id));
 
   const cardRef = React.useRef<HTMLDivElement>(null);
 
@@ -878,28 +918,33 @@ const StoryboardCard = ({
       ref={cardRef}
       style={{
         contentVisibility: "auto",
-        containIntrinsicSize: viewLayout === "grid" ? "320px 460px" : "300px 460px",
+        containIntrinsicSize:
+          viewLayout === "grid" ? "320px 460px" : "300px 460px",
       }}
-      className={`${viewLayout === "grid"
+      className={`${
+        viewLayout === "grid"
           ? "w-full min-w-0"
           : panelsLength === 1
-            ? "w-full max-w-[420px] sm:w-[380px] shrink-0"
-            : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center"
-        } group relative rounded-2xl border p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 transition-colors duration-150 select-none outline-none shadow-sm ${isMenuOpen ? "z-50" : "z-0"
-        } ${isThisPanelAnalyzing
+          ? "w-full max-w-[420px] sm:w-[380px] shrink-0"
+          : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center"
+      } group relative rounded-2xl border p-3 sm:p-3.5 space-y-2.5 sm:space-y-3 transition-colors duration-150 select-none outline-none shadow-sm ${
+        isMenuOpen ? "z-50" : "z-0"
+      } ${
+        isThisPanelAnalyzing
           ? "border-purple-500/70 bg-neutral-900 ring-1 ring-purple-500/30 shadow-lg shadow-purple-500/10"
           : currentPanelIndex === idx
-            ? "border-blue-500/80 bg-neutral-900/90 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/30"
-            : isSelected
-              ? "border-blue-500/40 bg-blue-950/20 shadow-md ring-1 ring-blue-500/20"
-              : "border-neutral-800 bg-neutral-950 hover:border-neutral-700"
-        }`}
+          ? "border-blue-500/80 bg-neutral-900/90 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/30"
+          : isSelected
+          ? "border-blue-500/40 bg-blue-950/20 shadow-md ring-1 ring-blue-500/20"
+          : "border-neutral-800 bg-neutral-950 hover:border-neutral-700"
+      }`}
     >
       {/* Image Thumbnail */}
       <div
         onClick={handleThumbnailClick}
-        className={`relative ${panelsLength === 1 ? "h-64 sm:h-72" : "h-56 sm:h-64"
-          } rounded-xl cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb hover:border-neutral-700 transition-colors duration-150`}
+        className={`relative ${
+          panelsLength === 1 ? "h-64 sm:h-72" : "h-56 sm:h-64"
+        } rounded-xl cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb hover:border-neutral-700 transition-colors duration-150`}
       >
         <div className="w-full h-full rounded-xl overflow-hidden flex items-center justify-center relative">
           <img
@@ -945,11 +990,13 @@ const StoryboardCard = ({
 
         {/* Top-Left: Index Badge & Reorder Controls */}
         <div className="absolute top-2 left-2 flex items-center gap-1.5 z-20">
-          <div className={`px-2 py-0.5 rounded-md backdrop-blur-sm border text-[10px] font-mono transition-colors ${
-            currentPanelIndex === idx
-              ? "bg-blue-950/80 border-blue-500/40 text-blue-300 font-bold"
-              : "bg-black/70 border-neutral-800 text-neutral-300 font-medium"
-          }`}>
+          <div
+            className={`px-2 py-0.5 rounded-md backdrop-blur-sm border text-[10px] font-mono transition-colors ${
+              currentPanelIndex === idx
+                ? "bg-blue-950/80 border-blue-500/40 text-blue-300 font-bold"
+                : "bg-black/70 border-neutral-800 text-neutral-300 font-medium"
+            }`}
+          >
             #{idx + 1}
           </div>
 
@@ -1008,7 +1055,9 @@ const StoryboardCard = ({
                 {/* Panel Resolution & Aspect Ratio Info */}
                 {dimensions && (
                   <div className="px-2 py-1 bg-neutral-950 rounded-lg border border-neutral-800/80 flex items-center justify-between text-[9px] font-mono text-neutral-400 select-none mb-1">
-                    <span>{dimensions.width} × {dimensions.height} px</span>
+                    <span>
+                      {dimensions.width} × {dimensions.height} px
+                    </span>
                     {aspectRatioLabel && (
                       <span className="text-neutral-300 font-medium">
                         {aspectRatioLabel}
@@ -1098,10 +1147,11 @@ const StoryboardCard = ({
               e.stopPropagation();
               onToggleSelect();
             }}
-            className={`rounded-full p-1 border transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer ${isSelected
+            className={`rounded-full p-1 border transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer ${
+              isSelected
                 ? "bg-blue-600 border-blue-500 text-white opacity-100"
                 : "bg-black/70 border-neutral-700 text-neutral-400 opacity-0 group-hover/thumb:opacity-100 hover:border-neutral-500"
-              }`}
+            }`}
             title={isSelected ? "Deselect panel" : "Select panel"}
           >
             <Check className="h-2.5 w-2.5 stroke-[3]" />
@@ -1126,10 +1176,11 @@ const StoryboardCard = ({
               <button
                 type="button"
                 onClick={() => setShowDetails(false)}
-                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${!showDetails
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${
+                  !showDetails
                     ? "bg-purple-950/60 text-purple-200 shadow-xs border border-purple-500/40 font-semibold"
                     : "text-neutral-400 hover:text-neutral-200"
-                  }`}
+                }`}
                 title="Story Narrator"
               >
                 <Mic className="w-2.5 h-2.5 text-purple-400" />
@@ -1139,10 +1190,11 @@ const StoryboardCard = ({
               <button
                 type="button"
                 onClick={() => setShowDetails(true)}
-                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${showDetails
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${
+                  showDetails
                     ? "bg-blue-950/60 text-blue-200 shadow-xs border border-blue-500/40 font-semibold"
                     : "text-neutral-400 hover:text-neutral-200"
-                  }`}
+                }`}
                 title="Details: Dialogue, SFX, Scene"
               >
                 <MessageSquare className="w-2.5 h-2.5 text-blue-400" />
@@ -1162,25 +1214,35 @@ const StoryboardCard = ({
                     disabled={
                       Boolean(
                         isGeneratingVoice &&
-                        generatingVoiceMode === (!showDetails ? "narrative" : "speech")
+                          generatingVoiceMode ===
+                            (!showDetails ? "narrative" : "speech")
                       ) || isThisPanelAnalyzing
                     }
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleGenerateVoice(false, !showDetails ? "narrative" : "speech");
+                      handleGenerateVoice(
+                        false,
+                        !showDetails ? "narrative" : "speech"
+                      );
                     }}
                     className="h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer disabled:opacity-50 shrink-0"
-                    title={!showDetails ? "Synthesize story narration voice" : "Synthesize speech bubble voice"}
+                    title={
+                      !showDetails
+                        ? "Synthesize story narration voice"
+                        : "Synthesize speech bubble voice"
+                    }
                   >
                     {isGeneratingVoice &&
-                      generatingVoiceMode === (!showDetails ? "narrative" : "speech") ? (
+                    generatingVoiceMode ===
+                      (!showDetails ? "narrative" : "speech") ? (
                       <RefreshCw className="w-2.5 h-2.5 animate-spin text-purple-400" />
                     ) : (
                       <Mic className="w-2.5 h-2.5 text-purple-400" />
                     )}
                     <span>
                       {isGeneratingVoice &&
-                        generatingVoiceMode === (!showDetails ? "narrative" : "speech")
+                      generatingVoiceMode ===
+                        (!showDetails ? "narrative" : "speech")
                         ? "Voicing"
                         : "Voice"}
                     </span>
@@ -1191,39 +1253,47 @@ const StoryboardCard = ({
                     disabled={
                       Boolean(
                         isGeneratingVoice &&
-                        generatingVoiceMode === (!showDetails ? "narrative" : "speech")
+                          generatingVoiceMode ===
+                            (!showDetails ? "narrative" : "speech")
                       ) || isThisPanelAnalyzing
                     }
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleToggleDialogueAudio(!showDetails ? "narrative" : "speech");
+                      handleToggleDialogueAudio(
+                        !showDetails ? "narrative" : "speech"
+                      );
                     }}
-                    className={`h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer shrink-0 ${isDialoguePlaying &&
-                        !isDialoguePaused &&
-                        playingAudioType === (!showDetails ? "narrative" : "speech")
+                    className={`h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer shrink-0 ${
+                      isDialoguePlaying &&
+                      !isDialoguePaused &&
+                      playingAudioType ===
+                        (!showDetails ? "narrative" : "speech")
                         ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30"
                         : "bg-emerald-950/30 border-emerald-500/30 hover:bg-emerald-900/40 text-emerald-300 hover:text-white"
-                      }`}
+                    }`}
                     title="Play/Pause Audio"
                   >
                     {isDialoguePlaying &&
-                      !isDialoguePaused &&
-                      playingAudioType === (!showDetails ? "narrative" : "speech") ? (
+                    !isDialoguePaused &&
+                    playingAudioType ===
+                      (!showDetails ? "narrative" : "speech") ? (
                       <Pause className="w-2.5 h-2.5 fill-current" />
                     ) : (
                       <Play className="w-2.5 h-2.5 fill-current text-emerald-400" />
                     )}
                     <span>
                       {isDialoguePlaying &&
-                        !isDialoguePaused &&
-                        playingAudioType === (!showDetails ? "narrative" : "speech")
+                      !isDialoguePaused &&
+                      playingAudioType ===
+                        (!showDetails ? "narrative" : "speech")
                         ? "Pause"
                         : "Play"}
                     </span>
                   </button>
 
                   {(isDialoguePlaying || isDialoguePaused) &&
-                    playingAudioType === (!showDetails ? "narrative" : "speech") && (
+                    playingAudioType ===
+                      (!showDetails ? "narrative" : "speech") && (
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1247,7 +1317,9 @@ const StoryboardCard = ({
               rows={2}
               disabled={isThisPanelAnalyzing}
               value={panel.narrative || ""}
-              onChange={(e) => handleModifyNarrative?.(panel.id, e.target.value)}
+              onChange={(e) =>
+                handleModifyNarrative?.(panel.id, e.target.value)
+              }
               placeholder="Story narration explaining actions, atmosphere, and context..."
               className="w-full min-h-[46px] bg-neutral-900 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-neutral-700 font-sans transition-colors resize-y leading-relaxed"
             />
@@ -1259,10 +1331,11 @@ const StoryboardCard = ({
                   type="button"
                   onClick={() => setActiveTab("speech")}
                   title="Speech Bubble Dialogue"
-                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${activeTab === "speech"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${
+                    activeTab === "speech"
                       ? "bg-blue-950/60 text-blue-200 shadow-xs border border-blue-500/40 font-semibold"
                       : "text-neutral-400 hover:text-neutral-200"
-                    }`}
+                  }`}
                 >
                   <MessageSquare className="w-3 h-3 text-blue-400 shrink-0" />
                   <span>Dialogue</span>
@@ -1274,10 +1347,11 @@ const StoryboardCard = ({
                   type="button"
                   onClick={() => setActiveTab("sfx")}
                   title="Sound Effects (SFX Cue)"
-                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${activeTab === "sfx"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${
+                    activeTab === "sfx"
                       ? "bg-emerald-950/60 text-emerald-200 shadow-xs border border-emerald-500/40 font-semibold"
                       : "text-neutral-400 hover:text-neutral-200"
-                    }`}
+                  }`}
                 >
                   <Volume2 className="w-3 h-3 text-emerald-400 shrink-0" />
                   <span>SFX</span>
@@ -1289,10 +1363,11 @@ const StoryboardCard = ({
                   type="button"
                   onClick={() => setActiveTab("visual")}
                   title="Visual Scene Prompt"
-                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${activeTab === "visual"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${
+                    activeTab === "visual"
                       ? "bg-amber-950/60 text-amber-200 shadow-xs border border-amber-500/40 font-semibold"
                       : "text-neutral-400 hover:text-neutral-200"
-                    }`}
+                  }`}
                 >
                   <Palette className="w-3 h-3 text-amber-400 shrink-0" />
                   <span>Scene</span>
@@ -1308,7 +1383,9 @@ const StoryboardCard = ({
                   rows={2}
                   disabled={isThisPanelAnalyzing}
                   value={panel.speech_text || ""}
-                  onChange={(e) => handleModifySpeechText(panel.id, e.target.value)}
+                  onChange={(e) =>
+                    handleModifySpeechText(panel.id, e.target.value)
+                  }
                   placeholder="Character dialogue or speech bubbles from this panel..."
                   className="w-full min-h-[46px] bg-neutral-900 border border-neutral-800 text-xs rounded-lg p-2 text-neutral-100 placeholder-neutral-500 outline-none focus:border-blue-500/50 font-sans transition-colors resize-y leading-relaxed"
                 />
@@ -1378,19 +1455,34 @@ const StoryboardCard = ({
               <option value="" className="bg-neutral-900 text-neutral-200">
                 Motion: None
               </option>
-              <option value="zoom_in" className="bg-neutral-900 text-neutral-200">
+              <option
+                value="zoom_in"
+                className="bg-neutral-900 text-neutral-200"
+              >
                 Zoom In
               </option>
-              <option value="zoom_out" className="bg-neutral-900 text-neutral-200">
+              <option
+                value="zoom_out"
+                className="bg-neutral-900 text-neutral-200"
+              >
                 Zoom Out
               </option>
-              <option value="pan_right" className="bg-neutral-900 text-neutral-200">
+              <option
+                value="pan_right"
+                className="bg-neutral-900 text-neutral-200"
+              >
                 Pan Right
               </option>
-              <option value="pan_left" className="bg-neutral-900 text-neutral-200">
+              <option
+                value="pan_left"
+                className="bg-neutral-900 text-neutral-200"
+              >
                 Pan Left
               </option>
-              <option value="pan_down" className="bg-neutral-900 text-neutral-200">
+              <option
+                value="pan_down"
+                className="bg-neutral-900 text-neutral-200"
+              >
                 Pan Down
               </option>
             </select>
@@ -1415,7 +1507,10 @@ const StoryboardCard = ({
                   }
                 }}
                 onBlur={(e) => {
-                  if (e.target.value === "" || parseFloat(e.target.value) <= 0) {
+                  if (
+                    e.target.value === "" ||
+                    parseFloat(e.target.value) <= 0
+                  ) {
                     handleModifyDuration(panel.id, 0);
                   }
                 }}
@@ -1432,7 +1527,10 @@ const StoryboardCard = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   const current = Number(panel.duration) || 0;
-                  const next = Math.max(0.5, Math.round((current - 0.5) * 10) / 10);
+                  const next = Math.max(
+                    0.5,
+                    Math.round((current - 0.5) * 10) / 10
+                  );
                   handleModifyDuration(panel.id, next);
                 }}
                 className="h-4 w-4 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer text-xs leading-none select-none"
@@ -1474,7 +1572,8 @@ const StoryboardCard = ({
             <button
               type="button"
               disabled={
-                analyzingPanelId !== null && String(analyzingPanelId) !== String(panel.id)
+                analyzingPanelId !== null &&
+                String(analyzingPanelId) !== String(panel.id)
               }
               onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
               className="h-7.5 rounded-lg border border-blue-500/30 bg-blue-950/30 hover:bg-blue-900/40 text-blue-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] disabled:opacity-40 outline-none focus:outline-none focus:ring-0"
@@ -1516,7 +1615,6 @@ const StoryboardCard = ({
             <span>AI Asset</span>
           </button>
         </div>
-
       </div>
     </div>
   );

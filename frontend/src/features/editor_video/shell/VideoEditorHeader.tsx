@@ -69,7 +69,9 @@ interface VideoEditorHeaderProps {
   user?: any;
   addNotification?: (message: string, type?: string) => void;
   layoutMode?: "standard" | "full_timeline" | "preview_only";
-  onLayoutModeChange?: (mode: "standard" | "full_timeline" | "preview_only") => void;
+  onLayoutModeChange?: (
+    mode: "standard" | "full_timeline" | "preview_only"
+  ) => void;
 }
 
 const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
@@ -155,7 +157,8 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   const { activeProjectId, activeProjectData, setDrawerOpen } =
     useProjectStore();
-  const { status: backendStatus, checkHealth: recheckBackend } = useBackendHealth();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
 
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const creditsRef = useRef<HTMLDivElement | null>(null);
@@ -283,12 +286,18 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
         {/* Server Status Indicator - Hidden on mobile (<580px) */}
         <div className="hidden min-[580px]:flex items-center justify-center">
-          <ServerStatusIndicator status={backendStatus} onClick={recheckBackend} />
+          <ServerStatusIndicator
+            status={backendStatus}
+            onClick={recheckBackend}
+          />
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           {/* 🤖 Global AI Model Selector - Hidden on very narrow mobile (<480px) */}
-          <AIModelSelector compact className="hidden min-[480px]:flex shrink-0" />
+          <AIModelSelector
+            compact
+            className="hidden min-[480px]:flex shrink-0"
+          />
 
           <div className="relative md:hidden" ref={moreActionsRef}>
             <button
@@ -320,7 +329,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                       <Keyboard className="w-4 h-4 text-neutral-400" />
                       Shortcuts
                     </span>
-                    <span className="text-[10px] uppercase tracking-wider text-neutral-500">?</span>
+                    <span className="text-[10px] uppercase tracking-wider text-neutral-500">
+                      ?
+                    </span>
                   </button>
 
                   <button
@@ -331,7 +342,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                     }}
                     className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
                   >
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400"
+                    >
                       <rect x="3" y="4" width="4" height="16" rx="1" />
                       <rect x="10" y="4" width="11" height="7" rx="1" />
                       <rect x="10" y="13" width="11" height="7" rx="1" />
@@ -347,11 +361,23 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                     }}
                     className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
                   >
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400"
+                    >
                       <rect x="3" y="4" width="18" height="16" rx="2" />
-                      <rect x="3" y="4" width="8" height="16" rx="1" className="fill-current stroke-none" />
+                      <rect
+                        x="3"
+                        y="4"
+                        width="8"
+                        height="16"
+                        rx="1"
+                        className="fill-current stroke-none"
+                      />
                     </svg>
-                    {layoutConfig?.mediaBin ? "Hide Media Bin" : "Show Media Bin"}
+                    {layoutConfig?.mediaBin
+                      ? "Hide Media Bin"
+                      : "Show Media Bin"}
                   </button>
 
                   <button
@@ -362,9 +388,19 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                     }}
                     className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
                   >
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400"
+                    >
                       <rect x="3" y="4" width="18" height="16" rx="2" />
-                      <rect x="3" y="12" width="18" height="8" rx="1" className="fill-current stroke-none" />
+                      <rect
+                        x="3"
+                        y="12"
+                        width="18"
+                        height="8"
+                        rx="1"
+                        className="fill-current stroke-none"
+                      />
                     </svg>
                     {layoutConfig?.timeline ? "Hide Timeline" : "Show Timeline"}
                   </button>
@@ -377,11 +413,23 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                     }}
                     className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
                   >
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4 fill-none stroke-current stroke-2 text-neutral-400"
+                    >
                       <rect x="3" y="4" width="18" height="16" rx="2" />
-                      <rect x="13" y="4" width="8" height="16" rx="1" className="fill-current stroke-none" />
+                      <rect
+                        x="13"
+                        y="4"
+                        width="8"
+                        height="16"
+                        rx="1"
+                        className="fill-current stroke-none"
+                      />
                     </svg>
-                    {layoutConfig?.rightInspector ? "Hide Inspector" : "Show Inspector"}
+                    {layoutConfig?.rightInspector
+                      ? "Hide Inspector"
+                      : "Show Inspector"}
                   </button>
                 </div>
               </div>
@@ -398,11 +446,15 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
                 }}
                 title="Your credit balance & daily rewards — click to view"
                 className={`h-8.5 flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
-                  showCreditsPopover ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#2A2A2A]" : ""
+                  showCreditsPopover
+                    ? "ring-2 ring-amber-500/40 border-amber-500/60 bg-[#2A2A2A]"
+                    : ""
                 }`}
               >
                 <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                <span className="font-bold text-amber-300 font-mono text-[11px]">{credits.toLocaleString()}</span>
+                <span className="font-bold text-amber-300 font-mono text-[11px]">
+                  {credits.toLocaleString()}
+                </span>
               </button>
 
               {showCreditsPopover && (
@@ -547,7 +599,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
               }}
               title="Notifications"
               className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#2A2A2A] hover:bg-[#2A2A2A] border border-[#2A2A2A] hover:border-[#2F2F2F] text-neutral-300 hover:text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
-                showNotifications ? "ring-2 ring-[#3B82F6] border-[#3B82F6] bg-[#3B82F6]/20 text-white" : ""
+                showNotifications
+                  ? "ring-2 ring-[#3B82F6] border-[#3B82F6] bg-[#3B82F6]/20 text-white"
+                  : ""
               }`}
             >
               {notificationsMuted ? (
@@ -608,11 +662,15 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             <span className="text-xs font-bold text-white group-hover:text-white truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#1E1E1E] border border-white/5">
               {activeUser?.full_name ||
                 activeUser?.username ||
-                (activeUser?.email ? activeUser.email.split("@")[0] : "Studio Creator")}
+                (activeUser?.email
+                  ? activeUser.email.split("@")[0]
+                  : "Studio Creator")}
             </span>
             <div className="relative w-7 h-7 rounded-full overflow-hidden border border-neutral-700 bg-[#121212] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
               <img
-                key={activeUser?.avatar_url || activeUser?.full_name || "avatar"}
+                key={
+                  activeUser?.avatar_url || activeUser?.full_name || "avatar"
+                }
                 src={getUserAvatarUrl(activeUser)}
                 referrerPolicy="no-referrer"
                 onLoad={(e) => {
@@ -649,8 +707,10 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
         onClose={() => setShowSaveModal(false)}
         initialDetails={{
           seriesTitle: seriesTitle || activeProjectData?.project?.title || "",
-          chapterNumber: chapterNumber || activeProjectData?.project?.chapterNumber || "",
-          chapterTitle: chapterTitle || activeProjectData?.project?.chapterTitle || "",
+          chapterNumber:
+            chapterNumber || activeProjectData?.project?.chapterNumber || "",
+          chapterTitle:
+            chapterTitle || activeProjectData?.project?.chapterTitle || "",
           scrapedGenre: activeProjectData?.project?.genre || "",
           seriesAuthor: activeProjectData?.project?.author || "",
           seriesCoverImage:

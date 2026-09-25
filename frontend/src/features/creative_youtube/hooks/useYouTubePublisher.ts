@@ -805,7 +805,9 @@ export function useYouTubePublisher({
       try {
         const res = await fetch(fileOrUrl);
         const blob = await res.blob();
-        const file = new File([blob], "ai_thumbnail.jpg", { type: "image/jpeg" });
+        const file = new File([blob], "ai_thumbnail.jpg", {
+          type: "image/jpeg",
+        });
         setSelectedThumbnail(file);
         if (thumbnailPreviewUrl && thumbnailPreviewUrl.startsWith("blob:")) {
           URL.revokeObjectURL(thumbnailPreviewUrl);
@@ -834,7 +836,10 @@ export function useYouTubePublisher({
         `[Thumbnail Studio] Set custom AI generated thumbnail: ${fileOrUrl.name}`,
       ]);
       if (addNotification) {
-        addNotification("🖼️ High-CTR AI Thumbnail applied to video details!", "success");
+        addNotification(
+          "🖼️ High-CTR AI Thumbnail applied to video details!",
+          "success"
+        );
       }
     }
   };

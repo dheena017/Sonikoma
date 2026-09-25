@@ -114,14 +114,22 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         <ToolBtn
           title={formatTooltip("Undo", "history_undo", "Ctrl+Z")}
           onClick={onUndo}
-          className={`p-1.5 rounded transition-colors cursor-pointer ${canUndo ? "text-neutral-500 hover:text-white hover:bg-white/5" : "text-neutral-700 cursor-not-allowed"}`}
+          className={`p-1.5 rounded transition-colors cursor-pointer ${
+            canUndo
+              ? "text-neutral-500 hover:text-white hover:bg-white/5"
+              : "text-neutral-700 cursor-not-allowed"
+          }`}
         >
           <Undo className="h-3.5 w-3.5" />
         </ToolBtn>
         <ToolBtn
           title={formatTooltip("Redo", "history_redo", "Ctrl+Y")}
           onClick={onRedo}
-          className={`p-1.5 rounded transition-colors cursor-pointer ${canRedo ? "text-neutral-500 hover:text-white hover:bg-white/5" : "text-neutral-700 cursor-not-allowed"}`}
+          className={`p-1.5 rounded transition-colors cursor-pointer ${
+            canRedo
+              ? "text-neutral-500 hover:text-white hover:bg-white/5"
+              : "text-neutral-700 cursor-not-allowed"
+          }`}
         >
           <Redo className="h-3.5 w-3.5" />
         </ToolBtn>
@@ -165,7 +173,11 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Delete */}
         <ToolBtn
-          title={formatTooltip("Delete Selected Clip", "timeline_delete", "Del")}
+          title={formatTooltip(
+            "Delete Selected Clip",
+            "timeline_delete",
+            "Del"
+          )}
           onClick={onDelete}
           className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors cursor-pointer"
         >
@@ -174,7 +186,11 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Duplicate */}
         <ToolBtn
-          title={formatTooltip("Duplicate Selected Clip", "timeline_duplicate", "Ctrl+D")}
+          title={formatTooltip(
+            "Duplicate Selected Clip",
+            "timeline_duplicate",
+            "Ctrl+D"
+          )}
           onClick={onDuplicate}
           className="p-1.5 text-neutral-500 hover:text-white hover:bg-white/5 rounded transition-colors cursor-pointer"
         >
@@ -185,7 +201,11 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Snap */}
         <button
-          title={formatTooltip("Toggle Magnetic Snapping", "timeline_snap", "N")}
+          title={formatTooltip(
+            "Toggle Magnetic Snapping",
+            "timeline_snap",
+            "N"
+          )}
           onClick={onToggleSnap}
           className={`p-1.5 rounded transition-colors cursor-pointer border ${
             snapEnabled
@@ -198,7 +218,11 @@ const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
         {/* Fit view */}
         <ToolBtn
-          title={formatTooltip("Fit Timeline View", "timeline_fit_view", "Shift+Z")}
+          title={formatTooltip(
+            "Fit Timeline View",
+            "timeline_fit_view",
+            "Shift+Z"
+          )}
           onClick={onFitView}
           className="p-1.5 text-neutral-500 hover:text-white hover:bg-white/5 rounded transition-colors cursor-pointer"
         >

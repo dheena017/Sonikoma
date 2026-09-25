@@ -166,7 +166,8 @@ export default function PlaylistSelector({
             {
               value: "",
               label: "-- No Playlist (Upload as Standalone Video) --",
-              description: "Uploads video directly to channel feed without playlist",
+              description:
+                "Uploads video directly to channel feed without playlist",
             },
             ...playlists.map((pl) => ({
               value: pl.id,

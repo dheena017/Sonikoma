@@ -102,7 +102,10 @@ export default function ShortcutItem({
                 </Tooltip>
               )}
               {isModified && (
-                <Tooltip text="Reset to default key combination" placement="top">
+                <Tooltip
+                  text="Reset to default key combination"
+                  placement="top"
+                >
                   <button
                     onClick={(e) => onResetSingle(id, e)}
                     className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-amber-400 transition-all cursor-pointer"

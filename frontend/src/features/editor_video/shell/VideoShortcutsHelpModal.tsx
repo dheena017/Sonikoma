@@ -24,10 +24,9 @@ const CATEGORIES = [
   { id: "layout", label: "General & Layout", icon: Sliders },
 ];
 
-export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
+export const VideoShortcutsHelpModal: React.FC<
+  VideoShortcutsHelpModalProps
+> = ({ isOpen, onClose }) => {
   const [search, setSearch] = useState("");
   const [activeCat, setActiveCat] = useState("all");
   const { shortcuts } = useAppShortcuts();
@@ -177,7 +176,8 @@ export const VideoShortcutsHelpModal: React.FC<VideoShortcutsHelpModalProps> = (
       {
         id: "horizontal_scroll",
         label: "Horizontal Scrolling",
-        description: "Hold Shift or Ctrl while scrolling mouse wheel to scroll horizontally",
+        description:
+          "Hold Shift or Ctrl while scrolling mouse wheel to scroll horizontally",
         keys: ["Shift", "Scroll"],
         category: "layout" as const,
       },

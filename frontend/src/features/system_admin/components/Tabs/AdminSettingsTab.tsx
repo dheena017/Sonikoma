@@ -65,9 +65,12 @@ export function AdminSettingsTab({
       return;
     setResetting(true);
     try {
-      const res = await fetchWithInterceptor("/api/v1/auth/admin/settings/reset", {
-        method: "POST",
-      });
+      const res = await fetchWithInterceptor(
+        "/api/v1/auth/admin/settings/reset",
+        {
+          method: "POST",
+        }
+      );
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.settings) {

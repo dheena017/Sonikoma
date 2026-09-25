@@ -111,7 +111,7 @@ export default function AutoCropSettingsModal({
   fetchWithInterceptor,
 }: AutoCropSettingsModalProps) {
   const { models } = useAIModels();
-  
+
   // Dynamically group vision-capable models from backend catalog
   const visionModels = useMemo(() => {
     return models.filter(
@@ -126,10 +126,17 @@ export default function AutoCropSettingsModal({
   const [activeImageIdx, setActiveImageIdx] = useState<number>(0);
   const [isTesting, setIsTesting] = useState(false);
   const [testBoxes, setTestBoxes] = useState<any[]>([]);
-  const [testDimensions, setTestDimensions] = useState<{ width: number; height: number } | null>(null);
-  const [testStats, setTestStats] = useState<{ count: number; timeMs: number } | null>(null);
+  const [testDimensions, setTestDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [testStats, setTestStats] = useState<{
+    count: number;
+    timeMs: number;
+  } | null>(null);
 
-  const targetList = selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+  const targetList =
+    selectedScraped.length > 0 ? selectedScraped : scrapedImages;
   const currentImageUrl = targetList[activeImageIdx] || targetList[0] || null;
 
   // Reset test boxes when switching images
@@ -166,7 +173,10 @@ export default function AutoCropSettingsModal({
 
   const handleRunSingleTest = async () => {
     if (!currentImageUrl) {
-      addNotification?.("Please select an image to test detection on.", "warning");
+      addNotification?.(
+        "Please select an image to test detection on.",
+        "warning"
+      );
       return;
     }
 
@@ -213,10 +223,16 @@ export default function AutoCropSettingsModal({
         );
       } else {
         setTestStats({ count: 0, timeMs: elapsed });
-        addNotification?.("Detection completed: No panel boundaries found.", "info");
+        addNotification?.(
+          "Detection completed: No panel boundaries found.",
+          "info"
+        );
       }
     } catch (err: any) {
-      console.error("[AutoCropSettingsModal] Single detection test failed:", err);
+      console.error(
+        "[AutoCropSettingsModal] Single detection test failed:",
+        err
+      );
       addNotification?.(
         `Test detection failed: ${err?.message || "Internal server error"}`,
         "error"
@@ -300,7 +316,8 @@ export default function AutoCropSettingsModal({
               </span>
             </h2>
             <p className="text-xs text-neutral-400 font-mono mt-0.5">
-              Auto crop settings for comic panel segmentation using local OpenCV or Gemini Multimodal Vision
+              Auto crop settings for comic panel segmentation using local OpenCV
+              or Gemini Multimodal Vision
             </p>
           </div>
         </div>
@@ -354,7 +371,9 @@ export default function AutoCropSettingsModal({
                   )}
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white">OpenCV Engine</div>
+                  <div className="text-xs font-bold text-white">
+                    OpenCV Engine
+                  </div>
                   <div className="text-[10px] text-neutral-400 font-mono mt-0.5">
                     Local CV · 0s latency · 0 credits
                   </div>
@@ -381,7 +400,9 @@ export default function AutoCropSettingsModal({
                   )}
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white">Gemini AI Vision</div>
+                  <div className="text-xs font-bold text-white">
+                    Gemini AI Vision
+                  </div>
                   <div className="text-[10px] text-neutral-400 font-mono mt-0.5">
                     Deep multimodal understanding
                   </div>
@@ -409,7 +430,8 @@ export default function AutoCropSettingsModal({
                 >
                   {visionModels.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.name || m.id} {m.speed_rating ? `— ${m.speed_rating}` : ""}
+                      {m.name || m.id}{" "}
+                      {m.speed_rating ? `— ${m.speed_rating}` : ""}
                     </option>
                   ))}
                 </select>
@@ -428,7 +450,9 @@ export default function AutoCropSettingsModal({
             {/* Edge Sensitivity Slider */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-neutral-200">Edge Sensitivity</span>
+                <span className="font-semibold text-neutral-200">
+                  Edge Sensitivity
+                </span>
                 <span className="font-mono font-bold text-[#3B82F6] bg-[#3B82F6]/10 px-2 py-0.5 rounded-lg border border-[#3B82F6]/20">
                   {sensitivity}%
                 </span>
@@ -452,7 +476,9 @@ export default function AutoCropSettingsModal({
             {/* Padding Slider */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-neutral-200">Panel Padding</span>
+                <span className="font-semibold text-neutral-200">
+                  Panel Padding
+                </span>
                 <span className="font-mono font-bold text-[#3B82F6] bg-[#3B82F6]/10 px-2 py-0.5 rounded-lg border border-[#3B82F6]/20">
                   {padding}px
                 </span>
@@ -567,7 +593,8 @@ export default function AutoCropSettingsModal({
               </div>
             ) : (
               <div className="p-4 rounded-xl border border-dashed border-neutral-800 text-center text-xs font-mono text-neutral-500">
-                No images available in this chapter. Scrape or import images first.
+                No images available in this chapter. Scrape or import images
+                first.
               </div>
             )}
           </div>
@@ -654,7 +681,9 @@ export default function AutoCropSettingsModal({
           <Info className="h-4 w-4 text-[#3B82F6] flex-shrink-0" />
           <span>
             {targetList.length > 0
-              ? `Ready to crop ${targetList.length} image${targetList.length > 1 ? "s" : ""} and push sliced panels to Storyboard Timeline.`
+              ? `Ready to crop ${targetList.length} image${
+                  targetList.length > 1 ? "s" : ""
+                } and push sliced panels to Storyboard Timeline.`
               : "No images loaded in current chapter."}
           </span>
         </div>
@@ -679,9 +708,7 @@ export default function AutoCropSettingsModal({
             ) : (
               <>
                 <Sparkles className="h-4 w-4 text-[#3B82F6]" />
-                <span>
-                  Apply Auto Crop ({targetList.length} Images)
-                </span>
+                <span>Apply Auto Crop ({targetList.length} Images)</span>
               </>
             )}
           </button>

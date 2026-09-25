@@ -15,7 +15,13 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-export type SoundscapeMood = "off" | "lofi" | "rain" | "space" | "pulse" | "zen";
+export type SoundscapeMood =
+  | "off"
+  | "lofi"
+  | "rain"
+  | "space"
+  | "pulse"
+  | "zen";
 
 export interface MoodConfig {
   id: SoundscapeMood;
@@ -26,14 +32,45 @@ export interface MoodConfig {
 
 export const SOUNDSCAPE_MOODS: MoodConfig[] = [
   { id: "off", name: "Mute", icon: "🔇", desc: "No background audio" },
-  { id: "lofi", name: "Lo-Fi Chords", icon: "🎵", desc: "Calm warm cinematic chords" },
-  { id: "rain", name: "Rain Waves", icon: "🌧️", desc: "Organic rain & ocean swell" },
-  { id: "space", name: "Cyber Drone", icon: "🌌", desc: "432Hz ethereal ambient drone" },
-  { id: "pulse", name: "Action Pulse", icon: "⚡", desc: "Tense rhythmic sub-bass pulse" },
-  { id: "zen", name: "Zen Harmony", icon: "🎋", desc: "Peaceful acoustic resonant harmonics" },
+  {
+    id: "lofi",
+    name: "Lo-Fi Chords",
+    icon: "🎵",
+    desc: "Calm warm cinematic chords",
+  },
+  {
+    id: "rain",
+    name: "Rain Waves",
+    icon: "🌧️",
+    desc: "Organic rain & ocean swell",
+  },
+  {
+    id: "space",
+    name: "Cyber Drone",
+    icon: "🌌",
+    desc: "432Hz ethereal ambient drone",
+  },
+  {
+    id: "pulse",
+    name: "Action Pulse",
+    icon: "⚡",
+    desc: "Tense rhythmic sub-bass pulse",
+  },
+  {
+    id: "zen",
+    name: "Zen Harmony",
+    icon: "🎋",
+    desc: "Peaceful acoustic resonant harmonics",
+  },
 ];
 
-export type CinemaShader = "normal" | "oled" | "sepia" | "cyber" | "noir" | "warm";
+export type CinemaShader =
+  | "normal"
+  | "oled"
+  | "sepia"
+  | "cyber"
+  | "noir"
+  | "warm";
 
 export interface ShaderConfig {
   id: CinemaShader;
@@ -44,11 +81,36 @@ export interface ShaderConfig {
 
 export const CINEMA_SHADERS: ShaderConfig[] = [
   { id: "normal", name: "Natural", icon: "🖼️", filterCss: "none" },
-  { id: "oled", name: "OLED Dark", icon: "🕶️", filterCss: "contrast(1.18) brightness(0.92) saturate(1.08)" },
-  { id: "sepia", name: "Warm Sepia", icon: "📜", filterCss: "sepia(0.38) contrast(1.08) brightness(0.96) hue-rotate(-12deg)" },
-  { id: "cyber", name: "Cyber Neon", icon: "🎆", filterCss: "saturate(1.45) contrast(1.15) hue-rotate(8deg)" },
-  { id: "noir", name: "Noir Ink", icon: "🖤", filterCss: "grayscale(1) contrast(1.3) brightness(0.95)" },
-  { id: "warm", name: "Night Amber", icon: "🕯️", filterCss: "sepia(0.55) brightness(0.92) hue-rotate(-25deg)" },
+  {
+    id: "oled",
+    name: "OLED Dark",
+    icon: "🕶️",
+    filterCss: "contrast(1.18) brightness(0.92) saturate(1.08)",
+  },
+  {
+    id: "sepia",
+    name: "Warm Sepia",
+    icon: "📜",
+    filterCss: "sepia(0.38) contrast(1.08) brightness(0.96) hue-rotate(-12deg)",
+  },
+  {
+    id: "cyber",
+    name: "Cyber Neon",
+    icon: "🎆",
+    filterCss: "saturate(1.45) contrast(1.15) hue-rotate(8deg)",
+  },
+  {
+    id: "noir",
+    name: "Noir Ink",
+    icon: "🖤",
+    filterCss: "grayscale(1) contrast(1.3) brightness(0.95)",
+  },
+  {
+    id: "warm",
+    name: "Night Amber",
+    icon: "🕯️",
+    filterCss: "sepia(0.55) brightness(0.92) hue-rotate(-25deg)",
+  },
 ];
 
 class AmbientSoundscapeEngine {
@@ -78,14 +140,18 @@ class AmbientSoundscapeEngine {
     this.volume = Math.max(0, Math.min(1, val));
     if (this.masterGain && this.ctx) {
       try {
-        this.masterGain.gain.setValueAtTime(0.08 * this.volume, this.ctx.currentTime);
+        this.masterGain.gain.setValueAtTime(
+          0.08 * this.volume,
+          this.ctx.currentTime
+        );
       } catch (_) {}
     }
   }
 
   private initCtx() {
     if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext || (window as any).webkitAudioContext;
       this.ctx = new AudioCtx();
     }
     if (this.ctx.state === "suspended") {
@@ -101,7 +167,10 @@ class AmbientSoundscapeEngine {
       this.masterGain = this.ctx!.createGain();
       this.masterGain.gain.setValueAtTime(0.001, this.ctx!.currentTime);
       const targetGain = 0.08 * this.volume;
-      this.masterGain.gain.exponentialRampToValueAtTime(targetGain, this.ctx!.currentTime + 2.0);
+      this.masterGain.gain.exponentialRampToValueAtTime(
+        targetGain,
+        this.ctx!.currentTime + 2.0
+      );
       this.masterGain.connect(this.ctx!.destination);
 
       if (mood === "lofi") {
@@ -125,18 +194,29 @@ class AmbientSoundscapeEngine {
         });
       } else if (mood === "rain") {
         const bufferSize = this.ctx!.sampleRate * 2;
-        const noiseBuffer = this.ctx!.createBuffer(1, bufferSize, this.ctx!.sampleRate);
+        const noiseBuffer = this.ctx!.createBuffer(
+          1,
+          bufferSize,
+          this.ctx!.sampleRate
+        );
         const output = noiseBuffer.getChannelData(0);
-        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+        let b0 = 0,
+          b1 = 0,
+          b2 = 0,
+          b3 = 0,
+          b4 = 0,
+          b5 = 0,
+          b6 = 0;
         for (let i = 0; i < bufferSize; i++) {
           const white = Math.random() * 2 - 1;
           b0 = 0.99886 * b0 + white * 0.0555179;
           b1 = 0.99332 * b1 + white * 0.0750759;
-          b2 = 0.96900 * b2 + white * 0.1538520;
-          b3 = 0.86650 * b3 + white * 0.3104856;
-          b4 = 0.55000 * b4 + white * 0.5329522;
-          b5 = -0.7616 * b5 - white * 0.0168980;
-          output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.08;
+          b2 = 0.969 * b2 + white * 0.153852;
+          b3 = 0.8665 * b3 + white * 0.3104856;
+          b4 = 0.55 * b4 + white * 0.5329522;
+          b5 = -0.7616 * b5 - white * 0.016898;
+          output[i] =
+            (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.08;
           b6 = white * 0.115926;
         }
 
@@ -167,9 +247,14 @@ class AmbientSoundscapeEngine {
           osc.type = "sine";
           osc.frequency.setValueAtTime(f, this.ctx!.currentTime);
 
-          const pan = this.ctx!.createStereoPanner ? this.ctx!.createStereoPanner() : null;
+          const pan = this.ctx!.createStereoPanner
+            ? this.ctx!.createStereoPanner()
+            : null;
           if (pan) {
-            pan.pan.setValueAtTime(i % 2 === 0 ? -0.4 : 0.4, this.ctx!.currentTime);
+            pan.pan.setValueAtTime(
+              i % 2 === 0 ? -0.4 : 0.4,
+              this.ctx!.currentTime
+            );
             osc.connect(pan);
             pan.connect(this.masterGain!);
             this.activeNodes.push(pan);
@@ -232,7 +317,10 @@ class AmbientSoundscapeEngine {
   public stop() {
     if (this.masterGain && this.ctx) {
       try {
-        this.masterGain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+        this.masterGain.gain.linearRampToValueAtTime(
+          0.001,
+          this.ctx.currentTime + 0.3
+        );
       } catch (_) {}
     }
     setTimeout(() => {
@@ -273,10 +361,14 @@ class AIVoiceNarratorEngine {
       const utt = new SpeechSynthesisUtterance(text);
       utt.rate = 1.05;
       utt.pitch = 1.0;
-      
+
       const voices = window.speechSynthesis.getVoices();
       const preferred = voices.find(
-        (v) => v.lang.startsWith("en") && (v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Samantha"))
+        (v) =>
+          v.lang.startsWith("en") &&
+          (v.name.includes("Natural") ||
+            v.name.includes("Google") ||
+            v.name.includes("Samantha"))
       );
       if (preferred) utt.voice = preferred;
 
@@ -376,11 +468,17 @@ export class CinemaPlayer {
   private bindGlobalShortcuts() {
     window.addEventListener("keydown", (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable) {
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+      ) {
         return;
       }
 
-      const isHudVisible = this.hudElement && !this.hudElement.classList.contains("sonikoma-hidden");
+      const isHudVisible =
+        this.hudElement &&
+        !this.hudElement.classList.contains("sonikoma-hidden");
       if (!isHudVisible) return;
 
       if (e.code === "Space") {
@@ -474,7 +572,9 @@ export class CinemaPlayer {
   }
 
   private createDimmerOverlay() {
-    let dimmer = document.getElementById("sonikoma-theater-dimmer") as HTMLElement;
+    let dimmer = document.getElementById(
+      "sonikoma-theater-dimmer"
+    ) as HTMLElement;
     if (!dimmer) {
       dimmer = document.createElement("div");
       dimmer.id = "sonikoma-theater-dimmer";
@@ -485,7 +585,9 @@ export class CinemaPlayer {
   }
 
   private createSpotlightOverlay() {
-    let spot = document.getElementById("sonikoma-cinema-spotlight") as HTMLElement;
+    let spot = document.getElementById(
+      "sonikoma-cinema-spotlight"
+    ) as HTMLElement;
     if (!spot) {
       spot = document.createElement("div");
       spot.id = "sonikoma-cinema-spotlight";
@@ -496,7 +598,9 @@ export class CinemaPlayer {
   }
 
   private createSubtitleOverlay() {
-    let sub = document.getElementById("sonikoma-cinema-subtitles") as HTMLElement;
+    let sub = document.getElementById(
+      "sonikoma-cinema-subtitles"
+    ) as HTMLElement;
     if (!sub) {
       sub = document.createElement("div");
       sub.id = "sonikoma-cinema-subtitles";
@@ -715,42 +819,85 @@ export class CinemaPlayer {
       (document.body || document.documentElement).appendChild(hud);
 
       // Button event listeners
-      hud.querySelector("#sonikoma-btn-cinema-toggle")?.addEventListener("click", () => {
-        if (this.isPlaying) this.pause();
-        else this.play();
-      });
+      hud
+        .querySelector("#sonikoma-btn-cinema-toggle")
+        ?.addEventListener("click", () => {
+          if (this.isPlaying) this.pause();
+          else this.play();
+        });
 
-      hud.querySelector("#sonikoma-btn-cinema-close")?.addEventListener("click", () => this.stop());
-      hud.querySelector("#sonikoma-btn-speed-minus")?.addEventListener("click", () => this.adjustSpeed(-0.25));
-      hud.querySelector("#sonikoma-btn-speed-plus")?.addEventListener("click", () => this.adjustSpeed(0.25));
-      hud.querySelector("#sonikoma-btn-prev-panel")?.addEventListener("click", () => this.jumpToPrevPanel());
-      hud.querySelector("#sonikoma-btn-next-panel")?.addEventListener("click", () => this.jumpToNextPanel());
-      hud.querySelector("#sonikoma-btn-cinema-bgm")?.addEventListener("click", () => this.cycleSoundscape());
-      hud.querySelector("#sonikoma-btn-cinema-shader")?.addEventListener("click", () => this.cycleShader());
-      hud.querySelector("#sonikoma-btn-cinema-voice")?.addEventListener("click", () => this.toggleVoiceNarrator());
-      hud.querySelector("#sonikoma-btn-cinema-dimmer")?.addEventListener("click", () => this.toggleTheaterDimmer());
-      hud.querySelector("#sonikoma-btn-cinema-spotlight")?.addEventListener("click", () => this.toggleSpotlight());
-      hud.querySelector("#sonikoma-btn-cinema-fs")?.addEventListener("click", () => this.toggleFullscreen());
-      hud.querySelector("#sonikoma-btn-cinema-snip")?.addEventListener("click", () => this.snipActiveScene());
-      hud.querySelector("#sonikoma-btn-cinema-bookmark")?.addEventListener("click", () => this.bookmarkActiveScene());
-      hud.querySelector("#sonikoma-btn-cinema-settings")?.addEventListener("click", () => this.toggleSettingsFlyout());
-      hud.querySelector("#sonikoma-btn-close-flyout")?.addEventListener("click", () => this.toggleSettingsFlyout(false));
-      hud.querySelector("#sonikoma-btn-cinema-dock")?.addEventListener("click", () => this.toggleDockPosition());
+      hud
+        .querySelector("#sonikoma-btn-cinema-close")
+        ?.addEventListener("click", () => this.stop());
+      hud
+        .querySelector("#sonikoma-btn-speed-minus")
+        ?.addEventListener("click", () => this.adjustSpeed(-0.25));
+      hud
+        .querySelector("#sonikoma-btn-speed-plus")
+        ?.addEventListener("click", () => this.adjustSpeed(0.25));
+      hud
+        .querySelector("#sonikoma-btn-prev-panel")
+        ?.addEventListener("click", () => this.jumpToPrevPanel());
+      hud
+        .querySelector("#sonikoma-btn-next-panel")
+        ?.addEventListener("click", () => this.jumpToNextPanel());
+      hud
+        .querySelector("#sonikoma-btn-cinema-bgm")
+        ?.addEventListener("click", () => this.cycleSoundscape());
+      hud
+        .querySelector("#sonikoma-btn-cinema-shader")
+        ?.addEventListener("click", () => this.cycleShader());
+      hud
+        .querySelector("#sonikoma-btn-cinema-voice")
+        ?.addEventListener("click", () => this.toggleVoiceNarrator());
+      hud
+        .querySelector("#sonikoma-btn-cinema-dimmer")
+        ?.addEventListener("click", () => this.toggleTheaterDimmer());
+      hud
+        .querySelector("#sonikoma-btn-cinema-spotlight")
+        ?.addEventListener("click", () => this.toggleSpotlight());
+      hud
+        .querySelector("#sonikoma-btn-cinema-fs")
+        ?.addEventListener("click", () => this.toggleFullscreen());
+      hud
+        .querySelector("#sonikoma-btn-cinema-snip")
+        ?.addEventListener("click", () => this.snipActiveScene());
+      hud
+        .querySelector("#sonikoma-btn-cinema-bookmark")
+        ?.addEventListener("click", () => this.bookmarkActiveScene());
+      hud
+        .querySelector("#sonikoma-btn-cinema-settings")
+        ?.addEventListener("click", () => this.toggleSettingsFlyout());
+      hud
+        .querySelector("#sonikoma-btn-close-flyout")
+        ?.addEventListener("click", () => this.toggleSettingsFlyout(false));
+      hud
+        .querySelector("#sonikoma-btn-cinema-dock")
+        ?.addEventListener("click", () => this.toggleDockPosition());
 
       // Volume Slider
-      hud.querySelector("#sonikoma-volume-slider")?.addEventListener("input", (e: any) => {
-        const val = parseInt(e.target.value, 10) / 100;
-        this.soundscape.setVolume(val);
-      });
+      hud
+        .querySelector("#sonikoma-volume-slider")
+        ?.addEventListener("input", (e: any) => {
+          const val = parseInt(e.target.value, 10) / 100;
+          this.soundscape.setVolume(val);
+        });
 
       // Interactive Timeline Scrubber & Live Tooltip
-      const timelineTrack = hud.querySelector("#sonikoma-hud-timeline") as HTMLElement;
-      const tooltip = hud.querySelector("#sonikoma-scrubber-tooltip") as HTMLElement;
+      const timelineTrack = hud.querySelector(
+        "#sonikoma-hud-timeline"
+      ) as HTMLElement;
+      const tooltip = hud.querySelector(
+        "#sonikoma-scrubber-tooltip"
+      ) as HTMLElement;
 
       if (timelineTrack && tooltip) {
         timelineTrack.addEventListener("mousemove", (e: MouseEvent) => {
           const rect = timelineTrack.getBoundingClientRect();
-          const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+          const ratio = Math.max(
+            0,
+            Math.min(1, (e.clientX - rect.left) / rect.width)
+          );
           const pct = Math.round(ratio * 100);
           tooltip.textContent = `Jump to ${pct}%`;
           tooltip.style.left = `${e.clientX - rect.left}px`;
@@ -763,10 +910,14 @@ export class CinemaPlayer {
 
         timelineTrack.addEventListener("click", (e: MouseEvent) => {
           const rect = timelineTrack.getBoundingClientRect();
-          const clickRatio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+          const clickRatio = Math.max(
+            0,
+            Math.min(1, (e.clientX - rect.left) / rect.width)
+          );
           const maxScroll = Math.max(
             1,
-            (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight
+            (document.documentElement.scrollHeight ||
+              document.body.scrollHeight) - window.innerHeight
           );
           window.scrollTo({ top: clickRatio * maxScroll, behavior: "smooth" });
           this.showToast(`Jumped to ${Math.round(clickRatio * 100)}%`);
@@ -774,21 +925,35 @@ export class CinemaPlayer {
       }
 
       // Adaptive Pacing Switch
-      hud.querySelector("#sonikoma-btn-toggle-pacing")?.addEventListener("click", (e: any) => {
-        this.isAdaptivePacing = !this.isAdaptivePacing;
-        e.target.textContent = this.isAdaptivePacing ? "ON" : "OFF";
-        if (this.isAdaptivePacing) e.target.classList.add("sonikoma-active");
-        else e.target.classList.remove("sonikoma-active");
-        this.showToast(this.isAdaptivePacing ? "AI Director Pacing ON" : "AI Director Pacing OFF");
-      });
+      hud
+        .querySelector("#sonikoma-btn-toggle-pacing")
+        ?.addEventListener("click", (e: any) => {
+          this.isAdaptivePacing = !this.isAdaptivePacing;
+          e.target.textContent = this.isAdaptivePacing ? "ON" : "OFF";
+          if (this.isAdaptivePacing) e.target.classList.add("sonikoma-active");
+          else e.target.classList.remove("sonikoma-active");
+          this.showToast(
+            this.isAdaptivePacing
+              ? "AI Director Pacing ON"
+              : "AI Director Pacing OFF"
+          );
+        });
 
       // Make both Cinema HUD and Settings Flyout Draggable & Moveable
-      const hudDragHandle = hud.querySelector("#sonikoma-hud-drag-handle") as HTMLElement;
-      const cinemaBar = hud.querySelector(".sonikoma-cinema-bar") as HTMLElement;
+      const hudDragHandle = hud.querySelector(
+        "#sonikoma-hud-drag-handle"
+      ) as HTMLElement;
+      const cinemaBar = hud.querySelector(
+        ".sonikoma-cinema-bar"
+      ) as HTMLElement;
       this.enableDraggable(hud, hudDragHandle || cinemaBar);
 
-      const flyout = hud.querySelector("#sonikoma-cinema-flyout") as HTMLElement;
-      const flyoutHeader = hud.querySelector("#sonikoma-flyout-drag-header") as HTMLElement;
+      const flyout = hud.querySelector(
+        "#sonikoma-cinema-flyout"
+      ) as HTMLElement;
+      const flyoutHeader = hud.querySelector(
+        "#sonikoma-flyout-drag-header"
+      ) as HTMLElement;
       if (flyout && flyoutHeader) {
         this.enableDraggable(flyout, flyoutHeader);
       }
@@ -838,8 +1003,20 @@ export class CinemaPlayer {
         if (!isDragging) return;
         const dx = me.clientX - startX;
         const dy = me.clientY - startY;
-        const newLeft = Math.max(10, Math.min(window.innerWidth - target.offsetWidth - 10, initialLeft + dx));
-        const newTop = Math.max(10, Math.min(window.innerHeight - target.offsetHeight - 10, initialTop + dy));
+        const newLeft = Math.max(
+          10,
+          Math.min(
+            window.innerWidth - target.offsetWidth - 10,
+            initialLeft + dx
+          )
+        );
+        const newTop = Math.max(
+          10,
+          Math.min(
+            window.innerHeight - target.offsetHeight - 10,
+            initialTop + dy
+          )
+        );
         target.style.setProperty("left", `${newLeft}px`, "important");
         target.style.setProperty("top", `${newTop}px`, "important");
       };
@@ -860,7 +1037,9 @@ export class CinemaPlayer {
 
   adjustSpeed(delta: number) {
     const speeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0];
-    let currentIndex = speeds.findIndex((s) => Math.abs(s - this.scrollSpeed) < 0.01);
+    let currentIndex = speeds.findIndex(
+      (s) => Math.abs(s - this.scrollSpeed) < 0.01
+    );
     if (currentIndex === -1) currentIndex = 3;
 
     if (delta > 0) currentIndex = Math.min(speeds.length - 1, currentIndex + 1);
@@ -876,7 +1055,9 @@ export class CinemaPlayer {
     const mood = this.soundscape.cycleMood();
     const btn = document.getElementById("sonikoma-btn-cinema-bgm");
     const icon = document.getElementById("sonikoma-bgm-icon");
-    const flyoutName = document.getElementById("sonikoma-flyout-soundscape-name");
+    const flyoutName = document.getElementById(
+      "sonikoma-flyout-soundscape-name"
+    );
 
     if (icon) icon.textContent = mood.icon;
     if (flyoutName) flyoutName.textContent = mood.name;
@@ -916,7 +1097,9 @@ export class CinemaPlayer {
   toggleVoiceNarrator() {
     const active = this.voiceNarrator.toggle();
     const btn = document.getElementById("sonikoma-btn-cinema-voice");
-    const flyoutStatus = document.getElementById("sonikoma-flyout-voice-status");
+    const flyoutStatus = document.getElementById(
+      "sonikoma-flyout-voice-status"
+    );
 
     if (btn) {
       if (active) btn.classList.add("sonikoma-active");
@@ -926,7 +1109,9 @@ export class CinemaPlayer {
       flyoutStatus.textContent = active ? "ON" : "OFF";
     }
 
-    this.showToast(active ? "🎙️ Voice Narrator Active" : "🎙️ Voice Narrator Off");
+    this.showToast(
+      active ? "🎙️ Voice Narrator Active" : "🎙️ Voice Narrator Off"
+    );
     if (active) {
       this.narrateCurrentScene();
     }
@@ -964,7 +1149,11 @@ export class CinemaPlayer {
     if (this.spotlightElement) {
       if (this.isSpotlight) {
         this.spotlightElement.classList.remove("sonikoma-hidden");
-        this.spotlightElement.style.setProperty("display", "block", "important");
+        this.spotlightElement.style.setProperty(
+          "display",
+          "block",
+          "important"
+        );
       } else {
         this.spotlightElement.classList.add("sonikoma-hidden");
         this.spotlightElement.style.setProperty("display", "none", "important");
@@ -974,7 +1163,9 @@ export class CinemaPlayer {
       if (this.isSpotlight) btn.classList.add("sonikoma-active");
       else btn.classList.remove("sonikoma-active");
     }
-    this.showToast(this.isSpotlight ? "Spotlight Focus ON" : "Spotlight Focus OFF");
+    this.showToast(
+      this.isSpotlight ? "Spotlight Focus ON" : "Spotlight Focus OFF"
+    );
   }
 
   toggleFullscreen() {
@@ -994,7 +1185,11 @@ export class CinemaPlayer {
     const currentPanel = this.detectedPanels[curIdx];
     this.showToast(`📸 Captured Scene #${curIdx + 1}!`);
 
-    if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.runtime &&
+      chrome.runtime.sendMessage
+    ) {
       chrome.runtime.sendMessage({
         type: "TRIGGER_ACTIVE_SCENE_SNIP",
         payload: {
@@ -1011,7 +1206,8 @@ export class CinemaPlayer {
     const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
     const maxScroll = Math.max(
       1,
-      (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight
+      (document.documentElement.scrollHeight || document.body.scrollHeight) -
+        window.innerHeight
     );
     const progress = Math.round((scrollY / maxScroll) * 100);
 
@@ -1023,13 +1219,24 @@ export class CinemaPlayer {
       timestamp: Date.now(),
     };
 
-    if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+    if (
+      typeof chrome !== "undefined" &&
+      chrome.storage &&
+      chrome.storage.local
+    ) {
       chrome.storage.local.get("sonikoma_bookmarks", (data) => {
-        const list = Array.isArray(data?.sonikoma_bookmarks) ? data.sonikoma_bookmarks : [];
+        const list = Array.isArray(data?.sonikoma_bookmarks)
+          ? data.sonikoma_bookmarks
+          : [];
         list.unshift(bookmark);
-        chrome.storage.local.set({ sonikoma_bookmarks: list.slice(0, 50) }, () => {
-          this.showToast(`📌 Bookmark saved at Scene ${curIdx} (${progress}%)`);
-        });
+        chrome.storage.local.set(
+          { sonikoma_bookmarks: list.slice(0, 50) },
+          () => {
+            this.showToast(
+              `📌 Bookmark saved at Scene ${curIdx} (${progress}%)`
+            );
+          }
+        );
       });
     } else {
       this.showToast(`📌 Bookmark saved at Scene ${curIdx} (${progress}%)`);
@@ -1039,7 +1246,8 @@ export class CinemaPlayer {
   toggleSettingsFlyout(force?: boolean) {
     const flyout = document.getElementById("sonikoma-cinema-flyout");
     if (!flyout) return;
-    this.isSettingsOpen = typeof force === "boolean" ? force : !this.isSettingsOpen;
+    this.isSettingsOpen =
+      typeof force === "boolean" ? force : !this.isSettingsOpen;
     if (this.isSettingsOpen) {
       flyout.classList.remove("sonikoma-hidden");
       flyout.style.setProperty("display", "flex", "important");
@@ -1078,7 +1286,10 @@ export class CinemaPlayer {
     const nextIdx = this.detectedPanels.findIndex((p) => p.top > currentY);
     if (nextIdx !== -1) {
       this.currentPanelIndex = nextIdx;
-      window.scrollTo({ top: this.detectedPanels[nextIdx].top - 80, behavior: "smooth" });
+      window.scrollTo({
+        top: this.detectedPanels[nextIdx].top - 80,
+        behavior: "smooth",
+      });
       this.updatePanelReadout();
       if (this.voiceNarrator.isActive) {
         this.voiceNarrator.speak(`Scene ${nextIdx + 1}`);
@@ -1100,7 +1311,10 @@ export class CinemaPlayer {
     }
     if (prevIdx !== -1) {
       this.currentPanelIndex = prevIdx;
-      window.scrollTo({ top: Math.max(0, this.detectedPanels[prevIdx].top - 80), behavior: "smooth" });
+      window.scrollTo({
+        top: Math.max(0, this.detectedPanels[prevIdx].top - 80),
+        behavior: "smooth",
+      });
       this.updatePanelReadout();
       if (this.voiceNarrator.isActive) {
         this.voiceNarrator.speak(`Scene ${prevIdx + 1}`);
@@ -1115,12 +1329,15 @@ export class CinemaPlayer {
       this.detectedPanels = this.scanner.scanChapterImages();
     }
     if (this.scanner?.scanChapterImagesAsync) {
-      this.scanner.scanChapterImagesAsync().then((panels: any) => {
-        if (panels && panels.length > 0) {
-          this.detectedPanels = panels;
-          this.updatePanelReadout();
-        }
-      }).catch(() => {});
+      this.scanner
+        .scanChapterImagesAsync()
+        .then((panels: any) => {
+          if (panels && panels.length > 0) {
+            this.detectedPanels = panels;
+            this.updatePanelReadout();
+          }
+        })
+        .catch(() => {});
     }
   }
 
@@ -1155,7 +1372,10 @@ export class CinemaPlayer {
         const text = (a.textContent || "").toLowerCase();
         const href = a.getAttribute("href") || "";
         if (
-          (text.includes("next chapter") || text.includes("next episode") || text.includes("next >") || a.className.includes("next")) &&
+          (text.includes("next chapter") ||
+            text.includes("next episode") ||
+            text.includes("next >") ||
+            a.className.includes("next")) &&
           href &&
           !href.startsWith("#") &&
           !href.startsWith("javascript")
@@ -1164,7 +1384,9 @@ export class CinemaPlayer {
         }
       }
       // 2. Try incrementing chapter in current URL
-      const match = window.location.href.match(/(chapter|ep|episode)[-_/](\d+)/i);
+      const match = window.location.href.match(
+        /(chapter|ep|episode)[-_/](\d+)/i
+      );
       if (match) {
         const nextNum = parseInt(match[2], 10) + 1;
         return window.location.href.replace(match[0], `${match[1]}-${nextNum}`);
@@ -1178,11 +1400,19 @@ export class CinemaPlayer {
       <div class="sonikoma-next-content">
         <span class="sonikoma-next-title">🎉 Chapter Finished!</span>
         <span id="sonikoma-next-timer" class="sonikoma-next-subtitle">
-          ${nextUrl ? `Auto-advancing to Next Chapter in <strong id="sk-countdown">6</strong>s...` : "You have reached the end of this chapter."}
+          ${
+            nextUrl
+              ? `Auto-advancing to Next Chapter in <strong id="sk-countdown">6</strong>s...`
+              : "You have reached the end of this chapter."
+          }
         </span>
       </div>
       <div class="sonikoma-next-actions">
-        ${nextUrl ? `<a href="${nextUrl}" id="sonikoma-btn-read-next" class="sonikoma-btn-next-act">Next Chapter ➔</a>` : ""}
+        ${
+          nextUrl
+            ? `<a href="${nextUrl}" id="sonikoma-btn-read-next" class="sonikoma-btn-next-act">Next Chapter ➔</a>`
+            : ""
+        }
         <button type="button" id="sonikoma-btn-cancel-next" class="sonikoma-btn-cancel-act">Stay Here</button>
       </div>
     `;
@@ -1190,9 +1420,11 @@ export class CinemaPlayer {
     (document.body || document.documentElement).appendChild(banner);
     this.nextChapterBanner = banner;
 
-    banner.querySelector("#sonikoma-btn-cancel-next")?.addEventListener("click", () => {
-      this.cancelNextChapterCountdown();
-    });
+    banner
+      .querySelector("#sonikoma-btn-cancel-next")
+      ?.addEventListener("click", () => {
+        this.cancelNextChapterCountdown();
+      });
 
     if (nextUrl) {
       this.nextChapterTimerId = setInterval(() => {
@@ -1239,7 +1471,8 @@ export class CinemaPlayer {
     if (this.scanner?.extractPageMetadata) {
       const meta = this.scanner.extractPageMetadata();
       const seriesElem = document.getElementById("sonikoma-cinema-series");
-      if (seriesElem) seriesElem.textContent = meta.seriesTitle || "Sonikoma Reader";
+      if (seriesElem)
+        seriesElem.textContent = meta.seriesTitle || "Sonikoma Reader";
     }
 
     // Default to Lo-Fi soundscape on start if off
@@ -1313,7 +1546,8 @@ export class CinemaPlayer {
       const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
       const maxScroll = Math.max(
         1,
-        (document.documentElement.scrollHeight || document.body.scrollHeight) - window.innerHeight
+        (document.documentElement.scrollHeight || document.body.scrollHeight) -
+          window.innerHeight
       );
 
       // AI Director Adaptive Pacing
@@ -1328,7 +1562,10 @@ export class CinemaPlayer {
           } else {
             this.lastPausedPanelIdx = nextPanelIdx;
             this.panelPauseTimer = 0;
-            if (this.voiceNarrator.isActive && this.lastNarratedPanelIdx !== nextPanelIdx) {
+            if (
+              this.voiceNarrator.isActive &&
+              this.lastNarratedPanelIdx !== nextPanelIdx
+            ) {
               this.lastNarratedPanelIdx = nextPanelIdx;
               this.voiceNarrator.speak(`Scene ${nextPanelIdx + 1}`);
             }
@@ -1338,7 +1575,8 @@ export class CinemaPlayer {
         }
       }
 
-      const scrollPixels = this.baseSpeedPxPerSec * effectiveSpeed * deltaTimeSec;
+      const scrollPixels =
+        this.baseSpeedPxPerSec * effectiveSpeed * deltaTimeSec;
       this.subpixelAccumulator += scrollPixels;
 
       const wholePixels = Math.floor(this.subpixelAccumulator);
@@ -1348,7 +1586,10 @@ export class CinemaPlayer {
       }
 
       // Progress bar calculation
-      const progressPercent = Math.min(100, Math.max(0, Math.round((scrollY / maxScroll) * 100)));
+      const progressPercent = Math.min(
+        100,
+        Math.max(0, Math.round((scrollY / maxScroll) * 100))
+      );
       const fill = document.getElementById("sonikoma-hud-progress-fill");
       if (fill) fill.style.width = `${progressPercent}%`;
 
@@ -1361,12 +1602,16 @@ export class CinemaPlayer {
       const etaElem = document.getElementById("sonikoma-flyout-eta");
       if (etaElem) {
         etaElem.textContent =
-          remainingMinutes > 1 ? `~${remainingMinutes} min left (${progressPercent}%)` : `< 1 min left (${progressPercent}%)`;
+          remainingMinutes > 1
+            ? `~${remainingMinutes} min left (${progressPercent}%)`
+            : `< 1 min left (${progressPercent}%)`;
       }
 
       // Track active panel index
       if (this.detectedPanels.length > 0) {
-        const activeIdx = this.detectedPanels.findIndex((p) => p.top > scrollY + 150);
+        const activeIdx = this.detectedPanels.findIndex(
+          (p) => p.top > scrollY + 150
+        );
         if (activeIdx !== -1 && activeIdx !== this.currentPanelIndex) {
           this.currentPanelIndex = Math.max(0, activeIdx - 1);
           this.updatePanelReadout();

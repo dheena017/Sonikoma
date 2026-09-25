@@ -8,7 +8,9 @@ export interface AIPlaygroundPageProps {
 /**
  * @deprecated AIPlaygroundPage has been consolidated into the AI Smart Model Routing page (/ai-core/routing).
  */
-export default function AIPlaygroundPage({ navigateTo }: AIPlaygroundPageProps) {
+export default function AIPlaygroundPage({
+  navigateTo,
+}: AIPlaygroundPageProps) {
   useEffect(() => {
     if (navigateTo) {
       navigateTo("/ai-core/routing");

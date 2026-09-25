@@ -31,13 +31,11 @@ const PanelAssistantPage = React.memo(
       (state) => state.activeProjectData
     );
     const storePanels = activeProjectData?.panels || [];
-    const safePanels = (
-      panels && panels.length > 0
-        ? panels
-        : Array.isArray(storePanels)
-        ? storePanels
-        : []
-    ) as unknown as GeneratedPanel[];
+    const safePanels = (panels && panels.length > 0
+      ? panels
+      : Array.isArray(storePanels)
+      ? storePanels
+      : []) as unknown as GeneratedPanel[];
     const [selectedIdx, setSelectedIdx] = useState(0);
 
     const filmstripRef = useRef<HTMLDivElement>(null);
@@ -72,8 +70,7 @@ const PanelAssistantPage = React.memo(
             prompt: "Mystic runes glowing across the ancient temple chamber",
             duration: 0,
             speech_text: "The awakening of the ancient realm begins now.",
-            visual_description:
-              "Mystic runes glow across the temple chamber.",
+            visual_description: "Mystic runes glow across the temple chamber.",
             image_url: "",
             sfx: "Magic Hum",
             motion_type: "",
@@ -90,7 +87,10 @@ const PanelAssistantPage = React.memo(
             motion_type: "pan_left",
           },
         ]);
-        addNotification?.("Loaded demo panels for Translation Studio!", "success");
+        addNotification?.(
+          "Loaded demo panels for Translation Studio!",
+          "success"
+        );
       }
     };
 
@@ -120,7 +120,8 @@ const PanelAssistantPage = React.memo(
                 </span>
               </h1>
               <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed">
-                Multi-language dialogue translator and narrative editor per comic panel frame.
+                Multi-language dialogue translator and narrative editor per
+                comic panel frame.
               </p>
             </div>
 
@@ -142,7 +143,8 @@ const PanelAssistantPage = React.memo(
                 No Storyboard Panels Loaded
               </h3>
               <p className="text-xs sm:text-sm text-[#9CA3AF] max-w-md mx-auto leading-relaxed mb-6 font-sans">
-                Please import a series or add panels to your storyboard timeline to translate dialogue and narrative text.
+                Please import a series or add panels to your storyboard timeline
+                to translate dialogue and narrative text.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <button
@@ -164,161 +166,168 @@ const PanelAssistantPage = React.memo(
             <>
               {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
               <div className="relative flex items-center gap-4 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3 shadow-md">
-          <button
-            onClick={() => scrollFilmstrip("left")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
-            title="Scroll left"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          <div
-            ref={filmstripRef}
-            className="flex items-center gap-3.5 overflow-x-auto py-1.5 scrollbar-none flex-1 scroll-smooth px-1"
-          >
-            {safePanels.map((p, idx) => {
-              const isSel = idx === selectedIdx;
-              return (
                 <button
-                  key={p?.id || idx}
-                  onClick={() => setSelectedIdx(idx)}
-                  className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/60 flex items-center justify-center ${
-                    isSel
-                      ? "border-2 border-[#3B82F6]  scale-105 bg-[#3B82F6]/10"
-                      : "border-neutral-850 opacity-60 hover:opacity-100 hover:border-neutral-700"
-                  }`}
+                  onClick={() => scrollFilmstrip("left")}
+                  className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
+                  title="Scroll left"
                 >
-                  {p?.image_url ? (
-                    <img
-                      src={p.image_url}
-                      alt={`Frame ${idx + 1}`}
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-[10px] text-neutral-600 font-mono">
-                      Panel #{idx + 1}
-                    </div>
-                  )}
-                  <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-neutral-300 border border-neutral-800">
-                    #{idx + 1}
-                  </div>
+                  <ChevronLeft className="w-4 h-4" />
                 </button>
-              );
-            })}
-          </div>
 
-          <button
-            onClick={() => scrollFilmstrip("right")}
-            className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
-            title="Scroll right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* TWO-COLUMN STUDIO WORKSPACE GRID (4 : 8) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* COLUMN 1 (LEFT - 4 COLS / 33% WIDTH): ACTIVE PANEL DETAILS */}
-          <div className="lg:col-span-4 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 space-y-4 shadow-xl">
-            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
-              FRAME PREVIEW
-            </span>
-            <div className="h-56 sm:h-64 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 flex items-center justify-center p-2 relative shadow-inner">
-              {activePanel?.image_url ? (
-                <img
-                  src={activePanel.image_url}
-                  alt={`Panel #${selectedIdx + 1}`}
-                  className="max-h-full max-w-full object-contain rounded"
-                />
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-neutral-600">
-                  <Sparkles className="w-8 h-8" />
-                  <span className="text-[10px] font-mono">
-                    No image rendered
-                  </span>
+                <div
+                  ref={filmstripRef}
+                  className="flex items-center gap-3.5 overflow-x-auto py-1.5 scrollbar-none flex-1 scroll-smooth px-1"
+                >
+                  {safePanels.map((p, idx) => {
+                    const isSel = idx === selectedIdx;
+                    return (
+                      <button
+                        key={p?.id || idx}
+                        onClick={() => setSelectedIdx(idx)}
+                        className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/60 flex items-center justify-center ${
+                          isSel
+                            ? "border-2 border-[#3B82F6]  scale-105 bg-[#3B82F6]/10"
+                            : "border-neutral-850 opacity-60 hover:opacity-100 hover:border-neutral-700"
+                        }`}
+                      >
+                        {p?.image_url ? (
+                          <img
+                            src={p.image_url}
+                            alt={`Frame ${idx + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-[10px] text-neutral-600 font-mono">
+                            Panel #{idx + 1}
+                          </div>
+                        )}
+                        <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-neutral-300 border border-neutral-800">
+                          #{idx + 1}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              )}
-              <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-[#60A5FA] border border-[#3B82F6]/20 shadow-md">
-                PANEL #{selectedIdx + 1}
-              </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
-                SPEECH & DIALOGUE
-              </span>
-              <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
-                {cleanDialogueDisplay(activePanel?.speech_text).speech ? (
-                  <div className="space-y-1.5">
-                    {cleanDialogueDisplay(activePanel?.speech_text).tone && (
-                      <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
-                        Tone:{" "}
-                        {cleanDialogueDisplay(activePanel?.speech_text).tone}
-                      </span>
+                <button
+                  onClick={() => scrollFilmstrip("right")}
+                  className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
+                  title="Scroll right"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* TWO-COLUMN STUDIO WORKSPACE GRID (4 : 8) */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                {/* COLUMN 1 (LEFT - 4 COLS / 33% WIDTH): ACTIVE PANEL DETAILS */}
+                <div className="lg:col-span-4 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 space-y-4 shadow-xl">
+                  <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
+                    FRAME PREVIEW
+                  </span>
+                  <div className="h-56 sm:h-64 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 flex items-center justify-center p-2 relative shadow-inner">
+                    {activePanel?.image_url ? (
+                      <img
+                        src={activePanel.image_url}
+                        alt={`Panel #${selectedIdx + 1}`}
+                        className="max-h-full max-w-full object-contain rounded"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-neutral-600">
+                        <Sparkles className="w-8 h-8" />
+                        <span className="text-[10px] font-mono">
+                          No image rendered
+                        </span>
+                      </div>
                     )}
-                    <p>
-                      {cleanDialogueDisplay(activePanel?.speech_text).speech}
-                    </p>
+                    <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-[#60A5FA] border border-[#3B82F6]/20 shadow-md">
+                      PANEL #{selectedIdx + 1}
+                    </div>
                   </div>
-                ) : (
-                  <span className="text-neutral-600 italic">
-                    No speech text recorded for this panel.
-                  </span>
-                )}
-              </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
-                NARRATIVE TEXT
-              </span>
-              <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
-                {activePanel?.visual_description || (
-                  <span className="text-neutral-600 italic">
-                    No narrative text recorded for this panel.
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
+                      SPEECH & DIALOGUE
+                    </span>
+                    <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
+                      {cleanDialogueDisplay(activePanel?.speech_text).speech ? (
+                        <div className="space-y-1.5">
+                          {cleanDialogueDisplay(activePanel?.speech_text)
+                            .tone && (
+                            <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
+                              Tone:{" "}
+                              {
+                                cleanDialogueDisplay(activePanel?.speech_text)
+                                  .tone
+                              }
+                            </span>
+                          )}
+                          <p>
+                            {
+                              cleanDialogueDisplay(activePanel?.speech_text)
+                                .speech
+                            }
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-neutral-600 italic">
+                          No speech text recorded for this panel.
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-          {/* COLUMN 2 (RIGHT - 8 COLS / 67% WIDTH): TRANSLATION WORKFLOW CANVAS */}
-          <div className="lg:col-span-8 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-6 shadow-xl flex flex-col min-h-[480px]">
-            <div className="flex items-center justify-between gap-3 border-b border-neutral-850 pb-3 mb-4">
-              <div>
-                <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
-                  ACTIVE WORKFLOW
-                </p>
-                <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
-                  <BookOpenText className="w-4 h-4 text-[#3B82F6]" />{" "}
-                  Translation & Localization Studio
-                </h4>
-                <p className="mt-0.5 text-xs text-neutral-400 font-mono">
-                  Translate dialogue and narrative text to target languages with
-                  1-click batch processing.
-                </p>
-              </div>
-              <div className="rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-[#60A5FA]">
-                PANEL #{selectedIdx + 1}
-              </div>
-            </div>
+                  <div className="space-y-1.5">
+                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
+                      NARRATIVE TEXT
+                    </span>
+                    <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
+                      {activePanel?.visual_description || (
+                        <span className="text-neutral-600 italic">
+                          No narrative text recorded for this panel.
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
-            <div className="flex-1">
-              <PanelTranslationTool
-                panel={activePanel}
-                panels={safePanels}
-                onUpdateDialogue={handleUpdateDialogue}
-                addNotification={addNotification}
-              />
-            </div>
-          </div>
-        </div>
+                {/* COLUMN 2 (RIGHT - 8 COLS / 67% WIDTH): TRANSLATION WORKFLOW CANVAS */}
+                <div className="lg:col-span-8 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-6 shadow-xl flex flex-col min-h-[480px]">
+                  <div className="flex items-center justify-between gap-3 border-b border-neutral-850 pb-3 mb-4">
+                    <div>
+                      <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">
+                        ACTIVE WORKFLOW
+                      </p>
+                      <h4 className="text-base font-bold text-white mt-0.5 flex items-center gap-2">
+                        <BookOpenText className="w-4 h-4 text-[#3B82F6]" />{" "}
+                        Translation & Localization Studio
+                      </h4>
+                      <p className="mt-0.5 text-xs text-neutral-400 font-mono">
+                        Translate dialogue and narrative text to target
+                        languages with 1-click batch processing.
+                      </p>
+                    </div>
+                    <div className="rounded-full border border-[#3B82F6]/30 bg-[#3B82F6]/10 px-3 py-1 text-[9px] font-mono font-bold uppercase tracking-widest text-[#60A5FA]">
+                      PANEL #{selectedIdx + 1}
+                    </div>
+                  </div>
+
+                  <div className="flex-1">
+                    <PanelTranslationTool
+                      panel={activePanel}
+                      panels={safePanels}
+                      onUpdateDialogue={handleUpdateDialogue}
+                      addNotification={addNotification}
+                    />
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </div>
       </div>
-  );
-}
+    );
+  }
 );
 
 export default PanelAssistantPage;

@@ -28,7 +28,9 @@ export const ElementGridCard: React.FC<ElementGridCardProps> = ({
           <p className="text-[10px] font-bold text-white truncate group-hover:text-[#93C5FD] transition-colors">
             {element.title}
           </p>
-          <p className="text-[8px] text-neutral-400 font-mono truncate">{element.badge}</p>
+          <p className="text-[8px] text-neutral-400 font-mono truncate">
+            {element.badge}
+          </p>
         </div>
 
         <button

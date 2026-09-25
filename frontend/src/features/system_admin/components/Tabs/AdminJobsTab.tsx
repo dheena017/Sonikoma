@@ -46,7 +46,9 @@ export function AdminJobsTab({
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
-  const [selectedJob, setSelectedJob] = useState<JobStatusResponse | null>(null);
+  const [selectedJob, setSelectedJob] = useState<JobStatusResponse | null>(
+    null
+  );
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,17 +68,23 @@ export function AdminJobsTab({
     if (showLoading) setLoading(true);
     try {
       const params = new URLSearchParams({ limit: "150" });
-      if (statusFilter && statusFilter !== "all") params.append("status", statusFilter);
-      if (typeFilter && typeFilter !== "all") params.append("job_type", typeFilter);
+      if (statusFilter && statusFilter !== "all")
+        params.append("status", statusFilter);
+      if (typeFilter && typeFilter !== "all")
+        params.append("job_type", typeFilter);
 
-      const res = await fetchWithInterceptor(`/api/v1/auth/admin/jobs?${params.toString()}`);
+      const res = await fetchWithInterceptor(
+        `/api/v1/auth/admin/jobs?${params.toString()}`
+      );
       if (res.ok) {
         const data = await res.json();
         setJobs(data.jobs || []);
-        
+
         // Sync selected job if open
         if (selectedJob) {
-          const updated = (data.jobs || []).find((j: JobStatusResponse) => j.job_id === selectedJob.job_id);
+          const updated = (data.jobs || []).find(
+            (j: JobStatusResponse) => j.job_id === selectedJob.job_id
+          );
           if (updated) setSelectedJob(updated);
         }
       }
@@ -121,7 +129,12 @@ export function AdminJobsTab({
   };
 
   const handleCancelAllActive = async () => {
-    if (!window.confirm("Are you sure you want to cancel all currently running and queued jobs?")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to cancel all currently running and queued jobs?"
+      )
+    )
+      return;
     try {
       const res = await fetchWithInterceptor(
         `/api/v1/auth/admin/jobs/cancel-all-active`,
@@ -141,7 +154,12 @@ export function AdminJobsTab({
   };
 
   const handlePurgeCompleted = async () => {
-    if (!window.confirm("Are you sure you want to purge all completed, failed, and cancelled jobs from the database?")) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to purge all completed, failed, and cancelled jobs from the database?"
+      )
+    )
+      return;
     try {
       const res = await fetchWithInterceptor(
         `/api/v1/auth/admin/jobs/purge-completed`,
@@ -161,10 +179,15 @@ export function AdminJobsTab({
   };
 
   const handleExportJSON = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jobs, null, 2));
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(jobs, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `sonikoma_jobs_export_${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute(
+      "download",
+      `sonikoma_jobs_export_${new Date().toISOString().slice(0, 10)}.json`
+    );
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -209,12 +232,17 @@ export function AdminJobsTab({
   const queuedCount = jobs.filter((j) => j.status === "queued").length;
   const completedCount = jobs.filter((j) => j.status === "completed").length;
   const failedCount = jobs.filter((j) => j.status === "failed").length;
-  const successRate = totalCount > 0 ? Math.round((completedCount / (completedCount + failedCount || 1)) * 100) : 100;
+  const successRate =
+    totalCount > 0
+      ? Math.round((completedCount / (completedCount + failedCount || 1)) * 100)
+      : 100;
 
   const calculateDuration = (job: JobStatusResponse) => {
     if (!job.started_at) return null;
     const start = new Date(job.started_at).getTime();
-    const end = job.completed_at ? new Date(job.completed_at).getTime() : Date.now();
+    const end = job.completed_at
+      ? new Date(job.completed_at).getTime()
+      : Date.now();
     const durationMs = end - start;
     if (durationMs < 1000) return `${durationMs}ms`;
     if (durationMs < 60000) return `${(durationMs / 1000).toFixed(1)}s`;
@@ -273,50 +301,74 @@ export function AdminJobsTab({
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3.5">
         <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-4 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#9CA3AF] uppercase font-bold font-mono">Total Jobs</span>
+            <span className="text-xs text-[#9CA3AF] uppercase font-bold font-mono">
+              Total Jobs
+            </span>
             <Layers className="w-4 h-4 text-[#9CA3AF]" />
           </div>
-          <h4 className="text-2xl font-bold text-[#E5E5E5] font-mono mt-2">{totalCount}</h4>
+          <h4 className="text-2xl font-bold text-[#E5E5E5] font-mono mt-2">
+            {totalCount}
+          </h4>
         </div>
 
         <div className="bg-[#141414] border border-[#3B82F6]/30 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#3B82F6] uppercase font-bold font-mono">Running</span>
+            <span className="text-xs text-[#3B82F6] uppercase font-bold font-mono">
+              Running
+            </span>
             <Activity className="w-4 h-4 text-[#3B82F6] animate-pulse" />
           </div>
-          <h4 className="text-2xl font-bold text-[#3B82F6] font-mono mt-2">{runningCount}</h4>
+          <h4 className="text-2xl font-bold text-[#3B82F6] font-mono mt-2">
+            {runningCount}
+          </h4>
         </div>
 
         <div className="bg-[#141414] border border-[#F59E0B]/30 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#F59E0B] uppercase font-bold font-mono">In Queue</span>
+            <span className="text-xs text-[#F59E0B] uppercase font-bold font-mono">
+              In Queue
+            </span>
             <Clock className="w-4 h-4 text-[#F59E0B]" />
           </div>
-          <h4 className="text-2xl font-bold text-[#F59E0B] font-mono mt-2">{queuedCount}</h4>
+          <h4 className="text-2xl font-bold text-[#F59E0B] font-mono mt-2">
+            {queuedCount}
+          </h4>
         </div>
 
         <div className="bg-[#141414] border border-[#10B981]/30 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#10B981] uppercase font-bold font-mono">Completed</span>
+            <span className="text-xs text-[#10B981] uppercase font-bold font-mono">
+              Completed
+            </span>
             <CheckCircle className="w-4 h-4 text-[#10B981]" />
           </div>
-          <h4 className="text-2xl font-bold text-[#10B981] font-mono mt-2">{completedCount}</h4>
+          <h4 className="text-2xl font-bold text-[#10B981] font-mono mt-2">
+            {completedCount}
+          </h4>
         </div>
 
         <div className="bg-[#141414] border border-[#EF4444]/30 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#EF4444] uppercase font-bold font-mono">Failed</span>
+            <span className="text-xs text-[#EF4444] uppercase font-bold font-mono">
+              Failed
+            </span>
             <AlertTriangle className="w-4 h-4 text-[#EF4444]" />
           </div>
-          <h4 className="text-2xl font-bold text-[#EF4444] font-mono mt-2">{failedCount}</h4>
+          <h4 className="text-2xl font-bold text-[#EF4444] font-mono mt-2">
+            {failedCount}
+          </h4>
         </div>
 
         <div className="bg-[#141414] border border-[#3B82F6]/30 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-[#3B82F6] uppercase font-bold font-mono">Success Rate</span>
+            <span className="text-xs text-[#3B82F6] uppercase font-bold font-mono">
+              Success Rate
+            </span>
             <Gauge className="w-4 h-4 text-[#3B82F6]" />
           </div>
-          <h4 className="text-2xl font-bold text-[#3B82F6] font-mono mt-2">{successRate}%</h4>
+          <h4 className="text-2xl font-bold text-[#3B82F6] font-mono mt-2">
+            {successRate}%
+          </h4>
         </div>
       </div>
 
@@ -379,7 +431,11 @@ export function AdminJobsTab({
             }`}
             title="Auto-refresh every 3s"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${autoRefresh ? "animate-spin text-[#3B82F6]" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${
+                autoRefresh ? "animate-spin text-[#3B82F6]" : ""
+              }`}
+            />
             Auto-Sync
           </button>
 
@@ -441,14 +497,20 @@ export function AdminJobsTab({
             <tbody className="divide-y divide-[#2F2F2F]">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-neutral-500">
+                  <td
+                    colSpan={8}
+                    className="px-4 py-12 text-center text-neutral-500"
+                  >
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-neutral-400" />
                     Loading system background jobs...
                   </td>
                 </tr>
               ) : filteredJobs.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-4 py-12 text-center text-neutral-500">
+                  <td
+                    colSpan={8}
+                    className="px-4 py-12 text-center text-neutral-500"
+                  >
                     No matching background jobs found.
                   </td>
                 </tr>
@@ -460,7 +522,9 @@ export function AdminJobsTab({
                       key={job.job_id}
                       onClick={() => setSelectedJob(job)}
                       className={`hover:bg-neutral-900/50 cursor-pointer transition-colors ${
-                        selectedJob?.job_id === job.job_id ? "bg-neutral-900/80 border-l-2 border-blue-500" : ""
+                        selectedJob?.job_id === job.job_id
+                          ? "bg-neutral-900/80 border-l-2 border-blue-500"
+                          : ""
                       }`}
                     >
                       <td className="px-4 py-3">
@@ -485,7 +549,11 @@ export function AdminJobsTab({
                         </div>
                         {job.created_at && (
                           <span className="text-[10px] text-neutral-500 block font-mono">
-                            {new Date(job.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                            {new Date(job.created_at).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                            })}
                           </span>
                         )}
                       </td>
@@ -537,7 +605,9 @@ export function AdminJobsTab({
                       <td className="px-4 py-3 text-xs text-neutral-400 font-mono">
                         {job.project_id ? (
                           <div>
-                            <span className="text-neutral-300 block">{job.project_id}</span>
+                            <span className="text-neutral-300 block">
+                              {job.project_id}
+                            </span>
                             {job.chapter_id && (
                               <span className="text-[11px] text-neutral-500 block">
                                 {job.chapter_id}
@@ -549,7 +619,10 @@ export function AdminJobsTab({
                         )}
                       </td>
 
-                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <td
+                        className="px-4 py-3 text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => setSelectedJob(job)}
@@ -558,7 +631,8 @@ export function AdminJobsTab({
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          {(job.status === "running" || job.status === "queued") && (
+                          {(job.status === "running" ||
+                            job.status === "queued") && (
                             <button
                               onClick={() => handleCancelJob(job.job_id)}
                               className="p-1.5 text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"

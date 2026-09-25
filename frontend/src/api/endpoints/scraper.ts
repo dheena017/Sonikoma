@@ -46,7 +46,11 @@ export const cancelScraperJob = async (
 export const pollJobUntilComplete = async <T = any>(
   fetchWithInterceptor: FetchClient,
   jobId: string,
-  onProgress?: (progress: number, stage: string, job: JobStatusResponse<T>) => void,
+  onProgress?: (
+    progress: number,
+    stage: string,
+    job: JobStatusResponse<T>
+  ) => void,
   intervalMs: number = 1500,
   timeoutMs: number = 180000
 ): Promise<JobStatusResponse<T>> => {
@@ -396,7 +400,7 @@ export const exportComicArchive = createExportJob;
 export {
   detectPanelsBatch,
   detectPanelsByUrl as detectPanels,
-  detectPanelsByUrl as detectPanelsB64
+  detectPanelsByUrl as detectPanelsB64,
 } from "./panels";
 
 export const extractOcrB64 = async (
@@ -501,42 +505,73 @@ export const listAdminDomains = async (
   status?: string
 ): Promise<{ domains: DomainRecord[]; total: number }> => {
   const qs = status ? `?status=${status}` : "";
-  return apiRequest(fetchWithInterceptor, `/api/v1/scraper/admin/domains${qs}`, {
-    method: "GET",
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/scraper/admin/domains${qs}`,
+    {
+      method: "GET",
+    }
+  );
 };
 
 export const requestDomainOnboarding = async (
   fetchWithInterceptor: FetchClient,
   url: string,
   notes?: string
-): Promise<{ success: boolean; domain: string; status: string; message: string }> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/scraper/admin/domains/request", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url, notes }),
-  });
+): Promise<{
+  success: boolean;
+  domain: string;
+  status: string;
+  message: string;
+}> => {
+  return apiRequest(
+    fetchWithInterceptor,
+    "/api/v1/scraper/admin/domains/request",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url, notes }),
+    }
+  );
 };
 
 export const updateDomainStatus = async (
   fetchWithInterceptor: FetchClient,
   domain: string,
-  payload: { status?: string; blueprint?: Record<string, any>; notes?: string; sample_url?: string }
-): Promise<{ success: boolean; domain: string; status: string; message: string }> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/scraper/admin/domains/${domain}/status`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  payload: {
+    status?: string;
+    blueprint?: Record<string, any>;
+    notes?: string;
+    sample_url?: string;
+  }
+): Promise<{
+  success: boolean;
+  domain: string;
+  status: string;
+  message: string;
+}> => {
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/scraper/admin/domains/${domain}/status`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
 };
 
 export const deleteAdminDomain = async (
   fetchWithInterceptor: FetchClient,
   domain: string
 ): Promise<{ success: boolean; domain: string; message: string }> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/scraper/admin/domains/${domain}`, {
-    method: "DELETE",
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/scraper/admin/domains/${domain}`,
+    {
+      method: "DELETE",
+    }
+  );
 };
 
 export interface SeparateUrlResult {
@@ -666,7 +701,12 @@ export const blockDomain = async (
   fetchWithInterceptor: FetchClient,
   domain: string,
   reason?: string
-): Promise<{ success: boolean; domain: string; status: string; message: string }> => {
+): Promise<{
+  success: boolean;
+  domain: string;
+  status: string;
+  message: string;
+}> => {
   return apiRequest(fetchWithInterceptor, "/api/v1/scraper/block-domain", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -678,9 +718,13 @@ export const unblockDomain = async (
   fetchWithInterceptor: FetchClient,
   domain: string
 ): Promise<{ success: boolean; domain: string; message: string }> => {
-  return apiRequest(fetchWithInterceptor, `/api/v1/scraper/block-domain/${encodeURIComponent(domain)}`, {
-    method: "DELETE",
-  });
+  return apiRequest(
+    fetchWithInterceptor,
+    `/api/v1/scraper/block-domain/${encodeURIComponent(domain)}`,
+    {
+      method: "DELETE",
+    }
+  );
 };
 
 export const listBlockedDomains = async (
@@ -694,7 +738,12 @@ export const listBlockedDomains = async (
 export const checkDomainBlocked = async (
   fetchWithInterceptor: FetchClient,
   url: string
-): Promise<{ url: string; domain: string; is_blocked: boolean; reason?: string | null }> => {
+): Promise<{
+  url: string;
+  domain: string;
+  is_blocked: boolean;
+  reason?: string | null;
+}> => {
   return apiRequest(fetchWithInterceptor, "/api/v1/scraper/check-blocked", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -802,6 +851,3 @@ export const saveDomainRule = async (
     body: JSON.stringify(payload),
   });
 };
-
-
-

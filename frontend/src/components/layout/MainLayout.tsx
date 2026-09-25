@@ -376,7 +376,6 @@ export default function MainLayout(props: MainLayoutProps) {
         isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-[#2A2A2A]"
       }`}
     >
-
       {/* --- Page Navigation Sidebar --- */}
       <React.Suspense fallback={null}>
         {isAdminRestricted ? null : isAnyAdmin ? (
@@ -578,8 +577,6 @@ export default function MainLayout(props: MainLayoutProps) {
           notificationsMuted={notificationsMuted}
         />
 
-
-
         {/* Scrollable Main Children Page Area */}
         <main
           id="main-scrollable-area"
@@ -733,8 +730,6 @@ export default function MainLayout(props: MainLayoutProps) {
             }}
           />
         )}
-
-
 
         {/* Global Active Project Activation Drawer */}
         <ActiveProjectSelectorDrawer

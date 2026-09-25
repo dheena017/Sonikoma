@@ -13,7 +13,10 @@
     "completion_price_per_1m": 0.28,
     "speed_rating": "Fast (~350ms)",
     "capabilities": ["reasoning", "json_mode", "text"],
-    "recommended_for": ["Cost-Effective Story Analysis", "Complex Script Structure"]
+    "recommended_for": [
+      "Cost-Effective Story Analysis",
+      "Complex Script Structure"
+    ]
   },
   {
     "id": "deepseek-reasoner",

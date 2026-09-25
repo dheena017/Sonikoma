@@ -75,13 +75,11 @@ const YouTubePage = React.memo(
       (state) => state.activeProjectData
     );
     const storePanels = activeProjectData?.panels || [];
-    const safePanels = (
-      panels && panels.length > 0
-        ? panels
-        : Array.isArray(storePanels)
-        ? storePanels
-        : []
-    ) as unknown as GeneratedPanel[];
+    const safePanels = (panels && panels.length > 0
+      ? panels
+      : Array.isArray(storePanels)
+      ? storePanels
+      : []) as unknown as GeneratedPanel[];
     const effectiveTitle =
       scrapedTitle || activeProjectData?.project?.title || "";
     const effectiveGenre =

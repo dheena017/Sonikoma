@@ -74,7 +74,9 @@ const ActiveProjectSidebarWidget: React.FC<{
                 <img
                   src={
                     coverUrl.startsWith("http")
-                      ? `/api/v1/proxy/image?url=${encodeURIComponent(coverUrl)}`
+                      ? `/api/v1/proxy/image?url=${encodeURIComponent(
+                          coverUrl
+                        )}`
                       : coverUrl
                   }
                   alt={activeProjectData.project?.title || "Project Cover"}
@@ -83,7 +85,8 @@ const ActiveProjectSidebarWidget: React.FC<{
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-blue-600/30 to-blue-600/30 border border-[#3B82F6]/20 flex items-center justify-center text-[#60A5FA] font-bold text-xs">
-                  {activeProjectData.project?.title?.charAt(0).toUpperCase() || "P"}
+                  {activeProjectData.project?.title?.charAt(0).toUpperCase() ||
+                    "P"}
                 </div>
               )}
             </div>
@@ -92,7 +95,10 @@ const ActiveProjectSidebarWidget: React.FC<{
                 {activeProjectData.project?.title || "Untitled Project"}
               </h4>
               <span className="text-[10px] text-neutral-400 truncate font-mono">
-                {activeProjectData.panels?.length || activeProjectData.project?.panels_count || 0} panels
+                {activeProjectData.panels?.length ||
+                  activeProjectData.project?.panels_count ||
+                  0}{" "}
+                panels
               </span>
             </div>
           </div>
