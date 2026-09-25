@@ -185,7 +185,7 @@ export function useAutoAnalysis({
       try {
         const currentMemory = useProjectStore.getState().storyMemory;
         const data = await api.analyzeSelectedPanels(fetchWithInterceptor, {
-          panels: panelIds.map((id, idx) => ({ id, url: imageUrls[idx] })),
+          urls: imageUrls,
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
@@ -203,11 +203,11 @@ export function useAutoAnalysis({
           const totalCandidates = (data as any).total_candidates || (data.results?.[0] as any)?.total_candidates || 1;
 
           setPanels((prev) =>
-            prev.map((p, idx) => {
+            prev.map((p) => {
               if (!panelIds.map(String).includes(String(p.id))) return p;
-              const result =
-                data.results.find((r: any) => String(r.id) === String(p.id)) ||
-                (data.results.length === 1 && panelIds.length === 1 ? data.results[0] : data.results[idx]);
+              // Map result by position in panelIds/imageUrls array
+              const chunkIndex = panelIds.findIndex((id) => String(id) === String(p.id));
+              const result = chunkIndex !== -1 ? data.results[chunkIndex] : undefined;
               const analysis = result?.analysis || result;
               if (result && (result.analysis || analysis?.speech_text !== undefined || analysis?.visual_description !== undefined)) {
                 const speech = analysis.speech_text !== undefined ? analysis.speech_text : p.speech_text;

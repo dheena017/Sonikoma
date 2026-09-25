@@ -36,6 +36,7 @@ class AIErrorCode(str, Enum):
 
 CAPABILITY_HUMAN_NAMES: Dict[str, str] = {
     "panel_analysis": "Panel Vision Analysis",
+    "batch_panel_analysis": "Batch Panel Vision Analysis",
     "storyboard_narrative": "Story Narrative",
     "smart_crop": "AI Smart Crop",
     "speech_synthesis": "Voice Generation",
@@ -394,6 +395,10 @@ class AIOrchestrator:
             custom_entry.get("primary") if isinstance(custom_entry, dict)
             else (custom_entry if isinstance(custom_entry, str) else None)
         )
+
+        # Safeguard: do not allow audio/websocket preview models as vision/text generation primary
+        if requested_model and ("live-translate" in requested_model.lower() or "live-preview" in requested_model.lower()):
+            requested_model = None
 
         # The model configured in AI Smart Routing takes priority
         primary = requested_model or custom_primary or cls.get_default_model_for_capability(capability)

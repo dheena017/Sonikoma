@@ -828,17 +828,14 @@ export default function App() {
             try {
               addNotification("Running script extraction...", "info");
               const seq = await api.analyzeAllPanels(fetchWithInterceptor, {
-                panels: currentPanels.map((p: any) => ({
-                  id: p.id,
-                  url: p.image_url,
-                })),
+                urls: currentPanels.map((p: any) => p.image_url),
                 model: selectedModel,
                 narrationStyle,
                 voice: voiceActor,
               });
               if (seq.success && seq.results) {
-                const updated = currentPanels.map((p: any) => {
-                  const res = seq.results.find((r: any) => r.id === p.id);
+                const updated = currentPanels.map((p: any, index: number) => {
+                  const res = seq.results[index];
                   return res && res.analysis
                     ? {
                         ...p,

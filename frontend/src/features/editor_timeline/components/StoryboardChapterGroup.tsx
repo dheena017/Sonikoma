@@ -94,7 +94,7 @@ export const StoryboardChapterGroup = ({
           <HorizontalScrollContainer>
             {panels.map((panel, idx) => (
               <StoryboardCard
-                key={panel.id}
+                key={`${panel.id}-${idx}`}
                 panel={panel}
                 idx={idx}
                 currentPanelIndex={currentPanelIndex}
@@ -134,7 +134,7 @@ export const StoryboardChapterGroup = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pt-3.5 px-1 w-full">
             {panels.map((panel, idx) => (
               <StoryboardCard
-                key={panel.id}
+                key={`${panel.id}-${idx}`}
                 panel={panel}
                 idx={idx}
                 currentPanelIndex={currentPanelIndex}
@@ -232,7 +232,7 @@ export const StoryboardChapterGroup = ({
                   const globalIdx = grp.startIndex + localIdx;
                   return (
                     <StoryboardCard
-                      key={panel.id}
+                      key={`${panel.id}-${globalIdx}`}
                       panel={panel}
                       idx={globalIdx}
                       currentPanelIndex={currentPanelIndex}
@@ -277,7 +277,7 @@ export const StoryboardChapterGroup = ({
                   const globalIdx = grp.startIndex + localIdx;
                   return (
                     <StoryboardCard
-                      key={panel.id}
+                      key={`${panel.id}-${globalIdx}`}
                       panel={panel}
                       idx={globalIdx}
                       currentPanelIndex={currentPanelIndex}

@@ -6,7 +6,7 @@ Pydantic request/response schemas for audio synthesis, analysis, and transcripti
 """
 
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Union, Dict, Any
 from app.providers.whisper import WhisperModel
 
 
@@ -58,6 +58,28 @@ class AudioGenerateRequest(BaseModel):
         default=1.0,
         description="Pitch of generated TTS audio"
     )
+    model_config = ConfigDict(extra="ignore")
+
+
+class BatchPanelAudioItem(BaseModel):
+    """Single panel definition for batch TTS generation."""
+    id: Union[int, str] = Field(..., description="Panel identifier")
+    text: Optional[str] = Field(None, description="Dialogue / spoken text")
+    dialogue_list: Optional[List[str]] = Field(None, description="List of dialogue lines")
+    narrative: Optional[str] = Field(None, description="Narrative recap or storytelling text")
+    voice: Optional[str] = Field(None, description="Optional per-panel voice override")
+    target_duration: Optional[float] = Field(4.0, description="Target duration in seconds")
+    model_config = ConfigDict(extra="ignore")
+
+
+class BatchAudioGenerateRequest(BaseModel):
+    """Request schema for batch generating TTS across multiple panels."""
+    panels: List[BatchPanelAudioItem] = Field(default_factory=list, description="List of panels to generate audio for")
+    voice: Optional[str] = Field("en-US-GuyNeural", description="Global fallback voice")
+    speech_rate: Optional[float] = Field(1.0, description="Speech rate multiplier")
+    speech_pitch: Optional[float] = Field(1.0, description="Speech pitch multiplier")
+    generate_dialogue_audio: Optional[bool] = Field(True, description="Whether to synthesize dialogue text")
+    generate_narrative_audio: Optional[bool] = Field(True, description="Whether to synthesize narrative text")
     model_config = ConfigDict(extra="ignore")
 
 

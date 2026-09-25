@@ -35,19 +35,28 @@ export function useAppEditorSettings() {
       "16:9"
   );
   const [selectedModel, setSelectedModel] = useState<string>(() => {
+    const isInvalid = (m: string | null | undefined) =>
+      !m || m.includes("live-translate") || m.includes("live-preview");
+
     const direct = localStorage.getItem("ai_comic_model");
-    if (direct) return direct;
+    if (direct && !isInvalid(direct)) return direct;
     try {
       const customRouting = localStorage.getItem("sonikoma_ai_routing_custom");
       if (customRouting) {
         const parsed = JSON.parse(customRouting);
         if (Array.isArray(parsed)) {
-          const panelRoute = parsed.find((r: any) => r.task === "panel_analysis" || r.task === "storyboard_narrative");
+          const panelRoute = parsed.find(
+            (r: any) =>
+              (r.task === "batch_panel_analysis" ||
+                r.task === "panel_analysis" ||
+                r.task === "storyboard_narrative") &&
+              !isInvalid(r.primary_model)
+          );
           if (panelRoute?.primary_model) return panelRoute.primary_model;
         }
       }
     } catch {}
-    return "gemini-2.0-flash";
+    return "gemini-2.5-flash";
   });
 
   useEffect(() => {

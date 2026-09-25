@@ -275,6 +275,7 @@ class ModelRegistry:
     RECOMMENDED_CAPABILITY_CHAINS: Dict[str, List[tuple[str, str]]] = {
         "storyboard_narrative": [("gemini", "gemini-2.5-flash"), ("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o")],
         "panel_analysis": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
+        "batch_panel_analysis": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
         "scraper_blueprint": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("deepseek", "deepseek-chat")],
         "prompt_enhancement": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
         "image_diffusion": [("huggingface", "FLUX.1-schnell"), ("openai", "dall-e-3"), ("stablediffusion", "stable-diffusion-xl")],

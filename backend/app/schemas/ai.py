@@ -5,7 +5,7 @@ Pydantic request/response schemas for AI models, analysis, skills, crop, and gen
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator
 from typing import List, Dict, Any, Optional, Union
 
 
@@ -25,7 +25,7 @@ class AnalyzeImageRequest(BaseModel):
     story_memory: Optional[Dict[str, Any]] = None
     generate_audio: Optional[bool] = False
     generate_dialogue_audio: Optional[bool] = False
-    generate_narrative_audio: Optional[bool] = True
+    generate_narrative_audio: Optional[bool] = False
     enableDialogueAudio: Optional[bool] = None
     enableNarrativeAudio: Optional[bool] = None
 
@@ -53,15 +53,25 @@ class AnalyzeSequenceRequest(BaseModel):
 
 class AnalyzePanelItem(BaseModel):
     """Individual panel item containing an ID and image URL."""
-    id: Any
+    id: Any = None
     url: str
     story_context: Optional[str] = None
     speaker_name: Optional[str] = None
 
 
 class AnalyzePanelSequenceRequest(BaseModel):
-    """Evaluates a structured list of panel items."""
-    panels: List[AnalyzePanelItem]
+    """Evaluates a structured list of panel items.
+
+    Accepts either:
+    - ``panels``: list of ``{id, url}`` objects (legacy shape), or
+    - ``urls``:   flat list of image URL strings (new shape).
+
+    When ``urls`` is supplied, the root_validator auto-converts each URL into
+    an ``AnalyzePanelItem`` with a 0-based integer id so all handler logic
+    downstream remains unchanged.
+    """
+    panels: Optional[List[AnalyzePanelItem]] = None
+    urls: Optional[List[str]] = None
     model: Optional[str] = None
     narrationStyle: Optional[str] = "long"
     voice: Optional[str] = None
@@ -71,9 +81,19 @@ class AnalyzePanelSequenceRequest(BaseModel):
     story_memory: Optional[Dict[str, Any]] = None
     generate_audio: Optional[bool] = False
     generate_dialogue_audio: Optional[bool] = False
-    generate_narrative_audio: Optional[bool] = True
+    generate_narrative_audio: Optional[bool] = False
     enableDialogueAudio: Optional[bool] = None
     enableNarrativeAudio: Optional[bool] = None
+
+    @model_validator(mode="after")
+    def coerce_urls_to_panels(self):
+        """Convert a flat urls[] list into panels[] when panels is absent."""
+        if not self.panels and self.urls:
+            self.panels = [
+                AnalyzePanelItem(id=idx, url=url)
+                for idx, url in enumerate(self.urls)
+            ]
+        return self
 
 
 class AnalyzeNarrativeSequenceRequest(BaseModel):

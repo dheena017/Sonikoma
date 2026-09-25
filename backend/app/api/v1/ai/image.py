@@ -94,7 +94,7 @@ async def analyze_image(
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
     try:
         gen_diag = body.enableDialogueAudio if body.enableDialogueAudio is not None else (body.generate_dialogue_audio if body.generate_dialogue_audio is not None else False)
-        gen_narr = body.enableNarrativeAudio if body.enableNarrativeAudio is not None else (body.generate_narrative_audio if body.generate_narrative_audio is not None else True)
+        gen_narr = body.enableNarrativeAudio if body.enableNarrativeAudio is not None else (body.generate_narrative_audio if body.generate_narrative_audio is not None else False)
         should_gen = bool(getattr(body, "generate_audio", False)) or gen_diag or gen_narr
         result = await facade_analyze_image(
             url=body.url,
@@ -220,20 +220,23 @@ async def analyze_panels(
     user_api_key: dict = Depends(get_user_gemini_key),
     current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
+    if not body.panels and not body.urls:
+        raise HTTPException(status_code=400, detail="Either 'panels' or 'urls' must be provided and non-empty")
     if not body.panels:
-        raise HTTPException(status_code=400, detail="Panels list cannot be empty")
+        raise HTTPException(status_code=400, detail="Panels list cannot be empty after processing")
 
     COST = min(50, len(body.panels) * 8)
     if current_user and get_available_credits(current_user["user_id"]) < COST:
         raise HTTPException(status_code=402, detail=f"Insufficient credits: need {COST}")
 
     results = []
+    overall_scene_summary = ""
     # Seed rolling memory from request body if available
     rolling_memory = body.story_memory or ({"current_scene": body.story_context} if body.story_context else None)
     
-    # Granular audio generation flags (Narrative defaults to True, Dialogue defaults to False)
+    # Granular audio generation flags (both default to False — opt-in only)
     gen_dialogue_audio = body.enableDialogueAudio if body.enableDialogueAudio is not None else (body.generate_dialogue_audio if body.generate_dialogue_audio is not None else False)
-    gen_narrative_audio = body.enableNarrativeAudio if body.enableNarrativeAudio is not None else (body.generate_narrative_audio if body.generate_narrative_audio is not None else True)
+    gen_narrative_audio = body.enableNarrativeAudio if body.enableNarrativeAudio is not None else (body.generate_narrative_audio if body.generate_narrative_audio is not None else False)
     should_gen_audio = bool(getattr(body, "generate_audio", False)) or gen_dialogue_audio or gen_narrative_audio
 
     if len(body.panels) == 1:
@@ -268,57 +271,54 @@ async def analyze_panels(
                 "error": clean_msg,
             })
     else:
-        # Micro-batching: process in chunks of up to 5 panels concurrently in one AI vision call
-        BATCH_SIZE = 5
-        for offset in range(0, len(body.panels), BATCH_SIZE):
-            chunk = body.panels[offset:offset + BATCH_SIZE]
-            try:
-                batch_res = await facade_analyze_batch(
-                    panels=chunk,
-                    model=body.model,
-                    voice=body.voice,
-                    narration_style=body.narrationStyle,
-                    user_keys=user_api_key,
-                    story_context=body.story_context,
-                    story_memory=rolling_memory,
-                    start_index=offset,
-                    generate_audio=should_gen_audio,
-                    generate_dialogue_audio=gen_dialogue_audio,
-                    generate_narrative_audio=gen_narrative_audio,
-                )
-                if batch_res.get("story_memory"):
-                    rolling_memory = batch_res["story_memory"]
-                results.extend(batch_res.get("results", []))
-            except Exception as e:
-                logger.warning(f"[AI Analysis] Batch starting at index {offset} failed: {e}. Falling back to single-panel analysis.")
-                for idx_rel, panel in enumerate(chunk):
-                    panel_idx = offset + idx_rel
-                    panel_voice = getattr(panel, "voice", None) or body.voice
-                    panel_context = getattr(panel, "story_context", None)
-                    try:
-                        res = await facade_analyze_image(
-                            url=panel.url,
-                            model=body.model,
-                            voice=panel_voice,
-                            narration_style=body.narrationStyle,
-                            user_keys=user_api_key,
-                            story_context=panel_context,
-                            story_memory=rolling_memory,
-                            panel_index=panel_idx,
-                            generate_audio=should_gen_audio,
-                            generate_dialogue_audio=gen_dialogue_audio,
-                            generate_narrative_audio=gen_narrative_audio,
-                        )
-                        if res.get("story_memory"):
-                            rolling_memory = res["story_memory"]
-                        results.append({"id": panel.id, "url": panel.url, **res})
-                    except Exception as err:
-                        results.append({
-                            "id": panel.id,
-                            "url": panel.url,
-                            "success": False,
-                            "error": str(err),
-                        })
+        # Analyze all panels in a single AI vision execution call
+        try:
+            batch_res = await facade_analyze_batch(
+                panels=body.panels,
+                model=body.model,
+                voice=body.voice,
+                narration_style=body.narrationStyle,
+                user_keys=user_api_key,
+                story_context=body.story_context,
+                story_memory=rolling_memory,
+                start_index=0,
+                generate_audio=should_gen_audio,
+                generate_dialogue_audio=gen_dialogue_audio,
+                generate_narrative_audio=gen_narrative_audio,
+            )
+            if batch_res.get("story_memory"):
+                rolling_memory = batch_res["story_memory"]
+            overall_scene_summary = batch_res.get("overall_scene_summary", "")
+            results.extend(batch_res.get("results", []))
+        except Exception as e:
+            logger.warning(f"[AI Analysis] Full sequence batch failed: {e}. Falling back to single-panel analysis.")
+            for panel_idx, panel in enumerate(body.panels):
+                panel_voice = getattr(panel, "voice", None) or body.voice
+                panel_context = getattr(panel, "story_context", None)
+                try:
+                    res = await facade_analyze_image(
+                        url=panel.url,
+                        model=body.model,
+                        voice=panel_voice,
+                        narration_style=body.narrationStyle,
+                        user_keys=user_api_key,
+                        story_context=panel_context,
+                        story_memory=rolling_memory,
+                        panel_index=panel_idx,
+                        generate_audio=should_gen_audio,
+                        generate_dialogue_audio=gen_dialogue_audio,
+                        generate_narrative_audio=gen_narrative_audio,
+                    )
+                    if res.get("story_memory"):
+                        rolling_memory = res["story_memory"]
+                    results.append({"id": panel.id, "url": panel.url, **res})
+                except Exception as err:
+                    results.append({
+                        "id": panel.id,
+                        "url": panel.url,
+                        "success": False,
+                        "error": str(err),
+                    })
 
     results = _attach_narratives_to_results(results)
     if current_user and any(item.get("success") for item in results):
@@ -338,6 +338,11 @@ async def analyze_panels(
     return {
         "success": success_count > 0,
         "results": results,
+        "combined_analysis": {
+            "panels": results,
+            "overall_scene_summary": overall_scene_summary,
+            "story_memory": rolling_memory,
+        },
         "model": used_model,
         "success_count": success_count,
         "total_count": len(results),

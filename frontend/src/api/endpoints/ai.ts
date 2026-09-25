@@ -33,7 +33,8 @@ export const analyzeAllPanels = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/v1/ai/analyze-all-panels panels=${data?.panels?.length || 0} model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
+  console.log(`[AI Endpoint] POST /api/v1/ai/analyze-all-panels urls=${data?.urls?.length || 0} model=${data?.model || "default"} has_memory=${Boolean(data?.story_memory)}`);
+  console.log("[AI Endpoint] /api/v1/ai/analyze-all-panels input:", data);
   try {
     const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/analyze-all-panels", {
       method: "POST",
@@ -42,7 +43,7 @@ export const analyzeAllPanels = async (
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/v1/ai/analyze-all-panels success (${elapsed}ms):`, res);
+    console.log(`[AI Endpoint] /api/v1/ai/analyze-all-panels output (${elapsed}ms):`, res);
     return res;
   } catch (err) {
     console.error(`[AI Endpoint] /api/v1/ai/analyze-all-panels failed:`, err);

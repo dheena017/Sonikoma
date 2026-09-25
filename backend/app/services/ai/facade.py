@@ -387,6 +387,16 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
 
 async def _synthesize_tts_to_cache(text: str, voice: str, target_dur: float) -> Tuple[Optional[str], Optional[float]]:
     """Synthesizes text using Edge TTS and saves to stitched_cache, returning (cached_url, actual_duration)."""
+    # Safety cap: truncate extremely long text to prevent native memory crashes in pydub
+    MAX_TTS_CHARS = 500
+    if len(text) > MAX_TTS_CHARS:
+        truncated = text[:MAX_TTS_CHARS]
+        # Try to cut at the last sentence boundary for natural speech
+        last_period = max(truncated.rfind(". "), truncated.rfind("! "), truncated.rfind("? "))
+        if last_period > MAX_TTS_CHARS // 2:
+            truncated = truncated[:last_period + 1]
+        text = truncated
+        logger.debug(f"[_synthesize_tts_to_cache] Text truncated to {len(text)} chars for TTS safety")
     with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_audio:
         temp_audio_path = tmp_audio.name
     try:
@@ -661,12 +671,11 @@ async def _fallback_individual_batch(
     generate_dialogue_audio: Optional[bool] = None,
     generate_narrative_audio: Optional[bool] = None,
 ) -> Dict[str, Any]:
-    """Helper to sequentially process panels with facade_analyze_image if batch execution fails."""
-    results = []
+    """Helper to concurrently process panels with facade_analyze_image if batch execution fails."""
     rolling_memory = story_memory or ({"current_scene": story_context} if story_context else None)
     used_model = model or "gemini-2.5-flash"
 
-    for i, p in enumerate(panels):
+    async def _analyze_single(i, p):
         p_id = getattr(p, "id", None) if not isinstance(p, dict) else p.get("id")
         p_url = getattr(p, "url", None) if not isinstance(p, dict) else p.get("url")
         p_voice = getattr(p, "voice", None) or voice
@@ -685,18 +694,23 @@ async def _fallback_individual_batch(
                 generate_dialogue_audio=generate_dialogue_audio,
                 generate_narrative_audio=generate_narrative_audio,
             )
-            if res.get("story_memory"):
-                rolling_memory = res["story_memory"]
-            if res.get("model"):
-                used_model = res["model"]
-            results.append({"id": p_id, "url": p_url, **res})
+            return {"id": p_id, "url": p_url, **res}
         except Exception as exc:
-            results.append({
+            return {
                 "id": p_id,
                 "url": p_url,
                 "success": False,
                 "error": str(exc),
-            })
+            }
+
+    results = await asyncio.gather(*(_analyze_single(i, p) for i, p in enumerate(panels)))
+    results = list(results)
+
+    for r in results:
+        if r.get("story_memory"):
+            rolling_memory = r["story_memory"]
+        if r.get("model"):
+            used_model = r["model"]
 
     return {
         "success": any(r.get("success") for r in results),
@@ -720,9 +734,10 @@ async def facade_analyze_batch(
     generate_narrative_audio: Optional[bool] = None,
 ) -> Dict[str, Any]:
     """
-    Analyzes a sequence of 2-8 panels concurrently in a SINGLE AI vision call.
-    Maintains memory continuity and formats results to match single-panel schema.
-    Falls back gracefully to individual panel calls if batch vision fails.
+    Analyzes storyboard panels in parallel batch AI vision calls.
+    Divides large sequences into optimal chunks of up to 6 panels and processes
+    all chunks concurrently via asyncio.gather for near-instant execution.
+    Maintains memory continuity and formats results to match storyboard panel schema.
     """
     start_time = time.time()
     memory_tracker = StoryMemoryTracker(story_memory or story_context)
@@ -739,37 +754,11 @@ async def facade_analyze_batch(
             return None
 
     img_buffers = await asyncio.gather(*(_resolve_one(p) for p in panels))
+    img_buffers = list(img_buffers)
 
-    # If any buffer failed to download, fallback to sequential single-panel analysis
-    if not all(img_buffers):
-        logger.warning("[facade_analyze_batch] One or more images failed to download; falling back to single-panel analysis.")
-        return await _fallback_individual_batch(
-            panels=panels,
-            model=model,
-            voice=voice,
-            narration_style=narration_style,
-            user_keys=user_keys,
-            story_context=story_context,
-            story_memory=story_memory,
-            start_index=start_index,
-            generate_audio=generate_audio,
-            generate_dialogue_audio=generate_dialogue_audio,
-            generate_narrative_audio=generate_narrative_audio,
-        )
-
-    # 2. Build prompt context
-    brightness = None
-    try:
-        brightness = img_utils.compute_brightness(img_buffers[0])
-    except Exception:
-        pass
-
-    tone_hint = ""
-    if brightness is not None:
-        if brightness < 80:
-            tone_hint = " The sequence appears dark or moody — favour dramatic or tense SFX."
-        elif brightness > 200:
-            tone_hint = " The sequence appears bright and vibrant — favour action or triumphant SFX."
+    # 1x1 blank fallback if any specific image buffer failed to load
+    BLANK_JPEG = b'\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00\xff\xdb\x00C\x00\x08\x06\x06\x07\x06\x05\x08\x07\x07\x07\t\t\x08\n\x0c\x14\r\x0c\x0b\x0b\x0c\x19\x12\x13\x0f\x14\x1d\x1a\x1f\x1e\x1d\x1a\x1c\x1c $.\' ",#\x1c\x1c(7),01444\x1f\'9=82<.342\xff\xc0\x00\x0b\x08\x00\x01\x00\x01\x01\x01\x11\x00\xff\xc4\x00\x1f\x00\x00\x01\x05\x01\x01\x01\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\xff\xda\x00\x08\x01\x01\x00\x00?\x00\xbf\x00\xff\xd9'
+    img_buffers = [b if b else BLANK_JPEG for b in img_buffers]
 
     style_val = (narration_style or "long").lower()
     if style_val == "short":
@@ -782,23 +771,67 @@ async def facade_analyze_batch(
     skill = registry.get("batch_panel_analysis")
     formatted_context = f"STORY CONTEXT & PRECEDING MEMORY:\n{story_context_section}\n" if story_context_section else ""
 
-    try:
+    # 2. Divide into optimal sub-batch chunks of 6 panels for high concurrency
+    CHUNK_SIZE = 6
+    chunks = []
+    for c_start in range(0, len(panels), CHUNK_SIZE):
+        c_end = min(c_start + CHUNK_SIZE, len(panels))
+        chunks.append((c_start, panels[c_start:c_end], img_buffers[c_start:c_end]))
+
+    async def _execute_chunk(c_start, c_panels, c_buffers):
+        brightness = None
+        try:
+            brightness = img_utils.compute_brightness(c_buffers[0])
+        except Exception:
+            pass
+
+        c_tone_hint = ""
+        if brightness is not None:
+            if brightness < 80:
+                c_tone_hint = " The sequence appears dark or moody — favour dramatic or tense SFX."
+            elif brightness > 200:
+                c_tone_hint = " The sequence appears bright and vibrant — favour action or triumphant SFX."
+
         raw_text = await skill.execute(
             model=model,
-            image_bytes=img_buffers,
+            image_bytes=c_buffers,
             user_keys=user_keys or {},
-            panel_count=len(panels),
-            tone_hint=tone_hint,
+            panel_count=len(c_panels),
+            tone_hint=c_tone_hint,
             narrative_length_hint=narrative_length_hint,
             story_context_section=formatted_context
         )
         parsed_json = json.loads(raw_text) if isinstance(raw_text, str) else raw_text
         if not isinstance(parsed_json, dict) or "panels" not in parsed_json:
-            raise ValueError("Invalid batch panel analysis response structure")
+            raise ValueError(f"Invalid batch panel analysis response structure for chunk at {c_start}")
 
-        batch_items = parsed_json.get("panels", [])
+        raw_items = parsed_json.get("panels", [])
+        items_by_idx = {it.get("panel_index"): it for it in raw_items if isinstance(it.get("panel_index"), int)}
+        ordered_items = []
+        for idx in range(len(c_panels)):
+            item = items_by_idx.get(idx + 1) or (raw_items[idx] if idx < len(raw_items) else {})
+            ordered_items.append(item)
+        return (c_start, ordered_items, parsed_json.get("overall_scene_summary", ""))
+
+    try:
+        chunk_outputs = await asyncio.gather(*[_execute_chunk(s, p, b) for s, p, b in chunks])
+        chunk_outputs = list(chunk_outputs)
+        chunk_outputs.sort(key=lambda x: x[0])
+        batch_items = []
+        overall_summaries = []
+        for _, items, summary in chunk_outputs:
+            batch_items.extend(items)
+            if summary:
+                overall_summaries.append(summary)
+        overall_scene_summary = " ".join(overall_summaries)
+        if len(batch_items) != len(panels) or any(
+            not isinstance(item, dict) or not item for item in batch_items
+        ):
+            raise ValueError(
+                f"Batch AI response returned {len(batch_items)} valid panels for {len(panels)} inputs"
+            )
     except Exception as exc:
-        logger.warning(f"[facade_analyze_batch] Batch AI vision execution failed: {exc}. Falling back to single-panel analysis.")
+        logger.warning(f"[facade_analyze_batch] Batch AI vision execution failed: {exc}. Falling back to concurrent single-panel analysis.")
         return await _fallback_individual_batch(
             panels=panels,
             model=model,
@@ -818,18 +851,11 @@ async def facade_analyze_batch(
     model_used = meta.get("model") or model or "gemini-2.5-flash"
     elapsed = int((time.time() - start_time) * 1000)
 
-    # Map parsed items by 1-based panel_index or sequential list index
-    items_by_idx = {}
-    for it in batch_items:
-        p_idx = it.get("panel_index")
-        if isinstance(p_idx, int):
-            items_by_idx[p_idx] = it
-
     results = []
     for i, p in enumerate(panels):
         p_id = getattr(p, "id", None) if not isinstance(p, dict) else p.get("id")
         p_url = getattr(p, "url", None) if not isinstance(p, dict) else p.get("url")
-        raw_analysis = items_by_idx.get(i + 1) or (batch_items[i] if i < len(batch_items) else {})
+        raw_analysis = batch_items[i] if i < len(batch_items) else {}
         analysis = validate_analysis(raw_analysis)
 
         # Format dialogue turns separated onto distinct lines if multiple turns exist
@@ -912,7 +938,7 @@ async def facade_analyze_batch(
         "results": results,
         "story_memory": memory_tracker.to_dict(),
         "model": model_used,
-        "overall_scene_summary": parsed_json.get("overall_scene_summary", "")
+        "overall_scene_summary": overall_scene_summary
     }
 
 

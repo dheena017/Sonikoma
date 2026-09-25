@@ -11,13 +11,13 @@ def test_schema_defaults():
     print("--- 1. Testing Default Audio Generation Settings ---")
     req = AnalyzePanelSequenceRequest(panels=[AnalyzePanelItem(id=1, url="http://example.com/panel1.jpg")])
     assert req.generate_dialogue_audio is False, f"Expected False, got {req.generate_dialogue_audio}"
-    assert req.generate_narrative_audio is True, f"Expected True, got {req.generate_narrative_audio}"
-    print("[PASS] AnalyzePanelSequenceRequest default: Dialogue=OFF, Narrative=ON")
+    assert req.generate_narrative_audio is False, f"Expected False, got {req.generate_narrative_audio}"
+    print("[PASS] AnalyzePanelSequenceRequest default: Dialogue=OFF, Narrative=OFF (Decoupled)")
 
     single_req = AnalyzeImageRequest(url="http://example.com/single.jpg")
     assert single_req.generate_dialogue_audio is False, f"Expected False, got {single_req.generate_dialogue_audio}"
-    assert single_req.generate_narrative_audio is True, f"Expected True, got {single_req.generate_narrative_audio}"
-    print("[PASS] AnalyzeImageRequest default: Dialogue=OFF, Narrative=ON")
+    assert single_req.generate_narrative_audio is False, f"Expected False, got {single_req.generate_narrative_audio}"
+    print("[PASS] AnalyzeImageRequest default: Dialogue=OFF, Narrative=OFF (Decoupled)")
 
     audio_settings = AudioSettingsUpdateRequest()
     assert audio_settings.enableDialogueAudio is None

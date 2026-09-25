@@ -10,6 +10,7 @@ import {
   RefreshCw,
   Download,
   X,
+  Volume2,
 } from "lucide-react";
 import EditorHeaderFrame from "@/features/editor_studio/components/EditorHeaderFrame";
 import StoryboardFilterBar, {
@@ -30,6 +31,8 @@ interface StoryboardHeaderProps {
   isAnalyzingAll?: boolean;
   handleAnalyzeAllPanels?: () => void;
   handleAnalyzeSelected?: () => void;
+  isGeneratingAudio?: boolean;
+  handleGenerateAllAudio?: () => void;
   selectAllPanels?: () => void;
   clearSelection?: () => void;
   handleSelectOdd?: () => void;
@@ -66,6 +69,8 @@ export default function StoryboardHeader({
   isAnalyzingAll,
   handleAnalyzeAllPanels,
   handleAnalyzeSelected,
+  isGeneratingAudio,
+  handleGenerateAllAudio,
   selectAllPanels,
   clearSelection,
   handleDeleteSelected,
@@ -341,9 +346,9 @@ export default function StoryboardHeader({
         <button
           type="button"
           onClick={handleAnalyzeAllPanels}
-          disabled={isAnalyzingAll}
-          title="Analyze full sequence"
-          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-900/30 transition-all cursor-pointer active:scale-95"
+          disabled={isAnalyzingAll || isGeneratingAudio}
+          title="Analyze full sequence (Vision & Script Extraction)"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-900/30 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCw
             className={`w-3.5 h-3.5 ${
@@ -351,6 +356,25 @@ export default function StoryboardHeader({
             }`}
           />
           <span className="hidden 2xl:inline">Analyze Sequence</span>
+        </button>
+      )}
+
+      {panelsLength > 0 && handleGenerateAllAudio && (
+        <button
+          type="button"
+          onClick={handleGenerateAllAudio}
+          disabled={isGeneratingAudio || isAnalyzingAll}
+          title="Generate voice narration & dialogue audio for all panels"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-purple-400/40 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white shadow-md shadow-purple-900/30 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Volume2
+            className={`w-3.5 h-3.5 ${
+              isGeneratingAudio ? "animate-pulse text-purple-200" : ""
+            }`}
+          />
+          <span className="hidden 2xl:inline">
+            {isGeneratingAudio ? "Generating Audio..." : "Generate Audio"}
+          </span>
         </button>
       )}
 

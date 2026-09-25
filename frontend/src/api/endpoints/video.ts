@@ -40,10 +40,14 @@ export const generateTts = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/audio/generate", {
+  const endpoint = "/api/v1/audio/generate";
+  console.log(`[Audio Endpoint] POST ${endpoint} input:`, data);
+  const response = await apiRequest(fetchWithInterceptor, endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
     ...options,
   });
+  console.log(`[Audio Endpoint] ${endpoint} output:`, response);
+  return response;
 };

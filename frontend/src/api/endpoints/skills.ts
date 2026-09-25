@@ -39,32 +39,57 @@ export const alignDialogue = async (
   panelId: string,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(
-    fetchWithInterceptor,
-    `/api/v1/audio/align-dialogue/${panelId}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }
-  );
+  const endpoint = `/api/v1/audio/align-dialogue/${panelId}`;
+  console.log(`[Audio Endpoint] POST ${endpoint} input:`, data);
+  const response = await apiRequest(fetchWithInterceptor, endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  console.log(`[Audio Endpoint] ${endpoint} output:`, response);
+  return response;
 };
 
 export const getVoices = async (
   fetchWithInterceptor: FetchClient
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/audio/voices");
+  const endpoint = "/api/v1/audio/voices";
+  console.log(`[Audio Endpoint] GET ${endpoint} input:`, null);
+  const response = await apiRequest(fetchWithInterceptor, endpoint);
+  console.log(`[Audio Endpoint] ${endpoint} output:`, response);
+  return response;
 };
 
 export const generateAudio = async (
   fetchWithInterceptor: FetchClient,
   data: any
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/audio/generate", {
+  const endpoint = "/api/v1/audio/generate";
+  console.log(`[Audio Endpoint] POST ${endpoint} input:`, data);
+  const response = await apiRequest(fetchWithInterceptor, endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
+  console.log(`[Audio Endpoint] ${endpoint} output:`, response);
+  return response;
+};
+
+export const batchGenerateAudio = async (
+  fetchWithInterceptor: FetchClient,
+  data: any,
+  options?: RequestInit
+): Promise<ApiResponse<any>> => {
+  const endpoint = "/api/v1/audio/batch-generate";
+  console.log(`[Audio Endpoint] POST ${endpoint} input:`, data);
+  const response = await apiRequest(fetchWithInterceptor, endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+    ...options,
+  });
+  console.log(`[Audio Endpoint] ${endpoint} output:`, response);
+  return response;
 };
 
 // Dedicated skill functions to avoid hardcoded paths in components

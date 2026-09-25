@@ -77,11 +77,14 @@ export function useStoryboardOperations({
     analyzingPanelId,
     isAnalyzingAll,
     isAnalyzingSelected,
+    isGeneratingAudio,
     isZipping,
     handleDownloadZip,
     handleAnalyzePanel,
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
+    handleGenerateAllAudio,
+    handleGenerateAudioForPanel,
     handleCancelAnalysis,
   } = useCompileActions({
     panels,
@@ -141,8 +144,11 @@ export function useStoryboardOperations({
     handleAnalyzePanel,
     handleAnalyzeAllPanels,
     handleAnalyzeSelectedPanels,
+    handleGenerateAllAudio,
+    handleGenerateAudioForPanel,
     isAnalyzingAll,
     isAnalyzingSelected,
+    isGeneratingAudio,
     handleCancelAnalysis,
   };
 }

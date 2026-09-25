@@ -138,7 +138,7 @@ async def execute_provider_call(
                 "or set GEMINI_API_KEY in your backend .env file."
             )
 
-        config_args = {}
+        config_args = {"max_output_tokens": 8192}
         schema = getattr(skill, "response_schema", None) if skill else None
         if schema:
             config_args["response_mime_type"] = "application/json"
@@ -171,6 +171,9 @@ async def execute_provider_call(
 
         # Normalize and alias deprecated or renamed model identifiers
         gemini_model_aliases = {
+            "gemini-3.5-live-translate-preview": "gemini-2.5-flash",
+            "gemini-3.1-flash-live-preview": "gemini-2.5-flash",
+            "gemini-3.1-pro-preview": "gemini-2.5-flash",
             "gemini-2.5-pro": "gemini-2.5-flash",
             "gemini-2.5-pro-preview-tts": "gemini-2.5-flash",
             "gemini-3.6-flash": "gemini-2.5-flash",
