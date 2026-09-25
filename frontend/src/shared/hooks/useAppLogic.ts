@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState, useMemo } from "react";
+import { useRef, useCallback, useState, useMemo } from "react";
 import { useAppState } from "@/shared/hooks/useAppState";
 import * as api from "@/api/index";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
@@ -26,10 +26,9 @@ export function normalizeScrapedImageUrls(images: any[]): string[] {
 
 export function useAppLogic() {
   const state = useAppState();
-  const { targetUrl, selectedSource, selectedModel } = state;
+  const { targetUrl, selectedModel } = state;
 
   const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
-  const lastScrapedUrlRef = useRef<string>("");
   const isGeneratingRef = useRef(false);
 
   const [isGeneratingStoryboard, setIsGeneratingStoryboard] = useState<boolean>(false);

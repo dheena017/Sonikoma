@@ -64,10 +64,6 @@ const EditorPage: React.FC<EditorPageProps> = ({
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
   const [currentSection, setCurrentSection] = React.useState("storyboard");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
-  const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">(
-    "high"
-  );
-  void previewQuality;
 
   const [activeTab, setActiveTab] = React.useState(() => {
     return new URLSearchParams(window.location.search).get("tab") || "";

@@ -81,7 +81,6 @@ const ChapterScraperPage = React.lazy(() =>
     "@/features/workspace_scraper/chapter-scraper/pages/ChapterScraperPage"
   ).then((m) => ({ default: m.ChapterScraperPage }))
 );
-const EpisodeScraperPage = ChapterScraperPage;
 const AdminPage = React.lazy(
   () => import("@/features/system_admin/pages/AdminPage")
 );

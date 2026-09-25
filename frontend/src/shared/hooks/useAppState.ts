@@ -265,7 +265,6 @@ export function useAppState() {
     setAuthLoading,
     setIsInitializing,
     handleLogout,
-    handleLoginSuccess,
   } = auth;
 
   const fetchWithInterceptor = useMemo(

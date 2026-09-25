@@ -592,6 +592,41 @@ export function parseHydratedProjectJson(
   };
 }
 
+/** 9b. Fetch project data from backend, with automatic fallback to public endpoint and slug lookup */
+export async function fetchProjectFromServer(
+  identifier: string,
+  fetchClient?: any
+): Promise<ActiveProjectData | null> {
+  if (!identifier) return null;
+  const fetcher = fetchClient || (typeof window !== "undefined" ? window.fetch : null);
+  if (!fetcher) return null;
+  const token = getStoredAuthToken();
+
+  // 1. Try authenticated project endpoint
+  try {
+    const res = await fetcher(`/api/v1/projects/${encodeURIComponent(identifier)}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const parsed = parseHydratedProjectJson(json, identifier);
+      if (parsed) return parsed;
+    }
+  } catch (_) {}
+
+  // 2. Fall back to public project endpoint (no auth required, works for public projects and chapter slugs)
+  try {
+    const res = await fetcher(`/api/v1/projects/public/${encodeURIComponent(identifier)}`);
+    if (res.ok) {
+      const json = await res.json();
+      const parsed = parseHydratedProjectJson(json, identifier);
+      if (parsed) return parsed;
+    }
+  } catch (_) {}
+
+  return null;
+}
+
 /** 10. Reorder helper for Drag-and-Drop panels */
 export function reorderPanelArray(list: PanelItem[], startIndex: number, endIndex: number): PanelItem[] {
   const result = Array.from(list);
@@ -629,28 +664,6 @@ export function computeSpeechDuration(text: string, wordsPerSec = 2.5, bufferSec
   return Math.max(2.5, Math.min(calculated, 15.0)); // Between 2.5s and 15s
 }
 
-/** 13. HTTP PUT settings helper for backend communication */
-async function sendSettingsUpdate(
-  projectId: string,
-  endpointSubpath: string,
-  payload: Record<string, any>,
-  fetchClient?: any
-): Promise<any | null> {
-  const fetchFn = fetchClient || window.fetch || fetch;
-  const res = await fetchFn(
-    `/api/v1/projects/${encodeURIComponent(projectId)}/settings${endpointSubpath}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }
-  );
-
-  if (!res.ok) {
-    throw new Error(`Failed settings update: ${res.statusText}`);
-  }
-  return res.json();
-}
 
 // =============================================================================
 // 3. Zustand Store Definition with Reload Resilience & History Stack
@@ -959,24 +972,71 @@ export const useProjectStore = create<ProjectStoreState>()(
             console.error("Error reading import project from local storage:", e);
           }
 
-          // 3. Check localStorage active-project-store ONLY for this specific project_id
+          // 3. Check localStorage active-project-store for matching or any temp project with data
           try {
             const storeData = readStoredProjectStoreState();
-            if (storeData?.project && storeData.project.project_id === idToHydrate) {
-              set({
-                activeProjectId: idToHydrate,
-                activeProjectData: storeData,
-                projectState: "active",
-                missingProjectInfo: null,
-                isHydrating: false,
-              });
-              return;
+            if (storeData?.project) {
+              // Exact match — always use it
+              if (storeData.project.project_id === idToHydrate) {
+                set({
+                  activeProjectId: idToHydrate,
+                  activeProjectData: storeData,
+                  projectState: "active",
+                  missingProjectInfo: null,
+                  isHydrating: false,
+                });
+                return;
+              }
+              // Stale URL: stored project is also a temp project with actual data → restore it
+              // (temp IDs diverge when navigating to an old URL from browser history)
+              const storedIsTempWithData =
+                isTempProject(storeData.project.project_id) &&
+                ((storeData.panels && storeData.panels.length > 0) ||
+                  (storeData.scrapedImages && storeData.scrapedImages.length > 0));
+              if (storedIsTempWithData) {
+                console.info(
+                  `[useProjectStore] Stale temp URL (${idToHydrate}), restoring stored temp project: ${storeData.project.project_id}`
+                );
+                set({
+                  activeProjectId: storeData.project.project_id,
+                  activeProjectData: storeData,
+                  projectState: "active",
+                  missingProjectInfo: null,
+                  isHydrating: false,
+                });
+                return;
+              }
             }
           } catch (e) {
             console.error("Error reading temp project from local storage:", e);
           }
 
-          // 4. Initialize fresh local draft if not present (never keep previous project's assets)
+          // 4. Check server for this project_id or chapter_slug (e.g. if saved to SQLite/Postgres)
+          try {
+            let serverProject = await fetchProjectFromServer(idToHydrate, fetchClient);
+            if (!serverProject && typeof window !== "undefined") {
+              const slugMatch = window.location.pathname.match(/\/chapters\/([^\/\?]+)/);
+              if (slugMatch && slugMatch[1] && slugMatch[1] !== idToHydrate) {
+                serverProject = await fetchProjectFromServer(slugMatch[1], fetchClient);
+              }
+            }
+            if (serverProject) {
+              const snapshot = pushHistorySnapshot([], -1, serverProject);
+              set({
+                activeProjectId: serverProject.project.project_id,
+                activeProjectData: serverProject,
+                projectState: "active",
+                missingProjectInfo: null,
+                isHydrating: false,
+                ...snapshot,
+              });
+              return;
+            }
+          } catch (e) {
+            console.warn("[useProjectStore] Server check for temp project failed:", e);
+          }
+
+          // 5. Initialize fresh local draft — no stored or server data found for this temp project
           const draftData: ActiveProjectData = {
             project: {
               project_id: idToHydrate,
@@ -1000,24 +1060,15 @@ export const useProjectStore = create<ProjectStoreState>()(
         set({ isHydrating: true, projectState: currentData ? "active" : "loading" });
 
         try {
-          const fetcher = fetchClient || window.fetch;
-          const token = getStoredAuthToken();
+          let parsed = await fetchProjectFromServer(idToHydrate, fetchClient);
 
-          const res = await fetcher(`/api/v1/projects/${encodeURIComponent(idToHydrate)}`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-          });
-
-          if (!res.ok) {
-            if (currentData && currentData.project?.project_id === idToHydrate) {
-              set({ projectState: "active", isHydrating: false });
-              return;
+          // If not found by ID, also check if current URL contains a chapter slug
+          if (!parsed && typeof window !== "undefined") {
+            const slugMatch = window.location.pathname.match(/\/chapters\/([^\/\?]+)/);
+            if (slugMatch && slugMatch[1] && slugMatch[1] !== idToHydrate) {
+              parsed = await fetchProjectFromServer(slugMatch[1], fetchClient);
             }
-            get().setProjectMissing(idToHydrate, { isJobId: idToHydrate.startsWith("job_") });
-            return;
           }
-
-          const json = await res.json();
-          const parsed = parseHydratedProjectJson(json, idToHydrate);
 
           if (!parsed) {
             if (currentData && currentData.project?.project_id === idToHydrate) {
