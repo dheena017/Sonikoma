@@ -109,7 +109,7 @@ DEFAULT_AUDIO_PRESETS: List[AudioPresetItem] = [
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
-@router.get("/settings", response_model=AudioSettingsModel, summary="Get active audio synthesis & mixing settings")
+@router.get("/audio-settings", response_model=AudioSettingsModel, summary="Get active audio synthesis & mixing settings")
 async def get_audio_settings_endpoint(current_user: Optional[dict] = Depends(get_optional_current_user)):
     """Retrieves current audio configuration, reading user preferences if authenticated."""
     if current_user and current_user.get("preferences"):
@@ -123,7 +123,7 @@ async def get_audio_settings_endpoint(current_user: Optional[dict] = Depends(get
     return _global_audio_settings
 
 
-@router.post("/settings", response_model=AudioSettingsModel, summary="Update active audio synthesis & mixing settings")
+@router.post("/audio-settings", response_model=AudioSettingsModel, summary="Update active audio synthesis & mixing settings")
 async def update_audio_settings_endpoint(
     body: AudioSettingsModel,
     current_user: Optional[dict] = Depends(get_optional_current_user)
@@ -145,7 +145,7 @@ async def update_audio_settings_endpoint(
     return _global_audio_settings
 
 
-@router.get("/presets", summary="List pre-configured voice and atmosphere audio presets")
+@router.get("/list-audio-presets", summary="List pre-configured voice and atmosphere audio presets")
 async def list_audio_presets_endpoint():
     """Returns curated cinematic voice actor presets and atmospheric configurations."""
     return {"success": True, "presets": DEFAULT_AUDIO_PRESETS, "total": len(DEFAULT_AUDIO_PRESETS)}

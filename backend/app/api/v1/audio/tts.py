@@ -2,9 +2,10 @@
 backend/app/api/v1/audio/tts.py
 ─────────────────────────────────────────────────────────────────────────────
 Text-To-Speech synthesis and voice listing endpoints.
-POST /tts           – Generate TTS panel audio
-GET  /voices        – List all available Edge-TTS voices
-POST /preview       – Instant voice audition / preview
+POST /synthesize-panel-audio – Generate TTS audio for one panel
+POST /synthesize-all-panel-audio – Generate TTS audio for all panels
+GET  /list-tts-voices – List all available Edge-TTS voices
+POST /preview-tts-voice – Instant voice audition / preview
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -43,8 +44,7 @@ def _cache_audio_base64(b64_str: str) -> Optional[str]:
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
-@router.post("/tts", summary="Generate TTS panel audio")
-@router.post("/generate", summary="Generate TTS panel audio (alias)")
+@router.post("/synthesize-panel-audio", summary="Synthesize TTS audio for one storyboard panel")
 async def generate_tts_endpoint(body: AudioGenerateRequest):
     """Synthesizes speech from a list of dialogue strings or text using Edge-TTS."""
     try:
@@ -70,8 +70,7 @@ async def generate_tts_endpoint(body: AudioGenerateRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/batch-generate", summary="Batch generate TTS audio for storyboard panels")
-@router.post("/batch", summary="Batch generate TTS audio (alias)")
+@router.post("/synthesize-all-panel-audio", summary="Synthesize TTS audio for all storyboard panels")
 async def batch_generate_tts_endpoint(body: BatchAudioGenerateRequest):
     """
     Synthesizes TTS audio for multiple storyboard panels concurrently.
@@ -149,14 +148,14 @@ async def batch_generate_tts_endpoint(body: BatchAudioGenerateRequest):
     return JSONResponse(content={"success": True, "results": list(results)})
 
 
-@router.get("/voices", summary="List available Edge-TTS voices")
+@router.get("/list-tts-voices", summary="List available Edge-TTS voices")
 async def list_voices_endpoint():
     """Returns all available Microsoft Edge-TTS neural voice codes and display names."""
     voices = get_available_voices()
     return JSONResponse(content={"success": True, "voices": voices})
 
 
-@router.post("/preview", summary="Generate instant spoken audio preview with selected voice and pitch")
+@router.post("/preview-tts-voice", summary="Generate instant spoken audio preview with selected voice and pitch")
 async def preview_voice_endpoint(body: AudioPreviewRequest):
     """Quick audio audition endpoint to test and preview Edge-TTS voice delivery."""
     try:

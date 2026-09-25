@@ -134,7 +134,7 @@ export default function StoryboardHeader({
               type="button"
               onClick={clearSelection}
               title="Clear Selection"
-              className="ml-1 p-0.5 rounded-md hover:bg-blue-500/20 text-blue-300 hover:text-white transition-colors cursor-pointer"
+              className="ml-1 p-0.5 rounded-md hover:bg-blue-500/20 text-blue-300 hover:text-white transition-colors duration-75 cursor-pointer [touch-action:manipulation]"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -145,7 +145,7 @@ export default function StoryboardHeader({
         <button
           type="button"
           onClick={isAllSelected ? clearSelection : selectAllPanels}
-          className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-neutral-700 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+          className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-sm active:scale-95 active:duration-75 [touch-action:manipulation]"
         >
           {isAllSelected ? (
             <Square className="w-3.5 h-3.5 text-neutral-400" />
@@ -190,7 +190,7 @@ export default function StoryboardHeader({
             onClick={handleAnalyzeSelected}
             disabled={isBusy}
             title="Analyze selected scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-sm active:scale-95 active:duration-75 disabled:opacity-40 [touch-action:manipulation]"
           >
             <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
             <span>Analyze Selected</span>
@@ -204,7 +204,7 @@ export default function StoryboardHeader({
             onClick={handleAutoCropSelected}
             disabled={isBusy}
             title="Auto-crop selected scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-sm active:scale-95 active:duration-75 disabled:opacity-40 [touch-action:manipulation]"
           >
             <Scissors className="w-3.5 h-3.5 text-neutral-400" />
             <span>Auto Crop</span>
@@ -218,7 +218,7 @@ export default function StoryboardHeader({
             onClick={handleCleanBubblesSelected}
             disabled={isBusy}
             title="Clean text speech bubbles"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-sm active:scale-95 active:duration-75 disabled:opacity-40 [touch-action:manipulation]"
           >
             <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
             <span>Clean Bubbles</span>
@@ -232,7 +232,7 @@ export default function StoryboardHeader({
             onClick={handleBatchMergeSelected}
             disabled={isBusy}
             title="Stitch selected scenes vertically"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#2A2A2A] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-neutral-700 bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-sm active:scale-95 active:duration-75 disabled:opacity-40 [touch-action:manipulation]"
           >
             <Link2 className="w-3.5 h-3.5 text-neutral-400" />
             <span>Merge ({selectedCount})</span>
@@ -245,7 +245,7 @@ export default function StoryboardHeader({
             type="button"
             onClick={handleCancelBatch}
             title="Cancel Operation"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-rose-500/40 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-rose-500/40 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-100 flex items-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-sm active:scale-95 active:duration-75 [touch-action:manipulation]"
           >
             <X className="w-3.5 h-3.5 text-rose-400" />
             <span>Cancel</span>
@@ -259,7 +259,7 @@ export default function StoryboardHeader({
             onClick={handleDeleteSelected}
             disabled={isBusy}
             title="Delete Selected Scenes"
-            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-rose-500/40 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-100 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95 disabled:opacity-40"
+            className="px-3 py-1.5 text-[11px] font-mono font-bold rounded-xl border border-rose-500/40 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-100 flex items-center gap-1.5 transition-colors duration-75 cursor-pointer shadow-sm active:scale-95 active:duration-75 disabled:opacity-40 [touch-action:manipulation]"
           >
             <Trash2 className="w-3.5 h-3.5 text-rose-400" />
             <span>Delete</span>
@@ -325,7 +325,7 @@ export default function StoryboardHeader({
               ? "Select filtered scenes"
               : "Select all scenes"
           }
-          className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-850 hover:border-neutral-700 text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shadow-sm"
+          className="text-[11px] font-mono font-bold border border-neutral-800 bg-neutral-900 hover:bg-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-colors duration-75 active:scale-95 active:duration-75 cursor-pointer shadow-sm [touch-action:manipulation]"
         >
           {isAllSelected ? (
             <Square className="w-3.5 h-3.5 text-neutral-400" />
@@ -348,7 +348,7 @@ export default function StoryboardHeader({
           onClick={handleAnalyzeAllPanels}
           disabled={isAnalyzingAll || isGeneratingAudio}
           title="Analyze full sequence (Vision & Script Extraction)"
-          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-900/30 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-md shadow-blue-900/30 transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 disabled:opacity-50 disabled:cursor-not-allowed [touch-action:manipulation]"
         >
           <RefreshCw
             className={`w-3.5 h-3.5 ${
@@ -365,7 +365,7 @@ export default function StoryboardHeader({
           onClick={handleGenerateAllAudio}
           disabled={isGeneratingAudio || isAnalyzingAll}
           title="Generate voice narration & dialogue audio for all panels"
-          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-purple-400/40 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white shadow-md shadow-purple-900/30 transition-all cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-8 px-3 rounded-xl text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 border border-purple-400/40 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white shadow-md shadow-purple-900/30 transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 disabled:opacity-50 disabled:cursor-not-allowed [touch-action:manipulation]"
         >
           <Volume2
             className={`w-3.5 h-3.5 ${
@@ -384,7 +384,7 @@ export default function StoryboardHeader({
           onClick={handleDownloadZip}
           disabled={isZipping}
           title="Download ZIP"
-          className="text-[11px] font-mono font-bold border border-neutral-700 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer"
+          className="text-[11px] font-mono font-bold border border-neutral-700 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-300 hover:text-white rounded-xl px-3 py-1.5 flex items-center gap-1.5 transition-colors duration-75 shadow-sm active:scale-95 active:duration-75 cursor-pointer [touch-action:manipulation]"
         >
           <Download className="w-3.5 h-3.5 text-blue-400" />
           <span className="hidden 2xl:inline">
@@ -398,7 +398,7 @@ export default function StoryboardHeader({
           type="button"
           onClick={() => setShowBulkOps(!showBulkOps)}
           title="Bulk actions"
-          className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-all shadow-sm active:scale-95 cursor-pointer ${
+          className={`text-[11px] font-mono font-bold border rounded-xl px-3 py-1.5 transition-colors duration-75 shadow-sm active:scale-95 active:duration-75 cursor-pointer [touch-action:manipulation] ${
             showBulkOps
               ? "border-blue-500/40 bg-blue-600/20 text-blue-300"
               : "border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white"

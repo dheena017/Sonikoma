@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
-import { generateTts } from "@/api";
+import { alignDialogue, generateTts } from "@/api";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { PanelAnalyzingOverlay } from "@/shared/ui/loading/PanelAnalyzingOverlay";
 
@@ -748,18 +748,14 @@ const StoryboardCard = ({
           .split("\n")
           .map((s) => s.trim())
           .filter(Boolean);
-        const alignRes = await fetchWithInterceptor(
-          `/api/v1/audio/align-dialogue/${panel.id}`,
+        const alignData = await alignDialogue(
+          fetchWithInterceptor,
+          String(panel.id),
           {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              audio_url: audioUrl,
-              ocr_texts: ocr_texts.length > 0 ? ocr_texts : [panel.speech_text],
-            }),
+            audio_url: audioUrl,
+            ocr_texts: ocr_texts.length > 0 ? ocr_texts : [panel.speech_text],
           }
         );
-        const alignData = await alignRes.json();
 
         if (alignData.success && alignData.dialogue_map) {
           syncMapObj = {
@@ -966,7 +962,7 @@ const StoryboardCard = ({
                 handleShiftPanel(idx, "left");
               }}
               disabled={idx === 0}
-              className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer text-[10px] leading-none"
+              className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer text-[10px] leading-none"
               title="Move Panel Left"
             >
               ◀
@@ -979,7 +975,7 @@ const StoryboardCard = ({
                 handleShiftPanel(idx, "right");
               }}
               disabled={idx === panelsLength - 1}
-              className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors cursor-pointer text-[10px] leading-none"
+              className="p-1 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer text-[10px] leading-none"
               title="Move Panel Right"
             >
               ▶
@@ -997,7 +993,7 @@ const StoryboardCard = ({
                 e.stopPropagation();
                 setIsMenuOpen((prev) => !prev);
               }}
-              className="p-1 rounded-md bg-black/70 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 backdrop-blur-sm transition-colors cursor-pointer flex items-center justify-center opacity-0 group-hover/thumb:opacity-100"
+              className="p-1 rounded-md bg-black/70 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 backdrop-blur-sm transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer flex items-center justify-center opacity-0 group-hover/thumb:opacity-100"
               title="Panel Options"
             >
               <MoreVertical className="h-3 w-3" />
@@ -1029,7 +1025,7 @@ const StoryboardCard = ({
                     setIsMenuOpen(false);
                     handleMagicMotion();
                   }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] cursor-pointer text-left"
                 >
                   <Wand2 className="w-3.5 h-3.5 text-neutral-400" />
                   <span>Magic Motion</span>
@@ -1039,7 +1035,7 @@ const StoryboardCard = ({
                 <button
                   type="button"
                   onClick={handleOpenAssistant}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] cursor-pointer text-left"
                 >
                   <Bot className="w-3.5 h-3.5 text-purple-400" />
                   <span>Panel Assistant</span>
@@ -1053,7 +1049,7 @@ const StoryboardCard = ({
                     setIsMenuOpen(false);
                     handleGenerateVoice();
                   }}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] cursor-pointer text-left"
                 >
                   <Mic className="w-3.5 h-3.5 text-neutral-400" />
                   <span>Create Voice Audio</span>
@@ -1063,7 +1059,7 @@ const StoryboardCard = ({
                 <button
                   type="button"
                   onClick={handleCopyText}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] cursor-pointer text-left"
                 >
                   <Copy className="w-3.5 h-3.5 text-neutral-400" />
                   <span>Copy Dialogue</span>
@@ -1073,7 +1069,7 @@ const StoryboardCard = ({
                 <button
                   type="button"
                   onClick={handleDuplicatePanel}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-neutral-300 hover:text-white hover:bg-neutral-800 transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] cursor-pointer text-left"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>Duplicate Panel</span>
@@ -1086,7 +1082,7 @@ const StoryboardCard = ({
                 <button
                   type="button"
                   onClick={handleDeletePanel}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 transition-colors cursor-pointer text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] cursor-pointer text-left"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-400" />
                   <span>Delete Panel</span>
@@ -1102,7 +1098,7 @@ const StoryboardCard = ({
               e.stopPropagation();
               onToggleSelect();
             }}
-            className={`rounded-full p-1 border transition-colors cursor-pointer ${isSelected
+            className={`rounded-full p-1 border transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer ${isSelected
                 ? "bg-blue-600 border-blue-500 text-white opacity-100"
                 : "bg-black/70 border-neutral-700 text-neutral-400 opacity-0 group-hover/thumb:opacity-100 hover:border-neutral-500"
               }`}
@@ -1130,7 +1126,7 @@ const StoryboardCard = ({
               <button
                 type="button"
                 onClick={() => setShowDetails(false)}
-                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-all cursor-pointer ${!showDetails
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${!showDetails
                     ? "bg-purple-950/60 text-purple-200 shadow-xs border border-purple-500/40 font-semibold"
                     : "text-neutral-400 hover:text-neutral-200"
                   }`}
@@ -1143,7 +1139,7 @@ const StoryboardCard = ({
               <button
                 type="button"
                 onClick={() => setShowDetails(true)}
-                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-all cursor-pointer ${showDetails
+                className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium flex items-center gap-1 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${showDetails
                     ? "bg-blue-950/60 text-blue-200 shadow-xs border border-blue-500/40 font-semibold"
                     : "text-neutral-400 hover:text-neutral-200"
                   }`}
@@ -1173,7 +1169,7 @@ const StoryboardCard = ({
                       e.stopPropagation();
                       handleGenerateVoice(false, !showDetails ? "narrative" : "speech");
                     }}
-                    className="h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white transition-colors cursor-pointer disabled:opacity-50 shrink-0"
+                    className="h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer disabled:opacity-50 shrink-0"
                     title={!showDetails ? "Synthesize story narration voice" : "Synthesize speech bubble voice"}
                   >
                     {isGeneratingVoice &&
@@ -1202,10 +1198,10 @@ const StoryboardCard = ({
                       e.stopPropagation();
                       handleToggleDialogueAudio(!showDetails ? "narrative" : "speech");
                     }}
-                    className={`h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors cursor-pointer shrink-0 ${isDialoguePlaying &&
+                    className={`h-6 px-1.5 rounded-md text-[10px] font-medium flex items-center gap-1 border transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer shrink-0 ${isDialoguePlaying &&
                         !isDialoguePaused &&
                         playingAudioType === (!showDetails ? "narrative" : "speech")
-                        ? "bg-emerald-600 border-emerald-500 text-white shadow-sm shadow-emerald-500/30"
+                        ? "bg-emerald-600 hover:bg-emerald-500 border-emerald-500 text-white shadow-sm shadow-emerald-500/30"
                         : "bg-emerald-950/30 border-emerald-500/30 hover:bg-emerald-900/40 text-emerald-300 hover:text-white"
                       }`}
                     title="Play/Pause Audio"
@@ -1234,7 +1230,7 @@ const StoryboardCard = ({
                           e.stopPropagation();
                           stopDialogueAudio();
                         }}
-                        className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/50 text-rose-300 hover:bg-rose-900/60 cursor-pointer"
+                        className="h-6 w-6 rounded-md flex items-center justify-center bg-rose-950/60 border border-rose-500/50 text-rose-300 hover:bg-rose-900/60 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer"
                         title="Stop Audio"
                       >
                         <Square className="w-2.5 h-2.5 fill-current" />
@@ -1258,12 +1254,12 @@ const StoryboardCard = ({
           ) : (
             <div className="space-y-1.5 animate-in fade-in duration-150">
               {/* Segmented Subtabs: Dialogue, SFX, Scene */}
-              <div className="flex items-center p-0.5 rounded-lg bg-neutral-950 border border-neutral-850 gap-0.5 select-none">
+              <div className="flex items-center p-0.5 rounded-lg bg-neutral-950 border border-neutral-800 gap-0.5 select-none">
                 <button
                   type="button"
                   onClick={() => setActiveTab("speech")}
                   title="Speech Bubble Dialogue"
-                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${activeTab === "speech"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${activeTab === "speech"
                       ? "bg-blue-950/60 text-blue-200 shadow-xs border border-blue-500/40 font-semibold"
                       : "text-neutral-400 hover:text-neutral-200"
                     }`}
@@ -1278,7 +1274,7 @@ const StoryboardCard = ({
                   type="button"
                   onClick={() => setActiveTab("sfx")}
                   title="Sound Effects (SFX Cue)"
-                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${activeTab === "sfx"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${activeTab === "sfx"
                       ? "bg-emerald-950/60 text-emerald-200 shadow-xs border border-emerald-500/40 font-semibold"
                       : "text-neutral-400 hover:text-neutral-200"
                     }`}
@@ -1293,7 +1289,7 @@ const StoryboardCard = ({
                   type="button"
                   onClick={() => setActiveTab("visual")}
                   title="Visual Scene Prompt"
-                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${activeTab === "visual"
+                  className={`flex-1 flex items-center justify-center gap-1 py-0.5 px-1.5 rounded-md text-[11px] font-medium transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${activeTab === "visual"
                       ? "bg-amber-950/60 text-amber-200 shadow-xs border border-amber-500/40 font-semibold"
                       : "text-neutral-400 hover:text-neutral-200"
                     }`}
@@ -1335,7 +1331,7 @@ const StoryboardCard = ({
                             const next = curr ? `${curr}, ${sfxTag}` : sfxTag;
                             handleModifySFX(panel.id, next);
                           }}
-                          className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 hover:text-white border border-emerald-500/20 transition-colors cursor-pointer"
+                          className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/40 hover:bg-emerald-900/50 text-emerald-300 hover:text-white border border-emerald-500/20 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer"
                         >
                           +{sfxTag}
                         </button>
@@ -1439,7 +1435,7 @@ const StoryboardCard = ({
                   const next = Math.max(0.5, Math.round((current - 0.5) * 10) / 10);
                   handleModifyDuration(panel.id, next);
                 }}
-                className="h-4 w-4 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs leading-none select-none"
+                className="h-4 w-4 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer text-xs leading-none select-none"
                 title="Decrease 0.5s"
               >
                 -
@@ -1452,7 +1448,7 @@ const StoryboardCard = ({
                   const next = Math.round((current + 0.5) * 10) / 10;
                   handleModifyDuration(panel.id, next);
                 }}
-                className="h-4 w-4 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer text-xs leading-none select-none"
+                className="h-4 w-4 rounded hover:bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer text-xs leading-none select-none"
                 title="Increase 0.5s"
               >
                 +
@@ -1468,7 +1464,7 @@ const StoryboardCard = ({
             <button
               type="button"
               onClick={() => handleCancelAnalysis && handleCancelAnalysis()}
-              className="h-7.5 rounded-lg border border-rose-500/50 bg-rose-950/40 text-rose-300 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+              className="h-7.5 rounded-lg border border-rose-500/50 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation]"
               title="Stop Analyzing"
             >
               <X className="h-3.5 w-3.5 text-rose-400" />
@@ -1481,7 +1477,7 @@ const StoryboardCard = ({
                 analyzingPanelId !== null && String(analyzingPanelId) !== String(panel.id)
               }
               onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
-              className="h-7.5 rounded-lg border border-blue-500/30 bg-blue-950/30 hover:bg-blue-900/40 text-blue-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40 outline-none focus:outline-none focus:ring-0"
+              className="h-7.5 rounded-lg border border-blue-500/30 bg-blue-950/30 hover:bg-blue-900/40 text-blue-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] disabled:opacity-40 outline-none focus:outline-none focus:ring-0"
               title="Analyze Scene"
             >
               <Sparkles className="h-3.5 w-3.5 text-blue-400" />
@@ -1495,7 +1491,7 @@ const StoryboardCard = ({
               type="button"
               disabled={isMagicProcessing}
               onClick={handleMagicMotion}
-              className="h-7.5 rounded-lg border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors disabled:opacity-40 outline-none focus:outline-none focus:ring-0"
+              className="h-7.5 rounded-lg border border-purple-500/30 bg-purple-950/30 hover:bg-purple-900/40 text-purple-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] disabled:opacity-40 outline-none focus:outline-none focus:ring-0"
               title="Magic Motion"
             >
               {isMagicProcessing ? (
@@ -1513,7 +1509,7 @@ const StoryboardCard = ({
           <button
             type="button"
             onClick={handleOpenAssistant}
-            className="h-7.5 rounded-lg border border-emerald-500/30 bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors outline-none focus:outline-none focus:ring-0"
+            className="h-7.5 rounded-lg border border-emerald-500/30 bg-emerald-950/30 hover:bg-emerald-900/40 text-emerald-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] outline-none focus:outline-none focus:ring-0"
             title="Open AI Panel Assistant"
           >
             <Bot className="h-3.5 w-3.5 text-emerald-400" />

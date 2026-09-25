@@ -622,7 +622,10 @@ export function useCompileActions({
       }
     } finally {
       setIsAnalyzingAll(false);
-      setPanels((prev) => prev.map((p) => ({ ...p, isAnalyzing: false })));
+      setPanels((prev) => {
+        if (!prev.some((p) => p.isAnalyzing)) return prev;
+        return prev.map((p) => (p.isAnalyzing ? { ...p, isAnalyzing: false } : p));
+      });
     }
   };
 

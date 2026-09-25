@@ -197,9 +197,9 @@ const ENDPOINT_SPECS = [
     tests: [
       {
         id: 'API-AUDIO-001',
-        title: 'API-AUDIO-001: GET /api/v1/audio/voices returns neural voice actors',
+        title: 'API-AUDIO-001: GET /api/v1/audio/list-tts-voices returns neural voice actors',
         method: 'GET',
-        url: 'http://127.0.0.1:5173/api/v1/audio/voices'
+        url: 'http://127.0.0.1:5173/api/v1/audio/list-tts-voices'
       },
       {
         id: 'API-AUDIO-002',

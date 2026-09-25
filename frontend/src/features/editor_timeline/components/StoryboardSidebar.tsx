@@ -54,11 +54,11 @@ const StoryboardSidebar = ({
           type="button"
           onClick={() => setIsCollapsed?.(false)}
           title="Open Storyboard Navigator"
-          className="w-full flex flex-col items-center gap-2 pt-2 cursor-pointer group"
+          className="w-full flex flex-col items-center gap-2 pt-2 cursor-pointer group active:scale-95 active:duration-75 [touch-action:manipulation]"
         >
-          <PanelLeft className="w-4 h-4 text-neutral-400 group-hover:text-white transition-colors" />
+          <PanelLeft className="w-4 h-4 text-neutral-400 group-hover:text-white transition-colors duration-75" />
           <span
-            className="text-[8px] font-black font-mono uppercase text-neutral-500 group-hover:text-[#60A5FA] transition-colors tracking-widest"
+            className="text-[8px] font-black font-mono uppercase text-neutral-500 group-hover:text-[#60A5FA] transition-colors duration-75 tracking-widest"
             style={{
               writingMode: "vertical-rl",
               textOrientation: "mixed",
@@ -87,7 +87,7 @@ const StoryboardSidebar = ({
               type="button"
               onClick={() => setTimelineEpSortAscending((prev) => !prev)}
               title="Toggle Sort Order (Ascending / Descending)"
-              className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-850 text-blue-400 border border-neutral-800 rounded-lg transition-all cursor-pointer"
+              className="px-2 py-0.5 text-[9px] font-mono font-bold bg-neutral-900 hover:bg-neutral-800 text-blue-400 border border-neutral-800 rounded-lg transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer"
             >
               {timelineEpSortAscending ? "1 → N" : "N → 1"}
             </button>
@@ -97,7 +97,7 @@ const StoryboardSidebar = ({
               type="button"
               onClick={() => setIsCollapsed(true)}
               title="Collapse Navigator"
-              className="w-6 h-6 flex items-center justify-center rounded-lg bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 hover:border-neutral-700 text-neutral-500 hover:text-white transition-all cursor-pointer"
+              className="w-6 h-6 flex items-center justify-center rounded-lg bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-500 hover:text-white transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer"
             >
               <PanelLeftClose className="w-3.5 h-3.5" />
             </button>
@@ -112,13 +112,13 @@ const StoryboardSidebar = ({
             value={timelineEpSearchQuery}
             onChange={(e) => setTimelineEpSearchQuery(e.target.value)}
             placeholder="Filter sequence..."
-            className="w-full bg-neutral-900/80 border border-neutral-850 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 font-mono transition-all"
+            className="w-full bg-neutral-900/80 border border-neutral-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 font-mono transition-colors duration-75"
           />
           {timelineEpSearchQuery && (
             <button
               type="button"
               onClick={() => setTimelineEpSearchQuery("")}
-              className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold"
+              className="absolute right-2.5 top-1.5 text-neutral-400 hover:text-white text-xs font-bold cursor-pointer transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation]"
             >
               ✕
             </button>
@@ -136,10 +136,10 @@ const StoryboardSidebar = ({
           <button
             type="button"
             onClick={() => setSelectedTimelineEp("all")}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all text-left cursor-pointer border ${
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer border ${
               selectedTimelineEp === "all"
                 ? "bg-blue-600/20 border-blue-500/40 text-blue-200 shadow-sm"
-                : "bg-neutral-900/60 border-neutral-850 text-neutral-400 hover:text-white"
+                : "bg-neutral-900/60 border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-800/80"
             }`}
           >
             <span className="truncate">All Scenes</span>
@@ -208,10 +208,10 @@ const StoryboardSidebar = ({
                           setHoveredTimelineEpIdx(originalIdx)
                         }
                         onMouseLeave={() => setHoveredTimelineEpIdx(null)}
-                        className={`w-full flex flex-col gap-1 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left border cursor-pointer ${
+                        className={`w-full flex flex-col gap-1 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left border cursor-pointer ${
                           isSelected
                             ? "bg-blue-600/20 border-blue-500/40 text-blue-100 shadow-sm"
-                            : "bg-neutral-900/50 border-neutral-850 text-neutral-350 hover:text-white"
+                            : "bg-neutral-900/50 border-neutral-800 text-neutral-350 hover:text-white hover:bg-neutral-800/80"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-1.5 w-full">
@@ -257,7 +257,7 @@ const StoryboardSidebar = ({
           onClick={() => {
             addNotification?.("All Storyboard panels selected", "info");
           }}
-          className="w-full px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-850 text-xs font-mono font-bold text-neutral-300 border border-neutral-800 text-center transition-all cursor-pointer truncate"
+          className="w-full px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-xs font-mono font-bold text-neutral-300 border border-neutral-800 text-center transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer truncate"
         >
           ✅ Select All Scenes
         </button>

@@ -1,5 +1,6 @@
 import { apiRequest } from "../client/request";
 import { FetchClient, ApiResponse } from "../types";
+import { logAudioEndpoint } from "./skills";
 
 export const generateVideo = async (
   fetchWithInterceptor: FetchClient,
@@ -40,14 +41,19 @@ export const generateTts = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  const endpoint = "/api/v1/audio/generate";
-  console.log(`[Audio Endpoint] POST ${endpoint} input:`, data);
-  const response = await apiRequest(fetchWithInterceptor, endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-    ...options,
-  });
-  console.log(`[Audio Endpoint] ${endpoint} output:`, response);
-  return response;
+  const endpoint = "/api/v1/audio/synthesize-panel-audio";
+  const startedAt = performance.now();
+  try {
+    const response = await apiRequest(fetchWithInterceptor, endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      ...options,
+    });
+    logAudioEndpoint("POST", endpoint, data, response, startedAt);
+    return response;
+  } catch (error) {
+    logAudioEndpoint("POST", endpoint, data, undefined, startedAt, error);
+    throw error;
+  }
 };

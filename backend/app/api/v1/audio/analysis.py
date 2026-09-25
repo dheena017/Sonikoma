@@ -25,7 +25,7 @@ class AudioAnalyzeRequest(AudioPathRequest):
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
-@router.post("/analyze", summary="Extract audio waveform summary statistics")
+@router.post("/analyze-audio", summary="Extract audio waveform summary statistics")
 async def analyze_audio_endpoint(body: AudioAnalyzeRequest):
     """
     Analyzes an audio file and returns spectral summary statistics:
@@ -41,7 +41,7 @@ async def analyze_audio_endpoint(body: AudioAnalyzeRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/silence", summary="Detect silence segments in audio")
+@router.post("/detect-silence", summary="Detect silence segments in audio")
 async def detect_silence_endpoint(body: SilenceDetectRequest):
     """
     Scans an audio file for silent regions below the specified dB threshold
@@ -62,7 +62,7 @@ async def detect_silence_endpoint(body: SilenceDetectRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/segments", summary="Segment audio by energy levels")
+@router.post("/segment-audio-by-energy", summary="Segment audio by energy levels")
 async def segment_audio_by_energy_endpoint(body: EnergySegmentRequest):
     """
     Divides an audio file into N energy-based segments, each containing

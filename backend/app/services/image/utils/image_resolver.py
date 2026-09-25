@@ -179,6 +179,29 @@ async def resolve_url_to_buffer(
         mime = mimetypes.guess_type(working_url)[0] or 'application/octet-stream'
         return {"data": buf, "content_type": mime, "contentType": mime}
 
+    # 4c. Direct zero-latency filesystem resolution for /media/ and /videos/
+    _project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", ".."))
+    if "/media/" in working_url or working_url.startswith("media/"):
+        clean_name = working_url.split("/media/")[-1] if "/media/" in working_url else working_url.split("media/")[-1]
+        clean_name = clean_name.split("?")[0]
+        for candidate_dir in ["local_media", "media", "temp"]:
+            cand_path = os.path.join(_project_root, "data", candidate_dir, clean_name)
+            if os.path.exists(cand_path) and os.path.isfile(cand_path):
+                with open(cand_path, 'rb') as f:
+                    buf = f.read()
+                ext = os.path.splitext(clean_name)[1].lower()
+                mime = "image/webp" if ext == ".webp" else ("image/png" if ext == ".png" else "image/jpeg")
+                return {"data": buf, "content_type": mime, "contentType": mime}
+
+    if "/videos/" in working_url or working_url.startswith("videos/"):
+        clean_name = working_url.split("/videos/")[-1] if "/videos/" in working_url else working_url.split("videos/")[-1]
+        clean_name = clean_name.split("?")[0]
+        cand_path = os.path.join(_project_root, "data", "media", clean_name)
+        if os.path.exists(cand_path) and os.path.isfile(cand_path):
+            with open(cand_path, 'rb') as f:
+                buf = f.read()
+            return {"data": buf, "content_type": "video/mp4", "contentType": "video/mp4"}
+
     # 5. Normalize internal hostnames → relative paths to call localhost directly
     if re.match(r'^https?://', working_url, re.IGNORECASE):
         try:

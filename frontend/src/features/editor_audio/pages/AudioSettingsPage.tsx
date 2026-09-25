@@ -314,7 +314,7 @@ export default function AudioSettingsPage({
       setLoadingVoices(true);
       try {
         const fetchFn = fetchWithInterceptor || window.fetch.bind(window);
-        const res = await fetchFn("/api/v1/audio/voices");
+        const res = await fetchFn("/api/v1/audio/list-tts-voices");
         const data = await res.json();
         if (active && data?.success && data?.voices) {
           setAvailableVoices(data.voices);

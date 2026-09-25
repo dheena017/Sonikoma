@@ -57,7 +57,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set duration");
               handleBulkSetDuration();
             }}
-            className="flex-1 bg-blue-950/40 hover:bg-blue-900/50 text-blue-300 hover:text-white border border-blue-500/30 text-[10px] font-bold py-1 rounded transition-colors cursor-pointer"
+            className="flex-1 bg-blue-950/40 hover:bg-blue-900/50 text-blue-300 hover:text-white border border-blue-500/30 text-[10px] font-bold py-1 rounded transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 [touch-action:manipulation]"
           >
             Apply All
           </button>
@@ -87,7 +87,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set motion");
               handleBulkSetMotion();
             }}
-            className="bg-blue-950/40 hover:bg-blue-900/50 text-blue-300 hover:text-white border border-blue-500/30 text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+            className="bg-blue-950/40 hover:bg-blue-900/50 text-blue-300 hover:text-white border border-blue-500/30 text-[10px] font-bold px-3 py-1 rounded transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 [touch-action:manipulation]"
           >
             Apply All
           </button>
@@ -118,7 +118,7 @@ export default function StoryboardBulkOps({
               console.log("[StoryboardBulkOps] Bulk set preset");
               handleBulkSetPreset();
             }}
-            className="bg-blue-950/40 hover:bg-blue-900/50 text-blue-300 hover:text-white border border-blue-500/30 text-[10px] font-bold px-3 py-1 rounded transition-colors cursor-pointer"
+            className="bg-blue-950/40 hover:bg-blue-900/50 text-blue-300 hover:text-white border border-blue-500/30 text-[10px] font-bold px-3 py-1 rounded transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 [touch-action:manipulation]"
           >
             Apply All
           </button>
@@ -134,7 +134,7 @@ export default function StoryboardBulkOps({
           type="button"
           disabled={isBatchMagicProcessing || selectedCount === 0}
           onClick={handleBatchMagicMotion}
-          className={`w-full py-2 rounded text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 border transition-all cursor-pointer h-7 ${
+          className={`w-full py-2 rounded text-[10px] font-mono font-bold flex items-center justify-center gap-1.5 border transition-colors duration-75 cursor-pointer h-7 [touch-action:manipulation] ${
             isBatchMagicProcessing
               ? "bg-neutral-900 text-neutral-400 border-neutral-800 cursor-not-allowed"
               : selectedCount > 0
@@ -166,7 +166,7 @@ export default function StoryboardBulkOps({
             console.log("[StoryboardBulkOps] Clear storyboard requested");
             handleClearTimeline();
           }}
-          className="w-full bg-red-950/40 hover:bg-red-950/60 border border-red-900/40 text-red-400 text-[10px] font-bold py-1.5 rounded transition-colors cursor-pointer"
+          className="w-full bg-red-950/40 hover:bg-red-950/60 border border-red-900/40 text-red-400 text-[10px] font-bold py-1.5 rounded transition-colors duration-75 cursor-pointer active:scale-95 active:duration-75 [touch-action:manipulation]"
         >
           Clear Storyboard
         </button>

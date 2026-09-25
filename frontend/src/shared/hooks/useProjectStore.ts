@@ -864,8 +864,9 @@ export const useProjectStore = create<ProjectStoreState>()(
 
       // ── Save Entire Active Project to Backend ─────────────────────────────
       saveActiveProject: async (fetchClient) => {
-        const { activeProjectId, activeProjectData } = get();
+        const { activeProjectId, activeProjectData, isSaving } = get();
         if (!activeProjectId || !activeProjectData) return false;
+        if (isSaving) return true;
 
         set({ isSaving: true });
         try {

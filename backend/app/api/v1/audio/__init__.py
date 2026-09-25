@@ -6,14 +6,18 @@ Audio API package — assembles all audio sub-routers into a single
 `audio_router` that the main api/router.py mounts at /api/v1/audio.
 
 Sub-modules:
-  settings.py      – GET/POST /settings, GET /presets
-  tts.py           – POST /tts, GET /voices, POST /preview
-  mixer.py         – POST /mix
-  alignment.py     – POST /align/{panel_id}
-  analysis.py      – POST /analyze, POST /silence, POST /segments
-  transcription.py – POST /transcribe, POST /transcribe/batch,
-                     POST /subtitles/srt, POST /subtitles/vtt,
-                     POST /timestamps
+  settings.py      – GET/POST /audio-settings, GET /list-audio-presets
+  tts.py           – POST /synthesize-panel-audio,
+                     POST /synthesize-all-panel-audio,
+                     GET /list-tts-voices, POST /preview-tts-voice
+  mixer.py         – POST /mix-audio-tracks
+  alignment.py     – POST /synchronize-dialogue/{panel_id}
+  analysis.py      – POST /analyze-audio, POST /detect-silence,
+                     POST /segment-audio-by-energy
+  transcription.py – POST /transcribe-audio, POST /transcribe-audio-batch,
+                     POST /generate-srt-subtitles,
+                     POST /generate-vtt-subtitles,
+                     POST /extract-word-timestamps
 ─────────────────────────────────────────────────────────────────────────────
 """
 

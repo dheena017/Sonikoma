@@ -333,7 +333,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     case "API_GET_VOICES": {
       try {
         const base = await getApiBaseUrl();
-        const res = await fetch(`${base.replace(/\/+$/, "")}/api/v1/audio/voices`, { method: "GET" });
+        const res = await fetch(`${base.replace(/\/+$/, "")}/api/v1/audio/list-tts-voices`, { method: "GET" });
         if (!res.ok) return { success: false, isOffline: true, voices: [] };
         const data = await res.json();
         return { success: true, voices: data.voices || [] };
@@ -345,7 +345,7 @@ async function handleIncomingMessage(message: any, _sender: chrome.runtime.Messa
     case "API_GENERATE_TTS": {
       try {
         const base = await getApiBaseUrl();
-        const res = await fetch(`${base.replace(/\/+$/, "")}/api/v1/audio/tts`, {
+        const res = await fetch(`${base.replace(/\/+$/, "")}/api/v1/audio/synthesize-panel-audio`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

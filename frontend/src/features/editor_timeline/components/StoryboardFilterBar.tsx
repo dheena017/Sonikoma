@@ -139,14 +139,14 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
           value={searchQuery || ""}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search scene..."
-          className="w-full h-8 pl-8 pr-6 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-neutral-600 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-all shadow-inner"
+          className="w-full h-8 pl-8 pr-6 bg-neutral-950/90 hover:bg-neutral-900 focus:bg-neutral-900 border border-neutral-800 focus:border-neutral-600 rounded-xl text-neutral-100 placeholder:text-neutral-500 text-[11px] font-mono focus:outline-none transition-colors duration-75 shadow-inner"
         />
         {searchQuery && (
           <button
             type="button"
             onClick={() => setSearchQuery("")}
             title="Clear search"
-            className="absolute right-1.5 p-0.5 rounded-md text-neutral-400 hover:text-white transition-colors cursor-pointer"
+            className="absolute right-1.5 p-0.5 rounded-md text-neutral-400 hover:text-white transition-colors duration-75 active:scale-90 active:duration-75 [touch-action:manipulation] cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -158,10 +158,10 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
         <button
           type="button"
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className={`h-8 px-2 sm:px-3 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-sm ${
+          className={`h-8 px-2 sm:px-3 rounded-xl border text-[11px] font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer shadow-sm ${
             filterStatus && filterStatus !== "all"
-              ? "bg-[#2A2A2A] border-neutral-700 text-neutral-300"
-              : "bg-neutral-950/80 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
+              ? "bg-[#2A2A2A] hover:bg-[#333333] border-neutral-700 text-neutral-300"
+              : "bg-neutral-950/80 hover:bg-neutral-900 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
           }`}
         >
           <Filter className="w-3.5 h-3.5 text-neutral-400" />
@@ -187,9 +187,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("all");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 !filterStatus || filterStatus === "all"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -209,9 +209,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("selected");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "selected"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -231,9 +231,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("unselected");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "unselected" || filterStatus === "not_selected"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -255,9 +255,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("with_speech");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "with_speech"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -278,9 +278,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("without_speech");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "without_speech"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -302,9 +302,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("with_narration");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "with_narration" || filterStatus === "with_narrative"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -325,9 +325,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("without_narration");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "without_narration" || filterStatus === "without_narrative"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -349,9 +349,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("with_sfx");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "with_sfx"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -372,9 +372,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("without_sfx");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "without_sfx"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -401,9 +401,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("with_motion");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "with_motion"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -424,9 +424,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("without_motion");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "without_motion"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -447,9 +447,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("with_audio");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "with_audio"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -470,9 +470,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
                 setFilterStatus("without_audio");
                 setIsDropdownOpen(false);
               }}
-              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-all text-left cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-[11px] font-mono font-bold transition-colors duration-75 active:scale-[0.98] active:duration-75 [touch-action:manipulation] text-left cursor-pointer ${
                 filterStatus === "without_audio"
-                  ? "bg-[#2A2A2A] text-neutral-300 border border-neutral-700"
+                  ? "bg-[#2A2A2A] hover:bg-[#333333] text-neutral-300 border border-neutral-700"
                   : "text-neutral-300 hover:bg-neutral-800 hover:text-white"
               }`}
             >
@@ -497,9 +497,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
             type="button"
             onClick={() => setViewLayout("scroll")}
             title="Horizontal Scroll View"
-            className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${
               viewLayout === "scroll"
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                ? "bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-500/30"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
             }`}
           >
@@ -510,9 +510,9 @@ export const StoryboardFilterBar: React.FC<StoryboardFilterBarProps> = ({
             type="button"
             onClick={() => setViewLayout("grid")}
             title="Grid View"
-            className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`h-7 px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer ${
               viewLayout === "grid"
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-500/30"
+                ? "bg-blue-600 hover:bg-blue-500 text-white shadow-sm shadow-blue-500/30"
                 : "text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900"
             }`}
           >

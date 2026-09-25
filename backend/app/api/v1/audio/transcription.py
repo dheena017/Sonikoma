@@ -40,7 +40,7 @@ def _default_output_path(suffix: str) -> str:
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
-@router.post("/transcribe", summary="Transcribe audio to text via Whisper")
+@router.post("/transcribe-audio", summary="Transcribe audio to text via Whisper")
 async def transcribe_audio_endpoint(body: TranscribeRequest):
     """
     Transcribes a local audio file using OpenAI Whisper.
@@ -70,7 +70,7 @@ async def transcribe_audio_endpoint(body: TranscribeRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/transcribe/batch", summary="Transcribe multiple audio files")
+@router.post("/transcribe-audio-batch", summary="Transcribe multiple audio files")
 async def batch_transcribe_audio_endpoint(body: BatchTranscribeRequest):
     """
     Transcribes a batch of audio files in sequence using the specified
@@ -90,7 +90,7 @@ async def batch_transcribe_audio_endpoint(body: BatchTranscribeRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/subtitles/srt", summary="Generate SRT subtitle file")
+@router.post("/generate-srt-subtitles", summary="Generate SRT subtitle file")
 async def generate_srt_subtitles_endpoint(body: SubtitleRequest):
     """
     Transcribes audio with Whisper and writes the output as an `.srt` subtitle
@@ -112,7 +112,7 @@ async def generate_srt_subtitles_endpoint(body: SubtitleRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/subtitles/vtt", summary="Generate WebVTT subtitle file")
+@router.post("/generate-vtt-subtitles", summary="Generate WebVTT subtitle file")
 async def generate_vtt_subtitles_endpoint(body: SubtitleRequest):
     """
     Transcribes audio with Whisper and writes the output as a `.vtt` WebVTT
@@ -134,7 +134,7 @@ async def generate_vtt_subtitles_endpoint(body: SubtitleRequest):
         raise HTTPException(status_code=500, detail=str(exc))
 
 
-@router.post("/timestamps", summary="Extract word-level timestamps from audio")
+@router.post("/extract-word-timestamps", summary="Extract word-level timestamps from audio")
 async def extract_word_timestamps_endpoint(body: ExtractWordsRequest):
     """
     Uses Whisper's word-level timestamp mode to extract precise start/end

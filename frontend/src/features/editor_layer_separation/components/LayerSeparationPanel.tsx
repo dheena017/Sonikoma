@@ -130,21 +130,17 @@ export default function LayerSeparationPanel({
       : [];
 
     try {
-      const res = await fetchWithInterceptor(
-        `/api/v1/audio/align-dialogue/${activeStoryboardPanel.id}`,
+      const data = await api.alignDialogue(
+        fetchWithInterceptor,
+        String(activeStoryboardPanel.id),
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            audio_url: activeStoryboardPanel.audio_url,
-            ocr_texts:
-              ocr_texts.length > 0
-                ? ocr_texts
-                : [activeStoryboardPanel.speech_text],
-          }),
+          audio_url: activeStoryboardPanel.audio_url,
+          ocr_texts:
+            ocr_texts.length > 0
+              ? ocr_texts
+              : [activeStoryboardPanel.speech_text],
         }
       );
-      const data = await res.json();
 
       if (data.success && data.dialogue_map) {
         setPanels((prev) =>

@@ -24,7 +24,7 @@ router = APIRouter()
 
 # ─── Endpoints ────────────────────────────────────────────────────────────────
 
-@router.post("/mix", summary="Mix voiceover, background music, and audio tracks with auto-ducking")
+@router.post("/mix-audio-tracks", summary="Mix voiceover, background music, and audio tracks with auto-ducking")
 async def mix_audio_endpoint(body: AudioMixRequest):
     """
     Blends a voice narration track and optional background music (BGM) into a

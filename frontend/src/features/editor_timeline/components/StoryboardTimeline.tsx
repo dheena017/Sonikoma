@@ -433,21 +433,17 @@ const StoryboardTimeline = React.memo(
                     .split("\n")
                     .map((s) => s.trim())
                     .filter(Boolean);
-                  const alignRes = await activeFetch(
-                    `/api/v1/audio/align-dialogue/${panel.id}`,
+                  const alignData = await api.alignDialogue(
+                    activeFetch,
+                    String(panel.id),
                     {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        audio_url: audioUrl,
-                        ocr_texts:
-                          ocr_texts.length > 0
-                            ? ocr_texts
-                            : [panel.speech_text],
-                      }),
+                      audio_url: audioUrl,
+                      ocr_texts:
+                        ocr_texts.length > 0
+                          ? ocr_texts
+                          : [panel.speech_text],
                     }
                   );
-                  const alignData = await alignRes.json();
                   if (alignData.success && alignData.dialogue_map) {
                     syncMapObj = {
                       dialogue_map: alignData.dialogue_map,
@@ -1143,7 +1139,7 @@ const StoryboardTimeline = React.memo(
                 setSearchQuery("");
                 setFilterStatus("all");
               }}
-              className="px-3 py-1.5 rounded-xl bg-[#2A2A2A] border border-[#3B82F6]/40 text-[#60A5FA] text-xs font-bold hover:bg-[#3B82F6]/20 transition-all cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#3B82F6]/40 text-[#60A5FA] text-xs font-bold hover:bg-[#3B82F6]/20 transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] cursor-pointer"
             >
               Reset Filters
             </button>
