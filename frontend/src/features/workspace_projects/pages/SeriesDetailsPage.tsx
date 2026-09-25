@@ -153,20 +153,40 @@ export default function SeriesDetailsPage({
         if (!cachedSeriesMap.has(seriesSlug)) {
           setLoading(true);
         }
-        const res = await fetchWithInterceptor("/api/v1/projects");
-        if (!res.ok) {
-          throw new Error("Failed to load projects");
-        }
-        const data = await res.json();
-        const allProjects: Project[] = data.projects || [];
-        const allSeries = groupProjectsIntoSeries(allProjects);
-
-        const foundSeries = allSeries.find(
-          (s) =>
-            s.slug === seriesSlug ||
-            s.id === seriesSlug ||
-            s.slug.toLowerCase() === seriesSlug.toLowerCase()
+        const seriesRes = await fetchWithInterceptor(
+          `/api/v1/projects/series/${encodeURIComponent(seriesSlug)}`
         );
+        if (!seriesRes.ok) {
+          throw new Error(
+            seriesRes.status === 404
+              ? "Series not found."
+              : "Failed to load series"
+          );
+        }
+        const seriesData = await seriesRes.json();
+        const seriesRecord = seriesData.series;
+        const projectsRes = await fetchWithInterceptor(
+          `/api/v1/projects?series_id=${encodeURIComponent(seriesRecord.id)}&limit=200`
+        );
+        if (!projectsRes.ok) {
+          throw new Error("Failed to load series chapters");
+        }
+        const projectsData = await projectsRes.json();
+        const allProjects: Project[] = projectsData.projects || [];
+        const groupedSeries = groupProjectsIntoSeries(allProjects).find(
+          (candidate) => candidate.id === seriesRecord.id
+        );
+        const foundSeries: Series = groupedSeries || {
+          id: seriesRecord.id,
+          slug: seriesRecord.slug || seriesSlug,
+          title: seriesRecord.title || "Untitled Series",
+          cover: seriesRecord.cover_image,
+          chapters: [],
+          chapterCount: 0,
+          genre: seriesRecord.genre,
+          author: seriesRecord.author,
+          synopsis: seriesRecord.synopsis,
+        };
 
         if (foundSeries) {
           cachedSeriesMap.set(seriesSlug, foundSeries);
