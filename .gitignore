@@ -36,6 +36,9 @@ client_secrets.json
 **/client_secrets.json
 service_account.json
 **/service_account.json
+serviceAccountKey.json
+**/serviceAccountKey.json
+*serviceAccountKey*.json
 
 # ── Database & Persistent Media Storage (data/ & backend/data/) ───────────────
 data/
