@@ -3,6 +3,138 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type { StoryMemoryState } from "../../types/models";
 
 // =============================================================================
+// 0. Storage Quota-Safe localStorage Wrapper
+// =============================================================================
+
+const STORAGE_KEYS = {
+  ACTIVE_PROJECT_ID: "active_project_id",
+  ACTIVE_JOB_ID: "active_job_id",
+  ACTIVE_SERIES_SLUG: "active_series_slug",
+  ACTIVE_CHAPTER_SLUG: "active_chapter_slug",
+  ZUSTAND_PROJECT_STORE: "sonikoma-active-project-store",
+  PROJECT_SNAPSHOT: "sonikoma_project_snapshot",
+  IMPORT_PROJECT: "sonikoma_import_project",
+  AUTH_TOKEN: "sonikoma_token",
+} as const;
+
+/** Wraps localStorage and catches QuotaExceededError gracefully */
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e: any) {
+      // QuotaExceededError — storage is full
+      if (
+        e?.name === "QuotaExceededError" ||
+        e?.code === 22 ||
+        e?.code === 1014
+      ) {
+        console.warn(
+          "[Storage] localStorage quota exceeded — project data could not be saved locally. " +
+          "Use the Save button to persist to the server."
+        );
+        // Try to save only the minimal essential keys (project_id) to recover space
+        try {
+          const minimal = JSON.parse(value || "{}");
+          if (minimal?.state?.activeProjectData) {
+            minimal.state.activeProjectData.panels = [];
+            minimal.state.activeProjectData.scrapedImages = [];
+          }
+          localStorage.setItem(key, JSON.stringify(minimal));
+        } catch {
+          // If even that fails, just skip — server save is the source of truth
+        }
+      }
+    }
+  },
+  removeItem: (key: string): void => {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // ignore
+    }
+  },
+};
+
+type PersistedProjectEnvelope = {
+  state?: {
+    activeProjectData?: ActiveProjectData | null;
+  };
+  activeProjectData?: ActiveProjectData | null;
+};
+
+function readJsonFromStorage<T>(key: string): T | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = safeLocalStorage.getItem(key);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+function writeJsonToStorage<T>(key: string, value: T): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    safeLocalStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.warn(`[useProjectStore] Failed to persist ${key}:`, error);
+  }
+}
+
+function readStoredProjectStoreState(): ActiveProjectData | null {
+  const parsed = readJsonFromStorage<PersistedProjectEnvelope>(STORAGE_KEYS.ZUSTAND_PROJECT_STORE);
+  if (!parsed) return null;
+
+  const stored = parsed?.state?.activeProjectData ?? parsed?.activeProjectData ?? null;
+  if (!stored?.project?.project_id) return null;
+
+  return normalizeProjectData(stored as ActiveProjectData);
+}
+
+function readStoredProjectImport(): Record<string, any> | null {
+  const parsed = readJsonFromStorage<any>(STORAGE_KEYS.IMPORT_PROJECT);
+  if (!parsed || !Array.isArray(parsed?.panels) || parsed.panels.length === 0) return null;
+
+  return parsed;
+}
+
+// =============================================================================
+// 0b. Debounced Auto-Save Scheduler
+// =============================================================================
+
+let _autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Call this after any panel/data change to schedule a background save.
+ * Resets the timer if called again before the delay expires.
+ */
+export function scheduleAutoSave(
+  fetchClient?: any,
+  delayMs = 2000
+): void {
+  if (_autoSaveTimer) clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(async () => {
+    _autoSaveTimer = null;
+    const store = useProjectStore.getState();
+    if (store.isDirty && store.activeProjectId && !store.isSaving) {
+      await store.saveActiveProject(fetchClient);
+    }
+  }, delayMs);
+}
+
+// =============================================================================
 // 1. Strongly Typed Interfaces
 // =============================================================================
 
@@ -242,8 +374,14 @@ export function isTempProject(projectId: string | null): boolean {
 export function getStoredAuthToken(): string {
   if (typeof window === "undefined") return "";
   return (
-    localStorage.getItem("sonikoma_token") ||
-    sessionStorage.getItem("sonikoma_token") ||
+    safeLocalStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) ||
+    (() => {
+      try {
+        return sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      } catch {
+        return null;
+      }
+    })() ||
     ""
   );
 }
@@ -251,10 +389,54 @@ export function getStoredAuthToken(): string {
 /** 3. Clear all active project session keys from localStorage */
 export function clearStoredProjectSession(): void {
   if (typeof window === "undefined") return;
-  localStorage.removeItem("active_project_id");
-  localStorage.removeItem("active_job_id");
-  localStorage.removeItem("active_series_slug");
-  localStorage.removeItem("active_chapter_slug");
+  safeLocalStorage.removeItem(STORAGE_KEYS.ACTIVE_PROJECT_ID);
+  safeLocalStorage.removeItem(STORAGE_KEYS.ACTIVE_JOB_ID);
+  safeLocalStorage.removeItem(STORAGE_KEYS.ACTIVE_SERIES_SLUG);
+  safeLocalStorage.removeItem(STORAGE_KEYS.ACTIVE_CHAPTER_SLUG);
+}
+
+export function setActiveProjectSession(projectId: string | null, jobId?: string | null): void {
+  if (typeof window === "undefined") return;
+
+  if (projectId) {
+    safeLocalStorage.setItem(STORAGE_KEYS.ACTIVE_PROJECT_ID, projectId);
+    if (jobId) {
+      safeLocalStorage.setItem(STORAGE_KEYS.ACTIVE_JOB_ID, String(jobId));
+    } else {
+      safeLocalStorage.removeItem(STORAGE_KEYS.ACTIVE_JOB_ID);
+    }
+    return;
+  }
+
+  safeLocalStorage.removeItem(STORAGE_KEYS.ACTIVE_PROJECT_ID);
+  safeLocalStorage.removeItem(STORAGE_KEYS.ACTIVE_JOB_ID);
+}
+
+export function writeProjectSnapshot(snapshot: ActiveProjectData | null): void {
+  if (typeof window === "undefined") return;
+
+  if (!snapshot || !snapshot.project?.project_id) {
+    safeLocalStorage.removeItem(STORAGE_KEYS.PROJECT_SNAPSHOT);
+    return;
+  }
+
+  writeJsonToStorage(STORAGE_KEYS.PROJECT_SNAPSHOT, snapshot);
+}
+
+export function readPersistedProjectSnapshot(): ActiveProjectData | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const directSnapshot = readJsonFromStorage<ActiveProjectData>(STORAGE_KEYS.PROJECT_SNAPSHOT);
+    if (directSnapshot?.project?.project_id) {
+      return normalizeProjectData(directSnapshot);
+    }
+
+    return readStoredProjectStoreState();
+  } catch (error) {
+    console.warn("[useProjectStore] Failed to read persisted project snapshot:", error);
+    return null;
+  }
 }
 
 /** 4. Construct a structured MissingProjectDetails record */
@@ -508,6 +690,7 @@ export const useProjectStore = create<ProjectStoreState>()(
         set((state) => {
           if (state.activeProjectId === id && state.projectState === "active") return state;
           if (!id) {
+            setActiveProjectSession(null, null);
             return {
               activeProjectId: null,
               activeProjectData: null,
@@ -520,6 +703,8 @@ export const useProjectStore = create<ProjectStoreState>()(
               canRedo: false,
             };
           }
+
+          setActiveProjectSession(id, state.activeProjectData?.project?.job_id ?? null);
           const hasMatchingData = state.activeProjectData?.project?.project_id === id;
           return {
             activeProjectId: id,
@@ -532,6 +717,8 @@ export const useProjectStore = create<ProjectStoreState>()(
         const normalized = normalizeProjectData(data);
         if (normalized) {
           const snapshot = pushHistorySnapshot([], -1, normalized);
+          setActiveProjectSession(normalized.project.project_id ?? null, normalized.project.job_id ?? null);
+          writeProjectSnapshot(normalized);
           set({
             activeProjectData: normalized,
             activeProjectId: normalized.project.project_id ?? null,
@@ -541,6 +728,8 @@ export const useProjectStore = create<ProjectStoreState>()(
             ...snapshot,
           });
         } else {
+          setActiveProjectSession(null, null);
+          writeProjectSnapshot(null);
           set({
             activeProjectData: null,
             activeProjectId: null,
@@ -606,10 +795,25 @@ export const useProjectStore = create<ProjectStoreState>()(
 
       // ── Hydrate / Fetch From Backend (Preserves Temp & Saved Projects on Reload) ──
       hydrateActiveProject: async (targetId, fetchClient) => {
-        const idToHydrate = targetId ?? get().activeProjectId;
+        const persistedSnapshot = readPersistedProjectSnapshot();
+        const fallbackId = targetId ?? get().activeProjectId ?? persistedSnapshot?.project?.project_id ?? null;
+        const idToHydrate = fallbackId;
         const currentData = get().activeProjectData;
 
         if (!idToHydrate) {
+          const restoredFromPersist = persistedSnapshot;
+          if (restoredFromPersist) {
+            const favProjectId = restoredFromPersist.project.project_id;
+            setActiveProjectSession(favProjectId, restoredFromPersist.project.job_id ?? null);
+            set({
+              activeProjectId: favProjectId,
+              activeProjectData: restoredFromPersist,
+              projectState: "active",
+              missingProjectInfo: null,
+              isHydrating: false,
+            });
+            return;
+          }
           if (currentData) {
             set({ projectState: "active", isHydrating: false });
             return;
@@ -706,10 +910,10 @@ export const useProjectStore = create<ProjectStoreState>()(
 
           // 2. Check localStorage for sonikoma_import_project
           try {
-            const importRaw = localStorage.getItem("sonikoma_import_project");
-            if (importRaw) {
-              const parsed = JSON.parse(importRaw);
-              if (parsed && (parsed.project_id === idToHydrate || !parsed.project_id) && Array.isArray(parsed.panels) && parsed.panels.length > 0) {
+            const importedProject = readStoredProjectImport();
+            if (importedProject && (importedProject.project_id === idToHydrate || !importedProject.project_id)) {
+              const parsed = importedProject;
+              if (parsed && Array.isArray(parsed.panels) && parsed.panels.length > 0) {
                 const transferredPanels: PanelItem[] = parsed.panels.map((p: any, idx: number) => ({
                   id: p.id || idx + 1,
                   panel_index: p.panel_index ?? idx,
@@ -757,20 +961,16 @@ export const useProjectStore = create<ProjectStoreState>()(
 
           // 3. Check localStorage active-project-store ONLY for this specific project_id
           try {
-            const raw = localStorage.getItem("sonikoma-active-project-store");
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              const storeData = parsed?.state?.activeProjectData;
-              if (storeData?.project && storeData.project.project_id === idToHydrate) {
-                set({
-                  activeProjectId: idToHydrate,
-                  activeProjectData: storeData,
-                  projectState: "active",
-                  missingProjectInfo: null,
-                  isHydrating: false,
-                });
-                return;
-              }
+            const storeData = readStoredProjectStoreState();
+            if (storeData?.project && storeData.project.project_id === idToHydrate) {
+              set({
+                activeProjectId: idToHydrate,
+                activeProjectData: storeData,
+                projectState: "active",
+                missingProjectInfo: null,
+                isHydrating: false,
+              });
+              return;
             }
           } catch (e) {
             console.error("Error reading temp project from local storage:", e);
@@ -1321,6 +1521,8 @@ export const useProjectStore = create<ProjectStoreState>()(
       // ── Reset Active Project ──────────────────────────────────────────────
       clearActiveProject: () => {
         clearStoredProjectSession();
+        setActiveProjectSession(null, null);
+        writeProjectSnapshot(null);
         set({
           activeProjectId: null,
           activeProjectData: null,
@@ -1347,18 +1549,45 @@ export const useProjectStore = create<ProjectStoreState>()(
     }),
     {
       name: "sonikoma-active-project-store",
-      storage: createJSONStorage(() => localStorage),
+      // Use quota-safe localStorage wrapper to prevent silent data loss
+      storage: createJSONStorage(() => safeLocalStorage),
       partialize: (state) => ({
         activeProjectId: state.activeProjectId,
-        activeProjectData: state.activeProjectData,
+        activeProjectData: state.activeProjectData
+          ? {
+              ...state.activeProjectData,
+              scrapedImages: (state.activeProjectData.scrapedImages ?? []).slice(0, 200),
+            }
+          : null,
         selectedPanelIndex: state.selectedPanelIndex,
         projectState: state.activeProjectData ? "active" : "idle",
+        missingProjectInfo: state.missingProjectInfo,
+        isEpisodeCollapsed: state.isEpisodeCollapsed,
         storyMemory: state.storyMemory,
+        searchQuery: state.searchQuery,
+        filterMotion: state.filterMotion,
+        lastSavedAt: state.lastSavedAt,
+        isDirty: state.isDirty,
       }),
+      merge: (persisted, current) => {
+        const merged = {
+          ...current,
+          ...(persisted as Partial<ProjectStoreState>),
+        } as ProjectStoreState;
+
+        if (merged.activeProjectData && merged.activeProjectId) {
+          merged.projectState = "active";
+        }
+
+        merged.isHydrating = false;
+        return merged;
+      },
       onRehydrateStorage: () => (state) => {
         if (state?.activeProjectData && state.activeProjectId) {
           state.projectState = "active";
           state.isHydrating = false;
+          setActiveProjectSession(state.activeProjectId, state.activeProjectData.project.job_id ?? null);
+          writeProjectSnapshot(state.activeProjectData);
         }
       },
     }

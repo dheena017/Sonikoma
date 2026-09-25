@@ -58,12 +58,16 @@ const EditorPage: React.FC<EditorPageProps> = ({
   void seriesSlug;
   void chapterSlug;
   const playerSettings = useImageEditorStore((state) => state.playerSettings);
+  // Read loading + dirty state from store
+  const isHydrating = useProjectStore((s) => s.isHydrating || s.projectState === "loading");
+  const isDirtyStore = useProjectStore((s) => s.isDirty);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
   const [currentSection, setCurrentSection] = React.useState("storyboard");
   const [isFocusMode, setIsFocusMode] = React.useState(false);
   const [previewQuality, setPreviewQuality] = React.useState<"draft" | "high">(
     "high"
   );
+  void previewQuality;
 
   const [activeTab, setActiveTab] = React.useState(() => {
     return new URLSearchParams(window.location.search).get("tab") || "";
@@ -81,6 +85,18 @@ const EditorPage: React.FC<EditorPageProps> = ({
       window.removeEventListener("locationchange", handleLocationChange);
     };
   }, []);
+
+  // ── Unsaved Changes Warning ───────────────────────────────────────────────
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirtyStore) {
+        e.preventDefault();
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirtyStore]);
 
   const handleCloseSettings = () => {
     const params = new URLSearchParams(window.location.search);
@@ -398,10 +414,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
             : Object.keys(confirmedMap);
         const selectedSet = new Set(selectedTargets);
 
-        setScrapedImages((prev) => {
+        setScrapedImages((prev: string[]) => {
           let injected = false;
           const copy: string[] = [];
-          prev.forEach((img) => {
+          prev.forEach((img: string) => {
             if (confirmedMap[img]) {
               if (selectedSet.has(img)) {
                 if (!injected) {
@@ -833,6 +849,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                 }`}
               >
                 <StoryboardTimeline
+                  isLoading={isHydrating}
                   panels={panels}
                   setPanels={setPanels}
                   currentPanelIndex={currentPanelIndex}

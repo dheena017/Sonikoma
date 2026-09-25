@@ -7,6 +7,7 @@ import * as api from "@/api";
 import { updateSelection } from "@/shared/utils/selection";
 
 import StoryboardEmptyState from "@/features/editor_timeline/components/StoryboardEmptyState";
+import StoryboardLoadingState from "@/features/editor_timeline/components/StoryboardLoadingState";
 import StoryboardHeader from "@/features/editor_timeline/components/StoryboardHeader";
 import StoryboardBulkOps from "@/features/editor_timeline/components/StoryboardBulkOps";
 import StoryboardCard from "@/features/editor_timeline/components/StoryboardCard";
@@ -26,6 +27,7 @@ type EpisodeGroupRecord = {
 };
 
 interface StoryboardTimelineProps {
+  isLoading?: boolean;
   panels: GeneratedPanel[];
   setPanels: React.Dispatch<React.SetStateAction<GeneratedPanel[]>>;
   currentPanelIndex: number;
@@ -80,6 +82,7 @@ interface StoryboardTimelineProps {
 
 const StoryboardTimeline = React.memo(
   ({
+    isLoading = false,
     panels,
     setPanels,
     currentPanelIndex,
@@ -1055,7 +1058,11 @@ const StoryboardTimeline = React.memo(
             viewLayout={storyboardViewLayout}
             setViewLayout={setStoryboardViewLayout}
           />
-          <StoryboardEmptyState hasScrapedImages={hasScrapedImages} />
+          {isLoading ? (
+            <StoryboardLoadingState />
+          ) : (
+            <StoryboardEmptyState hasScrapedImages={hasScrapedImages} />
+          )}
         </div>
       );
     }

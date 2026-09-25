@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { GeneratedPanel, CharacterBio } from "@/types";
 import { createFetchWithInterceptor } from "@/api/client/fetchWithInterceptor";
 import * as api from "@/api";
-import { useProjectStore, WorkspaceContext } from "./useProjectStore";
+import { useProjectStore, WorkspaceContext, scheduleAutoSave } from "./useProjectStore";
 import { useAppAuth } from "./useAppAuth";
 import { useAppNotifications } from "./useAppNotifications";
 import { useAppAutoCrop } from "./useAppAutoCrop";
@@ -62,6 +62,8 @@ export function useAppState() {
         panels: nextPanels as any,
         scrapedImages: cur?.scrapedImages ?? [],
       });
+      // Auto-save 2s after any panel change (debounced)
+      scheduleAutoSave(undefined, 2000);
     },
     []
   );
