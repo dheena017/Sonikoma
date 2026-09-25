@@ -248,7 +248,6 @@ class AmbientSoundscapeEngine {
 
 class AIVoiceNarratorEngine {
   private isVoiceActive: boolean = false;
-  private currentUtterance: SpeechSynthesisUtterance | null = null;
   private onSubtitleCallback: ((text: string) => void) | null = null;
 
   public setSubtitleCallback(cb: (text: string) => void) {
@@ -297,7 +296,6 @@ class AIVoiceNarratorEngine {
         }
       };
 
-      this.currentUtterance = utt;
       window.speechSynthesis.speak(utt);
     } catch (_) {}
   }
@@ -329,7 +327,6 @@ export class CinemaPlayer {
   private spotlightElement: HTMLElement | null = null;
   private toastElement: HTMLElement | null = null;
   private subtitleElement: HTMLElement | null = null;
-  private scrubberTooltipElement: HTMLElement | null = null;
   private nextChapterBanner: HTMLElement | null = null;
 
   // Feature States
@@ -749,7 +746,6 @@ export class CinemaPlayer {
       // Interactive Timeline Scrubber & Live Tooltip
       const timelineTrack = hud.querySelector("#sonikoma-hud-timeline") as HTMLElement;
       const tooltip = hud.querySelector("#sonikoma-scrubber-tooltip") as HTMLElement;
-      this.scrubberTooltipElement = tooltip;
 
       if (timelineTrack && tooltip) {
         timelineTrack.addEventListener("mousemove", (e: MouseEvent) => {

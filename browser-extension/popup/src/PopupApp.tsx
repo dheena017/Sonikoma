@@ -2,11 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { SonikomaLogo } from "../../shared/SonikomaLogo";
 import {
   Sparkles,
-  Play,
   Download,
   LayoutGrid,
   History,
-  ExternalLink,
   RefreshCw,
   Trash2,
   Layers,
@@ -16,7 +14,6 @@ import {
   ArrowUpRight,
   Tv,
   Zap,
-  Radio,
   Scissors,
   Smartphone,
   AlertCircle,
@@ -115,15 +112,11 @@ export const PopupApp: React.FC = () => {
   }, []);
 
   // 2. Robust Active Page Scanner with On-Demand Content Script Injection
-  const [isScanning, setIsScanning] = useState<boolean>(false);
-
   const scanActiveTab = useCallback(() => {
     if (typeof chrome === "undefined" || !chrome.tabs) return;
-    setIsScanning(true);
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (chrome.runtime.lastError) {
-        setIsScanning(false);
         const errMsg = chrome.runtime.lastError.message || "Failed to query active tab";
         showToast(errMsg, "error");
         showErrorModal(
@@ -145,7 +138,6 @@ export const PopupApp: React.FC = () => {
           hasDetectedChapter: false,
         });
         setPanels([]);
-        setIsScanning(false);
         return;
       }
 
@@ -163,7 +155,6 @@ export const PopupApp: React.FC = () => {
           hasDetectedChapter: false,
         });
         setPanels([]);
-        setIsScanning(false);
         showToast("Cannot scan internal browser pages", "warning");
         showErrorModal(
           "Cannot Scan Internal Browser Page",
@@ -175,7 +166,6 @@ export const PopupApp: React.FC = () => {
       }
 
       const processResults = (res: any, sourceLabel = "endpoint") => {
-        setIsScanning(false);
         if (!res || !res.images || res.images.length === 0) {
           setActivePageInfo({
             title: tab.title || "Web Page",
@@ -366,7 +356,7 @@ export const PopupApp: React.FC = () => {
               },
               () => {
                 setTimeout(() => {
-                  chrome.tabs.sendMessage(tab.id!, { type: messageType }, (finalRes) => {
+                  chrome.tabs.sendMessage(tab.id!, { type: messageType }, () => {
                     if (chrome.runtime.lastError) {
                       const errMsg =
                         chrome.runtime.lastError.message ||

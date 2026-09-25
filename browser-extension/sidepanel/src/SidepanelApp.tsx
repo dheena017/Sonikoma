@@ -10,7 +10,6 @@ import {
   Layers,
   Sliders,
   Settings,
-  Sparkle,
   AlertCircle,
   AlertTriangle,
   CheckCircle2,

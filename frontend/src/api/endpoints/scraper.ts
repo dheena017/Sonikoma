@@ -5,9 +5,8 @@ import {
   ChapterResult,
   ScrapeChapterPayload,
   JobRecord,
-  JobStatus,
 } from "../types";
-import { getJobStatus, type JobStatusResponse } from "./jobs";
+import type { JobStatusResponse } from "./jobs";
 
 // ============================================================================
 // 1. Unified Job Management & Polling

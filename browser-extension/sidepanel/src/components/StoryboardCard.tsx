@@ -14,8 +14,6 @@ import {
   Palette,
   Clock,
   Play,
-  Pause,
-  RefreshCw,
   X,
   Loader2,
   AlertCircle,
@@ -49,16 +47,6 @@ export const StoryboardCard: React.FC<StoryboardCardProps> = ({
   onPreviewImage,
 }) => {
   const [activeTab, setActiveTab] = useState<"speech" | "narrative" | "sfx" | "scene">("speech");
-
-  // Auto-calculate suggested duration based on dialogue length
-  const getSuggestedDuration = (text: string) => {
-    if (!text || text.trim().length === 0) return 3.0;
-    const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
-    const computed = wordCount * 0.42 + 1.2;
-    return Math.min(8.0, Math.max(1.5, Math.round(computed * 2) / 2));
-  };
-
-  const suggestedDuration = getSuggestedDuration(panel.dialogueText);
 
   return (
     <div
