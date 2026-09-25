@@ -27,29 +27,6 @@ export const analyzeImage = async (
 // analyzeSingleImage is the canonical name — analyzeImage is kept as an alias for backward compat
 export const analyzeSingleImage = analyzeImage;
 
-export const analyzeSequence = async (
-  fetchWithInterceptor: FetchClient,
-  data: any,
-  options?: RequestInit
-): Promise<ApiResponse<any>> => {
-  const start = performance.now();
-  console.log(`[AI Endpoint] POST /api/v1/ai/analyze-sequence total_urls=${data?.urls?.length || 0}`);
-  try {
-    const res = await apiRequest(fetchWithInterceptor, "/api/v1/ai/analyze-sequence", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-      ...options,
-    });
-    const elapsed = Math.round(performance.now() - start);
-    console.log(`[AI Endpoint] /api/v1/ai/analyze-sequence success (${elapsed}ms):`, res);
-    return res;
-  } catch (err) {
-    console.error(`[AI Endpoint] /api/v1/ai/analyze-sequence failed:`, err);
-    throw err;
-  }
-};
-
 export const analyzeAllPanels = async (
   fetchWithInterceptor: FetchClient,
   data: any,
