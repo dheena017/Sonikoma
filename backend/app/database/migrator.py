@@ -159,6 +159,17 @@ def init_postgres(conn) -> None:
         for table_name, column_name, column_definition in (
             ("users", "google_access_token", "TEXT"),
             ("chapters", "total_tokens_used", "INTEGER NOT NULL DEFAULT 0"),
+            ("series", "medium_type", "TEXT NOT NULL DEFAULT 'manhwa'"),
+            ("series", "image_model", "TEXT NOT NULL DEFAULT 'pollinations-flux'"),
+            ("series", "voice_language", "TEXT NOT NULL DEFAULT 'en-US'"),
+            ("series", "character_dna", "TEXT DEFAULT '[]'"),
+            ("series", "total_chapters", "INTEGER NOT NULL DEFAULT 1"),
+            ("chapters", "title", "TEXT"),
+            ("chapters", "synopsis", "TEXT"),
+            ("chapters", "progress_percent", "REAL NOT NULL DEFAULT 0.0"),
+            ("chapters", "current_stage_label", "TEXT DEFAULT 'Queued'"),
+            ("chapters", "webtoon_strip_urls", "TEXT"),
+            ("chapters", "comic_pages", "TEXT"),
         ):
             try:
                 row_column = conn.execute(
@@ -407,6 +418,42 @@ def init_sqlite(conn) -> None:
         _run_safe_alter(cursor, conn,
                         "ALTER TABLE chapters ADD COLUMN project_type TEXT NOT NULL DEFAULT 'permanent'",
                         "added 'project_type' to 'chapters'")
+
+        # Multi-chapter series & AI studio columns
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE series ADD COLUMN medium_type TEXT NOT NULL DEFAULT 'manhwa'",
+                        "added 'medium_type' to 'series'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE series ADD COLUMN image_model TEXT NOT NULL DEFAULT 'pollinations-flux'",
+                        "added 'image_model' to 'series'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE series ADD COLUMN voice_language TEXT NOT NULL DEFAULT 'en-US'",
+                        "added 'voice_language' to 'series'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE series ADD COLUMN character_dna TEXT DEFAULT '[]'",
+                        "added 'character_dna' to 'series'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE series ADD COLUMN total_chapters INTEGER NOT NULL DEFAULT 1",
+                        "added 'total_chapters' to 'series'")
+
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE chapters ADD COLUMN title TEXT",
+                        "added 'title' to 'chapters'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE chapters ADD COLUMN synopsis TEXT",
+                        "added 'synopsis' to 'chapters'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE chapters ADD COLUMN progress_percent REAL NOT NULL DEFAULT 0.0",
+                        "added 'progress_percent' to 'chapters'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE chapters ADD COLUMN current_stage_label TEXT DEFAULT 'Queued'",
+                        "added 'current_stage_label' to 'chapters'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE chapters ADD COLUMN webtoon_strip_urls TEXT",
+                        "added 'webtoon_strip_urls' to 'chapters'")
+        _run_safe_alter(cursor, conn,
+                        "ALTER TABLE chapters ADD COLUMN comic_pages TEXT",
+                        "added 'comic_pages' to 'chapters'")
 
         # ── Slug indexes & Moderation indexes ─────────────────────────────
         try:

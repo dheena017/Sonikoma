@@ -33,59 +33,59 @@ export default function DashboardStats({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
       {/* 1. Total Series */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-neutral-700 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
-        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
+      <div className="p-3.5 sm:p-5 rounded-lg bg-[#171717] border border-white/10 flex items-center gap-3 sm:gap-4 hover:border-white/20 hover:bg-[#1d1d1d] transition-colors group">
+        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-[#3B82F6]/10 text-[#60A5FA] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
           <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         <div className="min-w-0">
-          <div className="text-xl sm:text-3xl font-black text-[#E5E5E5] font-mono leading-none tracking-tight">
+          <div className="text-2xl sm:text-3xl font-bold text-[#F4F4F5] leading-none">
             {projectsCount}
           </div>
-          <div className="text-[10px] sm:text-xs text-[#9CA3AF] font-mono tracking-wide mt-1 sm:mt-1.5 truncate">
-            Total Series ({completedCount} Done)
+          <div className="mt-1.5 text-[11px] leading-snug text-[#A1A1AA] sm:text-xs">
+            {completedCount} complete · {processingCount} active
           </div>
         </div>
       </div>
 
       {/* 2. Sliced Panels */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-[#F59E0B]/60 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
-        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#F59E0B]/10 text-[#F59E0B] border border-[#F59E0B]/25 flex items-center justify-center shrink-0">
+      <div className="p-3.5 sm:p-5 rounded-lg bg-[#171717] border border-white/10 flex items-center gap-3 sm:gap-4 hover:border-amber-300/40 hover:bg-[#1d1d1d] transition-colors group">
+        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-[#F59E0B]/10 text-[#FBBF24] border border-[#F59E0B]/25 flex items-center justify-center shrink-0">
           <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         <div className="min-w-0">
-          <div className="text-xl sm:text-3xl font-black text-[#E5E5E5] font-mono leading-none tracking-tight">
+          <div className="text-2xl sm:text-3xl font-bold text-[#F4F4F5] leading-none">
             {totalPanels.toLocaleString()}
           </div>
-          <div className="text-[10px] sm:text-xs text-[#9CA3AF] font-mono tracking-wide mt-1 sm:mt-1.5 truncate">
-            Panels Sliced
+          <div className="mt-1.5 text-[11px] leading-snug text-[#A1A1AA] sm:text-xs">
+            Panels sliced
           </div>
         </div>
       </div>
 
       {/* 3. Estimated Reel Runtime */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-[#10B981]/60 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
-        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#10B981]/10 text-[#10B981] border border-[#10B981]/25 flex items-center justify-center shrink-0">
+      <div className="p-3.5 sm:p-5 rounded-lg bg-[#171717] border border-white/10 flex items-center gap-3 sm:gap-4 hover:border-emerald-300/40 hover:bg-[#1d1d1d] transition-colors group">
+        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-[#10B981]/10 text-[#6EE7B7] border border-[#10B981]/25 flex items-center justify-center shrink-0">
           <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         <div className="min-w-0">
-          <div className="text-xl sm:text-3xl font-black text-[#E5E5E5] font-mono leading-none tracking-tight">
+          <div className="text-2xl sm:text-3xl font-bold text-[#F4F4F5] leading-none">
             ~{estimatedRuntimeMinutes}m
           </div>
-          <div className="text-[10px] sm:text-xs text-[#9CA3AF] font-mono tracking-wide mt-1 sm:mt-1.5 truncate">
-            Reel Duration
+          <div className="mt-1.5 text-[11px] leading-snug text-[#A1A1AA] sm:text-xs">
+            Estimated runtime
           </div>
         </div>
       </div>
 
       {/* 4. Production Health */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] shadow-md flex items-center gap-3 sm:gap-4 hover:border-neutral-700 hover:bg-[#252525] hover:-translate-y-1 hover:shadow-xl transition-all duration-200 group">
-        <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
+      <div className="p-3.5 sm:p-5 rounded-lg bg-[#171717] border border-white/10 flex items-center gap-3 sm:gap-4 hover:border-white/20 hover:bg-[#1d1d1d] transition-colors group">
+        <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg bg-[#3B82F6]/10 text-[#60A5FA] border border-[#3B82F6]/25 flex items-center justify-center shrink-0">
           <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between text-[10px] sm:text-xs font-mono text-[#9CA3AF] mb-1.5">
-            <span>Health</span>
-            <span className="font-bold text-[#E5E5E5] font-mono">
+          <div className="flex items-center justify-between text-[11px] text-[#A1A1AA] mb-1.5 sm:text-xs">
+            <span>Completion</span>
+            <span className="font-semibold text-[#F4F4F5]">
               {projectsCount > 0
                 ? Math.round((completedCount / projectsCount) * 100)
                 : 100}

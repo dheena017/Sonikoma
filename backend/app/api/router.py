@@ -29,11 +29,13 @@ from api.v1.video.router import video_router
 from api.v1.jobs import jobs_router
 from api.v1.export.router import export_router
 from api.v1.health import health_router
+from api.v1.series.router import series_router
 
 api_router = APIRouter()
 
 # ── Canonical Versioned Endpoints (Single Source of Truth in OpenAPI Docs) ───
 api_router.include_router(auth_router,           prefix="/api/v1/auth")
+api_router.include_router(series_router,         prefix="/api/v1")
 api_router.include_router(project_router,        prefix="/api/v1/projects", tags=["02. Projects & Workspace"])
 api_router.include_router(scraper_router,        prefix="/api/v1/scraper", tags=["03. Webtoon Scraping"])
 api_router.include_router(proxy_router,          prefix="/api/v1/proxy", tags=["03. Webtoon Scraping"])

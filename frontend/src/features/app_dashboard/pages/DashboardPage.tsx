@@ -10,8 +10,10 @@ import {
   WelcomeBackUserModal,
   ComeBackUserModal,
 } from "@/shared/ui/modal";
+import CreateSeriesModal from "@/features/editor_series/components/CreateSeriesModal";
 
 export default function DashboardPage() {
+  const [isCreateSeriesModalOpen, setIsCreateSeriesModalOpen] = React.useState(false);
   const {
     themeMode,
     projects,
@@ -84,40 +86,36 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="w-full flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-4 sm:py-6 max-w-7xl mx-auto">
-      {/* ── MAIN COVER WRAPPER CARD ── */}
-      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
-        <div className="relative z-10">
-          <DashboardHeader
-            themeMode={themeMode}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onNewSeries={handleNewSeries}
-          />
-        </div>
+    <div className="w-full min-w-0 flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-6 sm:py-8 max-w-7xl mx-auto">
+      <main className="w-full space-y-8 text-left">
+        <DashboardHeader
+          themeMode={themeMode}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onNewSeries={() => setIsCreateSeriesModalOpen(true)}
+        />
 
-        <div className="relative z-10">
-          <DashboardStats
-            projectsCount={projects.length}
-            completedCount={completedCount}
-            processingCount={processingCount}
-            totalPanels={totalPanels}
-            loading={loading}
-          />
-        </div>
+        <DashboardStats
+          projectsCount={projects.length}
+          completedCount={completedCount}
+          processingCount={processingCount}
+          totalPanels={totalPanels}
+          loading={loading}
+        />
 
-        <div className="relative z-10">
-          <DashboardQuickLinks
-            onGoToWorkspace={handleNewSeries}
-            onGoToAudioLab={() =>
-              (window as any).navigateTo?.("/creative-suite/ai-voice")
-            }
-            onGoToCharacters={() => (window as any).navigateTo?.("/characters")}
-          />
-        </div>
+        <DashboardQuickLinks
+          onGoToAudioLab={() =>
+            (window as any).navigateTo?.("/creative-suite/ai-voice")
+          }
+          onGoToPanelAssistant={() =>
+            (window as any).navigateTo?.("/creative-suite/panel-assistant")
+          }
+          onGoToVideoOptimizer={() =>
+            (window as any).navigateTo?.("/creative-suite/ai-optimizer")
+          }
+        />
 
-        {/* ── MAIN CONTENT WORKSPACE (PROJECTS & RECENT PRODUCTION FEED) ── */}
-        <div className="space-y-10 relative z-10">
+        <div className="space-y-8">
           <DashboardProjectSection
             themeMode={themeMode}
             loading={loading}
@@ -128,7 +126,7 @@ export default function DashboardPage() {
             openMenuId={openMenuId}
             renamingProjectId={renamingProjectId}
             onRetry={handleRetry}
-            onNewSeries={handleNewSeries}
+            onNewSeries={() => setIsCreateSeriesModalOpen(true)}
             onOpenProject={handleOpenProject}
             onRename={handleRename}
             onExport={handleExport}
@@ -140,7 +138,13 @@ export default function DashboardPage() {
 
           <DashboardActivityFeed analytics={analytics} />
         </div>
-      </div>
+      </main>
+
+      {/* AI Multi-Chapter Series Studio Modal */}
+      <CreateSeriesModal
+        isOpen={isCreateSeriesModalOpen}
+        onClose={() => setIsCreateSeriesModalOpen(false)}
+      />
 
       {/* New User Welcome Onboarding Modal */}
       <WelcomeUserModal

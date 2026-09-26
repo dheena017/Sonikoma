@@ -22,12 +22,15 @@ from .project import (
     update_project_settings,
 )
 from .series import (
+    get_series,
     get_series_by_slug,
     delete_series,
     create_series,
     get_series_for_user,
     add_chapter_to_series,
     get_chapters_for_series,
+    update_chapter_progress,
+    update_chapter_media,
     delete_series_admin,
     update_series_admin,
 )

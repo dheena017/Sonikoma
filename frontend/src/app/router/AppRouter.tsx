@@ -37,6 +37,9 @@ const ProjectsPage = React.lazy(
 const SeriesDetailsPage = React.lazy(
   () => import("@/features/workspace_projects/pages/SeriesDetailsPage")
 );
+const SeriesDashboardPage = React.lazy(
+  () => import("@/features/editor_series/pages/SeriesDashboardPage")
+);
 const ShortcutsPage = React.lazy(
   () => import("@/features/app_shortcuts/pages/ShortcutsPage")
 );
@@ -873,6 +876,8 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath.startsWith("/admin/") && currentPath !== "/admin/",
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
+      isSeriesStudioPath:
+        currentPath.startsWith("/series/"),
       isSeriesDetailsPath:
         currentPath.startsWith("/projects/") &&
         !currentPath.includes("/chapter/"),
@@ -944,6 +949,7 @@ export default function AppRouter(props: AppRouterProps) {
     isAdminPath,
     isAdminDashboardPath,
     isChapterDetailsPath,
+    isSeriesStudioPath,
     isSeriesDetailsPath,
     isCreativeSuitePath,
     isCreativeSuiteDashboardPath,
@@ -1616,6 +1622,13 @@ export default function AppRouter(props: AppRouterProps) {
                 lastEditorPath={lastEditorPath}
               />
             </React.Suspense>
+          </div>
+        )}
+
+        {/* PAGE VIEW 17.4: AI Multi-Chapter Series Studio Dashboard */}
+        {isSeriesStudioPath && (
+          <div className="page-transition w-full flex-1 flex flex-col">
+            <SeriesDashboardPage />
           </div>
         )}
 
