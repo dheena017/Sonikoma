@@ -39,8 +39,19 @@ interface SeriesData {
   chapters: ChapterItem[];
 }
 
-export default function SeriesDashboardPage() {
-  const seriesId = window.location.pathname.split("/series/")[1]?.split("/")[0] || "";
+export interface SeriesDashboardPageProps {
+  seriesId?: string;
+  navigateTo?: (path: string) => void;
+}
+
+export default function SeriesDashboardPage({
+  seriesId: propSeriesId,
+  navigateTo,
+}: SeriesDashboardPageProps = {}) {
+  const seriesId =
+    propSeriesId ||
+    window.location.pathname.split("/series/")[1]?.split("/")[0] ||
+    "";
   const [series, setSeries] = useState<SeriesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -92,13 +103,17 @@ export default function SeriesDashboardPage() {
   }, [series, seriesId]);
 
   const handleBack = () => {
-    const nav = (window as any).navigateTo;
-    if (typeof nav === "function") nav("/dashboard");
-    else window.location.href = "/dashboard";
+    if (navigateTo) {
+      navigateTo("/dashboard");
+    } else if (typeof (window as any).navigateTo === "function") {
+      (window as any).navigateTo("/dashboard");
+    } else {
+      window.location.href = "/dashboard";
+    }
   };
 
   const handleOpenChapter = (chapter: ChapterItem) => {
-    const nav = (window as any).navigateTo;
+    const nav = navigateTo || (window as any).navigateTo;
     if (series?.medium_type === "anime" && chapter.video_url) {
       if (typeof nav === "function") {
         nav(`/editor?project=${chapter.id}`);

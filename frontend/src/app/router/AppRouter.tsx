@@ -173,7 +173,12 @@ export function isKnownRoute(path: string): boolean {
   }
 
   // 4. Projects & Series Details
-  if (clean === "/projects" || clean.startsWith("/projects/")) {
+  if (
+    clean === "/projects" ||
+    clean.startsWith("/projects/") ||
+    clean === "/series" ||
+    clean.startsWith("/series/")
+  ) {
     return true;
   }
 
@@ -778,7 +783,8 @@ export default function AppRouter(props: AppRouterProps) {
     !hasSavedToken &&
     currentPath !== "/scraper" &&
     !currentPath.startsWith("/editor") &&
-    !currentPath.startsWith("/scraper/editor")
+    !currentPath.startsWith("/scraper/editor") &&
+    !currentPath.startsWith("/series")
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return null;
@@ -877,7 +883,7 @@ export default function AppRouter(props: AppRouterProps) {
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
       isSeriesStudioPath:
-        currentPath.startsWith("/series/"),
+        currentPath === "/series" || currentPath.startsWith("/series/"),
       isSeriesDetailsPath:
         currentPath.startsWith("/projects/") &&
         !currentPath.includes("/chapter/"),
@@ -1628,7 +1634,9 @@ export default function AppRouter(props: AppRouterProps) {
         {/* PAGE VIEW 17.4: AI Multi-Chapter Series Studio Dashboard */}
         {isSeriesStudioPath && (
           <div className="page-transition w-full flex-1 flex flex-col">
-            <SeriesDashboardPage />
+            <React.Suspense fallback={<RouteLoadingFallback />}>
+              <SeriesDashboardPage navigateTo={navigateTo} />
+            </React.Suspense>
           </div>
         )}
 
