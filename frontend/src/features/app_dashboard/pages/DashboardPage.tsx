@@ -87,7 +87,7 @@ export default function DashboardPage() {
 
   return (
     <div className="w-full min-w-0 flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-6 sm:py-8 max-w-7xl mx-auto">
-      <main className="w-full space-y-8 text-left">
+      <section className="w-full space-y-8 text-left" aria-label="Dashboard overview">
         <DashboardHeader
           themeMode={themeMode}
           searchQuery={searchQuery}
@@ -138,7 +138,7 @@ export default function DashboardPage() {
 
           <DashboardActivityFeed analytics={analytics} />
         </div>
-      </main>
+      </section>
 
       {/* AI Multi-Chapter Series Studio Modal */}
       <CreateSeriesModal
