@@ -9,6 +9,7 @@ normalization, speed/pitch adjustment, and multi-speaker alignment.
 import os
 import re
 import io
+import shutil
 import base64
 import logging
 import tempfile
