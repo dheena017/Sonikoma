@@ -192,7 +192,6 @@ async def process_single_chapter(
     aspect_w, aspect_h = (1024, 576) if medium_type == "anime" else (768, 1024)
 
     for idx, p_out in enumerate(panels_outlines):
-        prompt = p_out.get("visual_prompt", f"Anime scene panel {idx + 1}")
         try:
             pub_url, _ = await generate_pollinations_image(
                 prompt=prompt,
@@ -201,8 +200,15 @@ async def process_single_chapter(
                 style_preset=medium_type,
             )
         except Exception as img_err:
-            logger.warning(f"[Series Orchestrator] Panel {idx + 1} image generation error: {img_err}. Using fallback.")
-            pub_url = f"/placeholder_{idx + 1}.webp"
+            logger.warning(f"[Series Orchestrator] Panel {idx + 1} image generation error: {img_err}. Using emergency visual canvas.")
+            from services.image.providers.pollinations import _generate_procedural_fallback_panel, _LOCAL_MEDIA_DIR
+            emergency_filename = f"gen_panel_{uuid.uuid4().hex[:10]}.webp"
+            emergency_path = os.path.join(_LOCAL_MEDIA_DIR, emergency_filename)
+            _generate_procedural_fallback_panel(prompt, aspect_w, aspect_h, medium_type, emergency_path)
+            pub_url = f"/media/{emergency_filename}"
+
+        # Polite delay to avoid API throttling
+        await asyncio.sleep(0.4)
 
         generated_panels.append({
             "id": idx + 1,

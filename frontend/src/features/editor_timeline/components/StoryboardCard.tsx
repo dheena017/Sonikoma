@@ -967,18 +967,26 @@ const StoryboardCard = ({
             }}
             onError={(e) => {
               const img = e.currentTarget;
-              if (img.dataset.retried) return;
+              if (img.dataset.retried === "2") {
+                return;
+              }
+              if (img.dataset.retried === "1") {
+                img.dataset.retried = "2";
+                img.src = `/placeholder_${(idx % 25) + 1}.webp`;
+                return;
+              }
               img.dataset.retried = "1";
               const src = img.src;
               if (
                 !src.includes("/api/v1/proxy/image") &&
                 !src.includes("/api/v1/images/") &&
                 !src.includes("/media/") &&
-                !src.includes("/videos/")
+                !src.includes("/videos/") &&
+                !src.includes("/placeholder_")
               ) {
                 img.src = `/api/v1/proxy/image?url=${encodeURIComponent(src)}`;
               } else {
-                img.style.display = "none";
+                img.src = `/placeholder_${(idx % 25) + 1}.webp`;
               }
             }}
           />
