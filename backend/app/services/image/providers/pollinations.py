@@ -98,27 +98,30 @@ async def generate_pollinations_image(
     logger.info(f"[Pollinations AI] Requesting generation: {width}x{height}, style='{style_preset}'...")
 
     # Retry loop with exponential backoff
-    max_retries = 3
+    max_retries = 4
     content = None
     for attempt in range(1, max_retries + 1):
+        status_code = None
         try:
-            async with httpx.AsyncClient(timeout=35.0) as client:
+            async with httpx.AsyncClient(timeout=40.0) as client:
                 response = await client.get(
                     url,
                     headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
                 )
-                if response.status_code == 200 and len(response.content) > 1000:
+                status_code = response.status_code
+                if status_code == 200 and len(response.content) > 1000:
                     content = response.content
                     break
                 else:
                     logger.warning(
-                        f"[Pollinations AI] Attempt {attempt} returned HTTP {response.status_code}. Retrying..."
+                        f"[Pollinations AI] Attempt {attempt} returned HTTP {status_code}. Retrying..."
                     )
         except Exception as req_err:
             logger.warning(f"[Pollinations AI] Attempt {attempt} request error: {req_err}")
 
         if attempt < max_retries:
-            await asyncio.sleep(1.2 * attempt)
+            delay = 3.0 if status_code == 429 else (1.5 * attempt)
+            await asyncio.sleep(delay)
 
     if content:
         with open(local_path, "wb") as f:

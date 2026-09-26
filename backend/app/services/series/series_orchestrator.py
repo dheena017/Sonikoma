@@ -92,27 +92,29 @@ async def generate_series_arc(
     """
 
     if ai_initialized and genai_client:
-        try:
-            config_args = {"response_mime_type": "application/json"}
-            if types and hasattr(types, "ThinkingConfig"):
-                config_args["thinking_config"] = types.ThinkingConfig(thinking_budget=0)
-            config = types.GenerateContentConfig(**config_args) if types else None
+        models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]
+        for g_model in models_to_try:
+            try:
+                config_args = {"response_mime_type": "application/json"}
+                if types and hasattr(types, "ThinkingConfig"):
+                    config_args["thinking_config"] = types.ThinkingConfig(thinking_budget=0)
+                config = types.GenerateContentConfig(**config_args) if types else None
 
-            response = await call_gemini_with_retry(
-                lambda: genai_client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    contents=[prompt],
-                    config=config,
+                response = await call_gemini_with_retry(
+                    lambda: genai_client.models.generate_content(
+                        model=g_model,
+                        contents=[prompt],
+                        config=config,
+                    )
                 )
-            )
-            raw_text = response.text.strip()
-            if raw_text.startswith("```json"):
-                raw_text = raw_text[7:]
-            if raw_text.endswith("```"):
-                raw_text = raw_text[:-3]
-            return json.loads(raw_text.strip())
-        except Exception as e:
-            logger.warning(f"[Series Orchestrator] Gemini story generation failed: {e}. Using intelligent fallback arc.")
+                raw_text = response.text.strip()
+                if raw_text.startswith("```json"):
+                    raw_text = raw_text[7:]
+                if raw_text.endswith("```"):
+                    raw_text = raw_text[:-3]
+                return json.loads(raw_text.strip())
+            except Exception as e:
+                logger.warning(f"[Series Orchestrator] Gemini ({g_model}) story generation error: {e}. Trying next model...")
 
     # Intelligent fallback story arc if API key is absent or fails
     fallback_cast = [
@@ -192,6 +194,7 @@ async def process_single_chapter(
     aspect_w, aspect_h = (1024, 576) if medium_type == "anime" else (768, 1024)
 
     for idx, p_out in enumerate(panels_outlines):
+        prompt = p_out.get("visual_prompt") or p_out.get("narrative") or p_out.get("speech_text") or f"Cinematic {medium_type} scene, panel {idx + 1}"
         try:
             pub_url, _ = await generate_pollinations_image(
                 prompt=prompt,
@@ -207,8 +210,8 @@ async def process_single_chapter(
             _generate_procedural_fallback_panel(prompt, aspect_w, aspect_h, medium_type, emergency_path)
             pub_url = f"/media/{emergency_filename}"
 
-        # Polite delay to avoid API throttling
-        await asyncio.sleep(0.4)
+        # Polite delay to respect free API rate limits (1 request at a time per IP)
+        await asyncio.sleep(1.8)
 
         generated_panels.append({
             "id": idx + 1,
