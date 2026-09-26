@@ -82,8 +82,6 @@ const EditorMiniSidebarInner = ({
   const [returnRect, setReturnRect] = useState<DOMRect | null>(null);
   const [menuHover, setMenuHover] = useState(false);
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
-  const [seriesHover, setSeriesHover] = useState(false);
-  const [seriesRect, setSeriesRect] = useState<DOMRect | null>(null);
 
   const CropSidebarToolItem = ({
     tool,
@@ -254,11 +252,6 @@ const EditorMiniSidebarInner = ({
       label: "Studios",
       items: [
         {
-          id: "ai-series",
-          label: "Create AI Series",
-          icon: Sparkles,
-        },
-        {
           id: "video-editor",
           label: "Video Studio",
           icon: Film,
@@ -340,13 +333,6 @@ const EditorMiniSidebarInner = ({
                   window.dispatchEvent(new Event("popstate"));
                 }
               }
-            }
-
-            if (item.id === "ai-series") {
-              window.dispatchEvent(
-                new CustomEvent("sonikoma:open-create-series")
-              );
-              return;
             }
 
             if (item.id === "video-editor") {
@@ -462,42 +448,8 @@ const EditorMiniSidebarInner = ({
       style={{ top: `${topOffsetPx}px` }}
       className="hidden md:flex fixed bottom-0 left-0 w-20 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] flex-col items-center py-3 z-[90] shadow-xl select-none overflow-hidden"
     >
-      {/* Top AI Series Creator Hero Action Trigger */}
-      <div className="w-full flex flex-col items-center pt-0.5 pb-2 border-b border-[#2F2F2F]/80 shrink-0 mb-1">
-        <div className="relative group w-full flex justify-center">
-          <button
-            onClick={() =>
-              window.dispatchEvent(
-                new CustomEvent("sonikoma:open-create-series")
-              )
-            }
-            onMouseEnter={(e) => {
-              setSeriesRect(e.currentTarget.getBoundingClientRect());
-              setSeriesHover(true);
-            }}
-            onMouseLeave={() => setSeriesHover(false)}
-            aria-label="Create AI Series"
-            className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
-          >
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-600 via-indigo-600 to-pink-500 p-[1.5px] shadow-lg shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105 active:scale-95">
-              <div className="w-full h-full bg-[#12111d] rounded-[14px] flex items-center justify-center group-hover:bg-[#1a1728] transition-colors">
-                <Sparkles className="w-5 h-5 text-purple-300 group-hover:text-white transition-colors animate-pulse" />
-              </div>
-            </div>
-            <span className="absolute -top-1 -right-0.5 px-1.5 py-0.5 bg-gradient-to-r from-pink-500 to-purple-600 text-[8px] font-black text-white rounded-full border border-black shadow leading-none">
-              AI
-            </span>
-          </button>
-          <TooltipPortal
-            text="✨ AI Series Studio (Anime, Manhwa, Comics)"
-            visible={seriesHover}
-            anchorRect={seriesRect}
-          />
-        </div>
-      </div>
-
       {/* Scrollable Tools Area */}
-      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-1">
+      <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {menuGroups.map((group, gi) => (
           <div
             key={group.label}

@@ -23,6 +23,7 @@ import {
   Database,
   Image,
   User,
+  Wand2,
 } from "lucide-react";
 
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
@@ -307,6 +308,20 @@ const SidebarInner = ({
       group: "Creative Studio",
       items: [
         {
+          label: "AI Series Studio",
+          icon: Wand2,
+          active: currentPath.startsWith("/series"),
+          path: "/series",
+          onClick: () => {
+            window.dispatchEvent(
+              new CustomEvent("sonikoma:open-create-series")
+            );
+            onClose();
+          },
+          enabled: true,
+          badge: "NEW",
+        },
+        {
           label: "Creative Suite",
           icon: Sparkles,
           active:
@@ -410,6 +425,36 @@ const SidebarInner = ({
             <X className="h-5 w-5" />
           </button>
         </div>
+
+        {/* Quick Action: AI Multi-Chapter Series Creator */}
+        <button
+          onClick={() => {
+            window.dispatchEvent(
+              new CustomEvent("sonikoma:open-create-series")
+            );
+            onClose();
+          }}
+          className="w-full relative group overflow-hidden rounded-2xl p-[1px] bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-500 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/35 transition-all duration-300 cursor-pointer active:scale-[0.98] text-left shrink-0"
+        >
+          <div className="w-full h-full bg-[#12111d] group-hover:bg-[#181628] rounded-[15px] p-3 flex items-center justify-between transition-colors">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center shrink-0">
+                <Sparkles className="w-4 h-4 text-purple-300 animate-pulse" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>Create AI Series</span>
+                  <span className="px-1.5 py-0.5 bg-gradient-to-r from-pink-500 to-purple-600 text-[8px] font-black text-white rounded-full leading-none">
+                    AI
+                  </span>
+                </div>
+                <p className="text-[10px] text-neutral-400 truncate">
+                  Anime, Manhwa & Comics
+                </p>
+              </div>
+            </div>
+          </div>
+        </button>
 
         {/* NAVIGATION MENUS WITH HIDDEN SCROLLBAR */}
         <div className="space-y-5 overflow-y-auto flex-grow min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1">
