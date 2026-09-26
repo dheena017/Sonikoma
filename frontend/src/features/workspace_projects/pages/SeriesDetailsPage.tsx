@@ -624,40 +624,42 @@ export default function SeriesDetailsPage({
         </div>
 
         {/* 4. Filter, Search & View Mode Controls Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-6 border-b border-white/5">
+        <div className="mb-5 flex flex-col gap-4 border-b border-white/10 pb-5 xl:flex-row xl:items-center xl:justify-between">
           {/* Title + Chapter Counter */}
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-white font-sans flex items-center gap-3 min-w-0 whitespace-nowrap">
+          <div className="flex min-w-0 items-center gap-3">
+            <h2 className="flex min-w-0 flex-wrap items-center gap-2 text-xl font-semibold text-white sm:text-2xl">
               Chapters
-              <span className="inline-flex items-center justify-center shrink-0 whitespace-nowrap text-xs leading-none font-mono bg-[#3B82F6]/10 border border-[#3B82F6]/25 px-2.5 py-1.5 rounded-lg text-[#93C5FD] font-bold">
+              <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs font-medium leading-none text-neutral-300">
                 {filteredChapters.length} of {series.chapterCount}
               </span>
             </h2>
           </div>
 
           {/* Controls Row */}
-          <div className="flex flex-wrap md:flex-nowrap items-center gap-3 w-full lg:w-auto min-w-0">
+          <div className="grid w-full min-w-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap xl:w-auto xl:flex-nowrap">
             {/* Search Box */}
-            <div className="relative flex-1 min-w-0 w-full md:w-[clamp(160px,22vw,260px)] md:flex-none lg:flex-1 lg:min-w-[200px] lg:max-w-xs">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
+            <div className="relative col-span-2 min-w-0 sm:col-span-1 sm:flex-1 sm:basis-52 xl:w-56 xl:flex-none">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
               <input
-                type="text"
+                type="search"
+                aria-label="Search chapters"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search chapter..."
-                className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-600 transition-colors font-sans"
+                placeholder="Search chapters"
+                className="h-11 w-full rounded-lg border border-white/10 bg-[#141414] py-2 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-500 focus:border-sky-300/50 focus:ring-2 focus:ring-sky-300/10"
               />
             </div>
 
             {/* Status Filters */}
-            <div className="flex items-center bg-neutral-900 border border-neutral-800 p-1 rounded-xl text-xs font-mono">
+            <div className="col-span-2 grid h-11 grid-cols-3 items-center rounded-lg border border-white/10 bg-[#141414] p-1 text-xs sm:col-span-1 sm:flex">
               {(["all", "draft", "ready"] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
-                  className={`px-3 py-1 rounded-lg uppercase tracking-wider font-bold transition-all cursor-pointer ${
+                  aria-pressed={statusFilter === status}
+                  className={`h-full rounded-md px-2 text-xs capitalize transition-colors cursor-pointer sm:px-3 ${
                     statusFilter === status
-                      ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
+                      ? "bg-white/10 font-medium text-white"
                       : "text-neutral-400 hover:text-white"
                   }`}
                 >
@@ -671,15 +673,13 @@ export default function SeriesDetailsPage({
               <button
                 type="button"
                 onClick={() => setIsSortOpen((prev) => !prev)}
-                className={`flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 border rounded-xl px-3 py-2 text-xs font-mono transition-all cursor-pointer select-none ${
+                className={`flex h-11 min-w-0 items-center justify-between gap-2 rounded-lg border bg-[#141414] px-3 text-xs transition-colors cursor-pointer select-none sm:flex-none ${
                   isSortOpen
-                    ? "border-[#3B82F6]/60 ring-2 ring-[#3B82F6]/50 text-white"
-                    : "border-neutral-800 text-neutral-300 hover:border-neutral-700"
+                    ? "border-sky-300/50 text-white ring-2 ring-sky-300/10"
+                    : "border-white/10 text-neutral-300 hover:border-white/20"
                 }`}
               >
-                <span className="text-[10px] text-neutral-500 uppercase tracking-wider font-bold">
-                  Sort:
-                </span>
+                  <span className="hidden text-neutral-500 sm:inline">Sort:</span>
                 <span className="font-semibold text-white">
                   {sortBy === "newest"
                     ? "Newest First"
@@ -697,7 +697,7 @@ export default function SeriesDetailsPage({
               </button>
 
               {isSortOpen && (
-                <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 z-50 mt-2 w-44 rounded-lg border border-white/10 bg-[#171717] py-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-1">
                     {[
                       { id: "newest", label: "Newest First" },
@@ -714,10 +714,10 @@ export default function SeriesDetailsPage({
                             setSortBy(opt.id as any);
                             setIsSortOpen(false);
                           }}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
+                          className={`my-0.5 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-xs transition-colors cursor-pointer ${
                             isSelected
-                              ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md shadow-blue-500/25"
-                              : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
+                              ? "bg-white/10 font-medium text-white"
+                              : "text-neutral-300 hover:bg-white/[0.07] hover:text-white"
                           }`}
                         >
                           <span>{opt.label}</span>
@@ -733,26 +733,30 @@ export default function SeriesDetailsPage({
             </div>
 
             {/* View Switcher */}
-            <div className="flex items-center bg-neutral-900 border border-neutral-800 p-1 rounded-xl">
+            <div className="flex h-11 items-center justify-center rounded-lg border border-white/10 bg-[#141414] p-1">
               <button
+                type="button"
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                aria-label="Grid view"
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors cursor-pointer ${
                   viewMode === "grid"
-                    ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
+                    ? "bg-white/10 text-white"
                     : "text-neutral-500 hover:text-white"
                 }`}
-                title="Grid View"
+                title="Grid view"
               >
                 <Grid className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                aria-label="List view"
+                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors cursor-pointer ${
                   viewMode === "list"
-                    ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
+                    ? "bg-white/10 text-white"
                     : "text-neutral-500 hover:text-white"
                 }`}
-                title="List View"
+                title="List view"
               >
                 <List className="w-4 h-4" />
               </button>

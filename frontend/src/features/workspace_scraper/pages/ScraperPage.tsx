@@ -605,12 +605,12 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   };
 
   return (
-    <main
+    <section
       id="main_workspace"
-      className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 flex flex-col gap-6 items-center justify-start text-[#E5E5E5] animate-fade-in"
+      aria-label="Scraper workspace"
+      className="flex-1 w-full min-w-0 max-w-7xl mx-auto py-6 sm:py-8 flex flex-col gap-8 items-center justify-start text-[#E5E5E5] animate-fade-in"
     >
-      {/* ── MAIN COVER WRAPPER CARD ── */}
-      <div className="w-full rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-10 relative overflow-hidden text-left">
+      <div className="w-full space-y-8 text-left">
         {matchingProject && (
           <WorkspaceResumeCard
             matchingProject={matchingProject as any}
@@ -619,13 +619,6 @@ const ScraperPageInner = (props: ScraperPageProps) => {
             getGenreStyle={getGenreStyle}
           />
         )}
-
-        {/* ── STATS BAR ── */}
-        <WorkspaceStatsBar
-          statsLoading={statsLoading}
-          stats={stats}
-          projectId={projectId}
-        />
 
         <div className="relative z-50">
           <UrlInputPanel
@@ -786,6 +779,12 @@ const ScraperPageInner = (props: ScraperPageProps) => {
           />
         </div>
 
+        <WorkspaceStatsBar
+          statsLoading={statsLoading}
+          stats={stats}
+          projectId={projectId}
+        />
+
         {/* ── RECENT PROJECTS ── */}
         <RecentProjectsSection
           recentProjects={recentProjects}
@@ -815,7 +814,7 @@ const ScraperPageInner = (props: ScraperPageProps) => {
           setActiveGuideTab={setActiveGuideTab}
         />
       </div>
-    </main>
+    </section>
   );
 };
 
