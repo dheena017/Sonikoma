@@ -85,7 +85,7 @@ export default function CreateSeriesModal({
       }
 
       const data = await res.json();
-      notify.success(`Series "${title}" created! Chapter 1 generation is underway.`);
+      notify.success(`AI Story "${title}" created! Chapter 1 generation is underway.`);
       onClose();
 
       if (onSeriesCreated && data.series_id) {
@@ -93,9 +93,9 @@ export default function CreateSeriesModal({
       } else if (data.series_id) {
         const nav = (window as any).navigateTo;
         if (typeof nav === "function") {
-          nav(`/series/${data.series_id}`);
+          nav(`/ai-story/${data.series_id}`);
         } else {
-          window.location.href = `/series/${data.series_id}`;
+          window.location.href = `/ai-story/${data.series_id}`;
         }
       }
     } catch (err: any) {
@@ -116,10 +116,10 @@ export default function CreateSeriesModal({
             </div>
             <div>
               <h2 className="text-lg font-bold text-white tracking-wide">
-                AI Multi-Chapter Studio
+                AI Story Studio
               </h2>
               <p className="text-xs text-neutral-400 font-mono">
-                Create, Read & Watch entire Anime, Manhwa & Comics
+                Create, Read & Watch AI-Generated Anime, Manhwa & Comics
               </p>
             </div>
           </div>
@@ -362,7 +362,7 @@ export default function CreateSeriesModal({
                 </>
               ) : (
                 <>
-                  <span>Create {totalChapters}-Chapter Series</span>
+                  <span>Generate {totalChapters}-Chapter Story</span>
                   <ChevronRight className="w-4 h-4" />
                 </>
               )}

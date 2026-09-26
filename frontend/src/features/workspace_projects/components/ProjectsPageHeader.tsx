@@ -14,17 +14,16 @@ export default function ProjectsPageHeader({
   onNewSeries,
 }: ProjectsPageHeaderProps) {
   return (
-    <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#2F2F2F] text-left">
-      <div className="space-y-2 max-w-2xl">
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-[#E5E5E5] leading-tight">
-          Projects &{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
-            Series
-          </span>
+    <div className="flex flex-col gap-5 border-b border-white/10 pb-6 text-left sm:flex-row sm:items-end sm:justify-between">
+      <div className="max-w-2xl">
+        <p className="mb-2 text-[11px] font-semibold uppercase text-emerald-300">
+          Library
+        </p>
+        <h1 className="text-3xl font-bold leading-tight text-[#F4F4F5] sm:text-4xl">
+          Projects
         </h1>
-        <p className="text-[#9CA3AF] text-xs sm:text-sm font-sans leading-relaxed max-w-xl">
-          Browse, organize, and manage your manga, webtoon, and video storyboard
-          productions.
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#A1A1AA]">
+          Browse and organize your series, chapters, and video projects.
         </p>
       </div>
 
@@ -32,10 +31,10 @@ export default function ProjectsPageHeader({
         <button
           type="button"
           onClick={onNewSeries}
-          className="btn-primary bg-[#3B82F6] hover:bg-[#2563EB] border border-[#3B82F6]/40 text-white flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider shadow-md shadow-blue-500/25 active:scale-95 cursor-pointer"
+          className="flex h-11 items-center gap-2 rounded-lg border border-emerald-300/30 bg-emerald-300 px-5 text-sm font-semibold text-[#101510] transition-colors hover:bg-emerald-200 active:scale-[0.98]"
         >
-          <Plus className="h-4 w-4 text-white" />
-          <span>New Chapter</span>
+          <Plus className="h-4 w-4" />
+          <span>New series</span>
         </button>
       </div>
     </div>

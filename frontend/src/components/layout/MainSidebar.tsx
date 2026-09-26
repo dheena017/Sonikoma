@@ -308,10 +308,12 @@ const SidebarInner = ({
       group: "Creative Studio",
       items: [
         {
-          label: "AI Series Studio",
+          label: "AI Story Studio",
           icon: Wand2,
-          active: currentPath.startsWith("/series"),
-          path: "/series",
+          active:
+            currentPath.startsWith("/ai-story") ||
+            currentPath.startsWith("/series"),
+          path: "/ai-story",
           onClick: () => {
             window.dispatchEvent(
               new CustomEvent("sonikoma:open-create-series")
@@ -426,7 +428,7 @@ const SidebarInner = ({
           </button>
         </div>
 
-        {/* Quick Action: AI Multi-Chapter Series Creator */}
+        {/* Quick Action: AI Story Creator */}
         <button
           onClick={() => {
             window.dispatchEvent(
@@ -443,13 +445,13 @@ const SidebarInner = ({
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <span>Create AI Series</span>
+                  <span>AI Story Studio</span>
                   <span className="px-1.5 py-0.5 bg-gradient-to-r from-pink-500 to-purple-600 text-[8px] font-black text-white rounded-full leading-none">
                     AI
                   </span>
                 </div>
                 <p className="text-[10px] text-neutral-400 truncate">
-                  Anime, Manhwa & Comics
+                  Prompt to Anime, Manhwa & Comics
                 </p>
               </div>
             </div>

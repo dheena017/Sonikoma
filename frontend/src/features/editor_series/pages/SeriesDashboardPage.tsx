@@ -50,6 +50,7 @@ export default function SeriesDashboardPage({
 }: SeriesDashboardPageProps = {}) {
   const seriesId =
     propSeriesId ||
+    window.location.pathname.split("/ai-story/")[1]?.split("/")[0] ||
     window.location.pathname.split("/series/")[1]?.split("/")[0] ||
     "";
   const [series, setSeries] = useState<SeriesData | null>(null);
@@ -140,11 +141,11 @@ export default function SeriesDashboardPage({
   if (!series) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center min-h-[60vh] text-center p-6">
-        <h2 className="text-xl font-bold text-neutral-200">Series Not Found</h2>
-        <p className="text-sm text-neutral-500 mt-2">The requested series session could not be located.</p>
+        <h2 className="text-xl font-bold text-neutral-200">Story Not Found</h2>
+        <p className="text-sm text-neutral-500 mt-2">The requested AI story session could not be located.</p>
         <button
           onClick={handleBack}
-          className="mt-6 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm"
+          className="mt-6 px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-sm cursor-pointer"
         >
           Return to Dashboard
         </button>

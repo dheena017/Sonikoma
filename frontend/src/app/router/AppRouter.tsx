@@ -172,12 +172,14 @@ export function isKnownRoute(path: string): boolean {
     return true;
   }
 
-  // 4. Projects & Series Details
+  // 4. Projects & AI Story Studio
   if (
     clean === "/projects" ||
     clean.startsWith("/projects/") ||
     clean === "/series" ||
-    clean.startsWith("/series/")
+    clean.startsWith("/series/") ||
+    clean === "/ai-story" ||
+    clean.startsWith("/ai-story/")
   ) {
     return true;
   }
@@ -784,7 +786,8 @@ export default function AppRouter(props: AppRouterProps) {
     currentPath !== "/scraper" &&
     !currentPath.startsWith("/editor") &&
     !currentPath.startsWith("/scraper/editor") &&
-    !currentPath.startsWith("/series")
+    !currentPath.startsWith("/series") &&
+    !currentPath.startsWith("/ai-story")
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return null;
@@ -883,7 +886,10 @@ export default function AppRouter(props: AppRouterProps) {
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
       isSeriesStudioPath:
-        currentPath === "/series" || currentPath.startsWith("/series/"),
+        currentPath === "/ai-story" ||
+        currentPath.startsWith("/ai-story/") ||
+        currentPath === "/series" ||
+        currentPath.startsWith("/series/"),
       isSeriesDetailsPath:
         currentPath.startsWith("/projects/") &&
         !currentPath.includes("/chapter/"),

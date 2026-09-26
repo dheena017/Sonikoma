@@ -130,10 +130,12 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
       group: "Studios",
       items: [
         {
-          label: "AI Series Studio",
+          label: "AI Story Studio",
           icon: Wand2,
-          active: currentPath.startsWith("/series"),
-          path: "/series",
+          active:
+            currentPath.startsWith("/ai-story") ||
+            currentPath.startsWith("/series"),
+          path: "/ai-story",
           onClick: () =>
             window.dispatchEvent(
               new CustomEvent("sonikoma:open-create-series")
@@ -280,7 +282,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
 
   return (
     <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] hidden lg:flex flex-col items-center py-3 z-40 overflow-hidden select-none">
-      {/* Top AI Series Creator Hero Action Trigger */}
+      {/* Top AI Story Creator Hero Action Trigger */}
       <div className="w-full flex flex-col items-center pt-0.5 pb-2 border-b border-[#2F2F2F]/80 shrink-0 mb-1">
         <div className="relative group w-full flex justify-center">
           <button
@@ -294,7 +296,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
               setSeriesHover(true);
             }}
             onMouseLeave={() => setSeriesHover(false)}
-            aria-label="Create AI Series"
+            aria-label="Create AI Story"
             className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
           >
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-600 via-indigo-600 to-pink-500 p-[1.5px] shadow-lg shadow-purple-500/25 group-hover:shadow-purple-500/40 transition-all duration-300 group-hover:scale-105 active:scale-95">
@@ -307,7 +309,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             </span>
           </button>
           <TooltipPortal
-            text="✨ AI Series Studio (Anime, Manhwa, Comics)"
+            text="✨ AI Story Studio (Prompt to Anime, Manhwa & Comics)"
             visible={seriesHover}
             anchorRect={seriesRect}
           />

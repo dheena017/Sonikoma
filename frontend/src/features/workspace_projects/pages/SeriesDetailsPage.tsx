@@ -401,22 +401,21 @@ export default function SeriesDetailsPage({
   }
 
   return (
-    <div className="w-full flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-4 sm:py-6 max-w-7xl mx-auto text-left">
-      {/* ── MAIN COVER WRAPPER CARD ── */}
-      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
+    <div className="w-full min-w-0 flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-6 sm:py-8 max-w-7xl mx-auto text-left">
+      <section className="w-full space-y-7 text-left" aria-label="Series details">
         {/* Top Back Nav & Quick Toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-[#2F2F2F]">
+        <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
             <button
               type="button"
               onClick={() => navigateTo("/projects")}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-neutral-900/80 hover:bg-[#2A2A2A] border border-white/10 hover:border-neutral-700 text-neutral-400 hover:text-[#93C5FD] transition-all cursor-pointer shadow-sm group"
+              className="flex min-h-9 items-center gap-1.5 rounded-lg border border-white/10 px-3 text-neutral-400 transition-colors hover:bg-white/5 hover:text-white group"
             >
               <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
               <span>Projects</span>
             </button>
             <span className="text-neutral-600 font-bold">&rsaquo;</span>
-            <span className="px-2.5 py-1 rounded-lg bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[#60A5FA] font-bold truncate max-w-xs sm:max-w-md">
+            <span className="max-w-[min(60vw,28rem)] truncate rounded-md px-1.5 py-1 font-semibold text-[#D4D4D8]">
               {series.title}
             </span>
           </div>
@@ -425,7 +424,8 @@ export default function SeriesDetailsPage({
             <button
               type="button"
               onClick={() => setIsFavorite(!isFavorite)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+              aria-pressed={isFavorite}
+              className={`flex min-h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors cursor-pointer ${
                 isFavorite
                   ? "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
                   : "bg-neutral-900/80 border-white/10 text-neutral-400 hover:text-white hover:bg-neutral-850"
@@ -442,7 +442,7 @@ export default function SeriesDetailsPage({
             <button
               type="button"
               onClick={() => setIsEditModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-900/80 border border-white/10 hover:border-neutral-700 text-xs font-bold text-neutral-300 hover:text-white transition-all cursor-pointer hover:bg-neutral-850"
+              className="flex min-h-9 items-center gap-1.5 rounded-lg border border-white/10 px-3 text-xs font-semibold text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
             >
               <Edit3 className="w-3.5 h-3.5 text-[#3B82F6]" />
               <span>Edit Info</span>
@@ -450,113 +450,78 @@ export default function SeriesDetailsPage({
           </div>
         </div>
 
-        {/* 1. Ambient Glassmorphic Hero Banner */}
-        <div className="relative mb-10 rounded-3xl overflow-hidden border border-white/10 bg-neutral-900/80 backdrop-blur-2xl shadow-2xl p-6 md:p-8">
-          {/* Cover Background Blur Glow */}
-          {series.cover && (
-            <div
-              className="absolute inset-0 bg-cover bg-center opacity-20 blur-3xl scale-125 pointer-events-none"
-              style={{ backgroundImage: `url(${series.cover})` }}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/90 to-transparent pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col md:flex-row gap-6 md:gap-7 items-center md:items-start">
+        <div className="relative overflow-hidden rounded-lg border border-white/10 bg-[#151515] p-4 sm:p-6 lg:p-7">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             {/* Cover Poster */}
-            <div className="w-40 h-56 sm:w-44 sm:h-60 shrink-0 rounded-2xl overflow-hidden border border-white/15 bg-neutral-950 shadow-2xl relative group">
+            <div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden rounded-md border border-white/10 bg-neutral-950 sm:w-40">
               {series.cover ? (
                 <img
                   src={series.cover}
                   alt={series.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#2A2A2A] via-neutral-900 to-neutral-955">
-                  <FolderOpen className="w-12 h-12 text-[#3B82F6]/50" />
-                  <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
+                <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-[#101010]">
+                  <FolderOpen className="h-10 w-10 text-neutral-600" />
+                  <span className="text-[10px] font-semibold uppercase text-neutral-500">
                     No Cover
                   </span>
                 </div>
               )}
-              <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/75 backdrop-blur-md border border-white/10 text-[9px] font-extrabold font-mono text-[#60A5FA] uppercase tracking-wider">
-                WEBTOON
+              <div className="absolute left-2 top-2 rounded bg-black/75 px-2 py-1 text-[9px] font-semibold uppercase text-white">
+                SERIES COVER
               </div>
             </div>
 
             {/* Series Meta Info & Actions */}
-            <div className="flex flex-col gap-4 flex-1 min-w-0">
+            <div className="flex min-w-0 flex-1 flex-col gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold font-mono">
+                  <span className="rounded-md border border-sky-300/20 bg-sky-300/10 px-2 py-1 text-xs font-medium text-sky-200">
                     {series.genre || "Fantasy Action"}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-neutral-800 text-neutral-300 text-xs font-mono">
+                  <span className="rounded-md border border-white/10 px-2 py-1 text-xs text-neutral-300">
                     By {series.author || "Unknown Author"}
                   </span>
                 </div>
 
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-white line-clamp-2 font-sans">
+                <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl">
                   {series.title}
                 </h1>
 
                 {series.synopsis && (
-                  <p className="text-neutral-300 text-sm md:text-base leading-relaxed max-w-3xl line-clamp-3 font-sans opacity-90">
+                  <p className="max-w-3xl text-sm leading-relaxed text-neutral-300">
                     {series.synopsis}
                   </p>
                 )}
               </div>
 
-              {/* Metadata Chips Row */}
-              <div className="flex flex-wrap gap-3 items-center pt-2">
-                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
-                  <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
-                  <span>
-                    {series.chapterCount}{" "}
-                    {series.chapterCount === 1 ? "Chapter" : "Chapters"}
-                  </span>
-                </div>
+              <p className="text-xs text-neutral-500">
+                Updated {series.latestUpdatedAt
+                  ? new Date(series.latestUpdatedAt).toLocaleDateString()
+                  : "recently"}
+              </p>
 
-                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{totalPanels} Sliced Panels</span>
-                </div>
-
-                <div className="flex items-center gap-2 bg-neutral-955/80 border border-white/10 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
-                  <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>~{estimatedRuntimeMinutes} Min Video</span>
-                </div>
-
-                <div className="flex items-center gap-2 text-neutral-400 text-xs font-mono ml-auto">
-                  <span>
-                    Updated:{" "}
-                    {series.latestUpdatedAt
-                      ? new Date(series.latestUpdatedAt).toLocaleDateString()
-                      : "Recently"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Hero Quick Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10 xl:flex xl:flex-wrap">
+              <div className="grid grid-cols-1 gap-2 border-t border-white/10 pt-4 sm:grid-cols-2 xl:flex xl:flex-wrap">
                 <button
                   onClick={handleNewChapter}
-                  className="flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/25 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-emerald-300/30 bg-emerald-300 px-4 text-sm font-semibold text-[#101510] transition-colors hover:bg-emerald-200 xl:justify-start"
                 >
                   <Plus className="h-4 w-4" />
-                  <span>New Chapter</span>
+                  <span>New chapter</span>
                 </button>
 
                 <button
                   onClick={() => setIsPublishModalOpen(true)}
-                  className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:bg-neutral-850 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/5 hover:text-white xl:justify-start"
                 >
                   <Film className="h-4 w-4 text-[#3B82F6]" />
-                  <span>Export Full Series</span>
+                  <span>Export series</span>
                 </button>
 
                 <button
                   onClick={() => setIsReaderModalOpen(true)}
-                  className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-emerald-500/40 hover:bg-neutral-850 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/5 hover:text-white xl:justify-start"
                 >
                   <BookOpen className="h-4 w-4 text-emerald-400" />
                   <span>Read Series</span>
@@ -564,7 +529,7 @@ export default function SeriesDetailsPage({
 
                 <button
                   onClick={() => navigateTo("/creative-suite/ai-voice")}
-                  className="flex items-center gap-2 bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 hover:bg-neutral-850 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/5 hover:text-white xl:justify-start"
                 >
                   <Volume2 className="h-4 w-4 text-amber-400" />
                   <span>Audio Studio</span>
@@ -575,60 +540,57 @@ export default function SeriesDetailsPage({
         </div>
 
         {/* 2. Deep Series Analytics Dashboard */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0">
-              <Layers className="w-6 h-6" />
+        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#171717] p-4">
+            <div className="shrink-0 rounded-lg border border-sky-400/20 bg-sky-400/10 p-2.5 text-sky-300">
+              <Layers className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-black text-white font-sans">
+              <div className="text-2xl font-bold text-white">
                 {series.chapterCount}
               </div>
-              <div className="text-xs text-neutral-400 font-mono">
-                Total Chapters ({readyChaptersCount} Ready ·{" "}
-                {draftChaptersCount} Draft)
+              <div className="text-xs text-neutral-400">
+                Chapters · {readyChaptersCount} ready · {draftChaptersCount} draft
               </div>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
-              <Zap className="w-6 h-6" />
+          <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#171717] p-4">
+            <div className="shrink-0 rounded-lg border border-amber-400/20 bg-amber-400/10 p-2.5 text-amber-300">
+              <Zap className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-black text-white font-sans">
-                {totalPanels}
+              <div className="text-2xl font-bold text-white">
+                {totalPanels.toLocaleString()}
               </div>
-              <div className="text-xs text-neutral-400 font-mono">
-                Comic Panels Extracted
+              <div className="text-xs text-neutral-400">
+                Panels extracted
               </div>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
-              <Clock className="w-6 h-6" />
+          <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#171717] p-4">
+            <div className="shrink-0 rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-2.5 text-emerald-300">
+              <Clock className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-black text-white font-sans">
+              <div className="text-2xl font-bold text-white">
                 ~{estimatedRuntimeMinutes}m
               </div>
-              <div className="text-xs text-neutral-400 font-mono">
-                Estimated Reel Duration
+              <div className="text-xs text-neutral-400">
+                Estimated video runtime
               </div>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-neutral-800 flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-[#2F2F2F] shrink-0">
-              <CheckCircle2 className="w-6 h-6" />
+          <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#171717] p-4">
+            <div className="shrink-0 rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2.5 text-indigo-300">
+              <CheckCircle2 className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-xs text-neutral-400 font-mono">
-                  Health Score
-                </span>
-                <span className="text-xs font-bold text-indigo-400 font-mono">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs text-neutral-400">Ready rate</span>
+                <span className="text-xs font-semibold text-indigo-300">
                   {Math.round(
                     (readyChaptersCount / Math.max(1, series.chapterCount)) *
                       100
@@ -636,9 +598,19 @@ export default function SeriesDetailsPage({
                   %
                 </span>
               </div>
-              <div className="w-full h-2 rounded-full bg-neutral-955 overflow-hidden border border-neutral-800">
+              <div
+                className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800"
+                role="progressbar"
+                aria-label="Ready chapter rate"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(
+                  (readyChaptersCount / Math.max(1, series.chapterCount)) *
+                    100
+                )}
+              >
                 <div
-                  className="h-full bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full"
+                  className="h-full rounded-full bg-indigo-300"
                   style={{
                     width: `${Math.round(
                       (readyChaptersCount / Math.max(1, series.chapterCount)) *
@@ -965,7 +937,7 @@ export default function SeriesDetailsPage({
           seriesTitle={series.title}
           chapters={series.chapters}
         />
-      </div>
+      </section>
     </div>
   );
 }

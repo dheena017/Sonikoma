@@ -62,21 +62,22 @@ export default function ProjectsFilters({
     SORT_OPTIONS.find((s) => s.id === sortBy)?.label || sortBy;
 
   return (
-    <div className="bg-[#0c0d12]/95 border border-white/10 rounded-2xl p-3.5 sm:p-4 mb-8 flex flex-col lg:flex-row gap-3.5 items-center justify-between shadow-2xl backdrop-blur-2xl">
+    <div className="mb-6 flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:flex-wrap sm:items-center">
       {/* Search Input */}
-      <div className="flex-1 w-full relative">
-        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3B82F6]" />
+      <div className="relative min-w-0 flex-1 sm:min-w-[240px]">
+        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71717A]" />
         <input
-          type="text"
-          placeholder="Search projects by title, series, or author..."
+          type="search"
+          aria-label="Search projects by title, series, or author"
+          placeholder="Search projects"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full bg-[#12131e]/80 border border-white/10 hover:border-neutral-700 text-white text-xs sm:text-sm rounded-xl pl-10 pr-4 py-2.5 outline-none focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700 font-sans transition-all placeholder:text-neutral-500 shadow-inner"
+          className="h-11 w-full rounded-lg border border-white/10 bg-[#141414] py-2 pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-[#71717A] hover:border-white/20 focus:border-sky-300/50 focus:ring-2 focus:ring-sky-300/10"
         />
       </div>
 
       {/* Filters and Controls */}
-      <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
         {/* Custom Genre Dropdown */}
         <div className="relative" ref={genreRef}>
           <button
@@ -85,13 +86,13 @@ export default function ProjectsFilters({
               setIsGenreOpen((prev) => !prev);
               setIsSortOpen(false);
             }}
-            className={`flex items-center gap-2 bg-[#12131e]/80 hover:bg-[#181926] border rounded-xl px-3.5 py-2.5 text-xs font-mono transition-all cursor-pointer shadow-sm select-none ${
+            className={`flex h-11 items-center gap-2 rounded-lg border bg-[#141414] px-3 text-xs transition-colors cursor-pointer select-none ${
               isGenreOpen
-                ? "border-[#3B82F6]/60 ring-2 ring-[#3B82F6]/50 text-white"
+                ? "border-sky-300/50 text-white ring-2 ring-sky-300/10"
                 : "border-white/10 text-neutral-300 hover:border-white/20"
             }`}
           >
-            <Filter className="w-3.5 h-3.5 text-[#3B82F6] shrink-0" />
+            <Filter className="h-3.5 w-3.5 shrink-0 text-[#A1A1AA]" />
             <span className="font-semibold">
               {genreFilter === "All" ? "All Genres" : genreFilter}
             </span>
@@ -103,7 +104,7 @@ export default function ProjectsFilters({
           </button>
 
           {isGenreOpen && (
-            <div className="absolute left-0 mt-2 w-48 rounded-2xl bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute left-0 z-50 mt-2 w-48 rounded-lg border border-white/10 bg-[#171717] py-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
               <div className="max-h-60 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-1">
                 {genres.map((g) => {
                   const isSelected = genreFilter === g;
@@ -115,10 +116,10 @@ export default function ProjectsFilters({
                         onGenreChange(g);
                         setIsGenreOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
+                      className={`my-0.5 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-xs transition-colors cursor-pointer ${
                         isSelected
-                          ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md shadow-blue-500/25"
-                          : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
+                          ? "bg-white/10 font-semibold text-white"
+                          : "text-neutral-300 hover:bg-white/[0.07] hover:text-white"
                       }`}
                     >
                       <span>{g === "All" ? "All Genres" : g}</span>
@@ -141,9 +142,9 @@ export default function ProjectsFilters({
               setIsSortOpen((prev) => !prev);
               setIsGenreOpen(false);
             }}
-            className={`flex items-center gap-2 bg-[#12131e]/80 hover:bg-[#181926] border rounded-xl px-3.5 py-2.5 text-xs font-mono transition-all cursor-pointer shadow-sm select-none ${
+            className={`flex h-11 items-center gap-2 rounded-lg border bg-[#141414] px-3 text-xs transition-colors cursor-pointer select-none ${
               isSortOpen
-                ? "border-[#3B82F6]/60 ring-2 ring-[#3B82F6]/50 text-white"
+                ? "border-sky-300/50 text-white ring-2 ring-sky-300/10"
                 : "border-white/10 text-neutral-300 hover:border-white/20"
             }`}
           >
@@ -159,7 +160,7 @@ export default function ProjectsFilters({
           </button>
 
           {isSortOpen && (
-            <div className="absolute left-0 lg:left-auto lg:right-0 mt-2 w-44 rounded-2xl bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.85)] py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute left-0 z-50 mt-2 w-44 rounded-lg border border-white/10 bg-[#171717] py-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150 sm:left-auto sm:right-0">
               <div className="px-1">
                 {SORT_OPTIONS.map((opt) => {
                   const isSelected = sortBy === opt.id;
@@ -171,10 +172,10 @@ export default function ProjectsFilters({
                         onSortChange(opt.id);
                         setIsSortOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-mono text-left transition-all cursor-pointer my-0.5 ${
+                      className={`my-0.5 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-xs transition-colors cursor-pointer ${
                         isSelected
-                          ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold shadow-md shadow-blue-500/25"
-                          : "text-neutral-300 hover:text-white hover:bg-white/[0.07]"
+                          ? "bg-white/10 font-semibold text-white"
+                          : "text-neutral-300 hover:bg-white/[0.07] hover:text-white"
                       }`}
                     >
                       <span>{opt.label}</span>
@@ -190,15 +191,16 @@ export default function ProjectsFilters({
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center bg-[#12131e]/80 border border-white/10 p-1 rounded-xl ml-auto lg:ml-2 shadow-inner">
+        <div className="ml-auto flex h-11 items-center rounded-lg border border-white/10 bg-[#141414] p-1">
           <button
             type="button"
             onClick={() => onViewModeChange("grid")}
-            title="Grid View"
+            aria-label="Grid view"
+            title="Grid view"
             className={`p-1.5 rounded-lg transition-all cursor-pointer active:scale-95 ${
               viewMode === "grid"
-                ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+                ? "bg-white/10 text-white"
+                : "text-neutral-400 hover:bg-white/5 hover:text-white"
             }`}
           >
             <LayoutGrid className="w-4 h-4" />
@@ -206,11 +208,12 @@ export default function ProjectsFilters({
           <button
             type="button"
             onClick={() => onViewModeChange("list")}
-            title="List View"
+            aria-label="List view"
+            title="List view"
             className={`p-1.5 rounded-lg transition-all cursor-pointer active:scale-95 ${
               viewMode === "list"
-                ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white shadow-sm shadow-blue-500/25"
-                : "text-neutral-400 hover:text-white hover:bg-white/5"
+                ? "bg-white/10 text-white"
+                : "text-neutral-400 hover:bg-white/5 hover:text-white"
             }`}
           >
             <List className="w-4 h-4" />
