@@ -17,3 +17,4 @@ export * from "./selection";
 export * from "./textUtils";
 export * from "./voiceMatcher";
 export * from "./workspaceNavigation";
+export * from "./urlValidator";

@@ -125,11 +125,14 @@ async def get_public_project_endpoint(project_id: str = Path(..., description="P
             if p.get("image_url"):
                 p["image_url"] = wrap_proxy_url(p["image_url"])
         scraped_images = []
-        audio_set = project.get("audio_settings") or {}
-        if isinstance(audio_set, dict):
-            scraped_images_raw = audio_set.get("scraped_images")
-            if isinstance(scraped_images_raw, list):
-                scraped_images = [wrap_proxy_url(img) for img in scraped_images_raw if img]
+        if project.get("scraped_images") and isinstance(project["scraped_images"], list):
+            scraped_images = [wrap_proxy_url(img) for img in project["scraped_images"] if img]
+        if not scraped_images:
+            audio_set = project.get("audio_settings") or {}
+            if isinstance(audio_set, dict):
+                scraped_images_raw = audio_set.get("scraped_images")
+                if isinstance(scraped_images_raw, list):
+                    scraped_images = [wrap_proxy_url(img) for img in scraped_images_raw if img]
         if not scraped_images and (project.get("url") or project.get("original_url")):
             try:
                 from repositories.scraper import get_latest_scrape_session
@@ -751,11 +754,14 @@ async def get_single_project_endpoint(
             if p.get("image_url"):
                 p["image_url"] = wrap_proxy_url(p["image_url"])
         scraped_images = []
-        audio_set = project.get("audio_settings") or {}
-        if isinstance(audio_set, dict):
-            scraped_images_raw = audio_set.get("scraped_images")
-            if isinstance(scraped_images_raw, list):
-                scraped_images = [wrap_proxy_url(img) for img in scraped_images_raw if img]
+        if project.get("scraped_images") and isinstance(project["scraped_images"], list):
+            scraped_images = [wrap_proxy_url(img) for img in project["scraped_images"] if img]
+        if not scraped_images:
+            audio_set = project.get("audio_settings") or {}
+            if isinstance(audio_set, dict):
+                scraped_images_raw = audio_set.get("scraped_images")
+                if isinstance(scraped_images_raw, list):
+                    scraped_images = [wrap_proxy_url(img) for img in scraped_images_raw if img]
         if not scraped_images and (project.get("url") or project.get("original_url")):
             try:
                 from repositories.scraper import get_latest_scrape_session

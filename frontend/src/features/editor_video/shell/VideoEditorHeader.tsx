@@ -236,9 +236,9 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   return (
     <>
-      <header className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-30">
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 h-full">
-          <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-white/5 h-full mr-1 sm:mr-2">
+      <header className="w-full min-w-0 h-16 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-30">
+        <div className="flex items-center shrink-0 h-full">
+          <div className="w-14 sm:w-16 md:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full">
             <button
               onClick={onToggleSidebar}
               className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl bg-white/[0.04] border border-white/8 hover:bg-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95"
@@ -248,10 +248,12 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
             </button>
           </div>
 
-          <SonikomaLogo
-            size="sm"
-            onClick={() => navigateTo && navigateTo("/dashboard")}
-          />
+          <div className="flex items-center gap-2 sm:gap-3 pl-3 sm:pl-4">
+            <SonikomaLogo
+              size="sm"
+              onClick={() => navigateTo && navigateTo("/dashboard")}
+            />
+          </div>
         </div>
 
         {/* ── Studio Layout Mode Segmented Switcher ─────────────────────── */}

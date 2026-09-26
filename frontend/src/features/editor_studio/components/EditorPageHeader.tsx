@@ -212,7 +212,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-1 sm:gap-2.5 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl pl-2 sm:pl-4 pr-3 sm:pr-6 md:pr-8 shadow-md shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-1 sm:gap-2.5 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-3 sm:pr-6 md:pr-8 shadow-md shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
         className || ""
       }`}
       style={style}
@@ -220,7 +220,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
       {/* Left Section - Menu Icon + Title + Metadata */}
       <div className="flex items-center shrink-0 h-full">
         {/* Match exactly the width and border of the mini-sidebar */}
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full mr-0.5 sm:mr-4">
+        <div className="w-14 sm:w-16 md:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full">
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
@@ -234,7 +234,7 @@ const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
         </div>
 
         <div
-          className="flex items-center gap-2 sm:gap-3 cursor-pointer"
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer pl-3 sm:pl-4"
           onClick={onBackToApp}
         >
           <SonikomaLogo iconOnly size="sm" />

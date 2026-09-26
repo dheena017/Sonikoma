@@ -552,18 +552,14 @@ export default function App() {
       }
     };
 
-    // If already hydrated by useProjectStore, sync local state, notify, and stop
+    // If already hydrated by useProjectStore, sync local state and stop
     const currentActive = useProjectStore.getState().activeProjectData;
-    if (
-      currentActive?.project?.project_id === projId &&
-      currentActive.panels &&
-      currentActive.panels.length > 0
-    ) {
-      if (panels.length === 0) setPanels(currentActive.panels as any);
-      if (scrapedImages.length === 0 && currentActive.scrapedImages) {
-        setScrapedImages(currentActive.scrapedImages);
+    if (currentActive?.project?.project_id === projId) {
+      setPanels((currentActive.panels as any) || []);
+      setScrapedImages(currentActive.scrapedImages || []);
+      if (currentActive.panels && currentActive.panels.length > 0) {
+        notifyStoryboardLoaded(projId, currentActive.panels.length);
       }
-      notifyStoryboardLoaded(projId, currentActive.panels.length);
       return;
     }
 
@@ -875,6 +871,10 @@ export default function App() {
                         visual_description:
                           res.analysis.visual_description ||
                           p.visual_description,
+                        narrative:
+                          res.narrative ||
+                          res.analysis?.narrative ||
+                          p.narrative,
                         audio_url: res.audio_url || p.audio_url,
                       }
                     : p;

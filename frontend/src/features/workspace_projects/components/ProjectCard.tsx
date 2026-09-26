@@ -42,9 +42,13 @@ interface ProjectCardProps {
   onSaveRename?: (projectId: string, newName: string) => void;
 }
 
-function formatEpisodeLabel(ep: any): string {
-  if (ep === undefined || ep === null) return "";
-  const str = String(ep).trim();
+function formatEpisodeLabel(ep?: any, slug?: string): string {
+  const val =
+    ep !== undefined && ep !== null && String(ep).trim() !== ""
+      ? String(ep)
+      : slug || "";
+  if (!val) return "";
+  const str = String(val).trim();
   if (!str) return "";
   const numMatch = str.match(/\d+/);
   if (numMatch) {
@@ -88,16 +92,16 @@ export default function ProjectCard({
 
   const statusColor =
     project.status?.toLowerCase() === "completed"
-      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-emerald-950/20"
+      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
       : project.status?.toLowerCase() === "processing"
-      ? "bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse"
-      : "bg-neutral-800/80 text-neutral-400 border-neutral-700/50";
+      ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+      : "bg-black/60 text-neutral-400 border-neutral-700/60";
 
   return (
     <div
       onClick={() => onOpenProject(project)}
-      className={`group relative overflow-hidden rounded-3xl border border-[#2F2F2F] bg-[#1E1E1E] hover:bg-[#252525] shadow-md cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:border-neutral-700 hover:shadow-xl flex flex-col h-full ${
-        isSelected ? "border-neutral-600 bg-neutral-900/90 shadow-md" : ""
+      className={`group relative overflow-hidden rounded-2xl border border-neutral-800 bg-[#161616] hover:border-neutral-700 hover:bg-[#1a1a1a] cursor-pointer flex flex-col h-full shadow-sm ${
+        isSelected ? "border-blue-500/60 bg-[#1c1c1c]" : ""
       }`}
     >
       {/* Selection checkbox */}
@@ -109,29 +113,19 @@ export default function ProjectCard({
           {isSelected ? (
             <CheckSquare className="w-5 h-5 text-[#3B82F6] drop-shadow-md" />
           ) : (
-            <Square className="w-5 h-5 text-white/40 opacity-0 group-hover:opacity-100 transition-opacity hover:text-white drop-shadow-md" />
+            <Square className="w-5 h-5 text-white/40 opacity-0 group-hover:opacity-100 hover:text-white drop-shadow-md" />
           )}
         </div>
       )}
 
       {/* ─── Thumbnail ─────────────────────────────────── */}
-      <div className="relative aspect-[16/10] w-full bg-neutral-950 overflow-hidden flex-shrink-0 rounded-t-3xl">
+      <div className="relative aspect-[16/10] w-full bg-neutral-900 overflow-hidden flex-shrink-0 rounded-t-2xl">
         {imgSrc && !imageError ? (
           <>
-            {/* Ambient blurred background filler */}
             <img
               src={imgSrc}
-              alt=""
-              aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover blur-xl opacity-35 scale-125 pointer-events-none"
-            />
-            {/* Crisp full image without cropping */}
-            <img
-              src={imgSrc}
-              alt={project.title}
-              className={`relative z-[1] w-full h-full object-contain transition-transform duration-700 ease-out block ${
-                isSelected ? "scale-105 opacity-90" : "group-hover:scale-105"
-              }`}
+              alt={project.title || "Cover"}
+              className="w-full h-full object-cover object-top block"
               onError={() => {
                 if (
                   imgSrc.includes("/api/v1/proxy/image") &&
@@ -143,37 +137,30 @@ export default function ProjectCard({
                 }
               }}
             />
-            {/* Seamless gradient overlay at bottom */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none z-[2]" />
+            {/* Clean bottom gradient overlay for badge readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
           </>
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-[#121212] p-4 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-2xl bg-[#1E1E1E] border border-[#2F2F2F] flex items-center justify-center shadow-md transition-transform group-hover:scale-110 duration-300">
-              <Sparkles className="w-5 h-5 text-[#3B82F6]" />
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 bg-neutral-900 p-4">
+            <div className="w-10 h-10 rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-blue-400" />
             </div>
-            <span className="text-[11px] text-[#E5E5E5] font-bold font-mono tracking-wider text-center line-clamp-1">
-              {formatEpisodeLabel(project.episode) ||
+            <span className="text-[11px] text-neutral-300 font-semibold font-mono tracking-wider text-center line-clamp-1">
+              {formatEpisodeLabel(project.episode, project.chapter_slug) ||
                 project.title ||
                 "CHAPTER PROJECT"}
             </span>
-            <span className="text-[9px] text-[#9CA3AF] font-mono">
+            <span className="text-[9px] text-neutral-500 font-mono">
               Ready for Creative Studio
             </span>
           </div>
         )}
 
-        {/* Hover play overlay */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 bg-black/40 backdrop-blur-[2px] z-10">
-          <div className="h-11 w-11 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] flex items-center justify-center shadow-xl scale-75 group-hover:scale-100 transition-transform duration-200 border border-[#60A5FA]/40">
-            <Play className="h-4 w-4 text-white fill-white ml-0.5" />
-          </div>
-        </div>
-
         {/* Top badges row */}
         <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
           {/* Status badge */}
           <div
-            className={`px-2 py-0.5 text-[8.5px] font-black uppercase tracking-wider rounded-full border backdrop-blur-md shadow-md ${statusColor}`}
+            className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-md border backdrop-blur-sm ${statusColor}`}
           >
             {project.status || "Draft"}
           </div>
@@ -189,7 +176,7 @@ export default function ProjectCard({
               }}
               aria-label="Project actions & options"
               title="Project actions & options"
-              className="w-7 h-7 rounded-full bg-black/70 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-white/20 hover:border-neutral-700 transition-all flex items-center justify-center cursor-pointer active:scale-90 shadow-lg backdrop-blur-md"
+              className="w-7 h-7 rounded-lg bg-black/60 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-white/10 flex items-center justify-center cursor-pointer"
             >
               <MoreVertical className="w-3.5 h-3.5" />
             </button>
@@ -198,26 +185,28 @@ export default function ProjectCard({
 
         {/* Bottom thumbnail badges */}
         <div className="absolute bottom-2 inset-x-2 z-10 flex items-center justify-between pointer-events-none">
-          {project.episode !== undefined && project.episode !== null ? (
-            <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-[#2F2F2F] rounded-lg text-[9px] font-extrabold text-white tracking-wider shadow-md flex items-center gap-1 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
-              <span>{formatEpisodeLabel(project.episode)}</span>
+          {formatEpisodeLabel(project.episode, project.chapter_slug) ? (
+            <div className="px-2 py-0.5 bg-black/80 backdrop-blur-sm border border-neutral-800 rounded-md text-[9px] font-bold text-white tracking-wider flex items-center gap-1.5 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+              <span>
+                {formatEpisodeLabel(project.episode, project.chapter_slug)}
+              </span>
             </div>
           ) : (
             <div />
           )}
 
-          <div className="px-2 py-0.5 bg-black/80 backdrop-blur-md border border-[#2F2F2F] rounded-lg text-[9px] font-bold text-[#9CA3AF] tracking-wider shadow-md flex items-center gap-1 font-mono">
-            <Clock className="w-2.5 h-2.5 text-[#6B7280]" />
+          <div className="px-2 py-0.5 bg-black/80 backdrop-blur-sm border border-neutral-800 rounded-md text-[9px] font-medium text-neutral-400 tracking-wider flex items-center gap-1 font-mono">
+            <Clock className="w-2.5 h-2.5 text-neutral-500" />
             <span>{timeAgo(project.created_at)}</span>
           </div>
         </div>
       </div>
 
-      {/* Dropdown menu — at card level so thumbnail overflow-hidden doesn't clip it */}
+      {/* Dropdown menu */}
       {openMenuId === project.project_id && (
         <div
-          className="absolute right-2 top-11 w-52 bg-[#0c0d16]/98 backdrop-blur-2xl border border-white/15 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.95)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 space-y-0.5"
+          className="absolute right-2 top-11 w-48 bg-[#181818] border border-neutral-700/80 rounded-xl shadow-2xl p-1.5 z-50 space-y-0.5"
           onClick={(e) => e.stopPropagation()}
         >
           <button
@@ -228,10 +217,10 @@ export default function ProjectCard({
               onOpenProject(project);
               onToggleMenu?.(e, project.project_id);
             }}
-            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/10 hover:text-white rounded-lg flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center text-[#3B82F6] group-hover/item:bg-[#3B82F6]/20 group-hover/item:text-[#60A5FA] transition-colors">
-              <Play className="w-3.5 h-3.5 fill-purple-400/20" />
+            <div className="w-6 h-6 rounded-md bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <Play className="w-3 h-3" />
             </div>
             <span className="font-semibold">Resume</span>
           </button>
@@ -247,10 +236,10 @@ export default function ProjectCard({
               }
               onToggleMenu?.(e, project.project_id);
             }}
-            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/10 hover:text-white rounded-lg flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
-              <FolderOpen className="w-3.5 h-3.5" />
+            <div className="w-6 h-6 rounded-md bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <FolderOpen className="w-3 h-3" />
             </div>
             <span className="font-semibold">Details</span>
           </button>
@@ -264,10 +253,10 @@ export default function ProjectCard({
               }
               onToggleMenu?.(e, project.project_id);
             }}
-            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/10 hover:text-white rounded-lg flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 group-hover/item:bg-blue-500/20 group-hover/item:text-blue-300 transition-colors">
-              <Edit2 className="w-3.5 h-3.5" />
+            <div className="w-6 h-6 rounded-md bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+              <Edit2 className="w-3 h-3" />
             </div>
             <span className="font-semibold">Rename</span>
           </button>
@@ -291,10 +280,10 @@ export default function ProjectCard({
               }
               onToggleMenu?.(e, project.project_id);
             }}
-            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/10 hover:text-white rounded-lg flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover/item:bg-emerald-500/20 group-hover/item:text-emerald-300 transition-colors">
-              <Download className="w-3.5 h-3.5" />
+            <div className="w-6 h-6 rounded-md bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <Download className="w-3 h-3" />
             </div>
             <span className="font-semibold">Export</span>
           </button>
@@ -320,10 +309,10 @@ export default function ProjectCard({
               }
               onToggleMenu?.(e, project.project_id);
             }}
-            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/[0.08] hover:text-white rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-neutral-300 hover:bg-white/10 hover:text-white rounded-lg flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover/item:bg-amber-500/20 group-hover/item:text-amber-300 transition-colors">
-              <Link className="w-3.5 h-3.5" />
+            <div className="w-6 h-6 rounded-md bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <Link className="w-3 h-3" />
             </div>
             <span className="font-semibold">Copy Link</span>
           </button>
@@ -338,10 +327,10 @@ export default function ProjectCard({
               }
               onToggleMenu?.(e, project.project_id);
             }}
-            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-rose-400 hover:bg-rose-500/15 rounded-xl flex items-center gap-2.5 transition-all cursor-pointer"
+            className="group/item w-full text-left px-2.5 py-1.5 text-xs font-mono font-medium text-rose-400 hover:bg-rose-500/15 rounded-lg flex items-center gap-2.5 cursor-pointer"
           >
-            <div className="w-7 h-7 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 group-hover/item:bg-rose-500/20 group-hover/item:text-rose-300 transition-colors">
-              <Trash2 className="w-3.5 h-3.5" />
+            <div className="w-6 h-6 rounded-md bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+              <Trash2 className="w-3 h-3" />
             </div>
             <span className="font-semibold">Delete</span>
           </button>
@@ -349,11 +338,11 @@ export default function ProjectCard({
       )}
 
       {/* ─── Card Body ─────────────────────────────────── */}
-      <div className="p-4 sm:p-4.5 flex flex-col flex-1 gap-2.5 relative z-10">
+      <div className="p-4 flex flex-col flex-1 gap-2 relative z-10">
         {/* Source label */}
         <div className="flex items-center gap-1.5">
           <SourceIcon className="h-3 w-3 text-neutral-500" />
-          <span className="text-[10.5px] text-neutral-500 font-mono tracking-wider uppercase truncate">
+          <span className="text-[10px] text-neutral-500 font-mono tracking-wider uppercase truncate">
             {getSourceName(project.url)}
           </span>
         </div>
@@ -374,7 +363,7 @@ export default function ProjectCard({
           />
         ) : (
           <h3
-            className="text-sm sm:text-base font-extrabold text-[#E5E5E5] leading-snug line-clamp-1 group-hover:text-[#3B82F6] transition-colors duration-200"
+            className="text-sm sm:text-base font-bold text-neutral-100 leading-snug line-clamp-1 group-hover:text-blue-400"
             title={titleText}
           >
             {titleText}
@@ -384,58 +373,54 @@ export default function ProjectCard({
         {/* Genre + Author row */}
         <div className="flex items-center gap-2 flex-wrap text-xs">
           {project.genre && (
-            <span className="text-[10px] bg-[#121212] text-[#3B82F6] border border-[#3B82F6]/30 px-2 py-0.5 rounded-md font-bold font-mono">
+            <span className="text-[10px] bg-neutral-800/90 text-blue-400 border border-blue-500/25 px-2 py-0.5 rounded-md font-semibold">
               {project.genre}
             </span>
           )}
           {project.author && (
-            <span className="text-[11px] text-[#9CA3AF] font-medium truncate">
+            <span className="text-[11px] text-neutral-400 font-medium truncate">
               {project.author}
             </span>
           )}
         </div>
 
         {/* ─── Footer ───────────────────────────────────── */}
-        <div className="pt-1.5 mt-auto flex items-center justify-between gap-2">
+        <div className="pt-2 mt-auto flex items-center justify-between gap-2 border-t border-neutral-800/80">
           {/* Storyboard Panels & Imported Assets Counts */}
-          <div className="flex items-center gap-2.5 text-xs font-mono truncate">
+          <div className="flex items-center gap-3 text-xs font-mono">
             {/* Storyboard Count */}
             <div
-              className="flex items-center gap-1 text-[#3B82F6]"
-              title={`${
-                project.panels_count || project.imported_assets_count || 0
-              } Storyboard Panels`}
+              className="flex items-center gap-1 text-neutral-400"
+              title={`${project.panels_count ?? 0} Storyboard Panels`}
             >
-              <Film className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
-              <span className="font-bold text-neutral-200">
-                {project.panels_count || project.imported_assets_count || 0}
+              <Film className="h-3.5 w-3.5 shrink-0 text-blue-400" />
+              <span className="font-semibold text-neutral-200">
+                {project.panels_count ?? 0}
               </span>
-              <span className="text-[10px] text-neutral-400">panels</span>
+              <span className="text-[10px] text-neutral-500">panels</span>
             </div>
 
             {/* Imported Assets Count */}
             <div
-              className="flex items-center gap-1 text-blue-400"
-              title={`${
-                project.imported_assets_count || project.panels_count || 0
-              } Imported Assets`}
+              className="flex items-center gap-1 text-neutral-400"
+              title={`${project.imported_assets_count ?? 0} Imported Assets`}
             >
-              <Layers className="h-3.5 w-3.5 shrink-0 text-blue-400" />
-              <span className="font-bold text-neutral-200">
-                {project.imported_assets_count || project.panels_count || 0}
+              <Layers className="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+              <span className="font-semibold text-neutral-200">
+                {project.imported_assets_count ?? 0}
               </span>
-              <span className="text-[10px] text-neutral-400">assets</span>
+              <span className="text-[10px] text-neutral-500">assets</span>
             </div>
           </div>
 
-          {/* Compact Resume Action Button */}
+          {/* Resume Action Button */}
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               onOpenProject(project);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-blue-500/25 active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-7 px-3 rounded-lg bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-semibold text-white shrink-0 cursor-pointer"
           >
             <span>Resume</span>
             <ArrowRight className="w-3 h-3 text-white" />
@@ -443,13 +428,10 @@ export default function ProjectCard({
         </div>
       </div>
 
-      {/* Processing shimmer bar */}
+      {/* Processing bar */}
       {isProcessing && (
         <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-neutral-800 z-20">
-          <div
-            className="h-full bg-gradient-to-r from-amber-500 via-blue-500 to-amber-500 animate-shimmer"
-            style={{ width: "100%", backgroundSize: "200% 100%" }}
-          />
+          <div className="h-full bg-blue-500" style={{ width: "100%" }} />
         </div>
       )}
     </div>

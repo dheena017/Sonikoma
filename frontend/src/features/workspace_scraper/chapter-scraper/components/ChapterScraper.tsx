@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Zap,
   Bookmark,
+  BookmarkCheck,
   CheckCircle2,
   Calendar,
   Layers,
@@ -31,6 +32,7 @@ import {
   Globe,
   Tag,
   Plus,
+  ThumbsUp,
 } from "lucide-react";
 
 import { ChapterCard } from "./ChapterCard";
@@ -50,6 +52,95 @@ import { makeSafeFilename } from "@/shared/utils/downloadNaming";
 import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
 import { ChapterScraperSkeleton } from "@/shared/ui/loading";
 import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
+
+// ── Series URL Validator ──────────────────────────────────────────────────────
+// Accepts full series listing / catalog URLs. Rejects plain-text, homepages,
+// single-episode viewer URLs, and incomplete links.
+function validateSeriesUrl(raw: string): { valid: boolean; error?: string } {
+  const trimmed = raw.trim();
+  if (!trimmed) return { valid: false, error: "Please enter a comic series URL." };
+
+  // Accept pure numeric title_no (Webtoons Series ID)
+  if (/^\d+$/.test(trimmed)) return { valid: true };
+
+  let parsed: URL;
+  try {
+    const formatted =
+      trimmed.startsWith("http://") || trimmed.startsWith("https://")
+        ? trimmed
+        : `https://${trimmed}`;
+    parsed = new URL(formatted);
+  } catch {
+    return { valid: false, error: "Not a valid URL. Paste a full comic series link (e.g. https://www.webtoons.com/en/.../list?title_no=...)." };
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+  if (!hostname.includes(".") || hostname.length < 4) {
+    return { valid: false, error: "Please enter a valid website URL." };
+  }
+
+  const segments = parsed.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+
+  // Reject bare homepage / root (no path segments)
+  if (segments.length === 0) {
+    return { valid: false, error: `Incomplete URL for ${hostname}. Please paste a direct series listing URL.` };
+  }
+
+  // ── Webtoons: accept /list?title_no=... (with optional &page=N)
+  if (hostname.includes("webtoons.com") || hostname.includes("webtoon.com")) {
+    const isViewer = segments.some((s) => s.toLowerCase() === "viewer");
+    const isList = segments.some((s) => s.toLowerCase() === "list");
+    const hasTitleNo = Boolean(parsed.searchParams.get("title_no"));
+
+    if (isViewer) {
+      return {
+        valid: false,
+        error: "This is an episode viewer URL. The Chapter Scraper needs the series list URL (e.g. .../list?title_no=958).",
+      };
+    }
+    if (!isList || !hasTitleNo) {
+      return {
+        valid: false,
+        error: "Please paste a Webtoons series list URL: https://www.webtoons.com/en/{genre}/{series}/list?title_no=...",
+      };
+    }
+    return { valid: true };
+  }
+
+  // ── MangaDex: /title/{uuid} is the series page
+  if (hostname.includes("mangadex.org")) {
+    const isChapter = segments.some((s) => s.toLowerCase() === "chapter");
+    const isTitle = segments.some((s) => s.toLowerCase() === "title");
+    if (isChapter) {
+      return { valid: false, error: "This is a MangaDex chapter reader. Paste the series /title/ URL instead." };
+    }
+    if (!isTitle) {
+      return { valid: false, error: "Please paste a MangaDex series URL: https://mangadex.org/title/{uuid}." };
+    }
+    return { valid: true };
+  }
+
+  // ── Bato.to: /series/ or /title/ is the series page
+  const batoDomains = ["bato.to", "mangatoto.com", "battwo.com", "batotoo.com", "batocomic.com"];
+  if (batoDomains.some((d) => hostname.includes(d))) {
+    const isChapter = segments.some((s) => s.toLowerCase() === "chapter");
+    if (isChapter) {
+      return { valid: false, error: "This is a Bato.to chapter URL. Paste the series listing URL instead." };
+    }
+    return { valid: true };
+  }
+
+  // ── Generic: reject if only 1 segment (bare domain + one path = still a homepage)
+  if (segments.length <= 1) {
+    return {
+      valid: false,
+      error: `Too short — looks like a homepage. Paste the full series catalog URL for ${hostname}.`,
+    };
+  }
+
+  // Accept anything else that looks like a real multi-segment URL
+  return { valid: true };
+}
 
 interface SeriesMetadata {
   seriesSlug?: string;
@@ -132,8 +223,12 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
   const scrapeInFlightRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Pagination
+  const PAGE_SIZE = 25;
+  const [currentPage, setCurrentPage] = useState(1);
+
   // Active View & Filters
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [sortBy, setSortBy] = useState<
     "latest" | "oldest" | "rating" | "likes"
   >("latest");
@@ -303,7 +398,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     sort_by?: string;
     bypass_cache?: boolean;
   }) => {
-    const body: any = { ...data };
+    const body: any = { ...data, auto_paginate: true };
     if (body.max_episodes === null) {
       delete body.max_episodes;
     }
@@ -350,6 +445,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     }
 
     setFilteredChapters(result);
+    setCurrentPage(1); // reset to page 1 whenever filters/sort change
   }, [
     chapters,
     sortBy,
@@ -373,9 +469,19 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     const activeTitleNo = titleNo !== undefined ? titleNo : titleNoInput;
 
     if (!activeUrl && !activeTitleNo) {
-      setError("Please enter a Comic, Manga, or Manhwa URL");
-      addNotification("Please enter a Comic, Manga, or Manhwa URL", "error");
+      setError("Please enter a Comic, Manga, or Manhwa series URL.");
+      addNotification("Please enter a series URL", "error");
       return;
+    }
+
+    // Validate the URL before firing any network request
+    if (activeUrl && activeUrl.trim() && !activeTitleNo) {
+      const check = validateSeriesUrl(activeUrl.trim());
+      if (!check.valid) {
+        setError(check.error || "Please enter a valid series URL.");
+        addNotification(check.error || "Invalid series URL", "error");
+        return;
+      }
     }
 
     scrapeInFlightRef.current = true;
@@ -403,6 +509,16 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
       } catch (e) {
         console.debug("[ChapterScraper] URL separation note:", e);
       }
+    }
+
+    if (targetSeriesUrl) {
+      try {
+        const u = new URL(targetSeriesUrl);
+        if (u.searchParams.has("page")) {
+          u.searchParams.delete("page");
+          targetSeriesUrl = u.toString();
+        }
+      } catch {}
     }
 
     try {
@@ -776,8 +892,14 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}
-              placeholder="Paste any comic, manga, or manhwa series URL (e.g. Webtoons, FlameComics, Toonily...)"
-              className="w-full rounded-2xl border border-neutral-800 bg-neutral-955/90 py-3 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none focus:ring-1 focus:ring-neutral-700 font-mono transition-all"
+      placeholder="Paste a series URL or Webtoons list URL (e.g. .../list?title_no=958)"
+              className={`w-full rounded-2xl border ${
+                urlInput.trim() && !validateSeriesUrl(urlInput).valid
+                  ? "border-amber-500/50 focus:border-amber-500"
+                  : urlInput.trim() && validateSeriesUrl(urlInput).valid
+                  ? "border-emerald-500/40 focus:border-emerald-500/60"
+                  : "border-neutral-800 focus:border-neutral-600"
+              } bg-neutral-955/90 py-3 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-700 font-mono transition-all`}
             />
 
             {/* Autocomplete Dropdown */}
@@ -805,7 +927,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                 ))}
               </div>
             )}
-          </div>
+        </div>
 
           <div>
             <input
@@ -819,7 +941,11 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
           <button
             type="submit"
-            disabled={isLoading || (!urlInput.trim() && !titleNoInput.trim())}
+            disabled={
+              isLoading ||
+              (!urlInput.trim() && !titleNoInput.trim()) ||
+              (!!urlInput.trim() && !titleNoInput.trim() && !validateSeriesUrl(urlInput).valid)
+            }
             className="flex items-center justify-center gap-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] px-6 py-3 text-sm font-extrabold text-white transition-all shadow-lg shadow-black/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
           >
             {isLoading ? (
@@ -1246,10 +1372,19 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             </div>
           )}
 
-          {/* ── 4. CHAPTERS GRID VIEW ── */}
+          {/* ── 4. CHAPTERS GRID / TABLE VIEW ── */}
+          {(() => {
+            const totalPages = Math.max(1, Math.ceil(filteredChapters.length / PAGE_SIZE));
+            const safePage = Math.min(currentPage, totalPages);
+            const pagedChapters = filteredChapters.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+            const pageNumbers: number[] = [];
+            const delta = 2;
+            for (let i = Math.max(1, safePage - delta); i <= Math.min(totalPages, safePage + delta); i++) pageNumbers.push(i);
+            return (
+              <>
           {viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-              {filteredChapters.map((chapter) => (
+              {pagedChapters.map((chapter) => (
                 <ChapterCard
                   key={chapter.url}
                   chapter={chapter}
@@ -1265,77 +1400,201 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               ))}
             </div>
           ) : (
-            /* ── 5. CHAPTERS LIST VIEW ── */
-            <div className="space-y-2">
-              {filteredChapters.map((chapter, idx) => (
-                <div
-                  key={chapter.url}
-                  onClick={() => handleChapterClick(chapter)}
-                  className="flex items-center justify-between p-3.5 bg-neutral-900/60 hover:bg-neutral-850/80 border border-transparent hover:border-neutral-700 rounded-2xl transition-all cursor-pointer group shadow-sm"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-16 h-12 rounded-xl overflow-hidden bg-neutral-950 shrink-0 border border-transparent relative">
-                      <img
-                        src={getProxiedImageUrl(
-                          chapter.cover_image || seriesMetadata?.cover_image,
-                          chapter.url
-                        )}
-                        alt={chapter.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
+            /* ── 5. CHAPTERS PAGE / TABLE VIEW ── */
+            <div className="rounded-xl overflow-hidden border border-[#1E1E26]">
+              {/* Table header */}
+              <div className="grid grid-cols-[3rem_3.5rem_1fr_7rem_5rem_7.5rem] items-center px-4 py-2.5 bg-[#0D0D12] border-b border-[#1E1E26] sticky top-0 z-10">
+                {isMultiSelectMode && <span />}
+                <span className="text-[10px] font-black text-neutral-600 tracking-widest font-mono uppercase text-right">#</span>
+                <span />
+                <span className="text-[10px] font-black text-neutral-600 tracking-widest font-mono uppercase pl-3">Title</span>
+                <span className="text-[10px] font-black text-neutral-600 tracking-widest font-mono uppercase text-center">Date</span>
+                <span className="text-[10px] font-black text-neutral-600 tracking-widest font-mono uppercase text-center">Rating</span>
+                <span />
+              </div>
+
+              {/* Rows */}
+              {pagedChapters.map((chapter, idx) => {
+                const rawNum = (chapter.number || "").trim();
+                const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() || String(idx + 1);
+                const rawTitle = (chapter.title || "")
+                  .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:\u2013\u2014]?\s*/i, "")
+                  .replace(/^[-:\u2013\u2014\s]+|[-:\u2013\u2014\s]+$/g, "")
+                  .trim();
+                const titleIsSameAsNum = !rawTitle ||
+                  rawTitle.toLowerCase() === cleanNum.toLowerCase() ||
+                  rawTitle.toLowerCase() === `chapter ${cleanNum}`.toLowerCase();
+                const isChapterRead = readUrls.includes(chapter.url);
+                const isChapterBookmarked = bookmarkedUrls.includes(chapter.url);
+                const isChapterSelected = selectedUrls.includes(chapter.url);
+                const displayTitle = !titleIsSameAsNum && rawTitle ? rawTitle : `Chapter ${cleanNum}`;
+
+                return (
+                  <div
+                    key={chapter.url}
+                    onClick={() => handleChapterClick(chapter)}
+                    className={`grid grid-cols-[3rem_3.5rem_1fr_7rem_5rem_7.5rem] items-center px-4 py-2.5 border-b border-[#141418] cursor-pointer transition-colors group ${
+                      isChapterSelected
+                        ? "bg-[#3B82F6]/8 border-b-[#3B82F6]/20"
+                        : idx % 2 === 0
+                        ? "bg-[#0F0F14] hover:bg-[#181822]"
+                        : "bg-[#111116] hover:bg-[#181822]"
+                    }`}
+                  >
+                    {/* Multiselect */}
+                    {isMultiSelectMode ? (
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          checked={isChapterSelected}
+                          onChange={() => handleToggleSelect(chapter.url)}
+                          className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
+                        />
+                      </div>
+                    ) : (
+                      /* Episode # */
+                      <span className={`text-right text-[11px] font-black font-mono transition-colors ${
+                        isChapterRead ? "text-neutral-700" : "text-neutral-600 group-hover:text-neutral-400"
+                      }`}>
+                        {cleanNum}
+                      </span>
+                    )}
+
+                    {/* Thumbnail */}
+                    <div className="flex items-center justify-center">
+                      <div className="w-10 h-7 rounded overflow-hidden bg-[#1A1A22] border border-[#2A2A36] shrink-0">
+                        <img
+                          src={getProxiedImageUrl(chapter.cover_image || seriesMetadata?.cover_image, chapter.url)}
+                          alt=""
+                          className="w-full h-full object-cover"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        />
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <h4 className="text-sm font-bold text-white group-hover:text-[#93C5FD] transition-colors truncate font-sans">
-                        {chapter.title ||
-                          `Chapter ${chapter.number || idx + 1}`}
-                      </h4>
-                      <div className="flex items-center gap-3 text-xs text-neutral-400 font-mono mt-0.5">
-                        <span className="text-[#3B82F6] font-bold">
-                          CH. {chapter.number || idx + 1}
-                        </span>
-                        <span>•</span>
-                        <span>{chapter.date || "Available"}</span>
-                        {chapter.rating && (
-                          <>
-                            <span>•</span>
-                            <span className="text-amber-400 font-bold flex items-center gap-0.5">
-                              <Star size={11} className="fill-current" />
-                              {Number(chapter.rating).toFixed(1)}
-                            </span>
-                          </>
+
+                    {/* Title */}
+                    <div className="pl-3 min-w-0 flex items-center gap-2">
+                      {isChapterBookmarked && (
+                        <BookmarkCheck size={11} className="text-amber-400 fill-current shrink-0" />
+                      )}
+                      <div className="min-w-0">
+                        <p className={`text-sm font-medium truncate transition-colors ${
+                          isChapterRead
+                            ? "text-neutral-600"
+                            : "text-neutral-200 group-hover:text-white"
+                        }`}>
+                          {displayTitle}
+                        </p>
+                        {isChapterRead && (
+                          <span className="text-[9px] font-bold text-emerald-700 font-mono tracking-wider uppercase">
+                            ✓ Read
+                          </span>
                         )}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setPreviewChapter(chapter);
-                      }}
-                      className="p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-colors cursor-pointer"
-                      title="Read Chapter"
-                    >
-                      <Eye size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleChapterClick(chapter);
-                      }}
-                      className="flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white font-mono font-bold text-xs shadow-md shadow-black/50 transition-all cursor-pointer"
-                    >
-                      <span>Import</span>
-                      <ArrowRight size={13} />
-                    </button>
+                    {/* Date */}
+                    <span className={`text-[10px] font-mono text-center truncate ${
+                      isChapterRead ? "text-neutral-700" : "text-neutral-500"
+                    }`}>
+                      {chapter.date || "—"}
+                    </span>
+
+                    {/* Rating */}
+                    <div className="flex items-center justify-center gap-1">
+                      {chapter.rating ? (
+                        <>
+                          <Star size={9} className="fill-amber-500 text-amber-500 shrink-0" />
+                          <span className="text-[10px] font-bold text-amber-400 font-mono">
+                            {Number(chapter.rating).toFixed(1)}
+                          </span>
+                        </>
+                      ) : chapter.likes ? (
+                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-600 font-mono">
+                          <ThumbsUp size={9} />
+                          {chapter.likes}
+                        </span>
+                      ) : (
+                        <span className="text-neutral-700 text-[10px]">—</span>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setPreviewChapter(chapter); }}
+                        className="p-1 rounded-md bg-[#1A1A22] hover:bg-[#252530] text-neutral-500 hover:text-white border border-[#2A2A36] transition-all cursor-pointer opacity-0 group-hover:opacity-100"
+                        title="Preview"
+                      >
+                        <Eye size={12} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleChapterClick(chapter); }}
+                        className="flex items-center gap-0.5 px-2.5 py-1 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono font-bold text-[10px] transition-all cursor-pointer opacity-0 group-hover:opacity-100 whitespace-nowrap"
+                      >
+                        Import <ArrowRight size={10} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
+
+          {/* ── PAGINATION BAR ── */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 px-1">
+              <span className="text-[11px] text-neutral-600 font-mono">
+                {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredChapters.length)} of {filteredChapters.length} chapters
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono border border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  ‹ Prev
+                </button>
+                {safePage > 3 && (
+                  <>
+                    <button onClick={() => setCurrentPage(1)} className="px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A] transition-all cursor-pointer">1</button>
+                    {safePage > 4 && <span className="text-neutral-700 px-1 text-xs">…</span>}
+                  </>
+                )}
+                {pageNumbers.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setCurrentPage(p)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono border transition-all cursor-pointer ${
+                      p === safePage
+                        ? "bg-[#3B82F6] border-[#3B82F6] text-white shadow-md shadow-blue-900/30"
+                        : "border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A]"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+                {safePage < totalPages - 2 && (
+                  <>
+                    {safePage < totalPages - 3 && <span className="text-neutral-700 px-1 text-xs">…</span>}
+                    <button onClick={() => setCurrentPage(totalPages)} className="px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A] transition-all cursor-pointer">{totalPages}</button>
+                  </>
+                )}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono border border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  Next ›
+                </button>
+              </div>
+            </div>
+          )}
+              </>
+            );
+          })()}
         </div>
       )}
 

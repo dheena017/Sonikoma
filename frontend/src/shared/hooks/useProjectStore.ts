@@ -599,22 +599,6 @@ export function parseHydratedProjectJson(
   const scrapedImagesRaw: string[] =
     json.scraped_images ?? json.scrapedImages ?? [];
 
-  // When opening an imported chapter with no panels generated yet,
-  // auto-synthesize storyboard panels from the scraped images so scenes display immediately
-  if (panelsRaw.length === 0 && scrapedImagesRaw.length > 0) {
-    panelsRaw = scrapedImagesRaw.map((imgUrl: string, idx: number) => ({
-      id: idx + 1,
-      panel_index: idx,
-      image_url: imgUrl,
-      original_url: imgUrl,
-      prompt: `Scene ${idx + 1}`,
-      speech_text: "",
-      narrative: "",
-      sfx: "",
-      duration: 0,
-      motion_type: "",
-    }));
-  }
 
   const { panelsCount, importedCount } = calculateAssetCounts(
     raw,
@@ -1139,26 +1123,6 @@ export const useProjectStore = create<ProjectStoreState>()(
                   });
                   return;
                 }
-                // Stale URL: stored project is also a temp project with actual data → restore it
-                // (temp IDs diverge when navigating to an old URL from browser history)
-                const storedIsTempWithData =
-                  isTempProject(storeData.project.project_id) &&
-                  ((storeData.panels && storeData.panels.length > 0) ||
-                    (storeData.scrapedImages &&
-                      storeData.scrapedImages.length > 0));
-                if (storedIsTempWithData) {
-                  console.info(
-                    `[useProjectStore] Stale temp URL (${idToHydrate}), restoring stored temp project: ${storeData.project.project_id}`
-                  );
-                  set({
-                    activeProjectId: storeData.project.project_id,
-                    activeProjectData: storeData,
-                    projectState: "active",
-                    missingProjectInfo: null,
-                    isHydrating: false,
-                  });
-                  return;
-                }
               }
             } catch (e) {
               console.error(
@@ -1324,14 +1288,12 @@ export const useProjectStore = create<ProjectStoreState>()(
           const panelsCount =
             activeProjectData.panels && activeProjectData.panels.length > 0
               ? activeProjectData.panels.length
-              : scrapedImgs.length > 0
-              ? scrapedImgs.length
-              : activeProjectData.project.panels_count || 0;
+              : 0;
 
           const importedCount =
             scrapedImgs.length > 0
               ? scrapedImgs.length
-              : activeProjectData.project.imported_assets_count || panelsCount;
+              : activeProjectData.project.imported_assets_count || 0;
 
           const res = await fetcher(
             `/api/v1/projects/${encodeURIComponent(activeProjectId)}`,

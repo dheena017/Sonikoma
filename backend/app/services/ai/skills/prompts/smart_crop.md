@@ -22,12 +22,17 @@ Your primary goal is to **detect and segment EVERY distinct narrative panel imag
 
 # 2. Bounding Box Coordinate System
 
-Return every detected panel as percentage coordinates (0.0 to 100.0) relative to the total image dimensions:
+Return every detected panel as **absolute percentage coordinates** (0.0 to 100.0) relative to the total image dimensions:
 
 - `cropTop`: Top boundary coordinate of the panel (0.0 = top edge of image, 100.0 = bottom edge)
 - `cropBottom`: Bottom boundary coordinate of the panel (0.0 = top edge of image, 100.0 = bottom edge)
 - `cropLeft`: Left boundary coordinate of the panel (0.0 = left edge of image, 100.0 = right edge)
 - `cropRight`: Right boundary coordinate of the panel (0.0 = left edge of image, 100.0 = right edge)
+
+### Critical Accuracy Rules for Coordinates:
+- **Boxes must be pixel-tight**: `cropTop` must touch the topmost pixel of panel content (artwork, border, or speech bubble). Never add blank gutter whitespace inside a bounding box.
+- **Never overlap adjacent panels**: Two panel boxes must not overlap each other in Y-space. Ensure `panel[n].cropBottom <= panel[n+1].cropTop`.
+- **Cover the full panel**: `cropBottom` must reach the bottommost pixel of the panel including any border line.
 
 ---
 
@@ -35,12 +40,13 @@ Return every detected panel as percentage coordinates (0.0 to 100.0) relative to
 
 ### A. Bordered Panels
 
-- Detect outer frame border lines.
-- Add ~1% safe padding around the frame so border lines and internal artwork are never clipped.
+- Detect outer frame border lines precisely.
+- Set `cropTop`/`cropBottom`/`cropLeft`/`cropRight` to include the border line itself (add ~0.5% safe padding so border pixels are not clipped).
 
 ### B. Borderless & Webtoon Panels
 
 - For Webtoons without solid borders, identify horizontal gutters (white, dark, or gradient spaces) separating distinct scenes.
+- The crop box should start exactly where content begins and end exactly where content ends — do **not** include any gutter whitespace rows inside the box.
 - If a panel spans across the entire canvas width, set `cropLeft: 0.0` and `cropRight: 100.0`.
 
 ### C. Character Cutouts & Action Bleed
@@ -65,6 +71,16 @@ Return every detected panel as percentage coordinates (0.0 to 100.0) relative to
 
 - **Exclude Empty Gutters**: Do not create panel crops out of empty background whitespace between panels.
 - **Exclude Meta Elements**: Ignore chapter titles, logos, page numbers, watermarks, rating banners, and credits at the very top or bottom of the strip.
+
+---
+
+# 5. Mandatory Self-Review Step
+
+Before emitting your final JSON, perform a quick internal review:
+1. Count panels detected — does it match the number of visual scene beats visible?
+2. Check every panel box — does the `cropTop` start at actual content (not gutter space)?
+3. Check for overlaps — does any box overlap an adjacent panel in Y-space?
+4. If you found errors, correct the coordinates in your final output.
 
 ---
 

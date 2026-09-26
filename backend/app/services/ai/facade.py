@@ -23,6 +23,7 @@ from app.core.config import call_gemini_with_retry
 from app.core.config import GEMINI_MODEL_PRIMARY
 from services.ai.skills.registry import registry
 from services.ai.skills.base import get_provider_and_model, resolve_api_key
+from services.ai.skills.utils import robust_parse_json
 from services.ai.orchestrator import AIOrchestrator, AIErrorCode
 from services.image.utils.panel_box_utils import PanelBounds
 from core.cache import stitched_cache, edit_history
@@ -771,80 +772,60 @@ async def facade_analyze_batch(
     skill = registry.get("batch_panel_analysis")
     formatted_context = f"STORY CONTEXT & PRECEDING MEMORY:\n{story_context_section}\n" if story_context_section else ""
 
-    # 2. Divide into optimal sub-batch chunks of 6 panels for high concurrency
-    CHUNK_SIZE = 6
-    chunks = []
-    for c_start in range(0, len(panels), CHUNK_SIZE):
-        c_end = min(c_start + CHUNK_SIZE, len(panels))
-        chunks.append((c_start, panels[c_start:c_end], img_buffers[c_start:c_end]))
-
-    async def _execute_chunk(c_start, c_panels, c_buffers):
-        brightness = None
-        try:
-            brightness = img_utils.compute_brightness(c_buffers[0])
-        except Exception:
-            pass
-
-        c_tone_hint = ""
+    # 2. Execute full sequence in a single unified AI vision call (calls AI API once)
+    tone_hint = ""
+    try:
+        brightness = img_utils.compute_brightness(img_buffers[0])
         if brightness is not None:
             if brightness < 80:
-                c_tone_hint = " The sequence appears dark or moody — favour dramatic or tense SFX."
+                tone_hint = " The sequence appears dark or moody — favour dramatic or tense SFX."
             elif brightness > 200:
-                c_tone_hint = " The sequence appears bright and vibrant — favour action or triumphant SFX."
+                tone_hint = " The sequence appears bright and vibrant — favour action or triumphant SFX."
+    except Exception:
+        pass
 
+    batch_items = []
+    overall_scene_summary = ""
+    single_call_success = False
+
+    logger.info(f"[AI Analysis] Executing single unified batch vision analysis for {len(panels)} panels (Model: {model or 'default'})...")
+    try:
         raw_text = await skill.execute(
             model=model,
-            image_bytes=c_buffers,
+            image_bytes=img_buffers,
             user_keys=user_keys or {},
-            panel_count=len(c_panels),
-            tone_hint=c_tone_hint,
+            panel_count=len(panels),
+            tone_hint=tone_hint,
             narrative_length_hint=narrative_length_hint,
             story_context_section=formatted_context
         )
-        parsed_json = json.loads(raw_text) if isinstance(raw_text, str) else raw_text
-        if not isinstance(parsed_json, dict) or "panels" not in parsed_json:
-            raise ValueError(f"Invalid batch panel analysis response structure for chunk at {c_start}")
+        parsed_json = robust_parse_json(raw_text) if isinstance(raw_text, str) else raw_text
+        if isinstance(parsed_json, dict) and "panels" in parsed_json and len(parsed_json.get("panels", [])) > 0:
+            raw_items = parsed_json.get("panels", [])
+            items_by_idx = {it.get("panel_index"): it for it in raw_items if isinstance(it, dict) and isinstance(it.get("panel_index"), int)}
+            for idx in range(len(panels)):
+                item = items_by_idx.get(idx + 1) or (raw_items[idx] if idx < len(raw_items) else {})
+                if not isinstance(item, dict):
+                    item = {}
+                batch_items.append(item)
+            overall_scene_summary = parsed_json.get("overall_scene_summary", "")
 
-        raw_items = parsed_json.get("panels", [])
-        items_by_idx = {it.get("panel_index"): it for it in raw_items if isinstance(it.get("panel_index"), int)}
-        ordered_items = []
-        for idx in range(len(c_panels)):
-            item = items_by_idx.get(idx + 1) or (raw_items[idx] if idx < len(raw_items) else {})
-            ordered_items.append(item)
-        return (c_start, ordered_items, parsed_json.get("overall_scene_summary", ""))
+            if len(batch_items) == len(panels):
+                single_call_success = True
+                logger.info(f"[AI Analysis] Single unified batch analysis succeeded for all {len(panels)} panels in 1 API call.")
+            else:
+                logger.warning(f"[AI Analysis] Single batch returned {len(batch_items)} items for {len(panels)} panels.")
+    except Exception as single_err:
+        logger.warning(f"[AI Analysis] Single batch vision execution failed: {single_err}.")
 
-    try:
-        chunk_outputs = await asyncio.gather(*[_execute_chunk(s, p, b) for s, p, b in chunks])
-        chunk_outputs = list(chunk_outputs)
-        chunk_outputs.sort(key=lambda x: x[0])
-        batch_items = []
-        overall_summaries = []
-        for _, items, summary in chunk_outputs:
-            batch_items.extend(items)
-            if summary:
-                overall_summaries.append(summary)
-        overall_scene_summary = " ".join(overall_summaries)
-        if len(batch_items) != len(panels) or any(
-            not isinstance(item, dict) or not item for item in batch_items
-        ):
-            raise ValueError(
-                f"Batch AI response returned {len(batch_items)} valid panels for {len(panels)} inputs"
-            )
-    except Exception as exc:
-        logger.warning(f"[facade_analyze_batch] Batch AI vision execution failed: {exc}. Falling back to concurrent single-panel analysis.")
-        return await _fallback_individual_batch(
-            panels=panels,
-            model=model,
-            voice=voice,
-            narration_style=narration_style,
-            user_keys=user_keys,
-            story_context=story_context,
-            story_memory=story_memory,
-            start_index=start_index,
-            generate_audio=generate_audio,
-            generate_dialogue_audio=generate_dialogue_audio,
-            generate_narrative_audio=generate_narrative_audio,
-        )
+    if not single_call_success:
+        if batch_items and len(batch_items) > 0:
+            logger.info(f"[AI Analysis] Assembling {len(batch_items)} parsed panels and padding remaining to {len(panels)}.")
+            while len(batch_items) < len(panels):
+                batch_items.append({})
+        else:
+            logger.warning(f"[AI Analysis] Single batch vision returned no items; initializing default structures for {len(panels)} panels (NO 1-by-1 API fallback).")
+            batch_items = [{} for _ in range(len(panels))]
 
     # 3. Assemble results and update rolling memory
     meta = getattr(skill, "last_execution_meta", {}) or {}

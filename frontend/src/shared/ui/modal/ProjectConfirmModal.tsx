@@ -338,19 +338,56 @@ export default function ProjectConfirmModal({
         activeData?.scrapedImages?.[0] ||
         "";
 
-      setSeriesTitle(
-        initialDetails?.seriesTitle || activeData?.project?.title || ""
-      );
-      setChapterNumber(
-        initialDetails?.chapterNumber ||
-          activeData?.project?.chapterNumber ||
-          ""
-      );
-      setChapterTitle(
-        initialDetails?.chapterTitle || activeData?.project?.chapterTitle || ""
-      );
+      const activeUrl = activeData?.project?.url || "";
+      let urlChNum = "";
+      let urlChTitle = "";
+      let urlGenre = "";
+      let urlSeries = "";
+
+      if (activeUrl) {
+        // Episode / Chapter number from URL
+        const mEp = activeUrl.match(/(?:episode_no|chapter|ep)[=/_-](\d+)/i) || activeUrl.match(/\/(\d+)[-_]/);
+        if (mEp) urlChNum = mEp[1];
+
+        // Chapter title from URL slug, e.g. /1270-backache-1/viewer -> Backache (1)
+        const mSlug = activeUrl.match(/\/(?:\d+[-_])?([a-zA-Z0-9-_]+)\/viewer/i);
+        if (mSlug) {
+          urlChTitle = mSlug[1].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        }
+
+        // Webtoons path parsing: /en/{genre}/{series-slug}/{episode}/viewer
+        const pathParts = activeUrl.split("?")[0].split("/").filter(Boolean);
+        const enIdx = pathParts.findIndex((p) => p.toLowerCase() === "en" || p.toLowerCase() === "id" || p.toLowerCase() === "th" || p.toLowerCase() === "zh-hant");
+        if (enIdx !== -1 && pathParts.length > enIdx + 2) {
+          urlGenre = pathParts[enIdx + 1].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+          urlSeries = pathParts[enIdx + 2].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        }
+      }
+
+      const resolvedTitle =
+        initialDetails?.seriesTitle || activeData?.project?.title || urlSeries || "";
+      let resolvedChTitle =
+        initialDetails?.chapterTitle || activeData?.project?.chapterTitle || urlChTitle || "";
+      let resolvedChNum =
+        initialDetails?.chapterNumber || activeData?.project?.chapterNumber || urlChNum || "";
+
+      // Clean up title prefix if chapter title came as "1270: Backache (1)"
+      if (resolvedChTitle && /^(\d+)\s*[:\-–]\s*(.+)$/i.test(resolvedChTitle)) {
+        const m = resolvedChTitle.match(/^(\d+)\s*[:\-–]\s*(.+)$/i);
+        if (m) {
+          if (!resolvedChNum) resolvedChNum = m[1];
+          resolvedChTitle = m[2].trim();
+        }
+      }
+      if (resolvedChTitle && resolvedChTitle.toLowerCase() === resolvedTitle.toLowerCase()) {
+        resolvedChTitle = urlChTitle || "";
+      }
+
+      setSeriesTitle(resolvedTitle);
+      setChapterNumber(resolvedChNum);
+      setChapterTitle(resolvedChTitle);
       setScrapedGenre(
-        initialDetails?.scrapedGenre || activeData?.project?.genre || ""
+        initialDetails?.scrapedGenre || activeData?.project?.genre || urlGenre || ""
       );
       setSeriesAuthor(
         initialDetails?.seriesAuthor || activeData?.project?.author || ""

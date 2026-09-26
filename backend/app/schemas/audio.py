@@ -64,11 +64,15 @@ class AudioGenerateRequest(BaseModel):
 class BatchPanelAudioItem(BaseModel):
     """Single panel definition for batch TTS generation."""
     id: Union[int, str] = Field(..., description="Panel identifier")
+    panel_index: Optional[int] = Field(None, description="1-based sequence index of the panel")
+    image_url: Optional[str] = Field(None, description="Image URL or slice path for this panel")
     text: Optional[str] = Field(None, description="Dialogue / spoken text")
     dialogue_list: Optional[List[str]] = Field(None, description="List of dialogue lines")
     narrative: Optional[str] = Field(None, description="Narrative recap or storytelling text")
     voice: Optional[str] = Field(None, description="Optional per-panel voice override")
     target_duration: Optional[float] = Field(4.0, description="Target duration in seconds")
+    audio_url: Optional[str] = Field(None, description="Existing dialogue audio URL if already generated")
+    narrative_audio_url: Optional[str] = Field(None, description="Existing narrative audio URL if already generated")
     model_config = ConfigDict(extra="ignore")
 
 
@@ -80,6 +84,7 @@ class BatchAudioGenerateRequest(BaseModel):
     speech_pitch: Optional[float] = Field(1.0, description="Speech pitch multiplier")
     generate_dialogue_audio: Optional[bool] = Field(True, description="Whether to synthesize dialogue text")
     generate_narrative_audio: Optional[bool] = Field(True, description="Whether to synthesize narrative text")
+    force_regenerate: Optional[bool] = Field(False, description="Whether to regenerate audio even if audio_url already exists")
     model_config = ConfigDict(extra="ignore")
 
 

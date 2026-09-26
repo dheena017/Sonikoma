@@ -9,18 +9,23 @@ audio narration, background music, and motion effects.
 import os
 import io
 import uuid
+import base64
+import shutil
 import tempfile
 import asyncio
 import logging
+import httpx
 import numpy as np
 from PIL import Image, ImageFilter
 from typing import List, Dict, Any, Optional
 
 from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
+from proglog import ProgressBarLogger
 from services.image.utils.image_utils import resolve_image_to_buffer
 from services.jobs import job_manager
 from services.audio.tts import generate_panel_audio
 from core.cache import stitched_cache
+from repositories.project import get_project, get_project_by_slug
 
 logger = logging.getLogger("sonikoma.services.video.video_compiler")
 
@@ -28,6 +33,29 @@ _PROJECT_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
 )
 _VIDEO_OUTPUT_DIR = os.path.join(_PROJECT_ROOT, "data", "media")
+
+
+class MoviePyCompileLogger(ProgressBarLogger):
+    """
+    Proglog logger that intercepts FFmpeg frame rendering from MoviePy and
+    emits concise log messages every 10% as well as updating the job manager progress.
+    """
+    def __init__(self, report_progress=None):
+        super().__init__()
+        self.report_progress = report_progress
+        self.last_pct = -1
+
+    def bars_callback(self, bar, attr, value, old_value=None):
+        if bar == "t" and attr == "index":
+            total = self.bars.get(bar, {}).get("total", 0)
+            if total > 0:
+                pct = int((value / total) * 100)
+                if pct % 10 == 0 and pct != self.last_pct:
+                    self.last_pct = pct
+                    logger.info(f"[Video Compiler] FFmpeg encoding progress: {pct}% ({value}/{total} frames)")
+                    if self.report_progress:
+                        prog = 88.0 + (pct / 100.0) * 11.0
+                        self.report_progress(round(prog, 1))
 
 
 def build_panel_frame_image(
@@ -67,6 +95,7 @@ async def compile_video_from_panels(
     voice: Optional[str] = None,
     enable_dialogue_audio: Optional[bool] = None,
     enable_narrative_audio: Optional[bool] = None,
+    report_progress: Optional[Any] = None,
     **kwargs: Any
 ) -> str:
     if not panels:
@@ -74,6 +103,8 @@ async def compile_video_from_panels(
 
     if not output_dir:
         output_dir = _VIDEO_OUTPUT_DIR
+
+    start_compilation_time = asyncio.get_event_loop().time()
 
     normalized_panels = []
     for p in panels:
@@ -88,6 +119,18 @@ async def compile_video_from_panels(
         else:
             normalized_panels.append(dict(p))
     panels = normalized_panels
+
+    # Look up database panels if project_id is available to ensure existing audio is discovered
+    db_panels_map: Dict[str, Dict[str, Any]] = {}
+    if project_id and not str(project_id).startswith("job_"):
+        try:
+            db_proj = get_project(project_id) or get_project_by_slug(project_id)
+            if db_proj and isinstance(db_proj.get("panels"), list):
+                for dp in db_proj["panels"]:
+                    pid = str(dp.get("id"))
+                    db_panels_map[pid] = dp
+        except Exception as p_err:
+            logger.debug(f"[Video Compiler] Project DB lookup note: {p_err}")
 
     backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     project_root = os.path.abspath(os.path.join(backend_root, ".."))
@@ -109,30 +152,52 @@ async def compile_video_from_panels(
 
     clips = []
     audio_files_to_cleanup = []
+    total_panels = len(panels)
 
-    logger.info(f"[Video Compiler] Starting compilation for project {project_id} ({series_slug} EP #{ep_num}) with {len(panels)} panels.")
+    logger.info(
+        f"[Video Compiler] >>> Starting video compilation for project '{project_id}' "
+        f"({series_slug} EP #{ep_num}) with {total_panels} panel(s)."
+    )
 
     for idx, panel in enumerate(panels):
         panel_id = panel.get("id") or (idx + 1)
-        logger.info(f"[Video Compiler] Processing panel {idx + 1}/{len(panels)} (ID: {panel_id})")
+        image_url = panel.get("image_url") or panel.get("url") or ""
+        img_name = os.path.basename(image_url) if image_url else f"panel_{panel_id}"
 
-        image_url = panel.get("image_url")
         if not image_url:
-            logger.warning(f"Panel {idx + 1} is missing an image_url. Skipping.")
+            logger.warning(f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}): Missing image URL. Skipping.")
             continue
 
         suggested_duration = float(panel.get("duration") or 0)
         if suggested_duration <= 0:
-            suggested_duration = 0
+            suggested_duration = 4.0
 
         # Determine audio prioritization: default is Narratives ON, Dialogue OFF
         narrative_preferred = enable_narrative_audio is not False
+        db_p = db_panels_map.get(str(panel_id)) or {}
 
-        audio_target = None
         if narrative_preferred:
-            audio_target = panel.get("narrative_audio_url") or panel.get("audio_url")
+            candidates = [
+                panel.get("narrative_audio_url"),
+                panel.get("audio_url"),
+                panel.get("dialogue_audio_url"),
+                panel.get("audio"),
+                db_p.get("narrative_audio_url"),
+                db_p.get("audio_url"),
+                db_p.get("dialogue_audio_url"),
+            ]
         else:
-            audio_target = panel.get("audio_url") or panel.get("narrative_audio_url")
+            candidates = [
+                panel.get("audio_url"),
+                panel.get("dialogue_audio_url"),
+                panel.get("narrative_audio_url"),
+                panel.get("audio"),
+                db_p.get("audio_url"),
+                db_p.get("dialogue_audio_url"),
+                db_p.get("narrative_audio_url"),
+            ]
+
+        audio_target = next((c for c in candidates if c and isinstance(c, str) and c.strip()), None)
 
         audio_path = os.path.join(temp_dir, f"{series_slug}_ep{ep_num}_p{panel_id}_audio_{uuid.uuid4().hex[:6]}.mp3")
         actual_duration = suggested_duration
@@ -142,25 +207,43 @@ async def compile_video_from_panels(
         if audio_target and isinstance(audio_target, str) and audio_target.strip():
             audio_target_str = audio_target.strip()
             try:
-                if "/cached/" in audio_target_str:
+                # 1a. Base64 Data URI
+                if audio_target_str.startswith("data:audio") or audio_target_str.startswith("data:application/octet-stream"):
+                    b64_part = audio_target_str.split(",", 1)[-1]
+                    raw_audio_bytes = base64.b64decode(b64_part)
+                    with open(audio_path, "wb") as f:
+                        f.write(raw_audio_bytes)
+                    if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                        has_audio = True
+                        audio_files_to_cleanup.append(audio_path)
+                # 1b. Stitched cache
+                elif "/cached/" in audio_target_str:
                     cache_key = audio_target_str.split("/cached/")[-1].split("?")[0].strip("/")
                     cached_obj = stitched_cache.get(cache_key)
-                    if cached_obj and isinstance(cached_obj, dict) and cached_obj.get("data"):
-                        with open(audio_path, "wb") as f:
-                            f.write(cached_obj["data"])
-                        if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
-                            has_audio = True
-                            audio_files_to_cleanup.append(audio_path)
-                            logger.info(f"[Video Compiler] Panel {panel_id}: Reusing pre-generated audio from cache ({cache_key})")
-                elif os.path.exists(audio_target_str):
-                    import shutil
+                    if cached_obj:
+                        raw_data = cached_obj.get("data") if isinstance(cached_obj, dict) else cached_obj
+                        if raw_data:
+                            with open(audio_path, "wb") as f:
+                                f.write(raw_data)
+                            if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                                has_audio = True
+                                audio_files_to_cleanup.append(audio_path)
+                # 1c. Local media directory (/media/...)
+                elif "/media/" in audio_target_str:
+                    media_filename = audio_target_str.split("/media/")[-1].split("?")[0].strip("/")
+                    local_cand = os.path.join(media_dir, media_filename)
+                    if os.path.exists(local_cand) and os.path.getsize(local_cand) > 0:
+                        shutil.copyfile(local_cand, audio_path)
+                        has_audio = True
+                        audio_files_to_cleanup.append(audio_path)
+                # 1d. Local filesystem path
+                elif os.path.exists(audio_target_str) and not os.path.isdir(audio_target_str):
                     shutil.copyfile(audio_target_str, audio_path)
                     if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
                         has_audio = True
                         audio_files_to_cleanup.append(audio_path)
-                        logger.info(f"[Video Compiler] Panel {panel_id}: Reusing local audio file ({audio_target_str})")
+                # 1e. Remote HTTP / HTTPS URL
                 elif audio_target_str.startswith("http://") or audio_target_str.startswith("https://"):
-                    import httpx
                     async with httpx.AsyncClient(timeout=15.0) as client:
                         resp = await client.get(audio_target_str)
                         if resp.status_code == 200 and len(resp.content) > 0:
@@ -170,12 +253,44 @@ async def compile_video_from_panels(
                                 has_audio = True
                                 audio_files_to_cleanup.append(audio_path)
             except Exception as e:
-                logger.warning(f"[Video Compiler] Panel {panel_id}: Could not load pre-generated audio {audio_target_str}: {e}")
+                logger.warning(f"[Video Compiler] Panel {panel_id}: Could not load pre-generated audio '{audio_target_str[:50]}': {e}")
 
-        # Step 2: If no pre-synthesized audio was loaded, synthesize it on the fly!
+        # Check per-panel audio cache key
         if not has_audio:
-            narrative_text = (panel.get("narrative") or panel.get("narrativeText") or "").strip()
-            speech_text = (panel.get("speech_text") or "").strip()
+            pre_cached = stitched_cache.get(f"audio_panel_{panel_id}")
+            if pre_cached:
+                raw_pre = pre_cached.get("data") if isinstance(pre_cached, dict) else pre_cached
+                if raw_pre:
+                    try:
+                        with open(audio_path, "wb") as f:
+                            f.write(raw_pre)
+                        if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                            has_audio = True
+                            audio_files_to_cleanup.append(audio_path)
+                    except Exception:
+                        pass
+
+        # Step 2: Determine if audio is present or must be synthesized
+        if has_audio:
+            # Reusing pre-generated audio: DO NOT synthesize!
+            try:
+                test_audio = AudioFileClip(audio_path)
+                if test_audio.duration and test_audio.duration > 0:
+                    duration = max(test_audio.duration, 1.0)
+                else:
+                    duration = suggested_duration
+                test_audio.close()
+            except Exception:
+                duration = suggested_duration
+
+            logger.info(
+                f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}): "
+                f"Reusing existing pre-generated audio ({duration:.1f}s) - Skipping synthesis."
+            )
+        else:
+            # Audio is missing: only synthesize where audio was not created!
+            narrative_text = (panel.get("narrative") or panel.get("narrativeText") or db_p.get("narrative") or "").strip()
+            speech_text = (panel.get("speech_text") or db_p.get("speech_text") or "").strip()
 
             text_to_speak = ""
             if narrative_preferred and narrative_text:
@@ -187,40 +302,50 @@ async def compile_video_from_panels(
 
             if text_to_speak:
                 panel_voice = panel.get("voice") or voice or "en-US-GuyNeural"
+                audio_kind = "Narrative" if text_to_speak == narrative_text else "Dialogue"
+                logger.info(
+                    f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}): "
+                    f"No existing audio found -> Synthesizing {audio_kind} on-the-fly with voice '{panel_voice}'..."
+                )
                 try:
-                    logger.info(f"[Video Compiler] Panel {panel_id}: Synthesizing on-the-fly audio ({'Narrative' if text_to_speak == narrative_text else 'Dialogue'}) with voice '{panel_voice}'")
                     _, actual_duration = await generate_panel_audio(
                         dialogue_list=[text_to_speak],
                         target_duration=suggested_duration,
                         output_path=audio_path,
                         voice=panel_voice,
-                        force_duration=False
+                        force_duration=False,
+                        context_info=f"Render Panel {idx + 1}/{total_panels}",
                     )
                     if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
                         has_audio = True
                         audio_files_to_cleanup.append(audio_path)
+                        duration = max(actual_duration, 1.0)
+                        logger.info(
+                            f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}): "
+                            f"Successfully synthesized audio ({actual_duration:.1f}s)."
+                        )
+                        # Save to cache so subsequent renders or retries find it immediately
+                        try:
+                            with open(audio_path, "rb") as af:
+                                stitched_cache.set(f"audio_panel_{panel_id}", {"data": af.read(), "content_type": "audio/mpeg"})
+                        except Exception:
+                            pass
                 except Exception as e:
-                    logger.error(f"[Video Compiler] Failed to generate audio for panel {idx + 1}: {e}")
+                    logger.error(f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}): Audio synthesis failed: {e}")
+                    duration = suggested_duration
+            else:
+                logger.info(
+                    f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}): "
+                    f"No text to synthesize -> Using silent panel ({suggested_duration:.1f}s)."
+                )
+                duration = suggested_duration
 
-        # Step 3: Align panel duration with spoken audio duration
-        if has_audio:
-            try:
-                test_audio = AudioFileClip(audio_path)
-                if test_audio.duration and test_audio.duration > 0:
-                    duration = max(test_audio.duration, 1.0)
-                else:
-                    duration = actual_duration
-                test_audio.close()
-            except Exception:
-                duration = actual_duration
-        else:
-            duration = suggested_duration
-
+        # Step 3: Fetch image and construct composite frame
         try:
             res = await resolve_image_to_buffer(image_url)
             image_bytes = res["data"]
         except Exception as e:
-            logger.error(f"Failed to fetch image for panel {idx + 1}: {e}")
+            logger.error(f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}): Failed to fetch image: {e}")
             continue
 
         try:
@@ -234,7 +359,7 @@ async def compile_video_from_panels(
                 frame_array = np.array(composite_frame, dtype=np.uint8)
 
         except Exception as e:
-            logger.error(f"Failed to process PIL images for panel {idx + 1}: {e}")
+            logger.error(f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}): Failed to process frame image: {e}")
             continue
 
         try:
@@ -245,22 +370,37 @@ async def compile_video_from_panels(
                 audio_clip = audio_clip.set_duration(duration)
                 composite_clip = composite_clip.set_audio(audio_clip)
 
+            clips.append(composite_clip)
+            logger.info(
+                f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}) -> "
+                f"Clip ready ({target_width}x{target_height}, {duration:.1f}s, Audio: {'Yes' if has_audio else 'None'})"
+            )
+
         except Exception as e:
-            logger.error(f"Failed to create MoviePy clip for panel {idx + 1}: {e}")
+            logger.error(f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}): Failed to build video clip: {e}")
             continue
 
-        clips.append(composite_clip)
+        # Real-time progress update
+        if report_progress:
+            prog = 5.0 + ((idx + 1) / total_panels) * 80.0
+            report_progress(round(prog, 1))
 
     if not clips:
         raise RuntimeError("No valid clips were generated. Cannot compile video.")
 
-    logger.info(f"[Video Compiler] Concatenating {len(clips)} clips...")
+    logger.info(f"[Video Compiler] Concatenating {len(clips)} panel clips into final MP4 video...")
+    if report_progress:
+        report_progress(88.0)
 
     try:
         final_video = concatenate_videoclips(clips, method="chain")
 
+        if report_progress:
+            report_progress(92.0)
+
         def render_video():
             temp_mpy_sound = os.path.join(temp_dir, f"temp_mpy_{uuid.uuid4().hex[:8]}_snd.m4a")
+            mpy_logger = MoviePyCompileLogger(report_progress=report_progress)
             final_video.write_videofile(
                 output_path,
                 fps=24,
@@ -268,19 +408,24 @@ async def compile_video_from_panels(
                 audio_codec="aac",
                 threads=4,
                 preset="ultrafast",
-                logger=None,
+                logger=mpy_logger,
                 bitrate="10000k",
                 temp_audiofile=temp_mpy_sound,
                 remove_temp=True
             )
 
         await asyncio.to_thread(render_video)
-        logger.info(f"[Video Compiler] Video compilation successful: {output_path}")
+        render_elapsed = asyncio.get_event_loop().time() - start_compilation_time
+        logger.info(
+            f"[Video Compiler] <<< Video compilation completed successfully in {render_elapsed:.1f}s: {output_path}"
+        )
+        if report_progress:
+            report_progress(100.0)
     except Exception as e:
-        logger.error(f"[Video Compiler] Failed to render video: {e}")
+        logger.error(f"[Video Compiler] Failed to render final video file: {e}")
         raise e
     finally:
-        logger.info("[Video Compiler] Cleaning up temporary files...")
+        logger.info("[Video Compiler] Cleaning up temporary working files...")
         for clip in clips:
             try:
                 clip.close()
@@ -319,7 +464,7 @@ async def process_render_job(
     project_id: Optional[str] = None,
 ) -> Dict[str, str]:
     logger.info(
-        f"[VideoService] Starting render job_id='{job_id}' for project_id='{project_id or 'N/A'}', ({len(panels)} panels)"
+        f"[VideoService] Starting render job_id='{job_id}' for project_id='{project_id or 'N/A'}' ({len(panels)} panels)"
     )
     report_progress(5.0)
 
@@ -332,6 +477,7 @@ async def process_render_job(
         voice=voice,
         enable_dialogue_audio=enable_dialogue_audio,
         enable_narrative_audio=enable_narrative_audio,
+        report_progress=report_progress,
     )
 
     video_url = f"/videos/{output_filename}"

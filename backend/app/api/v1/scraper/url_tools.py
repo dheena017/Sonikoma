@@ -112,3 +112,18 @@ async def detect_platform_endpoint(
         "is_chapter": source_info.is_chapter_url,
         "chapter_number": sep_data.get("chapter_number")
     }
+
+
+@router.post(
+    "/check-url",
+    summary="Validate and check comic URL before scraping",
+    description="Validates if a URL is a full chapter viewer URL or series catalog URL, and returns error diagnostics."
+)
+async def check_url_endpoint(
+    payload: SeparateUrlRequest,
+    current_user: dict = Depends(get_current_user)
+):
+    if not payload.url or not payload.url.strip():
+        raise HTTPException(status_code=400, detail="Target URL cannot be empty.")
+    logger.info(f"[URL Tools] Checking URL validity: {payload.url}")
+    return UniversalUrlSeparator.check_url(payload.url)

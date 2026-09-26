@@ -361,7 +361,7 @@ class DomExtractor:
         )
         desc = _get_meta("og:description", "twitter:description", "description")
         cover = _get_meta("og:image", "twitter:image", "image")
-        author = _get_meta("author", "article:author", "creator", "comic:creator")
+        author = _get_meta("author", "article:author", "creator", "comic:creator", "com-linewebtoon:episode:author", "og:creator", "twitter:creator")
         publisher = _get_meta("og:site_name", "publisher", "application-name")
         section = _get_meta("article:section", "genre", "category", "tag")
 
@@ -410,7 +410,7 @@ class DomExtractor:
 
         # DOM Author & Artist heuristics
         if not author:
-            for a_sel in ("a[href*='/author/']", "a[href*='/creator/']", "a[href*='/search/author/']", ".table-value a[href*='author']", ".author-content a", "[itemprop='author']"):
+            for a_sel in (".author_area", "span.author", ".author", ".subj_info .author", "a[href*='/author/']", "a[href*='/creator/']", "a[href*='/search/author/']", ".table-value a[href*='author']", ".author-content a", "[itemprop='author']"):
                 a_elem = soup.select_one(a_sel)
                 if a_elem and a_elem.get_text(strip=True):
                     author = a_elem.get_text(strip=True)

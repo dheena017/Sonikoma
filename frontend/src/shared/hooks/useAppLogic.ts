@@ -4,6 +4,7 @@ import * as api from "@/api/index";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { usePlaybackEngine } from "./usePlaybackEngine";
 import { usePipelineActions } from "./usePipelineActions";
+import { validateChapterUrl } from "@/shared/utils";
 
 /** Helper to format chapter title display (e.g. "Chapter 15 - The Awakening") */
 export function formatEpisodeString(
@@ -233,6 +234,16 @@ export function useAppLogic() {
         return false;
       }
 
+      const validation = validateChapterUrl(activeUrl);
+      if (!validation.valid) {
+        state.addNotification(
+          validation.error ||
+            "Please enter a valid chapter viewer URL (e.g. https://www.webtoons.com/.../viewer?title_no=...&episode_no=...).",
+          "warning"
+        );
+        return false;
+      }
+
       state.setIsScraping(true);
       state.setConsoleLogs((prev) => [
         `[Scraper] Starting import from: ${activeUrl}`,
@@ -257,33 +268,74 @@ export function useAppLogic() {
           state.setScrapedImages(finalImages);
           state.setSelectedScraped([]);
 
+          // Series metadata
           const title =
             data.series?.title || state.seriesTitle || "Untitled Comic";
           const author = data.series?.author || state.seriesAuthor || "";
           const cover =
             data.series?.cover_image ||
+            data.chapter?.cover_image ||
             state.seriesCoverImage ||
             finalImages[0] ||
             "";
           const synopsis =
             data.series?.description || state.seriesSynopsis || "";
           const genre =
-            data.series?.genres?.join(", ") || state.scrapedGenre || "";
+            (data.series?.genres && data.series.genres.length > 0
+              ? data.series.genres.join(", ")
+              : state.scrapedGenre) || "";
+
+          // Chapter number extraction
+          let chNum = "";
+          if (data.chapter?.number !== undefined && data.chapter?.number !== null) {
+            chNum = String(data.chapter.number).replace(/\.0$/, "");
+          } else if (data.chapter?.episode) {
+            const m = data.chapter.episode.match(/\d+(\.\d+)?/);
+            if (m) chNum = m[0];
+          }
+          if (!chNum && activeUrl) {
+            const urlMatch =
+              activeUrl.match(/(?:episode_no|chapter|ep)[=/_-](\d+)/i) ||
+              activeUrl.match(/\/(\d+)[-_]/);
+            if (urlMatch) chNum = urlMatch[1];
+          }
+
+          // Chapter title extraction
+          let rawChTitle = data.chapter?.title || "";
+          let chTitle = rawChTitle;
+          // If title is prefixed by number like "1270: Backache (1)", extract clean title "Backache (1)"
+          if (chTitle && /^(\d+)\s*[:\-–]\s*(.+)$/i.test(chTitle)) {
+            const match = chTitle.match(/^(\d+)\s*[:\-–]\s*(.+)$/i);
+            if (match) {
+              if (!chNum) chNum = match[1];
+              chTitle = match[2].trim();
+            }
+          }
+          // If chapter title was returned as identical to series title, try to find a better one
+          if (chTitle && chTitle.toLowerCase() === title.toLowerCase()) {
+            chTitle = "";
+          }
+          if (!chTitle && activeUrl) {
+            const slugMatch = activeUrl.match(/\/(?:\d+[-_])?([a-zA-Z0-9-_]+)\/viewer/i);
+            if (slugMatch) {
+              chTitle = slugMatch[1].replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+            }
+          }
+          if (!chTitle && rawChTitle) {
+            chTitle = rawChTitle;
+          }
 
           state.setProjectId(targetProjectId);
+          state.setSeriesTitle(title);
+          if (author) state.setSeriesAuthor(author);
+          if (cover) state.setSeriesCoverImage(cover);
+          if (synopsis) state.setSeriesSynopsis(synopsis);
+          if (genre) state.setScrapedGenre(genre);
+          if (chNum) state.setChapterNumber(chNum);
+          if (chTitle) state.setChapterTitle(chTitle);
 
-          const initialPanels = finalImages.map((imgUrl, idx) => ({
-            id: idx + 1,
-            panel_index: idx,
-            image_url: imgUrl,
-            original_url: imgUrl,
-            prompt: `Scene ${idx + 1}`,
-            speech_text: "",
-            narrative: "",
-            sfx: "",
-            duration: 0,
-            motion_type: "",
-          }));
+          // Do NOT automatically populate panels into storyboard — let the user select/add panels manually
+          state.setPanels([]);
 
           useProjectStore.getState().setActiveProject({
             project: {
@@ -294,8 +346,10 @@ export function useAppLogic() {
               cover_image: cover,
               synopsis,
               genre,
+              chapterNumber: chNum || state.chapterNumber || "",
+              chapterTitle: chTitle || state.chapterTitle || "",
             },
-            panels: initialPanels as any,
+            panels: [],
             scrapedImages: finalImages,
           });
 

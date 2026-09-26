@@ -220,12 +220,16 @@ def _compute_trim_bounds(
     Computes top and bottom trim offsets (px) from content row mask with safety padding.
     Trims away 100% of empty gutter whitespace above and below the panel content.
     Returns (top_pad, final_h, top_removed, bottom_removed).
+
+    Padding is intentionally generous (at least 8px or 1.5% of width) so that
+    artwork that bleeds right to the panel edge is never accidentally clipped.
     """
     if not np.any(content_rows):
         return 0, slice_h, 0, 0
 
     valid_y_indices = np.where(content_rows)[0]
-    pad = max(2, int(w * 0.005)) if padding_px is None else padding_px
+    # Minimum 8px safety margin so thin ink lines / borders are never clipped
+    pad = max(8, int(w * 0.015)) if padding_px is None else max(8, int(padding_px))
 
     top_pad = max(0, valid_y_indices[0] - pad)
     bot_pad = min(slice_h, valid_y_indices[-1] + pad + 1)
@@ -303,12 +307,14 @@ def detect_vertical_strip_panels(
         0.15 * mad_score
     )
 
-    sep_threshold = 0.35 if high_sensitivity else 0.40
+    # Lowered from 0.40 → 0.33 (standard) / 0.28 (high_sensitivity) so narrow
+    # gutters between dense panels are no longer missed.
+    sep_threshold = 0.28 if high_sensitivity else 0.33
     max_stroke_count = max(2, int(w_center * 0.015))
     is_gutter_row = (
         (stroke_counts <= max_stroke_count) &
-        ((separator_score >= sep_threshold) | (bg_ratio >= 0.40) | (row_stds <= gutter_std_thresh * 1.8)) &
-        (edge_density <= 0.15)
+        ((separator_score >= sep_threshold) | (bg_ratio >= 0.35) | (row_stds <= gutter_std_thresh * 2.2)) &
+        (edge_density <= 0.18)
     )
     is_content_row = ~is_gutter_row
 
@@ -342,7 +348,9 @@ def detect_vertical_strip_panels(
     
     in_gutter = False
     g_start = 0
-    min_gutter_h = max(6, int(w * 0.015))
+    # Lowered from w*0.015 to w*0.008 (minimum 3px) so very thin gutters
+    # common in dense manga grids or webtoons are not silently discarded.
+    min_gutter_h = max(3, int(w * 0.008))
 
     for i in range(h):
         if is_gutter_row[i] and not in_gutter:
@@ -806,10 +814,16 @@ def run_cv_detection(
     aspect_ratio_str: str = "free",
     auto_split: bool = True,
     use_yolo: bool = True,
+    canny_low: int = 20,
+    canny_high: int = 100,
+    close_kernel_size: int = 15,
+    padding_px: int = 10,
     **kwargs: Any
 ) -> List[Dict[str, Any]]:
     """
     Modular execution delegator for OpenCV and Webtoon panel detection.
+    Forwards all tuning parameters (canny thresholds, kernel size, padding)
+    to the underlying detectors so user-supplied settings are respected.
     """
     if not os.path.exists(image_path):
         return []
@@ -838,18 +852,35 @@ def run_cv_detection(
             median_bg=median_bg,
             sensitivity=sensitivity,
             top_median=top_med,
-            bottom_median=bot_med
+            bottom_median=bot_med,
+            padding_px=padding_px,
         )
         panels = res.panels if hasattr(res, "panels") else (res[0] if isinstance(res, tuple) else [])
         return panels
     else:
-        grid_panels = detect_manga_grid_panels(gray_arr, min_width_pct=min_width_pct, min_height_px=min_height_px)
+        # Forward all tuned params to grid + opencv detectors
+        grid_panels = detect_manga_grid_panels(
+            gray_arr,
+            min_width_pct=min_width_pct,
+            min_height_px=min_height_px,
+            canny_low=canny_low,
+            canny_high=canny_high,
+            close_kernel_size=close_kernel_size,
+        )
         if grid_panels and len(grid_panels) > 1:
             return grid_panels
 
         with open(image_path, "rb") as f:
             raw_bytes = f.read()
-        cv_res = detect_opencv_boxes(raw_bytes, min_width_pct=min_width_pct, min_height_px=min_height_px)
+        cv_res = detect_opencv_boxes(
+            raw_bytes,
+            min_width_pct=min_width_pct,
+            min_height_px=min_height_px,
+            canny_low=canny_low,
+            canny_high=canny_high,
+            close_kernel_size=close_kernel_size,
+            bleed_padding_px=max(5, padding_px),
+        )
         return cv_res.get("panels", [])
 
 

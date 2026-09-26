@@ -175,7 +175,7 @@ if __name__ == "__main__":
         "log_level": log_level_name,
         "log_config": custom_log_config,
         "use_colors": True,
-        "reload": False,
+        "reload": not IS_PRODUCTION,
     }
     if IS_PRODUCTION:
         run_args["workers"] = 1

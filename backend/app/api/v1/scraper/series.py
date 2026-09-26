@@ -61,7 +61,7 @@ async def scrape_series_async_endpoint(
             max_chapters=body.max_episodes if (body.max_episodes and body.max_episodes > 0) else None,
             sort_by=body.sort_by or "latest",
             page=body.page or 1,
-            per_page=body.per_page or 100,
+            per_page=body.per_page,
             include_ratings=body.include_ratings if body.include_ratings is not None else False,
             bypass_cache=body.bypass_cache or False,
         )
@@ -95,7 +95,7 @@ async def scrape_series_sync_endpoint(
         max_chapters=body.max_episodes if (body.max_episodes and body.max_episodes > 0) else None,
         sort_by=body.sort_by or "latest",
         page=body.page or 1,
-        per_page=body.per_page or 100,
+        per_page=body.per_page,
         include_ratings=body.include_ratings if body.include_ratings is not None else False,
         bypass_cache=body.bypass_cache or False,
     )

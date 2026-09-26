@@ -202,13 +202,11 @@ class ProjectService:
         if not project:
             # Auto-provision new/transient project if updating details
             panels_cnt = getattr(body, "panels_count", None)
-            if not panels_cnt and getattr(body, "panels", None):
+            if panels_cnt is None and getattr(body, "panels", None) is not None:
                 panels_cnt = len(body.panels)
             init_audio = getattr(body, "audio_settings", None) or {}
             if getattr(body, "scraped_images", None) and isinstance(init_audio, dict):
                 init_audio["scraped_images"] = body.scraped_images
-            if not panels_cnt and isinstance(init_audio, dict) and init_audio.get("scraped_images"):
-                panels_cnt = len(init_audio["scraped_images"])
 
             self.repo.insert_project({
                 "project_id": project_id,
@@ -250,10 +248,8 @@ class ProjectService:
             merged_audio["scraped_images"] = body.scraped_images
 
         panels_cnt = getattr(body, "panels_count", None)
-        if not panels_cnt and getattr(body, "panels", None):
+        if panels_cnt is None and getattr(body, "panels", None) is not None:
             panels_cnt = len(body.panels)
-        if not panels_cnt and merged_audio.get("scraped_images"):
-            panels_cnt = len(merged_audio["scraped_images"])
 
         field_map = {
             "title": body.title,

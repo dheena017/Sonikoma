@@ -75,8 +75,11 @@ def detect_opencv_boxes(
     
     # Adaptive Median-Tuned Canny Thresholds on Grayscale + Color Channels
     median_val = float(np.median(gray))
-    computed_low = max(10, int(max(0, (1.0 - 0.33) * median_val) if canny_low == 20 else canny_low))
-    computed_high = min(250, int(min(255, (1.0 + 0.33) * median_val) if canny_high == 100 else canny_high))
+    # Always use user-supplied canny values. Only auto-compute when the
+    # caller passes None, which is impossible via the current typed API, but
+    # guards against future callers who may omit them intentionally.
+    computed_low = canny_low if canny_low is not None else max(10, int(max(0, (1.0 - 0.33) * median_val)))
+    computed_high = canny_high if canny_high is not None else min(250, int(min(255, (1.0 + 0.33) * median_val)))
 
     edges_gray = cv2.Canny(filtered_bgr, computed_low, computed_high)
     edges_l = cv2.Canny(lab[:, :, 0], computed_low, computed_high)

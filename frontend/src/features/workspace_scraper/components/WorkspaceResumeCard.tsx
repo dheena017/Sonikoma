@@ -61,7 +61,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
     <>
       <div className="group bg-gradient-to-br from-[#2A2A2A] to-indigo-900/40 border border-[#3B82F6]/30 rounded-[32px] p-6 backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl transition-all hover:border-neutral-700">
         <div className="flex flex-col md:flex-row items-center gap-6 w-full">
-          <div className="relative h-28 w-48 rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-inner shrink-0 group-hover:scale-[1.02] transition-transform duration-500">
+          <div className="relative h-28 w-48 rounded-2xl overflow-hidden border border-white/10 bg-black/40 shadow-inner shrink-0">
             {matchingProject.cover_image ? (
               <img
                 src={matchingProject.cover_image}
@@ -75,7 +75,7 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-2 left-3 flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               <span className="text-[9px] font-black text-white uppercase tracking-widest font-mono">
                 In Progress
               </span>
@@ -119,10 +119,9 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
               );
             }
           }}
-          className="w-full md:w-auto px-8 py-4 bg-white text-[#3B82F6] font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-[#2A2A2A] transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 group-hover:shadow-[0_0_30px_rgba(59,130,246,0.2)]"
+          className="w-full md:w-auto px-8 py-4 bg-white text-[#3B82F6] font-black rounded-2xl text-xs uppercase tracking-[0.15em] hover:bg-[#2A2A2A] flex items-center justify-center gap-3 shadow-xl cursor-pointer"
         >
-          Launch Workspace{" "}
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          Launch Workspace <ArrowRight className="h-4 w-4" />
         </button>
       </div>
 
@@ -132,11 +131,11 @@ const WorkspaceResumeCard: React.FC<WorkspaceResumeCardProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleVideoPlay}
-                className="h-8 w-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 hover:bg-emerald-500/35 hover:scale-105 active:scale-95 transition-all text-emerald-400 cursor-pointer"
+                className="h-8 w-8 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 hover:bg-emerald-500/35 text-emerald-400 cursor-pointer"
                 title={isVideoPlaying ? "Pause Video" : "Play Video"}
               >
                 {isVideoPlaying ? (
-                  <Pause className="h-4 w-4 text-emerald-400 fill-emerald-400 animate-pulse" />
+                  <Pause className="h-4 w-4 text-emerald-400 fill-emerald-400" />
                 ) : (
                   <Play className="h-4 w-4 text-emerald-400 fill-emerald-400" />
                 )}

@@ -54,14 +54,23 @@ def detect_manga_grid_panels(
         _, thresh = cv2.threshold(gray, dyn_thresh, 255, cv2.THRESH_BINARY_INV if is_white_bg else cv2.THRESH_BINARY)
         
     median_intensity = float(np.median(gray))
+    # Only auto-compute if caller left defaults unchanged (25 / 120).
+    # If the user passed a custom canny_low/canny_high those must be honoured exactly.
     computed_canny_low = max(10, int(0.66 * median_intensity)) if canny_low == 25 else canny_low
     computed_canny_high = min(250, int(1.33 * median_intensity)) if canny_high == 120 else canny_high
     edges = cv2.Canny(gray, computed_canny_low, computed_canny_high)
     merged_mask = cv2.bitwise_or(thresh, edges)
     
-    # 2. Morphological Closing: bridges dashed frames without bridging gutters
-    kernel_w = max(3, (int(w_img * 0.006) | 1))
-    kernel_h = max(3, (int(h_img * 0.006) | 1))
+    # 2. Morphological Closing: bridges dashed frames without bridging gutters.
+    # Use the caller-supplied close_kernel_size so fine-tuning from AutoSlicer/API
+    # actually takes effect.  Fall back to auto-scaling only if close_kernel_size is
+    # the default value (7) which usually means "not explicitly set".
+    if close_kernel_size == 7:
+        kernel_w = max(3, (int(w_img * 0.006) | 1))
+        kernel_h = max(3, (int(h_img * 0.006) | 1))
+    else:
+        kernel_w = max(3, close_kernel_size)
+        kernel_h = max(3, close_kernel_size)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_w, kernel_h))
     closed = cv2.morphologyEx(merged_mask, cv2.MORPH_CLOSE, kernel)
     

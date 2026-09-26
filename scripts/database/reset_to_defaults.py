@@ -111,13 +111,13 @@ def run_database_seed():
     finally:
         conn.close()
 
-    # Ensure admin user (Dheenadayalan_R) is preserved with admin privileges
+    # Ensure admin user (Sonikoma_Admin) is preserved with admin privileges
     conn = sqlite3.connect(DB_PATH)
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT id FROM users WHERE email = 'dheenadayalan017@gmail.com'")
+        cursor.execute("SELECT id FROM users WHERE email = 'admin@sonikoma.ai'")
         if not cursor.fetchone():
-            logger.info("Adding default admin account (dheenadayalan017@gmail.com)...")
+            logger.info("Adding default admin account (admin@sonikoma.ai)...")
             cursor.execute("""
                 INSERT INTO users (
                     id, username, email, password_hash, preferences, avatar_url,
@@ -125,13 +125,13 @@ def run_database_seed():
                     credits, credit_balance, last_claimed_date, unlocked_rewards, mfa_enabled,
                     social_connections, created_at, updated_at
                 ) VALUES (
-                    'user_cacfbef1',
-                    'Dheenadayalan_R',
-                    'dheenadayalan017@gmail.com',
+                    'user_admin_sonikoma',
+                    'Sonikoma_Admin',
+                    'admin@sonikoma.ai',
                     '$2b$12$MI9pPwCXwr4F4sEbUTzNZe/Or.T6iRXQbu2Ka3EKyK7CqXL6WrV6m',
                     '{"theme":"dark","autoSave":true,"volume":1.0}',
                     'https://lh3.googleusercontent.com/a/default-user',
-                    'Dheenadayalan R',
+                    'Sonikoma Administrator',
                     NULL,
                     'admin',
                     'Platform Administrator',
@@ -143,8 +143,21 @@ def run_database_seed():
             conn.commit()
             logger.info(" Default admin account added.")
 
-        # Reassign all series, chapters, invoices, and transactions to Dheenadayalan_R
-        admin_id = "user_cacfbef1"
+        # Reassign and keep only the 5 default series for Sonikoma_Admin
+        admin_id = "user_admin_sonikoma"
+        allowed_series = (
+            "ser_lore_olympus",
+            "ser_tower_of_god",
+            "ser_omniscient_reader",
+            "ser_solo_leveling",
+            "ser_true_beauty"
+        )
+        # Delete any series/chapters/panels not in the 5 defaults
+        placeholders = ",".join("?" for _ in allowed_series)
+        cursor.execute(f"DELETE FROM panels WHERE chapter_id IN (SELECT id FROM chapters WHERE series_id NOT IN ({placeholders}))", allowed_series)
+        cursor.execute(f"DELETE FROM chapters WHERE series_id NOT IN ({placeholders})", allowed_series)
+        cursor.execute(f"DELETE FROM series WHERE id NOT IN ({placeholders})", allowed_series)
+
         cursor.execute("UPDATE series SET user_id = ?", (admin_id,))
         cursor.execute("UPDATE user_audit_logs SET user_id = ?", (admin_id,))
         cursor.execute("UPDATE user_invoices SET user_id = ?", (admin_id,))
@@ -156,11 +169,11 @@ def run_database_seed():
         cursor.execute("DELETE FROM user_sessions WHERE user_id != ?", (admin_id,))
         cursor.execute("DELETE FROM user_api_keys WHERE user_id != ?", (admin_id,))
         
-        # Remove all other users so only Dheenadayalan_R remains
+        # Remove all other users so only Sonikoma_Admin remains
         cursor.execute("DELETE FROM users WHERE id != ?", (admin_id,))
         cursor.execute("UPDATE users SET creator_role = 'admin' WHERE id = ?", (admin_id,))
         conn.commit()
-        logger.info(" Ensured Dheenadayalan_R is the only user and admin in the system.")
+        logger.info(" Ensured Sonikoma_Admin is the only user with the 5 default series in the system.")
     finally:
         conn.close()
 

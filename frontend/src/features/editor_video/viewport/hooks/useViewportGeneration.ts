@@ -499,8 +499,11 @@ export function useVideoPreviewGeneration({
 
       const jobId = data.job_id;
 
-      // Start polling
+      // Start polling with overlap guard
+      let isPollCallInProgress = false;
       const pollInterval = setInterval(async () => {
+        if (isPollCallInProgress) return;
+        isPollCallInProgress = true;
         try {
           const statusData = await api.getVideoStatus(
             fetchWithInterceptor,
@@ -552,6 +555,8 @@ export function useVideoPreviewGeneration({
           setIsRendering(false);
           isRenderingRef.current = false;
           setRenderProgress(0);
+        } finally {
+          isPollCallInProgress = false;
         }
       }, 2000);
     } catch (error: any) {

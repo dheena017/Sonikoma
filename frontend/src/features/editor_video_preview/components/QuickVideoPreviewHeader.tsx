@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
   Sparkles,
-  Save,
   Video,
   Layers,
   X,
   Sliders,
   ChevronDown,
+  Download,
 } from "lucide-react";
 import EditorHeaderFrame from "@/features/editor_studio/components/EditorHeaderFrame";
 import MetadataPanel from "@/shared/ui/video/MetadataPanel";
@@ -63,7 +63,6 @@ export const QuickVideoPreviewHeader: React.FC<
 }) => {
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const finalExport = onExportVideo || handleRenderFinalVideo || onExport;
-  const finalSave = onSave || handleSave;
 
   const titleBlock = (
     <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
@@ -176,20 +175,6 @@ export const QuickVideoPreviewHeader: React.FC<
         />
       </div>
 
-      {finalSave && (
-        <button
-          type="button"
-          onClick={finalSave}
-          disabled={isSaving}
-          className="h-8 px-2.5 sm:px-3 rounded-xl border border-neutral-800 bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md active:scale-95 disabled:opacity-50 shrink-0 whitespace-nowrap"
-          title="Save Storyboard State"
-        >
-          <Save className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
-          <span className="hidden md:inline">
-            {isSaving ? "Saving..." : "Save"}
-          </span>
-        </button>
-      )}
 
       {finalExport && (
         <button
@@ -205,6 +190,21 @@ export const QuickVideoPreviewHeader: React.FC<
           </span>
           <span className="md:hidden">{isRendering ? "..." : "Export"}</span>
         </button>
+      )}
+
+      {videoUrl && (
+        <a
+          href={videoUrl}
+          download={seriesTitle ? `${seriesTitle.replace(/[^a-zA-Z0-9_-]/g, "_")}_video.mp4` : "video.mp4"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="h-8 px-2.5 sm:px-3.5 rounded-xl border border-emerald-500/40 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-500/25 active:scale-95 shrink-0 whitespace-nowrap"
+          title="Download compiled MP4 video to your computer"
+        >
+          <Download className="h-3.5 w-3.5 text-white shrink-0" />
+          <span className="hidden md:inline">Download MP4</span>
+          <span className="md:hidden">MP4</span>
+        </a>
       )}
 
       {onClose && (

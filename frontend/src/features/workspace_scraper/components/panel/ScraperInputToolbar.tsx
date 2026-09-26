@@ -9,6 +9,7 @@ import {
   Clock,
   Copy,
   Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { FavoritesManager } from "@/features/workspace_scraper/chapter-scraper/utils/FavoritesManager";
 import {
@@ -16,6 +17,7 @@ import {
   type SeparateUrlResult,
 } from "@/api/endpoints/scraper";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { validateChapterUrl } from "@/shared/utils";
 
 export interface ScraperInputToolbarProps {
   targetUrl: string;
@@ -237,9 +239,25 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     }
   };
 
+  const urlValidation = React.useMemo(() => {
+    if (!targetUrl || !targetUrl.trim()) return null;
+    return validateChapterUrl(targetUrl);
+  }, [targetUrl]);
+
   const handleImportClick = () => {
     const trimmed = targetUrl.trim();
     if (!trimmed) return;
+    const validation = validateChapterUrl(trimmed);
+    if (!validation.valid) {
+      if (typeof (window as any).alertAsync === "function") {
+        (window as any).alertAsync(
+          validation.error || "Please enter a valid chapter viewer URL.",
+          "Incomplete URL",
+          "amber"
+        );
+      }
+      return;
+    }
     FavoritesManager.addEnteredUrl(trimmed);
     handleScrape?.();
   };
@@ -317,31 +335,42 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
     }
   };
 
-  return (
-    <div className="flex flex-col gap-2.5 w-full">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative group flex-grow z-30" ref={containerRef}>
-          <input
-            id="target_url_input"
-            type="text"
-            autoComplete="off"
-            value={targetUrl}
-            onFocus={() => setShowSuggestions(true)}
-            onChange={(e) => {
-              setTargetUrl(e.target.value);
-              setShowSuggestions(true);
-            }}
-            onPaste={handlePaste}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
-                handleImportClick();
-              }
-            }}
-            placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic reader URL..."
-            className="w-full bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-700 focus:border-neutral-600 focus:ring-2 focus:ring-neutral-700 rounded-2xl px-6 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-[#6B7280] transition-all shadow-inner"
-          />
+  const hasValidationError = !!(urlValidation && !urlValidation.valid);
+  const isValid = !!(targetUrl.trim() && urlValidation?.valid);
 
-          {showSuggestions && suggestions.length > 0 && (
+  return (
+    <div className="flex flex-col gap-3 w-full">
+      {/* ── URL Input Row ── */}
+      <div className="relative group w-full z-30" ref={containerRef}>
+        <input
+          id="target_url_input"
+          type="text"
+          autoComplete="off"
+          value={targetUrl}
+          onFocus={() => setShowSuggestions(true)}
+          onChange={(e) => {
+            setTargetUrl(e.target.value);
+            setShowSuggestions(true);
+          }}
+          onPaste={handlePaste}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !isProcessing && targetUrl.trim()) {
+              handleImportClick();
+            }
+          }}
+          placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic chapter URL..."
+          className={`w-full bg-[#1A1A1A] border ${
+            hasValidationError
+              ? "border-amber-500/50 focus:border-amber-500"
+              : isValid
+              ? "border-emerald-500/40 focus:border-emerald-500/60"
+              : "border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-500"
+          } focus:ring-2 ${
+            hasValidationError ? "focus:ring-amber-500/10" : "focus:ring-neutral-700"
+          } rounded-2xl px-5 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-[#555] shadow-inner transition-colors`}
+        />
+
+        {showSuggestions && suggestions.length > 0 && (
             <div className="absolute left-0 right-0 top-full mt-2 bg-[#121217]/98 backdrop-blur-xl border border-[#282834] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(59,130,246,0.12)] z-[1000] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
               <div className="px-4 py-3 border-b border-[#282834] bg-[#0E0E12] flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -426,67 +455,87 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
           )}
         </div>
 
-        {actionSlot || (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
-            <Tooltip
-              text="Extract and import panel images directly from this chapter URL"
-              placement="bottom"
-              offset={10}
-              disabled={isScraping}
-            >
-              <button
-                type="button"
-                onClick={handleImportClick}
-                disabled={isScraping || !targetUrl.trim()}
-                className={`btn-primary group relative w-full justify-center px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2.5 ${
-                  isScraping ? "cursor-wait" : "cursor-pointer"
-                } ${
-                  separatedData?.is_chapter_url || !separatedData?.is_series_url
-                    ? "border-[#3B82F6]/60 shadow-[0_0_15px_rgba(59,130,246,0.22)]"
-                    : ""
-                }`}
-                aria-label="Import Chapter Images"
-              >
-                {isScraping ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin text-white" />
-                    <span>Extracting...</span>
-                  </>
-                ) : (
-                  <>
-                    <ImageIcon className="h-4 w-4 text-white transition-transform duration-200 group-hover:scale-110" />
-                    <span>Import Chapter Images</span>
-                  </>
-                )}
-              </button>
-            </Tooltip>
-
-            <Tooltip
-              text="Browse series catalog & batch scrape multiple chapters"
-              placement="bottom"
-              offset={10}
-              disabled={isScraping}
-            >
-              <button
-                type="button"
-                onClick={handleOpenChapterScraperClick}
-                disabled={!targetUrl.trim() || isScraping}
-                className={`btn-primary group relative w-full justify-center px-5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:pointer-events-none disabled:cursor-not-allowed flex items-center gap-2.5 ${
-                  isScraping ? "cursor-wait" : "cursor-pointer"
-                } ${
-                  separatedData?.is_series_url && !separatedData?.is_chapter_url
-                    ? "border-[#3B82F6]/60 shadow-[0_0_15px_rgba(59,130,246,0.22)]"
-                    : ""
-                }`}
-                aria-label="Import Chapter Scraper"
-              >
-                <Zap className="h-4 w-4 text-white transition-transform duration-200 group-hover:scale-110" />
-                <span>Import Chapter Scraper</span>
-              </button>
-            </Tooltip>
+      {/* ── Status / Validation Row ── */}
+      <div className="h-7 flex items-center">
+        {hasValidationError ? (
+          <div className="flex items-center gap-2 text-amber-400 text-xs font-medium">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span className="leading-tight">{urlValidation?.error}</span>
           </div>
+        ) : isValid ? (
+          <div className="flex items-center gap-2 text-emerald-400 text-xs font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+            <span>Valid chapter URL detected</span>
+          </div>
+        ) : targetUrl.trim() ? (
+          <div className="flex items-center gap-2 text-neutral-500 text-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-neutral-600 shrink-0" />
+            <span>Checking URL…</span>
+          </div>
+        ) : (
+          <span className="text-[11px] text-neutral-600">
+            Supports Webtoons, MangaDex, Naver, Tapas, Bato.to, Asura, Flame Comics &amp; more
+          </span>
         )}
       </div>
+
+      {/* ── Action Buttons Row ── */}
+      {actionSlot || (
+        <div className="grid grid-cols-2 gap-3 w-full">
+          <Tooltip
+            text={
+              hasValidationError
+                ? urlValidation?.error || "Please enter a valid chapter viewer link"
+                : "Extract and import panel images directly from this chapter URL"
+            }
+            placement="top"
+            offset={8}
+            disabled={isScraping}
+          >
+            <button
+              type="button"
+              onClick={handleImportClick}
+              disabled={isScraping || !targetUrl.trim() || hasValidationError}
+              className={`btn-primary w-full justify-center px-4 py-3 rounded-xl text-sm font-bold shadow-md disabled:opacity-35 disabled:pointer-events-none flex items-center gap-2 ${
+                isScraping ? "cursor-wait" : "cursor-pointer"
+              }`}
+              aria-label="Import Chapter Images"
+            >
+              {isScraping ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-white" />
+                  <span>Extracting…</span>
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="h-4 w-4 text-white" />
+                  <span>Import Chapter Images</span>
+                </>
+              )}
+            </button>
+          </Tooltip>
+
+          <Tooltip
+            text="Browse series catalog & batch scrape multiple chapters"
+            placement="top"
+            offset={8}
+            disabled={isScraping}
+          >
+            <button
+              type="button"
+              onClick={handleOpenChapterScraperClick}
+              disabled={!targetUrl.trim() || isScraping}
+              className={`btn-primary w-full justify-center px-4 py-3 rounded-xl text-sm font-bold shadow-md disabled:opacity-35 disabled:pointer-events-none flex items-center gap-2 ${
+                isScraping ? "cursor-wait" : "cursor-pointer"
+              }`}
+              aria-label="Import Chapter Scraper"
+            >
+              <Zap className="h-4 w-4 text-white" />
+              <span>Import Chapter Scraper</span>
+            </button>
+          </Tooltip>
+        </div>
+      )}
 
       {/* Options Menu Portal (Unclipped by any parent overflow) */}
       {menuAnchor &&

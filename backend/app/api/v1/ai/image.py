@@ -291,34 +291,16 @@ async def analyze_panels(
             overall_scene_summary = batch_res.get("overall_scene_summary", "")
             results.extend(batch_res.get("results", []))
         except Exception as e:
-            logger.warning(f"[AI Analysis] Full sequence batch failed: {e}. Falling back to single-panel analysis.")
-            for panel_idx, panel in enumerate(body.panels):
-                panel_voice = getattr(panel, "voice", None) or body.voice
-                panel_context = getattr(panel, "story_context", None)
-                try:
-                    res = await facade_analyze_image(
-                        url=panel.url,
-                        model=body.model,
-                        voice=panel_voice,
-                        narration_style=body.narrationStyle,
-                        user_keys=user_api_key,
-                        story_context=panel_context,
-                        story_memory=rolling_memory,
-                        panel_index=panel_idx,
-                        generate_audio=should_gen_audio,
-                        generate_dialogue_audio=gen_dialogue_audio,
-                        generate_narrative_audio=gen_narrative_audio,
-                    )
-                    if res.get("story_memory"):
-                        rolling_memory = res["story_memory"]
-                    results.append({"id": panel.id, "url": panel.url, **res})
-                except Exception as err:
-                    results.append({
-                        "id": panel.id,
-                        "url": panel.url,
-                        "success": False,
-                        "error": str(err),
-                    })
+            logger.error(f"[AI Analysis] Full sequence batch failed: {e}. Preserving unified endpoint execution without 1-by-1 fallback loops.")
+            for panel in body.panels:
+                p_id = getattr(panel, "id", None) if not isinstance(panel, dict) else panel.get("id")
+                p_url = getattr(panel, "url", None) if not isinstance(panel, dict) else panel.get("url")
+                results.append({
+                    "id": p_id,
+                    "url": p_url,
+                    "success": False,
+                    "error": str(e),
+                })
 
     results = _attach_narratives_to_results(results)
     if current_user and any(item.get("success") for item in results):

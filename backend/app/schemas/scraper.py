@@ -380,6 +380,8 @@ class SeparateUrlResponse(BaseModel):
     target_adapter: Optional[str] = None
     recommended_action: str = "import_chapter"
     supported_actions: List[str] = Field(default_factory=lambda: ["import_chapter", "import_episodes", "batch_scrape"])
+    is_valid_chapter: Optional[bool] = None
+    validation_error: Optional[str] = None
 
 
 class SaveScrapedImagesRequest(BaseModel):
@@ -395,7 +397,7 @@ class ScrapeEpisodesRequest(BaseModel):
     title_no: Optional[str] = None
     max_episodes: Optional[int] = None
     page: Optional[int] = 1
-    per_page: Optional[int] = 100
+    per_page: Optional[int] = None
     language: Optional[str] = "en"
     sort_by: Optional[str] = "latest"
     include_ratings: Optional[bool] = True

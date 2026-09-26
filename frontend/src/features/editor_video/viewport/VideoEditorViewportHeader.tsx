@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Sparkles, Save, Video, ZoomIn, ZoomOut, Tv } from "lucide-react";
+import { Sparkles, Save, Video, ZoomIn, ZoomOut, Tv, Download } from "lucide-react";
 import MetadataPanel from "@/shared/ui/video/MetadataPanel";
 
 export interface VideoEditorViewportHeaderProps {
@@ -218,6 +218,22 @@ export const VideoEditorViewportHeader: React.FC<
                 : "Export Video"}
             </span>
           </button>
+        )}
+
+        {videoUrl && (
+          <a
+            href={videoUrl}
+            download={seriesTitle ? `${seriesTitle.replace(/[^a-zA-Z0-9_-]/g, "_")}_video.mp4` : "video.mp4"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-7 px-3 rounded-lg border border-emerald-500/40 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1 whitespace-nowrap transition cursor-pointer active:scale-95 shadow-sm shadow-emerald-500/25"
+            title="Download compiled MP4 video to your computer"
+          >
+            <Download className="h-3 w-3" />
+            <span className={isNarrow ? "hidden" : "inline"}>
+              {isCompact ? "MP4" : "Download MP4"}
+            </span>
+          </a>
         )}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { GeneratedPanel } from "@/types";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
@@ -45,6 +45,8 @@ export function useAutoSave(state?: AutoSaveState, debounceMs = 1500) {
   void debounceMs;
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const isDirty = useProjectStore((s) => s.isDirty);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   const saveProject = useCallback(
     async (
@@ -59,24 +61,30 @@ export function useAutoSave(state?: AutoSaveState, debounceMs = 1500) {
       void payloadOverrides;
       setSaveStatus("saving");
       try {
-        const fetchClient = overrideFetch || state?.fetchWithInterceptor;
+        const fetchClient =
+          overrideFetch || stateRef.current?.fetchWithInterceptor;
 
-        // Ensure state.scrapedImages (e.g. all 127 imported frames) is synced to activeProjectData before saving
+        // Ensure activeProjectData retains its own scrapedImages and only backfills if currently empty
         const curData = useProjectStore.getState().activeProjectData;
-        if (state?.scrapedImages && state.scrapedImages.length > 0 && curData) {
-          if (
-            !curData.scrapedImages ||
-            curData.scrapedImages.length !== state.scrapedImages.length
-          ) {
-            useProjectStore.getState().setActiveProject({
-              ...curData,
-              scrapedImages: state.scrapedImages,
-              project: {
-                ...curData.project,
-                imported_assets_count: state.scrapedImages.length,
-              },
-            });
-          }
+        const curImgs = curData?.scrapedImages;
+        const localImgs = stateRef.current?.scrapedImages;
+        const localProjId = stateRef.current?.projectId;
+
+        if (
+          curData &&
+          (!curImgs || curImgs.length === 0) &&
+          localImgs &&
+          localImgs.length > 0 &&
+          (!localProjId || localProjId === curData.project.project_id)
+        ) {
+          useProjectStore.getState().setActiveProject({
+            ...curData,
+            scrapedImages: localImgs,
+            project: {
+              ...curData.project,
+              imported_assets_count: localImgs.length,
+            },
+          });
         }
 
         const success = await useProjectStore

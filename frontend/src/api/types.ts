@@ -120,6 +120,8 @@ export interface ScraperSeriesInfo {
 }
 
 export interface ScraperChapterInfo {
+  episode?: string;
+  cover_image?: string;
   number?: number | string;
   title?: string;
   url?: string;

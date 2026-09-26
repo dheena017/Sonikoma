@@ -380,7 +380,7 @@ async def scrape_series_chapters_advanced(
     max_episodes: Optional[int] = None,
     max_chapters: Optional[int] = None,
     page: int = 1,
-    per_page: int = 100,
+    per_page: Optional[int] = None,
     include_ratings: bool = True,
     sort_by: str = "latest",
     bypass_cache: bool = False
@@ -403,15 +403,18 @@ async def scrape_series_chapters_advanced(
         chapters = chapters[:limit]
 
     total_chapters = len(chapters)
-    if not per_page or per_page <= 0:
-        per_page = total_chapters if total_chapters > 0 else 1
-
-    total_pages = max(1, (total_chapters + per_page - 1) // per_page)
-    page = max(1, min(page, total_pages))
-
-    start_idx = (page - 1) * per_page
-    end_idx = start_idx + per_page
-    paginated_chapters = chapters[start_idx:end_idx]
+    if per_page is None or per_page <= 0:
+        paginated_chapters = chapters
+        total_pages = 1
+        page = 1
+        page_size = total_chapters
+    else:
+        page_size = per_page
+        total_pages = max(1, (total_chapters + page_size - 1) // page_size)
+        page = max(1, min(page, total_pages))
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+        paginated_chapters = chapters[start_idx:end_idx]
 
     result["chapters"] = paginated_chapters
     result["total_chapters"] = total_chapters
@@ -419,11 +422,11 @@ async def scrape_series_chapters_advanced(
     result.pop("total_episodes", None)
     result["pagination"] = {
         "page": page,
-        "per_page": per_page,
+        "per_page": page_size,
         "total_pages": total_pages,
         "total_chapters": total_chapters,
-        "has_next": page < total_pages,
-        "has_prev": page > 1
+        "has_next": (page < total_pages) if per_page else False,
+        "has_prev": (page > 1) if per_page else False
     }
     result["sort_by"] = sort_by
     return result

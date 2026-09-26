@@ -34,6 +34,9 @@ def parse_simple_yaml(text: str) -> dict:
     return result
 
 
+import json
+
+
 def extract_json(text: str) -> str:
     """Extracts raw JSON blocks wrapped in markdown or matching brackets."""
     match = re.search(r"```json\s*(.*?)\s*```", text, re.DOTALL | re.IGNORECASE)
@@ -65,6 +68,78 @@ def extract_json(text: str) -> str:
     if start != -1 and end != -1 and start < end:
         return text[start:end+1].strip()
     return text.strip()
+
+
+def robust_parse_json(text: Any) -> dict:
+    """
+    Robust JSON parser for LLM outputs.
+    - Handles direct JSON strings and dicts
+    - Strips markdown code fences
+    - Auto-repairs truncated JSON (unterminated strings, unclosed brackets)
+    - Fallback regex extractor for panels array if outer structure was truncated
+    """
+    if not text:
+        return {}
+    if isinstance(text, dict):
+        return text
+    if not isinstance(text, str):
+        try:
+            return json.loads(str(text))
+        except Exception:
+            return {}
+
+    cleaned = text.strip()
+
+    # 1. Direct parse attempt
+    try:
+        data = json.loads(cleaned)
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+
+    # 2. Extract JSON block from markdown fences
+    extracted = extract_json(cleaned)
+    try:
+        data = json.loads(extracted)
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+
+    # 3. Handle unclosed quotes and brackets (repair truncated JSON)
+    trimmed = extracted.rstrip(", \r\n\t")
+    quote_candidates = ["", '"']
+    bracket_candidates = ["}]}", "]}", "}", "}}", "]"]
+    for q in quote_candidates:
+        for b in bracket_candidates:
+            try:
+                candidate = trimmed + q + b
+                data = json.loads(candidate)
+                if isinstance(data, dict):
+                    return data
+            except Exception:
+                pass
+
+    # 4. Fallback: regex search for individual panels inside array
+    panel_pattern = re.compile(r'\{[^{}]*"panel_index"\s*:\s*\d+.*?(?:\}\s*,|\}\s*\]|\}$)', re.DOTALL)
+    panel_matches = panel_pattern.findall(cleaned)
+    extracted_panels = []
+    for pm in panel_matches:
+        pm_clean = pm.rstrip(",]").strip()
+        if not pm_clean.endswith("}"):
+            pm_clean += "}"
+        try:
+            p_obj = json.loads(pm_clean)
+            if isinstance(p_obj, dict):
+                extracted_panels.append(p_obj)
+        except Exception:
+            pass
+
+    if extracted_panels:
+        return {"panels": extracted_panels}
+
+    return {}
 
 
 def resolve_api_key(provider: str, user_api_key: Any = None, user_keys: Optional[dict] = None) -> Optional[str]:

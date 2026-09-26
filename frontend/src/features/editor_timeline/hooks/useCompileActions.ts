@@ -57,6 +57,7 @@ export function useCompileActions({
   const [isZipping, setIsZipping] = useState<boolean>(false);
   const abortSignalRef = React.useRef({ aborted: false });
   const abortControllerRef = React.useRef<AbortController | null>(null);
+  const isAnalyzingRef = React.useRef(false); // Sync guard to prevent double-fire
 
   const getAudioFlags = () => {
     const genDiag =
@@ -365,6 +366,8 @@ export function useCompileActions({
     selectedIds: (number | string)[]
   ) => {
     if (selectedIds.length === 0) return;
+    if (isAnalyzingRef.current) return; // Sync guard: prevent double-fire before state update
+    isAnalyzingRef.current = true;
     setIsAnalyzingSelected(true);
     const activeModel = selectedModel || undefined;
     const modelDisplay = activeModel
@@ -537,6 +540,7 @@ export function useCompileActions({
         )
       );
     } finally {
+      isAnalyzingRef.current = false; // Release sync guard
       setIsAnalyzingSelected(false);
       setPanels((prev) =>
         prev.map((p) =>
@@ -548,6 +552,8 @@ export function useCompileActions({
 
   const handleAnalyzeAllPanels = async () => {
     if (panels.length === 0) return;
+    if (isAnalyzingRef.current) return; // Sync guard: prevent double-fire before state update
+    isAnalyzingRef.current = true;
     setIsAnalyzingAll(true);
     abortSignalRef.current.aborted = false;
     const activeModel = selectedModel || undefined;
@@ -702,6 +708,7 @@ export function useCompileActions({
         }
       }
     } finally {
+      isAnalyzingRef.current = false; // Release sync guard
       setIsAnalyzingAll(false);
       setPanels((prev) => {
         if (!prev.some((p) => p.isAnalyzing)) return prev;
@@ -750,21 +757,37 @@ export function useCompileActions({
       ]);
     }
 
+    const flags = getAudioFlags();
+    // Enforce strictly one mode: Narrative ON (default) or Dialogue ON (never both)
+    const useNarrative = flags.generate_narrative_audio !== false;
+    const useDialogue = !useNarrative && Boolean(flags.generate_dialogue_audio);
+
     try {
       const batchPayload = {
         voice: voiceToUse,
         speech_rate: speechRate,
         speech_pitch: speechPitch,
-        generate_dialogue_audio: true,
-        generate_narrative_audio: true,
-        panels: targetPanels.map((p) => ({
+        generate_dialogue_audio: useDialogue,
+        generate_narrative_audio: useNarrative,
+        panels: targetPanels.map((p, idx) => ({
           id: p.id,
+          panel_index: idx + 1,
+          image_url: p.image_url || (p as any).url || "",
           text: (p.speech_text || (p as any).dialogueSubtitleText || "").trim(),
           narrative: (p.narrative || "").trim(),
           voice: (p as any).voice || voiceToUse,
           target_duration: Number(p.duration) > 0 ? Number(p.duration) : 4.0,
+          audio_url: p.audio_url || null,
+          narrative_audio_url: p.narrative_audio_url || null,
         })),
       };
+
+      if (setConsoleLogs) {
+        setConsoleLogs((prev) => [
+          `[Audio Endpoint] POST /api/v1/audio/synthesize-all-panel-audio -> Sending ${targetPanels.length} panels...`,
+          ...prev,
+        ]);
+      }
 
       const res = await (api as any).batchGenerateAudio(
         activeFetch,
@@ -777,8 +800,9 @@ export function useCompileActions({
         );
         let updatedCount = 0;
 
-        setPanels((prev) =>
-          prev.map((p) => {
+        let updatedPanelsList: any[] = [];
+        setPanels((prev) => {
+          updatedPanelsList = prev.map((p) => {
             const match = resultMap.get(String(p.id));
             if (!match) return p;
 
@@ -795,8 +819,23 @@ export function useCompileActions({
               duration: actualDur > 0 ? actualDur : p.duration,
               timingSec: actualDur > 0 ? actualDur : p.duration,
             };
-          })
-        );
+          });
+          return updatedPanelsList;
+        });
+
+        // Sync with active project store so audio URLs persist into project state
+        useProjectStore.setState((state) => {
+          if (state.activeProjectData) {
+            return {
+              ...state,
+              activeProjectData: {
+                ...state.activeProjectData,
+                panels: updatedPanelsList,
+              },
+            };
+          }
+          return state;
+        });
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [

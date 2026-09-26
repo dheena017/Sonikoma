@@ -54,8 +54,16 @@ export const QuickVideoPreview: React.FC<QuickVideoPreviewProps> = ({
   advancedSettingsProps,
 }) => {
   const [monitorTab, setMonitorTab] = useState<"timeline" | "video">(
-    "timeline"
+    advancedSettingsProps?.activePreviewTab || (videoUrl ? "video" : "timeline")
   );
+
+  // Automatically switch the player to the compiled video when videoUrl becomes available
+  React.useEffect(() => {
+    if (videoUrl) {
+      setMonitorTab("video");
+    }
+  }, [videoUrl]);
+
   const finalExport = onExportVideo || handleRenderFinalVideo || onExport;
   const finalSave = onSave || handleSave;
 

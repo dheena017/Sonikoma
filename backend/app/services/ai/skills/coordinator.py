@@ -138,7 +138,16 @@ async def execute_provider_call(
                 "or set GEMINI_API_KEY in your backend .env file."
             )
 
-        config_args = {"max_output_tokens": 8192}
+        # Use maximum output window (65536 for Gemini 2.0 / 2.5 / 3.5) to prevent truncation of large sequences
+        is_lite = "-lite" in clean_model_id.lower()
+        config_args: dict[str, Any] = {"max_output_tokens": 65536 if not is_lite else 8192}
+        if not is_lite and types and hasattr(types, "ThinkingConfig"):
+            try:
+                # Disable thinking budget (0 = DISABLED) so 100% of tokens and compute are dedicated to output generation
+                config_args["thinking_config"] = types.ThinkingConfig(thinking_budget=0)
+            except Exception as e:
+                logger.debug(f"Could not set thinking_config: {e}")
+
         schema = getattr(skill, "response_schema", None) if skill else None
         if schema:
             config_args["response_mime_type"] = "application/json"
@@ -196,7 +205,21 @@ async def execute_provider_call(
                 max_attempts=max_retries
             )
         except Exception as gemini_err:
-            raise RuntimeError(f"Gemini API request failed for model '{effective_model_id}': {gemini_err}")
+            err_str = str(gemini_err).lower()
+            if ("invalid argument" in err_str or "invalid_argument" in err_str or "400" in err_str or "thinking" in err_str) and "thinking_config" in config_args and types:
+                logger.info(f"Model '{effective_model_id}' failed with thinking_config, retrying without thinking_config...")
+                config_args.pop("thinking_config", None)
+                fallback_cfg = types.GenerateContentConfig(**config_args)
+                response = await call_gemini_with_retry(
+                    lambda: client_to_use.models.generate_content(
+                        model=effective_model_id,
+                        contents=contents,
+                        config=fallback_cfg
+                    ),
+                    max_attempts=max_retries
+                )
+            else:
+                raise RuntimeError(f"Gemini API request failed for model '{effective_model_id}': {gemini_err}")
 
         if not response:
             skill_name = getattr(skill, "name", "ai_capability") if skill else "ai_capability"
@@ -211,7 +234,17 @@ async def execute_provider_call(
             return raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
-        raw_text = response.text or "{}"
+        raw_text = ""
+        if hasattr(response, "text") and response.text:
+            raw_text = response.text
+        elif hasattr(response, "candidates") and response.candidates:
+            for candidate in response.candidates:
+                if candidate.content and candidate.content.parts:
+                    for part in candidate.content.parts:
+                        if hasattr(part, "text") and part.text:
+                            raw_text += part.text
+        if not raw_text:
+            raw_text = "{}"
 
         try:
             parsed_json = json.loads(raw_text)

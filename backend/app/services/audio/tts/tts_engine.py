@@ -214,6 +214,7 @@ async def generate_panel_audio(
     force_duration: bool = False,
     speech_rate: float = 1.0,
     speech_pitch: float = 1.0,
+    context_info: Optional[str] = None,
 ) -> Tuple[str, float]:
     parsed_dialogues: List[str] = []
     for item in dialogue_list:
@@ -269,74 +270,71 @@ async def generate_panel_audio(
                 silence_seg.export(temp_file_path, format="mp3")
 
         def process_audio_sync() -> float:
-            from pydub.effects import normalize, compress_dynamic_range, high_pass_filter, low_pass_filter
-            combined_audio: AudioSegment = AudioSegment.empty()
-            for idx, file_path in enumerate(temp_files):
-                if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-                    continue
+            from pydub.effects import normalize
+            # Fast path: single segment without forced duration can bypass re-encoding
+            valid_files = [f for f in temp_files if os.path.exists(f) and os.path.getsize(f) > 0]
+            if not valid_files:
+                final_audio = AudioSegment.silent(duration=target_duration_ms)
+                if os.path.dirname(output_path):
+                    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                final_audio.export(output_path, format="mp3")
+                return target_duration
 
-                segment = cast(AudioSegment, AudioSegment.from_file(file_path, format="mp3"))
+            if len(valid_files) == 1 and not force_duration:
+                if os.path.dirname(output_path):
+                    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+                shutil.copy2(valid_files[0], output_path)
                 try:
-                    # 1. Clean sub-bass mic rumble (< 75 Hz)
-                    mastered = high_pass_filter(segment, 75)
-                    # 2. Smooth digital harshness (> 14500 Hz)
-                    mastered = low_pass_filter(mastered, 14500)
-                    # 3. Dynamic compression (gives broadcast warmth & presence)
-                    mastered = compress_dynamic_range(mastered, threshold=-18.0, ratio=2.5, attack=5.0, release=50.0)
-                    # 4. Studio peak normalization
-                    mastered = normalize(mastered, headroom=0.3)
-                    # 5. Smooth micro-fades to eliminate click artifacts
-                    mastered = mastered.fade_in(15).fade_out(25)
-                except Exception as master_err:
-                    logger.debug(f"[Mastering Fallback] {master_err}")
-                    mastered = segment
+                    seg = AudioSegment.from_file(output_path, format="mp3")
+                    return len(seg) / 1000.0
+                except Exception:
+                    return target_duration
 
-                normalized_seg: AudioSegment = mastered.set_frame_rate(44100).set_channels(2)
-
-                # Add natural 20ms lead-in and 40ms lead-out padding for fluid speech delivery
-                padded_seg = AudioSegment.silent(duration=20) + normalized_seg + AudioSegment.silent(duration=40)
-                combined_audio += padded_seg
-                if idx < len(temp_files) - 1:
-                    # Natural breathing gap between dialogue bubbles/sentences
+            # Multi-segment or force_duration: concatenate cleanly without unvectorized CPU-locking loops
+            combined_audio: AudioSegment = AudioSegment.empty()
+            for idx, file_path in enumerate(valid_files):
+                segment = cast(AudioSegment, AudioSegment.from_file(file_path, format="mp3"))
+                # Light fade to prevent clicks
+                mastered = segment.fade_in(10).fade_out(15)
+                combined_audio += mastered
+                if idx < len(valid_files) - 1:
                     combined_audio += AudioSegment.silent(duration=180)
 
             current_duration_ms: int = len(combined_audio)
-
             final_audio: AudioSegment
             if current_duration_ms == 0:
                 final_audio = AudioSegment.silent(duration=target_duration_ms)
-            elif force_duration:
-                if current_duration_ms > target_duration_ms and target_duration_ms > 0:
+            elif force_duration and target_duration_ms > 0:
+                if current_duration_ms > target_duration_ms:
                     playback_speed = float(current_duration_ms) / float(target_duration_ms)
-                    if playback_speed > 1.0:
-                        try:
-                            final_audio = cast(AudioSegment, speedup(combined_audio, playback_speed))
-                        except Exception:
-                            final_audio = combined_audio
-                    else:
+                    try:
+                        final_audio = cast(AudioSegment, speedup(combined_audio, playback_speed))
+                    except Exception:
                         final_audio = combined_audio
                     final_audio = cast(AudioSegment, final_audio[:target_duration_ms])
                 else:
                     silence_needed_ms = target_duration_ms - current_duration_ms
-                    silence_padding = AudioSegment.silent(duration=silence_needed_ms)
-                    final_audio = cast(AudioSegment, combined_audio + silence_padding)
-                    final_audio = cast(AudioSegment, final_audio[:target_duration_ms])
+                    final_audio = cast(AudioSegment, combined_audio + AudioSegment.silent(duration=silence_needed_ms))
             else:
-                final_audio = combined_audio
+                try:
+                    final_audio = normalize(combined_audio, headroom=0.3)
+                except Exception:
+                    final_audio = combined_audio
 
             final_duration_ms: int = len(final_audio)
-
             if os.path.dirname(output_path):
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
             final_audio.export(output_path, format="mp3")
             return final_duration_ms / 1000.0
 
         actual_duration = await asyncio.to_thread(process_audio_sync)
-        logger.info(f"[Audio Engine] Voice generated: {actual_voice} ({actual_duration:.1f}s audio for {len(parsed_dialogues)} dialogue segment{'s' if len(parsed_dialogues) != 1 else ''})")
+        ctx_prefix = f"[{context_info}] " if context_info else ""
+        logger.info(f"[Audio Engine] {ctx_prefix}Voice generated: {actual_voice} ({actual_duration:.1f}s audio for {len(parsed_dialogues)} dialogue segment{'s' if len(parsed_dialogues) != 1 else ''})")
         return output_path, actual_duration
 
     except Exception as general_err:
-        logger.error(f"[Audio Engine] Voice generation failed: {general_err}")
+        ctx_prefix = f"[{context_info}] " if context_info else ""
+        logger.error(f"[Audio Engine] {ctx_prefix}Voice generation failed: {general_err}")
         try:
             if os.path.dirname(output_path):
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -355,12 +353,13 @@ async def generate_panel_audio(
 
 
 async def generate_tts_audio(
-    dialogue_list: List[Dict[str, Any]],
+    dialogue_list: List[Any],
     target_duration: float,
-    voice: str,
+    voice: Optional[str] = "en-US-GuyNeural",
     speech_rate: float = 1.0,
     speech_pitch: float = 1.0,
-    return_base64: bool = True
+    return_base64: bool = True,
+    context_info: Optional[str] = None,
 ) -> Dict[str, Any]:
     with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
         output_path = tmp.name
@@ -372,7 +371,8 @@ async def generate_tts_audio(
             output_path=output_path,
             voice=voice,
             speech_rate=speech_rate,
-            speech_pitch=speech_pitch
+            speech_pitch=speech_pitch,
+            context_info=context_info,
         )
 
         if not os.path.exists(saved_path) or os.path.getsize(saved_path) == 0:

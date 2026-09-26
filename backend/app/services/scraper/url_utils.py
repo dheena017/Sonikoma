@@ -123,6 +123,20 @@ class UniversalUrlSeparator:
 
             # Specialized Platform Parent Series Resolvers
             netloc_lower = parsed.netloc.lower()
+            if "webtoons.com" in netloc_lower or "webtoon.com" in netloc_lower:
+                t_no = query_dict.get("title_no", [""])[0] or query_dict.get("titleNo", [""])[0]
+                lower_segs = [s.lower() for s in path_segments]
+                if "viewer" in lower_segs:
+                    v_idx = lower_segs.index("viewer")
+                    if v_idx >= 2:
+                        series_parts = path_segments[:v_idx - 1]
+                        q_str = f"?title_no={t_no}" if t_no else ""
+                        return f"{parsed.scheme}://{parsed.netloc}/{'/'.join(series_parts)}/list{q_str}"
+                elif "list" in lower_segs:
+                    clean_query = {k: v for k, v in query_dict.items() if k.lower() not in ("page", "episode_no")}
+                    q_str = f"?{urlencode(clean_query, doseq=True)}" if clean_query else ""
+                    return f"{parsed.scheme}://{parsed.netloc}{parsed.path}{q_str}"
+
             if "toomics.com" in netloc_lower:
                 if "/webtoon/detail/" in parsed.path:
                     m_toon = re.search(r"/toon/(\d+)", parsed.path)
@@ -274,6 +288,299 @@ class UniversalUrlSeparator:
         except Exception:
             domain_parts = [p for p in domain.split(".") if p not in ("com", "net", "org", "to", "io", "app", "me", "co", "xyz")]
             platform_name = domain_parts[0] if domain_parts else "generic"
+
+        # Webtoons Platform Specialized Extraction
+        if "webtoons.com" in domain or "webtoon.com" in domain:
+            title_no = query.get("title_no", [""])[0] or query.get("titleNo", [""])[0]
+            episode_no = query.get("episode_no", [""])[0] or query.get("episodeNo", [""])[0]
+            lower_segs = [s.lower() for s in path_segments]
+            
+            is_viewer = "viewer" in lower_segs or bool(episode_no)
+            is_list = "list" in lower_segs
+            
+            if is_viewer and len(path_segments) >= 3:
+                # Expected path: /{lang}/{genre}/{series_slug}/{episode_slug}/viewer
+                v_idx = lower_segs.index("viewer") if "viewer" in lower_segs else len(path_segments)
+                # When viewer is at the end, series_slug is at v_idx - 2, episode_slug is at v_idx - 1
+                series_slug = path_segments[v_idx - 2] if v_idx >= 2 else path_segments[0]
+                chapter_slug = path_segments[v_idx - 1] if v_idx >= 1 else f"episode-{episode_no}"
+                
+                ch_num = episode_no
+                if not ch_num and chapter_slug:
+                    m = re.match(r"^(\d+)", chapter_slug)
+                    if m:
+                        ch_num = m.group(1)
+                
+                series_parts = path_segments[:v_idx - 1]
+                q_str = f"?title_no={title_no}" if title_no else ""
+                parent_series_url = f"{parsed.scheme}://{parsed.netloc}/{'/'.join(series_parts)}/list{q_str}"
+                
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": parent_series_url,
+                    "parent_series_url": parent_series_url,
+                    "chapter_url": canonical,
+                    "is_chapter_url": True,
+                    "is_chapter": True,
+                    "is_series_url": False,
+                    "is_series": False,
+                    "platform": "webtoons",
+                    "domain": domain,
+                    "title_slug": series_slug,
+                    "title_id": title_no or series_slug,
+                    "series_slug": series_slug,
+                    "series_id": title_no or series_slug,
+                    "chapter_slug": chapter_slug,
+                    "chapter_number": ch_num,
+                    "title_no": title_no or None,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "import_chapter",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"],
+                    "is_valid_chapter": True,
+                    "validation_error": None
+                }
+            elif is_list and len(path_segments) >= 2:
+                l_idx = lower_segs.index("list")
+                series_slug = path_segments[l_idx - 1] if l_idx >= 1 else "webtoon"
+                clean_query = {k: v for k, v in query.items() if k.lower() not in ("page", "episode_no")}
+                q_str = f"?{urlencode(clean_query, doseq=True)}" if clean_query else ""
+                clean_series_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}{q_str}"
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": clean_series_url,
+                    "series_url": clean_series_url,
+                    "parent_series_url": clean_series_url,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_chapter": False,
+                    "is_series_url": True,
+                    "is_series": True,
+                    "platform": "webtoons",
+                    "domain": domain,
+                    "title_slug": series_slug,
+                    "title_id": title_no or series_slug,
+                    "series_slug": series_slug,
+                    "series_id": title_no or series_slug,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": title_no or None,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "import_episodes",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"],
+                    "is_valid_chapter": False,
+                    "validation_error": "Series catalog link detected. Please paste a specific episode / viewer URL to scrape chapter images."
+                }
+            else:
+                return {
+                    "success": False,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": None,
+                    "parent_series_url": None,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_chapter": False,
+                    "is_series_url": False,
+                    "is_series": False,
+                    "platform": "webtoons",
+                    "domain": domain,
+                    "title_slug": None,
+                    "title_id": None,
+                    "series_slug": None,
+                    "series_id": None,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": None,
+                    "target_adapter": "WebtoonsAdapter",
+                    "recommended_action": "none",
+                    "supported_actions": [],
+                    "is_valid_chapter": False,
+                    "validation_error": "Please provide a complete Webtoons episode viewer URL (e.g. webtoons.com/.../viewer?title_no=...&episode_no=...)."
+                }
+
+        # MangaDex Platform Specialized Extraction
+        if "mangadex.org" in domain:
+            lower_segs = [s.lower() for s in path_segments]
+            if "chapter" in lower_segs:
+                ch_idx = lower_segs.index("chapter")
+                ch_id = path_segments[ch_idx + 1] if ch_idx + 1 < len(path_segments) else None
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "parent_series_url": canonical,
+                    "chapter_url": canonical,
+                    "is_chapter_url": True,
+                    "is_chapter": True,
+                    "is_series_url": False,
+                    "is_series": False,
+                    "platform": "mangadex",
+                    "domain": domain,
+                    "title_slug": ch_id,
+                    "title_id": ch_id,
+                    "series_slug": ch_id,
+                    "series_id": ch_id,
+                    "chapter_slug": ch_id,
+                    "chapter_number": None,
+                    "title_no": ch_id,
+                    "target_adapter": "GenericAdaptiveAdapter",
+                    "recommended_action": "import_chapter",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"],
+                    "is_valid_chapter": True,
+                    "validation_error": None
+                }
+            elif "title" in lower_segs:
+                t_idx = lower_segs.index("title")
+                title_id = path_segments[t_idx + 1] if t_idx + 1 < len(path_segments) else None
+                title_slug = path_segments[t_idx + 2] if t_idx + 2 < len(path_segments) else title_id
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "parent_series_url": canonical,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_chapter": False,
+                    "is_series_url": True,
+                    "is_series": True,
+                    "platform": "mangadex",
+                    "domain": domain,
+                    "title_slug": title_slug,
+                    "title_id": title_id,
+                    "series_slug": title_slug,
+                    "series_id": title_id,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": title_id,
+                    "target_adapter": "GenericAdaptiveAdapter",
+                    "recommended_action": "import_episodes",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"],
+                    "is_valid_chapter": False,
+                    "validation_error": "Series catalog link detected. Please paste a specific chapter reader URL."
+                }
+            else:
+                return {
+                    "success": False,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": None,
+                    "parent_series_url": None,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_chapter": False,
+                    "is_series_url": False,
+                    "is_series": False,
+                    "platform": "mangadex",
+                    "domain": domain,
+                    "title_slug": None,
+                    "title_id": None,
+                    "series_slug": None,
+                    "series_id": None,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": None,
+                    "target_adapter": "GenericAdaptiveAdapter",
+                    "recommended_action": "none",
+                    "supported_actions": [],
+                    "is_valid_chapter": False,
+                    "validation_error": "Please provide a complete MangaDex chapter URL (e.g. mangadex.org/chapter/{uuid})."
+                }
+
+        # Bato.to Platform Specialized Extraction
+        if "bato.to" in domain:
+            lower_segs = [s.lower() for s in path_segments]
+            if "chapter" in lower_segs:
+                c_idx = lower_segs.index("chapter")
+                ch_id = path_segments[c_idx + 1] if c_idx + 1 < len(path_segments) else None
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "parent_series_url": canonical,
+                    "chapter_url": canonical,
+                    "is_chapter_url": True,
+                    "is_chapter": True,
+                    "is_series_url": False,
+                    "is_series": False,
+                    "platform": "bato",
+                    "domain": domain,
+                    "title_slug": ch_id,
+                    "title_id": ch_id,
+                    "series_slug": ch_id,
+                    "series_id": ch_id,
+                    "chapter_slug": ch_id,
+                    "chapter_number": None,
+                    "title_no": ch_id,
+                    "target_adapter": "BatoAdapter",
+                    "recommended_action": "import_chapter",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"],
+                    "is_valid_chapter": True,
+                    "validation_error": None
+                }
+            elif any(k in lower_segs for k in ("title", "series")):
+                matched_k = next(k for k in ("title", "series") if k in lower_segs)
+                idx = lower_segs.index(matched_k)
+                title_id = path_segments[idx + 1] if idx + 1 < len(path_segments) else None
+                title_slug = path_segments[idx + 2] if idx + 2 < len(path_segments) else title_id
+                return {
+                    "success": True,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": canonical,
+                    "parent_series_url": canonical,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_chapter": False,
+                    "is_series_url": True,
+                    "is_series": True,
+                    "platform": "bato",
+                    "domain": domain,
+                    "title_slug": title_slug,
+                    "title_id": title_id,
+                    "series_slug": title_slug,
+                    "series_id": title_id,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": title_id,
+                    "target_adapter": "BatoAdapter",
+                    "recommended_action": "import_episodes",
+                    "supported_actions": ["import_chapter", "import_episodes", "batch_scrape"],
+                    "is_valid_chapter": False,
+                    "validation_error": "Series catalog link detected. Please paste a specific chapter URL."
+                }
+            else:
+                return {
+                    "success": False,
+                    "raw_url": raw_trimmed,
+                    "canonical_url": canonical,
+                    "series_url": None,
+                    "parent_series_url": None,
+                    "chapter_url": None,
+                    "is_chapter_url": False,
+                    "is_chapter": False,
+                    "is_series_url": False,
+                    "is_series": False,
+                    "platform": "bato",
+                    "domain": domain,
+                    "title_slug": None,
+                    "title_id": None,
+                    "series_slug": None,
+                    "series_id": None,
+                    "chapter_slug": None,
+                    "chapter_number": None,
+                    "title_no": None,
+                    "target_adapter": "BatoAdapter",
+                    "recommended_action": "none",
+                    "supported_actions": [],
+                    "is_valid_chapter": False,
+                    "validation_error": "Please provide a complete Bato.to chapter reader URL (e.g. bato.to/chapter/{id})."
+                }
 
         # Toomics Platform Specialized Extraction
         if "toomics.com" in domain:
@@ -552,24 +859,34 @@ class UniversalUrlSeparator:
         series_url = cls.resolve_parent_series_url(canonical)
         chapter_url = canonical if is_chapter else None
 
-        is_series = not is_chapter or (series_url == canonical)
-
-        # Recommended action based on detected structure
-        if is_chapter:
-            recommended_action = "import_chapter"
+        is_bare = not path_segments or (len(path_segments) == 1 and path_segments[0].lower() in ("en", "kr", "jp", "cn", "fr", "es", "de", "webtoon", "manga", "comics", "home", "index"))
+        if is_bare:
+            is_chapter = False
+            is_series = False
+            is_valid_chapter = False
+            validation_error = "The URL is a homepage or directory root. Please paste a specific chapter reader URL."
+            recommended_action = "none"
+            success = False
         else:
-            recommended_action = "import_episodes"
+            is_series = (not is_chapter and bool(series_slug or series_id)) or (series_url == canonical and bool(series_slug or series_id))
+            is_valid_chapter = is_chapter and bool(chapter_slug or chapter_number or (path_segments and len(path_segments) >= 2))
+            success = is_chapter or is_series
+            validation_error = None if is_valid_chapter else ("Chapter reader URL required." if not is_series else "Series catalog link detected. Please paste a specific chapter reader URL.")
+            recommended_action = "import_chapter" if is_chapter else ("import_episodes" if is_series else "none")
 
-        supported_actions = ["import_chapter", "import_episodes", "batch_scrape"]
+        supported_actions = ["import_chapter", "import_episodes", "batch_scrape"] if (is_chapter or is_series) else []
 
         return {
-            "success": True,
+            "success": success,
             "raw_url": raw_trimmed,
             "canonical_url": canonical,
-            "series_url": series_url,
+            "series_url": series_url if (is_series or is_chapter) else None,
+            "parent_series_url": series_url if (is_series or is_chapter) else None,
             "chapter_url": chapter_url,
             "is_chapter_url": is_chapter,
+            "is_chapter": is_chapter,
             "is_series_url": is_series,
+            "is_series": is_series,
             "platform": platform_name,
             "domain": domain,
             "title_slug": series_slug,
@@ -581,7 +898,44 @@ class UniversalUrlSeparator:
             "title_no": series_id,
             "target_adapter": target_adapter_name,
             "recommended_action": recommended_action,
-            "supported_actions": supported_actions
+            "supported_actions": supported_actions,
+            "is_valid_chapter": is_valid_chapter,
+            "validation_error": validation_error
+        }
+
+    @classmethod
+    def check_url(cls, raw_url: str) -> Dict[str, Any]:
+        """
+        Validates whether raw_url is a valid, actionable comic chapter or series URL.
+        Returns a structured dictionary with validation status and error messages.
+        """
+        sep = cls.separate(raw_url)
+        is_chapter = bool(sep.get("is_chapter_url") or sep.get("is_chapter"))
+        is_series = bool(sep.get("is_series_url") or sep.get("is_series"))
+        is_valid_chapter = bool(sep.get("is_valid_chapter"))
+        platform = sep.get("platform", "generic")
+        domain = sep.get("domain", "")
+        error = sep.get("validation_error")
+
+        if not sep.get("success", False) or (not is_chapter and not is_series):
+            return {
+                "valid": False,
+                "is_chapter": False,
+                "is_series": False,
+                "is_valid_chapter": False,
+                "platform": platform,
+                "domain": domain,
+                "error": error or "The provided URL is not a recognized comic chapter or series."
+            }
+
+        return {
+            "valid": True,
+            "is_chapter": is_chapter,
+            "is_series": is_series,
+            "is_valid_chapter": is_valid_chapter,
+            "platform": platform,
+            "domain": domain,
+            "error": error
         }
 
     separate_url = separate

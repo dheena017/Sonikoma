@@ -18,7 +18,7 @@ from urllib.parse import quote
 from fastapi import APIRouter, HTTPException, Depends, Query
 
 from api.dependencies.auth import get_current_user, get_optional_current_user
-from api.v1.scraper._shared import parse_cookie_string, assert_not_blocked
+from api.v1.scraper._shared import parse_cookie_string, assert_not_blocked, validate_chapter_url
 from schemas.scraper import ScrapeChapterRequest, ChapterResult, SeparateUrlRequest
 from services.scraper.scraper_engine import AdaptiveScraperEngine
 from services.scraper.acquisition.http_page_fetcher import HttpFetcher
@@ -41,10 +41,7 @@ async def scrape_chapter_async_endpoint(
     body: ScrapeChapterRequest,
     current_user: dict = Depends(get_current_user)
 ):
-    if not body.url or not body.url.strip():
-        raise HTTPException(status_code=400, detail="Target Chapter URL is required.")
-
-    target_url = body.url.strip()
+    target_url = validate_chapter_url(body.url)
     assert_not_blocked(target_url)
     logger.info(f"[ScraperAPI] POST /chapter: url='{target_url}', force_refresh={body.force_refresh}")
 
@@ -143,10 +140,7 @@ async def scrape_chapter_sync_post(
     body: ScrapeChapterRequest,
     current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
-    if not body.url or not body.url.strip():
-        raise HTTPException(status_code=400, detail="Target Chapter URL is required.")
-
-    target_url = body.url.strip()
+    target_url = validate_chapter_url(body.url)
     assert_not_blocked(target_url)
     logger.info(f"[ScraperAPI] POST /chapter/sync: url='{target_url}'")
 
@@ -181,7 +175,9 @@ async def scrape_chapter_sync_post(
                 genre = (result.series.genres[0] if result.series and result.series.genres else "general")
                 synopsis = result.series.description if result.series and result.series.description else ""
                 author = result.series.author if result.series and result.series.author else "Unknown Author"
-                episode_str = result.chapter.title or f"Chapter {result.chapter.number or 1}" if result.chapter else "Chapter 1"
+                ch_num_val = str(result.chapter.number).replace('.0', '') if result.chapter and result.chapter.number is not None else ""
+                ch_title_val = result.chapter.title if result.chapter and result.chapter.title else ""
+                episode_str = ch_title_val or (f"Chapter {ch_num_val}" if ch_num_val else "Chapter 1")
 
                 payload = {
                     "project_id": body.project_id,
@@ -192,11 +188,14 @@ async def scrape_chapter_sync_post(
                     "genre": genre,
                     "synopsis": synopsis,
                     "episode": episode_str,
+                    "chapter_number": ch_num_val,
+                    "chapter_title": ch_title_val,
                     "url": target_url,
                     "source_url": target_url,
                     "status": "pending",
-                    "panels_count": len(img_urls),
-                    "total_panels": len(img_urls),
+                    "panels_count": 0,
+                    "total_panels": 0,
+                    "imported_assets_count": len(img_urls),
                     "audio_settings": {
                         "scraped_images": img_urls,
                         "imported_assets_count": len(img_urls),
@@ -226,10 +225,8 @@ async def scrape_chapter_sync_get(
     proxy_images: bool = Query(True, description="Proxy image URLs for hotlink bypass"),
     current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
-    if not url or not url.strip():
-        logger.warning("[ScraperAPI] GET /chapter/sync received empty URL")
-        raise HTTPException(status_code=400, detail="URL query parameter is required.")
-    target_url = url.strip()
+    target_url = validate_chapter_url(url)
+    assert_not_blocked(target_url)
     logger.info(f"[ScraperAPI] GET /chapter/sync: url='{target_url}'")
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
@@ -252,9 +249,8 @@ async def get_reader_chapter_panels_post(
     body: ScrapeChapterRequest,
     current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
-    if not body.url or not body.url.strip():
-        raise HTTPException(status_code=400, detail="Chapter URL is required.")
-    target_url = body.url.strip()
+    target_url = validate_chapter_url(body.url)
+    assert_not_blocked(target_url)
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
         bypass_cache=bool(body.force_refresh or body.bypass_cache),
@@ -289,9 +285,8 @@ async def get_reader_chapter_panels_get(
     force_refresh: bool = Query(False, description="Bypass cache"),
     current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
-    if not url or not url.strip():
-        raise HTTPException(status_code=400, detail="URL query parameter is required.")
-    target_url = url.strip()
+    target_url = validate_chapter_url(url)
+    assert_not_blocked(target_url)
     result = await AdaptiveScraperEngine.scrape_url(
         url=target_url,
         bypass_cache=force_refresh,

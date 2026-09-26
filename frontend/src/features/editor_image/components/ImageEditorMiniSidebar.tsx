@@ -118,11 +118,10 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Left edge active indicator bar */}
         <div
-          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${
-            active
+          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1 rounded-r-full transition-all duration-300 z-10 ${active
               ? "h-5 bg-[#3B82F6] opacity-100"
               : "h-0 bg-transparent opacity-0"
-          }`}
+            }`}
         />
 
         <button
@@ -139,18 +138,16 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
           aria-label={item.label}
         >
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${
-              active
+            className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200 shadow-sm ${active
                 ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white"
                 : "bg-[#1E1E1E] border border-[#2F2F2F] text-neutral-400 group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 group-hover:text-white"
-            }`}
+              }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                active
+              className={`w-[18px] h-[18px] transition-colors duration-200 ${active
                   ? "text-white"
                   : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
-              }`}
+                }`}
             />
           </div>
 
@@ -167,7 +164,7 @@ export const ImageEditorMiniSidebar: React.FC<ImageEditorMiniSidebarProps> = ({
   };
 
   return (
-    <div className="w-20 h-full flex flex-col items-center py-3 bg-neutral-950/85 border-r border-white/10 select-none shrink-0 z-30 overflow-hidden">
+    <div className="w-20 h-full flex flex-col items-center py-3 bg-[#0A0A0A]/95 border-r border-[#2F2F2F] select-none shrink-0 z-30 overflow-hidden">
       {/* Tool Icons List */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (

@@ -27,6 +27,7 @@ import CreatorGuideSection from "@/features/workspace_scraper/components/Creator
 import ProjectConfirmModal from "@/shared/ui/modal/ProjectConfirmModal";
 import type { Project } from "@/features/workspace_projects/hooks/ProjectTypes";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
+import { validateChapterUrl } from "@/shared/utils";
 
 export interface ScraperPageProps {
   [key: string]: any;
@@ -401,33 +402,19 @@ const ScraperPageInner = (props: ScraperPageProps) => {
   );
 
   const isValidUrl = (urlStr: string): boolean => {
-    if (!urlStr || !urlStr.trim()) return false;
-    try {
-      const formatted =
-        urlStr.trim().startsWith("http://") ||
-        urlStr.trim().startsWith("https://")
-          ? urlStr.trim()
-          : `https://${urlStr.trim()}`;
-      const parsed = new URL(formatted);
-      return Boolean(
-        parsed.hostname &&
-          parsed.hostname.includes(".") &&
-          parsed.hostname.split(".").every((part) => part.length > 0) &&
-          parsed.hostname.length >= 4
-      );
-    } catch {
-      return false;
-    }
+    return validateChapterUrl(urlStr).valid;
   };
 
   const handleWorkspaceImport = async () => {
     const trimmed = targetUrl.trim();
     if (!trimmed) return;
 
-    if (!isValidUrl(trimmed)) {
+    const validation = validateChapterUrl(trimmed);
+    if (!validation.valid) {
       if (addNotification) {
         addNotification(
-          "Please enter a valid comic URL (e.g. https://domain.com/chapter-1)",
+          validation.error ||
+            "Please enter a valid chapter viewer URL (e.g. https://www.webtoons.com/.../viewer?title_no=...&episode_no=...).",
           "warning"
         );
       }

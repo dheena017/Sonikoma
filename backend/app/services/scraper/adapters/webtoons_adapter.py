@@ -11,8 +11,9 @@ Provides:
 
 import re
 import time
+import asyncio
 import logging
-from urllib.parse import urlparse, parse_qs, urljoin
+from urllib.parse import urlparse, parse_qs, urljoin, urlencode, urlunparse
 from typing import Optional, Dict, Any, List
 
 from .base_site_adapter import BaseSiteAdapter
@@ -62,12 +63,24 @@ class WebtoonsAdapter(BaseSiteAdapter):
         q = parse_qs(parsed.query)
         title_no = q.get("title_no", [""])[0]
 
-        # If given a viewer/chapter URL, resolve the parent list URL
-        target_url = raw_url
+        # Clean target URL: strip transient page / episode parameters to normalize to clean base series list URL
+        clean_q = {k: v for k, v in q.items() if k.lower() not in ("page", "episode_no")}
+        if title_no and "title_no" not in clean_q:
+            clean_q["title_no"] = [title_no]
+        clean_query = urlencode(clean_q, doseq=True)
+        clean_path = parsed.path
         if "/viewer" in parsed.path:
             path_parts = [p for p in parsed.path.split("/") if p]
             if len(path_parts) >= 3 and title_no:
-                target_url = f"https://www.webtoons.com/{path_parts[0]}/{path_parts[1]}/{path_parts[2]}/list?title_no={title_no}"
+                clean_path = f"/{path_parts[0]}/{path_parts[1]}/{path_parts[2]}/list"
+        target_url = urlunparse((
+            parsed.scheme or "https",
+            parsed.netloc or "www.webtoons.com",
+            clean_path,
+            "",
+            clean_query,
+            ""
+        ))
 
         is_toomics = "toomics.com" in parsed.netloc.lower()
         referer = "https://global.toomics.com/" if is_toomics else "https://www.webtoons.com/"
@@ -114,55 +127,24 @@ class WebtoonsAdapter(BaseSiteAdapter):
             cover_image = self.extract_image_src(series_meta.cover_image, target_url)
 
 
-        # 2. Paginated Episode Extraction Loop
-        episodes: List[Dict[str, Any]] = []
-        seen_urls = set()
-        page_num = 1
-        max_pages = 50
-
-        while page_num <= max_pages:
-            if max_episodes and len(episodes) >= max_episodes:
-                break
-
-            current_page_url = target_url
-            if page_num > 1:
-                current_page_url = f"{target_url}&page={page_num}" if "?" in target_url else f"{target_url}?page={page_num}"
-                p_html, p_status, _ = await HttpFetcher.fetch_html(
-                    current_page_url,
-                    headers={"Referer": "https://www.webtoons.com/"}
-                )
-                if not p_html or p_status != 200:
-                    break
-                soup = DomExtractor.get_soup(p_html)
-                if not soup:
-                    break
-
-            list_items = soup.select("#_listUl li, ul#_episodeList li, .detail_lst li")
-            if not list_items:
-                break
-
-            page_new_count = 0
-            found_new = False
-            for li in list_items:
+        # 2. Paginated Episode Extraction
+        def extract_page_episodes(page_soup) -> List[Dict[str, Any]]:
+            items = page_soup.select("#_listUl li, ul#_episodeList li, .detail_lst li")
+            if not items:
+                return []
+            page_eps = []
+            for li in items:
                 a_tag = li.find("a", href=True)
                 if not a_tag:
                     continue
 
                 ep_url = urljoin(target_url, a_tag["href"])
-                if ep_url in seen_urls:
-                    continue
-                seen_urls.add(ep_url)
-                found_new = True
-                page_new_count += 1
-
-                # Episode number and title
                 sub_title_el = li.select_one(".subj span, .subj, .sub_title, .title")
                 ep_title = sub_title_el.get_text(strip=True) if sub_title_el else a_tag.get_text(strip=True)
-                
-                # Check for episode_no in query
+
                 ep_parsed = urlparse(ep_url)
                 ep_q = parse_qs(ep_parsed.query)
-                ep_no_str = ep_q.get("episode_no", [""])[0]
+                ep_no_str = ep_q.get("episode_no", [""])[0] or li.get("data-episode-no", "")
 
                 num_val, _ = self.extract_number_and_type(ep_title)
                 if num_val is None and ep_no_str:
@@ -171,36 +153,97 @@ class WebtoonsAdapter(BaseSiteAdapter):
                     except ValueError:
                         pass
 
-                # Thumbnail image
                 thmb_img = li.select_one(".thmb img, img")
                 thmb_src = self.extract_image_src(thmb_img, target_url) if thmb_img else cover_image
 
-                # Date
                 date_el = li.select_one(".date, .tx")
                 date_str = self.normalize_date(date_el.get_text(strip=True) if date_el else "")
 
-                # Likes count
                 like_el = li.select_one(".like_area em, .like_area, .like")
                 likes_str = like_el.get_text(strip=True) if like_el else ""
 
-                episodes.append({
-                    "episode_no": len(episodes) + 1,
-                    "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or ep_no_str or len(episodes)+1)),
+                page_eps.append({
+                    "episode_no": num_val or ep_no_str or len(page_eps) + 1,
+                    "number": str(int(num_val) if num_val is not None and float(num_val).is_integer() else (num_val or ep_no_str or len(page_eps) + 1)),
                     "chapter_number": num_val,
-                    "title": ep_title or f"Episode {ep_no_str or len(episodes)+1}",
+                    "title": ep_title or f"Episode {ep_no_str or len(page_eps) + 1}",
                     "url": ep_url,
                     "cover_image": thmb_src or cover_image,
                     "date": date_str,
                     "likes": likes_str,
                     "language": "en"
                 })
+            return page_eps
 
+        episodes: List[Dict[str, Any]] = []
+        seen_urls = set()
 
-            if not found_new:
+        # Extract page 1 episodes from the initial soup
+        for ep in extract_page_episodes(soup):
+            if ep["url"] not in seen_urls:
+                seen_urls.add(ep["url"])
+                episodes.append(ep)
+
+        # Estimate total pages from latest episode number on page 1
+        est_pages = 50
+        first_item = soup.select_one("#_listUl li, ul#_episodeList li, .detail_lst li")
+        if first_item:
+            data_ep = first_item.get("data-episode-no", "")
+            if not data_ep:
+                a_first = first_item.find("a", href=True)
+                if a_first:
+                    ep_q = parse_qs(urlparse(a_first["href"]).query)
+                    data_ep = ep_q.get("episode_no", [""])[0]
+            if data_ep and data_ep.isdigit():
+                est_pages = (int(data_ep) + 9) // 10
+
+        target_pages = min(est_pages, (max_episodes + 9) // 10) if max_episodes else min(max(est_pages, 50), 300)
+
+        # Fetch remaining pages concurrently in batches
+        batch_size = 5
+        curr_page = 2
+        consecutive_empty = 0
+
+        while curr_page <= target_pages and consecutive_empty < 2:
+            if max_episodes and len(episodes) >= max_episodes:
                 break
+            batch_pages = list(range(curr_page, min(curr_page + batch_size, target_pages + 1)))
+            batch_urls = [f"{target_url}&page={p}" if "?" in target_url else f"{target_url}?page={p}" for p in batch_pages]
 
-            # Try the next page even if no explicit next-button is found in HTML.
-            page_num += 1
+            tasks = [
+                HttpFetcher.fetch_html(
+                    b_url,
+                    headers={"Referer": referer, "Cookie": cookies}
+                )
+                for b_url in batch_urls
+            ]
+            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+            batch_new_count = 0
+            for p, res in zip(batch_pages, batch_results):
+                if isinstance(res, Exception) or not res or not res[0] or res[1] != 200:
+                    continue
+                p_html = res[0]
+                p_soup = DomExtractor.get_soup(p_html)
+                if not p_soup:
+                    continue
+                p_eps = extract_page_episodes(p_soup)
+                for ep in p_eps:
+                    if ep["url"] not in seen_urls:
+                        seen_urls.add(ep["url"])
+                        episodes.append(ep)
+                        batch_new_count += 1
+                        if max_episodes and len(episodes) >= max_episodes:
+                            break
+                if max_episodes and len(episodes) >= max_episodes:
+                    break
+
+            if batch_new_count == 0:
+                consecutive_empty += 1
+            else:
+                consecutive_empty = 0
+
+            curr_page += batch_size
 
         # Browser retry if HTTP episode list came back empty (geo-block / lazy render)
         if not episodes:
@@ -347,12 +390,19 @@ class WebtoonsAdapter(BaseSiteAdapter):
 
         if soup:
             series_meta, chapter_meta = DomExtractor.extract_metadata(soup, target_url)
-            if series_meta and series_meta.title and not context.series_info.title:
-                context.series_info.title = series_meta.title
-            if chapter_meta and chapter_meta.title and not context.chapter_info.title:
-                context.chapter_info.title = chapter_meta.title
+            if series_meta:
+                if series_meta.title and not context.series_info.title:
+                    context.series_info.title = series_meta.title
+                if series_meta.author and not context.series_info.author:
+                    context.series_info.author = series_meta.author
+                if series_meta.description and not context.series_info.description:
+                    context.series_info.description = series_meta.description
+                if series_meta.cover_image and not context.series_info.cover_image:
+                    context.series_info.cover_image = series_meta.cover_image
+                if series_meta.genres and not context.series_info.genres:
+                    context.series_info.genres = series_meta.genres
 
-            # Webtoon specific title extraction from viewer headers
+            # Webtoon specific series title extraction from viewer headers
             series_node = soup.select_one(".subj_info a.subj, .viewer_header .subj, .title_area h2, .info h1")
             if series_node and not context.series_info.title:
                 context.series_info.title = series_node.get_text(strip=True)
@@ -360,11 +410,61 @@ class WebtoonsAdapter(BaseSiteAdapter):
             if not context.series_info.title and context.series_info.slug:
                 context.series_info.title = context.series_info.slug.replace("-", " ").replace("_", " ").title()
 
-            title_node = soup.select_one(".subj_episode, .subj_sub, h1.subj, .subj")
-            if title_node:
-                ch_txt = title_node.get_text(strip=True)
-                if ch_txt:
+            # Webtoon specific author extraction
+            author_meta = soup.select_one(
+                "meta[property='com-linewebtoon:episode:author'], meta[name='author'], meta[property='og:creator'], meta[name='twitter:creator']"
+            )
+            if author_meta and author_meta.get("content"):
+                context.series_info.author = author_meta["content"].strip()
+            if not context.series_info.author:
+                author_node = soup.select_one(".author_area, span.author, .author, .subj_info .author, .creator, a.author")
+                if author_node and author_node.get_text(strip=True):
+                    context.series_info.author = author_node.get_text(strip=True)
+
+            # Webtoon specific synopsis / description extraction
+            desc_meta = soup.select_one(
+                "meta[property='og:description'], meta[name='description'], meta[name='twitter:description']"
+            )
+            if desc_meta and desc_meta.get("content"):
+                context.series_info.description = desc_meta["content"].strip()
+            if not context.series_info.description:
+                desc_node = soup.select_one(".summary, .desc, .summary_content, .detail_header .desc")
+                if desc_node and desc_node.get_text(strip=True):
+                    context.series_info.description = desc_node.get_text(strip=True)
+
+            # Webtoon specific cover image extraction (high-res official thumbnail)
+            og_img = soup.select_one("meta[property='og:image'], meta[name='twitter:image']")
+            if og_img and og_img.get("content"):
+                context.series_info.cover_image = og_img["content"].strip()
+
+            # Webtoon specific chapter title extraction (prioritizing episode header, NOT series title link)
+            ch_title_node = soup.select_one("h1.subj_episode, .subj_episode, .subj_sub, .title_area h1")
+            if ch_title_node:
+                ch_txt = ch_title_node.get_text(strip=True)
+                if ch_txt and ch_txt.lower() != (context.series_info.title or "").lower():
                     context.chapter_info.title = ch_txt
+
+            # Fallback chapter title from og:title if needed (e.g. "Series - Episode Title")
+            if not context.chapter_info.title:
+                og_title_el = soup.select_one("meta[property='og:title']")
+                if og_title_el and og_title_el.get("content"):
+                    raw_og_t = og_title_el["content"].strip()
+                    if " - " in raw_og_t:
+                        candidate_title = raw_og_t.split(" - ", 1)[1].strip()
+                        if candidate_title:
+                            context.chapter_info.title = candidate_title
+
+            # Fallback chapter title and number from URL path (e.g. /1270-backache-1/viewer)
+            if context.chapter_info.number is None:
+                m_num = re.search(r"/(\d+)[-_]([a-zA-Z0-9-_]+)", target_url)
+                if m_num:
+                    try:
+                        context.chapter_info.number = float(m_num.group(1))
+                        context.chapter_info.episode = f"Episode {m_num.group(1)}"
+                    except ValueError:
+                        pass
+                    if not context.chapter_info.title:
+                        context.chapter_info.title = m_num.group(2).replace("-", " ").title()
 
             seen_urls = set()
             for idx, img in enumerate(img_nodes):

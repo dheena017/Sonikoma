@@ -43,11 +43,25 @@ def _parse_audio_settings(proj_dict: Optional[Dict[str, Any]]) -> Optional[Dict[
     if isinstance(parsed_json, dict):
         proj_dict["video_settings"] = parsed_json.get("video_settings") or {}
         proj_dict["autocrop_settings"] = parsed_json.get("autocrop_settings") or {}
+
+        # Capture top-level scraped images
+        top_scraped_images = parsed_json.get("scraped_images")
+        if not top_scraped_images and isinstance(parsed_json.get("audio_settings"), dict):
+            top_scraped_images = parsed_json["audio_settings"].get("scraped_images")
+
         # If audio_settings was wrapped under "audio_settings" key
         if "audio_settings" in parsed_json and isinstance(parsed_json["audio_settings"], dict):
             proj_dict["audio_settings"] = parsed_json["audio_settings"]
         else:
             proj_dict["audio_settings"] = parsed_json
+
+        # Ensure top_scraped_images is never wiped out
+        if top_scraped_images and isinstance(top_scraped_images, list) and len(top_scraped_images) > 0:
+            if isinstance(proj_dict["audio_settings"], dict):
+                proj_dict["audio_settings"]["scraped_images"] = top_scraped_images
+            proj_dict["scraped_images"] = top_scraped_images
+        elif isinstance(proj_dict["audio_settings"], dict) and proj_dict["audio_settings"].get("scraped_images"):
+            proj_dict["scraped_images"] = proj_dict["audio_settings"]["scraped_images"]
     else:
         proj_dict["video_settings"] = {}
         proj_dict["autocrop_settings"] = {}
@@ -196,40 +210,6 @@ def _enrich_project_item(item: Dict[str, Any], conn: Any) -> Dict[str, Any]:
                             pass
         except Exception:
             pass
-
-    # 5. Check if another chapter/project with the same series title or cover image has panels or scraped images
-    if not imported_count and not panels_count:
-        try:
-            title = item.get("title")
-            cover = item.get("cover_image")
-            if title or cover:
-                other_p = conn.execute("""
-                    SELECT c.panels_count, c.audio_settings 
-                    FROM chapters c 
-                    JOIN series s ON c.series_id = s.id 
-                    WHERE (s.title = ? OR s.cover_image = ?) AND c.id != ? AND (c.panels_count > 0 OR c.audio_settings LIKE '%http%')
-                    ORDER BY c.created_at DESC LIMIT 1
-                """, (title or "", cover or "", item["project_id"])).fetchone()
-                if other_p:
-                    if other_p["panels_count"] and other_p["panels_count"] > 0:
-                        imported_count = other_p["panels_count"]
-                    elif other_p["audio_settings"]:
-                        try:
-                            o_audio = json.loads(other_p["audio_settings"])
-                            if isinstance(o_audio, dict) and o_audio.get("scraped_images"):
-                                imported_count = len(o_audio["scraped_images"])
-                        except Exception:
-                            pass
-        except Exception:
-            pass
-
-    # 6. Bi-directional Fallback:
-    # If imported_count is 0 but panels_count > 0 -> imported_count = panels_count
-    # If panels_count is 0 but imported_count > 0 -> panels_count = imported_count
-    if not imported_count and panels_count > 0:
-        imported_count = panels_count
-    elif not panels_count and imported_count > 0:
-        panels_count = imported_count
 
     item["panels_count"] = panels_count
     item["imported_assets_count"] = imported_count
@@ -396,7 +376,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             if 'job_id' in updates:
                 chapter_set_parts.append("job_id = ?")
                 chapter_params.append(updates['job_id'])
-            if any(k in updates for k in ('audio_settings', 'video_settings', 'autocrop_settings')):
+            if any(k in updates for k in ('audio_settings', 'video_settings', 'autocrop_settings', 'scraped_images')):
                 cur_row = conn.execute("SELECT audio_settings FROM chapters WHERE id = ?", (project_id,)).fetchone()
                 existing_raw = cur_row['audio_settings'] if cur_row else None
                 
@@ -410,7 +390,22 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     settings_dict = dict(existing_raw)
 
                 if 'audio_settings' in updates and updates['audio_settings'] is not None:
-                    settings_dict["audio_settings"] = updates['audio_settings']
+                    up_audio = updates['audio_settings']
+                    if isinstance(up_audio, dict):
+                        if "scraped_images" in up_audio and isinstance(up_audio["scraped_images"], list) and up_audio["scraped_images"]:
+                            settings_dict["scraped_images"] = up_audio["scraped_images"]
+                        if "audio_settings" in up_audio and isinstance(up_audio["audio_settings"], dict):
+                            settings_dict["audio_settings"] = up_audio["audio_settings"]
+                        else:
+                            settings_dict["audio_settings"] = up_audio
+                    else:
+                        settings_dict["audio_settings"] = up_audio
+
+                if 'scraped_images' in updates and isinstance(updates['scraped_images'], list) and updates['scraped_images']:
+                    settings_dict["scraped_images"] = updates['scraped_images']
+                    if isinstance(settings_dict.get("audio_settings"), dict):
+                        settings_dict["audio_settings"]["scraped_images"] = updates['scraped_images']
+
                 if 'video_settings' in updates and updates['video_settings'] is not None:
                     settings_dict["video_settings"] = updates['video_settings']
                 if 'autocrop_settings' in updates and updates['autocrop_settings'] is not None:

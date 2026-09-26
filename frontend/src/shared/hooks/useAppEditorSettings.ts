@@ -145,26 +145,48 @@ export function useAppEditorSettings() {
         String(DEFAULT_AUDIO_SETTINGS.speechPitch || 1.0)
     )
   );
-  const [enableDialogueAudio, setEnableDialogueAudio] = useState<boolean>(
-    () => localStorage.getItem("ai_comic_enable_dialogue_audio") === "true" // Default: OFF
+  const [enableDialogueAudio, _setEnableDialogueAudio] = useState<boolean>(
+    () => {
+      const storedNarr = localStorage.getItem("ai_comic_enable_narrative_audio");
+      const storedDiag = localStorage.getItem("ai_comic_enable_dialogue_audio");
+      // Default: Dialogue OFF, Narrative ON
+      if (storedDiag === "true" && storedNarr === "false") return true;
+      return false;
+    }
   );
-  const [enableNarrativeAudio, setEnableNarrativeAudio] = useState<boolean>(
-    () => localStorage.getItem("ai_comic_enable_narrative_audio") !== "false" // Default: ON (narratives one)
+  const [enableNarrativeAudio, _setEnableNarrativeAudio] = useState<boolean>(
+    () => {
+      const storedNarr = localStorage.getItem("ai_comic_enable_narrative_audio");
+      const storedDiag = localStorage.getItem("ai_comic_enable_dialogue_audio");
+      if (storedDiag === "true" && storedNarr === "false") return false;
+      return true; // Default: Narrative ON
+    }
   );
+
+  const setEnableDialogueAudio = (val: boolean) => {
+    _setEnableDialogueAudio(val);
+    _setEnableNarrativeAudio(!val);
+    localStorage.setItem("ai_comic_enable_dialogue_audio", String(val));
+    localStorage.setItem("ai_comic_enable_narrative_audio", String(!val));
+  };
+
+  const setEnableNarrativeAudio = (val: boolean) => {
+    _setEnableNarrativeAudio(val);
+    _setEnableDialogueAudio(!val);
+    localStorage.setItem("ai_comic_enable_narrative_audio", String(val));
+    localStorage.setItem("ai_comic_enable_dialogue_audio", String(!val));
+  };
 
   useEffect(() => {
     localStorage.setItem(
       "ai_comic_enable_dialogue_audio",
       String(enableDialogueAudio)
     );
-  }, [enableDialogueAudio]);
-
-  useEffect(() => {
     localStorage.setItem(
       "ai_comic_enable_narrative_audio",
       String(enableNarrativeAudio)
     );
-  }, [enableNarrativeAudio]);
+  }, [enableDialogueAudio, enableNarrativeAudio]);
   const [audioReactiveShake, setAudioReactiveShake] = useState<boolean>(() =>
     localStorage.getItem("ai_video_shake") !== null
       ? localStorage.getItem("ai_video_shake") === "true"
