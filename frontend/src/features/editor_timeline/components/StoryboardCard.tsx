@@ -998,7 +998,12 @@ const StoryboardCard = ({
               onError={(e) => {
                 const img = e.currentTarget;
                 const src = img.src;
+                const isLocalHost =
+                  src.includes("localhost") ||
+                  src.includes("127.0.0.1") ||
+                  (typeof window !== "undefined" && src.startsWith(window.location.origin));
                 if (
+                  !isLocalHost &&
                   !img.dataset.proxied &&
                   !src.includes("/api/v1/proxy/image") &&
                   !src.includes("/api/v1/images/") &&
