@@ -16,10 +16,10 @@ import asyncio
 import logging
 import httpx
 import numpy as np
-from PIL import Image, ImageFilter
-from typing import List, Dict, Any, Optional
+from PIL import Image, ImageFilter, ImageDraw, ImageFont
+from typing import List, Dict, Any, Optional, Tuple
 
-from moviepy.editor import ImageClip, AudioFileClip, concatenate_videoclips
+from moviepy.editor import ImageClip, AudioFileClip, VideoClip, concatenate_videoclips
 from proglog import ProgressBarLogger
 from services.image.utils.image_utils import resolve_image_to_buffer
 from services.jobs import job_manager
@@ -84,6 +84,128 @@ def build_panel_frame_image(
     offset_y = max(0, (target_height - new_h) // 2)
     frame.paste(fg_img, (offset_x, offset_y))
     return frame.convert("RGB")
+
+
+def create_subtitle_overlay(text: str, target_width: int = 1920) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+    """Renders a sleek cinematic subtitle overlay banner to blend onto frames."""
+    if not text or not text.strip():
+        return None
+    clean_text = text.strip()
+    if len(clean_text) > 160:
+        clean_text = clean_text[:157] + "..."
+
+    banner_h = 105
+    banner = Image.new("RGBA", (target_width, banner_h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(banner)
+
+    try:
+        font = ImageFont.truetype("arial.ttf", 26)
+    except Exception:
+        try:
+            font = ImageFont.load_default()
+        except Exception:
+            font = None
+
+    bbox = draw.textbbox((0, 0), clean_text, font=font) if hasattr(draw, "textbbox") and font else (0, 0, len(clean_text) * 14, 30)
+    text_w = bbox[2] - bbox[0]
+    pill_w = min(target_width - 80, max(360, text_w + 60))
+    pill_x0 = (target_width - pill_w) // 2
+    pill_x1 = pill_x0 + pill_w
+    pill_y0 = 12
+    pill_y1 = banner_h - 12
+
+    # Draw rounded pill background with subtle glow border
+    draw.rounded_rectangle([(pill_x0, pill_y0), (pill_x1, pill_y1)], radius=18, fill=(10, 10, 15, 210), outline=(255, 255, 255, 45), width=1)
+    
+    text_x = (target_width - text_w) // 2
+    text_y = (banner_h - (bbox[3] - bbox[1])) // 2 - 2
+    # Shadow and sharp text
+    draw.text((text_x + 1, text_y + 1), clean_text, font=font, fill=(0, 0, 0, 190))
+    draw.text((text_x, text_y), clean_text, font=font, fill=(255, 255, 255, 255))
+
+    banner_np = np.array(banner, dtype=np.float32)
+    alpha = banner_np[:, :, 3:4] / 255.0
+    rgb = banner_np[:, :, :3]
+    return rgb, alpha
+
+
+def build_cinematic_motion_clip(
+    img: Image.Image,
+    target_width: int,
+    target_height: int,
+    duration: float,
+    idx: int,
+    subtitle_text: Optional[str] = None
+):
+    """
+    Constructs a high-performance cinematic motion clip:
+    - Vertical Manhwa panels (aspect >= 1.2): Smooth Pan Down revealing artwork full-width without blurry sidebars.
+    - Landscape / Square panels: Smooth Slow Zoom In / Zoom Out (Ken Burns effect).
+    - Pre-rendered alpha-blended subtitles.
+    """
+    img_w, img_h = img.size
+    aspect_ratio = img_h / max(1, img_w)
+    sub_overlay = create_subtitle_overlay(subtitle_text, target_width) if subtitle_text else None
+
+    # CASE 1: Tall vertical manhwa / webtoon panel -> Smooth Cinematic Pan Down
+    if aspect_ratio >= 1.25:
+        scale = target_width / img_w
+        scaled_w = target_width
+        scaled_h = max(target_height, int(img_h * scale))
+        scaled_img = img.resize((scaled_w, scaled_h), Image.Resampling.LANCZOS)
+        arr = np.array(scaled_img, dtype=np.uint8)
+        max_scroll_y = max(0, scaled_h - target_height)
+
+        def make_frame_pan_down(t):
+            p = min(1.0, max(0.0, t / duration))
+            ease = 0.5 - 0.5 * np.cos(p * np.pi)
+            y0 = int(ease * max_scroll_y)
+            y1 = y0 + target_height
+            if y1 <= scaled_h:
+                frame = arr[y0:y1, 0:target_width].copy()
+            else:
+                frame = arr[scaled_h - target_height:scaled_h, 0:target_width].copy()
+
+            if sub_overlay:
+                rgb, alpha = sub_overlay
+                h_b = rgb.shape[0]
+                frame[-h_b:, 0:target_width] = (
+                    frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
+                ).astype(np.uint8)
+            return frame
+
+        return VideoClip(make_frame_pan_down, duration=duration)
+
+    # CASE 2: Standard landscape / square panel -> Smooth Slow Zoom In / Out
+    else:
+        composite_frame = build_panel_frame_image(img, img, target_width, target_height)
+        oversize_w = int(target_width * 1.08)
+        oversize_h = int(target_height * 1.08)
+        oversized = composite_frame.resize((oversize_w, oversize_h), Image.Resampling.LANCZOS)
+        arr = np.array(oversized, dtype=np.uint8)
+
+        max_dx = oversize_w - target_width
+        max_dy = oversize_h - target_height
+        zoom_in = (idx % 2 == 0)
+
+        def make_frame_zoom(t):
+            p = min(1.0, max(0.0, t / duration))
+            ease = 0.5 - 0.5 * np.cos(p * np.pi)
+            if not zoom_in:
+                ease = 1.0 - ease
+            x0 = int(ease * (max_dx // 2))
+            y0 = int(ease * (max_dy // 2))
+            frame = arr[y0:y0 + target_height, x0:x0 + target_width].copy()
+
+            if sub_overlay:
+                rgb, alpha = sub_overlay
+                h_b = rgb.shape[0]
+                frame[-h_b:, 0:target_width] = (
+                    frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
+                ).astype(np.uint8)
+            return frame
+
+        return VideoClip(make_frame_zoom, duration=duration)
 
 
 async def compile_video_from_panels(
@@ -350,31 +472,27 @@ async def compile_video_from_panels(
 
         try:
             with Image.open(io.BytesIO(image_bytes)).convert("RGB") as img:
-                composite_frame = build_panel_frame_image(
-                    background_image=img,
-                    foreground_image=img,
+                # Build dynamic cinematic motion clip (Pan-down for vertical, Zoom for standard, + Subtitles)
+                caption = text_to_speak if text_to_speak else (panel.get("speech_text") or panel.get("narrative") or "")
+                composite_clip = build_cinematic_motion_clip(
+                    img=img,
                     target_width=target_width,
                     target_height=target_height,
+                    duration=duration,
+                    idx=idx,
+                    subtitle_text=caption if caption else None,
                 )
-                frame_array = np.array(composite_frame, dtype=np.uint8)
 
-        except Exception as e:
-            logger.error(f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}): Failed to process frame image: {e}")
-            continue
+                if has_audio:
+                    audio_clip = AudioFileClip(audio_path)
+                    audio_clip = audio_clip.set_duration(duration)
+                    composite_clip = composite_clip.set_audio(audio_clip)
 
-        try:
-            composite_clip = ImageClip(frame_array).set_duration(duration)
-
-            if has_audio:
-                audio_clip = AudioFileClip(audio_path)
-                audio_clip = audio_clip.set_duration(duration)
-                composite_clip = composite_clip.set_audio(audio_clip)
-
-            clips.append(composite_clip)
-            logger.info(
-                f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}) -> "
-                f"Clip ready ({target_width}x{target_height}, {duration:.1f}s, Audio: {'Yes' if has_audio else 'None'})"
-            )
+                clips.append(composite_clip)
+                logger.info(
+                    f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}) -> "
+                    f"Cinematic motion clip ready ({target_width}x{target_height}, {duration:.1f}s, Audio: {'Yes' if has_audio else 'None'})"
+                )
 
         except Exception as e:
             logger.error(f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}): Failed to build video clip: {e}")
@@ -407,9 +525,10 @@ async def compile_video_from_panels(
                 codec="libx264",
                 audio_codec="aac",
                 threads=4,
-                preset="ultrafast",
+                preset="fast",
+                ffmpeg_params=["-pix_fmt", "yuv420p", "-crf", "19", "-movflags", "+faststart"],
                 logger=mpy_logger,
-                bitrate="10000k",
+                bitrate="12000k",
                 temp_audiofile=temp_mpy_sound,
                 remove_temp=True
             )
