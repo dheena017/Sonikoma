@@ -50,9 +50,6 @@ const ActiveProjectSelectorDrawer = React.lazy(
 const AutoCropSettingsModal = React.lazy(
   () => import("@/features/editor_auto_crop/components/AutoCropSettingsModal")
 );
-const CreateSeriesModal = React.lazy(
-  () => import("@/features/editor_series/components/CreateSeriesModal")
-);
 
 export interface MainLayoutProps {
   children: React.ReactNode;
@@ -358,15 +355,6 @@ export default function MainLayout(props: MainLayoutProps) {
   }, [currentPath, fetchWithInterceptor]);
 
   const isDrawerOpen = useProjectStore((s) => s.isDrawerOpen);
-  const [isCreateSeriesModalOpen, setIsCreateSeriesModalOpen] = React.useState(false);
-
-  useEffect(() => {
-    const handleOpenCreateSeries = () => setIsCreateSeriesModalOpen(true);
-    window.addEventListener("sonikoma:open-create-series", handleOpenCreateSeries);
-    return () => {
-      window.removeEventListener("sonikoma:open-create-series", handleOpenCreateSeries);
-    };
-  }, []);
 
   const handleCloseSidebar = useCallback(
     () => setIsSidebarOpen(false),
@@ -748,14 +736,6 @@ export default function MainLayout(props: MainLayoutProps) {
           fetchWithInterceptor={fetchWithInterceptor}
           navigateTo={navigateTo}
         />
-
-        {/* Global AI Multi-Chapter Series Studio Modal */}
-        {isCreateSeriesModalOpen && (
-          <CreateSeriesModal
-            isOpen={isCreateSeriesModalOpen}
-            onClose={() => setIsCreateSeriesModalOpen(false)}
-          />
-        )}
       </React.Suspense>
     </div>
   );

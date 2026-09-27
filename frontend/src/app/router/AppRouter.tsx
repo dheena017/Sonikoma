@@ -37,9 +37,6 @@ const ProjectsPage = React.lazy(
 const SeriesDetailsPage = React.lazy(
   () => import("@/features/workspace_projects/pages/SeriesDetailsPage")
 );
-const SeriesDashboardPage = React.lazy(
-  () => import("@/features/editor_series/pages/SeriesDashboardPage")
-);
 const ShortcutsPage = React.lazy(
   () => import("@/features/app_shortcuts/pages/ShortcutsPage")
 );
@@ -172,15 +169,8 @@ export function isKnownRoute(path: string): boolean {
     return true;
   }
 
-  // 4. Projects & AI Story Studio
-  if (
-    clean === "/projects" ||
-    clean.startsWith("/projects/") ||
-    clean === "/series" ||
-    clean.startsWith("/series/") ||
-    clean === "/ai-story" ||
-    clean.startsWith("/ai-story/")
-  ) {
+  // 4. Projects & Series Details
+  if (clean === "/projects" || clean.startsWith("/projects/")) {
     return true;
   }
 
@@ -785,9 +775,7 @@ export default function AppRouter(props: AppRouterProps) {
     !hasSavedToken &&
     currentPath !== "/scraper" &&
     !currentPath.startsWith("/editor") &&
-    !currentPath.startsWith("/scraper/editor") &&
-    !currentPath.startsWith("/series") &&
-    !currentPath.startsWith("/ai-story")
+    !currentPath.startsWith("/scraper/editor")
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return null;
@@ -885,11 +873,6 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath.startsWith("/admin/") && currentPath !== "/admin/",
       isChapterDetailsPath: false,
       isProjectEditorPath: false,
-      isSeriesStudioPath:
-        currentPath === "/ai-story" ||
-        currentPath.startsWith("/ai-story/") ||
-        currentPath === "/series" ||
-        currentPath.startsWith("/series/"),
       isSeriesDetailsPath:
         currentPath.startsWith("/projects/") &&
         !currentPath.includes("/chapter/"),
@@ -961,7 +944,6 @@ export default function AppRouter(props: AppRouterProps) {
     isAdminPath,
     isAdminDashboardPath,
     isChapterDetailsPath,
-    isSeriesStudioPath,
     isSeriesDetailsPath,
     isCreativeSuitePath,
     isCreativeSuiteDashboardPath,
@@ -1633,15 +1615,6 @@ export default function AppRouter(props: AppRouterProps) {
                 navigateTo={navigateTo}
                 lastEditorPath={lastEditorPath}
               />
-            </React.Suspense>
-          </div>
-        )}
-
-        {/* PAGE VIEW 17.4: AI Multi-Chapter Series Studio Dashboard */}
-        {isSeriesStudioPath && (
-          <div className="page-transition w-full flex-1 flex flex-col">
-            <React.Suspense fallback={<RouteLoadingFallback />}>
-              <SeriesDashboardPage navigateTo={navigateTo} />
             </React.Suspense>
           </div>
         )}

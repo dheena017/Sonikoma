@@ -23,7 +23,6 @@ import {
   MoreVertical,
   Copy,
   Trash2,
-  AlertCircle,
 } from "lucide-react";
 import { GeneratedPanel } from "@/types";
 import { getPanelFilterStyle } from "@/utils";
@@ -898,32 +897,6 @@ const StoryboardCard = ({
     height: number;
   } | null>(null);
 
-  const [imageError, setImageError] = React.useState(false);
-  const [isReloading, setIsReloading] = React.useState(false);
-  const [retryKey, setRetryKey] = React.useState(0);
-
-  React.useEffect(() => {
-    setImageError(false);
-  }, [panel.image_url]);
-
-  const handleReloadImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setIsReloading(true);
-    setImageError(false);
-    setRetryKey((prev) => prev + 1);
-    setTimeout(() => {
-      setIsReloading(false);
-    }, 600);
-  };
-
-  const effectiveImageUrl = React.useMemo(() => {
-    if (!panel.image_url) return "";
-    if (retryKey === 0) return panel.image_url;
-    const sep = panel.image_url.includes("?") ? "&" : "?";
-    return `${panel.image_url}${sep}_t=${Date.now()}`;
-  }, [panel.image_url, retryKey]);
-
   const aspectRatioLabel = React.useMemo(() => {
     if (!dimensions) return null;
     const ratio = dimensions.width / dimensions.height;
@@ -973,73 +946,42 @@ const StoryboardCard = ({
           panelsLength === 1 ? "h-64 sm:h-72" : "h-56 sm:h-64"
         } rounded-xl cursor-pointer select-none bg-neutral-950 border border-neutral-800/80 shadow-inner flex items-center justify-center p-1.5 group/thumb hover:border-neutral-700 transition-colors duration-150`}
       >
-        <div className="w-full h-full rounded-xl overflow-hidden flex items-center justify-center relative bg-neutral-950">
-          {!imageError && effectiveImageUrl ? (
-            <img
-              key={`${effectiveImageUrl}_${retryKey}`}
-              src={effectiveImageUrl}
-              alt={`Panel #${idx + 1}`}
-              loading="lazy"
-              decoding="async"
-              draggable={false}
-              onDragStart={(e) => e.preventDefault()}
-              className="w-full h-full object-contain object-center rounded-xl"
-              style={{ filter: getPanelFilterStyle(panel) }}
-              onLoad={(e) => {
-                setImageError(false);
-                const img = e.currentTarget;
-                if (img.naturalWidth && img.naturalHeight) {
-                  setDimensions({
-                    width: img.naturalWidth,
-                    height: img.naturalHeight,
-                  });
-                }
-              }}
-              onError={(e) => {
-                const img = e.currentTarget;
-                const src = img.src;
-                const isLocalHost =
-                  src.includes("localhost") ||
-                  src.includes("127.0.0.1") ||
-                  (typeof window !== "undefined" && src.startsWith(window.location.origin));
-                if (
-                  !isLocalHost &&
-                  !img.dataset.proxied &&
-                  !src.includes("/api/v1/proxy/image") &&
-                  !src.includes("/api/v1/images/") &&
-                  !src.includes("/media/") &&
-                  !src.includes("/videos/") &&
-                  (src.startsWith("http://") || src.startsWith("https://"))
-                ) {
-                  img.dataset.proxied = "1";
-                  img.src = `/api/v1/proxy/image?url=${encodeURIComponent(src)}`;
-                  return;
-                }
-                setImageError(true);
-              }}
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center p-3 text-center space-y-2 z-10 w-full h-full bg-neutral-900/90 backdrop-blur-sm rounded-xl border border-neutral-800">
-              <div className="w-9 h-9 rounded-full bg-red-950/50 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
-                <AlertCircle className="w-4 h-4" />
-              </div>
-              <div className="space-y-0.5 max-w-[210px]">
-                <p className="text-xs font-semibold text-neutral-200">Image failed to load</p>
-                <p className="text-[10px] text-neutral-400 truncate">
-                  {panel.image_url ? panel.image_url.split("/").pop() : "No image source"}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleReloadImage}
-                disabled={isReloading}
-                className="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-medium shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
-              >
-                <RefreshCw className={`w-3 h-3 ${isReloading ? "animate-spin" : ""}`} />
-                {isReloading ? "Reloading..." : "Reload Image"}
-              </button>
-            </div>
-          )}
+        <div className="w-full h-full rounded-xl overflow-hidden flex items-center justify-center relative">
+          <img
+            src={panel.image_url}
+            alt={`Panel #${idx + 1}`}
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+            className="w-full h-full object-contain object-center rounded-xl"
+            style={{ filter: getPanelFilterStyle(panel) }}
+            onLoad={(e) => {
+              const img = e.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) {
+                setDimensions({
+                  width: img.naturalWidth,
+                  height: img.naturalHeight,
+                });
+              }
+            }}
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (img.dataset.retried) return;
+              img.dataset.retried = "1";
+              const src = img.src;
+              if (
+                !src.includes("/api/v1/proxy/image") &&
+                !src.includes("/api/v1/images/") &&
+                !src.includes("/media/") &&
+                !src.includes("/videos/")
+              ) {
+                img.src = `/api/v1/proxy/image?url=${encodeURIComponent(src)}`;
+              } else {
+                img.style.display = "none";
+              }
+            }}
+          />
         </div>
 
         {isThisPanelAnalyzing && (

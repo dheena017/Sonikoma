@@ -10,10 +10,8 @@ import {
   WelcomeBackUserModal,
   ComeBackUserModal,
 } from "@/shared/ui/modal";
-import CreateSeriesModal from "@/features/editor_series/components/CreateSeriesModal";
 
 export default function DashboardPage() {
-  const [isCreateSeriesModalOpen, setIsCreateSeriesModalOpen] = React.useState(false);
   const {
     themeMode,
     projects,
@@ -87,12 +85,12 @@ export default function DashboardPage() {
 
   return (
     <div className="w-full min-w-0 flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-6 sm:py-8 max-w-7xl mx-auto">
-      <section className="w-full space-y-8 text-left" aria-label="Dashboard overview">
+      <main className="w-full space-y-8 text-left">
         <DashboardHeader
           themeMode={themeMode}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          onNewSeries={() => setIsCreateSeriesModalOpen(true)}
+          onNewSeries={handleNewSeries}
         />
 
         <DashboardStats
@@ -126,7 +124,7 @@ export default function DashboardPage() {
             openMenuId={openMenuId}
             renamingProjectId={renamingProjectId}
             onRetry={handleRetry}
-            onNewSeries={() => setIsCreateSeriesModalOpen(true)}
+            onNewSeries={handleNewSeries}
             onOpenProject={handleOpenProject}
             onRename={handleRename}
             onExport={handleExport}
@@ -138,13 +136,7 @@ export default function DashboardPage() {
 
           <DashboardActivityFeed analytics={analytics} />
         </div>
-      </section>
-
-      {/* AI Multi-Chapter Series Studio Modal */}
-      <CreateSeriesModal
-        isOpen={isCreateSeriesModalOpen}
-        onClose={() => setIsCreateSeriesModalOpen(false)}
-      />
+      </main>
 
       {/* New User Welcome Onboarding Modal */}
       <WelcomeUserModal
