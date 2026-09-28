@@ -391,3 +391,20 @@ class BatchGenerateRequest(BaseModel):
     guidance_scale: Optional[float] = Field(7.5, ge=1.0, le=20.0)
     num_inference_steps: Optional[int] = Field(50, ge=1, le=150)
     output_dir: Optional[str] = None
+
+
+class SeriesArcRequest(BaseModel):
+    """AI Series Arc Director invocation request."""
+    title: str = Field(..., description="Title of the series")
+    logline: Optional[str] = Field(None, description="Core plot premise and hook")
+    genre: Optional[str] = Field("action_fantasy", description="Genre e.g. action_fantasy, slice_of_life, murim")
+    format_type: Optional[str] = Field("manhwa", description="manhwa, comic_manga, or anime")
+    art_style: Optional[str] = Field("manhwa_action_hunter", description="Art style preset identifier")
+    total_sessions: Optional[int] = Field(1, ge=1, le=5)
+    chapters_per_session: Optional[int] = Field(5, ge=1, le=25)
+    panels_per_chapter: Optional[int] = Field(8, ge=2, le=24)
+    pacing: Optional[str] = Field("dynamic", description="Pacing profile")
+    dialogue_density: Optional[str] = Field("balanced", description="Dialogue density")
+    model: Optional[str] = Field(None, description="Gemini or LLM model override")
+    project_id: Optional[str] = None
+    job_id: Optional[str] = None

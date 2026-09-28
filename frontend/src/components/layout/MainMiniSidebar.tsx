@@ -20,6 +20,7 @@ import {
   Image,
   User,
   ExternalLink,
+  Clapperboard,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
 import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
@@ -134,7 +135,9 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           active:
             currentPath === "/creative-suite" ||
             currentPath.startsWith("/creative-suite/") ||
-            currentPath.startsWith("/ai-") ||
+            (currentPath.startsWith("/ai-") &&
+              !currentPath.startsWith("/ai-series") &&
+              !currentPath.startsWith("/ai-core")) ||
             currentPath === "/panel-assistant" ||
             currentPath === "/youtube",
           path: "/creative-suite",
@@ -147,6 +150,21 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             currentPath === "/ai-core" || currentPath.startsWith("/ai-core/"),
           path: "/ai-core",
           onClick: () => navigateTo("/ai-core"),
+        },
+        {
+          label: "AI Series",
+          icon: Clapperboard,
+          active:
+            currentPath === "/ai-series" ||
+            currentPath === "/ai-series/" ||
+            currentPath === "/series-generator" ||
+            currentPath === "/series-generator/" ||
+            currentPath.startsWith("/studio/") ||
+            currentPath.startsWith("/series/") ||
+            currentPath.startsWith("/watch/") ||
+            currentPath.startsWith("/read/"),
+          path: "/ai-series",
+          onClick: () => navigateTo("/ai-series"),
         },
         {
           label: "Image Editor",

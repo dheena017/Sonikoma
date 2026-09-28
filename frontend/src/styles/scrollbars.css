@@ -37,3 +37,46 @@ body::-webkit-scrollbar,
   width: 0 !important;
   height: 0 !important;
 }
+
+/* Visible Sleek Scrollbar for Studios & Continuous Webtoon Canvas */
+#main-scrollable-area .studio-visible-scrollbar,
+.studio-visible-scrollbar {
+  scrollbar-width: thin !important;
+  scrollbar-color: #3B82F6 #121212 !important;
+  -ms-overflow-style: auto !important;
+  touch-action: pan-y !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar,
+.studio-visible-scrollbar::-webkit-scrollbar {
+  display: block !important;
+  width: 12px !important;
+  height: 12px !important;
+}
+
+#main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar-track,
+.studio-visible-scrollbar::-webkit-scrollbar-track {
+  background: #121212 !important;
+  border-radius: 8px !important;
+}
+
+#main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar-thumb,
+.studio-visible-scrollbar::-webkit-scrollbar-thumb {
+  background: #3B82F6 !important;
+  border-radius: 9999px !important;
+  border: 2px solid #121212 !important;
+  min-height: 48px !important;
+}
+
+#main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar-thumb:hover,
+.studio-visible-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #60A5FA !important;
+}
+
+#main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar-thumb:active,
+.studio-visible-scrollbar::-webkit-scrollbar-thumb:active {
+  background: #93C5FD !important;
+}
+

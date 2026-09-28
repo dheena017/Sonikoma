@@ -339,16 +339,13 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
   const isValid = !!(targetUrl.trim() && urlValidation?.valid);
 
   return (
-    <div className="flex w-full flex-col gap-3">
+    <div className="flex flex-col gap-3 w-full">
       {/* ── URL Input Row ── */}
       <div className="relative group w-full z-30" ref={containerRef}>
         <input
           id="target_url_input"
           type="text"
-          aria-label="Chapter or series URL"
           autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
           value={targetUrl}
           onFocus={() => setShowSuggestions(true)}
           onChange={(e) => {
@@ -361,7 +358,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               handleImportClick();
             }
           }}
-          placeholder="Paste a chapter or series URL"
+          placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic chapter URL..."
           className={`w-full bg-[#1A1A1A] border ${
             hasValidationError
               ? "border-amber-500/50 focus:border-amber-500"
@@ -370,7 +367,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               : "border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-500"
           } focus:ring-2 ${
             hasValidationError ? "focus:ring-amber-500/10" : "focus:ring-neutral-700"
-          } rounded-lg px-4 py-3 text-sm text-[#E5E5E5] outline-none placeholder:text-[#71717A] transition-colors`}
+          } rounded-2xl px-5 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-[#555] shadow-inner transition-colors`}
         />
 
         {showSuggestions && suggestions.length > 0 && (
@@ -459,7 +456,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         </div>
 
       {/* ── Status / Validation Row ── */}
-      <div className="min-h-7 flex items-start pt-1 sm:items-center sm:pt-0">
+      <div className="h-7 flex items-center">
         {hasValidationError ? (
           <div className="flex items-center gap-2 text-amber-400 text-xs font-medium">
             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
@@ -476,15 +473,15 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <span>Checking URL…</span>
           </div>
         ) : (
-          <span className="text-xs leading-relaxed text-neutral-500">
-            Supports Webtoon, MangaDex, Naver, Tapas, Bato.to, and more
+          <span className="text-[11px] text-neutral-600">
+            Supports Webtoons, MangaDex, Naver, Tapas, Bato.to, Asura, Flame Comics &amp; more
           </span>
         )}
       </div>
 
       {/* ── Action Buttons Row ── */}
       {actionSlot || (
-        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3 w-full">
           <Tooltip
             text={
               hasValidationError
@@ -499,10 +496,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               type="button"
               onClick={handleImportClick}
               disabled={isScraping || !targetUrl.trim() || hasValidationError}
-              className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-emerald-300/30 bg-emerald-300 px-4 text-sm font-semibold text-[#101510] transition-colors hover:bg-emerald-200 disabled:pointer-events-none disabled:opacity-40 ${
+              className={`btn-primary w-full justify-center px-4 py-3 rounded-xl text-sm font-bold shadow-md disabled:opacity-35 disabled:pointer-events-none flex items-center gap-2 ${
                 isScraping ? "cursor-wait" : "cursor-pointer"
               }`}
-              aria-label="Import chapter images"
+              aria-label="Import Chapter Images"
             >
               {isScraping ? (
                 <>
@@ -512,7 +509,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               ) : (
                 <>
                   <ImageIcon className="h-4 w-4 text-white" />
-                  <span>Import chapter</span>
+                  <span>Import Chapter Images</span>
                 </>
               )}
             </button>
@@ -528,13 +525,13 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
               type="button"
               onClick={handleOpenChapterScraperClick}
               disabled={!targetUrl.trim() || isScraping}
-              className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/10 disabled:pointer-events-none disabled:opacity-40 ${
+              className={`btn-primary w-full justify-center px-4 py-3 rounded-xl text-sm font-bold shadow-md disabled:opacity-35 disabled:pointer-events-none flex items-center gap-2 ${
                 isScraping ? "cursor-wait" : "cursor-pointer"
               }`}
-              aria-label="Browse series chapters"
+              aria-label="Import Chapter Scraper"
             >
-              <Zap className="h-4 w-4 text-amber-300" />
-              <span>Browse series</span>
+              <Zap className="h-4 w-4 text-white" />
+              <span>Import Chapter Scraper</span>
             </button>
           </Tooltip>
         </div>

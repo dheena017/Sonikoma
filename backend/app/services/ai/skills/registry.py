@@ -23,9 +23,26 @@ class SkillRegistry:
     def get(self, name: str) -> BaseAISkill:
         if not self._skills:
             self.load_skills()
-        if name not in self._skills:
+        
+        # Support format aliases and alternative skill names
+        alias_map = {
+            "manhwa_arc_director": "series_arc_manhwa",
+            "comic_arc_director": "series_arc_comic",
+            "anime_arc_director": "series_arc_anime",
+            "manhwa": "series_arc_manhwa",
+            "comic": "series_arc_comic",
+            "manga": "series_arc_comic",
+            "comic_manga": "series_arc_comic",
+            "anime": "series_arc_anime",
+            "anime_sakuga": "series_arc_anime",
+        }
+        resolved = alias_map.get(name, name)
+        if resolved not in self._skills:
+            # Fall back to master series_arc_director if specialized skill not directly found
+            if "series_arc" in resolved and "series_arc_director" in self._skills:
+                return self._skills["series_arc_director"]
             raise KeyError(f"Skill '{name}' is not registered in the AI Skills Registry.")
-        return self._skills[name]
+        return self._skills[resolved]
 
     def list_skills(self) -> Dict[str, str]:
         if not self._skills:

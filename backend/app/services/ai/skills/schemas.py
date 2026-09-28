@@ -5,7 +5,7 @@ Pydantic schemas and metadata formats for AI structured responses.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from typing import List, Dict, Type, Optional
+from typing import List, Dict, Type, Optional, Any
 from pydantic import BaseModel, Field
 
 
@@ -270,6 +270,94 @@ class SequenceNarrativeModel(BaseModel):
     panels: List[PanelNarrativeModel] = Field(description="Chronological narrative texts matching each panel")
 
 
+# =============================================================================
+# Series Arc Director Models: Manhwa, Comic & Manga, Anime, and Master
+# =============================================================================
+
+class SeriesArcCastMember(BaseModel):
+    character_id: str = Field(default="", description="Unique character identifier slug")
+    name: str = Field(default="", description="Full character name")
+    role: str = Field(default="protagonist", description="protagonist | antagonist | deuteragonist | mentor | companion")
+    visual_summary: str = Field(default="", description="Precise visual description for image generator consistency")
+    hair_color: str = Field(default="")
+    eye_color: str = Field(default="")
+    clothing_palette: str = Field(default="")
+    signature_traits: List[str] = Field(default_factory=list)
+    voice_profile: Optional[Dict[str, Any]] = Field(default_factory=dict)
+
+
+class SeriesArcDialogueTurn(BaseModel):
+    speaker_name: str = Field(default="")
+    text: str = Field(default="")
+    bubble_type: str = Field(default="speech", description="speech | scream | whisper | thought | caption")
+
+
+class SeriesArcScenePanel(BaseModel):
+    panel_index: int = Field(default=1)
+    camera_angle: str = Field(default="cinematic_wide")
+    visual_description: str = Field(default="")
+    sfx_text: Optional[str] = Field(default=None)
+    motion_prompt: Optional[str] = Field(default=None)
+    dialogue: List[SeriesArcDialogueTurn] = Field(default_factory=list)
+
+
+class SeriesArcChapter(BaseModel):
+    chapter_number: int = Field(default=1)
+    chapter_title: str = Field(default="")
+    pacing_role: str = Field(default="rising_action", description="exposition | inciting_incident | rising_action | midpoint | climax | falling_action | epilogue_resolution")
+    summary: str = Field(default="")
+    unresolved_mysteries_introduced: List[str] = Field(default_factory=list)
+    mysteries_resolved_here: List[str] = Field(default_factory=list)
+    is_series_finale: bool = Field(default=False)
+    planned_panels_count: int = Field(default=8)
+    suggested_scene_prompts: List[SeriesArcScenePanel] = Field(default_factory=list)
+
+
+class SeriesArcSession(BaseModel):
+    session_number: int = Field(default=1)
+    session_title: str = Field(default="")
+    session_theme: str = Field(default="")
+    chapters: List[SeriesArcChapter] = Field(default_factory=list)
+
+
+class SeriesArcWorldBible(BaseModel):
+    setting_name: str = Field(default="")
+    lore_rules: List[str] = Field(default_factory=list)
+    factions: List[Dict[str, str]] = Field(default_factory=list)
+    unresolved_mysteries: List[str] = Field(default_factory=list)
+
+
+class SeriesArcDirectorModel(BaseModel):
+    series_title: str = Field(default="")
+    logline: str = Field(default="")
+    genre: str = Field(default="action_fantasy")
+    format_type: str = Field(default="manhwa")
+    world_bible: SeriesArcWorldBible = Field(default_factory=SeriesArcWorldBible)
+    cast: List[SeriesArcCastMember] = Field(default_factory=list)
+    sessions: List[SeriesArcSession] = Field(default_factory=list)
+
+
+class ManhwaArcDirectorModel(SeriesArcDirectorModel):
+    format_type: str = Field(default="manhwa")
+    scroll_direction: str = Field(default="vertical_infinite_scroll")
+    gutter_cadence_notes: str = Field(default="8-16px combat, 32-64px dramatic, 120-300px reveal voids")
+    webtoon_color_mode: str = Field(default="soft_pastel_cel_shading")
+
+
+class ComicArcDirectorModel(SeriesArcDirectorModel):
+    format_type: str = Field(default="comic_manga")
+    reading_direction: str = Field(default="right_to_left", description="right_to_left for manga, left_to_right for western comic")
+    koma_grid_template: str = Field(default="dynamic_asymmetric_koma_wari")
+    screentone_density: str = Field(default="50_lpi_halftone_dots")
+
+
+class AnimeArcDirectorModel(SeriesArcDirectorModel):
+    format_type: str = Field(default="anime")
+    aspect_ratio: str = Field(default="16:9_widescreen")
+    sakuga_choreography_style: str = Field(default="24fps_ufotable_sakuga")
+    cinematic_camera_style: str = Field(default="orbital_3d_tracking")
+
+
 SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
     "GeminiAnalysisModel":     GeminiAnalysisModel,
     "BatchPanelAnalysisModel": BatchPanelAnalysisModel,
@@ -289,5 +377,9 @@ SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
     "MidrollPlacementModel":   MidrollPlacementModel,
     "ShortsHookModel":         ShortsHookModel,
     "ThumbnailVisualModel":    ThumbnailVisualModel,
+    "SeriesArcDirectorModel":  SeriesArcDirectorModel,
+    "ManhwaArcDirectorModel":  ManhwaArcDirectorModel,
+    "ComicArcDirectorModel":   ComicArcDirectorModel,
+    "AnimeArcDirectorModel":   AnimeArcDirectorModel,
 }
 

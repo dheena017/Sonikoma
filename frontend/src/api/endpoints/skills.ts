@@ -16,6 +16,10 @@ export const SKILL_ENDPOINTS = {
   MIDROLLS: "/api/v1/ai/skills/midrolls",
   SHORTS_SCRIPT: "/api/v1/ai/skills/shorts-script",
   SHORTS_HOOK: "/api/v1/ai/skills/shorts-hook",
+  SERIES_ARC: "/api/v1/ai/skills/series-arc",
+  SERIES_ARC_MANHWA: "/api/v1/ai/skills/series-arc/manhwa",
+  SERIES_ARC_COMIC: "/api/v1/ai/skills/series-arc/comic",
+  SERIES_ARC_ANIME: "/api/v1/ai/skills/series-arc/anime",
 };
 
 export const runSkill = async (

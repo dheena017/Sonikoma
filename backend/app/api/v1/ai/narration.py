@@ -20,6 +20,7 @@ from schemas.ai import (
     SFXOverlayRequest,
     ShortsHookRequest,
     MidrollPlacementRequest,
+    SeriesArcRequest,
 )
 
 logger = logging.getLogger("sonikoma.api.ai.narration")
@@ -141,4 +142,91 @@ async def get_midrolls(body: MidrollPlacementRequest, user_api_key: dict = Depen
     except Exception as e:
         logger.error(f"[Midroll Placement Skill Error]: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── AI Series Arc Director Skills (Manhwa, Comic/Manga, Anime) ────────────────
+
+@router.post("/skills/series-arc", summary="Architect series arc using selected format skill (manhwa, comic_manga, anime)")
+async def direct_series_arc(body: SeriesArcRequest, user_api_key: dict = Depends(get_user_gemini_key)):
+    fmt = (body.format_type or "manhwa").lower()
+    if fmt in ("anime", "anime_sakuga"):
+        skill_name = "series_arc_anime"
+    elif fmt in ("comic_manga", "comic", "manga"):
+        skill_name = "series_arc_comic"
+    else:
+        skill_name = "series_arc_manhwa"
+
+    logger.info(f"[Series Arc Skill] Invoking skill '{skill_name}' for title='{body.title}' (format='{fmt}')...")
+    return await run_md_skill(
+        skill_name,
+        body.model,
+        api_key=user_api_key,
+        title=body.title,
+        logline=body.logline or "",
+        genre=body.genre or "action_fantasy",
+        art_style=body.art_style or "default",
+        total_sessions=body.total_sessions or 1,
+        chapters_per_session=body.chapters_per_session or 5,
+        panels_per_chapter=body.panels_per_chapter or 8,
+        pacing=body.pacing or "dynamic",
+        dialogue_density=body.dialogue_density or "balanced",
+    )
+
+
+@router.post("/skills/series-arc/manhwa", summary="Architect authentic Korean Webtoon Manhwa vertical-scroll series")
+async def direct_series_arc_manhwa(body: SeriesArcRequest, user_api_key: dict = Depends(get_user_gemini_key)):
+    logger.info(f"[Series Arc Manhwa Skill] Invoking 'series_arc_manhwa' for title='{body.title}'...")
+    return await run_md_skill(
+        "series_arc_manhwa",
+        body.model,
+        api_key=user_api_key,
+        title=body.title,
+        logline=body.logline or "",
+        genre=body.genre or "action_fantasy",
+        art_style=body.art_style or "manhwa_action_hunter",
+        total_sessions=body.total_sessions or 1,
+        chapters_per_session=body.chapters_per_session or 5,
+        panels_per_chapter=body.panels_per_chapter or 8,
+        pacing=body.pacing or "dynamic",
+        dialogue_density=body.dialogue_density or "balanced",
+    )
+
+
+@router.post("/skills/series-arc/comic", summary="Architect authentic Japanese Manga & Graphic Comic series")
+async def direct_series_arc_comic(body: SeriesArcRequest, user_api_key: dict = Depends(get_user_gemini_key)):
+    logger.info(f"[Series Arc Comic Skill] Invoking 'series_arc_comic' for title='{body.title}'...")
+    return await run_md_skill(
+        "series_arc_comic",
+        body.model,
+        api_key=user_api_key,
+        title=body.title,
+        logline=body.logline or "",
+        genre=body.genre or "action_fantasy",
+        art_style=body.art_style or "manga_shonen_jump",
+        total_sessions=body.total_sessions or 1,
+        chapters_per_session=body.chapters_per_session or 5,
+        panels_per_chapter=body.panels_per_chapter or 8,
+        pacing=body.pacing or "dynamic",
+        dialogue_density=body.dialogue_density or "balanced",
+    )
+
+
+@router.post("/skills/series-arc/anime", summary="Architect authentic Cinematic 24fps Sakuga Anime series")
+async def direct_series_arc_anime(body: SeriesArcRequest, user_api_key: dict = Depends(get_user_gemini_key)):
+    logger.info(f"[Series Arc Anime Skill] Invoking 'series_arc_anime' for title='{body.title}'...")
+    return await run_md_skill(
+        "series_arc_anime",
+        body.model,
+        api_key=user_api_key,
+        title=body.title,
+        logline=body.logline or "",
+        genre=body.genre or "action_fantasy",
+        art_style=body.art_style or "anime_ufotable_cinematic",
+        total_sessions=body.total_sessions or 1,
+        chapters_per_session=body.chapters_per_session or 5,
+        panels_per_chapter=body.panels_per_chapter or 8,
+        pacing=body.pacing or "dynamic",
+        dialogue_density=body.dialogue_density or "balanced",
+    )
+
 

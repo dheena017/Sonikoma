@@ -96,22 +96,23 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
   return (
     <div
       id="dynamic_input_box"
-      className="relative z-20 w-full min-w-0 space-y-5 overflow-visible rounded-lg border border-white/10 bg-[#151515] p-4 sm:p-6 animate-fade-in"
+      className="relative z-20 rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#121212] to-[#0E0E0E] backdrop-blur-2xl p-4 sm:p-8 shadow-2xl space-y-6 min-w-0 w-full overflow-visible animate-fade-in"
     >
       {/* 1. Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1.5">
-          <div className="mb-2 flex w-fit items-center gap-2 text-emerald-300">
-            <Sparkles className="h-4 w-4 shrink-0" />
-            <span className="text-[11px] font-semibold uppercase">
-              Import source
+          <div className="w-fit flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E1E1E] border border-[#2F2F2F] text-[#60A5FA] shadow-sm">
+            <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
+            <span className="text-[10px] font-black tracking-[0.2em] uppercase font-mono">
+              Project Constructor
             </span>
           </div>
-          <h2 className="text-xl font-semibold leading-tight text-white sm:text-2xl">
-            Start a project
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-[1.1]">
+            Initialize New Video Pipeline
           </h2>
-          <p className="text-sm leading-relaxed text-neutral-400">
-            Paste a chapter link or upload comic pages from your device.
+          <p className="text-xs sm:text-sm text-neutral-400 font-medium">
+            Define your project parameters and Manhwa, Manga, or Webcomic source
+            link to begin.
           </p>
         </div>
       </div>
@@ -119,7 +120,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
       {/* 2. Input Mode Selector & Tab Header */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2F2F2F] pb-4">
-          <div className="grid w-full grid-cols-2 gap-1 rounded-lg border border-white/10 bg-[#101010] p-1 sm:w-fit">
+          <div className="grid grid-cols-2 w-full sm:w-fit p-1 rounded-2xl bg-[#121212] border border-[#2F2F2F] gap-1.5 shadow-inner">
             <Tooltip
               text="Import panels via online webtoon, manga, or comic reader URL"
               placement="bottom"
@@ -127,19 +128,19 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               <button
                 type="button"
                 onClick={() => setInputMode("url")}
-                className={`flex min-h-10 min-w-0 items-center justify-center gap-2 rounded-md px-3 text-xs font-medium leading-tight transition-colors cursor-pointer sm:px-4 ${
+                className={`min-w-0 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 text-center leading-tight cursor-pointer ${
                   inputMode === "url"
-                    ? "bg-white/10 text-white"
-                    : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                    ? "bg-neutral-800 text-white border border-neutral-700 font-bold shadow-sm"
+                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-[#2F2F2F]"
                 }`}
-                aria-label="Import from URL"
+                aria-label="Scrape Comic / Manhwa URL"
               >
                 <Book
                   className={`w-4 h-4 ${
-                    inputMode === "url" ? "text-emerald-300" : "text-neutral-400"
+                    inputMode === "url" ? "text-white" : "text-neutral-400"
                   }`}
                 />
-                <span className="min-w-0">From URL</span>
+                <span className="min-w-0">Scrape Comic / Manhwa URL</span>
               </button>
             </Tooltip>
 
@@ -150,19 +151,19 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
               <button
                 type="button"
                 onClick={() => setInputMode("upload")}
-                className={`flex min-h-10 min-w-0 items-center justify-center gap-2 rounded-md px-3 text-xs font-medium leading-tight transition-colors cursor-pointer sm:px-4 ${
+                className={`min-w-0 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 text-center leading-tight cursor-pointer ${
                   inputMode === "upload"
-                    ? "bg-white/10 text-white"
-                    : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                    ? "bg-neutral-800 text-white border border-neutral-700 font-bold shadow-sm"
+                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-[#2F2F2F]"
                 }`}
-                aria-label="Upload comic pages"
+                aria-label="Upload Local Images"
               >
                 <UploadCloud
                   className={`w-4 h-4 ${
-                    inputMode === "upload" ? "text-emerald-300" : "text-neutral-400"
+                    inputMode === "upload" ? "text-white" : "text-neutral-400"
                   }`}
                 />
-                <span className="min-w-0">Upload pages</span>
+                <span className="min-w-0">Upload Local Images</span>
                 {selectedFiles.length > 0 && (
                   <span className="px-2 py-0.5 text-[9px] font-black bg-white/20 text-white rounded-full font-mono">
                     {selectedFiles.length}

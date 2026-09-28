@@ -114,6 +114,47 @@ const AICreditWalletPage = React.lazy(
   () => import("@/features/ai_core/pages/AICreditWalletPage")
 );
 
+// --- AI Generated Series Suite (Lazy Loaded) ---
+const AISeriesPage = React.lazy(
+  () => import("@/features/editor_series/pages/AISeriesPage")
+);
+const AISeriesGeneratorPage = React.lazy(
+  () => import("@/features/editor_series/pages/AISeriesGeneratorPage")
+);
+const ManhwaStudioPage = React.lazy(
+  () => import("@/features/editor_series/pages/ManhwaStudioPage")
+);
+const ComicStudioPage = React.lazy(
+  () => import("@/features/editor_series/pages/ComicStudioPage")
+);
+const AnimeStudioPage = React.lazy(
+  () => import("@/features/editor_series/pages/AnimeStudioPage")
+);
+const CharacterVaultPage = React.lazy(
+  () => import("@/features/editor_series/pages/CharacterVaultPage")
+);
+const WorldBuildingVaultPage = React.lazy(
+  () => import("@/features/editor_series/pages/WorldBuildingVaultPage")
+);
+const SeriesArcDirectorPage = React.lazy(
+  () => import("@/features/editor_series/pages/SeriesArcDirectorPage")
+);
+const VisualFXChoreographerPage = React.lazy(
+  () => import("@/features/editor_series/pages/VisualFXChoreographerPage")
+);
+const AudioDubStagePage = React.lazy(
+  () => import("@/features/editor_series/pages/AudioDubStagePage")
+);
+const SeriesLiveMonitorPage = React.lazy(
+  () => import("@/features/editor_series/pages/SeriesLiveMonitorPage")
+);
+const SeriesReaderTheaterPage = React.lazy(
+  () => import("@/features/editor_series/pages/SeriesReaderTheaterPage")
+);
+const SeriesExportMasterPage = React.lazy(
+  () => import("@/features/editor_series/pages/SeriesExportMasterPage")
+);
+
 import MainLayout from "@/components/layout/MainLayout";
 import { useProjectStore } from "@/shared/hooks";
 
@@ -231,8 +272,21 @@ export function isKnownRoute(path: string): boolean {
     return true;
   }
 
+  // 8. AI Generated Series Ecosystem
+  if (
+    clean === "/ai-series" ||
+    clean === "/series-generator" ||
+    clean.startsWith("/studio/") ||
+    clean.startsWith("/series/") ||
+    clean.startsWith("/watch/") ||
+    clean.startsWith("/read/")
+  ) {
+    return true;
+  }
+
   return false;
 }
+
 
 export interface AppRouterProps {
   currentPath: string;
@@ -775,11 +829,18 @@ export default function AppRouter(props: AppRouterProps) {
     !hasSavedToken &&
     currentPath !== "/scraper" &&
     !currentPath.startsWith("/editor") &&
-    !currentPath.startsWith("/scraper/editor")
+    !currentPath.startsWith("/scraper/editor") &&
+    !currentPath.startsWith("/ai-series") &&
+    !currentPath.startsWith("/series-generator") &&
+    !currentPath.startsWith("/studio/") &&
+    !currentPath.startsWith("/series/") &&
+    !currentPath.startsWith("/watch/") &&
+    !currentPath.startsWith("/read/")
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return null;
   }
+
 
   // --------------------------------------------------------------------------
   // ROUTING / NAVIGATION PATH CHECKS
@@ -920,6 +981,41 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/video-editor" ||
         currentPath === "/video-editor/" ||
         currentPath.startsWith("/video-editor/"),
+
+      // AI Generated Series Flags
+      isAISeriesPath:
+        currentPath === "/ai-series" ||
+        currentPath === "/ai-series/" ||
+        currentPath === "/series-generator" ||
+        currentPath === "/series-generator/" ||
+        currentPath.startsWith("/studio/") ||
+        currentPath.startsWith("/series/") ||
+        currentPath.startsWith("/watch/") ||
+        currentPath.startsWith("/read/"),
+      isAISeriesHubPath:
+        currentPath === "/ai-series" || currentPath === "/ai-series/",
+      isAISeriesGeneratorPath:
+        currentPath === "/series-generator" ||
+        currentPath === "/series-generator/",
+      isManhwaStudioPath: currentPath.startsWith("/studio/manhwa/"),
+      isComicStudioPath: currentPath.startsWith("/studio/comic/"),
+      isAnimeStudioPath: currentPath.startsWith("/studio/anime/"),
+      isCharacterVaultPath:
+        currentPath.includes("/cast") && currentPath.startsWith("/series/"),
+      isWorldVaultPath:
+        currentPath.includes("/world") && currentPath.startsWith("/series/"),
+      isTimelinePath:
+        currentPath.includes("/timeline") && currentPath.startsWith("/series/"),
+      isVFXStagePath:
+        currentPath.includes("/vfx") && currentPath.startsWith("/series/"),
+      isDubbingStagePath:
+        currentPath.includes("/dubbing") && currentPath.startsWith("/series/"),
+      isLiveMonitorPath:
+        currentPath.includes("/monitor") && currentPath.startsWith("/series/"),
+      isTheaterPath:
+        currentPath.startsWith("/watch/") || currentPath.startsWith("/read/"),
+      isExportMasterPath:
+        currentPath.includes("/export") && currentPath.startsWith("/series/"),
     };
   }, [currentPath]);
 
@@ -957,6 +1053,20 @@ export default function AppRouter(props: AppRouterProps) {
     isAIWalletPath,
     isImageEditorPage,
     isVideoEditorPath,
+    isAISeriesPath,
+    isAISeriesHubPath,
+    isAISeriesGeneratorPath,
+    isManhwaStudioPath,
+    isComicStudioPath,
+    isAnimeStudioPath,
+    isCharacterVaultPath,
+    isWorldVaultPath,
+    isTimelinePath,
+    isVFXStagePath,
+    isDubbingStagePath,
+    isLiveMonitorPath,
+    isTheaterPath,
+    isExportMasterPath,
   } = pathFlags;
 
   const isAnyAdmin = isAdminPath || isAdminDashboardPath;
@@ -1177,6 +1287,7 @@ export default function AppRouter(props: AppRouterProps) {
       isAnyAdmin={isAnyAdmin}
       isCreativeSuitePath={isCreativeSuitePath}
       isAICorePath={isAICorePath}
+      isAISeriesPath={isAISeriesPath}
       isImageEditorPage={isImageEditorPage}
       isProEditorPage={isProEditorPage}
       isSidebarOpen={isSidebarOpen}
@@ -1420,6 +1531,86 @@ export default function AppRouter(props: AppRouterProps) {
             <ProjectsPage />
           </div>
         )}
+
+        {/* AI GENERATED SERIES ECOSYSTEM VIEWS */}
+        {isAISeriesHubPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <AISeriesPage />
+          </div>
+        )}
+
+        {isAISeriesGeneratorPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <AISeriesGeneratorPage />
+          </div>
+        )}
+
+        {isManhwaStudioPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <ManhwaStudioPage />
+          </div>
+        )}
+
+        {isComicStudioPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <ComicStudioPage />
+          </div>
+        )}
+
+        {isAnimeStudioPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <AnimeStudioPage />
+          </div>
+        )}
+
+        {isCharacterVaultPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <CharacterVaultPage />
+          </div>
+        )}
+
+        {isWorldVaultPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <WorldBuildingVaultPage />
+          </div>
+        )}
+
+        {isTimelinePath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <SeriesArcDirectorPage />
+          </div>
+        )}
+
+        {isVFXStagePath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <VisualFXChoreographerPage />
+          </div>
+        )}
+
+        {isDubbingStagePath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <AudioDubStagePage />
+          </div>
+        )}
+
+        {isLiveMonitorPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <SeriesLiveMonitorPage />
+          </div>
+        )}
+
+        {isTheaterPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <SeriesReaderTheaterPage />
+          </div>
+        )}
+
+        {isExportMasterPath && (
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
+            <SeriesExportMasterPage />
+          </div>
+        )}
+
 
         {/* PAGE VIEW 2.25: SaaS Profile & Account Settings */}
         {isSettingsAccountPath && (

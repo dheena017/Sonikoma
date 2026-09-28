@@ -29,6 +29,7 @@ from api.v1.video.router import video_router
 from api.v1.jobs import jobs_router
 from api.v1.export.router import export_router
 from api.v1.health import health_router
+from app.api.v1.series.router import ai_series_master_router
 
 api_router = APIRouter()
 
@@ -47,6 +48,8 @@ api_router.include_router(video_router,          prefix="/api/v1/video", tags=["
 api_router.include_router(jobs_router,           prefix="/api/v1/jobs", tags=["11. Background Jobs"])
 api_router.include_router(export_router,         prefix="/api/v1/export", tags=["12. Export & Archiving"])
 api_router.include_router(health_router,         prefix="/api/v1/system", tags=["13. System Health & Telemetry"])
+api_router.include_router(ai_series_master_router, prefix="/api/v1/ai-series", tags=["14. AI Generated Series"])
+
 
 
 

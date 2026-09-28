@@ -263,6 +263,10 @@ class AIOrchestrator:
         "smart_crop": "gemini-2.5-flash",
         "chat_completion": "gemini-2.5-flash",
         "text": "gemini-2.5-flash",
+        "series_arc_director": "gemini-2.5-flash",
+        "series_arc_comic": "gemini-2.5-flash",
+        "series_arc_manhwa": "gemini-2.5-flash",
+        "series_arc_anime": "gemini-2.5-flash",
     }
 
     # Capability-aware fallback policy

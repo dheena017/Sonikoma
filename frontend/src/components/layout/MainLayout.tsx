@@ -44,6 +44,15 @@ const AICoreSidebar = React.lazy(
 const AICoreMiniSidebar = React.lazy(
   () => import("@/features/ai_core/components/AICoreMiniSidebar")
 );
+const AISeriesHeader = React.lazy(
+  () => import("@/features/editor_series/components/AISeriesHeader")
+);
+const AISeriesSidebar = React.lazy(
+  () => import("@/features/editor_series/components/AISeriesSidebar")
+);
+const AISeriesMiniSidebar = React.lazy(
+  () => import("@/features/editor_series/components/AISeriesMiniSidebar")
+);
 const ActiveProjectSelectorDrawer = React.lazy(
   () => import("@/components/layout/ActiveProjectSelectorDrawer")
 );
@@ -58,6 +67,7 @@ export interface MainLayoutProps {
   isAnyAdmin: boolean;
   isCreativeSuitePath: boolean;
   isAICorePath?: boolean;
+  isAISeriesPath?: boolean;
   isImageEditorPage: boolean;
   isProEditorPage: boolean;
   isVideoEditorPage: boolean;
@@ -189,6 +199,7 @@ export default function MainLayout(props: MainLayoutProps) {
     isAnyAdmin,
     isCreativeSuitePath,
     isAICorePath = false,
+    isAISeriesPath: propIsAISeriesPath,
     isImageEditorPage,
     isProEditorPage,
     isVideoEditorPage,
@@ -312,6 +323,25 @@ export default function MainLayout(props: MainLayoutProps) {
     !isImageEditorPage &&
     !isVideoEditorPage;
 
+  const isAISeriesPath =
+    propIsAISeriesPath ??
+    (currentPath === "/ai-series" ||
+      currentPath === "/ai-series/" ||
+      currentPath === "/series-generator" ||
+      currentPath === "/series-generator/" ||
+      currentPath.startsWith("/studio/") ||
+      currentPath.startsWith("/series/") ||
+      currentPath.startsWith("/watch/") ||
+      currentPath.startsWith("/read/"));
+
+  const isSeriesStudioRoute =
+    currentPath.startsWith("/studio/") ||
+    currentPath.startsWith("/watch/") ||
+    currentPath.startsWith("/read/");
+
+  const isFullBleedNoScroll =
+    isImageEditorPage || isProEditorPage || isVideoEditorPage || isSeriesStudioRoute;
+
   useEffect(() => {
     if (currentPath !== "/auto-crop" && showAutoCropModal) {
       if (appLogic?.setShowAutoCropModal) {
@@ -430,40 +460,57 @@ export default function MainLayout(props: MainLayoutProps) {
           </>
         ) : isImageEditorPage || isVideoEditorPage ? null : (
           <>
-            <Sidebar
-              isProcessing={appLogic.isProcessing}
-              panels={panels}
-              scrapedImages={scrapedImages}
-              totalCalculatedDuration={totalCalculatedDuration}
-              currentPath={currentPath}
-              editingImageIdx={editingImageIdx}
-              lastEditorPath={lastEditorPath}
-              isBatchCropping={isBatchCropping}
-              isCleaningBubbles={isCleaningBubbles}
-              isOpen={isSidebarOpen}
-              onClose={handleCloseSidebar}
-              projectId={projectId}
-              isDirty={isWorkspaceDirty}
-              navigateTo={navigateTo}
-              notifications={notifications}
-              seriesSlug={seriesSlugState}
-              chapterSlug={chapterSlugState}
-              user={user}
-            />
+            {isAISeriesPath ? (
+              <AISeriesSidebar
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                isOpen={isSidebarOpen}
+                onClose={handleCloseSidebar}
+              />
+            ) : (
+              <Sidebar
+                isProcessing={appLogic.isProcessing}
+                panels={panels}
+                scrapedImages={scrapedImages}
+                totalCalculatedDuration={totalCalculatedDuration}
+                currentPath={currentPath}
+                editingImageIdx={editingImageIdx}
+                lastEditorPath={lastEditorPath}
+                isBatchCropping={isBatchCropping}
+                isCleaningBubbles={isCleaningBubbles}
+                isOpen={isSidebarOpen}
+                onClose={handleCloseSidebar}
+                projectId={projectId}
+                isDirty={isWorkspaceDirty}
+                navigateTo={navigateTo}
+                notifications={notifications}
+                seriesSlug={seriesSlugState}
+                chapterSlug={chapterSlugState}
+                user={user}
+              />
+            )}
             {!isSidebarOpen &&
               !isDrawerOpen &&
               !isProEditorPage &&
               !isAnyAdmin && (
-                <MiniSidebar
-                  currentPath={currentPath}
-                  navigateTo={navigateTo}
-                  notificationsCount={
-                    notifications.filter((n) => !n.isRead).length
-                  }
-                  projectId={projectId}
-                  seriesSlug={seriesSlugState}
-                  chapterSlug={chapterSlugState}
-                />
+                isAISeriesPath ? (
+                  <AISeriesMiniSidebar
+                    currentPath={currentPath}
+                    navigateTo={navigateTo}
+                    onOpenSidebar={handleToggleSidebar}
+                  />
+                ) : (
+                  <MiniSidebar
+                    currentPath={currentPath}
+                    navigateTo={navigateTo}
+                    notificationsCount={
+                      notifications.filter((n) => !n.isRead).length
+                    }
+                    projectId={projectId}
+                    seriesSlug={seriesSlugState}
+                    chapterSlug={chapterSlugState}
+                  />
+                )
               )}
           </>
         )}
@@ -530,6 +577,23 @@ export default function MainLayout(props: MainLayoutProps) {
                 user={user}
                 addNotification={addNotification}
               />
+            ) : isAISeriesPath ? (
+              <AISeriesHeader
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                fetchWithInterceptor={fetchWithInterceptor}
+                onToggleSidebar={handleToggleSidebar}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                isSidebarOpen={isSidebarOpen}
+                user={user}
+                addNotification={addNotification}
+              />
             ) : (
               <Header
                 isProcessing={appLogic.isProcessing}
@@ -580,8 +644,8 @@ export default function MainLayout(props: MainLayoutProps) {
         {/* Scrollable Main Children Page Area */}
         <main
           id="main-scrollable-area"
-          className={`flex-1 flex flex-col w-full relative min-h-0 custom-purple-scrollbar page-scrollbar ${
-            isImageEditorPage || isProEditorPage || isVideoEditorPage
+          className={`flex-1 flex flex-col w-full relative min-h-0 h-full custom-purple-scrollbar page-scrollbar ${
+            isFullBleedNoScroll
               ? "overflow-hidden"
               : "overflow-y-auto overflow-x-hidden"
           }`}
@@ -614,9 +678,11 @@ export default function MainLayout(props: MainLayoutProps) {
           {/* Children Page Views */}
           <div
             key={currentPath}
-            className={`w-full max-w-full min-w-0 flex-1 flex flex-col ${
-              isImageEditorPage || isProEditorPage || isVideoEditorPage
-                ? "p-0"
+            className={`w-full max-w-full min-w-0 min-h-0 flex-1 flex flex-col ${
+              isFullBleedNoScroll
+                ? !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isVideoEditorPage
+                  ? "p-0 lg:pl-20 h-full overflow-hidden"
+                  : "p-0 h-full overflow-hidden"
                 : !isSidebarOpen
                 ? "px-4 sm:px-6 lg:px-8 lg:pl-28 pb-8 page-view-transition stagger-container"
                 : "px-4 sm:px-6 lg:px-8 pb-8 page-view-transition stagger-container"

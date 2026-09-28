@@ -90,18 +90,16 @@ class BaseAISkill:
         return None
 
     def build_prompt(self, **kwargs) -> str:
-        """Dynamically inserts key-value contexts into prompt brackets."""
-        safe_template = self.prompt_template
+        """Dynamically inserts key-value contexts into prompt brackets safely without crashing on JSON or markdown brackets."""
+        template = self.prompt_template
+        if not kwargs:
+            return template
 
-        try:
-            return safe_template.format(**kwargs)
-        except KeyError as e:
-            logger.warning(f"Missing parameter '{e}' during dynamic variable replacement in skill '{self.name}'. Injecting empty string.")
-            kwargs[str(e).strip("'")] = ""
-            return safe_template.format(**kwargs)
-        except Exception as e:
-            logger.error(f"Failed to compile prompt template for '{self.name}': {e}")
-            return safe_template
+        for k, v in kwargs.items():
+            val_str = str(v) if v is not None else ""
+            template = template.replace(f"{{{k}}}", val_str)
+
+        return template
 
     async def execute(
         self,

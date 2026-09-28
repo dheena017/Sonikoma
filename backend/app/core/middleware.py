@@ -103,6 +103,7 @@ PUBLIC_ROUTE_PREFIXES = (
     "/api/v1/video/",
     "/api/v1/jobs/",
     "/api/v1/ai/",
+    "/api/v1/ai-series/",
     "/api/v1/auth/google/",
 )
 
