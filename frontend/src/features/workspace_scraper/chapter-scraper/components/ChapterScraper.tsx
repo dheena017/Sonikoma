@@ -9,6 +9,7 @@ import {
   Clock,
   Sparkles,
   Loader,
+  Loader2,
   AlertCircle,
   Zap,
   Bookmark,
@@ -17,6 +18,7 @@ import {
   Calendar,
   Layers,
   ArrowRight,
+  Image as ImageIcon,
   Download,
   BookOpen,
   FolderOpen,
@@ -52,6 +54,20 @@ import { makeSafeFilename } from "@/shared/utils/downloadNaming";
 import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
 import { ChapterScraperSkeleton } from "@/shared/ui/loading";
 import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
+
+// ── Likes Count Cleaner & Formatter ───────────────────────────────────────────
+function formatLikesCount(raw: string | number | undefined): string | null {
+  if (!raw) return null;
+  const str = String(raw).trim();
+  const cleaned = str.replace(/^likes?[\s:.-]*/i, "").replace(/[\s:.-]*likes?$/i, "").trim();
+  const numericVal = parseFloat(cleaned.replace(/,/g, ""));
+  if (!isNaN(numericVal) && numericVal > 0) {
+    if (numericVal >= 1_000_000) return `${(numericVal / 1_000_000).toFixed(1)}M`;
+    if (numericVal >= 10_000) return `${(numericVal / 1000).toFixed(1)}K`;
+    return numericVal.toLocaleString();
+  }
+  return cleaned || str;
+}
 
 // ── Series URL Validator ──────────────────────────────────────────────────────
 // Accepts full series listing / catalog URLs. Rejects plain-text, homepages,
@@ -154,14 +170,15 @@ interface SeriesMetadata {
 }
 
 interface ChapterScraperProps {
-  onChapterSelect?: (chapter: Chapter) => void;
-  onEpisodeSelect?: (chapter: Chapter) => void; // alias for backwards compatibility
-  onMultipleChaptersSelect?: (chapters: Chapter[]) => void;
-  onMultipleEpisodesSelect?: (chapters: Chapter[]) => void; // alias
+  onChapterSelect?: (chapter: Chapter) => void | Promise<void>;
+  onEpisodeSelect?: (chapter: Chapter) => void | Promise<void>; // alias for backwards compatibility
+  onMultipleChaptersSelect?: (chapters: Chapter[]) => void | Promise<void>;
+  onMultipleEpisodesSelect?: (chapters: Chapter[]) => void | Promise<void>; // alias
   addNotification: (message: string, type: NotificationType) => void;
   fetchWithInterceptor: typeof fetch;
   isStandalone?: boolean;
   initialSeriesName?: string;
+  scrapeImages?: (url: string, projectId: string) => Promise<boolean>;
 }
 
 const parseLikes = (likesStr?: string): number => {
@@ -184,14 +201,8 @@ const parseWebtoonDate = (dateStr: string): Date | null => {
   return null;
 };
 
-const createTempProjectId = (slug?: string) => {
-  const cleanSlug = (slug || "comic")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return `temp_${cleanSlug}_${Date.now().toString(36)}_${Math.random()
-    .toString(36)
-    .substring(2, 6)}`;
+const createTempProjectId = (_slug?: string) => {
+  return `temp_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 };
 
 export const ChapterScraper: React.FC<ChapterScraperProps> = ({
@@ -203,10 +214,16 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
   fetchWithInterceptor,
   isStandalone = false,
   initialSeriesName,
+  scrapeImages,
 }) => {
   const handleSelectCallback = onChapterSelect || onEpisodeSelect;
   const handleMultipleCallback =
     onMultipleChaptersSelect || onMultipleEpisodesSelect;
+
+  // Single Chapter Direct Import Status
+  const [importingChapterUrl, setImportingChapterUrl] = useState<string | null>(
+    null
+  );
 
   // Form Inputs
   const [urlInput, setUrlInput] = useState("");
@@ -331,12 +348,32 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     setBookmarkedUrls(FavoritesManager.getBookmarks());
     setReadUrls(FavoritesManager.getReadChapters());
 
-    // Auto-discover if initialSeriesName or ?url= query is present
+    // Clean up any stale localStorage items
+    try {
+      localStorage.removeItem("chapter_scraper_url");
+      localStorage.removeItem("episode_scraper_url");
+    } catch {}
+
+    // Clean up leftover slug from URL pathname (e.g. /scraper/not-so-silent -> /scraper)
+    const currentPath = window.location.pathname;
+    if (
+      currentPath.startsWith("/scraper/") &&
+      !currentPath.startsWith("/scraper/editor") &&
+      !currentPath.startsWith("/scraper/audio-settings")
+    ) {
+      window.history.replaceState(null, "", "/chapter-scraper");
+    }
+
+    // Only auto-scrape if a VALID URL is explicitly provided in query params (?url=...) or initialSeriesName prop
     const searchParams = new URLSearchParams(window.location.search);
-    const queryUrl = searchParams.get("url") || searchParams.get("target");
-    const queryTitle = searchParams.get("title") || searchParams.get("series");
-    if (queryUrl) {
+    const queryUrl =
+      searchParams.get("url") ||
+      searchParams.get("target") ||
+      initialSeriesName;
+    if (queryUrl && validateSeriesUrl(queryUrl).valid) {
       setUrlInput(queryUrl);
+      const queryTitle =
+        searchParams.get("title") || searchParams.get("series");
       if (queryTitle) {
         setSeriesMetadata({
           title: queryTitle.replace(/\s*\|\s*.*$/, "").trim() || queryTitle,
@@ -348,48 +385,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         });
       }
       triggerScrape(queryUrl, undefined, false);
-      return;
     }
-
-    const isReservedRoute =
-      initialSeriesName === "scraper" ||
-      initialSeriesName === "chapters" ||
-      initialSeriesName === "chapter-scraper" ||
-      initialSeriesName === "episode-scraper" ||
-      initialSeriesName === "editor" ||
-      initialSeriesName === "audio-settings";
-
-    if (initialSeriesName && !isReservedRoute) {
-      const recents = FavoritesManager.getRecent();
-      const favorites = FavoritesManager.getFavorites();
-      const allItems = [...recents, ...favorites];
-
-      const match = allItems.find((item) => {
-        const titleSlug = (item.title || "")
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "");
-        const urlSlug = (item.url || "")
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "");
-        const targetSlug = initialSeriesName.toLowerCase();
-        return (
-          titleSlug.includes(targetSlug) ||
-          targetSlug.includes(titleSlug) ||
-          urlSlug.includes(targetSlug) ||
-          item.title_no === initialSeriesName
-        );
-      });
-
-      if (match && match.url) {
-        setUrlInput(match.url);
-        triggerScrape(match.url, match.title_no, false);
-      } else {
-        triggerScrape(initialSeriesName, undefined, false);
-      }
-    }
-  }, [initialSeriesName]);
+  }, []);
 
   const scrapeChaptersAPI = async (data: {
     url?: string;
@@ -575,29 +572,6 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
           );
         }
 
-        // Dynamically update browser URL to /scraper/{series-slug}
-        try {
-          const slug =
-            result.series_slug ||
-            resolvedTitle
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")
-              .replace(/^-+|-+$/g, "") ||
-            "";
-
-          if (slug) {
-            const newPath = `/scraper/${encodeURIComponent(slug)}`;
-            if (
-              window.location.pathname !== newPath &&
-              !window.location.pathname.startsWith("/scraper/editor")
-            ) {
-              window.history.replaceState(null, "", newPath);
-            }
-          }
-        } catch (e) {
-          console.debug("[ChapterScraper] Route sync notice:", e);
-        }
-
         const totalFound = result.total_chapters ?? normalizedChapters.length;
         const cacheNote = result.from_cache ? " (from cache)" : " (fresh)";
         addNotification(`Found ${totalFound} chapters!${cacheNote}`, "success");
@@ -616,110 +590,53 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     }
   };
 
-  // Initial load from URL params, stored URLs, or route /scraper/{seriesName}
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const paramUrl = params.get("url");
-    const storedUrl =
-      localStorage.getItem("chapter_scraper_url") ||
-      localStorage.getItem("episode_scraper_url");
-    let target = paramUrl || storedUrl;
+  const handleChapterClick = async (chapter: Chapter) => {
+    if (importingChapterUrl) return;
 
-    if (!target && initialSeriesName) {
-      if (
-        initialSeriesName.startsWith("http://") ||
-        initialSeriesName.startsWith("https://")
-      ) {
-        target = initialSeriesName;
-      } else {
-        try {
-          const recents = FavoritesManager.getRecent();
-          const favorites = FavoritesManager.getFavorites();
-          const allItems = [...recents, ...favorites];
-          const cleanInit = initialSeriesName
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-");
-          const found = allItems.find((item) => {
-            const itemSlug = (item.title || "")
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-");
-            return (
-              itemSlug === cleanInit ||
-              item.title_no === initialSeriesName ||
-              (item.url &&
-                item.url
-                  .toLowerCase()
-                  .includes(initialSeriesName.toLowerCase()))
-            );
-          });
-          if (found && found.url) {
-            target = found.url;
-          } else if (/^\d+$/.test(initialSeriesName)) {
-            setTitleNoInput(initialSeriesName);
-            triggerScrape(undefined, initialSeriesName);
-            return;
-          } else if (initialSeriesName && initialSeriesName !== "chapters") {
-            target = initialSeriesName;
-          }
-        } catch (e) {
-          console.debug("[ChapterScraper] Favorites lookup:", e);
-          if (initialSeriesName && initialSeriesName !== "chapters") {
-            target = initialSeriesName;
-          }
-        }
-      }
-    }
-
-    if (target) {
-      setUrlInput(target);
-      localStorage.removeItem("chapter_scraper_url");
-      localStorage.removeItem("episode_scraper_url");
-
-      if (paramUrl) {
-        const newParams = new URLSearchParams(window.location.search);
-        newParams.delete("url");
-        const newSearch = newParams.toString();
-        const newUrl =
-          window.location.pathname + (newSearch ? "?" + newSearch : "");
-        window.history.replaceState(null, "", newUrl);
-      }
-
-      triggerScrape(target);
-    }
-  }, []);
-
-  const handleChapterClick = (chapter: Chapter) => {
     FavoritesManager.markAsRead(chapter.url);
     setReadUrls(FavoritesManager.getReadChapters());
 
     if (handleSelectCallback) {
-      handleSelectCallback(chapter);
+      try {
+        setImportingChapterUrl(chapter.url);
+        await Promise.resolve(handleSelectCallback(chapter));
+      } finally {
+        setImportingChapterUrl(null);
+      }
       return;
     }
 
     const temporaryProjectId = createTempProjectId(
       seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
     );
+
+    if (typeof scrapeImages === "function") {
+      try {
+        setImportingChapterUrl(chapter.url);
+        const ok = await scrapeImages(chapter.url, temporaryProjectId);
+        if (ok) {
+          localStorage.removeItem("auto_import_url");
+          const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+
+          const nav = (window as any).navigateTo;
+          if (typeof nav === "function") {
+            nav(targetPath);
+          } else {
+            window.history.pushState({}, "", targetPath);
+            window.dispatchEvent(new Event("popstate"));
+          }
+        }
+      } catch (err) {
+        console.error("Direct chapter scrape error:", err);
+      } finally {
+        setImportingChapterUrl(null);
+      }
+      return;
+    }
+
     localStorage.setItem("auto_import_url", chapter.url);
 
-    const sSlug = (
-      seriesMetadata?.seriesSlug ||
-      seriesMetadata?.title ||
-      titleNoInput ||
-      ""
-    )
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    const cSlug = (chapter.title || `chapter-${chapter.number}`)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    const targetPath =
-      sSlug && cSlug
-        ? `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
-        : `/scraper/editor?id=${temporaryProjectId}`;
+    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
 
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
@@ -794,24 +711,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
     localStorage.setItem("auto_import_batch", JSON.stringify(selected));
     localStorage.setItem("auto_import_url", selected[0]?.url || "");
 
-    const sSlug = (
-      seriesMetadata?.seriesSlug ||
-      seriesMetadata?.title ||
-      titleNoInput ||
-      ""
-    )
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-    const cSlug = (selected[0]?.title || `chapter-${selected[0]?.number}`)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    const targetPath =
-      sSlug && cSlug
-        ? `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
-        : `/scraper/editor?id=${temporaryProjectId}`;
+    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
 
     const nav = (window as any).navigateTo;
     if (typeof nav === "function") {
@@ -877,22 +777,18 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             e.preventDefault();
             triggerScrape();
           }}
-          className="grid grid-cols-1 lg:grid-cols-[1fr_180px_auto] gap-3 p-5 bg-neutral-900/80 border border-[#3B82F6]/20 rounded-3xl backdrop-blur-xl shadow-2xl animate-in fade-in duration-200"
+          className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 p-4 sm:p-5 bg-neutral-900/80 border border-[#3B82F6]/20 rounded-3xl backdrop-blur-xl shadow-2xl animate-in fade-in duration-200"
         >
-          <div className="relative" ref={suggestionsContainerRef}>
+          <div className="relative">
             <Search
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"
               size={17}
             />
             <input
               type="text"
               value={urlInput}
-              onChange={(e) => {
-                setUrlInput(e.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-      placeholder="Paste a series URL or Webtoons list URL (e.g. .../list?title_no=958)"
+              onChange={(e) => setUrlInput(e.target.value)}
+              placeholder="Paste a series URL or Webtoons list URL (e.g. .../list?title_no=958)"
               className={`w-full rounded-2xl border ${
                 urlInput.trim() && !validateSeriesUrl(urlInput).valid
                   ? "border-amber-500/50 focus:border-amber-500"
@@ -901,52 +797,16 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   : "border-neutral-800 focus:border-neutral-600"
               } bg-neutral-955/90 py-3 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-700 font-mono transition-all`}
             />
-
-            {/* Autocomplete Dropdown */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-neutral-950 border border-neutral-800 rounded-2xl shadow-2xl z-50 overflow-hidden py-2">
-                <div className="px-3 py-1 text-[10px] font-mono text-neutral-500 uppercase tracking-wider">
-                  Recent &amp; Favorite Series
-                </div>
-                {suggestions.map((item, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setUrlInput(item.url || "");
-                      setShowSuggestions(false);
-                      triggerScrape(item.url);
-                    }}
-                    className="w-full px-3.5 py-2 text-left text-xs text-neutral-300 hover:text-white hover:bg-[#2A2A2A] flex items-center justify-between transition-colors font-mono cursor-pointer"
-                  >
-                    <span className="truncate font-semibold">{item.title}</span>
-                    <span className="text-[10px] text-[#3B82F6]/80 shrink-0 ml-2">
-                      {item.genre || "Comic"}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-        </div>
-
-          <div>
-            <input
-              type="text"
-              value={titleNoInput}
-              onChange={(e) => setTitleNoInput(e.target.value)}
-              placeholder="Series ID (Optional)"
-              className="w-full rounded-2xl border border-neutral-800 bg-neutral-955/90 px-3.5 py-3 text-sm text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none font-mono"
-            />
           </div>
 
           <button
             type="submit"
             disabled={
               isLoading ||
-              (!urlInput.trim() && !titleNoInput.trim()) ||
-              (!!urlInput.trim() && !titleNoInput.trim() && !validateSeriesUrl(urlInput).valid)
+              !urlInput.trim() ||
+              !validateSeriesUrl(urlInput).valid
             }
-            className="flex items-center justify-center gap-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] px-6 py-3 text-sm font-extrabold text-white transition-all shadow-lg shadow-black/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] px-6 py-3 text-sm font-extrabold text-white transition-all shadow-lg shadow-black/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-95 border border-[#60A5FA]/30 whitespace-nowrap"
           >
             {isLoading ? (
               <Loader className="h-4 w-4 animate-spin" />
@@ -963,14 +823,14 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
         <div className="p-4 bg-red-950/30 border border-red-500/40 rounded-2xl flex items-center gap-3 text-red-300 text-sm animate-in shake duration-300">
           <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400" />
           <p className="font-mono text-xs flex-1">{error}</p>
-          {(urlInput || titleNoInput) && (
+          {urlInput && (
             <button
               type="button"
               onClick={() => {
                 setError(null);
                 triggerScrape(
                   urlInput || undefined,
-                  titleNoInput || undefined,
+                  undefined,
                   true
                 );
               }}
@@ -1221,7 +1081,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               <h2 className="text-2xl font-black text-white tracking-tight">
                 Chapters
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[#60A5FA] text-xs font-bold font-mono">
+              <span className="px-3 py-1 rounded-full bg-[#0e2238] border border-[#1d4ed8]/35 text-[#38bdf8] text-xs font-bold font-mono">
                 {filteredChapters.length} of {chapters.length}
               </span>
             </div>
@@ -1230,7 +1090,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               {/* Search Chapter */}
               <div className="relative min-w-[220px]">
                 <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
                   size={14}
                 />
                 <input
@@ -1238,19 +1098,19 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search chapter..."
-                  className="w-full rounded-xl border border-transparent bg-neutral-900/80 py-2 pl-9 pr-3 text-xs text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none font-mono"
+                  className="w-full rounded-xl border border-[#1e2332] bg-[#0c0e14] hover:border-neutral-600 py-2 pl-9 pr-3 text-xs text-white placeholder:text-neutral-500 focus:border-[#2563eb] focus:outline-none font-mono shadow-inner transition-colors"
                 />
               </div>
 
               {/* Status Filter Tabs */}
-              <div className="flex items-center bg-neutral-900 border border-transparent rounded-xl p-0.5 text-xs font-mono">
+              <div className="flex items-center bg-[#0c0e14] border border-[#1e2332] rounded-xl p-1 text-xs font-mono shadow-inner gap-1">
                 <button
                   type="button"
                   onClick={() => setReadStatusFilter("all")}
                   className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                     readStatusFilter === "all"
-                      ? "bg-[#2A2A2A] text-white shadow-sm"
-                      : "text-neutral-400 hover:text-white"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   ALL
@@ -1260,8 +1120,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   onClick={() => setReadStatusFilter("unread")}
                   className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                     readStatusFilter === "unread"
-                      ? "bg-[#2A2A2A] text-white shadow-sm"
-                      : "text-neutral-400 hover:text-white"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   DRAFT
@@ -1271,8 +1131,8 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   onClick={() => setReadStatusFilter("read")}
                   className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                     readStatusFilter === "read"
-                      ? "bg-[#2A2A2A] text-white shadow-sm"
-                      : "text-neutral-400 hover:text-white"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                 >
                   READY
@@ -1280,42 +1140,47 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
               </div>
 
               {/* Sort Order Dropdown */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-2 bg-neutral-900 border border-transparent text-neutral-300 hover:text-white rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-neutral-600 cursor-pointer"
-              >
-                <option value="latest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="rating">Top Rated</option>
-                <option value="likes">Most Likes</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-3.5 py-2 bg-[#0c0e14] border border-[#1e2332] hover:border-neutral-600 text-neutral-200 hover:text-white rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-[#2563eb] cursor-pointer appearance-none pr-8 shadow-inner transition-colors"
+                >
+                  <option value="latest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="rating">Top Rated</option>
+                  <option value="likes">Most Likes</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-neutral-400">
+                  <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                </div>
+              </div>
 
               {/* View Mode Toggle */}
-              <div className="flex items-center bg-neutral-900 border border-transparent rounded-xl p-0.5">
+              <div className="flex items-center bg-[#0c0e14] border border-[#1e2332] rounded-xl p-1 gap-1 shadow-inner">
                 <button
                   type="button"
                   onClick={() => setViewMode("grid")}
                   className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                     viewMode === "grid"
-                      ? "bg-neutral-800 text-[#3B82F6] shadow-sm"
-                      : "text-neutral-400 hover:text-white"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                   title="Grid View"
                 >
-                  <Grid size={15} />
+                  <Grid size={14} />
                 </button>
                 <button
                   type="button"
                   onClick={() => setViewMode("list")}
                   className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                     viewMode === "list"
-                      ? "bg-neutral-800 text-[#3B82F6] shadow-sm"
-                      : "text-neutral-400 hover:text-white"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
                   }`}
                   title="List View"
                 >
-                  <List size={15} />
+                  <List size={14} />
                 </button>
               </div>
 
@@ -1326,10 +1191,10 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   setIsMultiSelectMode(!isMultiSelectMode);
                   setSelectedUrls([]);
                 }}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer shadow-inner ${
                   isMultiSelectMode
-                    ? "bg-[#2A2A2A] border-[#3B82F6] text-white shadow-md shadow-black/50"
-                    : "bg-neutral-900 border-transparent text-neutral-300 hover:text-white"
+                    ? "bg-[#2563eb] border-blue-400 text-white shadow-md shadow-blue-600/30"
+                    : "bg-[#0c0e14] border-[#1e2332] hover:border-neutral-600 text-neutral-300 hover:text-white hover:bg-white/5"
                 }`}
               >
                 <SlidersHorizontal size={13} />
@@ -1340,12 +1205,12 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
 
           {/* Multi-Select Floating Action Bar */}
           {isMultiSelectMode && (
-            <div className="p-4 bg-[#2A2A2A] border border-[#3B82F6]/30 rounded-2xl flex flex-wrap gap-4 items-center justify-between animate-in slide-in-from-bottom-2 duration-300 shadow-xl backdrop-blur-xl">
+            <div className="p-4 bg-[#0c0e14] border border-[#2563eb]/40 rounded-2xl flex flex-wrap gap-4 items-center justify-between animate-in slide-in-from-bottom-2 duration-300 shadow-xl backdrop-blur-xl">
               <div className="flex items-center gap-3 text-xs font-mono">
                 <button
                   type="button"
                   onClick={selectAllChapters}
-                  className="text-[#60A5FA] hover:text-white font-bold underline cursor-pointer"
+                  className="text-[#38bdf8] hover:text-white font-bold underline cursor-pointer"
                 >
                   {selectedUrls.length === filteredChapters.length
                     ? "Deselect All"
@@ -1363,7 +1228,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   type="button"
                   disabled={selectedUrls.length === 0}
                   onClick={handleBatchScrape}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-black/50"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-blue-600/30"
                 >
                   <Zap size={13} />
                   <span>Import Batch ({selectedUrls.length})</span>
@@ -1401,145 +1266,184 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
             </div>
           ) : (
             /* ── 5. CHAPTERS PAGE / TABLE VIEW ── */
-            <div className="rounded-xl overflow-hidden border border-[#1E1E26]">
+            <div className="rounded-2xl overflow-hidden border border-[#181a24] bg-[#090b10] shadow-2xl">
               {/* Table header */}
-              <div className="grid grid-cols-[3rem_3.5rem_1fr_7rem_5rem_7.5rem] items-center px-4 py-2.5 bg-[#0D0D12] border-b border-[#1E1E26] sticky top-0 z-10">
-                {isMultiSelectMode && <span />}
-                <span className="text-[10px] font-black text-neutral-600 tracking-widest font-mono uppercase text-right">#</span>
-                <span />
-                <span className="text-[10px] font-black text-neutral-600 tracking-widest font-mono uppercase pl-3">Title</span>
-                <span className="text-[10px] font-black text-neutral-600 tracking-widest font-mono uppercase text-center">Date</span>
-                <span className="text-[10px] font-black text-neutral-600 tracking-widest font-mono uppercase text-center">Rating</span>
-                <span />
+              <div className="grid grid-cols-[4.5rem_5.5rem_1fr_8.5rem_8rem_16rem] items-center px-4 py-3.5 bg-[#0e1017] border-b border-[#181a24] sticky top-0 z-10 text-[11px] font-mono font-bold tracking-widest text-neutral-400 uppercase select-none">
+                <span className="text-center">{isMultiSelectMode ? "Select" : "#"}</span>
+                <span className="text-center">Cover</span>
+                <span className="pl-3">Chapter Title</span>
+                <span className="text-center">Release Date</span>
+                <span className="text-center">Popularity</span>
+                <span className="text-right pr-3">Actions</span>
               </div>
 
               {/* Rows */}
-              {pagedChapters.map((chapter, idx) => {
-                const rawNum = (chapter.number || "").trim();
-                const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() || String(idx + 1);
-                const rawTitle = (chapter.title || "")
-                  .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:\u2013\u2014]?\s*/i, "")
-                  .replace(/^[-:\u2013\u2014\s]+|[-:\u2013\u2014\s]+$/g, "")
-                  .trim();
-                const titleIsSameAsNum = !rawTitle ||
-                  rawTitle.toLowerCase() === cleanNum.toLowerCase() ||
-                  rawTitle.toLowerCase() === `chapter ${cleanNum}`.toLowerCase();
-                const isChapterRead = readUrls.includes(chapter.url);
-                const isChapterBookmarked = bookmarkedUrls.includes(chapter.url);
-                const isChapterSelected = selectedUrls.includes(chapter.url);
-                const displayTitle = !titleIsSameAsNum && rawTitle ? rawTitle : `Chapter ${cleanNum}`;
+              <div className="divide-y divide-[#141620]">
+                {pagedChapters.map((chapter, idx) => {
+                  const rawNum = (chapter.number || "").trim();
+                  const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() || String(idx + 1);
+                  const rawTitle = (chapter.title || "")
+                    .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:\u2013\u2014]?\s*/i, "")
+                    .replace(/^[-:\u2013\u2014\s]+|[-:\u2013\u2014\s]+$/g, "")
+                    .trim();
+                  const titleIsSameAsNum = !rawTitle ||
+                    rawTitle.toLowerCase() === cleanNum.toLowerCase() ||
+                    rawTitle.toLowerCase() === `chapter ${cleanNum}`.toLowerCase();
+                  const isChapterRead = readUrls.includes(chapter.url);
+                  const isChapterBookmarked = bookmarkedUrls.includes(chapter.url);
+                  const isChapterSelected = selectedUrls.includes(chapter.url);
+                  const displayTitle = !titleIsSameAsNum && rawTitle ? rawTitle : `Chapter ${cleanNum}`;
+                  const formattedLikes = formatLikesCount(chapter.likes);
 
-                return (
-                  <div
-                    key={chapter.url}
-                    onClick={() => handleChapterClick(chapter)}
-                    className={`grid grid-cols-[3rem_3.5rem_1fr_7rem_5rem_7.5rem] items-center px-4 py-2.5 border-b border-[#141418] cursor-pointer transition-colors group ${
-                      isChapterSelected
-                        ? "bg-[#3B82F6]/8 border-b-[#3B82F6]/20"
-                        : idx % 2 === 0
-                        ? "bg-[#0F0F14] hover:bg-[#181822]"
-                        : "bg-[#111116] hover:bg-[#181822]"
-                    }`}
-                  >
-                    {/* Multiselect */}
-                    {isMultiSelectMode ? (
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={isChapterSelected}
-                          onChange={() => handleToggleSelect(chapter.url)}
-                          className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
-                        />
-                      </div>
-                    ) : (
-                      /* Episode # */
-                      <span className={`text-right text-[11px] font-black font-mono transition-colors ${
-                        isChapterRead ? "text-neutral-700" : "text-neutral-600 group-hover:text-neutral-400"
-                      }`}>
-                        {cleanNum}
-                      </span>
-                    )}
-
-                    {/* Thumbnail */}
-                    <div className="flex items-center justify-center">
-                      <div className="w-10 h-7 rounded overflow-hidden bg-[#1A1A22] border border-[#2A2A36] shrink-0">
-                        <img
-                          src={getProxiedImageUrl(chapter.cover_image || seriesMetadata?.cover_image, chapter.url)}
-                          alt=""
-                          className="w-full h-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Title */}
-                    <div className="pl-3 min-w-0 flex items-center gap-2">
-                      {isChapterBookmarked && (
-                        <BookmarkCheck size={11} className="text-amber-400 fill-current shrink-0" />
-                      )}
-                      <div className="min-w-0">
-                        <p className={`text-sm font-medium truncate transition-colors ${
-                          isChapterRead
-                            ? "text-neutral-600"
-                            : "text-neutral-200 group-hover:text-white"
-                        }`}>
-                          {displayTitle}
-                        </p>
-                        {isChapterRead && (
-                          <span className="text-[9px] font-bold text-emerald-700 font-mono tracking-wider uppercase">
-                            ✓ Read
+                  return (
+                    <div
+                      key={chapter.url}
+                      onClick={() => !importingChapterUrl && handleChapterClick(chapter)}
+                      className={`grid grid-cols-[4.5rem_5.5rem_1fr_8.5rem_8rem_16rem] items-center px-4 py-3 cursor-pointer transition-colors duration-150 group relative border-b border-[#141620] last:border-b-0 ${
+                        importingChapterUrl === chapter.url
+                          ? "bg-[#2563eb]/20 border-l-2 border-l-[#2563eb]"
+                          : isChapterSelected
+                          ? "bg-[#2563eb]/10 border-l-2 border-l-[#2563eb]"
+                          : "bg-[#090b10] hover:bg-[#0f121b]"
+                      }`}
+                    >
+                      {/* Multiselect / Episode Badge */}
+                      {isMultiSelectMode ? (
+                        <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={isChapterSelected}
+                            onChange={() => handleToggleSelect(chapter.url)}
+                            className="w-4 h-4 rounded accent-[#2563eb] cursor-pointer"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <span className={`px-2.5 py-1 rounded-lg border font-mono text-[11px] font-bold transition-colors ${
+                            isChapterRead
+                              ? "bg-[#10121a] border-neutral-800 text-neutral-500"
+                              : "bg-[#13151f] border-[#1e2230] text-neutral-300 group-hover:border-[#2563eb]/50 group-hover:text-white"
+                          }`}>
+                            #{cleanNum.padStart(2, "0")}
                           </span>
+                        </div>
+                      )}
+
+                      {/* Thumbnail Preview */}
+                      <div className="flex items-center justify-center">
+                        <div className="w-14 h-10 rounded-lg overflow-hidden bg-[#13151f] border border-[#1e2230] group-hover:border-[#2563eb]/50 shadow-sm transition-all duration-200 group-hover:scale-105 shrink-0 relative">
+                          <img
+                            src={getProxiedImageUrl(chapter.cover_image || seriesMetadata?.cover_image, chapter.url)}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Title & Status */}
+                      <div className="pl-3 min-w-0 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm font-bold truncate transition-colors ${
+                            isChapterRead
+                              ? "text-neutral-500"
+                              : "text-white group-hover:text-[#60A5FA]"
+                          }`}>
+                            {displayTitle}
+                          </p>
+                          {isChapterBookmarked && (
+                            <BookmarkCheck size={13} className="text-amber-400 fill-current shrink-0" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-mono">
+                          {isChapterRead ? (
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold uppercase">
+                              ✓ Read
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-md bg-[#0e2238] text-[#38bdf8] border border-[#1d4ed8]/35 font-semibold">
+                              Available
+                            </span>
+                          )}
+                          <span className="text-neutral-600">•</span>
+                          <span className="text-neutral-400 text-[11px]">Webtoon Strip</span>
+                        </div>
+                      </div>
+
+                      {/* Date */}
+                      <div className="flex items-center justify-center gap-1.5 text-xs font-mono text-neutral-400">
+                        <Calendar size={12} className="text-neutral-500 shrink-0" />
+                        <span>{chapter.date || "—"}</span>
+                      </div>
+
+                      {/* Rating / Popularity */}
+                      <div className="flex items-center justify-center">
+                        {chapter.rating ? (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-mono font-bold">
+                            <Star size={11} className="fill-amber-400 text-amber-400 shrink-0" />
+                            <span>{Number(chapter.rating).toFixed(1)}</span>
+                          </div>
+                        ) : formattedLikes ? (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2b1016] border border-[#be123c]/25 text-[#fb7185] text-xs font-mono font-semibold">
+                            <ThumbsUp size={11} className="text-[#fb7185] shrink-0" />
+                            <span>{formattedLikes}</span>
+                          </div>
+                        ) : (
+                          <span className="text-neutral-600 text-xs font-mono">—</span>
                         )}
                       </div>
-                    </div>
 
-                    {/* Date */}
-                    <span className={`text-[10px] font-mono text-center truncate ${
-                      isChapterRead ? "text-neutral-700" : "text-neutral-500"
-                    }`}>
-                      {chapter.date || "—"}
-                    </span>
-
-                    {/* Rating */}
-                    <div className="flex items-center justify-center gap-1">
-                      {chapter.rating ? (
-                        <>
-                          <Star size={9} className="fill-amber-500 text-amber-500 shrink-0" />
-                          <span className="text-[10px] font-bold text-amber-400 font-mono">
-                            {Number(chapter.rating).toFixed(1)}
-                          </span>
-                        </>
-                      ) : chapter.likes ? (
-                        <span className="flex items-center gap-0.5 text-[10px] text-neutral-600 font-mono">
-                          <ThumbsUp size={9} />
-                          {chapter.likes}
-                        </span>
-                      ) : (
-                        <span className="text-neutral-700 text-[10px]">—</span>
-                      )}
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-end gap-1.5 pr-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewChapter(chapter);
+                          }}
+                          className="p-2 rounded-xl bg-[#13151f] hover:bg-[#1c1f2e] text-neutral-400 hover:text-white border border-[#1e2230] transition-all cursor-pointer"
+                          title="Preview in Reader"
+                        >
+                          <Eye size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBookmarkToggle(chapter.url);
+                          }}
+                          className="p-2 rounded-xl bg-[#13151f] hover:bg-[#1c1f2e] text-neutral-400 hover:text-amber-400 border border-[#1e2230] transition-all cursor-pointer"
+                          title={isChapterBookmarked ? "Remove Bookmark" : "Bookmark Chapter"}
+                        >
+                          <Bookmark size={13} className={isChapterBookmarked ? "text-amber-400 fill-current" : ""} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={importingChapterUrl === chapter.url || Boolean(importingChapterUrl)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleChapterClick(chapter);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-mono font-bold text-xs transition-all shadow-md shadow-blue-600/30 cursor-pointer active:scale-95 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                          title="Import Chapter Images"
+                        >
+                          {importingChapterUrl === chapter.url ? (
+                            <>
+                              <Loader2 size={12} className="animate-spin text-white shrink-0" />
+                              <span>Extracting…</span>
+                            </>
+                          ) : (
+                            <>
+                              <ImageIcon size={12} className="shrink-0" />
+                              <span>Import Chapter Images</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setPreviewChapter(chapter); }}
-                        className="p-1 rounded-md bg-[#1A1A22] hover:bg-[#252530] text-neutral-500 hover:text-white border border-[#2A2A36] transition-all cursor-pointer opacity-0 group-hover:opacity-100"
-                        title="Preview"
-                      >
-                        <Eye size={12} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handleChapterClick(chapter); }}
-                        className="flex items-center gap-0.5 px-2.5 py-1 rounded-md bg-[#3B82F6] hover:bg-[#2563EB] text-white font-mono font-bold text-[10px] transition-all cursor-pointer opacity-0 group-hover:opacity-100 whitespace-nowrap"
-                      >
-                        Import <ArrowRight size={10} />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
 

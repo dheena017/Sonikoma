@@ -5,12 +5,15 @@ SDXL Turbo, Flux Schnell, Stable Diffusion), asynchronous local disk caching,
 SVG fallback resiliency, and verbose structured execution logging.
 """
 
+import asyncio
+import io
 import os
 import time
 import urllib.parse
 import logging
 from typing import Dict, Any, List, Optional
 import httpx
+from PIL import Image
 
 from app.repositories.series import ai_series_repo
 from app.schemas.series import ChapterSession, AISeriesPanel
@@ -37,9 +40,9 @@ class SeriesImageService:
     ) -> str:
         """Construct high-speed Pollinations.ai image URL supporting Flux-Anime, Flux.1, and SDXL Turbo."""
         clean_prompt = prompt.replace("\n", " ").strip()
-        # Cap prompt length to 800 characters to prevent URL 414 / CDN truncations
-        if len(clean_prompt) > 800:
-            clean_prompt = clean_prompt[:800]
+        # Cap prompt length to 600 chars — shorter prompts are faster to encode/transfer
+        if len(clean_prompt) > 600:
+            clean_prompt = clean_prompt[:600]
         encoded = urllib.parse.quote(clean_prompt)
         actual_seed = seed if seed is not None else int(time.time() % 100000)
 
@@ -50,12 +53,54 @@ class SeriesImageService:
             chosen_model = "stable-diffusion"
         elif "flux-realism" in m:
             chosen_model = "flux-realism"
+        elif "sana" in m:
+            chosen_model = "sana"
         elif "flux" in m and "anime" not in m:
             chosen_model = "flux"
         else:
             chosen_model = "flux-anime"
 
-        return f"https://image.pollinations.ai/prompt/{encoded}?width={width}&height={height}&seed={actual_seed}&model={chosen_model}&nologo=true"
+        return f"https://image.pollinations.ai/prompt/{encoded}?width={width}&height={height}&seed={actual_seed}&model={chosen_model}&nologo=true&nofeed=true"
+
+    def get_model_fallback_chain(self, requested_model: str) -> List[str]:
+        """Construct an ordered priority list of models to avoid paywalls (402) and rate limits."""
+        req = str(requested_model or "flux-anime").lower()
+        candidates = [req]
+        
+        # Standard free, fast, high-reliability fallbacks on Pollinations
+        reliable_fallbacks = ["turbo", "flux", "stable-diffusion"]
+        for fb in reliable_fallbacks:
+            if fb not in candidates:
+                candidates.append(fb)
+        return candidates
+
+    def _create_offline_placeholder(self, file_path: str, width: int = 768, height: int = 1024, prompt: str = "") -> None:
+        """Create a sleek cyberpunk/manga placeholder JPEG so UI never displays a broken frame or 402 error."""
+        try:
+            from PIL import ImageDraw
+            img = Image.new("RGB", (width, height), color=(14, 16, 26))
+            draw = ImageDraw.Draw(img)
+            
+            # Subtle double border
+            margin = 12
+            draw.rectangle([margin, margin, width - margin, height - margin], outline=(40, 48, 75), width=2)
+            draw.rectangle([margin + 4, margin + 4, width - margin - 4, height - margin - 4], outline=(25, 30, 48), width=1)
+            
+            # Accent corner lines
+            corner_len = 36
+            # Top-left
+            draw.line([(margin, margin + corner_len), (margin, margin), (margin + corner_len, margin)], fill=(59, 130, 246), width=3)
+            # Bottom-right
+            draw.line([(width - margin, height - margin - corner_len), (width - margin, height - margin), (width - margin - corner_len, height - margin)], fill=(59, 130, 246), width=3)
+            
+            # Center stylized badge
+            cx, cy = width // 2, height // 2
+            bw, bh = min(width - 80, 260), 64
+            draw.rectangle([cx - bw // 2, cy - bh // 2, cx + bw // 2, cy + bh // 2], fill=(20, 24, 40), outline=(59, 130, 246), width=1)
+            
+            img.save(file_path, format="JPEG", quality=90)
+        except Exception as e:
+            logger.warning(f"[AISeries Image Engine] Failed to create offline placeholder: {e}")
 
     async def render_panel_image(
         self,
@@ -92,35 +137,63 @@ class SeriesImageService:
             f"Dim: {width}x{height} | Prompt: {prompt[:65]}..."
         )
 
-        remote_url = self.build_pollinations_url(prompt, width=width, height=height, seed=seed, model=model)
-
-        # Attempt high-speed async HTTP fetch with retry
+        candidates = self.get_model_fallback_chain(model)
         img_bytes: Optional[bytes] = None
-        for attempt in range(1, 3):
+        successful_model: Optional[str] = None
+
+        for candidate in candidates:
+            cand_url = self.build_pollinations_url(prompt, width=width, height=height, seed=seed, model=candidate)
             try:
-                async with httpx.AsyncClient(timeout=35.0, follow_redirects=True) as client:
-                    resp = await client.get(remote_url)
+                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+                    resp = await client.get(cand_url)
                     if resp.status_code == 200 and len(resp.content) > 1000:
-                        img_bytes = resp.content
-                        break
+                        c_type = resp.headers.get("content-type", "")
+                        if "text" not in c_type and "json" not in c_type:
+                            img_bytes = resp.content
+                            successful_model = candidate
+                            break
+                    elif resp.status_code == 402:
+                        logger.warning(
+                            f"[AISeries Image Engine] Model '{candidate}' returned 402 Payment Required (x402 paywall). "
+                            f"Instantly bypassing to free fallback model..."
+                        )
+                        # Immediately try next free candidate without sleep
+                        continue
+                    elif resp.status_code == 429:
+                        logger.warning(
+                            f"[AISeries Image Engine] Model '{candidate}' rate limited (429). Trying fallback..."
+                        )
+                        await asyncio.sleep(1.0)
+                        continue
                     else:
                         logger.warning(
-                            f"[AISeries Image Engine] Attempt {attempt} returned status {resp.status_code} "
-                            f"(bytes: {len(resp.content)}). Retrying..."
+                            f"[AISeries Image Engine] Model '{candidate}' returned status {resp.status_code}. Trying fallback..."
                         )
             except Exception as ex:
-                logger.warning(f"[AISeries Image Engine] Attempt {attempt} error: {ex}")
-                if attempt < 2:
-                    time.sleep(1.0)
+                logger.warning(f"[AISeries Image Engine] Model '{candidate}' error: {ex}. Trying fallback...")
+                continue
 
         elapsed = round(time.time() - start_time, 2)
 
         if img_bytes:
+            try:
+                # Crop the bottom 32px to remove the baked-in pollinations.ai watermark badge
+                img = Image.open(io.BytesIO(img_bytes))
+                w, h = img.size
+                crop_px = min(32, int(h * 0.03))  # crop 32px or 3% of height, whichever is smaller
+                img_cropped = img.crop((0, 0, w, h - crop_px))
+                buf = io.BytesIO()
+                img_cropped.save(buf, format="JPEG", quality=92, optimize=True)
+                final_bytes = buf.getvalue()
+            except Exception as crop_err:
+                logger.warning(f"[AISeries Image Engine] Crop failed ({crop_err}), saving original.")
+                final_bytes = img_bytes
+
             with open(file_path, "wb") as f:
-                f.write(img_bytes)
-            size_kb = round(len(img_bytes) / 1024, 1)
+                f.write(final_bytes)
+            size_kb = round(len(final_bytes) / 1024, 1)
             logger.info(
-                f"[AISeries Image Engine] Render SUCCESS for '{panel_id}' in {elapsed}s -> "
+                f"[AISeries Image Engine] Render SUCCESS for '{panel_id}' using '{successful_model}' in {elapsed}s -> "
                 f"Saved to {file_path} ({size_kb} KB)"
             )
             return {
@@ -130,21 +203,23 @@ class SeriesImageService:
                 "cached": False,
                 "size_kb": size_kb,
                 "status": "success",
+                "model_used": successful_model,
                 "duration_seconds": elapsed,
             }
         else:
             logger.warning(
-                f"[AISeries Image Engine] Remote generation timed out after {elapsed}s for '{panel_id}'. "
-                f"Falling back to direct remote URL."
+                f"[AISeries Image Engine] All remote models failed for '{panel_id}' after {elapsed}s. "
+                f"Generating local storyboard placeholder to prevent 402 paywall error."
             )
-            # Fallback directly to the CDN URL so frontend still has a live URL to query
+            self._create_offline_placeholder(file_path, width=width, height=height, prompt=prompt)
+            size_kb = round(os.path.getsize(file_path) / 1024, 1) if os.path.exists(file_path) else 0
             return {
                 "panel_id": panel_id,
-                "image_url": remote_url,
-                "file_path": None,
+                "image_url": local_url,
+                "file_path": file_path,
                 "cached": False,
-                "size_kb": 0,
-                "status": "remote_fallback",
+                "size_kb": size_kb,
+                "status": "placeholder_fallback",
                 "duration_seconds": elapsed,
             }
 

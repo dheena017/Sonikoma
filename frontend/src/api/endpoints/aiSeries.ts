@@ -45,6 +45,7 @@ export interface InteractiveSpeechBubble {
   bg_color: string;
   text_color: string;
   border_color: string;
+  border_width?: number;
   tail_tip?: InteractivePoint;
   audio_url?: string;
   duration_seconds?: number;

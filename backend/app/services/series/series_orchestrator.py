@@ -35,6 +35,7 @@ from app.schemas.series import (
 )
 from app.repositories.series import ai_series_repo
 from app.services.series.series_memory_engine import series_memory_engine
+from app.services.series.series_image_service import series_image_service
 from services.ai.skills.registry import registry
 
 logger = logging.getLogger(__name__)
@@ -109,25 +110,9 @@ class SeriesOrchestrator:
         self, prompt: str, width: int = 768, height: int = 1024, seed: Optional[int] = None, model: str = "flux-anime"
     ) -> str:
         """Construct free, high-speed Pollinations.ai image URL supporting Flux-Anime, Flux.1, and SDXL Turbo."""
-        clean_prompt = prompt.replace("\n", " ").strip()
-        encoded = urllib.parse.quote(clean_prompt)
-        actual_seed = seed if seed is not None else int(datetime.utcnow().timestamp() % 100000)
-        
-        # Model selector: flux-anime produces crisp 2D anime, manga, and manhwa cel art without photorealistic or 3D distortion
-        m = str(model or "flux-anime").lower()
-        if "turbo" in m or "fast" in m:
-            chosen_model = "turbo"
-        elif "stable-diffusion" in m or "stablediffusion" in m or "sd" in m:
-            chosen_model = "stable-diffusion"
-        elif "flux-realism" in m:
-            chosen_model = "flux-realism"
-        elif "flux" in m and "anime" not in m:
-            chosen_model = "flux"
-        else:
-            # Default to flux-anime: specifically trained for clean 2D anime/manga/manhwa lines
-            chosen_model = "flux-anime"
-
-        return f"https://image.pollinations.ai/prompt/{encoded}?width={width}&height={height}&seed={actual_seed}&model={chosen_model}&nologo=true"
+        return series_image_service.build_pollinations_url(
+            prompt=prompt, width=width, height=height, seed=seed, model=model
+        )
 
     async def create_series_project(self, req: CreateAISeriesRequest) -> AISeriesProject:
         """Initialize an AI Series project with full narrative architecture and turbo chapter 1."""
@@ -263,119 +248,89 @@ class SeriesOrchestrator:
                 dialogue_turns_list = scene_data.get("dialogue") or []
                 dialogue_text = dialogue_turns_list[0].get("spoken_line", "") if (dialogue_turns_list and isinstance(dialogue_turns_list[0], dict)) else ""
             elif is_anime:
-                # ── TOTALLY UNIQUE ANIME VISUAL LANGUAGE: 16:9 Widescreen Sakuga Movie Keyframes ──
+                # Dynamic cinematic anime keyframe generation based on chapter, hero, genre, and panel progression
+                progress = p_idx / max(panel_count, 1)
                 if p_idx == 1:
-                    action = f"cinematic 16:9 anime movie keyframe of {clean_hero} standing on skyscraper rooftop overlooking Neo-Tokyo skyline at dusk, glowing cybernetic eye trail, wind whipping through dark hair and combat jacket, vibrant anime color palette, atmospheric depth of field"
-                    camera = "cinematic_wide_skyline"
-                    dialogue_text = "The orbital grid is fracturing. We move at dawn."
+                    camera = "cinematic_wide_establishing"
+                    action = f"cinematic 16:9 widescreen anime movie keyframe of {clean_hero} in the world of '{chapter_title}', setting the scene for {genre or 'the journey'}, atmospheric visual depth, dynamic lighting"
+                    dialogue_text = f"The story begins here in {chapter_title}."
                 elif p_idx == panel_count and is_series_finale:
-                    action = f"theatrical anime movie finale frame of {clean_hero} looking back with gentle confident smile as golden morning dawn breaks over restored city, warm volumetric anime lens flare, hand-painted anime sky, 24fps keyframe animation"
-                    camera = "golden_dawn_resolution"
-                    dialogue_text = "Our battle is finished. The sky is ours again."
+                    camera = "golden_resolution_wide"
+                    action = f"theatrical anime movie finale frame of {clean_hero} standing victorious as the sun breaks through, peaceful closure, 24fps keyframe animation"
+                    dialogue_text = "Our journey is complete. The future is ours."
                 elif p_idx == panel_count:
-                    action = f"high-tension anime cliffhanger cut of {clean_hero} turning around with determined fiery gaze, glowing energy trail igniting in fist, dynamic Dutch tilt angle, dramatic anime lighting"
                     camera = "dutch_tilt_climax"
-                    dialogue_text = "This isn't over yet. Brace yourselves!"
-                elif p_idx % 3 == 0:
-                    action = f"high-velocity sakuga animation combat cut of {clean_hero} executing aerial sonic-boom dash, radiant neon blue energy streaks slicing through frame, kinetic motion blur, fluid 24fps anime action"
-                    camera = "high_velocity_tracking"
-                    dialogue_text = "Accelerating past Mach 3!"
-                elif p_idx % 2 == 0:
-                    action = f"dramatic anime character close-up cut of {clean_hero} in intense emotional standoff, detailed expressive anime eyes, dramatic rim lighting, atmospheric floating light motes"
+                    action = f"high-tension anime cliffhanger cut of {clean_hero} turning around with intense fiery gaze, dynamic energy aura, dramatic cinematic anime lighting"
+                    dialogue_text = "This isn't over yet!"
+                elif progress <= 0.4:
+                    camera = "medium_tracking_shot"
+                    action = f"focused anime scene of {clean_hero} navigating the surroundings in '{chapter_title}', determined expression, rich atmospheric environment"
+                    dialogue_text = "Stay alert. We have to keep moving."
+                elif progress <= 0.7:
                     camera = "dramatic_anime_close_up"
-                    dialogue_text = "I knew you were behind this all along."
+                    action = f"intense character close-up cut of {clean_hero} facing rising confrontation in '{chapter_title}', expressive anime eyes, dramatic rim lighting"
+                    dialogue_text = "I knew this moment would come."
                 else:
-                    action = f"atmospheric anime keyframe of {clean_hero} walking forward along neon-lit rainy street, reflections rippling on wet pavement, cinematic anime movie still"
-                    camera = "over_the_shoulder_cinematic"
-                    dialogue_text = "Every clue leads deeper into Sector 7."
+                    camera = "high_velocity_action"
+                    action = f"high-velocity dynamic sakuga animation action cut of {clean_hero} executing a decisive move, kinetic motion streaks, fluid anime action"
+                    dialogue_text = "Now is our chance!"
 
             elif is_comic:
-                # ── TOTALLY UNIQUE COMIC / MANGA VISUAL LANGUAGE: Black & White G-Pen Inking & Screentones ──
+                # Dynamic manga/comic panel generation based on chapter, hero, genre, and panel progression
+                progress = p_idx / max(panel_count, 1)
                 if p_idx == 1:
-                    action = f"traditional black and white manga drawing of swordsman {clean_hero} drawing heavy dark-ink katana on Kyoto Iron Wastes balcony, radiating focus lines (Shuuchuusen), dense screentone shading, high-contrast ink crosshatching"
                     camera = "koma_establishing_wide"
-                    dialogue_text = "The seal has broken. Draw your steel!"
+                    action = f"traditional manga panel of {clean_hero} introduced in '{chapter_title}', establishing the {genre or 'manga'} setting, dense screentone shading, crisp G-pen inking"
+                    dialogue_text = "So it begins..."
                 elif p_idx == panel_count and is_series_finale:
-                    action = f"climactic seinen manga panel of {clean_hero} standing victorious on destroyed stone battlefield under monochrome inked sky, torn combat hakama, bold G-pen contours, heavy contrast, dramatic manga art"
                     camera = "heroic_low_angle"
-                    dialogue_text = "It's finally over. Rest in peace, old friend."
+                    action = f"climactic manga splash panel of {clean_hero} standing victorious under monochrome inked sky, bold G-pen contours, heavy contrast, emotional resolution"
+                    dialogue_text = "It's finally over."
                 elif p_idx == panel_count:
-                    action = f"dramatic manga page-turner cliffhanger of {clean_hero} unleashing cursed blade, massive black ink aura erupting through panel borders into gutter, intense speedlines"
                     camera = "dynamic_tachi_kiri"
-                    dialogue_text = "You haven't seen my true form yet!"
-                elif p_idx % 3 == 0:
-                    action = f"explosive manga combat strike of {clean_hero} executing flash sword slash, sharp white sword trajectory cutting through solid Kuro-beta black shadows, dynamic G-pen speedlines (Kouka-sen)"
-                    camera = "extreme_action_slash"
-                    dialogue_text = "First Form: Moon Shadow Sever!"
-                elif p_idx % 2 == 0:
-                    action = f"intense manga face-off close-up on {clean_hero}'s fierce eyes and furrowed brow, dense crosshatching tension lines, stark black inking, psychological battle tension"
-                    camera = "dramatic_manga_close_up"
-                    dialogue_text = "Take one more step and you lose your arm."
-                else:
-                    action = f"atmospheric manga panel of {clean_hero} walking with nodachi across desolate windswept wasteland, screentone shaded clouds, detailed ink hatching on rocky terrain"
+                    action = f"dramatic manga page-turner cliffhanger of {clean_hero} ready for the next battle, bold black ink speedlines breaking through panel borders"
+                    dialogue_text = "The real battle starts now!"
+                elif progress <= 0.4:
                     camera = "medium_manga_tracking"
-                    dialogue_text = "The trail of cursed iron continues north."
+                    action = f"atmospheric manga panel of {clean_hero} observing the environment in '{chapter_title}', detailed ink crosshatching, focused gaze"
+                    dialogue_text = "Something is approaching."
+                elif progress <= 0.7:
+                    camera = "dramatic_manga_close_up"
+                    action = f"intense manga face-off close-up on {clean_hero}'s focused eyes, dense tension lines, stark black inking, psychological tension"
+                    dialogue_text = "Don't underestimate me."
+                else:
+                    camera = "extreme_action_slash"
+                    action = f"explosive dynamic manga combat panel of {clean_hero} unleashing power, high action speedlines, bold Kuro-beta black shadows"
+                    dialogue_text = "Take this!"
 
             else:
-                # ── TOTALLY UNIQUE MANHWA VISUAL LANGUAGE: Full-Color Korean Webtoon with Glowing Mana ──
-                if is_slice_of_life:
-                    if p_idx == 1:
-                        action = f"young handsome father with dark hair in stylish jacket entering doorway holding a gift bag, smiling warmly with gentle eyes, clear character portrait, rich color depth, 2D Korean webtoon art"
-                        camera = "medium_shot_entry"
-                        dialogue_text = "Honey, I'm back! Where's our little angel?"
-                    elif p_idx == 2:
-                        action = f"young mother resting against white pillows in hospital bed, tenderly holding newborn baby swaddled in soft white blanket, gentle maternal smile, sunny bright window, 2D webtoon"
-                        camera = "medium_shot_bedside"
-                        dialogue_text = "Hi, honey. Our little angel just had a feeding and he's asleep now."
-                    elif p_idx == 3:
-                        action = f"close up portrait of smiling mother with brown hair gently touching sleeping baby cheek with her finger, cute peaceful baby face, soft blushing cheeks, clean 2D anime manhwa drawing"
-                        camera = "intimate_close_up"
-                        dialogue_text = "I'm trying to take in every little detail. He looks so cute when he's sleeping."
-                    elif p_idx == 4:
-                        action = f"scenic view of radiant morning sunlight and lens flare glowing through hospital window curtains, casting warm golden light over mother and sleeping baby in bed, serene atmosphere, 2D comic art"
-                        camera = "wide_luminous_glow"
-                        dialogue_text = None
-                    elif p_idx == 5:
-                        action = f"young father leaning over bedside, smiling with adoring eyes, playfully touching the baby tiny hand, mother laughing softly, cute webtoon family moment"
-                        camera = "two_shot_warm"
-                        dialogue_text = "Oh, dear. You'll wake him up if you're not careful, haha."
-                    elif p_idx == 6:
-                        action = f"young father and mother sitting close together looking lovingly at their newborn baby in swaddle, domestic family warmth, soft pastel colors, clean Korean webtoon panel"
-                        camera = "medium_tender"
-                        dialogue_text = "What should we name our little miracle?"
-                    elif p_idx == 7:
-                        action = f"adorable close up of newborn baby wrapped in blanket opening tiny eyes sleepily, soft pastel background, authentic Naver webtoon illustration"
-                        camera = "baby_macro_close_up"
-                        dialogue_text = "Look, he's looking right at you."
-                    else:
-                        action = f"young parents holding hands together over the baby crib under warm afternoon sunlight, peaceful heartfelt ending scene, clean 2D manhwa comic drawing"
-                        camera = "golden_hour_finale"
-                        dialogue_text = "Welcome to our family, little one."
+                # Dynamic Korean Webtoon (Manhwa) panel generation based on chapter, hero, genre, and panel progression
+                progress = p_idx / max(panel_count, 1)
+                context_hint = f", context: {logline[:100]}" if logline else ""
+                if p_idx == 1:
+                    camera = "vertical_webtoon_establishing"
+                    action = f"vibrant 2D Korean webtoon establishing panel of {clean_hero} in the setting of '{chapter_title}'{context_hint}, sharp digital line art, atmospheric ambient lighting, webtoon style"
+                    dialogue_text = f"The curtain rises on '{chapter_title}'..."
+                elif p_idx == panel_count and is_series_finale:
+                    camera = "celestial_epilogue_splash"
+                    action = f"emotional full-color manhwa climax illustration of {clean_hero} bathed in radiant celestial light, peaceful smile, glowing aura, high-resolution webtoon masterpiece"
+                    dialogue_text = "All conflicts are resolved. Peace has returned."
+                elif p_idx == panel_count:
+                    camera = "vertical_scroll_reveal"
+                    action = f"high-tension vertical webtoon scroll cliffhanger of {clean_hero} facing the pivotal moment of '{chapter_title}', intense glowing eyes, dramatic webtoon lighting"
+                    dialogue_text = "This story has only just begun..."
+                elif progress <= 0.35:
+                    camera = "manhwa_medium_portrait"
+                    action = f"character-centric manhwa panel of {clean_hero} in '{chapter_title}', expressive anime eyes, sleek modern webtoon attire, stylish composition"
+                    dialogue_text = "We need to analyze the situation carefully."
+                elif progress <= 0.70:
+                    camera = "manhwa_dramatic_close_up"
+                    action = f"intense manhwa confrontation portrait of {clean_hero}, sharp determined gaze, vibrant lighting accents, high-stakes emotional tension"
+                    dialogue_text = "I won't let anyone stand in my way."
                 else:
-                    if p_idx == 1:
-                        action = f"vibrant 2D Korean webtoon drawing of awakened hunter {clean_hero} in sleek obsidian trench coat standing before colossal glowing blue dungeon gate, glowing violet mana daggers, radiant ethereal lighting, sharp manhwa lineart"
-                        camera = "vertical_webtoon_low_angle"
-                        dialogue_text = "An S-Rank gate in the middle of Seoul? This is bad."
-                    elif p_idx == panel_count and is_series_finale:
-                        action = f"emotional manhwa splash illustration of {clean_hero} bathed in radiant celestial golden light, serene smile, glowing purple and gold mana aura swirling, high-resolution webtoon masterpiece"
-                        camera = "celestial_epilogue_splash"
-                        dialogue_text = "The monarchs have fallen. The human realm is safe."
-                    elif p_idx == panel_count:
-                        action = f"high-tension manhwa vertical scroll cliffhanger of {clean_hero} raising glowing mana blade toward shadowy monarch descending from dungeon ceiling, intense glowing eyes, dark fantasy webtoon"
-                        camera = "vertical_scroll_reveal"
-                        dialogue_text = "So you're the master of this dungeon..."
-                    elif p_idx % 3 == 0:
-                        action = f"dynamic vertical manhwa action leap of {clean_hero} executing mid-air dual dagger strike, electric violet speed trails, sharp cel-shaded shadows, intense glowing eyes, dramatic webtoon combat frame"
-                        camera = "dynamic_vertical_slash"
-                        dialogue_text = "Ruler's Authority: Shadow Extraction!"
-                    elif p_idx % 2 == 0:
-                        action = f"intimate manhwa portrait of {clean_hero} with sharp intense gaze, glowing violet pupils, sleek tousled dark hair, dramatic rim lighting, high-stakes emotional confrontation"
-                        camera = "manhwa_dramatic_close_up"
-                        dialogue_text = "If you step into my territory, you won't walk out."
-                    else:
-                        action = f"stylish manhwa panel of {clean_hero} walking through modern neon city street at twilight, holographic hunter rank status window glowing in air, crisp 2D digital webtoon drawing"
-                        camera = "hunter_street_medium"
-                        dialogue_text = "My stats have leveled up again."
+                    camera = "dynamic_vertical_action"
+                    action = f"dynamic vertical webtoon action shot of {clean_hero} executing a decisive strike, glowing energy effects, sharp cel-shaded shadows, dramatic speed trails"
+                    dialogue_text = "Now! Everything rides on this moment!"
 
             # Construct TOTALLY DISTINCT prompt and negative prompt per format
             if is_anime:
@@ -482,6 +437,21 @@ class SeriesOrchestrator:
                 motion_model = "i2v_character_anchor" if p_idx % 2 != 0 else "t2v_high_velocity"
                 video_url = f"/api/v1/ai-series/preview-video/{panel_id}.mp4"
 
+            # Dynamic sound effects based on genre and panel beat
+            sfx = None
+            if "action" in theme_str or "fantasy" in theme_str or "hunter" in theme_str or "murim" in theme_str:
+                if p_idx % 3 == 0:
+                    sfx = "[IMPACT!]"
+                elif p_idx % 3 == 1 and p_idx > 1:
+                    sfx = "[WHOOSH!]"
+            elif is_slice_of_life or "romance" in theme_str:
+                if p_idx == 1:
+                    sfx = "[CHIME]"
+                elif p_idx % 4 == 0:
+                    sfx = "[FOOTSTEPS]"
+            elif p_idx % 3 == 0:
+                sfx = "[RUMBLE]"
+
             panel = AISeriesPanel(
                 panel_id=panel_id,
                 panel_index=p_idx,
@@ -493,7 +463,7 @@ class SeriesOrchestrator:
                 video_url=video_url,
                 motion_model=motion_model,
                 speech_bubbles=bubbles,
-                sound_effects="[DOOR CLICK]" if (is_slice_of_life and p_idx == 1) else ("[SLASH!]" if p_idx % 3 == 0 else None),
+                sound_effects=sfx,
                 duration=4.5 if is_anime else 3.0,
             )
             panels.append(panel)
@@ -506,49 +476,48 @@ class SeriesOrchestrator:
         """Create multi-session architecture with guaranteed 0-cliffhanger epilogue resolution using format-specific AI skill."""
         fmt_str = (req.format_type.value if hasattr(req.format_type, "value") else str(req.format_type)).lower()
 
-        # Route to exact separated format skill
+        clean_title = req.title.strip()
+        title_tokens = clean_title.split() if clean_title else []
+        clean_word = title_tokens[0].rstrip(",.:;!?") if title_tokens else "Awakening"
+        genre_str = (getattr(req, "genre", "") or "").lower()
+        req_theme_str = f"{clean_title} {genre_str} {req.logline or ''}".lower()
+        concept_summary = (req.logline or req.synopsis or clean_title).strip()
+        is_slice_of_life = (
+            "slice of life" in genre_str or "romance" in genre_str or "drama" in genre_str or "comedy" in genre_str
+            or any(kw in req_theme_str for kw in ["coffee", "convenience", "store", "clerk", "rain", "cafe", "school"])
+        )
+
+        # Derive dynamic character, world, and lore foundations directly from user input
+        hero_candidate = clean_word if clean_word.lower() not in ("the", "a", "an", "of", "in", "and", "to") else "Protagonist"
+        default_hero_name = hero_candidate
+        default_hero_desc = (
+            f"Lead protagonist of '{clean_title}', {genre_str} character with distinctive expressive features, "
+            f"stylish hairstyle, iconic attire suited for {genre_str or 'the journey'}, and a determined presence."
+        )
+        default_hero_palette = "Thematic tones with radiant signature accents"
+
+        default_rival_name = f"Rival of {default_hero_name}"
+        default_rival_desc = (
+            f"Primary rival and foil to {default_hero_name} in '{clean_title}', sharp contrasting attire, "
+            f"commanding presence, piercing gaze, and formidable abilities."
+        )
+        default_rival_palette = "Contrasting bold dark and metallic tones"
+
+        default_setting = f"The World of {clean_title}"
+        default_rules = [
+            f"The primary conflict centers on: {concept_summary[:120]}.",
+            f"Power dynamics and faction conflicts in {clean_title} are driven by {genre_str or 'the overarching struggle'}.",
+        ]
+
         if fmt_str in ("anime", "anime_sakuga"):
             skill_name = "series_arc_anime"
             format_medium = "anime"
-            default_hero_name = f"Shin {req.title.split()[0]}"
-            default_hero_desc = "Athletic high-agility operative with cybernetic eye, flowing dark hair with silver streaks, dynamic combat jacket, 24fps sakuga aesthetic."
-            default_hero_palette = "Obsidian black with luminous cyan circuit trim"
-            default_rival_name = "Reiko Vance"
-            default_rival_desc = "Poised imperial commander with piercing cerulean gaze, immaculate white cape, high-frequency vibro-katana."
-            default_rival_palette = "Ivory white, platinum trim, royal navy"
-            default_setting = "Neo-Tokyo Spire Sector 7"
-            default_rules = [
-                "Sakuga resonance amplifies physical velocity past sound barrier during emotional apex.",
-                "The Orbital Grid fractures every solstice, unlocking classified sky domains."
-            ]
         elif fmt_str in ("comic_manga", "comic", "manga"):
             skill_name = "series_arc_comic"
             format_medium = "comic_manga"
-            default_hero_name = f"Kaito {req.title.split()[0]}"
-            default_hero_desc = "Determined swordsman with fierce dark eyes, spiked black hair, rough inked combat hakama, bold G-pen lines."
-            default_hero_palette = "Monochrome inked blacks with stark white highlights and crimson sash"
-            default_rival_name = "Renjiro Kuroda"
-            default_rival_desc = "Towering cursed rival with jagged scars, heavy plate armor, soul-consuming nodachi, dense screentone shading."
-            default_rival_palette = "Heavy black inks, crosshatched steel, charcoal gray"
-            default_setting = "Kyoto Iron Wastes"
-            default_rules = [
-                "Swordsmen channel spiritual pressure through G-pen speedline techniques.",
-                "Breaking panel boundaries allows physical attacks to strike through dimensional gutters."
-            ]
         else: # manhwa
             skill_name = "series_arc_manhwa"
             format_medium = "manhwa"
-            default_hero_name = f"Sung-Min {req.title.split()[0]}"
-            default_hero_desc = "Lean hunter with sharp jawline, tousled charcoal hair, piercing glowing violet eyes, modern stylish hunter trench coat."
-            default_hero_palette = "Obsidian black with radiant violet mana accents"
-            default_rival_name = "Guildmaster Kang"
-            default_rival_desc = "Elite S-rank hunter with platinum swept-back hair, immaculate gold-embroidered suit, twin crystalline daggers."
-            default_rival_palette = "Pristine white, polished gold, crystal azure"
-            default_setting = "Seoul Dungeon Gate Metropolis"
-            default_rules = [
-                "Awakened hunters rank from E to S, seeing glowing blue holographic status notifications.",
-                "The Gate Abyss expands downward through infinite vertical dungeon strata."
-            ]
 
         # Attempt invocation of specialized AI prompt skill
         ai_data: Optional[Dict[str, Any]] = None
@@ -598,7 +567,7 @@ class SeriesOrchestrator:
                 c_role = c_raw.get("role") or "supporting"
                 c_summary = c_raw.get("visual_summary") or c_name
                 v_prof = c_raw.get("voice_profile") or {}
-                voice_id = v_prof.get("voice_name") if isinstance(v_prof, dict) else None
+                voice_id = v_prof.get("voice_name") if isinstance(v_prof, dict) else (getattr(v_prof, "voice_name", None) if v_prof else None)
                 cast.append(CharacterDNA(
                     character_id=cid,
                     name=c_name,
@@ -642,8 +611,8 @@ class SeriesOrchestrator:
                 "setting_name": default_setting,
                 "lore_rules": default_rules,
                 "unresolved_mysteries": [
-                    f"The ancient origin of {cast[0].name}'s awakened power",
-                    f"Why {cast[1].name if len(cast) > 1 else 'the antagonist'} secretly triggered the rift",
+                    f"The true origin behind the events of {clean_title}",
+                    f"The hidden truth that links {cast[0].name} to {cast[1].name if len(cast) > 1 else 'the central conflict'}",
                 ],
             }
 
@@ -667,8 +636,8 @@ class SeriesOrchestrator:
         for s_idx in range(1, total_sessions + 1):
             is_final_session = (s_idx == total_sessions)
             ai_s_data = ai_sessions_dict.get(s_idx, {})
-            session_title = ai_s_data.get("session_title") or f"Season {s_idx}: {'The Final Reckoning' if is_final_session else f'Ascension Phase {s_idx}'}"
-            session_theme = ai_s_data.get("session_theme") or f"Dramatic arc covering {chapters_per_session} chapters."
+            session_title = ai_s_data.get("session_title") or f"Season {s_idx}: {clean_title} (Arc {s_idx})"
+            session_theme = ai_s_data.get("session_theme") or f"Narrative arc exploring the escalation of {clean_title} across {chapters_per_session} chapters."
 
             ai_chapters_dict: Dict[int, Any] = {}
             if isinstance(ai_s_data.get("chapters"), list):
@@ -689,20 +658,20 @@ class SeriesOrchestrator:
                     summary = ai_c_data.get("summary", "")
                 elif is_series_finale:
                     pacing_role = "epilogue_resolution"
-                    chap_title = "The Eternal Dawn (Final Epilogue)"
-                    summary = f"All battles conclude. The central mystery is resolved. {cast[0].name} seals the rift forever. Complete emotional and narrative closure."
+                    chap_title = f"Finale: The Legacy of {clean_word}"
+                    summary = f"All conflicts in {clean_title} reach their definitive conclusion. The central mystery is resolved. {cast[0].name} achieves lasting resolution. Complete emotional and narrative closure."
                 elif c_idx == 1 and s_idx == 1:
                     pacing_role = "inciting_incident"
-                    chap_title = "Awakening of the Ash Gate"
-                    summary = f"{cast[0].name} witnesses the sudden collapse of the district barrier, awakening a legendary lineage."
+                    chap_title = f"Chapter 1: The Genesis of {clean_word}"
+                    summary = f"Introduction to {cast[0].name} as the inciting event of {clean_title} begins to unfold: {concept_summary[:120]}."
                 elif c_idx == chapters_per_session:
                     pacing_role = "climax"
-                    chap_title = f"Season {s_idx} Climactic Showdown"
-                    summary = f"High stakes confrontation between factions as secrets are brought to the boiling point."
+                    chap_title = f"Season {s_idx} Climax: The Decisive Stand"
+                    summary = f"High-stakes confrontation as tensions reach a boiling point in {clean_title}."
                 else:
                     pacing_role = "rising_action"
-                    chap_title = f"Chapter {c_idx}: Shadows Converge"
-                    summary = "Alliances are tested as clues to the central conspiracy deepen."
+                    chap_title = f"Chapter {c_idx}: {clean_word} - The Journey Deepens"
+                    summary = f"{cast[0].name} confronts escalating challenges and uncovers deeper secrets in {clean_title}."
 
                 # Synthesize configured panels right away using AI-directed scenes
                 suggested_scenes = ai_c_data.get("suggested_scene_prompts") or []
@@ -801,10 +770,11 @@ class SeriesOrchestrator:
         chapter.status = ProjectStatus.COMPLETED
         ai_series_repo.update_chapter(series_id, chapter)
 
-        # If finale, mark unresolved threads resolved
+        # If finale, mark all unresolved threads resolved
         if chapter.is_series_finale:
-            series_memory_engine.mark_thread_resolved(series_id, "The origin of Ren's runic scar")
-            series_memory_engine.mark_thread_resolved(series_id, "Why Vespera Vance secretly sabotaged the Central Spire gate")
+            continuity = series_memory_engine.get_continuity(series_id)
+            for thread in list(continuity.unresolved_narrative_threads.keys()):
+                series_memory_engine.mark_thread_resolved(series_id, thread)
 
         logger.info(f"[AISeries] Chapter S{session_number}:C{chapter_number} successfully synthesized ({len(panels)} panels).")
         return chapter

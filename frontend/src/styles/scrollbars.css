@@ -40,7 +40,10 @@ body::-webkit-scrollbar,
 
 /* Visible Sleek Scrollbar for Studios & Continuous Webtoon Canvas */
 #main-scrollable-area .studio-visible-scrollbar,
-.studio-visible-scrollbar {
+.studio-visible-scrollbar,
+#main-scrollable-area #shot-director-inspector-scroll-deck,
+#shot-director-inspector-scroll-deck,
+.inspector-visible-scrollbar {
   scrollbar-width: thin !important;
   scrollbar-color: #3B82F6 #121212 !important;
   -ms-overflow-style: auto !important;
@@ -50,33 +53,49 @@ body::-webkit-scrollbar,
 }
 
 #main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar,
-.studio-visible-scrollbar::-webkit-scrollbar {
+.studio-visible-scrollbar::-webkit-scrollbar,
+#main-scrollable-area #shot-director-inspector-scroll-deck::-webkit-scrollbar,
+#shot-director-inspector-scroll-deck::-webkit-scrollbar,
+.inspector-visible-scrollbar::-webkit-scrollbar {
   display: block !important;
-  width: 12px !important;
-  height: 12px !important;
+  width: 10px !important;
+  height: 10px !important;
 }
 
 #main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar-track,
-.studio-visible-scrollbar::-webkit-scrollbar-track {
+.studio-visible-scrollbar::-webkit-scrollbar-track,
+#main-scrollable-area #shot-director-inspector-scroll-deck::-webkit-scrollbar-track,
+#shot-director-inspector-scroll-deck::-webkit-scrollbar-track,
+.inspector-visible-scrollbar::-webkit-scrollbar-track {
   background: #121212 !important;
   border-radius: 8px !important;
 }
 
 #main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar-thumb,
-.studio-visible-scrollbar::-webkit-scrollbar-thumb {
+.studio-visible-scrollbar::-webkit-scrollbar-thumb,
+#main-scrollable-area #shot-director-inspector-scroll-deck::-webkit-scrollbar-thumb,
+#shot-director-inspector-scroll-deck::-webkit-scrollbar-thumb,
+.inspector-visible-scrollbar::-webkit-scrollbar-thumb {
   background: #3B82F6 !important;
   border-radius: 9999px !important;
   border: 2px solid #121212 !important;
-  min-height: 48px !important;
+  min-height: 40px !important;
 }
 
 #main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar-thumb:hover,
-.studio-visible-scrollbar::-webkit-scrollbar-thumb:hover {
+.studio-visible-scrollbar::-webkit-scrollbar-thumb:hover,
+#main-scrollable-area #shot-director-inspector-scroll-deck::-webkit-scrollbar-thumb:hover,
+#shot-director-inspector-scroll-deck::-webkit-scrollbar-thumb:hover,
+.inspector-visible-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #60A5FA !important;
 }
 
 #main-scrollable-area .studio-visible-scrollbar::-webkit-scrollbar-thumb:active,
-.studio-visible-scrollbar::-webkit-scrollbar-thumb:active {
+.studio-visible-scrollbar::-webkit-scrollbar-thumb:active,
+#main-scrollable-area #shot-director-inspector-scroll-deck::-webkit-scrollbar-thumb:active,
+#shot-director-inspector-scroll-deck::-webkit-scrollbar-thumb:active,
+.inspector-visible-scrollbar::-webkit-scrollbar-thumb:active {
   background: #93C5FD !important;
 }
+
 

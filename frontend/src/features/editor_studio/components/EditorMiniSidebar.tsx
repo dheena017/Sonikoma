@@ -97,11 +97,10 @@ const EditorMiniSidebarInner = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Left edge active indicator bar */}
         <div
-          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
-            isActive
+          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${isActive
               ? "h-6 bg-[#3B82F6] opacity-100 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
               : "h-0 bg-transparent opacity-0"
-          }`}
+            }`}
         />
 
         <button
@@ -117,18 +116,16 @@ const EditorMiniSidebarInner = ({
           aria-label={tool.label}
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
-              isActive
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${isActive
                 ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white shadow-lg shadow-blue-500/25 scale-105"
                 : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 "
-            }`}
+              }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                isActive
+              className={`w-[18px] h-[18px] transition-colors duration-200 ${isActive
                   ? "text-white"
                   : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
-              }`}
+                }`}
             />
           </div>
 
@@ -309,11 +306,10 @@ const EditorMiniSidebarInner = ({
       <div className="relative group w-full flex justify-center py-0.5">
         {/* Left edge active indicator bar */}
         <div
-          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${
-            isActive
+          className={`absolute left-0.5 top-1/2 -translate-y-1/2 w-1.5 rounded-r-full transition-all duration-300 z-10 ${isActive
               ? "h-6 bg-[#3B82F6] opacity-100 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
               : "h-0 bg-transparent opacity-0"
-          }`}
+            }`}
         />
 
         <button
@@ -323,9 +319,8 @@ const EditorMiniSidebarInner = ({
               if (p.has("tab")) {
                 p.delete("tab");
                 const searchStr = p.toString();
-                const newPath = `${window.location.pathname}${
-                  searchStr ? "?" + searchStr : ""
-                }`;
+                const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""
+                  }`;
                 if (navigateTo) {
                   navigateTo(newPath);
                 } else {
@@ -408,18 +403,16 @@ const EditorMiniSidebarInner = ({
           aria-label={item.label}
         >
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
-              isActive
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${isActive
                 ? "bg-[#3B82F6] border border-[#60A5FA]/40 text-white scale-105 shadow-lg shadow-blue-500/25"
                 : "bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] group-hover:bg-[#2A2A2A] group-hover:border-neutral-700 "
-            }`}
+              }`}
           >
             <Icon
-              className={`w-[18px] h-[18px] transition-colors duration-200 ${
-                isActive
+              className={`w-[18px] h-[18px] transition-colors duration-200 ${isActive
                   ? "text-white"
                   : "text-[#9CA3AF] group-hover:text-[#3B82F6]"
-              }`}
+                }`}
             />
           </div>
 

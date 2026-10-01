@@ -78,11 +78,17 @@ interface StoryboardTimelineProps {
   setSelectedPanelIds?: React.Dispatch<React.SetStateAction<Set<number>>>;
   enableDialogueAudio?: boolean;
   enableNarrativeAudio?: boolean;
+  isAISeries?: boolean;
+  onSynthesizeScenes?: () => void;
+  isSynthesizingScenes?: boolean;
 }
 
 const StoryboardTimeline = React.memo(
   ({
     isLoading = false,
+    isAISeries = false,
+    onSynthesizeScenes,
+    isSynthesizingScenes = false,
     panels,
     setPanels,
     currentPanelIndex,
@@ -1134,6 +1140,9 @@ const StoryboardTimeline = React.memo(
               onAddAllToStoryboard={
                 activeScraped.length > 0 ? handleAddAllScraped : undefined
               }
+              isAISeries={isAISeries}
+              onSynthesizeScenes={onSynthesizeScenes}
+              isSynthesizingScenes={isSynthesizingScenes}
             />
           )}
         </div>

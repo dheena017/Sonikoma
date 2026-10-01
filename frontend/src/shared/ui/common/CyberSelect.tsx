@@ -1,20 +1,38 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDown, Check, Search } from "lucide-react";
 
 export interface CyberSelectOption {
   value: string;
   label: string;
   description?: string;
+  badge?: string;
+  group?: string;
   icon?: React.ReactNode;
   disabled?: boolean;
 }
+
+export type CyberSelectVariant =
+  | "red"
+  | "purple"
+  | "cyan"
+  | "amber"
+  | "emerald"
+  | "blue"
+  | "default";
 
 export interface CyberSelectProps {
   value: string;
   onChange: (value: string) => void;
   options: (
     | CyberSelectOption
-    | { value: string; label: string; description?: string; disabled?: boolean }
+    | {
+        value: string;
+        label: string;
+        description?: string;
+        badge?: string;
+        group?: string;
+        disabled?: boolean;
+      }
   )[];
   placeholder?: string;
   label?: string;
@@ -22,9 +40,87 @@ export interface CyberSelectProps {
   className?: string;
   dropdownClassName?: string;
   size?: "sm" | "md" | "lg";
+  variant?: CyberSelectVariant;
   searchable?: boolean;
   ariaLabel?: string;
 }
+
+const VARIANT_STYLES: Record<
+  CyberSelectVariant,
+  {
+    openBorder: string;
+    focusBorder: string;
+    text: string;
+    activeText: string;
+    icon: string;
+    itemActive: string;
+    check: string;
+  }
+> = {
+  red: {
+    openBorder: "border-red-500/80 shadow-[0_0_20px_rgba(239,68,68,0.25)] ring-1 ring-red-500/30",
+    focusBorder: "focus:border-red-500/60",
+    text: "text-red-200",
+    activeText: "text-white font-bold",
+    icon: "text-red-400",
+    itemActive: "bg-red-500/15 border border-red-500/30 text-white font-bold shadow-sm",
+    check: "text-red-400",
+  },
+  purple: {
+    openBorder: "border-purple-500/80 shadow-[0_0_20px_rgba(168,85,247,0.25)] ring-1 ring-purple-500/30",
+    focusBorder: "focus:border-purple-500/60",
+    text: "text-purple-200",
+    activeText: "text-purple-200 font-bold",
+    icon: "text-purple-400",
+    itemActive: "bg-purple-500/20 border border-purple-500/35 text-purple-200 font-bold shadow-sm",
+    check: "text-purple-400",
+  },
+  cyan: {
+    openBorder: "border-cyan-500/80 shadow-[0_0_20px_rgba(6,182,212,0.25)] ring-1 ring-cyan-500/30",
+    focusBorder: "focus:border-cyan-500/60",
+    text: "text-cyan-200",
+    activeText: "text-cyan-200 font-bold",
+    icon: "text-cyan-400",
+    itemActive: "bg-cyan-500/20 border border-cyan-400/35 text-cyan-200 font-bold shadow-sm",
+    check: "text-cyan-400",
+  },
+  amber: {
+    openBorder: "border-amber-500/80 shadow-[0_0_20px_rgba(245,158,11,0.25)] ring-1 ring-amber-500/30",
+    focusBorder: "focus:border-amber-500/60",
+    text: "text-amber-200",
+    activeText: "text-amber-200 font-bold",
+    icon: "text-amber-400",
+    itemActive: "bg-amber-500/20 border border-amber-500/35 text-amber-200 font-bold shadow-sm",
+    check: "text-amber-400",
+  },
+  emerald: {
+    openBorder: "border-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.25)] ring-1 ring-emerald-500/30",
+    focusBorder: "focus:border-emerald-500/60",
+    text: "text-emerald-200",
+    activeText: "text-emerald-200 font-bold",
+    icon: "text-emerald-400",
+    itemActive: "bg-emerald-500/20 border border-emerald-500/35 text-emerald-200 font-bold shadow-sm",
+    check: "text-emerald-400",
+  },
+  blue: {
+    openBorder: "border-blue-500/80 shadow-[0_0_20px_rgba(59,130,246,0.25)] ring-1 ring-blue-500/30",
+    focusBorder: "focus:border-blue-500/60",
+    text: "text-blue-200",
+    activeText: "text-blue-200 font-bold",
+    icon: "text-blue-400",
+    itemActive: "bg-blue-500/20 border border-blue-500/35 text-blue-200 font-bold shadow-sm",
+    check: "text-blue-400",
+  },
+  default: {
+    openBorder: "border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.15)] ring-1 ring-white/20",
+    focusBorder: "focus:border-white/50",
+    text: "text-neutral-200",
+    activeText: "text-white font-bold",
+    icon: "text-neutral-400",
+    itemActive: "bg-white/15 border border-white/25 text-white font-bold shadow-sm",
+    check: "text-white",
+  },
+};
 
 export const CyberSelect: React.FC<CyberSelectProps> = ({
   value,
@@ -36,18 +132,22 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
   className = "",
   dropdownClassName = "",
   size = "md",
+  variant = "red",
   searchable = false,
   ariaLabel,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Find active option
-  const selectedOption = options.find((opt) => opt.value === value);
+  const currentTheme = VARIANT_STYLES[variant] || VARIANT_STYLES.red;
 
-  // Close when clicking outside
+  // Find active option
+  const selectedOption = options.find((opt) => String(opt.value) === String(value));
+
+  // Dismiss on clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -67,6 +167,108 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
     };
   }, [isOpen]);
 
+  // Dismiss on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        setSearchQuery("");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  // Auto-close when scrolled away from viewpoint
+  const checkViewpointAndDismiss = useCallback(() => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    // Window viewport check: if scrolled outside screen bounds
+    if (
+      rect.bottom < 50 ||
+      rect.top > viewportHeight - 50 ||
+      rect.right < 20 ||
+      rect.left > viewportWidth - 20
+    ) {
+      setIsOpen(false);
+      setSearchQuery("");
+      return;
+    }
+
+    // Parent container viewpoint check: if scrolled outside its visible container
+    let parent = containerRef.current.parentElement;
+    while (parent && parent !== document.body) {
+      const style = window.getComputedStyle(parent);
+      if (
+        style.overflowY === "auto" ||
+        style.overflowY === "scroll" ||
+        style.overflow === "auto" ||
+        style.overflow === "scroll" ||
+        style.overflow === "hidden"
+      ) {
+        const pRect = parent.getBoundingClientRect();
+        if (rect.bottom < pRect.top + 8 || rect.top > pRect.bottom - 8) {
+          setIsOpen(false);
+          setSearchQuery("");
+          return;
+        }
+      }
+      parent = parent.parentElement;
+    }
+  }, []);
+
+  // Viewpoint Observer (Native IntersectionObserver)
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry && (!entry.isIntersecting || entry.intersectionRatio < 0.25)) {
+          setIsOpen(false);
+          setSearchQuery("");
+        }
+      },
+      {
+        threshold: [0, 0.25, 0.5, 1.0],
+      }
+    );
+
+    observer.observe(containerRef.current);
+    return () => {
+      observer.disconnect();
+    };
+  }, [isOpen]);
+
+  // Track outer scroll and resize: auto-close immediately if trigger moved away from viewpoint
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleScrollOrResize = (e: Event) => {
+      // Don't close if user is scrolling inside the options list itself
+      if (dropdownRef.current && dropdownRef.current.contains(e.target as Node)) {
+        return;
+      }
+      checkViewpointAndDismiss();
+    };
+
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, [isOpen, checkViewpointAndDismiss]);
+
   // Focus search on open
   useEffect(() => {
     if (isOpen && searchable && searchInputRef.current) {
@@ -84,9 +286,9 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
     : options;
 
   const sizeClasses = {
-    sm: "px-3 py-1.5 text-xs rounded-xl min-h-[34px]",
-    md: "px-3.5 py-2.5 text-xs rounded-xl min-h-[42px]",
-    lg: "px-4 py-3 text-sm rounded-2xl min-h-[48px]",
+    sm: "px-2.5 py-1.5 text-xs rounded-lg min-h-[32px]",
+    md: "px-3 py-2 text-xs rounded-xl min-h-[38px]",
+    lg: "px-3.5 py-2.5 text-sm rounded-xl min-h-[44px]",
   };
 
   return (
@@ -114,29 +316,34 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
           disabled
             ? "bg-neutral-900/50 border border-neutral-800 text-neutral-600 cursor-not-allowed opacity-60"
             : isOpen
-            ? "bg-[#161622] border-red-500/80 text-white shadow-[0_0_20px_rgba(239,68,68,0.25)] ring-1 ring-red-500/30"
+            ? `bg-[#161622] ${currentTheme.openBorder} text-white`
             : "bg-[#0E0E15]/90 hover:bg-[#151520] border border-white/[0.10] hover:border-white/[0.20] text-neutral-200 hover:text-white shadow-inner"
         }`}
       >
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           {"icon" in (selectedOption || {}) &&
             (selectedOption as CyberSelectOption)?.icon && (
-              <span className="shrink-0 text-red-400">
+              <span className={`shrink-0 ${currentTheme.icon}`}>
                 {(selectedOption as CyberSelectOption).icon}
               </span>
             )}
           <span
             className={`truncate ${
-              !selectedOption ? "text-neutral-500" : "text-white font-medium"
+              !selectedOption ? "text-neutral-500" : currentTheme.activeText
             }`}
           >
             {selectedOption ? selectedOption.label : placeholder}
           </span>
+          {selectedOption?.badge && (
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-white/10 text-neutral-300 border border-white/10 shrink-0">
+              {selectedOption.badge}
+            </span>
+          )}
         </div>
 
         <ChevronDown
           className={`w-4 h-4 text-neutral-400 transition-transform duration-200 shrink-0 ${
-            isOpen ? "rotate-180 text-red-400" : ""
+            isOpen ? `rotate-180 ${currentTheme.icon}` : ""
           }`}
         />
       </button>
@@ -144,11 +351,12 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
       {/* Dropdown Popover */}
       {isOpen && (
         <div
-          className={`absolute left-0 right-0 top-full mt-1.5 z-[120] bg-[#0E0E17]/98 backdrop-blur-2xl border border-white/[0.12] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.85)] p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150 font-mono ${dropdownClassName}`}
+          ref={dropdownRef}
+          className={`absolute left-0 right-0 top-full mt-1.5 z-[150] bg-[#0E0E17]/98 backdrop-blur-2xl border border-white/[0.15] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.9)] p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150 font-mono ${dropdownClassName}`}
         >
           {/* Optional Search inside popup */}
           {(searchable || options.length > 7) && (
-            <div className="p-1.5 pb-2 border-b border-white/[0.06]">
+            <div className="p-1.5 pb-2 border-b border-white/[0.08]">
               <div className="relative">
                 <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -157,7 +365,7 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search options..."
-                  className="w-full bg-[#161622] border border-white/[0.08] focus:border-red-500/60 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none"
+                  className={`w-full bg-[#161622] border border-white/[0.08] ${currentTheme.focusBorder} rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none`}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -165,56 +373,73 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
           )}
 
           {/* Options List */}
-          <div className="max-h-60 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden space-y-0.5 py-0.5">
+          <div className="max-h-56 overflow-y-auto custom-scrollbar space-y-0.5 py-0.5">
             {filteredOptions.length === 0 ? (
-              <div className="py-4 px-3 text-center text-xs text-neutral-500">
+              <div className="py-3 px-3 text-center text-xs text-neutral-500">
                 No matching options
               </div>
             ) : (
-              filteredOptions.map((opt) => {
-                const isSelected = opt.value === value;
+              filteredOptions.map((opt, idx) => {
+                const isSelected = String(opt.value) === String(value);
+                const prevOpt = idx > 0 ? filteredOptions[idx - 1] : null;
+                const showGroupHeader =
+                  opt.group && (!prevOpt || prevOpt.group !== opt.group);
+
                 return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    disabled={opt.disabled}
-                    onClick={() => {
-                      if (!opt.disabled) {
-                        onChange(opt.value);
-                        setIsOpen(false);
-                        setSearchQuery("");
-                      }
-                    }}
-                    className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-xs transition-all text-left cursor-pointer ${
-                      opt.disabled
-                        ? "opacity-40 cursor-not-allowed text-neutral-600"
-                        : isSelected
-                        ? "bg-red-500/15 border border-red-500/30 text-white font-bold shadow-sm"
-                        : "hover:bg-white/[0.06] text-neutral-300 hover:text-white border border-transparent"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      {"icon" in opt && (opt as CyberSelectOption).icon && (
-                        <span className="shrink-0 text-red-400">
-                          {(opt as CyberSelectOption).icon}
-                        </span>
-                      )}
-                      <div className="min-w-0">
-                        <span className="truncate block font-sans text-xs">
-                          {opt.label}
-                        </span>
-                        {opt.description && (
-                          <span className="text-[10px] text-neutral-400 font-mono truncate block mt-0.5">
-                            {opt.description}
+                  <React.Fragment key={`${opt.value}-${idx}`}>
+                    {showGroupHeader && (
+                      <div className="px-2 pt-1.5 pb-0.5 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400 border-b border-white/10 mt-1 first:mt-0">
+                        {opt.group}
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      disabled={opt.disabled}
+                      onClick={() => {
+                        if (!opt.disabled) {
+                          onChange(String(opt.value));
+                          setIsOpen(false);
+                          setSearchQuery("");
+                        }
+                      }}
+                      className={`w-full flex items-center justify-between gap-2.5 px-3 py-1.5 rounded-lg text-xs transition-all text-left cursor-pointer ${
+                        opt.disabled
+                          ? "opacity-40 cursor-not-allowed text-neutral-600"
+                          : isSelected
+                          ? currentTheme.itemActive
+                          : "hover:bg-white/[0.07] text-neutral-300 hover:text-white border border-transparent"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        {"icon" in opt && (opt as CyberSelectOption).icon && (
+                          <span className={`shrink-0 ${currentTheme.icon}`}>
+                            {(opt as CyberSelectOption).icon}
                           </span>
                         )}
+                        <div className="min-w-0 flex-1">
+                          <span className="leading-snug break-words block font-medium">
+                            {opt.label}
+                          </span>
+                          {opt.description && (
+                            <span className="text-[10px] text-neutral-400 font-mono block mt-0.5 leading-tight">
+                              {opt.description}
+                            </span>
+                          )}
+                          {opt.badge && (
+                            <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white/10 text-neutral-300 border border-white/10">
+                              {opt.badge}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {isSelected && (
-                      <Check className="w-4 h-4 text-red-400 shrink-0 stroke-[2.5]" />
-                    )}
-                  </button>
+                      {isSelected && (
+                        <Check
+                          className={`w-3.5 h-3.5 shrink-0 stroke-[2.5] ${currentTheme.check}`}
+                        />
+                      )}
+                    </button>
+                  </React.Fragment>
                 );
               })
             )}

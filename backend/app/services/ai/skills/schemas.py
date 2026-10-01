@@ -274,6 +274,16 @@ class SequenceNarrativeModel(BaseModel):
 # Series Arc Director Models: Manhwa, Comic & Manga, Anime, and Master
 # =============================================================================
 
+class SeriesArcVoiceProfile(BaseModel):
+    voice_name: Optional[str] = Field(default=None, description="Preset voice identifier or actor name")
+    accent_or_tone: Optional[str] = Field(default=None, description="Tone, pitch, or accent description")
+
+
+class SeriesArcFaction(BaseModel):
+    name: str = Field(default="", description="Faction or clan name")
+    description: str = Field(default="", description="Faction doctrine or summary")
+
+
 class SeriesArcCastMember(BaseModel):
     character_id: str = Field(default="", description="Unique character identifier slug")
     name: str = Field(default="", description="Full character name")
@@ -283,7 +293,7 @@ class SeriesArcCastMember(BaseModel):
     eye_color: str = Field(default="")
     clothing_palette: str = Field(default="")
     signature_traits: List[str] = Field(default_factory=list)
-    voice_profile: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    voice_profile: Optional[SeriesArcVoiceProfile] = Field(default=None)
 
 
 class SeriesArcDialogueTurn(BaseModel):
@@ -323,7 +333,7 @@ class SeriesArcSession(BaseModel):
 class SeriesArcWorldBible(BaseModel):
     setting_name: str = Field(default="")
     lore_rules: List[str] = Field(default_factory=list)
-    factions: List[Dict[str, str]] = Field(default_factory=list)
+    factions: List[SeriesArcFaction] = Field(default_factory=list)
     unresolved_mysteries: List[str] = Field(default_factory=list)
 
 

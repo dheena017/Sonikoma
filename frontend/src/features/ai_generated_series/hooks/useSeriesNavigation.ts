@@ -18,23 +18,16 @@ export function useSeriesNavigation() {
   const getSeriesId = (): string => {
     if (typeof window === "undefined") return "";
     const parts = window.location.pathname.split("/").filter(Boolean);
-    // Patterns:
-    // /studio/manhwa/:id -> parts[2]
-    // /studio/comic/:id  -> parts[2]
-    // /studio/anime/:id  -> parts[2]
-    // /series/:id/cast   -> parts[1]
-    // /watch/:id         -> parts[1]
-    // /read/:id          -> parts[1]
-    if (parts.length >= 3 && parts[0] === "studio") {
+    if (parts[0] === "studio" && parts.length >= 3) {
       return parts[2] || "";
     }
-    if (parts.length >= 3 && parts[0] === "series") {
+    if (parts[0] === "series" && parts.length >= 2) {
       return parts[1] || "";
     }
-    if (parts.length >= 2 && (parts[0] === "watch" || parts[0] === "read" || parts[0] === "series")) {
+    if (parts.length >= 2 && (parts[0] === "watch" || parts[0] === "read")) {
       return parts[1] || "";
     }
-    return parts[parts.length - 1] || "";
+    return "";
   };
 
   return {

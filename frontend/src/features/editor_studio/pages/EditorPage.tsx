@@ -9,6 +9,7 @@ import { Tv, Eye, Sliders, Save, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/features/editor_studio/hooks/useEditorState";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 
+
 const AudioSettingsPage = React.lazy(
   () => import("@/features/editor_audio/pages/AudioSettingsPage")
 );
@@ -89,9 +90,8 @@ const EditorPage: React.FC<EditorPageProps> = ({
     const params = new URLSearchParams(window.location.search);
     params.delete("tab");
     const searchStr = params.toString();
-    const newPath = `${window.location.pathname}${
-      searchStr ? "?" + searchStr : ""
-    }`;
+    const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""
+      }`;
     if (navigateTo) {
       navigateTo(newPath);
     } else {
@@ -239,10 +239,11 @@ const EditorPage: React.FC<EditorPageProps> = ({
   );
 
   const [isSaving, setIsSaving] = React.useState(false);
-  const stableNoop = React.useCallback(() => {}, []);
+  const stableNoop = React.useCallback(() => { }, []);
   const [userCredits, setUserCredits] = React.useState<number | null>(
     appLogic.user?.credit_balance ?? appLogic.user?.credits ?? null
   );
+
 
   React.useEffect(() => {
     let active = true;
@@ -509,16 +510,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
       <main className="flex-1 w-full relative bg-transparent min-w-0 flex flex-col">
         {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
         <div
-          className={`relative z-10 bg-transparent min-h-0 min-w-0 flex-1 flex flex-col ${
-            activeTab === "video-settings" ||
-            activeTab === "settings" ||
-            activeTab === "audio-settings" ||
-            activeTab === "autocrop-settings"
+          className={`relative z-10 bg-transparent min-h-0 min-w-0 flex-1 flex flex-col ${activeTab === "video-settings" ||
+              activeTab === "settings" ||
+              activeTab === "audio-settings" ||
+              activeTab === "autocrop-settings"
               ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-5xl mx-auto"
-              : `border-t border-white/5 px-3 sm:px-5 lg:px-6 py-3 sm:py-4 flex flex-col gap-3.5 sm:gap-4 w-full max-w-[1720px] mx-auto flex-1 min-h-0 ${
-                  isFocusMode ? "hidden" : "flex flex-col flex-1"
-                }`
-          }`}
+              : `border-t border-white/5 px-3 sm:px-5 lg:px-6 py-3 sm:py-4 flex flex-col gap-3.5 sm:gap-4 w-full max-w-[1720px] mx-auto flex-1 min-h-0 ${isFocusMode ? "hidden" : "flex flex-col flex-1"
+              }`
+            }`}
         >
           {activeTab === "video-settings" || activeTab === "settings" ? (
             <div className="w-full space-y-6 rounded-3xl border border-neutral-800/80 bg-[#050508]/95 backdrop-blur-3xl shadow-2xl p-6 sm:p-8">
@@ -599,7 +598,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
                   frameRate={frameRate}
                   setFrameRate={appLogic.setFrameRate}
                   activeTheme={appLogic.activeTheme || "obsidian"}
-                  setActiveTheme={appLogic.setActiveTheme || (() => {})}
+                  setActiveTheme={appLogic.setActiveTheme || (() => { })}
                   targetUrl={targetUrl}
                   selectedModel={selectedModel}
                   selectedSource={selectedSource}
@@ -774,11 +773,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
               <div
                 id="section-monitor"
                 data-section="section-monitor"
-                className={`w-full scroll-mt-20 min-h-0 ${
-                  currentSection === "monitor"
+                className={`w-full scroll-mt-20 min-h-0 ${currentSection === "monitor"
                     ? "flex flex-col flex-1 h-full min-h-[calc(100vh-180px)]"
                     : "hidden lg:flex lg:flex-col"
-                }`}
+                  }`}
               >
                 {playerSettings.isPlayerOpen ? (
                   <QuickVideoPreview
@@ -848,13 +846,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
               <div
                 id="section-storyboard"
                 data-section="section-timeline"
-                className={`w-full scroll-mt-20 min-h-0 ${
-                  currentSection === "storyboard" ||
-                  currentSection === "timeline"
+                className={`w-full scroll-mt-20 min-h-0 ${currentSection === "storyboard" ||
+                    currentSection === "timeline"
                     ? "flex flex-col min-h-0"
                     : "hidden lg:flex lg:flex-col"
-                }`}
+                  }`}
               >
+
+
                 <StoryboardTimeline
                   isLoading={isHydrating}
                   panels={panels}
@@ -911,11 +910,10 @@ const EditorPage: React.FC<EditorPageProps> = ({
               {/* BOTTOM: Imported Assets (Resource Pool) */}
               <div
                 id="section-assets"
-                className={`w-full scroll-mt-20 min-h-0 ${
-                  currentSection === "assets" || currentSection === "raw-images"
+                className={`w-full scroll-mt-20 min-h-0 ${currentSection === "assets" || currentSection === "raw-images"
                     ? "flex flex-col min-h-0"
                     : "hidden lg:flex lg:flex-col"
-                }`}
+                  }`}
               >
                 <div className="bg-transparent flex-1 flex flex-col h-full min-h-0">
                   <ChapterScraperDeck

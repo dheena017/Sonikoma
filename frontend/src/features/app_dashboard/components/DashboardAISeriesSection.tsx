@@ -11,7 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import { aiSeriesApi, AISeriesProject } from "@/api/endpoints/aiSeries";
-import { useSeriesNavigation } from "@/features/editor_series/hooks/useSeriesNavigation";
+import { useSeriesNavigation } from "@/features/ai_generated_series/hooks/useSeriesNavigation";
 
 export const DashboardAISeriesSection: React.FC = () => {
   const { navigate } = useSeriesNavigation();

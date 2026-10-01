@@ -6,7 +6,11 @@ Handles creation, retrieval, listing, and deletion of AI Series projects.
 from __future__ import annotations
 
 from typing import List, Optional
+import logging
+
 from fastapi import APIRouter, HTTPException, Query, status
+
+logger = logging.getLogger(__name__)
 
 from app.schemas.series import (
     AISeriesProject,
@@ -37,6 +41,7 @@ async def create_ai_series(req: CreateAISeriesRequest):
         project = await series_orchestrator.create_series_project(req)
         return project
     except Exception as e:
+        logger.exception(f"[AISeries] Failed to architect AI Series '{req.title}': {e}")
         raise HTTPException(status_code=500, detail=f"Failed to architect AI Series: {str(e)}")
 
 

@@ -84,6 +84,9 @@ async def get_current_user_profile_endpoint(current_user: dict = Depends(get_cur
         "avatar_url": current_user["avatar_url"],
         "creator_role": current_user.get("creator_role") or "creator",
         "bio": current_user.get("bio") or "",
+        "location": current_user.get("location") or "",
+        "website": current_user.get("website") or "",
+        "timezone": current_user.get("timezone") or "UTC",
         "newsletter": bool(current_user.get("newsletter")),
         "language": current_user.get("language") or "en",
         "portfolio_links": portfolio_links,
@@ -111,12 +114,20 @@ async def update_user_profile_endpoint(body: ProfileUpdate, request: Request, cu
         updates["creator_role"] = body.creator_role
     if body.bio is not None:
         updates["bio"] = body.bio
+    if body.location is not None:
+        updates["location"] = body.location
+    if body.website is not None:
+        updates["website"] = body.website
+    if body.timezone is not None:
+        updates["timezone"] = body.timezone
     if body.newsletter is not None:
         updates["newsletter"] = 1 if body.newsletter else 0
     if body.language is not None:
         updates["language"] = body.language
     if body.portfolio_links is not None:
-        updates["portfolio_links"] = json.dumps(body.portfolio_links)
+        updates["portfolio_links"] = json.dumps(
+            [link.model_dump() for link in body.portfolio_links]
+        )
     if body.social_connections is not None:
         updates["social_connections"] = json.dumps(body.social_connections)
     if body.preferences is not None:

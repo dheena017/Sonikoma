@@ -8,13 +8,17 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  errorInfo?: ErrorInfo | null;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
+    errorInfo: null,
   };
+
+  private errorInfo: ErrorInfo | null = null;
 
   public static getDerivedStateFromError(error: Error): State {
     // Update state so the next render will show the fallback UI.
@@ -23,6 +27,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("[CRITICAL] Uncaught error:", error, errorInfo);
+    this.errorInfo = errorInfo;
   }
 
   private handleReset = () => {
@@ -45,9 +50,10 @@ class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      const stack = this.state.error?.stack || this.errorInfo?.componentStack || "";
       return (
         <div className="min-h-screen bg-[#070709] flex items-center justify-center p-6 text-neutral-100 font-sans">
-          <div className="max-w-lg w-full bg-neutral-900 border border-rose-500/20 rounded-[32px] p-8 sm:p-10 text-center shadow-2xl shadow-rose-950/20 animate-in fade-in zoom-in duration-300">
+          <div className="max-w-2xl w-full bg-neutral-900 border border-rose-500/20 rounded-[32px] p-8 sm:p-10 text-center shadow-2xl shadow-rose-950/20 animate-in fade-in zoom-in duration-300">
             <div className="w-20 h-20 bg-rose-500/10 border border-rose-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8">
               <AlertTriangle className="w-10 h-10 text-rose-500" />
             </div>
@@ -56,18 +62,24 @@ class ErrorBoundary extends Component<Props, State> {
               Application Fault Detected
             </h1>
             <p className="text-neutral-400 text-sm mb-8 leading-relaxed font-mono">
-              A critical runtime error occurred in the UI layer. The workspace
+              A runtime error occurred in the UI layer. The workspace
               state has been preserved, but the view must be reset.
             </p>
 
             {this.state.error && (
-              <div className="bg-black/40 border border-white/5 rounded-2xl p-4 mb-8 text-left overflow-x-auto">
-                <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-1">
-                  Error Trace
+              <div className="bg-black/60 border border-rose-500/20 rounded-2xl p-4 mb-8 text-left overflow-x-auto max-h-80">
+                <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest mb-1.5 flex items-center justify-between">
+                  <span>Error Diagnostics</span>
+                  <span className="font-mono text-neutral-500">{this.state.error.name}</span>
                 </p>
-                <code className="text-[11px] text-neutral-500 font-mono break-all">
-                  {this.state.error.toString()}
+                <code className="text-[11px] text-rose-300 font-mono break-all block mb-2 font-bold">
+                  {this.state.error.message || this.state.error.toString()}
                 </code>
+                {stack && (
+                  <pre className="text-[10px] text-neutral-400 font-mono whitespace-pre-wrap leading-relaxed mt-2 pt-2 border-t border-white/10 max-h-52 overflow-y-auto custom-purple-scrollbar">
+                    {stack}
+                  </pre>
+                )}
               </div>
             )}
 

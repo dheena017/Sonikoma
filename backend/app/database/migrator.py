@@ -390,6 +390,15 @@ def init_sqlite(conn) -> None:
         _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN last_login_ip TEXT",
                         "added 'last_login_ip' to 'users'")
         _run_safe_alter(cursor, conn,
+                "ALTER TABLE users ADD COLUMN location TEXT NOT NULL DEFAULT ''",
+                "added 'location' to 'users'")
+        _run_safe_alter(cursor, conn,
+                "ALTER TABLE users ADD COLUMN website TEXT NOT NULL DEFAULT ''",
+                "added 'website' to 'users'")
+        _run_safe_alter(cursor, conn,
+                "ALTER TABLE users ADD COLUMN timezone TEXT NOT NULL DEFAULT 'UTC'",
+                "added 'timezone' to 'users'")
+        _run_safe_alter(cursor, conn,
                         "ALTER TABLE series ADD COLUMN status TEXT NOT NULL DEFAULT 'ready'",
                         "added 'status' to 'series'")
         _run_safe_alter(cursor, conn,

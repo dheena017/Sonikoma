@@ -64,6 +64,15 @@ def register_routers(app: FastAPI):
     os.makedirs(videos_path, exist_ok=True)
     app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
 
+    # Serve AI series generated panel images & voice dubbing audio
+    backend_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "local_media"))
+    series_images_dir = os.path.join(backend_media_dir, "series_images")
+    series_audio_dir = os.path.join(backend_media_dir, "series_audio")
+    os.makedirs(series_images_dir, exist_ok=True)
+    os.makedirs(series_audio_dir, exist_ok=True)
+    app.mount("/media/series_images", StaticFiles(directory=series_images_dir), name="series_images")
+    app.mount("/media/series_audio", StaticFiles(directory=series_audio_dir), name="series_audio")
+
     # Serve locally generated panel layer WebPs
     local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "local_media"))
     os.makedirs(local_media_dir, exist_ok=True)

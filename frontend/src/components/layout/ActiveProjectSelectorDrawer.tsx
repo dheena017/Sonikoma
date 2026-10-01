@@ -17,12 +17,16 @@ import {
   ExternalLink,
   RotateCcw,
   Trash2,
+  Tv,
+  Swords,
+  BookOpen,
 } from "lucide-react";
 import { useProjectStore } from "@/shared/hooks/useProjectStore";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { SonikomaLogo } from "@/shared/ui/branding";
 import { getProxiedImageUrl, getSourceIcon, getSourceName } from "@/utils";
 import { timeAgo } from "@/utils/dateUtils";
+import { aiSeriesApi, AISeriesProject } from "@/api/endpoints/aiSeries";
 
 interface ProjectItem {
   project_id: string;
@@ -78,8 +82,10 @@ export const ActiveProjectSelectorDrawer: React.FC<
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<
-    "all" | "recent" | "draft" | "processing" | "completed" | "favorites"
+    "all" | "ai_series" | "recent" | "draft" | "processing" | "completed" | "favorites"
   >("all");
+  const [aiSeriesList, setAiSeriesList] = useState<AISeriesProject[]>([]);
+  const [loadingAiSeries, setLoadingAiSeries] = useState(false);
   const [sortBy, setSortBy] = useState<
     "newest" | "oldest" | "panels" | "title"
   >("newest");
@@ -126,7 +132,7 @@ export const ActiveProjectSelectorDrawer: React.FC<
     };
   }, [isDrawerOpen]);
 
-  // Fetch real project list when drawer opens
+  // Fetch real project list & AI series when drawer opens
   useEffect(() => {
     if (!isDrawerOpen) return;
 
@@ -159,7 +165,23 @@ export const ActiveProjectSelectorDrawer: React.FC<
       }
     };
 
+    const fetchAiSeries = async () => {
+      setLoadingAiSeries(true);
+      try {
+        const aiList = await aiSeriesApi.listSeries();
+        if (isMounted) {
+          setAiSeriesList(aiList || []);
+        }
+      } catch (err) {
+        console.warn("Failed to fetch AI series for drawer:", err);
+      } finally {
+        if (isMounted) setLoadingAiSeries(false);
+      }
+    };
+
     fetchProjectList();
+    fetchAiSeries();
+
     return () => {
       isMounted = false;
     };
@@ -212,6 +234,22 @@ export const ActiveProjectSelectorDrawer: React.FC<
       return 0;
     });
   }, [projects, searchQuery, activeTab, sortBy, favorites]);
+
+  // Real Filter AI Series
+  const filteredAiSeries = useMemo(() => {
+    let result = aiSeriesList;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (s) =>
+          s.title.toLowerCase().includes(q) ||
+          (s.logline && s.logline.toLowerCase().includes(q)) ||
+          (s.genre && s.genre.toLowerCase().includes(q)) ||
+          (s.format_type && s.format_type.toLowerCase().includes(q))
+      );
+    }
+    return result;
+  }, [aiSeriesList, searchQuery]);
 
   const executeActivation = async (id: string) => {
     setActiveProjectId(id);
@@ -880,30 +918,169 @@ export const ActiveProjectSelectorDrawer: React.FC<
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-xs">
             {[
               { id: "all", label: "All Projects" },
+              {
+                id: "ai_series",
+                label: "AI Series",
+                isAi: true,
+                count: aiSeriesList.length,
+              },
               { id: "favorites", label: "★ Favorites" },
               { id: "recent", label: "Recent" },
               { id: "draft", label: "Drafts" },
               { id: "processing", label: "Processing" },
               { id: "completed", label: "Completed" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`px-3 py-1.5 rounded-xl transition-all text-xs font-medium whitespace-nowrap cursor-pointer ${
-                  activeTab === tab.id
-                    ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
-                    : "text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            ].map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-xl transition-all text-xs font-medium whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+                    isActive
+                      ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold shadow-[0_0_12px_rgba(59,130,246,0.35)]"
+                      : "text-[#9CA3AF] bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
+                  }`}
+                >
+                  {tab.isAi && (
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  )}
+                  <span>{tab.label}</span>
+                  {tab.count !== undefined && (
+                    <span
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-neutral-800 text-neutral-400"
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* ─── Real Projects List ─── */}
         <div className="flex-grow overflow-y-auto p-4 space-y-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden bg-[#141414]">
-          {loading ? (
+          {activeTab === "ai_series" ? (
+            loadingAiSeries ? (
+              <div className="flex flex-col items-center justify-center py-20 text-[#9CA3AF] gap-3">
+                <Loader2 className="w-7 h-7 animate-spin text-[#3B82F6]" />
+                <span className="text-xs font-mono">
+                  Loading AI Series projects...
+                </span>
+              </div>
+            ) : filteredAiSeries.length === 0 ? (
+              <div className="text-center py-16 px-4 text-[#9CA3AF] space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-[#181818] border border-[#2F2F2F] flex items-center justify-center mx-auto text-[#6B7280]">
+                  <Sparkles className="w-7 h-7 text-amber-400/80" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#E5E5E5]">
+                    No AI Series found
+                  </p>
+                  <p className="text-xs text-[#9CA3AF] mt-1">
+                    {searchQuery
+                      ? `No AI series match "${searchQuery}".`
+                      : "No AI series created yet. Generate one in the AI Studio."}
+                  </p>
+                </div>
+                {navigateTo && (
+                  <button
+                    onClick={() => {
+                      setDrawerOpen(false);
+                      navigateTo("/scraper");
+                    }}
+                    className="btn-primary px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 uppercase tracking-wider"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Create AI Series</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              filteredAiSeries.map((s) => {
+                const fmt = (s.format_type || "manhwa").toLowerCase();
+                const isAnime = fmt === "anime";
+                const isManga = fmt === "comic_manga";
+                const FormatIcon = isAnime ? Tv : isManga ? Swords : BookOpen;
+                const chapterCount =
+                  s.sessions?.[0]?.chapters?.length ||
+                  s.chapters_per_session ||
+                  s.total_episodes ||
+                  8;
+                const studioUrl = `/ai-series/${s.series_id}?format=${fmt}`;
+
+                return (
+                  <div
+                    key={s.series_id}
+                    onClick={() => {
+                      setDrawerOpen(false);
+                      navigateTo?.(studioUrl);
+                    }}
+                    className="group relative p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 bg-[#181818] hover:bg-[#262626] border-[#2F2F2F] hover:border-[#3B82F6]/50 shadow-sm"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-neutral-900 border border-[#2F2F2F] shrink-0 relative flex items-center justify-center">
+                        {s.cover_image_url ? (
+                          <img
+                            src={s.cover_image_url}
+                            alt={s.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <FormatIcon className="w-5 h-5 text-[#3B82F6]" />
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex flex-col space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <FormatIcon className="w-3 h-3 text-[#3B82F6] shrink-0" />
+                          <span className="text-[10px] text-[#60A5FA] font-mono uppercase font-bold truncate">
+                            {fmt.replace("_", " ")}
+                          </span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md border font-mono capitalize text-[#10B981] bg-[#10B981]/10 border-[#10B981]/30">
+                            Ready
+                          </span>
+                        </div>
+                        <h4 className="font-extrabold text-xs text-[#E5E5E5] truncate group-hover:text-[#3B82F6] transition-colors">
+                          {s.title}
+                        </h4>
+
+                        <div className="flex items-center gap-2 text-[11px] text-[#9CA3AF] flex-wrap">
+                          <span className="inline-flex items-center gap-1 font-mono">
+                            <Layers className="w-3 h-3 text-[#9CA3AF]" />
+                            {chapterCount}{" "}
+                            {chapterCount === 1 ? "Chapter" : "Chapters"}
+                          </span>
+                          <span>•</span>
+                          <span className="font-mono text-[#F59E0B]">
+                            {s.genre || "Action Fantasy"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDrawerOpen(false);
+                          navigateTo?.(studioUrl);
+                        }}
+                        className="btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold inline-flex items-center gap-1.5"
+                      >
+                        <span>Open Studio</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )
+          ) : loading ? (
             <div className="flex flex-col items-center justify-center py-20 text-[#9CA3AF] gap-3">
               <Loader2 className="w-7 h-7 animate-spin text-[#3B82F6]" />
               <span className="text-xs font-mono">

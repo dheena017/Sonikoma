@@ -7,13 +7,40 @@ interface ChapterScraperPageProps {
   fetchWithInterceptor: typeof fetch;
   navigateTo: (path: string) => void;
   lastEditorPath?: string;
+  scrapeImages?: (url: string, projectId: string) => Promise<boolean>;
+  setSeriesTitle?: (title: string) => void;
+  setChapterNumber?: (num: string) => void;
+  setChapterTitle?: (title: string) => void;
+  setSeriesAuthor?: (author: string) => void;
+  setSeriesCoverImage?: (cover: string) => void;
 }
 
 export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
   addNotification,
   fetchWithInterceptor,
   navigateTo,
+  scrapeImages,
+  setSeriesTitle,
+  setChapterNumber,
+  setChapterTitle,
+  setSeriesAuthor,
+  setSeriesCoverImage,
 }) => {
+  React.useEffect(() => {
+    const path = window.location.pathname;
+    if (
+      path.startsWith("/scraper/") &&
+      !path.startsWith("/scraper/editor") &&
+      !path.startsWith("/scraper/audio-settings")
+    ) {
+      window.history.replaceState(null, "", "/chapter-scraper");
+    }
+    try {
+      localStorage.removeItem("chapter_scraper_url");
+      localStorage.removeItem("episode_scraper_url");
+    } catch {}
+  }, []);
+
   const seriesNameParam = React.useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     const searchUrl =
@@ -21,33 +48,23 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
     if (searchUrl) {
       return searchUrl;
     }
-
-    const path = window.location.pathname;
-    if (path.startsWith("/scraper/")) {
-      const seg = decodeURIComponent(
-        path.replace(/^\/scraper\//, "").replace(/\/$/, "")
-      );
-      if (seg && seg !== "editor" && seg !== "audio-settings") {
-        return seg;
-      }
-    }
     return undefined;
   }, []);
 
   return (
     <div className="w-full flex-1 flex flex-col py-4 sm:py-6 max-w-7xl mx-auto text-[#E5E5E5] animate-fade-in text-left">
       {/* ── MAIN COVER WRAPPER CARD ── */}
-      <div className="rounded-[28px] border border-transparent bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+      <div className="rounded-[28px] border border-[#181a24] bg-gradient-to-b from-[#0c0e14] via-[#090b10] to-[#07080c] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
         <ChapterScraper
           addNotification={addNotification}
           fetchWithInterceptor={fetchWithInterceptor}
           isStandalone={true}
           initialSeriesName={seriesNameParam}
-          onChapterSelect={(chapter) => {
+          scrapeImages={scrapeImages}
+          onChapterSelect={async (chapter) => {
             const temporaryProjectId = `temp_${Date.now()}_${Math.random()
               .toString(36)
               .substring(2, 10)}`;
-            localStorage.setItem("auto_import_url", chapter.url);
 
             if (chapter.rating !== undefined && chapter.rating !== null) {
               localStorage.setItem(
@@ -74,26 +91,27 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
               localStorage.removeItem("active_chapter_views");
             }
 
-            const sSlug = seriesNameParam
-              ? seriesNameParam
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, "-")
-                  .replace(/^-+|-+$/g, "")
-              : "";
-            const cSlug = (chapter.title || `chapter-${chapter.number}`)
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")
-              .replace(/^-+|-+$/g, "");
+            if (setChapterTitle && chapter.title) {
+              setChapterTitle(chapter.title);
+            }
+            if (setChapterNumber && chapter.number) {
+              setChapterNumber(chapter.number);
+            }
 
-            if (sSlug && cSlug) {
-              navigateTo(
-                `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
-              );
+            const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+
+            if (typeof scrapeImages === "function") {
+              const ok = await scrapeImages(chapter.url, temporaryProjectId);
+              if (ok) {
+                localStorage.removeItem("auto_import_url");
+                navigateTo(targetPath);
+              }
             } else {
-              navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
+              localStorage.setItem("auto_import_url", chapter.url);
+              navigateTo(targetPath);
             }
           }}
-          onMultipleChaptersSelect={(chapters) => {
+          onMultipleChaptersSelect={async (chapters) => {
             if (chapters.length > 0) {
               const temporaryProjectId = `temp_${Date.now()}_${Math.random()
                 .toString(36)
@@ -102,7 +120,6 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
                 "auto_import_batch",
                 JSON.stringify(chapters)
               );
-              localStorage.setItem("auto_import_url", chapters[0].url);
 
               const chapter = chapters[0];
               if (chapter.rating !== undefined && chapter.rating !== null) {
@@ -130,23 +147,24 @@ export const ChapterScraperPage: React.FC<ChapterScraperPageProps> = ({
                 localStorage.removeItem("active_chapter_views");
               }
 
-              const sSlug = seriesNameParam
-                ? seriesNameParam
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, "-")
-                    .replace(/^-+|-+$/g, "")
-                : "";
-              const cSlug = (chapter.title || `chapter-${chapter.number}`)
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, "-")
-                .replace(/^-+|-+$/g, "");
+              if (setChapterTitle && chapter.title) {
+                setChapterTitle(chapter.title);
+              }
+              if (setChapterNumber && chapter.number) {
+                setChapterNumber(chapter.number);
+              }
 
-              if (sSlug && cSlug) {
-                navigateTo(
-                  `/scraper/editor/series/${sSlug}/chapters/${cSlug}?project_id=${temporaryProjectId}`
-                );
+              const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+
+              if (typeof scrapeImages === "function") {
+                const ok = await scrapeImages(chapter.url, temporaryProjectId);
+                if (ok) {
+                  localStorage.removeItem("auto_import_url");
+                  navigateTo(targetPath);
+                }
               } else {
-                navigateTo(`/scraper/editor?id=${temporaryProjectId}`);
+                localStorage.setItem("auto_import_url", chapter.url);
+                navigateTo(targetPath);
               }
             }
           }}

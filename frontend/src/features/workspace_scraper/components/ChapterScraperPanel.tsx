@@ -3,6 +3,7 @@ import { Sparkles, Book, UploadCloud } from "lucide-react";
 import { NotificationType } from "@/features/app_notification";
 import { ScraperInputToolbar } from "./panel/ScraperInputToolbar";
 import { LocalImageUploadZone } from "./panel/LocalImageUploadZone";
+import { AIGeneratedSeries } from "@/features/ai_generated_series/components/AIGeneratedSeries";
 import type { SeparateUrlResult } from "@/api/endpoints/scraper";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
@@ -88,7 +89,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
     onUploadImages,
   } = props;
 
-  const [inputMode, setInputMode] = React.useState<"url" | "upload">("url");
+  const [inputMode, setInputMode] = React.useState<"url" | "upload" | "ai_series">("url");
   const [selectedFiles, setSelectedFiles] = React.useState<File[]>([]);
   const [separatedData, setSeparatedData] =
     React.useState<SeparateUrlResult | null>(null);
@@ -104,15 +105,16 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           <div className="w-fit flex items-center gap-2 px-3 py-1 rounded-full bg-[#1E1E1E] border border-[#2F2F2F] text-[#60A5FA] shadow-sm">
             <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#3B82F6]" />
             <span className="text-[10px] font-black tracking-[0.2em] uppercase font-mono">
-              Project Constructor
+              {inputMode === "ai_series" ? "Autonomous Series Studio" : "Project Constructor"}
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-[1.1]">
-            Initialize New Video Pipeline
+            {inputMode === "ai_series" ? "Generate AI Multi-Chapter Series" : "Initialize New Video Pipeline"}
           </h2>
           <p className="text-xs sm:text-sm text-neutral-400 font-medium">
-            Define your project parameters and Manhwa, Manga, or Webcomic source
-            link to begin.
+            {inputMode === "ai_series"
+              ? "Architect original Korean Manhwa, Japanese Manga, or Cinematic Anime series with 2D diffusion artwork and Edge-TTS voice dubbing."
+              : "Define your project parameters and Manhwa, Manga, or Webcomic source link to begin."}
           </p>
         </div>
       </div>
@@ -120,7 +122,7 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
       {/* 2. Input Mode Selector & Tab Header */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#2F2F2F] pb-4">
-          <div className="grid grid-cols-2 w-full sm:w-fit p-1 rounded-2xl bg-[#121212] border border-[#2F2F2F] gap-1.5 shadow-inner">
+          <div className="flex flex-wrap items-center w-full sm:w-fit p-1 rounded-2xl bg-[#121212] border border-[#2F2F2F] gap-1.5 shadow-inner">
             <Tooltip
               text="Import panels via online webtoon, manga, or comic reader URL"
               placement="bottom"
@@ -171,6 +173,30 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
                 )}
               </button>
             </Tooltip>
+
+            {/* TAB 3: Generate AI Series */}
+            <Tooltip
+              text="Architect original multi-chapter series with AI story architecture, 2D art, and voice dubbing"
+              placement="bottom"
+            >
+              <button
+                type="button"
+                onClick={() => setInputMode("ai_series")}
+                className={`min-w-0 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 text-center leading-tight cursor-pointer ${
+                  inputMode === "ai_series"
+                    ? "bg-neutral-800 text-white border border-neutral-700 font-bold shadow-sm"
+                    : "text-neutral-400 hover:text-white hover:bg-[#1E1E1E] hover:border-neutral-700 border border-[#2F2F2F]"
+                }`}
+                aria-label="Generate AI Series"
+              >
+                <Sparkles
+                  className={`w-4 h-4 ${
+                    inputMode === "ai_series" ? "text-white" : "text-neutral-400"
+                  }`}
+                />
+                <span className="min-w-0">Generate AI Series</span>
+              </button>
+            </Tooltip>
           </div>
 
           {/* Platform Badge Aligned in Tab Header Row */}
@@ -197,7 +223,9 @@ const UrlInputPanel = React.memo((props: UrlInputPanelProps) => {
           )}
         </div>
 
-        {inputMode === "upload" ? (
+        {inputMode === "ai_series" ? (
+          <AIGeneratedSeries addNotification={addNotification} />
+        ) : inputMode === "upload" ? (
           <LocalImageUploadZone
             selectedFiles={selectedFiles}
             setSelectedFiles={setSelectedFiles}

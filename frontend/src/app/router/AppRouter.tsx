@@ -37,6 +37,9 @@ const ProjectsPage = React.lazy(
 const SeriesDetailsPage = React.lazy(
   () => import("@/features/workspace_projects/pages/SeriesDetailsPage")
 );
+const AISeriesStudioPage = React.lazy(
+  () => import("@/features/ai_generated_series/pages/AISeriesStudioPage")
+);
 const ShortcutsPage = React.lazy(
   () => import("@/features/app_shortcuts/pages/ShortcutsPage")
 );
@@ -113,48 +116,6 @@ const AIRoutingPage = React.lazy(
 const AICreditWalletPage = React.lazy(
   () => import("@/features/ai_core/pages/AICreditWalletPage")
 );
-
-// --- AI Generated Series Suite (Lazy Loaded) ---
-const AISeriesPage = React.lazy(
-  () => import("@/features/editor_series/pages/AISeriesPage")
-);
-const AISeriesGeneratorPage = React.lazy(
-  () => import("@/features/editor_series/pages/AISeriesGeneratorPage")
-);
-const ManhwaStudioPage = React.lazy(
-  () => import("@/features/editor_series/pages/ManhwaStudioPage")
-);
-const ComicStudioPage = React.lazy(
-  () => import("@/features/editor_series/pages/ComicStudioPage")
-);
-const AnimeStudioPage = React.lazy(
-  () => import("@/features/editor_series/pages/AnimeStudioPage")
-);
-const CharacterVaultPage = React.lazy(
-  () => import("@/features/editor_series/pages/CharacterVaultPage")
-);
-const WorldBuildingVaultPage = React.lazy(
-  () => import("@/features/editor_series/pages/WorldBuildingVaultPage")
-);
-const SeriesArcDirectorPage = React.lazy(
-  () => import("@/features/editor_series/pages/SeriesArcDirectorPage")
-);
-const VisualFXChoreographerPage = React.lazy(
-  () => import("@/features/editor_series/pages/VisualFXChoreographerPage")
-);
-const AudioDubStagePage = React.lazy(
-  () => import("@/features/editor_series/pages/AudioDubStagePage")
-);
-const SeriesLiveMonitorPage = React.lazy(
-  () => import("@/features/editor_series/pages/SeriesLiveMonitorPage")
-);
-const SeriesReaderTheaterPage = React.lazy(
-  () => import("@/features/editor_series/pages/SeriesReaderTheaterPage")
-);
-const SeriesExportMasterPage = React.lazy(
-  () => import("@/features/editor_series/pages/SeriesExportMasterPage")
-);
-
 import MainLayout from "@/components/layout/MainLayout";
 import { useProjectStore } from "@/shared/hooks";
 
@@ -275,7 +236,10 @@ export function isKnownRoute(path: string): boolean {
   // 8. AI Generated Series Ecosystem
   if (
     clean === "/ai-series" ||
+    clean.startsWith("/ai-series/") ||
+    clean.startsWith("/ai-series") ||
     clean === "/series-generator" ||
+    clean.startsWith("/series-generator/") ||
     clean.startsWith("/studio/") ||
     clean.startsWith("/series/") ||
     clean.startsWith("/watch/") ||
@@ -892,10 +856,18 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/scraper/chapter-scraper" ||
         currentPath === "/episode-scraper" ||
         currentPath === "/scraper/episode-scraper",
+      isAISeriesStudioPath:
+        currentPath.startsWith("/ai-series") ||
+        currentPath.startsWith("/studio/ai-series") ||
+        /^\/series\/[^/]+\/(manhwa|comic|anime)\/?$/.test(currentPath),
       isEditorPath:
-        currentPath.startsWith("/editor") ||
-        currentPath.startsWith("/scraper/editor") ||
-        (chapterPathMatch !== null && !isDetailsMode),
+        !currentPath.startsWith("/ai-series") &&
+        !currentPath.startsWith("/studio/ai-series") &&
+        !/^\/series\/[^/]+\/(manhwa|comic|anime)\/?$/.test(currentPath) &&
+        (currentPath.startsWith("/editor") ||
+          currentPath.startsWith("/scraper/editor") ||
+          (currentPath.startsWith("/studio/") && !currentPath.startsWith("/studio/ai-series")) ||
+          (chapterPathMatch !== null && !isDetailsMode)),
       isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
       isOptimizerPath:
@@ -981,41 +953,6 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/video-editor" ||
         currentPath === "/video-editor/" ||
         currentPath.startsWith("/video-editor/"),
-
-      // AI Generated Series Flags
-      isAISeriesPath:
-        currentPath === "/ai-series" ||
-        currentPath === "/ai-series/" ||
-        currentPath === "/series-generator" ||
-        currentPath === "/series-generator/" ||
-        currentPath.startsWith("/studio/") ||
-        currentPath.startsWith("/series/") ||
-        currentPath.startsWith("/watch/") ||
-        currentPath.startsWith("/read/"),
-      isAISeriesHubPath:
-        currentPath === "/ai-series" || currentPath === "/ai-series/",
-      isAISeriesGeneratorPath:
-        currentPath === "/series-generator" ||
-        currentPath === "/series-generator/",
-      isManhwaStudioPath: currentPath.startsWith("/studio/manhwa/"),
-      isComicStudioPath: currentPath.startsWith("/studio/comic/"),
-      isAnimeStudioPath: currentPath.startsWith("/studio/anime/"),
-      isCharacterVaultPath:
-        currentPath.includes("/cast") && currentPath.startsWith("/series/"),
-      isWorldVaultPath:
-        currentPath.includes("/world") && currentPath.startsWith("/series/"),
-      isTimelinePath:
-        currentPath.includes("/timeline") && currentPath.startsWith("/series/"),
-      isVFXStagePath:
-        currentPath.includes("/vfx") && currentPath.startsWith("/series/"),
-      isDubbingStagePath:
-        currentPath.includes("/dubbing") && currentPath.startsWith("/series/"),
-      isLiveMonitorPath:
-        currentPath.includes("/monitor") && currentPath.startsWith("/series/"),
-      isTheaterPath:
-        currentPath.startsWith("/watch/") || currentPath.startsWith("/read/"),
-      isExportMasterPath:
-        currentPath.includes("/export") && currentPath.startsWith("/series/"),
     };
   }, [currentPath]);
 
@@ -1027,6 +964,7 @@ export default function AppRouter(props: AppRouterProps) {
     isSettingsAccountPath,
     isAutoCropPath,
     isEpisodeScraperPath,
+    isAISeriesStudioPath,
     isEditorPath,
     isShortcutsPath,
     isAudioSettingsPath,
@@ -1053,20 +991,6 @@ export default function AppRouter(props: AppRouterProps) {
     isAIWalletPath,
     isImageEditorPage,
     isVideoEditorPath,
-    isAISeriesPath,
-    isAISeriesHubPath,
-    isAISeriesGeneratorPath,
-    isManhwaStudioPath,
-    isComicStudioPath,
-    isAnimeStudioPath,
-    isCharacterVaultPath,
-    isWorldVaultPath,
-    isTimelinePath,
-    isVFXStagePath,
-    isDubbingStagePath,
-    isLiveMonitorPath,
-    isTheaterPath,
-    isExportMasterPath,
   } = pathFlags;
 
   const isAnyAdmin = isAdminPath || isAdminDashboardPath;
@@ -1086,6 +1010,8 @@ export default function AppRouter(props: AppRouterProps) {
     (Boolean(pathFlags.editorRouteMatch) ||
       currentPath.startsWith("/editor") ||
       currentPath.startsWith("/scraper/editor") ||
+      currentPath.startsWith("/studio/") ||
+      /^\/series\/[^/]+\/(manhwa|comic|anime)\/?$/.test(currentPath) ||
       Boolean(pathFlags.chapterPathMatch && !pathFlags.isDetailsMode)) &&
     !pathFlags.isImageEditorPage;
 
@@ -1173,6 +1099,13 @@ export default function AppRouter(props: AppRouterProps) {
       currentPath === "/editor" ||
       currentPath === "/editor/"
     ) {
+      const search = window.location.search;
+      const params = new URLSearchParams(search);
+      if (params.has("series_id") || params.has("seriesId")) {
+        navigateTo(`/scraper/editor${search}`);
+        return;
+      }
+
       const activeProjId =
         projectId ||
         (typeof window !== "undefined"
@@ -1189,7 +1122,7 @@ export default function AppRouter(props: AppRouterProps) {
           navigateTo(`/scraper/editor?id=${encodeURIComponent(activeProjId)}`);
         }
       } else {
-        navigateTo(`/scraper/editor`);
+        navigateTo(`/scraper/editor${search}`);
       }
       return;
     }
@@ -1219,6 +1152,9 @@ export default function AppRouter(props: AppRouterProps) {
     ) {
       const search = window.location.search;
       const params = new URLSearchParams(search);
+      if (params.has("series_id") || params.has("seriesId")) {
+        return;
+      }
       const projId = params.get("id") || params.get("project_id") || projectId;
 
       // Guard: Ensure store data is hydrated and actually matches the target project before normalising
@@ -1287,7 +1223,6 @@ export default function AppRouter(props: AppRouterProps) {
       isAnyAdmin={isAnyAdmin}
       isCreativeSuitePath={isCreativeSuitePath}
       isAICorePath={isAICorePath}
-      isAISeriesPath={isAISeriesPath}
       isImageEditorPage={isImageEditorPage}
       isProEditorPage={isProEditorPage}
       isSidebarOpen={isSidebarOpen}
@@ -1532,88 +1467,7 @@ export default function AppRouter(props: AppRouterProps) {
           </div>
         )}
 
-        {/* AI GENERATED SERIES ECOSYSTEM VIEWS */}
-        {isAISeriesHubPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <AISeriesPage />
-          </div>
-        )}
-
-        {isAISeriesGeneratorPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <AISeriesGeneratorPage />
-          </div>
-        )}
-
-        {isManhwaStudioPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <ManhwaStudioPage />
-          </div>
-        )}
-
-        {isComicStudioPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <ComicStudioPage />
-          </div>
-        )}
-
-        {isAnimeStudioPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <AnimeStudioPage />
-          </div>
-        )}
-
-        {isCharacterVaultPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <CharacterVaultPage />
-          </div>
-        )}
-
-        {isWorldVaultPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <WorldBuildingVaultPage />
-          </div>
-        )}
-
-        {isTimelinePath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <SeriesArcDirectorPage />
-          </div>
-        )}
-
-        {isVFXStagePath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <VisualFXChoreographerPage />
-          </div>
-        )}
-
-        {isDubbingStagePath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <AudioDubStagePage />
-          </div>
-        )}
-
-        {isLiveMonitorPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <SeriesLiveMonitorPage />
-          </div>
-        )}
-
-        {isTheaterPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <SeriesReaderTheaterPage />
-          </div>
-        )}
-
-        {isExportMasterPath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 h-full">
-            <SeriesExportMasterPage />
-          </div>
-        )}
-
-
-        {/* PAGE VIEW 2.25: SaaS Profile & Account Settings */}
-        {isSettingsAccountPath && (
+       {isSettingsAccountPath && (
           <div className="page-transition w-full flex-1 flex flex-col">
             <ProfilePage
               user={user}
@@ -1805,6 +1659,12 @@ export default function AppRouter(props: AppRouterProps) {
                 fetchWithInterceptor={fetchWithInterceptor}
                 navigateTo={navigateTo}
                 lastEditorPath={lastEditorPath}
+                scrapeImages={scrapeImages}
+                setSeriesTitle={setSeriesTitle}
+                setChapterNumber={setChapterNumber}
+                setChapterTitle={setChapterTitle}
+                setSeriesAuthor={setSeriesAuthor}
+                setSeriesCoverImage={setSeriesCoverImage}
               />
             </React.Suspense>
           </div>
@@ -1865,6 +1725,20 @@ export default function AppRouter(props: AppRouterProps) {
               minPanelHeightPx={cropMinHeightPx}
               isApplying={isBatchCropping}
             />
+          </div>
+        )}
+
+        {/* PAGE VIEW 18.5: Dedicated AI Series Master Studio */}
+        {isAISeriesStudioPath && !isPipMode && (
+          <div className="page-transition w-full flex-1 flex flex-col h-full min-h-0 max-h-full overflow-hidden">
+            <React.Suspense fallback={<RouteLoadingFallback />}>
+              <AISeriesStudioPage
+                seriesIdFromRoute={currentPath.match(/^\/ai-series\/([^/?#]+)/)?.[1]}
+                navigateTo={navigateTo}
+                addNotification={addNotification}
+                fetchWithInterceptor={fetchWithInterceptor as typeof fetch}
+              />
+            </React.Suspense>
           </div>
         )}
 

@@ -192,7 +192,7 @@ export default function AICoreHeader({
     >
       {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0 h-full">
-        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-4">
+        <div className="w-10 sm:w-12 lg:w-16 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-2">
           <button
             onClick={onToggleSidebar}
             className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"

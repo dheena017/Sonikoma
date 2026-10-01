@@ -284,6 +284,8 @@ export const HorizontalScrollContainer: React.FC<{
   );
 };
 
+const EMPTY_PANELS_LIST: any[] = [];
+
 const ChapterScraperDeck = React.memo(
   ({
     scrapedImages,
@@ -378,9 +380,10 @@ const ChapterScraperDeck = React.memo(
     const setIsEpisodeCollapsed = useProjectStore(
       (s) => s.setIsEpisodeCollapsed
     );
-    const activePanelsList = useProjectStore(
-      (s) => s.activeProjectData?.panels || []
+    const activePanels = useProjectStore(
+      (s) => s.activeProjectData?.panels
     );
+    const activePanelsList = activePanels || EMPTY_PANELS_LIST;
     const activeFetch = fetchWithInterceptor || fetch;
 
     const inStoryboardCount = React.useMemo(() => {

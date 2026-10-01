@@ -50,7 +50,7 @@ def update_user(user_id: str, updates: Dict[str, Any]) -> None:
         allowed_keys = (
             'username', 'email', 'password_hash', 'hashed_password', 'preferences',
             'full_name', 'avatar_url', 'creator_role', 'bio',
-            'newsletter', 'language', 'portfolio_links', 'credits', 'credit_balance',
+            'location', 'website', 'timezone', 'newsletter', 'language', 'portfolio_links', 'credits', 'credit_balance',
             'is_locked', 'is_banned', 'ban_reason', 'last_login_at', 'last_login_ip',
             'last_claimed_date', 'unlocked_rewards', 'mfa_enabled', 'social_connections',
             'google_id', 'google_access_token'

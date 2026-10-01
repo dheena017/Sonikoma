@@ -7,6 +7,9 @@ import {
   ToggleRight,
   Sparkles,
   Compass,
+  Globe2,
+  MapPin,
+  Clock3,
 } from "lucide-react";
 
 interface ProfileAccountTabProps {
@@ -17,6 +20,9 @@ interface ProfileAccountTabProps {
     avatarUrl: string;
     role: string;
     bio: string;
+    location: string;
+    website: string;
+    timezone: string;
     newsletter: boolean;
     language: string;
   };
@@ -27,6 +33,9 @@ interface ProfileAccountTabProps {
       avatarUrl: string;
       role: string;
       bio: string;
+      location: string;
+      website: string;
+      timezone: string;
       newsletter: boolean;
       language: string;
     }>
@@ -226,6 +235,72 @@ export default function ProfileAccountTab({
               }
               className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-[#3B82F6]" />
+                Location
+              </label>
+              <input
+                type="text"
+                value={profileUser.location}
+                placeholder="City, Country"
+                onChange={(e) =>
+                  setProfileUser((prev) => ({
+                    ...prev,
+                    location: e.target.value,
+                  }))
+                }
+                className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
+                <Globe2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                Website
+              </label>
+              <input
+                type="url"
+                value={profileUser.website}
+                placeholder="https://example.com"
+                onChange={(e) =>
+                  setProfileUser((prev) => ({
+                    ...prev,
+                    website: e.target.value,
+                  }))
+                }
+                className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 ml-1 flex items-center gap-1">
+                <Clock3 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                Timezone
+              </label>
+              <select
+                value={profileUser.timezone}
+                onChange={(e) =>
+                  setProfileUser((prev) => ({
+                    ...prev,
+                    timezone: e.target.value,
+                  }))
+                }
+                className="w-full bg-black/40 border border-white/5 focus:border-neutral-600 rounded-xl py-3 px-4 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all"
+              >
+                <option value="UTC">UTC</option>
+                <option value="America/Los_Angeles">Pacific Time</option>
+                <option value="America/New_York">Eastern Time</option>
+                <option value="Europe/London">London</option>
+                <option value="Europe/Berlin">Central Europe</option>
+                <option value="Asia/Tokyo">Tokyo</option>
+                <option value="Asia/Seoul">Seoul</option>
+                <option value="Australia/Sydney">Sydney</option>
+              </select>
+            </div>
           </div>
 
           <div className="space-y-1.5 text-left">

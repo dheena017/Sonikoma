@@ -151,7 +151,32 @@ async def execute_provider_call(
         schema = getattr(skill, "response_schema", None) if skill else None
         if schema:
             config_args["response_mime_type"] = "application/json"
-            config_args["response_schema"] = schema
+            clean_schema = schema
+            if types and hasattr(types, "Schema"):
+                try:
+                    from google.genai._transformers import t_schema
+                    transformed = t_schema(None, schema)
+
+                    def _strip_additional_props(s):
+                        if not s:
+                            return
+                        if hasattr(s, "additional_properties"):
+                            s.additional_properties = None
+                        if hasattr(s, "properties") and s.properties:
+                            for prop in s.properties.values():
+                                _strip_additional_props(prop)
+                        if hasattr(s, "items") and s.items:
+                            _strip_additional_props(s.items)
+                        if hasattr(s, "any_of") and s.any_of:
+                            for sub in s.any_of:
+                                _strip_additional_props(sub)
+
+                    _strip_additional_props(transformed)
+                    clean_schema = transformed
+                except Exception as ex:
+                    logger.debug(f"Could not pre-clean schema for Gemini: {ex}")
+                    clean_schema = schema
+            config_args["response_schema"] = clean_schema
 
         config = types.GenerateContentConfig(**config_args) if types else None
 

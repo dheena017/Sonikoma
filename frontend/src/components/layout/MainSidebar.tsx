@@ -23,7 +23,6 @@ import {
   Database,
   Image,
   User,
-  Clapperboard,
 } from "lucide-react";
 
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
@@ -314,7 +313,6 @@ const SidebarInner = ({
             currentPath === "/creative-suite" ||
             currentPath.startsWith("/creative-suite/") ||
             (currentPath.startsWith("/ai-") &&
-              !currentPath.startsWith("/ai-series") &&
               !currentPath.startsWith("/ai-core")) ||
             currentPath === "/panel-assistant" ||
             currentPath === "/youtube",
@@ -330,23 +328,6 @@ const SidebarInner = ({
           path: "/ai-core",
           onClick: () => navigateTo("/ai-core"),
           enabled: true,
-        },
-        {
-          label: "AI Series",
-          icon: Clapperboard,
-          active:
-            currentPath === "/ai-series" ||
-            currentPath === "/ai-series/" ||
-            currentPath === "/series-generator" ||
-            currentPath === "/series-generator/" ||
-            currentPath.startsWith("/studio/") ||
-            currentPath.startsWith("/series/") ||
-            currentPath.startsWith("/watch/") ||
-            currentPath.startsWith("/read/"),
-          path: "/ai-series",
-          onClick: () => navigateTo("/ai-series"),
-          enabled: true,
-          badge: "AI",
         },
         {
           label: "Image Editor",

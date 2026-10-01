@@ -1,5 +1,5 @@
 import React from "react";
-import { Film, CheckCircle2, BarChart2 } from "lucide-react";
+import { Film, CheckCircle2, BarChart2, Sparkles } from "lucide-react";
 
 interface ProjectsStatsProps {
   stats: {
@@ -10,15 +10,17 @@ interface ProjectsStatsProps {
   statusFilter: string;
   onStatusChange: (value: string) => void;
   showTabs: boolean;
+  aiSeriesCount?: number;
 }
 
-const statusTabs = ["All", "Completed", "Processing", "Draft"];
+const statusTabs = ["All", "Completed", "Processing", "Draft", "AI Series"];
 
 export default function ProjectsStats({
   stats,
   statusFilter,
   onStatusChange,
   showTabs,
+  aiSeriesCount = 0,
 }: ProjectsStatsProps) {
   return (
     <div className="space-y-6 mb-8">
@@ -71,6 +73,7 @@ export default function ProjectsStats({
       {showTabs && (
         <div className="flex w-full max-w-full items-center gap-1 overflow-x-auto rounded-lg border border-white/10 bg-[#141414] p-1 sm:w-fit">
           {statusTabs.map((tab) => {
+            const isAi = tab === "AI Series";
             const isActive =
               statusFilter.toLowerCase() === tab.toLowerCase() ||
               (tab === "All" && !statusFilter);
@@ -79,13 +82,27 @@ export default function ProjectsStats({
                 key={tab}
                 type="button"
                 onClick={() => onStatusChange(tab)}
-                className={`min-h-9 flex-1 rounded-md px-4 py-1.5 text-xs font-semibold transition-colors cursor-pointer sm:flex-none ${
+                className={`min-h-9 flex-1 rounded-md px-4 py-1.5 text-xs font-semibold transition-colors cursor-pointer sm:flex-none inline-flex items-center justify-center gap-1.5 ${
                   isActive
-                    ? "bg-white/10 text-white"
+                    ? isAi
+                      ? "bg-[#3B82F6] text-white shadow-[0_0_12px_rgba(59,130,246,0.35)]"
+                      : "bg-white/10 text-white"
                     : "text-[#A1A1AA] hover:bg-white/5 hover:text-white"
                 }`}
               >
-                {tab}
+                {isAi && <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
+                <span>{tab}</span>
+                {isAi && aiSeriesCount > 0 && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold ${
+                      isActive
+                        ? "bg-white/20 text-white"
+                        : "bg-neutral-800 text-neutral-400"
+                    }`}
+                  >
+                    {aiSeriesCount}
+                  </span>
+                )}
               </button>
             );
           })}

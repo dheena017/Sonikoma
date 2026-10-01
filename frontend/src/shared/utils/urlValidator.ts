@@ -13,6 +13,7 @@ export interface UrlValidationResult {
   error?: string;
   platform?: string;
   isWebtoons?: boolean;
+  isList?: boolean;
 }
 
 const COMMON_LANG_CODES = new Set([
@@ -102,8 +103,9 @@ export function validateChapterUrl(urlStr: string): UrlValidationResult {
         valid: false,
         platform: "Webtoons",
         isWebtoons: true,
+        isList: true,
         error:
-          "This is a series episode list page. Please click into a specific episode viewer URL (e.g. .../viewer?title_no=...&episode_no=...).",
+          "This is a series episode list page. Click 'Import Chapter Scraper' below to choose an episode, or enter a specific episode viewer URL.",
       };
     }
 

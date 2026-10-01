@@ -42,9 +42,18 @@ export interface RegisterUserData {
 }
 
 export interface UpdateProfilePayload {
-  name?: string;
-  email?: string;
-  [key: string]: any;
+  full_name?: string;
+  avatar_url?: string;
+  creator_role?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  timezone?: string;
+  newsletter?: boolean;
+  language?: string;
+  portfolio_links?: Array<{ id: string; site: string; url: string }>;
+  social_connections?: Record<string, boolean>;
+  preferences?: Record<string, unknown>;
 }
 
 export interface UpdatePasswordPayload {

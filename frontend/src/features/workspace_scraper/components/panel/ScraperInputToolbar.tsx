@@ -264,68 +264,18 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
   const handleOpenChapterScraperClick = () => {
     const destinationUrl = separatedData?.series_url || targetUrl.trim();
-    let seriesSlug = separatedData?.series_slug || separatedData?.title_slug;
-
-    if (!seriesSlug && destinationUrl) {
-      try {
-        const u = new URL(
-          destinationUrl.startsWith("http")
-            ? destinationUrl
-            : `https://${destinationUrl}`
-        );
-        const segments = u.pathname.split("/").filter(Boolean);
-        const ignored = new Set([
-          "list",
-          "viewer",
-          "chapter",
-          "episode",
-          "detail",
-          "read",
-          "index",
-          "comic",
-          "comics",
-          "manga",
-          "series",
-          "en",
-          "ko",
-          "id",
-          "zh",
-          "webtoon",
-        ]);
-        while (
-          segments.length > 0 &&
-          ignored.has(segments[segments.length - 1].toLowerCase())
-        ) {
-          segments.pop();
-        }
-        if (
-          segments.length > 1 &&
-          (/^(chapter|episode|ep|ch)[-_]?\d+/i.test(
-            segments[segments.length - 1]
-          ) ||
-            /^\d+$/.test(segments[segments.length - 1]))
-        ) {
-          segments.pop();
-        }
-        seriesSlug = segments[segments.length - 1] || "";
-      } catch {
-        seriesSlug = destinationUrl.split("/").filter(Boolean).pop() || "";
-      }
-    }
-
-    if (destinationUrl) {
-      localStorage.setItem("chapter_scraper_url", destinationUrl);
-      localStorage.setItem("episode_scraper_url", destinationUrl);
-    }
-
     const opener = onOpenChapterScraper || onOpenEpisodeScraper;
     if (opener) {
       opener(destinationUrl);
     } else {
       const nav = (window as any).navigateTo;
-      const targetPath = seriesSlug
-        ? `/scraper/${encodeURIComponent(seriesSlug)}`
-        : "/scraper";
+      const isValidWebUrl =
+        destinationUrl &&
+        (destinationUrl.startsWith("http://") ||
+          destinationUrl.startsWith("https://"));
+      const targetPath = isValidWebUrl
+        ? `/chapter-scraper?url=${encodeURIComponent(destinationUrl)}`
+        : "/chapter-scraper";
       if (typeof nav === "function") {
         nav(targetPath);
       } else {
@@ -337,6 +287,10 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
 
   const hasValidationError = !!(urlValidation && !urlValidation.valid);
   const isValid = !!(targetUrl.trim() && urlValidation?.valid);
+  const isSeriesCatalog = Boolean(
+    urlValidation?.isList ||
+    (targetUrl && targetUrl.includes("/list?") && targetUrl.includes("title_no="))
+  );
 
   return (
     <div className="flex flex-col gap-3 w-full">
@@ -359,101 +313,101 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             }
           }}
           placeholder="Paste any Manhwa, Manga, Webtoon, or Webcomic chapter URL..."
-          className={`w-full bg-[#1A1A1A] border ${
+          className={`w-full bg-[#0c0e14] border ${
             hasValidationError
               ? "border-amber-500/50 focus:border-amber-500"
               : isValid
               ? "border-emerald-500/40 focus:border-emerald-500/60"
-              : "border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-500"
-          } focus:ring-2 ${
-            hasValidationError ? "focus:ring-amber-500/10" : "focus:ring-neutral-700"
-          } rounded-2xl px-5 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-[#555] shadow-inner transition-colors`}
+              : "border-[#1e2332] hover:border-neutral-600 focus:border-[#2563eb]"
+          } focus:ring-1 ${
+            hasValidationError ? "focus:ring-amber-500/20" : "focus:ring-[#2563eb]/25"
+          } rounded-2xl px-5 py-4 text-sm text-[#E5E5E5] outline-none placeholder:text-neutral-500 shadow-inner transition-colors font-mono`}
         />
 
         {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute left-0 right-0 top-full mt-2 bg-[#121217]/98 backdrop-blur-xl border border-[#282834] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(59,130,246,0.12)] z-[1000] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
-              <div className="px-4 py-3 border-b border-[#282834] bg-[#0E0E12] flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-[#3B82F6]" />
-                  <span className="text-[11px] font-bold text-[#E5E5E5] uppercase tracking-wider font-mono">
-                    Recent &amp; Bookmarked Episodes
-                  </span>
-                  <span className="px-2 py-0.5 text-[9px] font-bold bg-[#3B82F6]/20 text-[#60A5FA] rounded-full border border-[#3B82F6]/40 shadow-[0_0_8px_rgba(59,130,246,0.3)]">
-                    {suggestions.length}
-                  </span>
-                </div>
-              </div>
-              <div className="max-h-72 overflow-y-auto divide-y divide-[#282834]/50 bg-[#121217]">
-                {suggestions.map((series, idx) => {
-                  const displayInfo = formatSeriesDisplay(
-                    series.url,
-                    series.title
-                  );
-
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => {
-                        if (series.url) {
-                          if (series.url !== targetUrl && resetWorkspace) {
-                            resetWorkspace();
-                          }
-                          setTargetUrl(series.url);
-                          if (setSeriesTitle && series.title)
-                            setSeriesTitle(series.title);
-                        }
-                        setShowSuggestions(false);
-                      }}
-                      className="w-full px-4 py-3 hover:bg-[#181D2A] border-b border-[#282834]/50 last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-[#121217]"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#181820] border border-[#2F2F38] group-hover:bg-[#2A2A35] group-hover:border-neutral-700 group-hover:shadow-[0_0_14px_rgba(59,130,246,0.6)] transition-all duration-200 flex-shrink-0 shadow-sm">
-                          <Book className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-all duration-200 transform group-hover:scale-110" />
-                        </div>
-                        <div className="flex-grow min-w-0">
-                          <p className="text-xs font-bold text-[#E5E5E5] group-hover:text-[#60A5FA] truncate leading-snug transition-colors">
-                            {displayInfo.title}
-                          </p>
-                          <p className="text-[10.5px] text-[#9CA3AF] group-hover:text-neutral-300 truncate mt-0.5 transition-colors">
-                            {displayInfo.subtitle}
-                          </p>
-                          <p className="text-[9px] text-[#6B7280] group-hover:text-neutral-400 font-mono truncate mt-0.5 select-all transition-colors">
-                            {series.url}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-widest rounded border bg-[#181820] text-[#9CA3AF] border-[#2F2F38] group-hover:bg-[#3B82F6]/20 group-hover:text-[#93C5FD] group-hover:border-neutral-700 transition-all">
-                          Recent
-                        </span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const rect =
-                              e.currentTarget.getBoundingClientRect();
-                            if (
-                              menuAnchor &&
-                              menuAnchor.series.url === series.url
-                            ) {
-                              setMenuAnchor(null);
-                            } else {
-                              setMenuAnchor({ rect, series });
-                            }
-                          }}
-                          className="w-7 h-7 rounded-lg bg-[#181820] hover:bg-[#252530] hover:border-neutral-700 text-[#9CA3AF] hover:text-white border border-[#2F2F38] flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm hover:shadow-[0_0_10px_rgba(59,130,246,0.4)]"
-                          title="Options"
-                        >
-                          <MoreVertical className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+          <div className="absolute left-0 right-0 top-full mt-2 bg-[#0c0e14]/98 backdrop-blur-xl border border-[#1e2332] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85),0_0_20px_rgba(37,99,235,0.15)] z-[1000] overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150">
+            <div className="px-4 py-3 border-b border-[#181a24] bg-[#090b10] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#38bdf8]" />
+                <span className="text-[11px] font-bold text-[#E5E5E5] uppercase tracking-wider font-mono">
+                  Recent &amp; Bookmarked Episodes
+                </span>
+                <span className="px-2.5 py-0.5 text-[9px] font-bold bg-[#0e2238] text-[#38bdf8] rounded-full border border-[#1d4ed8]/35 shadow-[0_0_8px_rgba(37,99,235,0.25)] font-mono">
+                  {suggestions.length}
+                </span>
               </div>
             </div>
-          )}
-        </div>
+            <div className="max-h-72 overflow-y-auto divide-y divide-[#141620] bg-[#0c0e14]">
+              {suggestions.map((series, idx) => {
+                const displayInfo = formatSeriesDisplay(
+                  series.url,
+                  series.title
+                );
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => {
+                      if (series.url) {
+                        if (series.url !== targetUrl && resetWorkspace) {
+                          resetWorkspace();
+                        }
+                        setTargetUrl(series.url);
+                        if (setSeriesTitle && series.title)
+                          setSeriesTitle(series.title);
+                      }
+                      setShowSuggestions(false);
+                    }}
+                    className="w-full px-4 py-3 hover:bg-[#13151f] border-b border-[#141620] last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-[#0c0e14]"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#13151f] border border-[#1e2230] group-hover:bg-[#181d2a] group-hover:border-[#2563eb]/50 group-hover:shadow-[0_0_14px_rgba(37,99,235,0.4)] transition-all duration-200 flex-shrink-0 shadow-sm">
+                        <Book className="w-4 h-4 text-[#38bdf8] group-hover:text-white transition-all duration-200 transform group-hover:scale-110" />
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <p className="text-xs font-bold text-[#E5E5E5] group-hover:text-[#60A5FA] truncate leading-snug transition-colors">
+                          {displayInfo.title}
+                        </p>
+                        <p className="text-[10.5px] text-[#9CA3AF] group-hover:text-neutral-300 truncate mt-0.5 transition-colors">
+                          {displayInfo.subtitle}
+                        </p>
+                        <p className="text-[9px] text-[#6B7280] group-hover:text-neutral-400 font-mono truncate mt-0.5 select-all transition-colors">
+                          {series.url}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="px-2 py-0.5 text-[8.5px] font-bold uppercase tracking-widest rounded border bg-[#13151f] text-neutral-400 border-[#1e2230] group-hover:bg-[#0e2238] group-hover:text-[#38bdf8] group-hover:border-[#1d4ed8]/35 transition-all">
+                        Recent
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const rect =
+                            e.currentTarget.getBoundingClientRect();
+                          if (
+                            menuAnchor &&
+                            menuAnchor.series.url === series.url
+                          ) {
+                            setMenuAnchor(null);
+                          } else {
+                            setMenuAnchor({ rect, series });
+                          }
+                        }}
+                        className="w-7 h-7 rounded-lg bg-[#13151f] hover:bg-[#181d2a] hover:border-neutral-600 text-[#9CA3AF] hover:text-white border border-[#1e2230] flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm hover:shadow-[0_0_10px_rgba(37,99,235,0.3)]"
+                        title="Options"
+                      >
+                        <MoreVertical className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* ── Status / Validation Row ── */}
       <div className="h-7 flex items-center">
@@ -473,7 +427,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <span>Checking URL…</span>
           </div>
         ) : (
-          <span className="text-[11px] text-neutral-600">
+          <span className="text-[11px] text-neutral-500 font-mono">
             Supports Webtoons, MangaDex, Naver, Tapas, Bato.to, Asura, Flame Comics &amp; more
           </span>
         )}
@@ -484,7 +438,9 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
         <div className="grid grid-cols-2 gap-3 w-full">
           <Tooltip
             text={
-              hasValidationError
+              isSeriesCatalog
+                ? "Series catalog detected — use 'Import Chapter Scraper' to browse chapters"
+                : hasValidationError
                 ? urlValidation?.error || "Please enter a valid chapter viewer link"
                 : "Extract and import panel images directly from this chapter URL"
             }
@@ -495,9 +451,11 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <button
               type="button"
               onClick={handleImportClick}
-              disabled={isScraping || !targetUrl.trim() || hasValidationError}
-              className={`btn-primary w-full justify-center px-4 py-3 rounded-xl text-sm font-bold shadow-md disabled:opacity-35 disabled:pointer-events-none flex items-center gap-2 ${
-                isScraping ? "cursor-wait" : "cursor-pointer"
+              disabled={isScraping || !targetUrl.trim() || hasValidationError || isSeriesCatalog}
+              className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all font-mono ${
+                !isSeriesCatalog
+                  ? "bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-lg shadow-blue-600/30 border border-blue-400/30 disabled:opacity-35 disabled:pointer-events-none cursor-pointer"
+                  : "bg-[#13151f] text-neutral-400 border border-[#1e2230] opacity-40 pointer-events-none"
               }`}
               aria-label="Import Chapter Images"
             >
@@ -524,13 +482,19 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
             <button
               type="button"
               onClick={handleOpenChapterScraperClick}
-              disabled={!targetUrl.trim() || isScraping}
-              className={`btn-primary w-full justify-center px-4 py-3 rounded-xl text-sm font-bold shadow-md disabled:opacity-35 disabled:pointer-events-none flex items-center gap-2 ${
-                isScraping ? "cursor-wait" : "cursor-pointer"
+              disabled={isScraping}
+              className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-bold active:scale-95 transition-all font-mono group cursor-pointer ${
+                isSeriesCatalog
+                  ? "bg-[#2563eb] hover:bg-[#1d4ed8] text-white shadow-lg shadow-blue-600/30 border border-blue-400/30 ring-2 ring-blue-500/30"
+                  : "bg-[#13151f] hover:bg-[#181d2a] hover:border-[#2563eb]/50 text-neutral-200 hover:text-white border border-[#1e2230] shadow-md disabled:opacity-35 disabled:pointer-events-none"
               }`}
               aria-label="Import Chapter Scraper"
             >
-              <Zap className="h-4 w-4 text-white" />
+              <Zap
+                className={`h-4 w-4 transition-transform group-hover:scale-110 ${
+                  isSeriesCatalog ? "text-white" : "text-[#38bdf8]"
+                }`}
+              />
               <span>Import Chapter Scraper</span>
             </button>
           </Tooltip>

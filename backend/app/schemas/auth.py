@@ -45,15 +45,25 @@ class PasswordUpdate(BaseModel):
     new_password: str
 
 
+class PortfolioLink(BaseModel):
+    """A creator portfolio entry shown on the public profile."""
+    id: Optional[str] = None
+    site: str
+    url: str
+
+
 class ProfileUpdate(BaseModel):
     """User profile parameters (avatar, bio, role, social links)."""
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
     creator_role: Optional[str] = None
     bio: Optional[str] = None
+    location: Optional[str] = None
+    website: Optional[str] = None
+    timezone: Optional[str] = None
     newsletter: Optional[bool] = None
     language: Optional[str] = None
-    portfolio_links: Optional[List[str]] = None
+    portfolio_links: Optional[List[PortfolioLink]] = None
     social_connections: Optional[Dict[str, bool]] = None
     preferences: Optional[Dict[str, Any]] = None
 
@@ -71,9 +81,12 @@ class UserProfileResponse(BaseModel):
     avatar_url: Optional[str] = None
     creator_role: Optional[str] = "creator"
     bio: Optional[str] = ""
+    location: Optional[str] = ""
+    website: Optional[str] = ""
+    timezone: Optional[str] = "UTC"
     newsletter: Optional[bool] = False
     language: Optional[str] = "en"
-    portfolio_links: Optional[List[str]] = []
+    portfolio_links: Optional[List[PortfolioLink]] = []
     credits: Optional[int] = 0
     unlocked_rewards: Optional[List[str]] = []
     mfa_enabled: Optional[bool] = False
