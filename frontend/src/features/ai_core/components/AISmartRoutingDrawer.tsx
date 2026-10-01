@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Key,
 } from "lucide-react";
+import { SonikomaLogo } from "@/shared/ui/branding";
 import {
   useAIModelStore,
   AIModelInfo,
@@ -297,7 +298,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
         }`}
         title="AI Smart Routing: Open Multi-Model Cascades Matrix"
       >
-        <Workflow className="w-3.5 h-3.5 text-white shrink-0" />
+        <SonikomaLogo iconOnly size="xs" className="shrink-0" />
         <span
           className={
             compact
@@ -336,8 +337,8 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
               {/* 1. Header Bar */}
               <div className="p-4 sm:p-5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#1E1E1E] border border-[#2F2F2F] flex items-center justify-center flex-shrink-0 text-[#3B82F6]">
-                    <Workflow className="w-5 h-5 text-[#3B82F6]" />
+                  <div className="flex items-center justify-center flex-shrink-0">
+                    <SonikomaLogo iconOnly size="md" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-white tracking-tight font-sans">
