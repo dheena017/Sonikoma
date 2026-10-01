@@ -1608,7 +1608,7 @@ export default function AppRouter(props: AppRouterProps) {
 
         {/* ── AI CORE SUITE (STANDALONE DEDICATED WORKSPACE) ── */}
         {isAICorePath && (
-          <div className="page-transition w-full flex-1 flex flex-col min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="page-transition w-full flex-1 flex flex-col min-h-0">
             <div className="max-w-7xl mx-auto w-full space-y-6">
               {isAIAPIKeysPath ? (
                 <AIAPIKeysPage addNotification={addNotification} />
@@ -1620,10 +1620,8 @@ export default function AppRouter(props: AppRouterProps) {
                 <AIRoutingPage addNotification={addNotification} />
               ) : isAIWalletPath ? (
                 <AICreditWalletPage addNotification={addNotification} />
-              ) : isAICoreDashboardPath ? (
-                <AICoreOverviewPage addNotification={addNotification} />
               ) : (
-                <PageNotFound onNavigateHome={() => navigateTo("/ai-core")} />
+                <AICoreOverviewPage addNotification={addNotification} />
               )}
             </div>
           </div>

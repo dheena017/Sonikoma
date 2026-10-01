@@ -357,7 +357,10 @@ export const aiSeriesApi = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ panel_id: panelId, ...payload }),
     });
-    if (!res.ok) throw new Error("Failed to render panel image");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => null);
+      throw new Error(errData?.detail || `Failed to render panel image (${res.status})`);
+    }
     return res.json();
   },
 

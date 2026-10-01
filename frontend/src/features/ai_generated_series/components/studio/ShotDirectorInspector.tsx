@@ -22,11 +22,11 @@ import {
   HelpCircle,
   Type,
   Move,
-  Users,
-  Globe,
   Headphones,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  X,
 } from "lucide-react";
 import type {
   AISeriesPanel,
@@ -318,7 +318,7 @@ export const ShotDirectorInspector: React.FC<ShotDirectorInspectorProps> = ({
       <aside className="w-80 lg:w-[380px] bg-[#0A0B12] border-l border-white/10 flex flex-col h-full min-h-0 max-h-full overflow-hidden text-left shadow-2xl">
         {/* ── HEADER TIER 1: Primary Shot Navigator ── */}
         <div className="h-12 px-3 border-b border-white/10 flex items-center justify-between bg-gradient-to-b from-[#131422] to-[#0E0F1A] shrink-0">
-          {/* Left: Shot Identification */}
+          {/* Left: Shot Identification & Counter */}
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-full bg-[#0A0B12] border border-cyan-400/40 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.25)] shrink-0 overflow-hidden aspect-square">
               <img
@@ -333,7 +333,7 @@ export const ShotDirectorInspector: React.FC<ShotDirectorInspectorProps> = ({
                 <span className="text-xs font-mono font-black uppercase tracking-wider text-white">
                   Shot #{selectedPanelIdx + 1}
                 </span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/30 shrink-0">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/30 shrink-0">
                   {selectedPanelIdx + 1} / {totalPanels}
                 </span>
               </div>
@@ -345,56 +345,39 @@ export const ShotDirectorInspector: React.FC<ShotDirectorInspectorProps> = ({
               </div>
             </div>
           </div>
-        </div>
 
-      {/* ── HEADER TIER 2: Studio Tools & Quick Flyouts ── */}
-      <div className="px-3.5 py-2 bg-[#0A0B14] border-b border-white/10 flex items-center justify-between gap-2 shrink-0">
-        <div className="flex items-center gap-1.5">
-          {onOpenCharacterVault && (
+          {/* Right: Shot Steppers & Close Trigger */}
+          <div className="flex items-center gap-1 shrink-0">
             <button
               type="button"
-              onClick={onOpenCharacterVault}
-              className="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/25 hover:border-purple-400/50 text-purple-300 hover:text-white text-[10px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-              title="Character DNA Vault"
+              onClick={() => onSelectPanelIdx?.(Math.max(0, selectedPanelIdx - 1))}
+              disabled={selectedPanelIdx === 0}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer"
+              title="Previous Shot"
             >
-              <Users className="w-3 h-3 text-purple-400" />
-              <span>Cast DNA</span>
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
-          )}
-
-          {onOpenWorldBible && (
             <button
               type="button"
-              onClick={onOpenWorldBible}
-              className="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 hover:border-blue-400/50 text-blue-300 hover:text-white text-[10px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-              title="World Lore Bible"
+              onClick={() => onSelectPanelIdx?.(Math.min(totalPanels - 1, selectedPanelIdx + 1))}
+              disabled={selectedPanelIdx >= totalPanels - 1}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white disabled:opacity-25 disabled:pointer-events-none transition-colors cursor-pointer"
+              title="Next Shot"
             >
-              <Globe className="w-3 h-3 text-blue-400" />
-              <span>World Bible</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
-          )}
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-lg hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer ml-1"
+                title="Close Inspector"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
-
-        {onToggleSpeechBubbles && (
-          <button
-            type="button"
-            onClick={onToggleSpeechBubbles}
-            className={`px-2.5 py-1 rounded-lg border text-[10px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              showSpeechBubbles
-                ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.15)]"
-                : "bg-black/30 border-white/10 text-neutral-400 hover:text-white"
-            }`}
-            title="Toggle Speech Bubbles Overlay"
-          >
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                showSpeechBubbles ? "bg-emerald-400 animate-pulse" : "bg-neutral-600"
-              }`}
-            />
-            <span>Bubbles {showSpeechBubbles ? "ON" : "OFF"}</span>
-          </button>
-        )}
-      </div>
 
       {/* ── Sub Navigation Tabs ── */}
       <div className="grid grid-cols-4 p-1.5 gap-1 border-b border-white/10 bg-[#0C0D18] shrink-0">
@@ -423,82 +406,6 @@ export const ShotDirectorInspector: React.FC<ShotDirectorInspectorProps> = ({
           );
         })}
       </div>
-
-      {/* ── Chapter Master Production Action Deck (Synthesize Visuals & Dub Audio) ── */}
-      {(onSynthesizeChapterVisuals || onSynthesizeChapterAudio) && (
-        <div className="px-3.5 py-2.5 bg-gradient-to-r from-[#0E0F1A] via-[#101222] to-[#0E0F1A] border-b border-white/10 space-y-2 shrink-0">
-          {/* Model Speed Picker */}
-          {onSynthesizeChapterVisuals && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-mono text-neutral-500 shrink-0">Model:</span>
-              <div className="flex items-center gap-1 flex-1 overflow-x-auto [scrollbar-width:none]">
-                {[
-                  { id: "turbo",      label: "⚡ Turbo",  sub: "~3s",  cls: "border-amber-500/40 text-amber-300 bg-amber-500/10" },
-                  { id: "flux",       label: "⚡ Flux",    sub: "~5s",  cls: "border-cyan-500/40 text-cyan-300 bg-cyan-500/10" },
-                  { id: "flux-anime", label: "🎨 Anime",  sub: "~15s", cls: "border-purple-500/40 text-purple-300 bg-purple-500/10" },
-                  { id: "flux-realism", label: "📸 Real", sub: "~15s", cls: "border-pink-500/40 text-pink-300 bg-pink-500/10" },
-                  { id: "sana",       label: "🌟 Sana",   sub: "~20s", cls: "border-emerald-500/40 text-emerald-300 bg-emerald-500/10" },
-                ].map((m) => {
-                  const isActive = synthesizeModel === m.id;
-                  return (
-                    <button
-                      key={m.id}
-                      type="button"
-                      onClick={() => setSynthesizeModel(m.id)}
-                      disabled={isSynthesizingVisuals}
-                      className={`shrink-0 flex flex-col items-center px-2 py-1 rounded-lg border text-[10px] font-mono font-bold transition-all cursor-pointer disabled:pointer-events-none ${
-                        isActive
-                          ? m.cls
-                          : "border-white/10 text-neutral-400 bg-transparent hover:border-white/25 hover:text-white"
-                      }`}
-                    >
-                      <span>{m.label}</span>
-                      <span className="text-[9px] opacity-70">{m.sub}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons Row */}
-          <div className="flex items-center gap-2">
-            {onSynthesizeChapterVisuals && (
-              <button
-                type="button"
-                onClick={() => onSynthesizeChapterVisuals(synthesizeModel)}
-                disabled={isSynthesizingVisuals}
-                className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 border border-purple-400/40 text-white text-[11px] font-mono font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-950/50 cursor-pointer disabled:opacity-50 active:scale-98"
-                title="Synthesize artwork for all shots in chapter"
-              >
-                {isSynthesizingVisuals ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                )}
-                <span>{isSynthesizingVisuals ? "Synthesizing..." : "Synthesize All"}</span>
-              </button>
-            )}
-
-            {onSynthesizeChapterAudio && (
-              <button
-                type="button"
-                onClick={onSynthesizeChapterAudio}
-                disabled={isSynthesizingAudio}
-                className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 border border-emerald-400/40 text-white text-[11px] font-mono font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-950/50 cursor-pointer disabled:opacity-50 active:scale-98"
-                title="Synthesize vocal lines for all character dialogue"
-              >
-                {isSynthesizingAudio ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Headphones className="w-3.5 h-3.5 text-white" />
-                )}
-                <span>{isSynthesizingAudio ? "Dubbing..." : "Dub Audio"}</span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ── Scrollable Inspector Content Deck ── */}
       <div
@@ -682,7 +589,7 @@ export const ShotDirectorInspector: React.FC<ShotDirectorInspectorProps> = ({
                   {onSynthesizeChapterVisuals && (
                     <button
                       type="button"
-                      onClick={onSynthesizeChapterVisuals}
+                      onClick={() => onSynthesizeChapterVisuals()}
                       disabled={isSynthesizingVisuals}
                       className="w-full py-2 px-3 rounded-xl bg-purple-900/20 hover:bg-purple-900/40 border border-purple-500/30 hover:border-purple-500/60 text-purple-200 text-xs font-mono font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
                     >

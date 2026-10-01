@@ -440,7 +440,7 @@ class AIOrchestrator:
     def is_provider_configured(cls, provider: str, user_keys: Optional[dict] = None) -> bool:
         """Verifies whether server-side or user-supplied credentials exist for provider."""
         p = provider.lower()
-        if p in ("edgetts", "stablediffusion", "whisper", "local"):
+        if p in ("edgetts", "stablediffusion", "whisper", "local", "pollinations", "video_kinetic", "voice_cloning", "enhancer"):
             return True
         if user_keys and user_keys.get(p):
             return True

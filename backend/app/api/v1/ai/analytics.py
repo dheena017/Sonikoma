@@ -1383,10 +1383,10 @@ async def get_models_breakdown(
     current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Returns enriched models breakdown with pricing, observed token usage, RPM/TPM limits and meters."""
-    from services.model_catalog.registry import MODEL_CATALOG_DETAILED
+    from services.model_catalog.registry import ModelRegistry
     from services.ai.orchestrator import AIOrchestrator
 
-    filter_active = configured_only or active_only
+    filter_active = (configured_only is True) or (active_only is True)
     rate_limiter = AIOrchestrator.get_rate_limiter()
     now = time.time()
     current_min = int(now // 60)
@@ -1438,7 +1438,7 @@ async def get_models_breakdown(
     breakdown_list = []
     providers_summary = {}
 
-    for m in MODEL_CATALOG_DETAILED:
+    for m in ModelRegistry.get_catalog():
         m_id = m["id"]
         m_lower = m_id.lower()
         provider_id = m.get("provider", "gemini")
@@ -1473,6 +1473,10 @@ async def get_models_breakdown(
             "stablediffusion": "Local Stable Diffusion",
             "whisper": "OpenAI Whisper",
             "huggingface": "Hugging Face Hub",
+            "pollinations": "Pollinations AI & Diffusion",
+            "video_kinetic": "Kinetic & Video Engines",
+            "voice_cloning": "Voice Dubbing & Cloning",
+            "enhancer": "Enhancement & Upscaling",
         }.get(provider_id, provider_id.capitalize())
 
         provider_badge = {
@@ -1487,6 +1491,10 @@ async def get_models_breakdown(
             "stablediffusion": "Local GPU",
             "whisper": "Audio STT",
             "huggingface": "Serverless Diffusers",
+            "pollinations": "Free High-Speed GPU",
+            "video_kinetic": "24fps Beast Engines",
+            "voice_cloning": "Zero-Shot Voice Beast",
+            "enhancer": "4K Super-Resolution",
         }.get(provider_id, "Standard Engine")
 
         # Track provider summary counts
@@ -1564,7 +1572,7 @@ async def get_models_breakdown(
 async def sync_live_quotas(current_user: Optional[dict] = Depends(get_optional_current_user)):
     """Probes active providers and returns refreshed models breakdown with live latency metrics."""
     t0 = time.perf_counter()
-    from services.model_catalog.registry import MODEL_CATALOG_DETAILED
+    from services.model_catalog.registry import ModelRegistry
 
     # Execute lightweight health probes
     probes = {}
@@ -1584,7 +1592,7 @@ async def sync_live_quotas(current_user: Optional[dict] = Depends(get_optional_c
         "success": True,
         "sync_timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "sync_duration_ms": max(sync_lat, 120.0),
-        "total_models_tracked": len(MODEL_CATALOG_DETAILED),
+        "total_models_tracked": len(ModelRegistry.get_catalog()),
         "models_breakdown": breakdown_data.get("models_breakdown", []),
         "projects": breakdown_data.get("projects", []),
         "tier": "Tier 1 (Pay-As-You-Go)",

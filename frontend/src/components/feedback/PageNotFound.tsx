@@ -3,9 +3,15 @@ import { Compass, ArrowLeft } from "lucide-react";
 
 interface PageNotFoundProps {
   onNavigateHome: () => void;
+  customTitle?: string;
+  customMessage?: string;
 }
 
-export default function PageNotFound({ onNavigateHome }: PageNotFoundProps) {
+export default function PageNotFound({
+  onNavigateHome,
+  customTitle,
+  customMessage,
+}: PageNotFoundProps) {
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-16 md:py-24 relative overflow-hidden bg-transparent">
       {/* Background decorative glowing orbs */}

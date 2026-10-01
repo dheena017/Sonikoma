@@ -676,7 +676,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       }
     } catch (err: any) {
       console.error("Panel render failed:", err);
-      addNotification("Failed to generate shot visual.", "error");
+      addNotification(err.message || "Failed to generate shot visual.", "error");
     } finally {
       setIsRegeneratingPanel(false);
       setRegeneratingPanelIdx(null);
@@ -759,16 +759,59 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       <div className="flex-1 min-w-0 relative h-full min-h-0 overflow-hidden flex flex-col">
         {/* Top Studio Bar: Left (Series Title & Format) | Right (Episode & Session) */}
         <header className="h-12 pl-4 pr-2 bg-[#0A0B12]/95 backdrop-blur-md border-b border-white/10 flex items-center justify-between shrink-0 z-20">
-          {/* Left: Format Badge + Series Title */}
-          <div className="flex items-center gap-2.5 min-w-0">
+          {/* Left: Format Badge + Series Title + Quick Studio Tools */}
+          <div className="flex items-center gap-3 min-w-0">
             {project.format_type && (
               <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-400/30 shrink-0">
                 {project.format_type.replace(/_/g, " ")}
               </span>
             )}
-            <h1 className="text-sm font-bold text-white truncate max-w-xs sm:max-w-md" title={project.title}>
+            <h1 className="text-sm font-bold text-white truncate max-w-xs sm:max-w-sm" title={project.title}>
               {project.title || "AI Series Studio"}
             </h1>
+
+            <div className="h-4 w-px bg-white/10 shrink-0 hidden md:block" />
+
+            {/* Quick Tools on Left Side */}
+            <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsCharacterVaultOpen(true)}
+                className="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/25 hover:border-purple-400/50 text-purple-300 hover:text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="Character DNA Vault"
+              >
+                <Users className="w-3.5 h-3.5 text-purple-400" />
+                <span>Cast DNA</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsWorldBibleOpen(true)}
+                className="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/25 hover:border-blue-400/50 text-blue-300 hover:text-white text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm active:scale-95"
+                title="World Lore Bible"
+              >
+                <Globe className="w-3.5 h-3.5 text-blue-400" />
+                <span>World Bible</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowSpeechBubbles(!showSpeechBubbles)}
+                className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
+                  showSpeechBubbles
+                    ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.2)]"
+                    : "bg-white/5 border-white/10 text-neutral-400 hover:text-white"
+                }`}
+                title="Toggle Speech Bubbles Overlay"
+              >
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    showSpeechBubbles ? "bg-emerald-400 animate-pulse" : "bg-neutral-600"
+                  }`}
+                />
+                <span>Bubbles {showSpeechBubbles ? "ON" : "OFF"}</span>
+              </button>
+            </div>
           </div>
 
           {/* Right: Session and Episode / Chapter Selector */}

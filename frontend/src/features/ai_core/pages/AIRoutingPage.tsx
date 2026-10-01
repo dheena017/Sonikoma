@@ -18,6 +18,11 @@ import {
   ArrowRight,
   X,
   Key,
+  Copy,
+  Check,
+  DollarSign,
+  Gauge,
+  ExternalLink,
 } from "lucide-react";
 import TierModelCard, {
   DynamicModelOption,
@@ -241,7 +246,13 @@ export const inferModelProviderInfo = (modelId: string = "") => {
   ) {
     return { provider: "openai", provider_name: "OpenAI" };
   }
-  if (id.includes("gemini") || id.includes("imagen") || id.includes("google")) {
+  if (
+    id.includes("gemini") ||
+    id.includes("imagen") ||
+    id.includes("google") ||
+    id.includes("veo") ||
+    id.includes("lyria")
+  ) {
     return { provider: "gemini", provider_name: "Google Gemini" };
   }
   if (id.includes("deepseek")) {
@@ -256,8 +267,34 @@ export const inferModelProviderInfo = (modelId: string = "") => {
   if (id.includes("deepl")) {
     return { provider: "deepl", provider_name: "DeepL Pro" };
   }
-  if (id.includes("edgetts") || id.includes("edge_tts")) {
+  if (id.includes("edgetts") || id.includes("edge-tts") || id.includes("edge_tts")) {
     return { provider: "edgetts", provider_name: "Microsoft Edge TTS" };
+  }
+  if (
+    id.includes("turbo") ||
+    id.includes("flux") ||
+    id.includes("sana") ||
+    id.includes("pollinations")
+  ) {
+    return { provider: "pollinations", provider_name: "Pollinations AI" };
+  }
+  if (
+    id.includes("tooncrafter") ||
+    id.includes("animatediff") ||
+    id.includes("wan") ||
+    id.includes("parallax")
+  ) {
+    return { provider: "video_kinetic", provider_name: "Kinetic & Video" };
+  }
+  if (id.includes("sovits") || id.includes("cosyvoice")) {
+    return { provider: "voice_cloning", provider_name: "Voice Dubbing" };
+  }
+  if (
+    id.includes("esrgan") ||
+    id.includes("comic-text") ||
+    id.includes("manga-ocr")
+  ) {
+    return { provider: "enhancer", provider_name: "4K Enhancer" };
   }
   if (id.includes("stable") || id.includes("sdxl")) {
     return { provider: "stablediffusion", provider_name: "Stable Diffusion" };
@@ -268,12 +305,110 @@ export const inferModelProviderInfo = (modelId: string = "") => {
   return { provider: "gemini", provider_name: "Google Gemini" };
 };
 
+const PROVIDER_COLOR_MAP: Record<string, { bg: string; text: string; border: string }> = {
+  gemini: { bg: "rgba(59, 130, 246, 0.15)", text: "#60a5fa", border: "rgba(59, 130, 246, 0.35)" },
+  openai: { bg: "rgba(16, 185, 129, 0.15)", text: "#34d399", border: "rgba(16, 185, 129, 0.35)" },
+  anthropic: { bg: "rgba(217, 119, 6, 0.15)", text: "#fbbf24", border: "rgba(217, 119, 6, 0.35)" },
+  deepseek: { bg: "rgba(14, 165, 233, 0.15)", text: "#38bdf8", border: "rgba(14, 165, 233, 0.35)" },
+  groq: { bg: "rgba(249, 115, 22, 0.15)", text: "#fb923c", border: "rgba(249, 115, 22, 0.35)" },
+  pollinations: { bg: "rgba(168, 85, 247, 0.15)", text: "#c084fc", border: "rgba(168, 85, 247, 0.35)" },
+  video_kinetic: { bg: "rgba(234, 179, 8, 0.15)", text: "#facc15", border: "rgba(234, 179, 8, 0.35)" },
+  voice_cloning: { bg: "rgba(20, 184, 166, 0.15)", text: "#2dd4bf", border: "rgba(20, 184, 166, 0.35)" },
+  edgetts: { bg: "rgba(107, 114, 128, 0.15)", text: "#9ca3af", border: "rgba(107, 114, 128, 0.35)" },
+  elevenlabs: { bg: "rgba(236, 72, 153, 0.15)", text: "#f472b6", border: "rgba(236, 72, 153, 0.35)" },
+  deepl: { bg: "rgba(56, 189, 248, 0.15)", text: "#38bdf8", border: "rgba(56, 189, 248, 0.35)" },
+  huggingface: { bg: "rgba(234, 179, 8, 0.15)", text: "#facc15", border: "rgba(234, 179, 8, 0.35)" },
+  stablediffusion: { bg: "rgba(139, 92, 246, 0.15)", text: "#a78bfa", border: "rgba(139, 92, 246, 0.35)" },
+  whisper: { bg: "rgba(16, 185, 129, 0.15)", text: "#34d399", border: "rgba(16, 185, 129, 0.35)" },
+};
+
 export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [routes, setRoutes] = useState<CapabilityRoute[]>([]);
   const [originalRoutes, setOriginalRoutes] = useState<CapabilityRoute[]>([]);
   const [availableModels, setAvailableModels] = useState<DynamicModelOption[]>(
     []
   );
+  const [activeViewTab, setActiveViewTab] = useState<"matrix" | "routing">(() => {
+    if (typeof window !== "undefined" && window.location.pathname.includes("/models")) {
+      return "matrix";
+    }
+    return "matrix";
+  });
+  const [selectedProviderFilter, setSelectedProviderFilter] = useState<string>("All");
+  const [selectedCapabilityFilter, setSelectedCapabilityFilter] = useState<string>("All");
+  const [modelSearchQuery, setModelSearchQuery] = useState<string>("");
+  const [copiedModelId, setCopiedModelId] = useState<string | null>(null);
+
+  const handleCopyModelId = (id: string) => {
+    try {
+      navigator.clipboard?.writeText(id);
+      setCopiedModelId(id);
+      setTimeout(() => setCopiedModelId(null), 1800);
+      addNotification?.(`Copied model ID "${id}" to clipboard`, "info");
+    } catch {}
+  };
+
+  const handleSelectAsActiveModel = (modelId: string) => {
+    localStorage.setItem("ai_comic_model", modelId);
+    window.dispatchEvent(
+      new CustomEvent("ai-model-changed", {
+        detail: { model: modelId },
+      })
+    );
+    addNotification?.(`Set "${modelId}" as active primary studio model!`, "success");
+  };
+
+  const providerList = useMemo(() => {
+    const counts: Record<string, number> = { All: availableModels.length };
+    availableModels.forEach((m) => {
+      const p = m.provider_name || m.provider;
+      counts[p] = (counts[p] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+  }, [availableModels]);
+
+  const capabilityOptions = [
+    { id: "All", label: "All Capabilities" },
+    { id: "vision", label: "Vision & OCR" },
+    { id: "image_generation", label: "Diffusion & Artwork" },
+    { id: "text", label: "Scripting & Reasoning" },
+    { id: "tts", label: "Speech & Audio" },
+    { id: "video_generation", label: "Kinetic Video & Sakuga" },
+    { id: "upscaling", label: "4K Super-Resolution" },
+    { id: "translation", label: "Translation" },
+  ];
+
+  const filteredCatalogModels = useMemo(() => {
+    return availableModels.filter((m) => {
+      const pName = m.provider_name || m.provider;
+      const matchesProvider =
+        selectedProviderFilter === "All" || pName === selectedProviderFilter;
+      const caps = m.capabilities || [];
+      const matchesCap =
+        selectedCapabilityFilter === "All" ||
+        caps.includes(selectedCapabilityFilter) ||
+        (selectedCapabilityFilter === "tts" &&
+          (caps.includes("audio") || caps.includes("voice_cloning"))) ||
+        (selectedCapabilityFilter === "image_generation" &&
+          (caps.includes("diffusion") ||
+            (m.category || "").toLowerCase().includes("diffusion")));
+      const q = modelSearchQuery.toLowerCase().trim();
+      const matchesQuery =
+        !q ||
+        m.name.toLowerCase().includes(q) ||
+        m.id.toLowerCase().includes(q) ||
+        (m.provider_name || "").toLowerCase().includes(q) ||
+        (m.category || "").toLowerCase().includes(q) ||
+        (m.recommended_for || []).some((r: string) => r.toLowerCase().includes(q));
+      return matchesProvider && matchesCap && matchesQuery;
+    });
+  }, [
+    availableModels,
+    selectedProviderFilter,
+    selectedCapabilityFilter,
+    modelSearchQuery,
+  ]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -400,7 +535,9 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           cat.includes("voice") ||
           id.includes("tts") ||
           id.includes("eleven") ||
-          id.includes("edge")
+          id.includes("edge") ||
+          id.includes("sovits") ||
+          id.includes("cosyvoice")
         );
       });
     } else if (req === "image_diffusion") {
@@ -418,6 +555,9 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           id.includes("flux") ||
           id.includes("dall") ||
           id.includes("stable") ||
+          id.includes("turbo") ||
+          id.includes("sana") ||
+          id.includes("pollinations") ||
           id.includes("image")
         );
       });
@@ -434,7 +574,9 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           cat.includes("ocr") ||
           id.includes("gemini") ||
           id.includes("gpt-4o") ||
-          id.includes("claude-3-5-sonnet")
+          id.includes("claude-3-5-sonnet") ||
+          id.includes("manga-ocr") ||
+          id.includes("comic-text")
         );
       });
     } else if (req === "translation") {
@@ -463,7 +605,15 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           id.includes("eleven") ||
           id.includes("flux") ||
           id.includes("stable-diffusion") ||
-          id.includes("dall-e");
+          id.includes("dall-e") ||
+          id.includes("turbo") ||
+          id.includes("sana") ||
+          id.includes("tooncrafter") ||
+          id.includes("animatediff") ||
+          id.includes("wan-video") ||
+          id.includes("parallax") ||
+          id.includes("sovits") ||
+          id.includes("cosyvoice");
         return !isPureAudioOrImage;
       });
     }
@@ -842,70 +992,446 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           <div className="space-y-1.5">
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
-                AI Smart Model{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
-                  Routing
-                </span>
+                {activeViewTab === "matrix" ? (
+                  <>
+                    AI Model{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#60A5FA]">
+                      Matrix & Catalog
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    AI Smart Model{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
+                      Routing
+                    </span>
+                  </>
+                )}
               </h1>
               <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-mono font-bold text-[#3B82F6] flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
-                11 ACTIVE PIPELINES
+                {activeViewTab === "matrix"
+                  ? `${availableModels.length} ENGINES TRACKED`
+                  : "11 ACTIVE PIPELINES"}
               </span>
             </div>
             <p className="text-neutral-400 text-xs sm:text-sm max-w-3xl leading-relaxed">
-              Configure specialized 3-tier cascade engines (Primary, High-Speed
-              Fallback, and Emergency Failover) across all comic generation
-              pipelines.
+              {activeViewTab === "matrix"
+                ? "Unified index of all foundation, diffusion, voice cloning, and kinetic video AI engines with live specs, pricing, and capabilities."
+                : "Configure specialized 3-tier cascade engines (Primary, High-Speed Fallback, and Emergency Failover) across all comic generation pipelines."}
             </p>
           </div>
 
           {/* Action CTAs: Reset Defaults + Save */}
-          <div className="flex items-center gap-3 shrink-0">
+          {activeViewTab === "routing" && (
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={handleResetDefaults}
+                className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold font-mono text-[#E5E5E5] bg-[#1E1E1E] border border-[#2F2F2F] hover:bg-[#2A2A2A] transition-all cursor-pointer shadow-sm"
+                title="Reset all 11 task routes to default specialized configurations"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-[#9CA3AF]" />
+                <span>Reset Defaults</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 cursor-pointer disabled:opacity-40 shadow-md ${
+                  saved
+                    ? "bg-[#10B981] border border-[#10B981]/30"
+                    : hasUnsavedChanges
+                    ? "bg-[#3B82F6] hover:bg-[#2563EB] border border-[#3B82F6]/30"
+                    : "bg-[#3B82F6]/80 hover:bg-[#3B82F6] border border-[#3B82F6]/30"
+                }`}
+              >
+                {saved ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Saved!</span>
+                  </>
+                ) : isSaving ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Saving…</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>
+                      {hasUnsavedChanges ? "Save Changes *" : "Save Rules"}
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ── TOP VIEW MODE SWITCHER TABS ── */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-2 rounded-2xl bg-[#121212] border border-[#2F2F2F]">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/5">
             <button
               type="button"
-              onClick={handleResetDefaults}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold font-mono text-[#E5E5E5] bg-[#1E1E1E] border border-[#2F2F2F] hover:bg-[#2A2A2A] transition-all cursor-pointer shadow-sm"
-              title="Reset all 11 task routes to default specialized configurations"
+              onClick={() => setActiveViewTab("matrix")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                activeViewTab === "matrix"
+                  ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-900/40"
+                  : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+              }`}
             >
-              <RotateCcw className="w-3.5 h-3.5 text-[#9CA3AF]" />
-              <span>Reset Defaults</span>
+              <Cpu className="w-3.5 h-3.5" />
+              <span>All Models Matrix</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">
+                {availableModels.length}
+              </span>
             </button>
 
             <button
               type="button"
-              onClick={handleSave}
-              disabled={isSaving}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white transition-all duration-200 cursor-pointer disabled:opacity-40 shadow-md ${
-                saved
-                  ? "bg-[#10B981] border border-[#10B981]/30"
-                  : hasUnsavedChanges
-                  ? "bg-[#3B82F6] hover:bg-[#2563EB] border border-[#3B82F6]/30"
-                  : "bg-[#3B82F6]/80 hover:bg-[#3B82F6] border border-[#3B82F6]/30"
+              onClick={() => setActiveViewTab("routing")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                activeViewTab === "routing"
+                  ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-900/40"
+                  : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
               }`}
             >
-              {saved ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Saved!</span>
-                </>
-              ) : isSaving ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Saving…</span>
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>
-                    {hasUnsavedChanges ? "Save Changes *" : "Save Rules"}
-                  </span>
-                </>
-              )}
+              <Sliders className="w-3.5 h-3.5" />
+              <span>3-Tier Pipeline Cascades</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">
+                {routes.length}
+              </span>
             </button>
+          </div>
+
+          <div className="text-xs font-mono text-neutral-400 flex items-center gap-2 px-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+            <span>
+              {activeViewTab === "matrix"
+                ? `Showing ${filteredCatalogModels.length} of ${availableModels.length} AI Engines`
+                : `${routes.length} Active Comic Pipelines Configured`}
+            </span>
           </div>
         </div>
 
-        {/* ── 1.1 MISSING API KEYS WARNING BANNER ────────────────────────────── */}
+        {activeViewTab === "matrix" ? (
+          <div className="space-y-6 animate-in fade-in duration-150">
+            {/* KPI Metrics Grid for Models */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+                <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+                  <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+                    Total Tracked Models
+                  </span>
+                  <Cpu className="w-4 h-4 text-[#3B82F6]" />
+                </div>
+                <div className="text-xl font-bold text-[#E5E5E5] font-mono">
+                  {availableModels.length} Engines
+                </div>
+                <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
+                  Multimodal, diffusion, audio & video
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+                <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+                  <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+                    Connected Providers
+                  </span>
+                  <Activity className="w-4 h-4 text-[#10B981]" />
+                </div>
+                <div className="text-xl font-bold text-[#10B981] font-mono">
+                  {Math.max(1, providerList.length - 1)} Ecosystems
+                </div>
+                <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
+                  Google, OpenAI, Claude, Pollinations...
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+                <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+                  <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+                    Diffusion & Media
+                  </span>
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                </div>
+                <div className="text-xl font-bold text-purple-300 font-mono">
+                  {availableModels.filter(m => (m.category || "").toLowerCase().includes("diffusion") || (m.capabilities || []).includes("image_generation")).length} Models
+                </div>
+                <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
+                  SDXL, Flux, Anime, Inpainting
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
+                <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
+                  <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
+                    Voice & Kinetic
+                  </span>
+                  <Zap className="w-4 h-4 text-amber-400" />
+                </div>
+                <div className="text-xl font-bold text-amber-300 font-mono">
+                  {availableModels.filter(m => (m.capabilities || []).some((c: string) => ["tts", "voice_cloning", "video_generation"].includes(c))).length} Engines
+                </div>
+                <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
+                  GPT-SoVITS, ToonCrafter, Wan2.1
+                </div>
+              </div>
+            </div>
+
+            {/* Filter Bar: Providers + Capabilities + Search */}
+            <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] space-y-3.5 shadow-md">
+              {/* Provider Pills */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400">
+                  Filter By Provider:
+                </span>
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 flex-wrap [scrollbar-width:none]">
+                  {providerList.map((p) => {
+                    const isActive = selectedProviderFilter === p.name;
+                    return (
+                      <button
+                        key={p.name}
+                        type="button"
+                        onClick={() => setSelectedProviderFilter(p.name)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                          isActive
+                            ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#60A5FA] shadow-sm"
+                            : "bg-[#121212] border-[#2F2F2F] text-neutral-400 hover:text-white hover:border-neutral-600"
+                        }`}
+                      >
+                        <span>{p.name}</span>
+                        <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-white/10">
+                          {p.count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Capability & Search Row */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1 border-t border-white/5">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 flex-wrap">
+                  {capabilityOptions.map((c) => {
+                    const isActive = selectedCapabilityFilter === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setSelectedCapabilityFilter(c.id)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-sans font-semibold transition-all cursor-pointer border ${
+                          isActive
+                            ? "bg-white/15 border-white/30 text-white"
+                            : "bg-transparent border-transparent text-neutral-400 hover:text-white hover:bg-white/5"
+                        }`}
+                      >
+                        {c.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Search */}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#2F2F2F] bg-[#121212] w-full md:w-72 focus-within:border-[#3B82F6] transition-colors">
+                  <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
+                  <input
+                    type="text"
+                    value={modelSearchQuery}
+                    onChange={(e) => setModelSearchQuery(e.target.value)}
+                    placeholder="Search all models..."
+                    className="bg-transparent text-xs text-[#E5E5E5] placeholder-[#6B7280] outline-none w-full font-sans"
+                  />
+                  {modelSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setModelSearchQuery("")}
+                      className="text-[10px] text-[#9CA3AF] hover:text-white"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Models Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filteredCatalogModels.map((m) => {
+                const info = inferModelProviderInfo(m.id);
+                const theme = PROVIDER_COLOR_MAP[info.provider] || {
+                  bg: "rgba(59, 130, 246, 0.15)",
+                  text: "#60a5fa",
+                  border: "rgba(59, 130, 246, 0.35)",
+                };
+                const isCopied = copiedModelId === m.id;
+                const isFreeTier =
+                  m.cost_per_1m_prompt === 0 &&
+                  m.cost_per_1m_completion === 0 &&
+                  (m.price_per_image === 0 || m.price_per_image === undefined);
+
+                return (
+                  <div
+                    key={m.id}
+                    className="rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 flex flex-col justify-between hover:border-neutral-600 transition-all duration-200 shadow-md group relative overflow-hidden"
+                  >
+                    <div className="space-y-3">
+                      {/* Top Row: Provider & Status */}
+                      <div className="flex items-center justify-between gap-2">
+                        <span
+                          className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border flex items-center gap-1.5"
+                          style={{
+                            backgroundColor: theme.bg,
+                            borderColor: theme.border,
+                            color: theme.text,
+                          }}
+                        >
+                          <span
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{ backgroundColor: theme.text }}
+                          />
+                          {m.provider_name || info.provider_name}
+                        </span>
+
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold">
+                          {isFreeTier ? "BUILT-IN / FREE" : "ONLINE API"}
+                        </span>
+                      </div>
+
+                      {/* Model Name & ID */}
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-bold text-white group-hover:text-[#60A5FA] transition-colors leading-snug">
+                          {m.name}
+                        </h3>
+                        <div className="flex items-center gap-1.5">
+                          <code className="text-[10px] font-mono text-neutral-400 bg-black/40 px-2 py-0.5 rounded border border-white/5 truncate max-w-[200px]">
+                            {m.id}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyModelId(m.id)}
+                            className="p-1 rounded hover:bg-white/10 text-neutral-500 hover:text-white transition-colors cursor-pointer"
+                            title="Copy Model ID"
+                          >
+                            {isCopied ? (
+                              <Check className="w-3 h-3 text-emerald-400" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Specs Row: Speed, Context, Price */}
+                      <div className="grid grid-cols-3 gap-2 py-2 px-2.5 rounded-xl bg-[#0E0F16] border border-white/5 text-[11px] font-mono">
+                        <div>
+                          <span className="text-[9px] text-neutral-500 block uppercase">
+                            Speed
+                          </span>
+                          <span className="font-semibold text-neutral-200 truncate block">
+                            {m.speed_rating || "Fast"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-neutral-500 block uppercase">
+                            Context
+                          </span>
+                          <span className="font-semibold text-neutral-200 truncate block">
+                            {typeof m.context_window === "number"
+                              ? `${Math.round(m.context_window / 1000)}k`
+                              : m.context_window || "128k"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] text-neutral-500 block uppercase">
+                            Pricing
+                          </span>
+                          <span className="font-semibold text-emerald-400 truncate block">
+                            {isFreeTier
+                              ? "$0 / Free"
+                              : m.price_per_image
+                              ? `$${m.price_per_image}/img`
+                              : `$${m.cost_per_1m_prompt || 0}/1M`}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Capabilities Tags */}
+                      {m.capabilities && m.capabilities.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {m.capabilities.map((c: string) => (
+                            <span
+                              key={c}
+                              className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-white/[0.04] border border-white/10 text-neutral-400"
+                            >
+                              {c.replace(/_/g, " ")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Recommended For */}
+                      {m.recommended_for && m.recommended_for.length > 0 && (
+                        <div className="space-y-1 pt-1">
+                          <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider block">
+                            Best Suited For:
+                          </span>
+                          <ul className="text-[10px] text-neutral-300 font-sans space-y-0.5 list-disc list-inside">
+                            {m.recommended_for.slice(0, 2).map((rec: string, rIdx: number) => (
+                              <li key={rIdx} className="truncate">
+                                {rec}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card Footer: Set As Active Studio Model */}
+                    <div className="pt-3 mt-3 border-t border-white/5 flex items-center justify-between gap-2">
+                      <span className="text-[10px] text-neutral-500 font-mono capitalize">
+                        {m.category || "General"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectAsActiveModel(m.id)}
+                        className="px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-300 hover:text-white text-[10px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer active:scale-95"
+                      >
+                        <Zap className="w-3 h-3" />
+                        <span>Select Engine</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {filteredCatalogModels.length === 0 && (
+              <div className="p-12 text-center rounded-2xl bg-[#141414] border border-[#2F2F2F] space-y-3">
+                <Cpu className="w-8 h-8 text-neutral-600 mx-auto" />
+                <h3 className="text-sm font-bold text-white">No Models Found</h3>
+                <p className="text-xs text-neutral-400 max-w-sm mx-auto font-sans">
+                  No models matched your search criteria. Try selecting "All Providers" or resetting your filter.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedProviderFilter("All");
+                    setSelectedCapabilityFilter("All");
+                    setModelSearchQuery("");
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-mono font-semibold"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* ── 1.1 MISSING API KEYS WARNING BANNER ────────────────────────────── */}
         {!hasUserKey && (
           <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in shadow-lg">
             <div className="flex items-start gap-3.5">
@@ -1193,6 +1719,8 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
             );
           })}
         </div>
+      </div>
+    )}
 
         {/* ── 5. CASCADE DRY-RUN SIMULATOR MODAL ─────────────────────────────── */}
         {simModalOpen && simTask && (

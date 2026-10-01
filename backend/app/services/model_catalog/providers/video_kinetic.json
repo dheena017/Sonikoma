@@ -1,0 +1,156 @@
+[
+  {
+    "id": "tooncrafter",
+    "provider": "video_kinetic",
+    "name": "ToonCrafter (Anime Keyframe Interpolation • Beast)",
+    "category": "Kinetic & Motion Synthesis",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 30,
+    "limit_tpm": 1000,
+    "limit_rpd": 1000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.01,
+    "speed_rating": "GPU (~4s)",
+    "capabilities": [
+      "video_generation",
+      "keyframe_interpolation",
+      "anime_motion",
+      "24fps"
+    ],
+    "recommended_for": ["Anime Action Cuts", "Panel-to-Panel Morphing Transitions"]
+  },
+  {
+    "id": "animatediff",
+    "provider": "video_kinetic",
+    "name": "AnimateDiff v3 (24fps Dynamic Sakuga • Beast)",
+    "category": "Kinetic & Motion Synthesis",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 30,
+    "limit_tpm": 1000,
+    "limit_rpd": 1000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.012,
+    "speed_rating": "GPU (~6s)",
+    "capabilities": [
+      "video_generation",
+      "dynamic_sakuga",
+      "camera_motion",
+      "motion_lora"
+    ],
+    "recommended_for": ["Explosive Battle Sequences", "Dynamic Hair & Aura Flutter"]
+  },
+  {
+    "id": "wan-video",
+    "provider": "video_kinetic",
+    "name": "Wan2.1 (Cinematic AI Video Generation • Beast)",
+    "category": "Kinetic & Motion Synthesis",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 20,
+    "limit_tpm": 1000,
+    "limit_rpd": 500,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.025,
+    "speed_rating": "GPU (~8s)",
+    "capabilities": [
+      "video_generation",
+      "cinematic_video",
+      "high_fidelity_temporal",
+      "wide_angle"
+    ],
+    "recommended_for": ["Cinematic Establishing Shots", "Opening Video Traversal"]
+  },
+  {
+    "id": "parallax",
+    "provider": "video_kinetic",
+    "name": "2.5D Parallax Optical Pan & Scan",
+    "category": "Kinetic & Motion Synthesis",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 120,
+    "limit_tpm": 1000,
+    "limit_rpd": 5000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.0,
+    "speed_rating": "Instant (~1s)",
+    "capabilities": [
+      "video_generation",
+      "parallax_2_5d",
+      "depth_mapping",
+      "zero_cost"
+    ],
+    "recommended_for": ["Webtoon Vertical Scroll Animations", "Multi-Layer Depth Scans"]
+  },
+  {
+    "id": "real-esrgan-anime",
+    "provider": "video_kinetic",
+    "name": "Real-ESRGAN Anime 6B (4K Super-Resolution • Beast)",
+    "category": "Enhancement & Upscaling",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 60,
+    "limit_tpm": 1000,
+    "limit_rpd": 5000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.002,
+    "speed_rating": "Fast (~2s)",
+    "capabilities": [
+      "upscaling",
+      "4k_super_resolution",
+      "halftone_enhancement",
+      "lineart_sharp"
+    ],
+    "recommended_for": ["Ultra-Crisp 4K Manga Panels", "Print-Ready Webtoon Lineart"]
+  },
+  {
+    "id": "comic-text-detector",
+    "provider": "video_kinetic",
+    "name": "ComicTextDetector + IOPaint (Clean Speech Inpainting • Beast)",
+    "category": "Enhancement & Upscaling",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 60,
+    "limit_tpm": 1000,
+    "limit_rpd": 5000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.001,
+    "speed_rating": "Fast (~1.5s)",
+    "capabilities": [
+      "inpainting",
+      "bubble_cleaning",
+      "text_erasure",
+      "background_restore"
+    ],
+    "recommended_for": ["Clean Manga Translation Typesetting", "Bubble Inpainting"]
+  },
+  {
+    "id": "manga-ocr",
+    "provider": "video_kinetic",
+    "name": "Manga-OCR (Stylized Typography & SFX Reader)",
+    "category": "Enhancement & Upscaling",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 120,
+    "limit_tpm": 1000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.0,
+    "speed_rating": "Ultra Fast (<300ms)",
+    "capabilities": [
+      "ocr",
+      "sfx_reading",
+      "vertical_japanese_ocr",
+      "sound_effects"
+    ],
+    "recommended_for": ["Vertical Japanese SFX Detection", "Manga Onomatopoeia Parsing"]
+  }
+]

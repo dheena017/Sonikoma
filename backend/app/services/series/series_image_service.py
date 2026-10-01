@@ -74,34 +74,6 @@ class SeriesImageService:
                 candidates.append(fb)
         return candidates
 
-    def _create_offline_placeholder(self, file_path: str, width: int = 768, height: int = 1024, prompt: str = "") -> None:
-        """Create a sleek cyberpunk/manga placeholder JPEG so UI never displays a broken frame or 402 error."""
-        try:
-            from PIL import ImageDraw
-            img = Image.new("RGB", (width, height), color=(14, 16, 26))
-            draw = ImageDraw.Draw(img)
-            
-            # Subtle double border
-            margin = 12
-            draw.rectangle([margin, margin, width - margin, height - margin], outline=(40, 48, 75), width=2)
-            draw.rectangle([margin + 4, margin + 4, width - margin - 4, height - margin - 4], outline=(25, 30, 48), width=1)
-            
-            # Accent corner lines
-            corner_len = 36
-            # Top-left
-            draw.line([(margin, margin + corner_len), (margin, margin), (margin + corner_len, margin)], fill=(59, 130, 246), width=3)
-            # Bottom-right
-            draw.line([(width - margin, height - margin - corner_len), (width - margin, height - margin), (width - margin - corner_len, height - margin)], fill=(59, 130, 246), width=3)
-            
-            # Center stylized badge
-            cx, cy = width // 2, height // 2
-            bw, bh = min(width - 80, 260), 64
-            draw.rectangle([cx - bw // 2, cy - bh // 2, cx + bw // 2, cy + bh // 2], fill=(20, 24, 40), outline=(59, 130, 246), width=1)
-            
-            img.save(file_path, format="JPEG", quality=90)
-        except Exception as e:
-            logger.warning(f"[AISeries Image Engine] Failed to create offline placeholder: {e}")
-
     async def render_panel_image(
         self,
         series_id: str,
@@ -140,6 +112,7 @@ class SeriesImageService:
         candidates = self.get_model_fallback_chain(model)
         img_bytes: Optional[bytes] = None
         successful_model: Optional[str] = None
+        last_error_msg: Optional[str] = None
 
         for candidate in candidates:
             cand_url = self.build_pollinations_url(prompt, width=width, height=height, seed=seed, model=candidate)
@@ -153,24 +126,26 @@ class SeriesImageService:
                             successful_model = candidate
                             break
                     elif resp.status_code == 402:
+                        last_error_msg = f"Model '{candidate}': 402 Payment Required (x402 paywall protocol active)"
                         logger.warning(
-                            f"[AISeries Image Engine] Model '{candidate}' returned 402 Payment Required (x402 paywall). "
-                            f"Instantly bypassing to free fallback model..."
+                            f"[AISeries Image Engine] {last_error_msg}. Bypassing to next candidate..."
                         )
-                        # Immediately try next free candidate without sleep
                         continue
                     elif resp.status_code == 429:
+                        last_error_msg = f"Model '{candidate}': 429 Rate Limited"
                         logger.warning(
-                            f"[AISeries Image Engine] Model '{candidate}' rate limited (429). Trying fallback..."
+                            f"[AISeries Image Engine] {last_error_msg}. Bypassing to next candidate..."
                         )
                         await asyncio.sleep(1.0)
                         continue
                     else:
+                        last_error_msg = f"Model '{candidate}': HTTP {resp.status_code}"
                         logger.warning(
-                            f"[AISeries Image Engine] Model '{candidate}' returned status {resp.status_code}. Trying fallback..."
+                            f"[AISeries Image Engine] {last_error_msg}. Trying fallback..."
                         )
             except Exception as ex:
-                logger.warning(f"[AISeries Image Engine] Model '{candidate}' error: {ex}. Trying fallback...")
+                last_error_msg = f"Model '{candidate}': Network error ({ex})"
+                logger.warning(f"[AISeries Image Engine] {last_error_msg}. Trying fallback...")
                 continue
 
         elapsed = round(time.time() - start_time, 2)
@@ -207,19 +182,18 @@ class SeriesImageService:
                 "duration_seconds": elapsed,
             }
         else:
-            logger.warning(
-                f"[AISeries Image Engine] All remote models failed for '{panel_id}' after {elapsed}s. "
-                f"Generating local storyboard placeholder to prevent 402 paywall error."
+            error_detail = last_error_msg or "Failed to synthesize image from AI image engine."
+            logger.error(
+                f"[AISeries Image Engine] Generation FAILED for '{panel_id}' after {elapsed}s: {error_detail}"
             )
-            self._create_offline_placeholder(file_path, width=width, height=height, prompt=prompt)
-            size_kb = round(os.path.getsize(file_path) / 1024, 1) if os.path.exists(file_path) else 0
             return {
                 "panel_id": panel_id,
-                "image_url": local_url,
-                "file_path": file_path,
+                "image_url": None,
+                "file_path": None,
                 "cached": False,
-                "size_kb": size_kb,
-                "status": "placeholder_fallback",
+                "size_kb": 0,
+                "status": "error",
+                "error": error_detail,
                 "duration_seconds": elapsed,
             }
 

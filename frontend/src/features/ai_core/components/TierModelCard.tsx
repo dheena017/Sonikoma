@@ -147,6 +147,30 @@ const PROVIDER_THEMES: Record<
     text: "#9ca3af",
     border: "rgba(75, 85, 99, 0.4)",
   },
+  pollinations: {
+    name: "POLLINATIONS AI",
+    bg: "rgba(168, 85, 247, 0.15)",
+    text: "#c084fc",
+    border: "rgba(168, 85, 247, 0.35)",
+  },
+  video_kinetic: {
+    name: "KINETIC & VIDEO",
+    bg: "rgba(245, 158, 11, 0.15)",
+    text: "#fbbf24",
+    border: "rgba(245, 158, 11, 0.35)",
+  },
+  voice_cloning: {
+    name: "VOICE DUBBING",
+    bg: "rgba(16, 185, 129, 0.15)",
+    text: "#34d399",
+    border: "rgba(16, 185, 129, 0.35)",
+  },
+  enhancer: {
+    name: "4K ENHANCER",
+    bg: "rgba(6, 182, 212, 0.15)",
+    text: "#22d3ee",
+    border: "rgba(6, 182, 212, 0.35)",
+  },
 };
 
 export const isProviderKeyConfiguredInVault = (providerKey: string = "") => {
@@ -156,7 +180,11 @@ export const isProviderKeyConfiguredInVault = (providerKey: string = "") => {
     p === "edge_tts" ||
     p === "stable_diffusion" ||
     p === "stablediffusion" ||
-    p === "whisper"
+    p === "whisper" ||
+    p === "pollinations" ||
+    p === "video_kinetic" ||
+    p === "voice_cloning" ||
+    p === "enhancer"
   ) {
     return true;
   }

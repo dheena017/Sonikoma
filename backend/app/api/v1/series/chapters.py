@@ -135,6 +135,11 @@ async def render_single_panel_image(series_id: str, panel_id: str, req: RenderPa
         force_regenerate=True,
     )
 
+    if res.get("status") == "error":
+        err_msg = res.get("error", "Image generation failed")
+        status_code = 402 if "402" in str(err_msg) or "Payment" in str(err_msg) else 502
+        raise HTTPException(status_code=status_code, detail=err_msg)
+
     if res.get("image_url"):
         panel.image_url = res["image_url"]
         if req.prompt:
