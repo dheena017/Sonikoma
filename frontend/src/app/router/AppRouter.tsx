@@ -218,6 +218,7 @@ export function isKnownRoute(path: string): boolean {
     clean === "/ai-core/overview" ||
     clean === "/ai-core/api-keys" ||
     clean === "/ai-core/limits" ||
+    clean === "/ai-core/rate-limits" ||
     clean === "/ai-core/safety-quotas" ||
     clean === "/ai-core/tokens" ||
     clean === "/ai-core/usage" ||
@@ -228,7 +229,8 @@ export function isKnownRoute(path: string): boolean {
     clean === "/ai-core/wallet" ||
     clean === "/ai-core/billing" ||
     clean === "/ai-core/playground" ||
-    clean === "/ai-core/arena"
+    clean === "/ai-core/arena" ||
+    clean.startsWith("/ai-core/")
   ) {
     return true;
   }
@@ -933,19 +935,32 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/ai-core" ||
         currentPath === "/ai-core/" ||
         currentPath === "/ai-core/overview",
-      isAIAPIKeysPath: currentPath === "/ai-core/api-keys",
+      isAIAPIKeysPath:
+        currentPath === "/ai-core/api-keys" ||
+        currentPath.startsWith("/ai-core/api-keys"),
       isAIRateLimitsPath:
         currentPath === "/ai-core/limits" ||
+        currentPath === "/ai-core/rate-limits" ||
+        currentPath.startsWith("/ai-core/rate-limits") ||
+        currentPath.startsWith("/ai-core/limits") ||
         currentPath === "/ai-core/safety-quotas" ||
         currentPath === "/ai-core/tokens",
       isAIUsagePath:
         currentPath === "/ai-core/usage" ||
         currentPath === "/ai-core/charts" ||
-        currentPath === "/ai-core/analytics",
+        currentPath === "/ai-core/analytics" ||
+        currentPath.startsWith("/ai-core/analytics") ||
+        currentPath.startsWith("/ai-core/usage"),
       isAIRoutingPath:
-        currentPath === "/ai-core/routing" || currentPath === "/ai-core/models",
+        currentPath === "/ai-core/routing" ||
+        currentPath === "/ai-core/models" ||
+        currentPath.startsWith("/ai-core/routing") ||
+        currentPath.startsWith("/ai-core/models"),
       isAIWalletPath:
-        currentPath === "/ai-core/wallet" || currentPath === "/ai-core/billing",
+        currentPath === "/ai-core/wallet" ||
+        currentPath === "/ai-core/billing" ||
+        currentPath.startsWith("/ai-core/wallet") ||
+        currentPath.startsWith("/ai-core/billing"),
 
       editorRouteMatch,
       isImageEditorPage,
