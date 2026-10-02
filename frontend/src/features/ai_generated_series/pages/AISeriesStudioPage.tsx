@@ -375,6 +375,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
       )}
 
       <img
+        key={finalSrc}
         src={finalSrc}
         alt={alt}
         className={`w-auto h-full max-h-full max-w-full ${
@@ -383,6 +384,12 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
           imageState === "loaded" ? "opacity-100" : "opacity-0"
         } ${screentoneFilter ? "contrast-125 grayscale" : ""}`}
         loading="eager"
+        ref={(el) => {
+          if (el && el.complete && el.naturalWidth > 0 && imageState !== "loaded") {
+            setImageState("loaded");
+            setIsLocalReloading(false);
+          }
+        }}
         onLoad={() => {
           setImageState("loaded");
           setIsLocalReloading(false);
@@ -451,6 +458,11 @@ const FilmstripThumbnail: React.FC<FilmstripThumbnailProps> = ({
             thumbState === "loaded" ? "opacity-100" : "opacity-0"
           }`}
           loading="eager"
+          ref={(el) => {
+            if (el && el.complete && el.naturalWidth > 0 && thumbState !== "loaded") {
+              setThumbState("loaded");
+            }
+          }}
           onLoad={() => setThumbState("loaded")}
           onError={() => setThumbState("error")}
         />
@@ -728,7 +740,11 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   };
 
   // ── Single Panel Regeneration Action by Index ─────────────────────────
-  const handleRegeneratePanelByIdx = async (idx: number) => {
+  const handleRegeneratePanelByIdx = async (
+    idx: number,
+    overridePrompt?: string,
+    overrideModel?: string
+  ) => {
     if (!resolvedSeriesId || !panels[idx]) return;
     try {
       setSelectedPanelIdx(idx);
@@ -736,12 +752,14 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       setIsRegeneratingPanel(true);
       const targetPanel = panels[idx];
       const panelId = targetPanel.panel_id || targetPanel.id || String(idx + 1);
+      const promptToUse = (overridePrompt ?? editingPrompt ?? targetPanel.prompt)?.trim() || targetPanel.prompt;
       addNotification(`Generating Shot #${idx + 1}...`, "info");
       const updatedPanel = await aiSeriesApi.renderPanelImage(
         resolvedSeriesId,
         panelId,
         {
-          prompt: targetPanel.prompt || editingPrompt,
+          prompt: promptToUse,
+          image_model: overrideModel || project?.image_model,
           session_number: selectedSessionNum,
           chapter_number: selectedChapterNum,
         }
@@ -756,11 +774,13 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         updatedPanels[idx] = {
           ...updatedPanels[idx],
           image_url: bustUrl,
+          prompt: promptToUse,
         };
         setCurrentChapter({
           ...currentChapter,
           panels: updatedPanels,
         });
+        setEditingPrompt(promptToUse);
         addNotification(`Shot #${idx + 1} generated!`, "success");
       }
     } catch (err: any) {
@@ -772,8 +792,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
     }
   };
 
-  const handleRegenerateActivePanel = async () => {
-    await handleRegeneratePanelByIdx(selectedPanelIdx);
+  const handleRegenerateActivePanel = async (overridePrompt?: string, overrideModel?: string) => {
+    await handleRegeneratePanelByIdx(selectedPanelIdx, overridePrompt, overrideModel);
   };
 
   // ── Audio Playback Control ────────────────────────────────────────────
@@ -1367,7 +1387,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           }}
           onRegenerateVisual={async (newPrompt, newModel) => {
             setEditingPrompt(newPrompt);
-            await handleRegenerateActivePanel();
+            await handleRegenerateActivePanel(newPrompt, newModel);
           }}
           onSynthesizeAudio={async (spk, txt) => {
             if (activePanel?.audio_url) {

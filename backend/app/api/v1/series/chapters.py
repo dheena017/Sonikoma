@@ -5,6 +5,7 @@ Handles session hierarchies, chapter retrieval, and chapter-level panel synthesi
 
 from __future__ import annotations
 
+import os
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
@@ -14,6 +15,24 @@ from app.repositories.series import ai_series_repo
 from app.services.series.series_orchestrator import series_orchestrator
 
 router = APIRouter(tags=["AI Series - Chapters & Sessions"])
+
+
+def _enrich_chapter_image_timestamps(series_id: str, chapter: ChapterSession) -> ChapterSession:
+    """Ensure every panel's image_url includes the latest file modification timestamp (?v=mtime) from disk."""
+    if not chapter or not chapter.panels:
+        return chapter
+    backend_media_dir = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media", "series_images", series_id)
+    )
+    for p in chapter.panels:
+        if p.image_url and "/media/series_images/" in p.image_url:
+            clean_url = p.image_url.split("?")[0]
+            filename = os.path.basename(clean_url)
+            disk_path = os.path.join(backend_media_dir, filename)
+            if os.path.exists(disk_path):
+                mtime = int(os.path.getmtime(disk_path))
+                p.image_url = f"{clean_url}?v={mtime}"
+    return chapter
 
 
 @router.get("/{series_id}/sessions", response_model=List[SeriesSession])
@@ -41,7 +60,7 @@ async def get_series_chapter(series_id: str, session_number: int, chapter_number
             session_number=session_number,
             chapter_number=chapter_number,
         )
-    return chapter
+    return _enrich_chapter_image_timestamps(series_id, chapter)
 
 
 @router.post(
@@ -65,7 +84,7 @@ async def synthesize_chapter(
             panel_count=panel_count,
             image_model=image_model,
         )
-        return updated_chapter
+        return _enrich_chapter_image_timestamps(series_id, updated_chapter)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate chapter: {str(e)}")
 
@@ -92,7 +111,7 @@ async def render_chapter_images_endpoint(
             model=image_model,
             force_regenerate=force,
         )
-        return chapter
+        return _enrich_chapter_image_timestamps(series_id, chapter)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to render chapter images: {str(e)}")
 

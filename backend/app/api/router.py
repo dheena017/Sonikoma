@@ -54,6 +54,16 @@ api_router.include_router(ai_series_master_router, prefix="/api/v1/ai-series", t
 
 
 
+class NoCacheStaticFiles(StaticFiles):
+    """StaticFiles subclass that sets anti-caching headers for freshly rendered AI assets."""
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+
+
 def register_routers(app: FastAPI):
     """Registers API routers and static mounts onto the FastAPI application."""
     # Include main API router
@@ -64,14 +74,14 @@ def register_routers(app: FastAPI):
     os.makedirs(videos_path, exist_ok=True)
     app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
 
-    # Serve AI series generated panel images & voice dubbing audio
+    # Serve AI series generated panel images & voice dubbing audio (with anti-caching headers)
     backend_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "local_media"))
     series_images_dir = os.path.join(backend_media_dir, "series_images")
     series_audio_dir = os.path.join(backend_media_dir, "series_audio")
     os.makedirs(series_images_dir, exist_ok=True)
     os.makedirs(series_audio_dir, exist_ok=True)
-    app.mount("/media/series_images", StaticFiles(directory=series_images_dir), name="series_images")
-    app.mount("/media/series_audio", StaticFiles(directory=series_audio_dir), name="series_audio")
+    app.mount("/media/series_images", NoCacheStaticFiles(directory=series_images_dir), name="series_images")
+    app.mount("/media/series_audio", NoCacheStaticFiles(directory=series_audio_dir), name="series_audio")
 
     # Serve locally generated panel layer WebPs
     local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "local_media"))

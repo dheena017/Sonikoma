@@ -93,10 +93,12 @@ class SeriesImageService:
         # Check existing disk cache unless force regenerate
         if not force_regenerate and os.path.exists(file_path) and os.path.getsize(file_path) > 1000:
             size_kb = round(os.path.getsize(file_path) / 1024, 1)
-            logger.info(f"[AISeries Image] Cache HIT for panel '{panel_id}' ({size_kb} KB) at {local_url}")
+            mtime = int(os.path.getmtime(file_path))
+            url_with_v = f"{local_url}?v={mtime}"
+            logger.info(f"[AISeries Image] Cache HIT for panel '{panel_id}' ({size_kb} KB) at {url_with_v}")
             return {
                 "panel_id": panel_id,
-                "image_url": local_url,
+                "image_url": url_with_v,
                 "file_path": file_path,
                 "cached": True,
                 "size_kb": size_kb,
@@ -201,13 +203,15 @@ class SeriesImageService:
             with open(file_path, "wb") as f:
                 f.write(final_bytes)
             size_kb = round(len(final_bytes) / 1024, 1)
+            mtime = int(os.path.getmtime(file_path))
+            url_with_v = f"{local_url}?v={mtime}"
             logger.info(
                 f"[AISeries Image Engine] Render SUCCESS for '{panel_id}' using '{successful_model}' in {elapsed}s -> "
-                f"Saved to {file_path} ({size_kb} KB)"
+                f"Saved to {file_path} ({size_kb} KB) at {url_with_v}"
             )
             return {
                 "panel_id": panel_id,
-                "image_url": local_url,
+                "image_url": url_with_v,
                 "file_path": file_path,
                 "cached": False,
                 "size_kb": size_kb,
