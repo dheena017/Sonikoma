@@ -1,8 +1,7 @@
 """
-backend/app/engines/ffmpeg/engine.py
+backend/app/providers/ffmpeg/engine.py
 ─────────────────────────────────────────────────────────────────────────────
-FFmpeg engine facade (moved from engines/ffmpeg.py). Delegates to
-`engines.ffmpeg.commands` and engine-level primitives.
+FFmpeg engine facade. Delegates to commands and video primitives.
 """
 
 import subprocess
@@ -11,11 +10,9 @@ import json
 import asyncio
 from typing import List, Optional
 from app.providers.ffmpeg.types import FilterType, VideoMetadata, TransitionSpec, CutSpec
-from app.providers.ffmpeg.commands import build_ffprobe_cmd
-from app.providers.video.render_engine import RenderEngine
-from app.providers.video.subtitle_engine import SubtitleEngine
+from app.providers.ffmpeg.helpers import build_ffprobe_cmd
 
-logger = logging.getLogger("sonikoma.engines.ffmpeg")
+logger = logging.getLogger("sonikoma.providers.ffmpeg")
 
 
 class FFmpegEngine:
@@ -29,10 +26,14 @@ class FFmpegEngine:
             ffmpeg_path: Path to ffmpeg executable
             ffprobe_path: Path to ffprobe executable (for metadata)
         """
+        # Lazy imports to avoid circular imports at module load time
+        from app.providers.video.render_engine import RenderEngine
+        from app.providers.video.subtitle_engine import SubtitleEngine
+
         self.ffmpeg_path = ffmpeg_path
         self.ffprobe_path = ffprobe_path
         self._verify_ffmpeg()
-        
+
         # Instantiate delegate engine primitives
         self._render_service = RenderEngine(ffmpeg_path=ffmpeg_path)
         self._subtitle_service = SubtitleEngine(ffmpeg_path=ffmpeg_path)

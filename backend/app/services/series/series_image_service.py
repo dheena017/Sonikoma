@@ -111,53 +111,36 @@ class SeriesImageService:
             f"Dim: {width}x{height} | Prompt: {prompt[:65]}..."
         )
 
-        # 1. Primary Engine: Hugging Face FLUX.1 Inference Client (fast, reliable, free with token)
+        # 1. Primary Engine: Hugging Face Provider (FLUX.1 Schnell)
         try:
-            from app.core.config import hf_client
-            if hf_client:
-                hf_prompt = f"Korean manhwa webtoon style, Solo Leveling 2D digital art, {prompt}"[:450]
-                logger.info(f"[AISeries Image Engine] Synthesizing via HuggingFace FLUX.1 for '{panel_id}'...")
-                hf_img = await asyncio.to_thread(
-                    hf_client.text_to_image,
-                    hf_prompt,
-                    model="black-forest-labs/FLUX.1-schnell",
-                )
-                if hf_img:
-                    hf_img = hf_img.resize((width, height), Image.Resampling.LANCZOS)
-                    buf = io.BytesIO()
-                    hf_img.save(buf, format="JPEG", quality=90, optimize=True)
-                    img_bytes = buf.getvalue()
-                    successful_model = "black-forest-labs/FLUX.1-schnell"
+            from app.providers import HuggingFaceProvider
+            hf_prompt = f"Korean manhwa webtoon style, Solo Leveling 2D digital art, {prompt}"
+            img_bytes = await HuggingFaceProvider.generate_image(
+                prompt=hf_prompt,
+                model="black-forest-labs/FLUX.1-schnell",
+                width=width,
+                height=height,
+            )
+            if img_bytes:
+                successful_model = "black-forest-labs/FLUX.1-schnell"
         except Exception as hf_err:
-            logger.warning(f"[AISeries Image Engine] HuggingFace FLUX.1 failed ({hf_err}), trying Pollinations fallback...")
+            logger.warning(f"[AISeries Image Engine] HuggingFaceProvider failed ({hf_err}), trying Pollinations fallback...")
 
-        # 2. Secondary Engine: Pollinations.ai Multi-Model Fallback Chain
+        # 2. Secondary Engine: Pollinations Provider Multi-Model Fallback Chain
         if not img_bytes:
-            candidates = self.get_model_fallback_chain(model)
-            for candidate in candidates:
-                cand_url = self.build_pollinations_url(prompt, width=width, height=height, seed=seed, model=candidate)
-                try:
-                    async with httpx.AsyncClient(timeout=25.0, follow_redirects=True) as client:
-                        resp = await client.get(cand_url)
-                        if resp.status_code == 200 and len(resp.content) > 1000:
-                            c_type = resp.headers.get("content-type", "")
-                            if "text" not in c_type and "json" not in c_type:
-                                img_bytes = resp.content
-                                successful_model = candidate
-                                break
-                        elif resp.status_code == 402:
-                            last_error_msg = f"Model '{candidate}': 402 Payment Required"
-                            logger.warning(f"[AISeries Image Engine] {last_error_msg}. Bypassing...")
-                            continue
-                        elif resp.status_code == 429:
-                            last_error_msg = f"Model '{candidate}': 429 Rate Limited"
-                            logger.warning(f"[AISeries Image Engine] {last_error_msg}. Bypassing...")
-                            await asyncio.sleep(0.5)
-                            continue
-                except Exception as ex:
-                    last_error_msg = f"Model '{candidate}': Network error ({ex})"
-                    logger.warning(f"[AISeries Image Engine] {last_error_msg}. Trying fallback...")
-                    continue
+            from app.providers import PollinationsProvider
+            p_bytes, p_model, p_err = await PollinationsProvider.generate_image(
+                prompt=prompt,
+                model=model,
+                width=width,
+                height=height,
+                seed=seed,
+            )
+            if p_bytes:
+                img_bytes = p_bytes
+                successful_model = p_model
+            else:
+                last_error_msg = p_err
 
         # 3. Tertiary Resiliency: Generate Stylized Manhwa Frame if remote providers fail
         if not img_bytes:

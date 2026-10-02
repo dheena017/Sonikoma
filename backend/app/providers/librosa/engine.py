@@ -1,13 +1,16 @@
 """
-backend/app/engines/librosa/engine.py
-Librosa engine moved into package structure.
+backend/app/providers/librosa/engine.py
+─────────────────────────────────────────────────────────────────────────────
+Audio feature extraction and acoustic analysis engine using Librosa.
+─────────────────────────────────────────────────────────────────────────────
 """
 
 import logging
 import asyncio
 from typing import Tuple, Optional, Dict, Any, List, cast
-from dataclasses import dataclass
 import numpy as np
+
+from app.providers.librosa.types import AudioFeatures, SilenceSegment, EnergySegment
 
 try:
     import librosa
@@ -18,41 +21,7 @@ except ImportError:
     sf = None
     LIBROSA_AVAILABLE = False
 
-logger = logging.getLogger("sonikoma.services.librosa_engine")
-
-
-@dataclass
-class AudioFeatures:
-    duration: float
-    sample_rate: int
-    energy: np.ndarray
-    mfcc: np.ndarray
-    spectral_centroid: np.ndarray
-    spectral_bandwidth: np.ndarray
-    spectral_rolloff: np.ndarray
-    zero_crossing_rate: np.ndarray
-    chroma: np.ndarray
-    tempo: float
-    beats: np.ndarray
-
-
-@dataclass
-class SilenceSegment:
-    start_time: float
-    end_time: float
-    duration: float
-    threshold_db: float
-
-
-@dataclass
-class EnergySegment:
-    segment_id: int
-    start_frame: int
-    end_frame: int
-    start_time: float
-    end_time: float
-    duration: float
-    mean_energy: float
+logger = logging.getLogger("sonikoma.providers.librosa.engine")
 
 
 class LibrosaEngine:

@@ -11,7 +11,14 @@ import json
 import logging
 from typing import List, Optional, Dict, Any, Union
 
-from app.providers.whisper.engine import TranscriptionResult, get_whisper_engine, WhisperModel, WHISPER_AVAILABLE
+from app.providers.whisper import (
+    TranscriptionResult,
+    get_whisper_engine,
+    WhisperModel,
+    WHISPER_AVAILABLE,
+    format_srt_time as _format_srt_time,
+    format_vtt_time as _format_vtt_time,
+)
 
 logger = logging.getLogger("sonikoma.services.audio.transcription.speech_transcriber")
 
@@ -248,20 +255,6 @@ async def batch_transcribe_service(
     return [r.__dict__ if r else None for r in results]
 
 
-def _format_srt_time(seconds: float) -> str:
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    secs = int(seconds % 60)
-    millis = int((seconds % 1) * 1000)
-    return f"{hours:02d}:{minutes:02d}:{secs:02d},{millis:03d}"
-
-
-def _format_vtt_time(seconds: float) -> str:
-    hours = int(seconds // 3600)
-    minutes = int((seconds % 3600) // 60)
-    secs = int(seconds % 60)
-    millis = int((seconds % 1) * 1000)
-    return f"{hours:02d}:{minutes:02d}:{secs:02d}.{millis:03d}"
 
 
 # Human-readable aliases

@@ -1,17 +1,16 @@
 """
-backend/app/engines/video/subtitle_engine.py
+backend/app/providers/video/subtitle_engine.py
 ─────────────────────────────────────────────────────────────────────────────
-Subtitle engine: low-level operations to burn subtitles into video.
-Replaces the previous `subtitle_service.py`.
+Subtitle engine: operations to format, sync, and burn subtitles into video.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import logging
 import subprocess
 import asyncio
-import app.providers.ffmpeg.commands as ffmpeg_cmds
+import app.providers.ffmpeg.helpers as ffmpeg_cmds
 
-logger = logging.getLogger("sonikoma.engines.video.subtitles")
+logger = logging.getLogger("sonikoma.providers.video.subtitles")
 
 
 class SubtitleEngine:

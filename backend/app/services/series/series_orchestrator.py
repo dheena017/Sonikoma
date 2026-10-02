@@ -110,7 +110,8 @@ class SeriesOrchestrator:
         self, prompt: str, width: int = 768, height: int = 1024, seed: Optional[int] = None, model: str = "flux-anime"
     ) -> str:
         """Construct free, high-speed Pollinations.ai image URL supporting Flux-Anime, Flux.1, and SDXL Turbo."""
-        return series_image_service.build_pollinations_url(
+        from app.providers import PollinationsProvider
+        return PollinationsProvider.build_url(
             prompt=prompt, width=width, height=height, seed=seed, model=model
         )
 

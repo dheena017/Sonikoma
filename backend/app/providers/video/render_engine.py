@@ -1,8 +1,8 @@
 """
-backend/app/engines/video/render_engine.py
+backend/app/providers/video/render_engine.py
 ─────────────────────────────────────────────────────────────────────────────
 Execution primitives for cutting, mixing audio, applying filters, and concatenations.
-This replaces the previous `render_service.py` and exposes the engine-level API.
+Exposes the engine-level API for high-level video rendering operations.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -13,9 +13,9 @@ import asyncio
 import tempfile
 from typing import List, Optional
 from app.providers.ffmpeg.types import TransitionSpec, CutSpec, FilterType
-import app.providers.ffmpeg.commands as ffmpeg_cmds
+import app.providers.ffmpeg.helpers as ffmpeg_cmds
 
-logger = logging.getLogger("sonikoma.engines.video.render")
+logger = logging.getLogger("sonikoma.providers.video.render")
 
 
 class RenderEngine:

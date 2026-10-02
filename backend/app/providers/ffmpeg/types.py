@@ -1,8 +1,7 @@
 """
-backend/app/engines/ffmpeg/types.py
+backend/app/providers/ffmpeg/types.py
 ─────────────────────────────────────────────────────────────────────────────
 Video and FFmpeg processing specifications: enums and metadata dataclasses.
-Moved from engines.video.ffmpeg_types.
 """
 
 from enum import Enum

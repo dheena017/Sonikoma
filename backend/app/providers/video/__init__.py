@@ -1,11 +1,36 @@
 """
-backend/app/engines/video/__init__.py
+backend/app/providers/video/__init__.py
 ─────────────────────────────────────────────────────────────────────────────
-Video rendering and subtitle engine package.
+Video rendering, motion, and subtitle engine package.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from app.providers.video.render_engine import RenderEngine
-from app.providers.video.subtitle_engine import SubtitleEngine
+from app.providers.video.types import (
+    TransitionType,
+    FilterType,
+    VideoMetadata,
+    TransitionSpec,
+    CutSpec,
+)
+from app.providers.video.helpers import (
+    get_ffmpeg_filter_string,
+    format_duration,
+)
+from app.providers.video.client import VideoClient
+from app.providers.video.engine import VideoEngine, get_video_engine
 
-__all__ = ["RenderEngine", "SubtitleEngine"]
+__all__ = [
+    # Types
+    "TransitionType",
+    "FilterType",
+    "VideoMetadata",
+    "TransitionSpec",
+    "CutSpec",
+    # Helpers
+    "get_ffmpeg_filter_string",
+    "format_duration",
+    # Client & Engine
+    "VideoClient",
+    "VideoEngine",
+    "get_video_engine",
+]

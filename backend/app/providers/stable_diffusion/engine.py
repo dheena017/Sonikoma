@@ -1,15 +1,17 @@
 """
-backend/app/engines/stable_diffusion/engine.py
-Stable Diffusion engine moved into package structure.
+backend/app/providers/stable_diffusion/engine.py
+─────────────────────────────────────────────────────────────────────────────
+Local Stable Diffusion inference engine with CPU/CUDA pipeline execution.
+─────────────────────────────────────────────────────────────────────────────
 """
 
 import os
 import logging
 import asyncio
 from typing import List, Optional, Dict, Any
-from dataclasses import dataclass
-from enum import Enum
 import tempfile
+
+from app.providers.stable_diffusion.types import StableDiffusionModel, GeneratedImage
 
 # Lazy-loaded imports for diffusers and torch to keep startup RAM lightweight (~120MB)
 DIFFUSERS_AVAILABLE = True
@@ -35,28 +37,7 @@ def _load_diffusers_and_torch():
     except ImportError:
         return None
 
-logger = logging.getLogger("sonikoma.services.stable_diffusion_engine")
-
-
-class StableDiffusionModel(str, Enum):
-    V1_5 = "runwayml/stable-diffusion-v1-5"
-    V2_1 = "stabilityai/stable-diffusion-2-1"
-    XL = "stabilityai/stable-diffusion-xl-base-1.0"
-    TURBO = "stabilityai/sdxl-turbo"
-
-
-@dataclass
-class GeneratedImage:
-    image_path: str
-    image: Optional['Any'] = None
-    nsfw_content_detected: bool = False
-    width: int = 512
-    height: int = 512
-    seed: int = 0
-    prompt: str = ""
-    negative_prompt: str = ""
-    guidance_scale: float = 7.5
-    num_inference_steps: int = 50
+logger = logging.getLogger("sonikoma.providers.stable_diffusion.engine")
 
 
 class StableDiffusionEngine:
@@ -111,6 +92,27 @@ class StableDiffusionEngine:
             logger.error(f"Failed to load model: {e}")
             raise
 
+    def _ensure_inpaint_pipe(self) -> dict:
+        """Ensure the inpaint pipeline is loaded. Returns the mods dict for use in closures."""
+        mods = _load_diffusers_and_torch()
+        if not mods:
+            raise RuntimeError("diffusers, torch, and Pillow are required for inpainting.")
+
+        if self.inpaint_pipe is None:
+            StableDiffusionInpaintPipeline = mods["StableDiffusionInpaintPipeline"]
+            torch = mods["torch"]
+            pipe = StableDiffusionInpaintPipeline.from_pretrained(
+                self.model_name.value,
+                torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
+                cache_dir=self.cache_dir
+            )
+            if pipe is None:
+                raise RuntimeError("Failed to load StableDiffusionInpaintPipeline")
+            self.inpaint_pipe = pipe.to(self.device)
+            logger.info(f"✓ Inpaint pipeline loaded on device: {self.device}")
+
+        return mods
+
     async def generate_images(
         self,
         prompt: str,
@@ -135,11 +137,13 @@ class StableDiffusionEngine:
         )
 
         self._ensure_pipe()
+        mods = _load_diffusers_and_torch()
 
         try:
             def _generate():
-                if seed is not None and torch is not None:
-                    torch.manual_seed(seed)
+                _torch = mods["torch"] if mods else None
+                if seed is not None and _torch is not None:
+                    _torch.manual_seed(seed)
 
                 assert self.pipe is not None, "StableDiffusionPipeline must be initialized"
                 output = self.pipe(
@@ -150,9 +154,7 @@ class StableDiffusionEngine:
                     guidance_scale=guidance_scale,
                     num_inference_steps=num_inference_steps,
                 )
-                images = output[0] if isinstance(output, tuple) else output.images
-
-                return images
+                return output[0] if isinstance(output, tuple) else output.images
 
             images = await asyncio.to_thread(_generate)
 
@@ -160,9 +162,7 @@ class StableDiffusionEngine:
             for i, img in enumerate(images):
                 filename = f"generated_{i:03d}_{seed or 'random'}.png"
                 filepath = os.path.join(output_dir, filename)
-
                 img.save(filepath)
-
                 results.append(GeneratedImage(
                     image_path=filepath,
                     image=img,
@@ -172,9 +172,8 @@ class StableDiffusionEngine:
                     prompt=prompt,
                     negative_prompt=negative_prompt,
                     guidance_scale=guidance_scale,
-                    num_inference_steps=num_inference_steps
+                    num_inference_steps=num_inference_steps,
                 ))
-
                 logger.info(f"✓ Generated and saved: {filepath}")
 
             return results
@@ -182,6 +181,31 @@ class StableDiffusionEngine:
         except Exception as e:
             logger.error(f"Image generation failed: {e}")
             raise
+
+    async def generate_image(
+        self,
+        prompt: str,
+        negative_prompt: str = "",
+        height: int = 512,
+        width: int = 512,
+        guidance_scale: float = 7.5,
+        num_inference_steps: int = 50,
+        seed: Optional[int] = None,
+        output_dir: str = "",
+    ) -> GeneratedImage:
+        """Generate a single image from text prompt (singular alias for generate_images)."""
+        results = await self.generate_images(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            num_images=1,
+            height=height,
+            width=width,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
+            seed=seed,
+            output_dir=output_dir,
+        )
+        return results[0]
 
     async def inpaint(
         self,
@@ -200,26 +224,16 @@ class StableDiffusionEngine:
 
         logger.info(f"Inpainting: {image_path} with prompt: '{prompt[:50]}...'")
 
+        mods = self._ensure_inpaint_pipe()
+        _Image = mods["Image"]
+
         try:
             def _inpaint():
-                if not DIFFUSERS_AVAILABLE or StableDiffusionInpaintPipeline is None or torch is None or Image is None:
-                    raise RuntimeError("diffusers, torch, and Pillow are required for inpainting.")
-
-                image = Image.open(image_path).convert("RGB")
-                mask = Image.open(mask_path).convert("L")
+                image = _Image.open(image_path).convert("RGB")
+                mask = _Image.open(mask_path).convert("L")
 
                 if mask.size != image.size:
-                    mask = mask.resize(image.size, Image.Resampling.LANCZOS)
-
-                if self.inpaint_pipe is None:
-                    pipe = StableDiffusionInpaintPipeline.from_pretrained(
-                        self.model_name.value,
-                        torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
-                        cache_dir=self.cache_dir
-                    )
-                    if pipe is None:
-                        raise RuntimeError("Failed to load StableDiffusionInpaintPipeline")
-                    self.inpaint_pipe = pipe.to(self.device)
+                    mask = mask.resize(image.size, _Image.Resampling.LANCZOS)
 
                 assert self.inpaint_pipe is not None, "StableDiffusionInpaintPipeline must be initialized"
                 output = self.inpaint_pipe(
@@ -229,16 +243,14 @@ class StableDiffusionEngine:
                     mask_image=mask,
                     guidance_scale=guidance_scale,
                     num_inference_steps=num_inference_steps,
-                    strength=strength
+                    strength=strength,
                 )
                 images = output[0] if isinstance(output, tuple) else output.images
                 result = images[0]
-
                 result.save(output_path)
                 return result, image.size
 
             result_img, size = await asyncio.to_thread(_inpaint)
-
             logger.info(f"✓ Inpainting complete: {output_path}")
 
             return GeneratedImage(
@@ -247,7 +259,7 @@ class StableDiffusionEngine:
                 width=size[0],
                 height=size[1],
                 prompt=prompt,
-                negative_prompt=negative_prompt
+                negative_prompt=negative_prompt,
             )
 
         except Exception as e:
@@ -269,14 +281,15 @@ class StableDiffusionEngine:
         logger.info(f"Upscaling image {scale_factor}x: {image_path}")
 
         try:
+            mods = _load_diffusers_and_torch()
+            if not mods:
+                raise RuntimeError("Pillow is required for upscaling.")
+            _Image = mods["Image"]
+
             def _upscale():
-                if not DIFFUSERS_AVAILABLE or Image is None:
-                    raise RuntimeError("Pillow is required for upscaling.")
-
-                image = Image.open(image_path).convert("RGB")
+                image = _Image.open(image_path).convert("RGB")
                 new_size = (image.width * scale_factor, image.height * scale_factor)
-
-                upscaled = image.resize(new_size, Image.Resampling.LANCZOS)
+                upscaled = image.resize(new_size, _Image.Resampling.LANCZOS)
                 upscaled.save(output_path)
                 return upscaled
 
@@ -306,12 +319,14 @@ class StableDiffusionEngine:
         logger.info(f"Applying style transfer: {style_prompt}")
 
         try:
-            if not DIFFUSERS_AVAILABLE or Image is None:
+            mods = _load_diffusers_and_torch()
+            if not mods:
                 raise RuntimeError("diffusers and Pillow are required for style transfer.")
+            _Image = mods["Image"]
 
-            image = Image.open(image_path).convert("RGB")
+            image = _Image.open(image_path).convert("RGB")
 
-            mask = Image.new("L", image.size, 255)
+            mask = _Image.new("L", image.size, 255)
             mask_path = os.path.join(tempfile.gettempdir(), "full_mask.png")
             mask.save(mask_path)
 

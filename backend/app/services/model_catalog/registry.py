@@ -15,28 +15,40 @@ from typing import List, Any, Optional, Dict
 logger = logging.getLogger("sonikoma.model_catalog")
 
 _CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROVIDERS_DIR = os.path.join(_CURRENT_DIR, "providers")
+_APP_PROVIDERS_ROOT = os.path.abspath(os.path.join(_CURRENT_DIR, "..", "..", "providers"))
+_LEGACY_PROVIDERS_DIR = os.path.join(_CURRENT_DIR, "providers")
 
 
 def load_catalog_from_providers() -> List[Dict[str, Any]]:
     """
-    Loads model catalogs dynamically from separate provider JSON files in providers/
-    (e.g., google.json, openai.json, anthropic.json, etc.), ensuring google.json is prioritized first.
+    Loads model catalogs dynamically from each provider's `catalog.json` in `app/providers/<provider>/catalog.json`,
+    prioritizing Gemini models first.
     """
     all_models: List[Dict[str, Any]] = []
     seen_ids = set()
 
-    if os.path.exists(_PROVIDERS_DIR) and os.path.isdir(_PROVIDERS_DIR):
-        all_files = [f for f in os.listdir(_PROVIDERS_DIR) if f.endswith(".json")]
+    if os.path.exists(_APP_PROVIDERS_ROOT) and os.path.isdir(_APP_PROVIDERS_ROOT):
+        subdirs = [
+            d for d in os.listdir(_APP_PROVIDERS_ROOT)
+            if os.path.isdir(os.path.join(_APP_PROVIDERS_ROOT, d)) and d not in ("__pycache__", "catalogs")
+        ]
         # Prioritize Google Gemini models first
-        ordered_files = [f for f in all_files if "google" in f.lower() or "gemini" in f.lower()] + [
-            f for f in sorted(all_files) if "google" not in f.lower() and "gemini" not in f.lower()
+        ordered_dirs = [d for d in subdirs if "gemini" in d.lower()] + [
+            d for d in sorted(subdirs) if "gemini" not in d.lower()
         ]
 
-        for fname in ordered_files:
-            fpath = os.path.join(_PROVIDERS_DIR, fname)
+        for prov_name in ordered_dirs:
+            prov_dir = os.path.join(_APP_PROVIDERS_ROOT, prov_name)
+            cat_file = os.path.join(prov_dir, "catalog.json")
+            if not os.path.exists(cat_file):
+                candidate_jsons = [f for f in os.listdir(prov_dir) if f.endswith(".json")]
+                if candidate_jsons:
+                    cat_file = os.path.join(prov_dir, candidate_jsons[0])
+                else:
+                    continue
+
             try:
-                with open(fpath, "r", encoding="utf-8") as f:
+                with open(cat_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     if isinstance(data, list):
                         for m in data:
@@ -45,7 +57,23 @@ def load_catalog_from_providers() -> List[Dict[str, Any]]:
                                 seen_ids.add(m_id)
                                 all_models.append(m)
             except Exception as e:
-                logger.error(f"Failed to load provider catalog {fname}: {e}")
+                logger.error(f"Failed to load catalog for provider '{prov_name}': {e}")
+
+    # Fallback to legacy location if nothing was loaded
+    if not all_models and os.path.exists(_LEGACY_PROVIDERS_DIR):
+        for fname in os.listdir(_LEGACY_PROVIDERS_DIR):
+            if fname.endswith(".json"):
+                try:
+                    with open(os.path.join(_LEGACY_PROVIDERS_DIR, fname), "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                        if isinstance(data, list):
+                            for m in data:
+                                m_id = m.get("id")
+                                if m_id and m_id not in seen_ids:
+                                    seen_ids.add(m_id)
+                                    all_models.append(m)
+                except Exception as e:
+                    logger.error(f"Failed to load legacy provider catalog {fname}: {e}")
 
     return all_models
 

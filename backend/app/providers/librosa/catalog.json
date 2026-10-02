@@ -1,0 +1,28 @@
+[
+  {
+    "id": "librosa-engine",
+    "provider": "librosa",
+    "name": "Librosa Acoustic & Feature Analysis Engine",
+    "category": "Voice & Speech Studios",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 120,
+    "limit_tpm": 1000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.0,
+    "speed_rating": "Fast (<500ms)",
+    "capabilities": [
+      "audio_analysis",
+      "tempo_detection",
+      "beat_tracking",
+      "silence_detection"
+    ],
+    "recommended_for": [
+      "Silence Detection",
+      "Audio Energy Segmentation",
+      "Beat Grid Alignment"
+    ]
+  }
+]

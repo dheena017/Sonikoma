@@ -1,6 +1,8 @@
 """
-backend/app/engines/whisper/engine.py
-Whisper engine moved into package structure.
+backend/app/providers/whisper/engine.py
+─────────────────────────────────────────────────────────────────────────────
+Local Whisper Speech-to-Text inference engine with CUDA/CPU acceleration.
+─────────────────────────────────────────────────────────────────────────────
 """
 
 import os
@@ -8,50 +10,24 @@ import logging
 import asyncio
 import json
 from typing import Dict, Any, List, Optional, Union
-from dataclasses import dataclass
-from enum import Enum
-
 import importlib
 
-# Lazy loaded whisper to keep startup RAM under 120MB
-WHISPER_AVAILABLE = True
+from app.providers.whisper.types import (
+    WhisperModel,
+    TranscriptionSegment,
+    TranscriptionResult,
+)
 
+# Lazy loaded whisper to keep startup RAM under 120MB
 def _get_whisper_lib():
     try:
         return importlib.import_module("whisper")
     except ImportError:
         return None
 
-logger = logging.getLogger("sonikoma.services.whisper_engine")
+WHISPER_AVAILABLE = _get_whisper_lib() is not None
 
-
-class WhisperModel(str, Enum):
-    """Available Whisper model sizes."""
-    TINY = "tiny"
-    BASE = "base"
-    SMALL = "small"
-    MEDIUM = "medium"
-    LARGE = "large"
-
-
-@dataclass
-class TranscriptionSegment:
-    """Single transcription segment with timing."""
-    id: int
-    start_time: float
-    end_time: float
-    text: str
-    confidence: Optional[float] = None
-
-
-@dataclass
-class TranscriptionResult:
-    """Complete transcription result."""
-    text: str
-    language: str
-    segments: List[TranscriptionSegment]
-    duration: float
-    confidence: float  # Average confidence
+logger = logging.getLogger("sonikoma.providers.whisper.engine")
 
 
 class WhisperEngine:
@@ -63,10 +39,6 @@ class WhisperEngine:
         device: str = "cpu",
         language: Optional[str] = None
     ):
-        if not WHISPER_AVAILABLE:
-            raise RuntimeError(
-                "openai-whisper is not available. Install with: pip install openai-whisper"
-            )
         """
         Initialize Whisper engine.
 
@@ -75,6 +47,10 @@ class WhisperEngine:
             device: Device to use (cpu, cuda)
             language: ISO language code (e.g., 'en', 'fr'). None = auto-detect
         """
+        if not WHISPER_AVAILABLE:
+            raise RuntimeError(
+                "openai-whisper is not available. Install with: pip install openai-whisper"
+            )
         self.model_name = model_name or WhisperModel.BASE
         self.device = device
         self.language = language
@@ -165,8 +141,13 @@ class WhisperEngine:
         output_path: str,
         language: Optional[str] = None
     ) -> str:
-        from services.audio.transcription import generate_srt as _gen_srt
-        return await _gen_srt(self, audio_path, output_path, language=language)
+        from app.providers.whisper.helpers import segments_to_srt
+        result = await self.transcribe(audio_path, language=language)
+        content = segments_to_srt(result.segments)
+        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return output_path
 
     async def generate_vtt(
         self,
@@ -174,15 +155,20 @@ class WhisperEngine:
         output_path: str,
         language: Optional[str] = None
     ) -> str:
-        from services.audio.transcription import generate_vtt as _gen_vtt
-        return await _gen_vtt(self, audio_path, output_path, language=language)
+        from app.providers.whisper.helpers import segments_to_vtt
+        result = await self.transcribe(audio_path, language=language)
+        content = segments_to_vtt(result.segments)
+        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return output_path
 
     async def extract_words_with_timestamps(
         self,
         audio_path: str,
         language: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        from services.audio.transcription import extract_words_with_timestamps as _ext_words
+        from app.services.audio.transcription.speech_transcriber import extract_words_with_timestamps as _ext_words
         return await _ext_words(self, audio_path, language=language)
 
     async def generate_json_transcript(
@@ -192,7 +178,7 @@ class WhisperEngine:
         language: Optional[str] = None,
         include_words: bool = False
     ) -> str:
-        from services.audio.transcription import generate_json_transcript as _gen_json
+        from app.services.audio.transcription.speech_transcriber import generate_json_transcript as _gen_json
         return await _gen_json(self, audio_path, output_path, language=language, include_words=include_words)
 
     async def batch_transcribe(
@@ -200,7 +186,7 @@ class WhisperEngine:
         audio_paths: List[str],
         language: Optional[str] = None
     ) -> List[Optional[TranscriptionResult]]:
-        from services.audio.transcription import batch_transcribe as _batch_transcribe
+        from app.services.audio.transcription.speech_transcriber import batch_transcribe as _batch_transcribe
         return await _batch_transcribe(self, audio_paths, language=language)
 
 

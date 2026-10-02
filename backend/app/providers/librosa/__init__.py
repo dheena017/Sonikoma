@@ -1,5 +1,41 @@
-"""Librosa engine package."""
+"""
+backend/app/providers/librosa/__init__.py
+─────────────────────────────────────────────────────────────────────────────
+Librosa audio analysis engine, client, feature contracts, and helpers package.
+─────────────────────────────────────────────────────────────────────────────
+"""
 
-from .engine import get_librosa_engine, LIBROSA_AVAILABLE
+from app.providers.librosa.types import (
+    AudioFeatures,
+    SilenceSegment,
+    EnergySegment,
+)
+from app.providers.librosa.client import (
+    LibrosaClient,
+    LIBROSA_AVAILABLE,
+)
+from app.providers.librosa.engine import (
+    LibrosaEngine,
+    get_librosa_engine,
+)
+from app.providers.librosa.helpers import (
+    frames_to_time,
+    time_to_frames,
+    amplitude_to_db,
+)
 
-__all__ = ["get_librosa_engine", "LIBROSA_AVAILABLE"]
+__all__ = [
+    # Types
+    "AudioFeatures",
+    "SilenceSegment",
+    "EnergySegment",
+    # Client & Engine
+    "LibrosaClient",
+    "LibrosaEngine",
+    "get_librosa_engine",
+    "LIBROSA_AVAILABLE",
+    # Helpers
+    "frames_to_time",
+    "time_to_frames",
+    "amplitude_to_db",
+]

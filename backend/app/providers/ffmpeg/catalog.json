@@ -1,0 +1,28 @@
+[
+  {
+    "id": "ffmpeg-engine",
+    "provider": "ffmpeg",
+    "name": "FFmpeg Native Video Composition Engine",
+    "category": "Kinetic & Motion Synthesis",
+    "context_window": 512,
+    "max_output_tokens": 1,
+    "limit_rpm": 120,
+    "limit_tpm": 1000,
+    "limit_rpd": 10000,
+    "prompt_price_per_1m": 0.0,
+    "completion_price_per_1m": 0.0,
+    "price_per_image": 0.0,
+    "speed_rating": "Native OS (<1s)",
+    "capabilities": [
+      "video_rendering",
+      "subtitles",
+      "filtering",
+      "concatenation"
+    ],
+    "recommended_for": [
+      "Multi-Track Audio Mixing",
+      "SubRip Subtitle Burning",
+      "Transitions"
+    ]
+  }
+]

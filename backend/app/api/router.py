@@ -30,6 +30,7 @@ from api.v1.jobs import jobs_router
 from api.v1.export.router import export_router
 from api.v1.health import health_router
 from app.api.v1.series.router import ai_series_master_router
+from app.api.v1.providers import providers_router
 
 api_router = APIRouter()
 
@@ -42,6 +43,7 @@ api_router.include_router(panels_router,         prefix="/api/v1/panels", tags=[
 api_router.include_router(ocr_router,            prefix="/api/v1/ocr", tags=["05. OCR & Speech Extraction"])
 api_router.include_router(storyboard_router,     prefix="/api/v1/storyboard", tags=["06. Storyboard AI"])
 api_router.include_router(ai_router,             prefix="/api/v1/ai")
+api_router.include_router(providers_router,      prefix="/api/v1/providers", tags=["07. AI Providers & Models"])
 api_router.include_router(image_router,          prefix="/api/v1/images", tags=["08. Image Canvas & Editing"])
 api_router.include_router(audio_router,          prefix="/api/v1/audio", tags=["09. Audio Synthesis"])
 api_router.include_router(video_router,          prefix="/api/v1/video", tags=["10. Video Rendering Engine"])

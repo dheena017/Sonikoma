@@ -9,41 +9,11 @@ import os
 import re
 import logging
 from typing import Dict, Any, List, Optional
-import edge_tts
-from edge_tts.exceptions import NoAudioReceived
-
 from app.repositories.series import ai_series_repo
 from app.schemas.series import ChapterSession, CharacterDNA, InteractiveSpeechBubble
+from app.providers.edge_tts import EdgeTTSProvider, DEFAULT_VOICES, VOICE_LIST
 
 logger = logging.getLogger("sonikoma.services.series.audio")
-
-# Standard voice catalog matching character archetypes
-DEFAULT_VOICES = {
-    "protagonist_male": "en-US-ChristopherNeural",
-    "protagonist_female": "en-US-JennyNeural",
-    "antagonist_male": "en-US-TonyNeural",
-    "antagonist_female": "en-US-AriaNeural",
-    "mentor": "en-US-GuyNeural",
-    "anime_male": "ja-JP-KeitaNeural",
-    "anime_female": "ja-JP-NanamiNeural",
-    "manhwa_male": "ko-KR-InJoonNeural",
-    "manhwa_female": "ko-KR-SunHiNeural",
-}
-
-VOICE_LIST = [
-    {"id": "en-US-ChristopherNeural", "name": "Christopher (Heroic / Protagonist)", "gender": "male", "lang": "English (US)"},
-    {"id": "en-US-JennyNeural", "name": "Jenny (Expressive / Heroine)", "gender": "female", "lang": "English (US)"},
-    {"id": "en-US-GuyNeural", "name": "Guy (Calm / Mentor)", "gender": "male", "lang": "English (US)"},
-    {"id": "en-US-AriaNeural", "name": "Aria (Intense / Antagonist)", "gender": "female", "lang": "English (US)"},
-    {"id": "en-US-TonyNeural", "name": "Tony (Deep / Anti-Hero)", "gender": "male", "lang": "English (US)"},
-    {"id": "en-US-EricNeural", "name": "Eric (Youthful / Companion)", "gender": "male", "lang": "English (US)"},
-    {"id": "en-GB-SoniaNeural", "name": "Sonia (Refined / Royalty)", "gender": "female", "lang": "English (UK)"},
-    {"id": "en-GB-RyanNeural", "name": "Ryan (Noble / Knight)", "gender": "male", "lang": "English (UK)"},
-    {"id": "ja-JP-KeitaNeural", "name": "Keita (Authentic Japanese Anime Male)", "gender": "male", "lang": "Japanese"},
-    {"id": "ja-JP-NanamiNeural", "name": "Nanami (Authentic Japanese Anime Female)", "gender": "female", "lang": "Japanese"},
-    {"id": "ko-KR-InJoonNeural", "name": "InJoon (Korean Manhwa Male)", "gender": "male", "lang": "Korean"},
-    {"id": "ko-KR-SunHiNeural", "name": "SunHi (Korean Manhwa Female)", "gender": "female", "lang": "Korean"},
-]
 
 
 class SeriesAudioService:
@@ -133,8 +103,13 @@ class SeriesAudioService:
 
         logger.info(f"[AISeries Audio] Generating vocal line with '{voice}' for {speaker_name}: \"{clean_text[:40]}\"...")
         try:
-            communicate = edge_tts.Communicate(clean_text, voice, rate=rate, pitch=pitch)
-            await communicate.save(file_path)
+            await EdgeTTSProvider.synthesize(
+                clean_text,
+                voice=voice,
+                output_path=file_path,
+                rate=rate,
+                pitch=pitch,
+            )
             
             size_bytes = os.path.getsize(file_path) if os.path.exists(file_path) else 0
             duration = max(1.2, round(len(clean_text.split()) * 0.38, 2))
