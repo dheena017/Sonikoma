@@ -15,7 +15,7 @@ import {
   ChevronRight,
   Sliders,
 } from "lucide-react";
-import { GeneratedPanel } from "@/types";
+import { GeneratedPanel } from "@/shared/types";
 
 interface Chapter {
   title: string;

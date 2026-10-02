@@ -1,0 +1,1603 @@
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
+import {
+  Search,
+  Filter,
+  Grid,
+  List,
+  RotateCw,
+  Clock,
+  Sparkles,
+  Loader,
+  Loader2,
+  AlertCircle,
+  Zap,
+  Bookmark,
+  BookmarkCheck,
+  CheckCircle2,
+  Calendar,
+  Layers,
+  ArrowRight,
+  Image as ImageIcon,
+  Download,
+  BookOpen,
+  FolderOpen,
+  Star,
+  Film,
+  Volume2,
+  ChevronRight,
+  Eye,
+  SlidersHorizontal,
+  X,
+  Edit3,
+  Flame,
+  Globe,
+  Tag,
+  Plus,
+  ThumbsUp,
+} from "lucide-react";
+
+import { ChapterCard } from "./ChapterCard";
+import {
+  FavoritesManager,
+  FavoriteSeries,
+  FAVORITES_UPDATED_EVENT,
+} from "../utils/FavoritesManager";
+import { BatchThumbnailDownloader } from "./BatchThumbnailDownloader";
+import { ChapterReaderModal } from "./ChapterReaderModal";
+import { ChapterScraperEmptyState } from "./ChapterScraperEmptyState";
+import ScraperConnectionErrorCard from "./ScraperConnectionErrorCard";
+import type { NotificationType } from "@/features/platform/notifications";
+import { getSeriesEpisodes, separateComicUrl } from "@/features/platform/scraper/api/scraper";
+import type { Chapter } from "../types/ChapterTypes";
+import { makeSafeFilename } from "@/shared/utils/downloadNaming";
+import { getProxiedImageUrl, getSourceName } from "@/shared/utils/imageProxy";
+import { ChapterScraperSkeleton } from "@/features/platform/scraper/components/ChapterScraperSkeleton";
+import RouteLoadingFallback from "@/shared/ui/feedback/RouteLoadingFallback";
+
+// ── Likes Count Cleaner & Formatter ───────────────────────────────────────────
+function formatLikesCount(raw: string | number | undefined): string | null {
+  if (!raw) return null;
+  const str = String(raw).trim();
+  const cleaned = str.replace(/^likes?[\s:.-]*/i, "").replace(/[\s:.-]*likes?$/i, "").trim();
+  const numericVal = parseFloat(cleaned.replace(/,/g, ""));
+  if (!isNaN(numericVal) && numericVal > 0) {
+    if (numericVal >= 1_000_000) return `${(numericVal / 1_000_000).toFixed(1)}M`;
+    if (numericVal >= 10_000) return `${(numericVal / 1000).toFixed(1)}K`;
+    return numericVal.toLocaleString();
+  }
+  return cleaned || str;
+}
+
+// ── Series URL Validator ──────────────────────────────────────────────────────
+// Accepts full series listing / catalog URLs. Rejects plain-text, homepages,
+// single-episode viewer URLs, and incomplete links.
+function validateSeriesUrl(raw: string): { valid: boolean; error?: string } {
+  const trimmed = raw.trim();
+  if (!trimmed) return { valid: false, error: "Please enter a comic series URL." };
+
+  // Accept pure numeric title_no (Webtoons Series ID)
+  if (/^\d+$/.test(trimmed)) return { valid: true };
+
+  let parsed: URL;
+  try {
+    const formatted =
+      trimmed.startsWith("http://") || trimmed.startsWith("https://")
+        ? trimmed
+        : `https://${trimmed}`;
+    parsed = new URL(formatted);
+  } catch {
+    return { valid: false, error: "Not a valid URL. Paste a full comic series link (e.g. https://www.webtoons.com/en/.../list?title_no=...)." };
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+  if (!hostname.includes(".") || hostname.length < 4) {
+    return { valid: false, error: "Please enter a valid website URL." };
+  }
+
+  const segments = parsed.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+
+  // Reject bare homepage / root (no path segments)
+  if (segments.length === 0) {
+    return { valid: false, error: `Incomplete URL for ${hostname}. Please paste a direct series listing URL.` };
+  }
+
+  // ── Webtoons: accept /list?title_no=... (with optional &page=N)
+  if (hostname.includes("webtoons.com") || hostname.includes("webtoon.com")) {
+    const isViewer = segments.some((s) => s.toLowerCase() === "viewer");
+    const isList = segments.some((s) => s.toLowerCase() === "list");
+    const hasTitleNo = Boolean(parsed.searchParams.get("title_no"));
+
+    if (isViewer) {
+      return {
+        valid: false,
+        error: "This is an episode viewer URL. The Chapter Scraper needs the series list URL (e.g. .../list?title_no=958).",
+      };
+    }
+    if (!isList || !hasTitleNo) {
+      return {
+        valid: false,
+        error: "Please paste a Webtoons series list URL: https://www.webtoons.com/en/{genre}/{series}/list?title_no=...",
+      };
+    }
+    return { valid: true };
+  }
+
+  // ── MangaDex: /title/{uuid} is the series page
+  if (hostname.includes("mangadex.org")) {
+    const isChapter = segments.some((s) => s.toLowerCase() === "chapter");
+    const isTitle = segments.some((s) => s.toLowerCase() === "title");
+    if (isChapter) {
+      return { valid: false, error: "This is a MangaDex chapter reader. Paste the series /title/ URL instead." };
+    }
+    if (!isTitle) {
+      return { valid: false, error: "Please paste a MangaDex series URL: https://mangadex.org/title/{uuid}." };
+    }
+    return { valid: true };
+  }
+
+  // ── Bato.to: /series/ or /title/ is the series page
+  const batoDomains = ["bato.to", "mangatoto.com", "battwo.com", "batotoo.com", "batocomic.com"];
+  if (batoDomains.some((d) => hostname.includes(d))) {
+    const isChapter = segments.some((s) => s.toLowerCase() === "chapter");
+    if (isChapter) {
+      return { valid: false, error: "This is a Bato.to chapter URL. Paste the series listing URL instead." };
+    }
+    return { valid: true };
+  }
+
+  // ── Generic: reject if only 1 segment (bare domain + one path = still a homepage)
+  if (segments.length <= 1) {
+    return {
+      valid: false,
+      error: `Too short — looks like a homepage. Paste the full series catalog URL for ${hostname}.`,
+    };
+  }
+
+  // Accept anything else that looks like a real multi-segment URL
+  return { valid: true };
+}
+
+interface SeriesMetadata {
+  seriesSlug?: string;
+  title: string;
+  author: string;
+  genre: string;
+  platform?: string;
+  cover_image: string;
+  description: string;
+  url?: string;
+}
+
+interface ChapterScraperProps {
+  onChapterSelect?: (chapter: Chapter) => void | Promise<void>;
+  onEpisodeSelect?: (chapter: Chapter) => void | Promise<void>; // alias for backwards compatibility
+  onMultipleChaptersSelect?: (chapters: Chapter[]) => void | Promise<void>;
+  onMultipleEpisodesSelect?: (chapters: Chapter[]) => void | Promise<void>; // alias
+  addNotification: (message: string, type: NotificationType) => void;
+  fetchWithInterceptor: typeof fetch;
+  isStandalone?: boolean;
+  initialSeriesName?: string;
+  scrapeImages?: (url: string, projectId: string) => Promise<boolean>;
+}
+
+const parseLikes = (likesStr?: string): number => {
+  if (!likesStr) return 0;
+  const clean = likesStr.replace(/,/g, "").trim().toUpperCase();
+  const numPart = parseFloat(clean);
+  if (isNaN(numPart)) return 0;
+  if (clean.endsWith("K")) return numPart * 1000;
+  if (clean.endsWith("M")) return numPart * 1000000;
+  if (clean.endsWith("B")) return numPart * 1000000000;
+  return numPart;
+};
+
+const parseWebtoonDate = (dateStr: string): Date | null => {
+  if (!dateStr) return null;
+  const parsed = Date.parse(dateStr);
+  if (!isNaN(parsed)) {
+    return new Date(parsed);
+  }
+  return null;
+};
+
+const createTempProjectId = (_slug?: string) => {
+  return `temp_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+};
+
+export const ChapterScraper: React.FC<ChapterScraperProps> = ({
+  onChapterSelect,
+  onEpisodeSelect,
+  onMultipleChaptersSelect,
+  onMultipleEpisodesSelect,
+  addNotification,
+  fetchWithInterceptor,
+  isStandalone = false,
+  initialSeriesName,
+  scrapeImages,
+}) => {
+  const handleSelectCallback = onChapterSelect || onEpisodeSelect;
+  const handleMultipleCallback =
+    onMultipleChaptersSelect || onMultipleEpisodesSelect;
+
+  // Single Chapter Direct Import Status
+  const [importingChapterUrl, setImportingChapterUrl] = useState<string | null>(
+    null
+  );
+
+  // Form Inputs
+  const [urlInput, setUrlInput] = useState("");
+  const [titleNoInput, setTitleNoInput] = useState("");
+  const [isUrlBarOpen, setIsUrlBarOpen] = useState(false);
+
+  // Scraped Data State
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [filteredChapters, setFilteredChapters] = useState<Chapter[]>([]);
+  const [seriesMetadata, setSeriesMetadata] = useState<SeriesMetadata | null>(
+    null
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const scrapeInFlightRef = useRef(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Pagination
+  const PAGE_SIZE = 25;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Active View & Filters
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [sortBy, setSortBy] = useState<
+    "latest" | "oldest" | "rating" | "likes"
+  >("latest");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [readStatusFilter, setReadStatusFilter] = useState<
+    "all" | "unread" | "read"
+  >("all");
+  const [bookmarksOnly, setBookmarksOnly] = useState(false);
+  const [minRating, setMinRating] = useState<number>(0);
+  const [minLikes, setMinLikes] = useState<number>(0);
+  const [maxChapters, setMaxChapters] = useState<number | null>(null);
+
+  // Multi-select & Batch Actions
+  const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
+  const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+  const [isDownloadingZip, setIsDownloadingZip] = useState(false);
+
+  // Favorites & Read History
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [bookmarkedUrls, setBookmarkedUrls] = useState<string[]>([]);
+  const [readUrls, setReadUrls] = useState<string[]>([]);
+
+  // Modals & Lightboxes
+  const [previewChapter, setPreviewChapter] = useState<Chapter | null>(null);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  // Suggestions
+  const [suggestions, setSuggestions] = useState<FavoriteSeries[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsContainerRef = useRef<HTMLDivElement>(null);
+
+  // Aggregated series metrics
+  const totalPanels = useMemo(() => {
+    return chapters.length * 8; // Estimate average 8 panels per chapter
+  }, [chapters]);
+
+  const estimatedRuntimeMinutes = useMemo(() => {
+    return Math.max(1, Math.round((totalPanels * 4) / 60));
+  }, [totalPanels]);
+
+  const readChaptersCount = useMemo(() => {
+    return chapters.filter((c) => readUrls.includes(c.url)).length;
+  }, [chapters, readUrls]);
+
+  const unreadChaptersCount = useMemo(() => {
+    return chapters.length - readChaptersCount;
+  }, [chapters, readChaptersCount]);
+
+  const avgRating = useMemo(() => {
+    const rated = chapters.filter(
+      (c) => c.rating !== undefined && c.rating !== null && c.rating > 0
+    );
+    if (rated.length === 0) return "9.6";
+    const sum = rated.reduce((acc, c) => acc + (c.rating || 0), 0);
+    return (sum / rated.length).toFixed(1);
+  }, [chapters]);
+
+  const isErrorSeries = useMemo(() => {
+    if (error) return true;
+    if (!seriesMetadata) return false;
+    const title = (seriesMetadata.title || "").toLowerCase();
+    return (
+      title.includes("connect error") ||
+      title.includes("error ::") ||
+      title.includes("404 not found") ||
+      title.includes("page not found") ||
+      title.includes("access denied") ||
+      (chapters.length === 0 && !isLoading)
+    );
+  }, [error, seriesMetadata, chapters.length, isLoading]);
+
+  // Load suggestions from FavoritesManager
+  useEffect(() => {
+    const refreshSuggestions = () => {
+      try {
+        const recents = FavoritesManager.getRecent();
+        const favorites = FavoritesManager.getFavorites();
+        const merged = [...recents, ...favorites];
+        const uniqueMap = new Map();
+        merged.forEach((item) => {
+          if (item.url) uniqueMap.set(item.url, item);
+        });
+        setSuggestions(Array.from(uniqueMap.values()).slice(0, 8));
+      } catch (e) {
+        console.warn("Failed to load autocomplete suggestions:", e);
+      }
+    };
+
+    refreshSuggestions();
+    window.addEventListener(FAVORITES_UPDATED_EVENT, refreshSuggestions);
+    window.addEventListener("storage", refreshSuggestions);
+
+    return () => {
+      window.removeEventListener(FAVORITES_UPDATED_EVENT, refreshSuggestions);
+      window.removeEventListener("storage", refreshSuggestions);
+    };
+  }, []);
+
+  useEffect(() => {
+    setBookmarkedUrls(FavoritesManager.getBookmarks());
+    setReadUrls(FavoritesManager.getReadChapters());
+
+    // Clean up any stale localStorage items
+    try {
+      localStorage.removeItem("chapter_scraper_url");
+      localStorage.removeItem("episode_scraper_url");
+    } catch {}
+
+    // Clean up leftover slug from URL pathname (e.g. /scraper/not-so-silent -> /scraper)
+    const currentPath = window.location.pathname;
+    if (
+      currentPath.startsWith("/scraper/") &&
+      !currentPath.startsWith("/scraper/editor") &&
+      !currentPath.startsWith("/scraper/audio-settings")
+    ) {
+      window.history.replaceState(null, "", "/chapter-scraper");
+    }
+
+    // Only auto-scrape if a VALID URL is explicitly provided in query params (?url=...) or initialSeriesName prop
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryUrl =
+      searchParams.get("url") ||
+      searchParams.get("target") ||
+      initialSeriesName;
+    if (queryUrl && validateSeriesUrl(queryUrl).valid) {
+      setUrlInput(queryUrl);
+      const queryTitle =
+        searchParams.get("title") || searchParams.get("series");
+      if (queryTitle) {
+        setSeriesMetadata({
+          title: queryTitle.replace(/\s*\|\s*.*$/, "").trim() || queryTitle,
+          author: "",
+          genre: "",
+          cover_image: "",
+          description: "",
+          url: queryUrl,
+        });
+      }
+      triggerScrape(queryUrl, undefined, false);
+    }
+  }, []);
+
+  const scrapeChaptersAPI = async (data: {
+    url?: string;
+    title_no?: string;
+    max_episodes?: number | null;
+    sort_by?: string;
+    bypass_cache?: boolean;
+  }) => {
+    const body: any = { ...data, auto_paginate: true };
+    if (body.max_episodes === null) {
+      delete body.max_episodes;
+    }
+    return await getSeriesEpisodes(fetchWithInterceptor, body);
+  };
+
+  // Filter & sort chapters logic
+  useEffect(() => {
+    let result = [...chapters];
+
+    if (sortBy === "oldest") {
+      result = result.reverse();
+    } else if (sortBy === "rating") {
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortBy === "likes") {
+      result.sort((a, b) => parseLikes(b.likes) - parseLikes(a.likes));
+    }
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (ch) =>
+          ch.title.toLowerCase().includes(q) ||
+          ch.number.toLowerCase().includes(q)
+      );
+    }
+
+    if (minRating > 0) {
+      result = result.filter((ch) => (ch.rating || 0) >= minRating);
+    }
+
+    if (minLikes > 0) {
+      result = result.filter((ch) => parseLikes(ch.likes) >= minLikes);
+    }
+
+    if (readStatusFilter === "read") {
+      result = result.filter((ch) => readUrls.includes(ch.url));
+    } else if (readStatusFilter === "unread") {
+      result = result.filter((ch) => !readUrls.includes(ch.url));
+    }
+
+    if (bookmarksOnly) {
+      result = result.filter((ch) => bookmarkedUrls.includes(ch.url));
+    }
+
+    setFilteredChapters(result);
+    setCurrentPage(1); // reset to page 1 whenever filters/sort change
+  }, [
+    chapters,
+    sortBy,
+    searchQuery,
+    minRating,
+    minLikes,
+    readStatusFilter,
+    bookmarksOnly,
+    readUrls,
+    bookmarkedUrls,
+  ]);
+
+  const triggerScrape = async (
+    url?: string,
+    titleNo?: string,
+    bypassCache = true
+  ) => {
+    if (scrapeInFlightRef.current) return;
+
+    const activeUrl = url !== undefined ? url : urlInput;
+    const activeTitleNo = titleNo !== undefined ? titleNo : titleNoInput;
+
+    if (!activeUrl && !activeTitleNo) {
+      setError("Please enter a Comic, Manga, or Manhwa series URL.");
+      addNotification("Please enter a series URL", "error");
+      return;
+    }
+
+    // Validate the URL before firing any network request
+    if (activeUrl && activeUrl.trim() && !activeTitleNo) {
+      const check = validateSeriesUrl(activeUrl.trim());
+      if (!check.valid) {
+        setError(check.error || "Please enter a valid series URL.");
+        addNotification(check.error || "Invalid series URL", "error");
+        return;
+      }
+    }
+
+    scrapeInFlightRef.current = true;
+    setIsLoading(true);
+    setError(null);
+
+    let targetSeriesUrl = activeUrl;
+    let targetTitleNo = activeTitleNo;
+
+    if (activeUrl && activeUrl.trim()) {
+      try {
+        const sep = await separateComicUrl(
+          fetchWithInterceptor,
+          activeUrl.trim()
+        );
+        if (sep && sep.success) {
+          if (sep.series_url) {
+            targetSeriesUrl = sep.series_url;
+          }
+          if (sep.title_no && !targetTitleNo) {
+            targetTitleNo = sep.title_no;
+            setTitleNoInput(sep.title_no);
+          }
+        }
+      } catch (e) {
+        console.debug("[ChapterScraper] URL separation note:", e);
+      }
+    }
+
+    if (targetSeriesUrl) {
+      try {
+        const u = new URL(targetSeriesUrl);
+        if (u.searchParams.has("page")) {
+          u.searchParams.delete("page");
+          targetSeriesUrl = u.toString();
+        }
+      } catch {}
+    }
+
+    try {
+      const result = await scrapeChaptersAPI({
+        url: targetSeriesUrl || undefined,
+        title_no: targetTitleNo || undefined,
+        max_episodes: maxChapters,
+        sort_by: sortBy,
+        bypass_cache: bypassCache,
+      });
+
+      if (result.success) {
+        const rawChapters = result.chapters || [];
+        const fallbackCover =
+          result.cover_image || result.series?.cover_image || "";
+        const normalizedChapters = rawChapters.map((ch: any, i: number) => ({
+          ...ch,
+          cover_image: ch.cover_image || fallbackCover,
+          chapter_number: ch.chapter_number ?? ch.number ?? i + 1,
+          number: String(ch.chapter_number ?? ch.number ?? i + 1),
+          title: ch.title || `Chapter ${ch.chapter_number ?? i + 1}`,
+          url: ch.url,
+          index: ch.index ?? i,
+        }));
+
+        setChapters(normalizedChapters);
+        const seriesData = result.series || result;
+        const resolvedTitle =
+          seriesData.title || result.title || "Comic Series";
+
+        setSeriesMetadata({
+          title: resolvedTitle,
+          author: seriesData.author || "",
+          genre: seriesData.genre || "General",
+          platform: seriesData.platform || "comic",
+          cover_image: seriesData.cover_image || fallbackCover,
+          description: seriesData.description || "",
+          url: seriesData.url || targetSeriesUrl || activeUrl,
+        });
+
+        // Add to recents
+        if (result.title_no || activeUrl) {
+          FavoritesManager.addRecent({
+            title_no: result.title_no || "comic",
+            title: resolvedTitle,
+            genre: seriesData.genre || "General",
+            cover_image: seriesData.cover_image || fallbackCover,
+            timestamp: Date.now(),
+            url: activeUrl || result.url || targetSeriesUrl,
+          });
+
+          setIsFavorite(
+            FavoritesManager.isFavorite(result.title_no || resolvedTitle)
+          );
+        }
+
+        const totalFound = result.total_chapters ?? normalizedChapters.length;
+        const cacheNote = result.from_cache ? " (from cache)" : " (fresh)";
+        addNotification(`Found ${totalFound} chapters!${cacheNote}`, "success");
+      } else {
+        const errorMsg = result.error || "Failed to scrape chapters";
+        setError(errorMsg);
+        addNotification(errorMsg, "error");
+      }
+    } catch (err: any) {
+      const errorMsg = err.message || "An error occurred while scraping";
+      setError(errorMsg);
+      addNotification(errorMsg, "error");
+    } finally {
+      setIsLoading(false);
+      scrapeInFlightRef.current = false;
+    }
+  };
+
+  const handleChapterClick = async (chapter: Chapter) => {
+    if (importingChapterUrl) return;
+
+    FavoritesManager.markAsRead(chapter.url);
+    setReadUrls(FavoritesManager.getReadChapters());
+
+    if (handleSelectCallback) {
+      try {
+        setImportingChapterUrl(chapter.url);
+        await Promise.resolve(handleSelectCallback(chapter));
+      } finally {
+        setImportingChapterUrl(null);
+      }
+      return;
+    }
+
+    const temporaryProjectId = createTempProjectId(
+      seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
+    );
+
+    if (typeof scrapeImages === "function") {
+      try {
+        setImportingChapterUrl(chapter.url);
+        const ok = await scrapeImages(chapter.url, temporaryProjectId);
+        if (ok) {
+          localStorage.removeItem("auto_import_url");
+          const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+
+          const nav = (window as any).navigateTo;
+          if (typeof nav === "function") {
+            nav(targetPath);
+          } else {
+            window.history.pushState({}, "", targetPath);
+            window.dispatchEvent(new Event("popstate"));
+          }
+        }
+      } catch (err) {
+        console.error("Direct chapter scrape error:", err);
+      } finally {
+        setImportingChapterUrl(null);
+      }
+      return;
+    }
+
+    localStorage.setItem("auto_import_url", chapter.url);
+
+    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+
+    const nav = (window as any).navigateTo;
+    if (typeof nav === "function") {
+      nav(targetPath);
+    } else {
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
+  const handleFavoriteToggle = () => {
+    if (!seriesMetadata) return;
+    const key = titleNoInput || seriesMetadata.title;
+    if (isFavorite) {
+      FavoritesManager.removeFavorite(key);
+      setIsFavorite(false);
+      addNotification(`Removed from favorites`, "info");
+    } else {
+      FavoritesManager.addFavorite({
+        title_no: titleNoInput || "comic",
+        title: seriesMetadata.title,
+        genre: seriesMetadata.genre,
+        cover_image: seriesMetadata.cover_image,
+        timestamp: Date.now(),
+        url: urlInput || seriesMetadata.url || "",
+      });
+      setIsFavorite(true);
+      addNotification(
+        `Added "${seriesMetadata.title}" to favorites`,
+        "success"
+      );
+    }
+  };
+
+  const handleBookmarkToggle = (url: string) => {
+    const isBookmarked = FavoritesManager.isBookmarked(url);
+    if (isBookmarked) {
+      FavoritesManager.removeBookmark(url);
+      addNotification("Removed bookmark", "info");
+    } else {
+      FavoritesManager.addBookmark(url);
+      addNotification("Chapter bookmarked", "success");
+    }
+    setBookmarkedUrls(FavoritesManager.getBookmarks());
+  };
+
+  const handleToggleSelect = (url: string) => {
+    setSelectedUrls((prev) =>
+      prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]
+    );
+  };
+
+  const selectAllChapters = () => {
+    if (selectedUrls.length === filteredChapters.length) {
+      setSelectedUrls([]);
+    } else {
+      setSelectedUrls(filteredChapters.map((c) => c.url));
+    }
+  };
+
+  const handleBatchScrape = () => {
+    if (selectedUrls.length === 0) return;
+    const selected = chapters.filter((c) => selectedUrls.includes(c.url));
+    if (handleMultipleCallback) {
+      handleMultipleCallback(selected);
+      return;
+    }
+
+    const temporaryProjectId = createTempProjectId(
+      seriesMetadata?.seriesSlug || seriesMetadata?.title || titleNoInput
+    );
+    localStorage.setItem("auto_import_batch", JSON.stringify(selected));
+    localStorage.setItem("auto_import_url", selected[0]?.url || "");
+
+    const targetPath = `/scraper/editor?id=${temporaryProjectId}`;
+
+    const nav = (window as any).navigateTo;
+    if (typeof nav === "function") {
+      nav(targetPath);
+    } else {
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
+  const handleExportJSON = () => {
+    if (chapters.length === 0) return;
+    const jsonContent = JSON.stringify(
+      {
+        series: seriesMetadata,
+        chapters: chapters,
+      },
+      null,
+      2
+    );
+    const blob = new Blob([jsonContent], {
+      type: "application/json;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const safeSeries = makeSafeFilename(seriesMetadata?.title, "Comic_Series");
+    link.download = `${safeSeries}_full_metadata.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    addNotification("Exported series metadata JSON", "success");
+  };
+
+  return (
+    <div className="w-full flex-1 flex flex-col text-neutral-100 animate-fade-in relative z-10 py-2 max-w-7xl mx-auto selection:bg-[#2A2A2A] space-y-8">
+      {/* ── TOP PERSISTENT NAV: New Chapter button (when series is loaded) ── */}
+      {seriesMetadata && (
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => {
+              const nav = (window as any).navigateTo;
+              if (typeof nav === "function") {
+                nav("/scraper");
+              } else {
+                window.history.pushState({}, "", "/scraper");
+                window.dispatchEvent(new Event("popstate"));
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-900/80 border border-neutral-700/60 hover:border-neutral-700 text-neutral-300 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer group active:scale-95 backdrop-blur-sm"
+          >
+            <Plus className="w-3.5 h-3.5 text-[#3B82F6] group-hover:rotate-90 transition-transform duration-200" />
+            New Chapter
+          </button>
+        </div>
+      )}
+
+      {/* ── COLLAPSIBLE SEARCH & URL INPUT TOOLBAR (WHEN NO SERIES OR TOGGLED) ── */}
+      {(isUrlBarOpen || !seriesMetadata) && (
+        <form
+          aria-label="Chapter scraper input"
+          onSubmit={(e) => {
+            e.preventDefault();
+            triggerScrape();
+          }}
+          className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3 p-4 sm:p-5 bg-neutral-900/80 border border-[#3B82F6]/20 rounded-3xl backdrop-blur-xl shadow-2xl animate-in fade-in duration-200"
+        >
+          <div className="relative">
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"
+              size={17}
+            />
+            <input
+              type="text"
+              value={urlInput}
+              onChange={(e) => setUrlInput(e.target.value)}
+              placeholder="Paste a series URL or Webtoons list URL (e.g. .../list?title_no=958)"
+              className={`w-full rounded-2xl border ${
+                urlInput.trim() && !validateSeriesUrl(urlInput).valid
+                  ? "border-amber-500/50 focus:border-amber-500"
+                  : urlInput.trim() && validateSeriesUrl(urlInput).valid
+                  ? "border-emerald-500/40 focus:border-emerald-500/60"
+                  : "border-neutral-800 focus:border-neutral-600"
+              } bg-neutral-955/90 py-3 pl-10 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-700 font-mono transition-all`}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={
+              isLoading ||
+              !urlInput.trim() ||
+              !validateSeriesUrl(urlInput).valid
+            }
+            className="flex items-center justify-center gap-2 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] px-6 py-3 text-sm font-extrabold text-white transition-all shadow-lg shadow-black/50 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer active:scale-95 border border-[#60A5FA]/30 whitespace-nowrap"
+          >
+            {isLoading ? (
+              <Loader className="h-4 w-4 animate-spin" />
+            ) : (
+              <Zap className="h-4 w-4 text-amber-300" />
+            )}
+            <span>{isLoading ? "Crawling..." : "Fetch Chapters"}</span>
+          </button>
+        </form>
+      )}
+
+      {/* Error Alert */}
+      {error && (
+        <div className="p-4 bg-red-950/30 border border-red-500/40 rounded-2xl flex items-center gap-3 text-red-300 text-sm animate-in shake duration-300">
+          <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-400" />
+          <p className="font-mono text-xs flex-1">{error}</p>
+          {urlInput && (
+            <button
+              type="button"
+              onClick={() => {
+                setError(null);
+                triggerScrape(
+                  urlInput || undefined,
+                  undefined,
+                  true
+                );
+              }}
+              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-800/60 hover:bg-red-700/60 border border-red-500/40 text-red-200 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer"
+            >
+              <RotateCw className="w-3 h-3" />
+              Retry
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── SKELETON LOADING STATE (shown while fetching series/chapter data from backend) ── */}
+      {isLoading && <ChapterScraperSkeleton />}
+
+      {/* ── ERROR STATE: Scraper Connection Error Card ── */}
+      {!isLoading && isErrorSeries && (
+        <ScraperConnectionErrorCard
+          errorMessage={
+            error ||
+            (seriesMetadata?.title?.toLowerCase().includes("connect error")
+              ? "The source server returned a connection error. The requested series could not be found or was blocked."
+              : "Unable to retrieve chapters for this series URL.")
+          }
+          targetUrl={urlInput || titleNoInput || initialSeriesName}
+          onRetry={(newUrl) => {
+            setError(null);
+            setSeriesMetadata(null);
+            setChapters([]);
+            if (newUrl) setUrlInput(newUrl);
+            triggerScrape(
+              newUrl || urlInput || undefined,
+              titleNoInput || undefined,
+              true
+            );
+          }}
+        />
+      )}
+
+      {/* ── 1. AMBIENT GLASSMORPHIC HERO BANNER (MATCHING SERIES DETAILS PAGE) ── */}
+      {!isLoading && !isErrorSeries && seriesMetadata && (
+        <div className="relative rounded-3xl overflow-hidden border border-transparent bg-neutral-900/80 backdrop-blur-2xl shadow-2xl p-6 md:p-8">
+          {/* Cover Background Blur Glow */}
+          {seriesMetadata.cover_image && (
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-25 blur-3xl scale-125 pointer-events-none"
+              style={{
+                backgroundImage: `url(${getProxiedImageUrl(
+                  seriesMetadata.cover_image,
+                  seriesMetadata.url
+                )})`,
+              }}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/90 to-transparent pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
+            {/* Cover Poster */}
+            <div className="w-48 h-64 md:w-56 md:h-76 shrink-0 rounded-2xl overflow-hidden border border-transparent bg-neutral-950 shadow-2xl relative group">
+              {seriesMetadata.cover_image ? (
+                <img
+                  src={getProxiedImageUrl(
+                    seriesMetadata.cover_image,
+                    seriesMetadata.url
+                  )}
+                  alt={seriesMetadata.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#2A2A2A] via-neutral-900 to-neutral-955">
+                  <FolderOpen className="w-12 h-12 text-[#3B82F6]/50" />
+                  <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.2em]">
+                    No Cover
+                  </span>
+                </div>
+              )}
+              <div className="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-transparent text-[9px] font-extrabold font-mono text-[#60A5FA] uppercase tracking-wider">
+                {seriesMetadata.platform
+                  ? seriesMetadata.platform.toUpperCase()
+                  : "WEBTOON"}
+              </div>
+            </div>
+
+            {/* Series Meta Info & Actions */}
+            <div className="flex flex-col gap-4 flex-1 min-w-0">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 text-[#3B82F6] text-xs font-bold font-mono">
+                    {seriesMetadata.genre || "Comic"}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-neutral-800 border border-transparent text-neutral-300 text-xs font-mono">
+                    By {seriesMetadata.author || "Unknown Author"}
+                  </span>
+                </div>
+
+                <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white line-clamp-2 font-sans">
+                  {seriesMetadata.title}
+                </h1>
+
+                {seriesMetadata.description && (
+                  <p className="text-neutral-300 text-sm md:text-base leading-relaxed max-w-3xl line-clamp-3 font-sans opacity-90">
+                    {seriesMetadata.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Metadata Chips Row */}
+              <div className="flex flex-wrap gap-3 items-center pt-2">
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-transparent px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                  <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  <span>{chapters.length} Chapters</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-transparent px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{totalPanels} Sliced Panels</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-neutral-955/80 border border-transparent px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono text-neutral-200">
+                  <Clock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>~{estimatedRuntimeMinutes} Min Video</span>
+                </div>
+
+                <div className="flex items-center gap-2 text-neutral-400 text-xs font-mono ml-auto">
+                  <span>Updated: {new Date().toLocaleDateString("en-GB")}</span>
+                </div>
+              </div>
+
+              {/* Hero Quick Action Buttons */}
+              <div className="flex flex-wrap gap-3 pt-3 border-t border-neutral-850/50">
+                <button
+                  type="button"
+                  onClick={() => triggerScrape(undefined, undefined, true)}
+                  className="flex items-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white px-5 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Fetch New Chapters</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportJSON}
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                >
+                  <Film className="h-4 w-4 text-[#3B82F6]" />
+                  <span>Export Full Series</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (chapters.length > 0) {
+                      setPreviewChapter(chapters[0]);
+                    }
+                  }}
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                >
+                  <BookOpen className="h-4 w-4 text-emerald-400" />
+                  <span>Read Series</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nav = (window as any).navigateTo;
+                    if (typeof nav === "function")
+                      nav("/creative-suite/ai-voice");
+                  }}
+                  className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
+                >
+                  <Volume2 className="h-4 w-4 text-amber-400" />
+                  <span>Audio Studio</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 2. DEEP SERIES ANALYTICS DASHBOARD (4 GLASS CARDS) ── */}
+      {seriesMetadata && chapters.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-transparent flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-[#3B82F6]/10 text-[#3B82F6] border border-[#3B82F6]/20 shrink-0">
+              <Layers className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-white font-sans">
+                {chapters.length}
+              </div>
+              <div className="text-xs text-neutral-400 font-mono">
+                Total Chapters ({readChaptersCount} Ready ·{" "}
+                {unreadChaptersCount} Draft)
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-transparent flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shrink-0">
+              <Zap className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-white font-sans">
+                {totalPanels}
+              </div>
+              <div className="text-xs text-neutral-400 font-mono">
+                Comic Panels Extracted
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-transparent flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+              <Clock className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-2xl font-black text-white font-sans">
+                ~{estimatedRuntimeMinutes}m
+              </div>
+              <div className="text-xs text-neutral-400 font-mono">
+                Estimated Reel Duration
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 rounded-2xl bg-neutral-900/70 border border-transparent flex items-center gap-4 shadow-lg">
+            <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-transparent shrink-0">
+              <CheckCircle2 className="w-6 h-6" />
+            </div>
+            <div className="w-full">
+              <div className="flex justify-between items-center text-xs font-mono text-neutral-300 mb-1">
+                <span>Health Score</span>
+                <span className="font-bold text-indigo-400">100%</span>
+              </div>
+              <div className="w-full bg-neutral-800 rounded-full h-1.5 overflow-hidden">
+                <div className="bg-gradient-to-r from-indigo-500 to-blue-500 h-full w-full rounded-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 3. CHAPTERS SECTION HEADER & FILTER CONTROLS ── */}
+      {chapters.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-black text-white tracking-tight">
+                Chapters
+              </h2>
+              <span className="px-3 py-1 rounded-full bg-[#0e2238] border border-[#1d4ed8]/35 text-[#38bdf8] text-xs font-bold font-mono">
+                {filteredChapters.length} of {chapters.length}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Search Chapter */}
+              <div className="relative min-w-[220px]">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+                  size={14}
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search chapter..."
+                  className="w-full rounded-xl border border-[#1e2332] bg-[#0c0e14] hover:border-neutral-600 py-2 pl-9 pr-3 text-xs text-white placeholder:text-neutral-500 focus:border-[#2563eb] focus:outline-none font-mono shadow-inner transition-colors"
+                />
+              </div>
+
+              {/* Status Filter Tabs */}
+              <div className="flex items-center bg-[#0c0e14] border border-[#1e2332] rounded-xl p-1 text-xs font-mono shadow-inner gap-1">
+                <button
+                  type="button"
+                  onClick={() => setReadStatusFilter("all")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    readStatusFilter === "all"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  ALL
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReadStatusFilter("unread")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    readStatusFilter === "unread"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  DRAFT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReadStatusFilter("read")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                    readStatusFilter === "read"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  READY
+                </button>
+              </div>
+
+              {/* Sort Order Dropdown */}
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-3.5 py-2 bg-[#0c0e14] border border-[#1e2332] hover:border-neutral-600 text-neutral-200 hover:text-white rounded-xl text-xs font-mono font-bold focus:outline-none focus:border-[#2563eb] cursor-pointer appearance-none pr-8 shadow-inner transition-colors"
+                >
+                  <option value="latest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="rating">Top Rated</option>
+                  <option value="likes">Most Likes</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-neutral-400">
+                  <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                </div>
+              </div>
+
+              {/* View Mode Toggle */}
+              <div className="flex items-center bg-[#0c0e14] border border-[#1e2332] rounded-xl p-1 gap-1 shadow-inner">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("grid")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewMode === "grid"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                  }`}
+                  title="Grid View"
+                >
+                  <Grid size={14} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewMode === "list"
+                      ? "bg-[#2563eb] text-white shadow-md shadow-blue-600/30"
+                      : "text-neutral-400 hover:text-white hover:bg-white/5"
+                  }`}
+                  title="List View"
+                >
+                  <List size={14} />
+                </button>
+              </div>
+
+              {/* Multi-Select Toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMultiSelectMode(!isMultiSelectMode);
+                  setSelectedUrls([]);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold border transition-all cursor-pointer shadow-inner ${
+                  isMultiSelectMode
+                    ? "bg-[#2563eb] border-blue-400 text-white shadow-md shadow-blue-600/30"
+                    : "bg-[#0c0e14] border-[#1e2332] hover:border-neutral-600 text-neutral-300 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <SlidersHorizontal size={13} />
+                <span>Multi-Select</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Multi-Select Floating Action Bar */}
+          {isMultiSelectMode && (
+            <div className="p-4 bg-[#0c0e14] border border-[#2563eb]/40 rounded-2xl flex flex-wrap gap-4 items-center justify-between animate-in slide-in-from-bottom-2 duration-300 shadow-xl backdrop-blur-xl">
+              <div className="flex items-center gap-3 text-xs font-mono">
+                <button
+                  type="button"
+                  onClick={selectAllChapters}
+                  className="text-[#38bdf8] hover:text-white font-bold underline cursor-pointer"
+                >
+                  {selectedUrls.length === filteredChapters.length
+                    ? "Deselect All"
+                    : "Select All"}
+                </button>
+                <span className="text-neutral-400">
+                  Selected{" "}
+                  <strong className="text-white">{selectedUrls.length}</strong>{" "}
+                  of {filteredChapters.length} chapters
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={selectedUrls.length === 0}
+                  onClick={handleBatchScrape}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#2563eb] hover:bg-[#1d4ed8] disabled:opacity-50 text-white rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-blue-600/30"
+                >
+                  <Zap size={13} />
+                  <span>Import Batch ({selectedUrls.length})</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── 4. CHAPTERS GRID / TABLE VIEW ── */}
+          {(() => {
+            const totalPages = Math.max(1, Math.ceil(filteredChapters.length / PAGE_SIZE));
+            const safePage = Math.min(currentPage, totalPages);
+            const pagedChapters = filteredChapters.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+            const pageNumbers: number[] = [];
+            const delta = 2;
+            for (let i = Math.max(1, safePage - delta); i <= Math.min(totalPages, safePage + delta); i++) pageNumbers.push(i);
+            return (
+              <>
+          {viewMode === "grid" ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+              {pagedChapters.map((chapter) => (
+                <ChapterCard
+                  key={chapter.url}
+                  chapter={chapter}
+                  onClick={handleChapterClick}
+                  onPreviewClick={(ch) => setPreviewChapter(ch)}
+                  onBookmark={handleBookmarkToggle}
+                  isBookmarked={bookmarkedUrls.includes(chapter.url)}
+                  isRead={readUrls.includes(chapter.url)}
+                  isMultiSelectMode={isMultiSelectMode}
+                  isSelected={selectedUrls.includes(chapter.url)}
+                  onToggleSelect={handleToggleSelect}
+                />
+              ))}
+            </div>
+          ) : (
+            /* ── 5. CHAPTERS PAGE / TABLE VIEW ── */
+            <div className="rounded-2xl overflow-hidden border border-[#181a24] bg-[#090b10] shadow-2xl">
+              {/* Table header */}
+              <div className="grid grid-cols-[4.5rem_5.5rem_1fr_8.5rem_8rem_16rem] items-center px-4 py-3.5 bg-[#0e1017] border-b border-[#181a24] sticky top-0 z-10 text-[11px] font-mono font-bold tracking-widest text-neutral-400 uppercase select-none">
+                <span className="text-center">{isMultiSelectMode ? "Select" : "#"}</span>
+                <span className="text-center">Cover</span>
+                <span className="pl-3">Chapter Title</span>
+                <span className="text-center">Release Date</span>
+                <span className="text-center">Popularity</span>
+                <span className="text-right pr-3">Actions</span>
+              </div>
+
+              {/* Rows */}
+              <div className="divide-y divide-[#141620]">
+                {pagedChapters.map((chapter, idx) => {
+                  const rawNum = (chapter.number || "").trim();
+                  const cleanNum = rawNum.replace(/^(?:episode|ep|chapter|ch)[\s._-]*/i, "").trim() || String(idx + 1);
+                  const rawTitle = (chapter.title || "")
+                    .replace(/^(?:episode|ep|chapter|ch)[\s._-]*\d+\s*[-:\u2013\u2014]?\s*/i, "")
+                    .replace(/^[-:\u2013\u2014\s]+|[-:\u2013\u2014\s]+$/g, "")
+                    .trim();
+                  const titleIsSameAsNum = !rawTitle ||
+                    rawTitle.toLowerCase() === cleanNum.toLowerCase() ||
+                    rawTitle.toLowerCase() === `chapter ${cleanNum}`.toLowerCase();
+                  const isChapterRead = readUrls.includes(chapter.url);
+                  const isChapterBookmarked = bookmarkedUrls.includes(chapter.url);
+                  const isChapterSelected = selectedUrls.includes(chapter.url);
+                  const displayTitle = !titleIsSameAsNum && rawTitle ? rawTitle : `Chapter ${cleanNum}`;
+                  const formattedLikes = formatLikesCount(chapter.likes);
+
+                  return (
+                    <div
+                      key={chapter.url}
+                      onClick={() => !importingChapterUrl && handleChapterClick(chapter)}
+                      className={`grid grid-cols-[4.5rem_5.5rem_1fr_8.5rem_8rem_16rem] items-center px-4 py-3 cursor-pointer transition-colors duration-150 group relative border-b border-[#141620] last:border-b-0 ${
+                        importingChapterUrl === chapter.url
+                          ? "bg-[#2563eb]/20 border-l-2 border-l-[#2563eb]"
+                          : isChapterSelected
+                          ? "bg-[#2563eb]/10 border-l-2 border-l-[#2563eb]"
+                          : "bg-[#090b10] hover:bg-[#0f121b]"
+                      }`}
+                    >
+                      {/* Multiselect / Episode Badge */}
+                      {isMultiSelectMode ? (
+                        <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="checkbox"
+                            checked={isChapterSelected}
+                            onChange={() => handleToggleSelect(chapter.url)}
+                            className="w-4 h-4 rounded accent-[#2563eb] cursor-pointer"
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <span className={`px-2.5 py-1 rounded-lg border font-mono text-[11px] font-bold transition-colors ${
+                            isChapterRead
+                              ? "bg-[#10121a] border-neutral-800 text-neutral-500"
+                              : "bg-[#13151f] border-[#1e2230] text-neutral-300 group-hover:border-[#2563eb]/50 group-hover:text-white"
+                          }`}>
+                            #{cleanNum.padStart(2, "0")}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Thumbnail Preview */}
+                      <div className="flex items-center justify-center">
+                        <div className="w-14 h-10 rounded-lg overflow-hidden bg-[#13151f] border border-[#1e2230] group-hover:border-[#2563eb]/50 shadow-sm transition-all duration-200 group-hover:scale-105 shrink-0 relative">
+                          <img
+                            src={getProxiedImageUrl(chapter.cover_image || seriesMetadata?.cover_image, chapter.url)}
+                            alt=""
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Title & Status */}
+                      <div className="pl-3 min-w-0 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm font-bold truncate transition-colors ${
+                            isChapterRead
+                              ? "text-neutral-500"
+                              : "text-white group-hover:text-[#60A5FA]"
+                          }`}>
+                            {displayTitle}
+                          </p>
+                          {isChapterBookmarked && (
+                            <BookmarkCheck size={13} className="text-amber-400 fill-current shrink-0" />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] font-mono">
+                          {isChapterRead ? (
+                            <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold uppercase">
+                              ✓ Read
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-md bg-[#0e2238] text-[#38bdf8] border border-[#1d4ed8]/35 font-semibold">
+                              Available
+                            </span>
+                          )}
+                          <span className="text-neutral-600">•</span>
+                          <span className="text-neutral-400 text-[11px]">Webtoon Strip</span>
+                        </div>
+                      </div>
+
+                      {/* Date */}
+                      <div className="flex items-center justify-center gap-1.5 text-xs font-mono text-neutral-400">
+                        <Calendar size={12} className="text-neutral-500 shrink-0" />
+                        <span>{chapter.date || "—"}</span>
+                      </div>
+
+                      {/* Rating / Popularity */}
+                      <div className="flex items-center justify-center">
+                        {chapter.rating ? (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-mono font-bold">
+                            <Star size={11} className="fill-amber-400 text-amber-400 shrink-0" />
+                            <span>{Number(chapter.rating).toFixed(1)}</span>
+                          </div>
+                        ) : formattedLikes ? (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2b1016] border border-[#be123c]/25 text-[#fb7185] text-xs font-mono font-semibold">
+                            <ThumbsUp size={11} className="text-[#fb7185] shrink-0" />
+                            <span>{formattedLikes}</span>
+                          </div>
+                        ) : (
+                          <span className="text-neutral-600 text-xs font-mono">—</span>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center justify-end gap-1.5 pr-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewChapter(chapter);
+                          }}
+                          className="p-2 rounded-xl bg-[#13151f] hover:bg-[#1c1f2e] text-neutral-400 hover:text-white border border-[#1e2230] transition-all cursor-pointer"
+                          title="Preview in Reader"
+                        >
+                          <Eye size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBookmarkToggle(chapter.url);
+                          }}
+                          className="p-2 rounded-xl bg-[#13151f] hover:bg-[#1c1f2e] text-neutral-400 hover:text-amber-400 border border-[#1e2230] transition-all cursor-pointer"
+                          title={isChapterBookmarked ? "Remove Bookmark" : "Bookmark Chapter"}
+                        >
+                          <Bookmark size={13} className={isChapterBookmarked ? "text-amber-400 fill-current" : ""} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={importingChapterUrl === chapter.url || Boolean(importingChapterUrl)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleChapterClick(chapter);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-mono font-bold text-xs transition-all shadow-md shadow-blue-600/30 cursor-pointer active:scale-95 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                          title="Import Chapter Images"
+                        >
+                          {importingChapterUrl === chapter.url ? (
+                            <>
+                              <Loader2 size={12} className="animate-spin text-white shrink-0" />
+                              <span>Extracting…</span>
+                            </>
+                          ) : (
+                            <>
+                              <ImageIcon size={12} className="shrink-0" />
+                              <span>Import Chapter Images</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── PAGINATION BAR ── */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 px-1">
+              <span className="text-[11px] text-neutral-600 font-mono">
+                {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredChapters.length)} of {filteredChapters.length} chapters
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono border border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  ‹ Prev
+                </button>
+                {safePage > 3 && (
+                  <>
+                    <button onClick={() => setCurrentPage(1)} className="px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A] transition-all cursor-pointer">1</button>
+                    {safePage > 4 && <span className="text-neutral-700 px-1 text-xs">…</span>}
+                  </>
+                )}
+                {pageNumbers.map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setCurrentPage(p)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono border transition-all cursor-pointer ${
+                      p === safePage
+                        ? "bg-[#3B82F6] border-[#3B82F6] text-white shadow-md shadow-blue-900/30"
+                        : "border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A]"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+                {safePage < totalPages - 2 && (
+                  <>
+                    {safePage < totalPages - 3 && <span className="text-neutral-700 px-1 text-xs">…</span>}
+                    <button onClick={() => setCurrentPage(totalPages)} className="px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A] transition-all cursor-pointer">{totalPages}</button>
+                  </>
+                )}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold font-mono border border-[#2A2A36] bg-[#111116] text-neutral-400 hover:text-white hover:bg-[#1E1E2A] disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+                >
+                  Next ›
+                </button>
+              </div>
+            </div>
+          )}
+              </>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* ── EMPTY / ONBOARDING STATE (WHEN NO SERIES LOADED) ── */}
+      {!seriesMetadata && chapters.length === 0 && !isLoading && (
+        <div className="p-12 text-center bg-neutral-900/40 border border-transparent rounded-3xl backdrop-blur-xl space-y-6 shadow-2xl">
+          <div className="w-16 h-16 rounded-3xl bg-[#3B82F6]/10 border border-[#3B82F6]/25 flex items-center justify-center mx-auto text-[#3B82F6] shadow-xl shadow-black/50">
+            <Zap className="h-8 w-8 text-[#3B82F6]" />
+          </div>
+
+          <div className="max-w-md mx-auto space-y-2">
+            <h3 className="text-xl font-bold text-white font-sans">
+              Ready to Scrape Comic Chapters
+            </h3>
+            <p className="text-xs text-neutral-400 leading-relaxed font-mono">
+              Paste any comic or manga series URL in the input bar above to
+              automatically fetch chapters, panel images, and ratings.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left max-w-3xl mx-auto pt-4">
+            <div className="bg-neutral-955 border border-transparent rounded-2xl p-4 space-y-2">
+              <div className="flex items-center gap-2 text-[#3B82F6] font-bold text-xs font-mono">
+                <span className="w-5 h-5 rounded-full bg-[#3B82F6]/20 flex items-center justify-center text-[10px]">
+                  1
+                </span>
+                Paste Comic URL
+              </div>
+              <p className="text-[11px] text-neutral-500 font-mono">
+                Copy the URL from any supported comic site (Webtoons, Toonily,
+                FlameComics, etc.).
+              </p>
+            </div>
+
+            <div className="bg-neutral-955 border border-transparent rounded-2xl p-4 space-y-2">
+              <div className="flex items-center gap-2 text-[#3B82F6] font-bold text-xs font-mono">
+                <span className="w-5 h-5 rounded-full bg-[#3B82F6]/20 flex items-center justify-center text-[10px]">
+                  2
+                </span>
+                Preview &amp; Filter
+              </div>
+              <p className="text-[11px] text-neutral-500 font-mono">
+                Filter chapters by rating, date, or read panels full screen in
+                reader mode.
+              </p>
+            </div>
+
+            <div className="bg-neutral-955 border border-transparent rounded-2xl p-4 space-y-2">
+              <div className="flex items-center gap-2 text-[#3B82F6] font-bold text-xs font-mono">
+                <span className="w-5 h-5 rounded-full bg-[#3B82F6]/20 flex items-center justify-center text-[10px]">
+                  3
+                </span>
+                Import to Editor
+              </div>
+              <p className="text-[11px] text-neutral-500 font-mono">
+                Directly import chapter panels into the timeline video
+                workspace.
+              </p>
+            </div>
+          </div>
+
+          {/* New Chapter CTA button */}
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                const nav = (window as any).navigateTo;
+                if (typeof nav === "function") {
+                  nav("/scraper");
+                } else {
+                  window.history.pushState({}, "", "/scraper");
+                  window.dispatchEvent(new Event("popstate"));
+                }
+              }}
+              className="flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-[#3B82F6] hover:bg-[#2563EB] text-white font-extrabold text-sm shadow-lg shadow-black/50 transition-all hover:-translate-y-0.5 cursor-pointer active:scale-95 border border-[#60A5FA]/30"
+            >
+              <Plus className="w-4 h-4" />
+              Go to Scraper
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── QUICK PREVIEW LIGHTBOX READER MODAL ── */}
+      {previewChapter &&
+        createPortal(
+          <ChapterReaderModal
+            chapter={previewChapter}
+            onClose={() => setPreviewChapter(null)}
+            onImport={(ch) => {
+              setPreviewChapter(null);
+              handleChapterClick(ch);
+            }}
+            fetchWithInterceptor={fetchWithInterceptor}
+          />,
+          document.body
+        )}
+    </div>
+  );
+};
+
+export const EpisodeScraper = ChapterScraper;

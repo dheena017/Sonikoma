@@ -345,7 +345,7 @@ export default defineConfig(({ mode, command }) => {
           // Forward to in-app system-logs so it appears in the UI terminal
           if (backendTarget) {
             const logMsg = `[Vite HMR] 📝 File changed: ${relativePath} → pushing live update…`;
-            fetch(`${backendTarget}/api/v1/system/system-logs/log`, {
+            fetch(`${backendTarget}/api/v1/system/logs`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ message: logMsg, level: "info" }),

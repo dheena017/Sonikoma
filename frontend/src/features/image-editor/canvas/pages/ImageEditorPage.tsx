@@ -1,0 +1,635 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { useCropEditorStore } from "@/features/image-editor/canvas/hooks/useImageEditorState";
+import { useImageEditor } from "@/features/image-editor/canvas/hooks/useImageEditor";
+import { useAppLogic } from "@/features/platform/scraper/hooks/useChapterIngestion";
+import { ImageEditorHeader } from "@/features/image-editor/canvas/components/ImageEditorHeader";
+import ImageEditorCanvasContainer from "@/features/image-editor/canvas/components/ImageEditorCanvasContainer";
+import ImageEditorToolsPanel from "@/features/image-editor/canvas/components/ImageEditorToolsPanel";
+import ImageEditorSidebar from "@/features/image-editor/canvas/components/ImageEditorSidebar";
+import { ImageEditorLayout } from "@/features/image-editor/canvas/components/ImageEditorLayout";
+import { ImageEditorEmptyState } from "@/features/image-editor/canvas/components/ImageEditorEmptyState";
+import { GeneratedPanel } from "@/shared/types";
+import { ChevronLeft, ChevronRight, Sliders, Wrench, Save } from "lucide-react";
+
+interface ImageEditorPageProps {
+  appLogic: ReturnType<typeof useAppLogic>;
+  themeMode?: "dark" | "light";
+  toggleThemeMode?: () => void;
+  isSidebarOpen?: boolean;
+  setIsSidebarOpen?: (val: boolean) => void;
+  navigateTo?: (path: string) => void;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+}
+
+const ImageEditorPage = React.memo(
+  ({
+    appLogic,
+    themeMode,
+    toggleThemeMode,
+    isSidebarOpen,
+    setIsSidebarOpen,
+    navigateTo,
+    seriesSlug,
+    chapterSlug,
+  }: ImageEditorPageProps) => {
+    const { editingImageIdx, setEditingImageIdx } = appLogic;
+    const { activeTool, setActiveTool } = useCropEditorStore();
+    const [isToolsPanelOpen, setIsToolsPanelOpen] = useState(true);
+
+    const [localSidebarOpen, setLocalSidebarOpen] = useState(false);
+    const sidebarOpen =
+      isSidebarOpen !== undefined ? isSidebarOpen : localSidebarOpen;
+    const handleToggleSidebar = () => {
+      if (setIsSidebarOpen) {
+        setIsSidebarOpen(!isSidebarOpen);
+      } else {
+        setLocalSidebarOpen((prev) => !prev);
+      }
+    };
+
+    // Lock body scrolling when sidebar drawer overlay is open
+    useEffect(() => {
+      if (sidebarOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }, [sidebarOpen]);
+
+    // Auto-select the first image if the user opens the editor but hasn't picked one yet
+    useEffect(() => {
+      if (editingImageIdx === null && appLogic.scrapedImages?.length > 0) {
+        setEditingImageIdx(0);
+      }
+    }, [editingImageIdx, appLogic.scrapedImages, setEditingImageIdx]);
+
+    // Fallback sync: If scrapedImages is empty but panels exist, populate scrapedImages from panels
+    useEffect(() => {
+      if (
+        (!appLogic.scrapedImages || appLogic.scrapedImages.length === 0) &&
+        appLogic.panels &&
+        appLogic.panels.length > 0
+      ) {
+        const extracted = appLogic.panels
+          .map((p: any) => p.image_url || p.original_image_url)
+          .filter(Boolean);
+        if (extracted.length > 0) {
+          appLogic.setScrapedImages(extracted);
+          if (editingImageIdx === null) {
+            setEditingImageIdx(0);
+          }
+        }
+      }
+    }, [
+      appLogic.scrapedImages,
+      appLogic.panels,
+      appLogic.setScrapedImages,
+      editingImageIdx,
+      setEditingImageIdx,
+    ]);
+
+    // Load the editor logic
+    const editorProps = useImageEditor({ appLogic });
+
+    // Keyboard Arrow navigation for Previous / Next Image
+    useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        const target = e.target as HTMLElement;
+        if (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable
+        ) {
+          return;
+        }
+
+        if (e.key === "ArrowLeft") {
+          editorProps.handlePrevImage();
+        } else if (e.key === "ArrowRight") {
+          editorProps.handleNextImage();
+        }
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [editorProps]);
+
+    const activeStoryboardPanel = useMemo(() => {
+      if (editingImageIdx === null) return null;
+      return (
+        appLogic.panels?.find(
+          (p: any) => p.image_url === appLogic.scrapedImages[editingImageIdx]
+        ) || null
+      );
+    }, [appLogic.panels, appLogic.scrapedImages, editingImageIdx]);
+
+    // Memoize the Heavy Canvas to prevent lag
+    const canvasSubtree = useMemo(() => {
+      if (editingImageIdx === null) return null;
+      return (
+        <ImageEditorCanvasContainer
+          key={editorProps.imageUrl || undefined}
+          activeStoryboardPanel={
+            activeStoryboardPanel as unknown as GeneratedPanel
+          }
+          handleAiCrop={editorProps.handleAiCrop}
+          isAiDetecting={editorProps.isAiDetecting}
+          editingImageIdx={editingImageIdx}
+          scrapedImages={appLogic.scrapedImages}
+          setPanels={appLogic.setPanels}
+          containerRef={editorProps.containerRef}
+          editCropTop={appLogic.editCropTop}
+          editCropBottom={appLogic.editCropBottom}
+          editCropLeft={appLogic.editCropLeft}
+          editCropRight={appLogic.editCropRight}
+          slices={editorProps.slices}
+          selectedSliceId={editorProps.selectedSliceId}
+          showSplitPosition={editorProps.showSplitPosition}
+          splitPosition={editorProps.splitPosition}
+          splitLines={editorProps.splitLines}
+          handleStart={editorProps.handleStart}
+          handleMove={editorProps.handleMove}
+          handleEnd={editorProps.handleEnd}
+          isPointInsideSelection={editorProps.isPointInsideSelection}
+          handleSelectSlice={editorProps.handleSelectSlice}
+          handleDeleteSlice={editorProps.handleDeleteSlice}
+          handleRemoveSplitLine={editorProps.handleRemoveSplitLine}
+          dragType={editorProps.dragType}
+          onResizeStart={editorProps.onResizeStart}
+          handleSelectAndDragSlice={editorProps.handleSelectAndDragSlice}
+          zoom={editorProps.zoom}
+          editMode={editorProps.editMode}
+          detectedBubbles={editorProps.detectedBubbles}
+          selectedBubbleIdx={editorProps.selectedBubbleIdx}
+          setSelectedBubbleIdx={editorProps.setSelectedBubbleIdx}
+          brushSize={editorProps.brushSize}
+          brushAction={editorProps.brushAction}
+          canvasMaskRef={editorProps.canvasMaskRef}
+          setSplitPosition={editorProps.setSplitPosition}
+          setShowSplitPosition={editorProps.setShowSplitPosition}
+          setEditCropTop={appLogic.setEditCropTop}
+          setEditCropBottom={appLogic.setEditCropBottom}
+          setEditCropLeft={appLogic.setEditCropLeft}
+          setSelectedSliceId={editorProps.setSelectedSliceId}
+          activeTab={editorProps.activeTab}
+          aspectRatio={appLogic.aspectRatio}
+          fillColor={editorProps.fillColor}
+          textBgColor="#ffffff"
+          handleUndo={editorProps.handleUndo}
+          historyLength={editorProps.history.length}
+          handleRedo={editorProps.handleRedo}
+          redoHistoryLength={editorProps.redoHistory.length}
+          handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
+          isPipMode={false}
+          setIsPipMode={() => {}}
+          isToolsPanelOpen={isToolsPanelOpen}
+          setIsToolsPanelOpen={setIsToolsPanelOpen}
+          setEditCropRight={appLogic.setEditCropRight}
+          handleExecuteSave={editorProps.handleExecuteSave}
+          navigateTo={navigateTo}
+          seriesSlug={seriesSlug}
+          chapterSlug={chapterSlug}
+          setEditingImageIdx={appLogic.setEditingImageIdx}
+          isSavingEdit={appLogic.isSavingEdit}
+        />
+      );
+    }, [
+      editorProps.imageUrl,
+      editingImageIdx,
+      editorProps.activeTab,
+      appLogic.scrapedImages,
+      editorProps.slices,
+      editorProps.selectedSliceId,
+      editorProps.showSplitPosition,
+      editorProps.splitPosition,
+      editorProps.splitLines,
+      editorProps.zoom,
+      editorProps.editMode,
+      editorProps.detectedBubbles,
+      editorProps.selectedBubbleIdx,
+      editorProps.brushSize,
+      editorProps.brushAction,
+      editorProps.fillColor,
+      appLogic.aspectRatio,
+      appLogic.editCropTop,
+      appLogic.editCropBottom,
+      appLogic.editCropLeft,
+      appLogic.editCropRight,
+      editorProps.handleExecuteSave,
+      navigateTo,
+      seriesSlug,
+      chapterSlug,
+      appLogic.setEditingImageIdx,
+      appLogic.isSavingEdit,
+    ]);
+
+    // Empty State if no images exist in the project yet
+    if (!appLogic.scrapedImages || appLogic.scrapedImages.length === 0) {
+      return (
+        <ImageEditorEmptyState
+          onImagesUploaded={(urls) => {
+            appLogic.setScrapedImages(urls);
+            setEditingImageIdx(0);
+          }}
+          onLoadSample={(dataUrl) => {
+            appLogic.setScrapedImages([dataUrl]);
+            setEditingImageIdx(0);
+          }}
+          navigateTo={navigateTo}
+        />
+      );
+    }
+
+    // Render standard inline layout (No Modal/Fixed overlays!)
+    return (
+      <ImageEditorLayout
+        onToggleSidebar={handleToggleSidebar}
+        navigateTo={navigateTo}
+        projectId={
+          new URLSearchParams(window.location.search).get("id") || null
+        }
+        seriesSlug={seriesSlug}
+        chapterSlug={chapterSlug}
+        scrapedCount={appLogic.scrapedImages?.length || 0}
+        panelsCount={appLogic.panels?.length || 0}
+        header={
+          <ImageEditorHeader
+            editingImageIdx={editingImageIdx ?? 0}
+            scrapedImages={appLogic.scrapedImages}
+            handlePrevImage={editorProps.handlePrevImage}
+            handleNextImage={editorProps.handleNextImage}
+            handleUndo={editorProps.handleUndo}
+            historyLength={editorProps.history.length}
+            handleRedo={editorProps.handleRedo}
+            redoHistoryLength={editorProps.redoHistory.length}
+            handleDeleteCurrentImage={editorProps.handleDeleteCurrentImage}
+            setEditingImageIdx={setEditingImageIdx}
+            activeTab={activeTool}
+            isPipMode={false}
+            setIsPipMode={() => {}}
+            slices={editorProps.slices}
+            isToolsPanelOpen={isToolsPanelOpen}
+            setIsToolsPanelOpen={setIsToolsPanelOpen}
+            handleExecuteSave={editorProps.handleExecuteSave}
+            user={appLogic.user}
+            notifications={appLogic.notifications}
+            markNotificationAsRead={appLogic.markNotificationAsRead}
+            markAllNotificationsAsRead={appLogic.markAllNotificationsAsRead}
+            deleteNotification={appLogic.deleteNotification}
+            clearAllNotifications={appLogic.clearAllNotifications}
+            notificationsMuted={appLogic.notificationsMuted}
+            setNotificationsMuted={appLogic.setNotificationsMuted}
+            themeMode={themeMode}
+            toggleThemeMode={toggleThemeMode}
+            onToggleSidebar={handleToggleSidebar}
+            isSidebarOpen={sidebarOpen}
+            navigateTo={navigateTo}
+            seriesSlug={seriesSlug}
+            chapterSlug={chapterSlug}
+          />
+        }
+      >
+        {/* Full Expanded Navigation Sidebar Drawer Overlay */}
+        <ImageEditorSidebar
+          isCollapsed={!sidebarOpen}
+          setIsCollapsed={() => handleToggleSidebar()}
+          activeTool={activeTool}
+          setActiveTool={setActiveTool}
+          scrapedCount={appLogic.scrapedImages?.length || 0}
+          panelsCount={appLogic.panels?.length || 0}
+          navigateTo={navigateTo}
+          projectId={
+            new URLSearchParams(window.location.search).get("id") || null
+          }
+          seriesSlug={seriesSlug}
+          chapterSlug={chapterSlug}
+        />
+
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden w-full relative">
+          {/* Left Tools Sidebar */}
+          <aside
+            className={`w-full lg:w-[min(420px,calc(100vw-80px))] bg-[#0a0b10] border-b lg:border-b-0 lg:border-r border-white/10 shrink-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] relative ${
+              isToolsPanelOpen
+                ? "flex-1 h-full w-full lg:h-full lg:flex-none lg:w-[min(420px,calc(100vw-80px))]"
+                : "hidden lg:flex h-0 lg:h-full lg:w-0 border-none pointer-events-none opacity-0"
+            }`}
+          >
+            <div
+              className={`w-full lg:w-[min(420px,calc(100vw-80px))] h-full flex flex-col min-h-0 overflow-hidden transition-opacity duration-200 ${
+                !isToolsPanelOpen
+                  ? "pointer-events-none opacity-0 invisible"
+                  : "opacity-100"
+              }`}
+            >
+              <ImageEditorToolsPanel
+                setActiveTab={setActiveTool}
+                slices={editorProps.slices}
+                setSlices={editorProps.setSlices}
+                editingImageIdx={editingImageIdx ?? 0}
+                scrapedImages={appLogic.scrapedImages}
+                isMerging={editorProps.isMerging}
+                handleMergeWithNext={editorProps.handleMergeWithNext}
+                editCropTop={appLogic.editCropTop}
+                editCropBottom={appLogic.editCropBottom}
+                editCropLeft={appLogic.editCropLeft}
+                editCropRight={appLogic.editCropRight}
+                setEditCropTop={appLogic.setEditCropTop}
+                setEditCropBottom={appLogic.setEditCropBottom}
+                setEditCropLeft={appLogic.setEditCropLeft}
+                setEditCropRight={appLogic.setEditCropRight}
+                zoom={editorProps.zoom}
+                setZoom={editorProps.setZoom}
+                isTransforming={editorProps.isTransforming}
+                handleTransform={(action, param) =>
+                  editorProps.handleTransform(
+                    action as "rotate" | "flip",
+                    param
+                  )
+                }
+                handleResetCropBounds={editorProps.handleResetCropBounds}
+                activeStoryboardPanel={
+                  appLogic.panels?.find(
+                    (p: any) =>
+                      p.image_url === appLogic.scrapedImages[editingImageIdx!]
+                  ) || null
+                }
+                handleModifyBrightness={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, brightness: val } : p
+                    )
+                  )
+                }
+                handleModifyContrast={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, contrast: val } : p
+                    )
+                  )
+                }
+                handleModifySaturation={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, saturation: val } : p
+                    )
+                  )
+                }
+                handleModifyFilterPreset={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, filter_preset: val } : p
+                    )
+                  )
+                }
+                handleModifyGrayscale={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, grayscale: val } : p
+                    )
+                  )
+                }
+                handleModifyDuration={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, duration: val } : p
+                    )
+                  )
+                }
+                handleModifyMotionType={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, motion_type: val } : p
+                    )
+                  )
+                }
+                handleModifySpeechText={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, speech_text: val } : p
+                    )
+                  )
+                }
+                handleModifyNarrative={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, narrative: val } : p
+                    )
+                  )
+                }
+                handleModifyVisualDescription={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, visual_description: val } : p
+                    )
+                  )
+                }
+                handleModifySfx={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) => (p.id === panelId ? { ...p, sfx: val } : p))
+                  )
+                }
+                handleModifyCropPadding={(panelId: any, val: any) =>
+                  appLogic.setPanels?.((prev: any[]) =>
+                    prev.map((p) =>
+                      p.id === panelId ? { ...p, crop_padding: val } : p
+                    )
+                  )
+                }
+                setScrapedImages={appLogic.setScrapedImages}
+                setPanels={appLogic.setPanels}
+                addNotification={appLogic.addNotification}
+                fetchWithInterceptor={appLogic.fetchWithInterceptor}
+                setConsoleLogs={appLogic.setConsoleLogs}
+                editMode={editorProps.editMode}
+                setEditMode={editorProps.setEditMode}
+                brushSize={editorProps.brushSize}
+                setBrushSize={editorProps.setBrushSize}
+                brushAction={editorProps.brushAction}
+                setBrushAction={editorProps.setBrushAction}
+                handleClearBrushMask={editorProps.handleClearBrushMask}
+                detectionStyle={editorProps.detectionStyle}
+                setDetectionStyle={editorProps.setDetectionStyle}
+                eraseMethod={editorProps.eraseMethod}
+                setEraseMethod={editorProps.setEraseMethod}
+                sensitivity={editorProps.sensitivity}
+                setSensitivity={editorProps.setSensitivity}
+                dilation={editorProps.dilation}
+                setDilation={editorProps.setDilation}
+                inpaintRadius={editorProps.inpaintRadius}
+                setInpaintRadius={editorProps.setInpaintRadius}
+                debugMode={editorProps.debugMode}
+                setDebugMode={editorProps.setDebugMode}
+                fillColor={editorProps.fillColor}
+                setFillColor={editorProps.setFillColor}
+                textBgColor="#ffffff"
+                setTextBgColor={() => {}}
+                ocrLang={editorProps.ocrLang}
+                setOcrLang={editorProps.setOcrLang}
+                gpu={editorProps.gpu}
+                setGpu={editorProps.setGpu}
+                morphKernelSize={editorProps.morphKernelSize}
+                setMorphKernelSize={editorProps.setMorphKernelSize}
+                morphShape={editorProps.morphShape}
+                setMorphShape={editorProps.setMorphShape}
+                useCustomColorTarget={editorProps.useCustomColorTarget}
+                setUseCustomColorTarget={editorProps.setUseCustomColorTarget}
+                customColorTarget={editorProps.customColorTarget}
+                setCustomColorTarget={editorProps.setCustomColorTarget}
+                customColorTolerance={editorProps.customColorTolerance}
+                setCustomColorTolerance={editorProps.setCustomColorTolerance}
+                splitPosition={editorProps.splitPosition}
+                setSplitPosition={editorProps.setSplitPosition}
+                splitLines={editorProps.splitLines}
+                setSplitLines={editorProps.setSplitLines}
+                showSplitPosition={editorProps.showSplitPosition}
+                setShowSplitPosition={editorProps.setShowSplitPosition}
+                setSelectedSliceId={editorProps.setSelectedSliceId}
+                handleAddSplitLine={editorProps.handleAddSplitLine}
+                handleRemoveSplitLine={editorProps.handleRemoveSplitLine}
+                handleExecuteHorizontalSplit={
+                  editorProps.handleExecuteHorizontalSplit
+                }
+                isSavingEdit={appLogic.isSavingEdit}
+                imageUrl={editorProps.imageUrl}
+                magneticSnap={editorProps.magneticSnap}
+                setMagneticSnap={editorProps.setMagneticSnap}
+                detectedGutters={editorProps.detectedGutters}
+                setDetectedGutters={editorProps.setDetectedGutters}
+                selectedSliceId={editorProps.selectedSliceId}
+                editAutoTrim={appLogic.editAutoTrim}
+                handlePushToSlices={editorProps.handlePushToSlices}
+                autoPushOnDraw={editorProps.autoPushOnDraw}
+                setAutoPushOnDraw={editorProps.setAutoPushOnDraw}
+                handleClearAllSlices={editorProps.handleClearAllSlices}
+                handleNudge={editorProps.handleNudge}
+                handleSelectSlice={editorProps.handleSelectSlice}
+                handleDeleteSlice={editorProps.handleDeleteSlice}
+                handleCropSingleSlice={editorProps.handleCropSingleSlice}
+                isCroppingSlice={editorProps.isCroppingSlice}
+                handleDetectPanels={editorProps.handleDetectPanels}
+                handleCancelDetect={editorProps.handleCancelDetect}
+                isDetecting={editorProps.isDetecting}
+                handleCommitDetectedBoxes={
+                  editorProps.handleCommitDetectedBoxes
+                }
+                detectedBoxes={editorProps.detectedBoxes}
+                handleClearDetectedBoxes={editorProps.handleClearDetectedBoxes}
+                handleExecuteSave={editorProps.handleExecuteSave}
+                activeTab={activeTool as any}
+              />
+            </div>
+
+            {/* Floating Sidebar Collapse/Expand Tab Button (Desktop Only) */}
+            <button
+              type="button"
+              onClick={() => setIsToolsPanelOpen((prev) => !prev)}
+              aria-label={
+                isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
+              }
+              className="hidden lg:flex absolute left-full -ml-[1px] top-1/2 -translate-y-1/2 z-50 w-6 sm:w-7 h-24 rounded-r-2xl bg-[#141524] hover:bg-[#1f2138] border-y border-r border-[#3B82F6]/40 hover:border-neutral-700 text-[#60A5FA] hover:text-white flex-col items-center justify-center gap-1 shadow-[6px_0_20px_rgba(59,130,246,0.35)] transition-all cursor-pointer group active:scale-95 select-none pointer-events-auto"
+              title={
+                isToolsPanelOpen ? "Collapse Tools Panel" : "Expand Tools Panel"
+              }
+            >
+              <div className="w-1 h-3 rounded-full bg-[#2A2A2A] group-hover:bg-[#2A2A2A] transition-colors" />
+              {isToolsPanelOpen ? (
+                <ChevronLeft className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-transform group-hover:-translate-x-0.5" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-transform group-hover:translate-x-0.5" />
+              )}
+              <div className="w-1 h-3 rounded-full bg-[#2A2A2A] group-hover:bg-[#2A2A2A] transition-colors" />
+            </button>
+          </aside>
+
+          {/* Center Canvas */}
+          <main
+            className={`flex-1 h-full min-h-0 relative overflow-hidden bg-black/30 backdrop-blur-sm flex items-center justify-center ${
+              isToolsPanelOpen ? "hidden lg:flex" : "flex"
+            }`}
+          >
+            <div
+              className="absolute inset-0 opacity-20 pointer-events-none"
+              style={{
+                backgroundImage: "radial-gradient(#3b82f6 1px, transparent 0)",
+                backgroundSize: "20px 20px",
+              }}
+            />
+            <div className="relative w-full h-full z-10 flex items-center justify-center p-2 sm:p-4">
+              {canvasSubtree}
+            </div>
+          </main>
+        </div>
+
+        {/* ── Mobile Viewport Bottom Navigation Bar (< 1024px) ────────── */}
+        <div className="flex lg:hidden items-center justify-around bg-[#0B0C0E] border-t border-white/10 pt-2 pb-4.5 px-3 shrink-0 z-40 select-none shadow-2xl backdrop-blur-xl">
+          <button
+            type="button"
+            onClick={() => setIsToolsPanelOpen(false)}
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] ${
+              !isToolsPanelOpen
+                ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Sliders className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">Canvas</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsToolsPanelOpen((prev) => !prev)}
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] ${
+              isToolsPanelOpen
+                ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+                : "text-neutral-400 hover:text-white"
+            }`}
+          >
+            <Wrench className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">Tools</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => editorProps.handlePrevImage()}
+            disabled={editingImageIdx === null || editingImageIdx <= 0}
+            className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] text-neutral-400 hover:text-white disabled:opacity-35 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">Prev</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => editorProps.handleNextImage()}
+            disabled={
+              editingImageIdx === null ||
+              editingImageIdx >= (appLogic.scrapedImages?.length || 1) - 1
+            }
+            className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] text-neutral-400 hover:text-white disabled:opacity-35 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">Next</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => editorProps.handleExecuteSave()}
+            disabled={appLogic.isSavingEdit}
+            className="flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[56px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 active:scale-95"
+          >
+            <Save className="w-4 h-4 shrink-0" />
+            <span className="leading-none mt-0.5">
+              {appLogic.isSavingEdit ? "Saving" : "Save"}
+            </span>
+          </button>
+        </div>
+      </ImageEditorLayout>
+    );
+  }
+);
+
+export default ImageEditorPage;

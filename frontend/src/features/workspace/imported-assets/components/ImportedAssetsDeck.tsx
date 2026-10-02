@@ -1,0 +1,1369 @@
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { normalizeLog } from "@/shared/types/logs";
+import { createPortal } from "react-dom";
+import {
+  Image as ImageIcon,
+  RefreshCw,
+  Download,
+  X,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  Rows,
+  Loader2,
+  Save,
+  PanelLeft,
+  PanelLeftClose,
+  CheckSquare,
+  Square,
+  Scissors,
+  Sparkles,
+  Link2,
+  Plus,
+} from "lucide-react";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+import * as api from "@/shared/api";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import { ImportedAssetsDeckProps } from "./types";
+import PanelCard from "./PanelCard";
+import ImportedAssetsDeckEmptyState from "./ImportedAssetsDeckEmptyState";
+import ImportedAssetsHeader from "./ImportedAssetsHeader";
+import ImportedAssetsSidebar from "./ImportedAssetsSidebar";
+import { AssetFilterStatus } from "./ImportedAssetsFilterBar";
+
+import { getSourceName, getProxiedImageUrl } from "@/shared/utils";
+import { updateSelection } from "@/shared/utils/selection";
+import { ChapterRatingDisplay } from "@/features/platform/scraper/chapter-scraper/components/ChapterRatingDisplay";
+const EpisodeRatingDisplay = ChapterRatingDisplay;
+import { ExtractionSkeletonCard } from "@/features/workspace/shell/components/ExtractionSkeletonCard";
+import { ImportImagesOverlay } from "@/features/workspace/imported-assets/components/ImportImagesOverlay";
+
+export function formatDisplayEpisodeLabel(label: string): string {
+  if (!label) return "Episode";
+  const trimmed = label.trim();
+  const duplicateMatch = trimmed.match(
+    /^(Episode\s*\d+|Chapter\s*\d+|Ep\.\s*\d+)\s*[-:]\s*\1(.*)$/i
+  );
+  if (duplicateMatch) {
+    const main = duplicateMatch[1];
+    const rest = duplicateMatch[2]?.replace(/^[-:\s]+/, "").trim();
+    return rest ? `${main}: ${rest}` : main;
+  }
+  const trailingTruncateMatch = trimmed.match(
+    /^(Episode\s*\d+|Chapter\s*\d+|Ep\.\s*\d+)\s*[-:]\s*E(?:\.\.\.|\s*)$/i
+  );
+  if (trailingTruncateMatch) {
+    return trailingTruncateMatch[1];
+  }
+  return trimmed;
+}
+
+export function getSortedEpisodeGroups<T extends { episodeLabel: string }>(
+  groups: T[]
+): Array<{ grp: T; originalIdx: number }> {
+  if (!groups || groups.length === 0) return [];
+  const mapped = groups.map((grp, originalIdx) => ({ grp, originalIdx }));
+
+  const parseNum = (label: string) => {
+    const match = label.match(/(?:Episode|Chapter|Ep\.?|Ch\.?)\s*(\d+)/i);
+    if (match) return parseInt(match[1], 10);
+    const num = label.match(/\d+/);
+    return num ? parseInt(num[0], 10) : 0;
+  };
+
+  return mapped.sort(
+    (a, b) => parseNum(a.grp.episodeLabel) - parseNum(b.grp.episodeLabel)
+  );
+}
+
+export const HorizontalScrollContainer: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className = "" }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // Mouse drag-to-scroll refs
+  const isMouseDownRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftStartRef = useRef(0);
+  const isDraggingRef = useRef(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 5);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 5);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          checkScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", checkScroll, { passive: true });
+
+    // Wheel event handler: allows normal page vertical scroll, and horizontal scroll on Shift+Scroll
+    const handleNativeWheel = (e: WheelEvent) => {
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+
+      // Trackpad native horizontal swipe - Let the browser handle it natively
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        return;
+      }
+
+      // Shift + wheel -> smoothly scroll horizontal container
+      if (e.shiftKey) {
+        if (e.deltaY !== 0 || e.deltaX !== 0) {
+          e.preventDefault();
+          el.scrollLeft += (e.deltaY || e.deltaX) * 1.2;
+        }
+        return;
+      }
+    };
+
+    el.addEventListener("wheel", handleNativeWheel, { passive: false });
+
+    // Mouse drag movement listeners
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isMouseDownRef.current || !scrollRef.current) return;
+      const dx = e.pageX - startXRef.current;
+
+      // Require > 5px drag distance before intercepting clicks (prevents swallowing card clicks)
+      if (Math.abs(dx) > 5) {
+        isDraggingRef.current = true;
+      }
+
+      if (isDraggingRef.current) {
+        scrollRef.current.scrollLeft = scrollLeftStartRef.current - dx;
+      }
+    };
+
+    const handleGlobalMouseUp = () => {
+      isMouseDownRef.current = false;
+      setTimeout(() => {
+        isDraggingRef.current = false;
+      }, 50);
+    };
+
+    window.addEventListener("mousemove", handleGlobalMouseMove);
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+
+    const observer = new ResizeObserver(() => checkScroll());
+    observer.observe(el);
+
+    const mutObserver = new MutationObserver(() => checkScroll());
+    mutObserver.observe(el, { childList: true, subtree: true });
+
+    const timer1 = setTimeout(checkScroll, 100);
+    const timer2 = setTimeout(checkScroll, 400);
+
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", checkScroll);
+      el.removeEventListener("wheel", handleNativeWheel);
+      window.removeEventListener("mousemove", handleGlobalMouseMove);
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
+      observer.disconnect();
+      mutObserver.disconnect();
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [checkScroll, children]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Ignore clicks on buttons, inputs, links, textareas
+    const target = e.target as HTMLElement;
+    if (target.closest("button, input, textarea, a, select")) return;
+
+    if (scrollRef.current) {
+      isMouseDownRef.current = true;
+      isDraggingRef.current = false;
+      startXRef.current = e.pageX;
+      scrollLeftStartRef.current = scrollRef.current.scrollLeft;
+    }
+  };
+
+  const handleClickCapture = (e: React.MouseEvent) => {
+    if (isDraggingRef.current) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  };
+
+  const scroll = (direction: "left" | "right") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const scrollAmount = Math.max(340, el.clientWidth * 0.75);
+    el.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <div className="w-full max-w-full min-w-0 relative isolate flex items-center justify-center group/hscroll overflow-hidden rounded-2xl">
+      {/* Left Edge Gradient Mask */}
+      <div
+        className={`absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-[#0c0d16] via-[#0c0d16]/80 to-transparent pointer-events-none z-30 transition-opacity duration-300 ${
+          canScrollLeft ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      {/* Left Arrow (Vertically Centered on Left Edge with Smooth Transitions) */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          scroll("left");
+        }}
+        aria-label="Scroll Left"
+        title="Scroll Left"
+        disabled={!canScrollLeft}
+        className={`flex absolute left-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-neutral-700 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
+          canScrollLeft
+            ? "opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            : "opacity-0 scale-75 pointer-events-none"
+        }`}
+      >
+        <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
+      </button>
+
+      {/* Scroll Track */}
+      <div
+        ref={scrollRef}
+        onMouseDown={handleMouseDown}
+        onClickCapture={handleClickCapture}
+        className={`w-full min-w-0 flex items-center gap-3 sm:gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain touch-pan-x snap-x snap-mandatory sm:snap-none [transform:translateZ(0)] px-3 sm:px-2 ${className}`}
+      >
+        {children}
+      </div>
+
+      {/* Right Edge Gradient Mask */}
+      <div
+        className={`absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-[#0c0d16] via-[#0c0d16]/80 to-transparent pointer-events-none z-30 transition-opacity duration-300 ${
+          canScrollRight ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      {/* Right Arrow (Vertically Centered on Right Edge with Smooth Transitions) */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          scroll("right");
+        }}
+        aria-label="Scroll Right"
+        title="Scroll Right"
+        disabled={!canScrollRight}
+        className={`flex absolute right-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-neutral-700 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
+          canScrollRight
+            ? "opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            : "opacity-0 scale-75 pointer-events-none"
+        }`}
+      >
+        <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+      </button>
+    </div>
+  );
+};
+
+const EMPTY_PANELS_LIST: any[] = [];
+
+const ImportedAssetsDeck = React.memo(
+  ({
+    scrapedImages,
+    isScraping,
+    selectedScraped,
+    setSelectedScraped,
+    setScrapedImages,
+    mergingIndices,
+    setConsoleLogs,
+    handleMergeWithNext,
+    setEditingImageIdx,
+    setEditCropTop,
+    setEditCropBottom,
+    setEditCropLeft,
+    setEditCropRight,
+    setEditAutoTrim,
+    addNotification,
+    fetchWithInterceptor,
+    openEditingImageIdx,
+    // Bubble Cleaner props from App.tsx
+    showBubbleModal,
+    setShowBubbleModal,
+    isCleaningBubbles,
+    cleanProgress,
+    bubbleCroppingImgUrl,
+    // Auto Crop props from App.tsx
+    showAutoCropModal,
+    setShowAutoCropModal,
+    isBatchCropping,
+    batchProgress,
+    croppingImgUrl,
+    handleAutoCropSelected,
+    handleCleanBubblesSelected,
+    addPanelsToStoryboard,
+    isDashboardOnly = true,
+    targetUrl = "",
+    handleSaveAssets,
+    handleCancelBatch,
+    rating,
+    likes,
+    views,
+    consoleLogs,
+    selectedModel,
+    resetWorkspace,
+  }: ImportedAssetsDeckProps) => {
+    const [isZipping, setIsZipping] = useState(false);
+    const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(
+      null
+    );
+    const [isBatchMerging, setIsBatchMerging] = useState(false);
+    const [viewLayout, setViewLayout] = useState<"scroll" | "grid">("scroll");
+    const [selectedEpisodeIdx, setSelectedEpisodeIdx] = useState<
+      number | "all"
+    >("all");
+    const [episodeSearchQuery, setEpisodeSearchQuery] = useState("");
+    const [episodeSortAscending, setEpisodeSortAscending] = useState(true);
+    const [hoveredEpisodeIdx, setHoveredEpisodeIdx] = useState<number | null>(
+      null
+    );
+    const [assetSearchQuery, setAssetSearchQuery] = useState("");
+    const [assetFilterStatus, setAssetFilterStatus] =
+      useState<AssetFilterStatus>("all");
+    const [assetSortOrder, setAssetSortOrder] = useState<"asc" | "desc">("asc");
+
+    const handleReloadAssets = useCallback(() => {
+      window.dispatchEvent(new Event("scraped-assets-reload"));
+    }, []);
+
+    const imageDimensionsRef = useRef<
+      Map<string, { width: number; height: number }>
+    >(new Map());
+
+    useEffect(() => {
+      scrapedImages.forEach((imgUrl) => {
+        if (!imageDimensionsRef.current.has(imgUrl)) {
+          const proxied = getProxiedImageUrl(imgUrl, targetUrl);
+          const img = new Image();
+          img.src = proxied;
+          img.onload = () => {
+            if (img.naturalWidth && img.naturalHeight) {
+              imageDimensionsRef.current.set(imgUrl, {
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+              });
+            }
+          };
+        }
+      });
+    }, [scrapedImages, targetUrl]);
+
+    const isEpisodeCollapsed = useProjectStore((s) => s.isEpisodeCollapsed);
+    const setIsEpisodeCollapsed = useProjectStore(
+      (s) => s.setIsEpisodeCollapsed
+    );
+    const activePanels = useProjectStore(
+      (s) => s.activeProjectData?.panels
+    );
+    const activePanelsList = activePanels || EMPTY_PANELS_LIST;
+    const activeFetch = fetchWithInterceptor || fetch;
+
+    const inStoryboardCount = React.useMemo(() => {
+      return scrapedImages.filter((imgUrl) => {
+        const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+        return activePanelsList.some(
+          (p) =>
+            p.image_url === imgUrl ||
+            p.image_url === proxiedUrl ||
+            p.original_url === imgUrl
+        );
+      }).length;
+    }, [scrapedImages, activePanelsList, targetUrl]);
+
+    const filterAndSortImages = useCallback(
+      (imagesList: string[], startGlobalIdx: number = 0) => {
+        let indexed = imagesList.map((imgUrl, localIdx) => ({
+          imgUrl,
+          localIdx,
+          globalIdx: startGlobalIdx + localIdx,
+        }));
+
+        if (assetSearchQuery.trim()) {
+          const rawQ = assetSearchQuery.trim();
+          const cleanQ = rawQ.replace(/^#/, "").trim().toLowerCase();
+          const isNumeric = /^\d+$/.test(cleanQ);
+
+          indexed = indexed.filter(({ imgUrl, localIdx, globalIdx }) => {
+            const frameNum = globalIdx + 1;
+            const localNum = localIdx + 1;
+
+            if (isNumeric) {
+              const targetNum = parseInt(cleanQ, 10);
+              return (
+                frameNum === targetNum ||
+                localNum === targetNum ||
+                frameNum.toString().startsWith(cleanQ) ||
+                localNum.toString().startsWith(cleanQ)
+              );
+            }
+
+            const searchTerms = [
+              `#${frameNum}`,
+              `frame ${frameNum}`,
+              `page ${frameNum}`,
+              `#${localNum}`,
+            ];
+            const matchesTextTerm = searchTerms.some((t) => t.includes(cleanQ));
+            const filename = imgUrl.split("/").pop()?.toLowerCase() || "";
+            const matchesFilename = filename.includes(cleanQ);
+
+            return matchesTextTerm || matchesFilename;
+          });
+        }
+
+        if (assetFilterStatus === "selected") {
+          indexed = indexed.filter(({ imgUrl }) =>
+            selectedScraped.includes(imgUrl)
+          );
+        } else if (assetFilterStatus === "in_storyboard") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+            return activePanelsList.some(
+              (p) =>
+                p.image_url === imgUrl ||
+                p.image_url === proxiedUrl ||
+                p.original_url === imgUrl
+            );
+          });
+        } else if (assetFilterStatus === "not_in_storyboard") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const proxiedUrl = getProxiedImageUrl(imgUrl, targetUrl);
+            return !activePanelsList.some(
+              (p) =>
+                p.image_url === imgUrl ||
+                p.image_url === proxiedUrl ||
+                p.original_url === imgUrl
+            );
+          });
+        } else if (assetFilterStatus === "portrait") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const dim = imageDimensionsRef.current.get(imgUrl);
+            if (!dim) return true;
+            const ratio = dim.width / dim.height;
+            return ratio <= 1.25 && ratio >= 0.6;
+          });
+        } else if (assetFilterStatus === "landscape") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const dim = imageDimensionsRef.current.get(imgUrl);
+            if (!dim) return true;
+            return dim.width / dim.height > 1.25;
+          });
+        } else if (assetFilterStatus === "tall_strip") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const dim = imageDimensionsRef.current.get(imgUrl);
+            if (!dim) return true;
+            const ratio = dim.width / dim.height;
+            return ratio < 0.6 && ratio >= 0.28;
+          });
+        } else if (assetFilterStatus === "too_tall_strip") {
+          indexed = indexed.filter(({ imgUrl }) => {
+            const dim = imageDimensionsRef.current.get(imgUrl);
+            if (!dim) return true;
+            const ratio = dim.width / dim.height;
+            return ratio < 0.28;
+          });
+        }
+
+        if (assetSortOrder === "desc") {
+          indexed = [...indexed].reverse();
+        }
+
+        return indexed;
+      },
+      [
+        assetSearchQuery,
+        assetFilterStatus,
+        assetSortOrder,
+        selectedScraped,
+        activePanelsList,
+        targetUrl,
+      ]
+    );
+
+    useEffect(() => {
+      (window as any).__scrapedImagesList = scrapedImages;
+    }, [scrapedImages]);
+
+    /** Core card click handler — supports shift-range selection and Ctrl/Cmd toggling */
+    const handleCardClick = useCallback(
+      (idx: number, imgUrl: string, shiftKey: boolean, ctrlOrMeta: boolean) => {
+        if (shiftKey && lastSelectedIndex !== null) {
+          const lo = Math.min(lastSelectedIndex, idx);
+          const hi = Math.max(lastSelectedIndex, idx);
+          const rangeUrls = scrapedImages.slice(lo, hi + 1);
+          setSelectedScraped(
+            (prev) =>
+              updateSelection(prev, {
+                type: "range",
+                items: rangeUrls,
+              }) as string[]
+          );
+        } else if (ctrlOrMeta) {
+          setSelectedScraped(
+            (prev) =>
+              updateSelection(prev, {
+                type: "toggle",
+                item: imgUrl,
+              }) as string[]
+          );
+          setLastSelectedIndex(idx);
+        } else {
+          // Single click (no modifiers) does NOT change/toggle selection now.
+          // It strictly sets/updates lastSelectedIndex.
+          setLastSelectedIndex(idx);
+        }
+      },
+      [lastSelectedIndex, scrapedImages, setSelectedScraped]
+    );
+
+    const handleCardDoubleClick = useCallback(
+      (idx: number, imgUrl: string) => {
+        setSelectedScraped(
+          (prev) =>
+            updateSelection(prev, { type: "double", item: imgUrl }) as string[]
+        );
+        setLastSelectedIndex(idx);
+      },
+      [setSelectedScraped]
+    );
+
+    const makeSafeFilename = (name: string) => {
+      const cleaned = name.replace(/[^\w\s-]/g, "");
+      const replaced = cleaned.replace(/[-\s]+/g, "_");
+      return replaced.replace(/^_+|_+$/g, ""); // trim underscores
+    };
+
+    const getZipFilename = () => {
+      const proj = useProjectStore.getState().activeProjectData?.project;
+      const source = targetUrl ? getSourceName(targetUrl) : "";
+      const title = proj?.title || "";
+      const ep = proj?.episode || "";
+      const parts: string[] = [];
+
+      if (source && source.toLowerCase() !== "custom source") {
+        parts.push(makeSafeFilename(source));
+      }
+      if (title && title.trim()) {
+        parts.push(makeSafeFilename(title.trim()));
+      }
+      if (ep && ep.trim()) {
+        parts.push(makeSafeFilename(ep.trim()));
+      }
+      if (parts.length > 0) {
+        return `${parts.join("_")}.zip`;
+      }
+      return "webtoon_frames.zip";
+    };
+
+    const handleDownloadZip = async () => {
+      const toDownload =
+        selectedScraped.length > 0 ? selectedScraped : scrapedImages;
+      if (toDownload.length === 0) return;
+      console.log(
+        "[ImportedAssetsDeck] Starting ZIP download for",
+        toDownload.length,
+        "images"
+      );
+
+      setIsZipping(true);
+      try {
+        const zip = new JSZip();
+        const folder = zip.folder("webtoon_frames");
+        if (!folder) {
+          setIsZipping(false);
+          return;
+        }
+
+        for (let i = 0; i < toDownload.length; i++) {
+          try {
+            const url = toDownload[i];
+            const res = await activeFetch(url);
+            const blob = await res.blob();
+            const filename = `webtoon_frame_${String(i + 1).padStart(
+              3,
+              "0"
+            )}.png`;
+            folder.file(filename, blob);
+          } catch (err) {
+            console.error("Download failed for:", toDownload[i], err);
+          }
+        }
+
+        const blobContent = await zip.generateAsync({ type: "blob" });
+        const targetFilename = getZipFilename();
+        saveAs(blobContent, targetFilename);
+        setConsoleLogs((prev) => [
+          normalizeLog(
+            `[GUI] Successfully generated zip named ${targetFilename} for ${toDownload.length} images`
+          ),
+          ...prev,
+        ]);
+      } catch (err) {
+        console.error("Zip generation failed:", err);
+      } finally {
+        setIsZipping(false);
+      }
+    };
+
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    React.useEffect(() => {
+      const container = document.getElementById("main-scroll-container");
+      if (showDeleteConfirm) {
+        document.body.style.overflow = "hidden";
+        if (container) container.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+        if (container) container.style.overflow = "";
+      }
+      return () => {
+        document.body.style.overflow = "";
+        if (container) container.style.overflow = "";
+      };
+    }, [showDeleteConfirm]);
+
+    const executeDeleteSelected = () => {
+      setScrapedImages((prev) =>
+        prev.filter((img) => !selectedScraped.includes(img))
+      );
+      setConsoleLogs((prev) => [
+        normalizeLog(`[GUI] Removed ${selectedScraped.length} images`),
+        ...prev,
+      ]);
+      addNotification(
+        `Deleted ${selectedScraped.length} selected image(s) from the deck.`,
+        "success"
+      );
+      setSelectedScraped([]);
+      setLastSelectedIndex(null);
+    };
+
+    const handleDeleteSelected = () => {
+      if (selectedScraped.length === 0) return;
+      setShowDeleteConfirm(true);
+    };
+
+    const handleAddToStoryboard = () => {
+      if (selectedScraped.length === 0) return;
+      addPanelsToStoryboard(selectedScraped);
+      console.log(
+        `[GUI] Adding ${selectedScraped.length} selected image(s) to storyboard.`
+      );
+      setSelectedScraped([]);
+      setLastSelectedIndex(null);
+    };
+
+    const episodeGroups =
+      ((window as any).__scrapeEpisodeGroups as Array<{
+        episodeLabel: string;
+        startIndex: number;
+        count: number;
+      }>) || [];
+
+    // Get currently active deck images (scoped to selected episode or all)
+    const currentActiveImages = React.useMemo(() => {
+      if (selectedEpisodeIdx === "all" || selectedEpisodeIdx === null) {
+        return scrapedImages;
+      }
+      const grp =
+        typeof selectedEpisodeIdx === "number"
+          ? episodeGroups[selectedEpisodeIdx]
+          : undefined;
+      if (!grp) return scrapedImages;
+      return scrapedImages.slice(grp.startIndex, grp.startIndex + grp.count);
+    }, [scrapedImages, episodeGroups, selectedEpisodeIdx]);
+
+    const handleClearAll = () => {
+      setSelectedScraped((prev) =>
+        prev.filter((img) => !currentActiveImages.includes(img))
+      );
+      setLastSelectedIndex(null);
+    };
+
+    const handleSelectAllToggle = () => {
+      const activeSelectedCount = currentActiveImages.filter((img) =>
+        selectedScraped.includes(img)
+      ).length;
+      if (
+        activeSelectedCount === currentActiveImages.length &&
+        currentActiveImages.length > 0
+      ) {
+        setSelectedScraped((prev) =>
+          prev.filter((img) => !currentActiveImages.includes(img))
+        );
+        setLastSelectedIndex(null);
+        setConsoleLogs((prev) => ["[GUI] Cleared episode selections", ...prev]);
+      } else {
+        setSelectedScraped((prev) =>
+          Array.from(new Set([...prev, ...currentActiveImages]))
+        );
+        setConsoleLogs((prev) => [
+          "[GUI] Selected all episode images",
+          ...prev,
+        ]);
+      }
+    };
+
+    // Selection / filter helpers (scoped to currentActiveImages)
+    const handleInvertSelection = () => {
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
+        const activeInverted = currentActiveImages.filter(
+          (img) => !prev.includes(img)
+        );
+        return [...otherSelected, ...activeInverted];
+      });
+      setLastSelectedIndex(null);
+      setConsoleLogs((prev) => ["[GUI] Inverted selection set", ...prev]);
+    };
+
+    const handleSelectOdd = () => {
+      const oddImages = currentActiveImages.filter((_, idx) => idx % 2 === 0);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
+        return [...otherSelected, ...oddImages];
+      });
+      setLastSelectedIndex(null);
+      setConsoleLogs((prev) => ["[GUI] Selected odd-numbered frames", ...prev]);
+    };
+
+    const handleSelectEven = () => {
+      const evenImages = currentActiveImages.filter((_, idx) => idx % 2 !== 0);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
+        return [...otherSelected, ...evenImages];
+      });
+      setLastSelectedIndex(null);
+      setConsoleLogs((prev) => [
+        "[GUI] Selected even-numbered frames",
+        ...prev,
+      ]);
+    };
+
+    const handleReverseDeckOrder = () => {
+      setScrapedImages((prev) => [...prev].reverse());
+      setLastSelectedIndex(null);
+      setConsoleLogs((prev) => ["[GUI] Reversed image order", ...prev]);
+      addNotification("Reversed image order!", "info");
+    };
+
+    const handleSelectFirstN = (n: number) => {
+      const clamped = Math.min(Math.max(1, n), currentActiveImages.length);
+      const firstNImages = currentActiveImages.slice(0, clamped);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
+        return [...otherSelected, ...firstNImages];
+      });
+      setLastSelectedIndex(null);
+      setConsoleLogs((prev) => [
+        `[GUI] Selected first ${clamped} frames`,
+        ...prev,
+      ]);
+    };
+
+    const handleSelectLastN = (n: number) => {
+      const clamped = Math.min(Math.max(1, n), currentActiveImages.length);
+      const lastNImages = currentActiveImages.slice(-clamped);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
+        return [...otherSelected, ...lastNImages];
+      });
+      setLastSelectedIndex(null);
+      setConsoleLogs((prev) => [
+        `[GUI] Selected last ${clamped} frames`,
+        ...prev,
+      ]);
+    };
+
+    const handleSelectRange = (a: number, b: number) => {
+      const lo = Math.max(0, Math.min(a, b) - 1);
+      const hi = Math.min(currentActiveImages.length, Math.max(a, b));
+      const rangeImages = currentActiveImages.slice(lo, hi);
+      setSelectedScraped((prev) => {
+        const otherSelected = prev.filter(
+          (img) => !currentActiveImages.includes(img)
+        );
+        return [...otherSelected, ...rangeImages];
+      });
+      setLastSelectedIndex(null);
+      setConsoleLogs((prev) => [`[GUI] Selected panels ${a} to ${b}`, ...prev]);
+    };
+
+    const handleBatchMergeSelected = async () => {
+      if (selectedScraped.length < 2) {
+        addNotification("Select at least 2 panels to stitch together", "info");
+        return;
+      }
+      console.log(
+        "[ImportedAssetsDeck] Starting batch vertical merge for",
+        selectedScraped.length,
+        "images"
+      );
+      setIsBatchMerging(true);
+      setConsoleLogs((prev) => [
+        normalizeLog(
+          `[Stitch Generator] Merging ${selectedScraped.length} selected images vertically...`
+        ),
+        ...prev,
+      ]);
+
+      try {
+        const data = await api.mergeImages(activeFetch, {
+          urls: selectedScraped,
+          layout: "vertical",
+          spacing: 0,
+          spacingColor: "white",
+          scaleToFit: true,
+          alignMode: "center",
+          padding: 0,
+        });
+
+        if (data.url) {
+          const firstSelectedIdx = scrapedImages.findIndex((img) =>
+            selectedScraped.includes(img)
+          );
+          setScrapedImages((prev) => {
+            const filtered = prev.filter(
+              (img) => !selectedScraped.includes(img)
+            );
+            filtered.splice(
+              firstSelectedIdx === -1 ? 0 : firstSelectedIdx,
+              0,
+              data.url
+            );
+            return filtered;
+          });
+          setSelectedScraped([]);
+          setLastSelectedIndex(null);
+          setConsoleLogs((prev) => [
+            normalizeLog(
+              `[Stitch Generator] ✓ Stitching completed! Stored URL: ${data.url}`
+            ),
+            ...prev,
+          ]);
+          addNotification(
+            "Stitched selected panels into one frame successfully!",
+            "success"
+          );
+        }
+      } catch (err: any) {
+        console.error("Batch stitch failed:", err);
+        addNotification(`Merge failed: ${err.message}`, "error");
+      } finally {
+        setIsBatchMerging(false);
+      }
+    };
+
+    const showEmptyState = !isScraping && scrapedImages.length === 0;
+    const showImportLoading = isScraping && scrapedImages.length === 0;
+
+    return (
+      <>
+        <div
+          id="scraped_strips_deck"
+          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full min-h-[190px] flex-1 flex flex-col overflow-hidden"
+        >
+          <ImportedAssetsHeader
+            scrapedImagesLength={scrapedImages.length}
+            selectedScrapedLength={selectedScraped.length}
+            viewLayout={viewLayout}
+            setViewLayout={setViewLayout}
+            handleSelectAllToggle={handleSelectAllToggle}
+            handleClearAll={handleClearAll}
+            handleSelectOdd={handleSelectOdd}
+            handleSelectEven={handleSelectEven}
+            handleInvertSelection={handleInvertSelection}
+            handleAddToStoryboard={handleAddToStoryboard}
+            handleAutoCropSelected={handleAutoCropSelected}
+            handleCleanBubblesSelected={handleCleanBubblesSelected}
+            handleBatchMergeSelected={handleBatchMergeSelected}
+            handleDeleteSelected={handleDeleteSelected}
+            handleCancelBatch={handleCancelBatch}
+            handleSaveAssets={handleSaveAssets}
+            handleReloadAssets={handleReloadAssets}
+            isBatchCropping={isBatchCropping}
+            batchProgress={batchProgress}
+            isCleaningBubbles={isCleaningBubbles}
+            cleanProgress={cleanProgress}
+            isBatchMerging={isBatchMerging}
+            isEpisodeCollapsed={isEpisodeCollapsed}
+            setIsEpisodeCollapsed={setIsEpisodeCollapsed}
+            hasMultipleEpisodes={(() => {
+              const headerEpisodeGroups =
+                ((window as any).__scrapeEpisodeGroups as Array<{
+                  episodeLabel: string;
+                  startIndex: number;
+                  count: number;
+                }>) || [];
+              return headerEpisodeGroups.length > 1;
+            })()}
+            searchQuery={assetSearchQuery}
+            setSearchQuery={setAssetSearchQuery}
+            filterStatus={assetFilterStatus}
+            setFilterStatus={setAssetFilterStatus}
+            sortOrder={assetSortOrder}
+            setSortOrder={setAssetSortOrder}
+            filteredCount={filterAndSortImages(scrapedImages).length}
+            inStoryboardCount={inStoryboardCount}
+          />
+
+          {showEmptyState ? (
+            <ImportedAssetsDeckEmptyState />
+          ) : showImportLoading ? (
+            <ImportImagesOverlay />
+          ) : (
+            <div className="space-y-4">
+              {/* Grid list of extracted cards */}
+              {(() => {
+                const episodeGroups =
+                  ((window as any).__scrapeEpisodeGroups as Array<{
+                    episodeLabel: string;
+                    startIndex: number;
+                    count: number;
+                  }>) || [];
+
+                if (episodeGroups.length > 0) {
+                  const rawSortedGroups = getSortedEpisodeGroups(episodeGroups);
+                  const sortedGroups = episodeSortAscending
+                    ? rawSortedGroups
+                    : [...rawSortedGroups].reverse();
+
+                  const filteredGroups = sortedGroups.filter(({ grp }) => {
+                    if (!episodeSearchQuery.trim()) return true;
+                    const label = formatDisplayEpisodeLabel(
+                      grp.episodeLabel
+                    ).toLowerCase();
+                    return label.includes(episodeSearchQuery.toLowerCase());
+                  });
+
+                  const visibleGroups =
+                    selectedEpisodeIdx === "all"
+                      ? sortedGroups.map(({ grp, originalIdx }) => ({
+                          grp,
+                          gIdx: originalIdx,
+                        }))
+                      : episodeGroups[selectedEpisodeIdx]
+                      ? [
+                          {
+                            grp: episodeGroups[selectedEpisodeIdx],
+                            gIdx: selectedEpisodeIdx as number,
+                          },
+                        ]
+                      : sortedGroups.map(({ grp, originalIdx }) => ({
+                          grp,
+                          gIdx: originalIdx,
+                        }));
+
+                  return (
+                    <div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+                      {/* IN-PANEL LEFT SIDEBAR: EPISODE NAVIGATOR */}
+                      <ImportedAssetsSidebar
+                        episodeGroups={episodeGroups}
+                        scrapedImages={scrapedImages}
+                        selectedEpisodeIdx={selectedEpisodeIdx}
+                        setSelectedEpisodeIdx={setSelectedEpisodeIdx}
+                        episodeSearchQuery={episodeSearchQuery}
+                        setEpisodeSearchQuery={setEpisodeSearchQuery}
+                        episodeSortAscending={episodeSortAscending}
+                        setEpisodeSortAscending={setEpisodeSortAscending}
+                        isEpisodeCollapsed={isEpisodeCollapsed}
+                        setIsEpisodeCollapsed={setIsEpisodeCollapsed}
+                        selectedScraped={selectedScraped}
+                        setSelectedScraped={setSelectedScraped}
+                        setConsoleLogs={setConsoleLogs}
+                        setLastSelectedIndex={setLastSelectedIndex}
+                      />
+
+                      {/* IN-PANEL RIGHT MAIN AREA: EPISODE IMAGES */}
+                      <div className="flex-1 w-full space-y-6 min-w-0">
+                        {visibleGroups.map(({ grp, gIdx }) => {
+                          const grpImages = scrapedImages.slice(
+                            grp.startIndex,
+                            grp.startIndex + grp.count
+                          );
+                          return (
+                            <div
+                              key={`ep-section-${gIdx}`}
+                              id={`ep-section-${gIdx}`}
+                              className="bg-[#0c0d16]/70 border border-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl scroll-mt-24"
+                            >
+                              {/* Episode Horizontal / Grid Cards */}
+                              {(() => {
+                                const processedGrp = filterAndSortImages(
+                                  grpImages,
+                                  grp.startIndex
+                                );
+
+                                if (processedGrp.length === 0) {
+                                  return (
+                                    <div className="p-4 text-center text-xs font-mono text-neutral-500 bg-neutral-950/40 rounded-xl border border-neutral-900">
+                                      No frames match the active filter in this
+                                      episode.
+                                    </div>
+                                  );
+                                }
+
+                                return viewLayout === "scroll" ? (
+                                  <HorizontalScrollContainer>
+                                    {processedGrp.map(
+                                      ({ imgUrl, localIdx, globalIdx }) => {
+                                        const isSelected =
+                                          selectedScraped.includes(imgUrl);
+                                        const proxiedUrl = getProxiedImageUrl(
+                                          imgUrl,
+                                          targetUrl
+                                        );
+                                        const isInTimeline =
+                                          activePanelsList.some(
+                                            (p) =>
+                                              p.image_url === imgUrl ||
+                                              p.image_url === proxiedUrl ||
+                                              p.original_url === imgUrl
+                                          );
+
+                                        return (
+                                          <PanelCard
+                                            key={`${imgUrl}-${globalIdx}`}
+                                            imgUrl={proxiedUrl}
+                                            rawImgUrl={imgUrl}
+                                            idx={globalIdx}
+                                            displayIdx={localIdx}
+                                            isSelected={isSelected}
+                                            isInTimeline={isInTimeline}
+                                            isBatchCropping={isBatchCropping}
+                                            croppingImgUrl={croppingImgUrl}
+                                            bubbleCroppingImgUrl={
+                                              bubbleCroppingImgUrl
+                                            }
+                                            scrapedImages={scrapedImages}
+                                            mergingIndices={mergingIndices}
+                                            handleMergeWithNext={
+                                              handleMergeWithNext
+                                            }
+                                            setScrapedImages={setScrapedImages}
+                                            setSelectedScraped={
+                                              setSelectedScraped
+                                            }
+                                            setConsoleLogs={setConsoleLogs}
+                                            addPanelsToStoryboard={
+                                              addPanelsToStoryboard
+                                            }
+                                            addNotification={addNotification}
+                                            onCardClick={handleCardClick}
+                                            onCardDoubleClick={
+                                              handleCardDoubleClick
+                                            }
+                                            viewLayout="scroll"
+                                          />
+                                        );
+                                      }
+                                    )}
+                                  </HorizontalScrollContainer>
+                                ) : (
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-3.5 px-1 w-full">
+                                    {processedGrp.map(
+                                      ({ imgUrl, localIdx, globalIdx }) => {
+                                        const isSelected =
+                                          selectedScraped.includes(imgUrl);
+                                        const proxiedUrl = getProxiedImageUrl(
+                                          imgUrl,
+                                          targetUrl
+                                        );
+                                        const isInTimeline =
+                                          activePanelsList.some(
+                                            (p) =>
+                                              p.image_url === imgUrl ||
+                                              p.image_url === proxiedUrl ||
+                                              p.original_url === imgUrl
+                                          );
+
+                                        return (
+                                          <PanelCard
+                                            key={`${imgUrl}-${globalIdx}`}
+                                            imgUrl={proxiedUrl}
+                                            rawImgUrl={imgUrl}
+                                            idx={globalIdx}
+                                            displayIdx={localIdx}
+                                            isSelected={isSelected}
+                                            isInTimeline={isInTimeline}
+                                            isBatchCropping={isBatchCropping}
+                                            croppingImgUrl={croppingImgUrl}
+                                            bubbleCroppingImgUrl={
+                                              bubbleCroppingImgUrl
+                                            }
+                                            scrapedImages={scrapedImages}
+                                            mergingIndices={mergingIndices}
+                                            handleMergeWithNext={
+                                              handleMergeWithNext
+                                            }
+                                            setScrapedImages={setScrapedImages}
+                                            setSelectedScraped={
+                                              setSelectedScraped
+                                            }
+                                            setConsoleLogs={setConsoleLogs}
+                                            addPanelsToStoryboard={
+                                              addPanelsToStoryboard
+                                            }
+                                            addNotification={addNotification}
+                                            onCardClick={handleCardClick}
+                                            onCardDoubleClick={
+                                              handleCardDoubleClick
+                                            }
+                                            viewLayout="grid"
+                                          />
+                                        );
+                                      }
+                                    )}
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                }
+
+                const processedFlat = filterAndSortImages(scrapedImages, 0);
+
+                if (processedFlat.length === 0 && scrapedImages.length > 0) {
+                  return (
+                    <div className="p-8 text-center text-xs font-mono text-neutral-400 bg-neutral-950/40 rounded-2xl border border-neutral-850 space-y-2">
+                      <p className="text-neutral-300 font-bold">
+                        No assets match your search/filter criteria.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAssetSearchQuery("");
+                          setAssetFilterStatus("all");
+                          setAssetSortOrder("asc");
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60 transition-all text-[11px] font-mono cursor-pointer"
+                      >
+                        Reset All Filters
+                      </button>
+                    </div>
+                  );
+                }
+
+                return viewLayout === "scroll" ? (
+                  <HorizontalScrollContainer>
+                    {processedFlat.map(({ imgUrl, globalIdx }) => {
+                      const isSelected = selectedScraped.includes(imgUrl);
+                      const proxiedUrl = imgUrl?.startsWith("/api/")
+                        ? imgUrl
+                        : `/api/v1/proxy/image?url=${encodeURIComponent(
+                            imgUrl
+                          )}`;
+                      const isInTimeline = activePanelsList.some(
+                        (p) =>
+                          p.image_url === imgUrl ||
+                          p.image_url === proxiedUrl ||
+                          p.original_url === imgUrl
+                      );
+
+                      return (
+                        <PanelCard
+                          key={`${imgUrl}-${globalIdx}`}
+                          imgUrl={proxiedUrl}
+                          rawImgUrl={imgUrl}
+                          idx={globalIdx}
+                          isSelected={isSelected}
+                          isInTimeline={isInTimeline}
+                          isBatchCropping={isBatchCropping}
+                          croppingImgUrl={croppingImgUrl}
+                          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                          scrapedImages={scrapedImages}
+                          mergingIndices={mergingIndices}
+                          handleMergeWithNext={handleMergeWithNext}
+                          setScrapedImages={setScrapedImages}
+                          setSelectedScraped={setSelectedScraped}
+                          setConsoleLogs={setConsoleLogs}
+                          addPanelsToStoryboard={addPanelsToStoryboard}
+                          addNotification={addNotification}
+                          onCardClick={handleCardClick}
+                          onCardDoubleClick={handleCardDoubleClick}
+                          viewLayout="scroll"
+                        />
+                      );
+                    })}
+
+                    {isScraping && scrapedImages.length > 0 && (
+                      <div className="shrink-0 flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 w-[140px] text-center gap-2 text-neutral-500">
+                        <Loader2 className="w-4 h-4 text-[#3B82F6] animate-spin" />
+                        <span className="text-[10px] font-mono uppercase tracking-wider font-medium">
+                          Extracting...
+                        </span>
+                      </div>
+                    )}
+                  </HorizontalScrollContainer>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 pt-3.5 px-1 w-full">
+                    {processedFlat.map(({ imgUrl, globalIdx }) => {
+                      const isSelected = selectedScraped.includes(imgUrl);
+                      const proxiedUrl = imgUrl?.startsWith("/api/")
+                        ? imgUrl
+                        : `/api/v1/proxy/image?url=${encodeURIComponent(
+                            imgUrl
+                          )}`;
+                      const isInTimeline = activePanelsList.some(
+                        (p) =>
+                          p.image_url === imgUrl ||
+                          p.image_url === proxiedUrl ||
+                          p.original_url === imgUrl
+                      );
+
+                      return (
+                        <PanelCard
+                          key={`${imgUrl}-${globalIdx}`}
+                          imgUrl={proxiedUrl}
+                          rawImgUrl={imgUrl}
+                          idx={globalIdx}
+                          isSelected={isSelected}
+                          isInTimeline={isInTimeline}
+                          isBatchCropping={isBatchCropping}
+                          croppingImgUrl={croppingImgUrl}
+                          bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                          scrapedImages={scrapedImages}
+                          mergingIndices={mergingIndices}
+                          handleMergeWithNext={handleMergeWithNext}
+                          setScrapedImages={setScrapedImages}
+                          setSelectedScraped={setSelectedScraped}
+                          setConsoleLogs={setConsoleLogs}
+                          addPanelsToStoryboard={addPanelsToStoryboard}
+                          addNotification={addNotification}
+                          onCardClick={handleCardClick}
+                          onCardDoubleClick={handleCardDoubleClick}
+                          viewLayout="grid"
+                        />
+                      );
+                    })}
+
+                    {isScraping && scrapedImages.length > 0 && (
+                      <div className="flex flex-col items-center justify-center p-6 rounded-xl border border-dashed border-neutral-800 bg-neutral-950/40 min-h-[200px] text-center gap-2 text-neutral-500">
+                        <Loader2 className="w-5 h-5 text-[#3B82F6] animate-spin" />
+                        <span className="text-[10px] font-mono uppercase tracking-wider font-medium">
+                          Extracting panel...
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+
+        {/* Delete Imported Frames Confirmation Modal */}
+        {showDeleteConfirm &&
+          createPortal(
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              <div
+                className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+                onClick={() => setShowDeleteConfirm(false)}
+              />
+              <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 flex flex-col">
+                {/* Glow Accent */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 blur-[1px]" />
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-850 shrink-0 bg-neutral-900/50">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-red-500/10 rounded-xl text-red-400">
+                      <Trash2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-white tracking-tight">
+                        Delete Selected Images?
+                      </h2>
+                      <p className="text-[10px] text-neutral-450 font-mono">
+                        Warning: This action cannot be undone
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="text-neutral-400 hover:text-white bg-neutral-950/40 hover:bg-neutral-950 p-2 rounded-full transition-all cursor-pointer"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Body */}
+                <div className="p-6 space-y-4">
+                  <p className="text-xs text-neutral-350 leading-relaxed font-sans">
+                    Are you sure you want to delete the{" "}
+                    <strong>{selectedScraped.length}</strong> selected image
+                    frame(s) from the deck?
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <div className="px-6 py-4 bg-neutral-950/40 border-t border-neutral-850 flex items-center justify-end gap-3 shrink-0">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer border border-neutral-800"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      executeDeleteSelected();
+                    }}
+                    className="px-6 py-2.5 bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 border border-red-550/30 text-white font-bold rounded-xl text-xs tracking-wide transition-all shadow-[0_0_20px_-5px_rgba(239,68,68,0.5)] active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Confirm & Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
+      </>
+    );
+  }
+);
+
+export { ImportedAssetsDeck };
+export default ImportedAssetsDeck;

@@ -1,0 +1,518 @@
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Focus,
+  LayoutPanelTop,
+  Save,
+  Menu,
+  Layers,
+  Clock,
+  Wifi,
+  WifiOff,
+  Share2,
+  Bell,
+  BellOff,
+  Zap,
+  Monitor,
+  FolderSync,
+  Globe,
+  User,
+  Tag,
+  ExternalLink,
+  BookOpen,
+} from "lucide-react";
+import {
+  getUserAvatarUrl,
+  DEFAULT_USER_AVATAR_DATA_URI,
+} from "@/shared/utils/avatar";
+import NotificationDropdown from "@/features/platform/notifications/components/NotificationDropdown";
+import { Notification } from "@/features/platform/notifications";
+import { getUserCreditsPayload, claimDailyCredits } from "@/features/auth/api/auth";
+import { HeaderCreditsPopover } from "@/features/intelligence/core";
+import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import { useBackendHealth } from "@/shared/api/hooks/useBackendHealth";
+import { AIModelSelector } from "@/features/intelligence/core";
+import ServerStatusIndicator from "@/shared/ui/status/ServerStatusIndicator";
+import { Tooltip } from "@/shared/ui/common/TooltipPortal";
+import { SonikomaLogo } from "@/shared/ui/branding";
+
+interface EditorPageHeaderProps {
+  title: string;
+  subtitle?: string;
+
+  onSave: () => void;
+  isSaving: boolean;
+  isDirty?: boolean;
+  isFocusMode: boolean;
+  setIsFocusMode: React.Dispatch<React.SetStateAction<boolean>>;
+  onToggleSidebar?: () => void;
+  isSidebarCollapsed?: boolean;
+  isSidebarOpen?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  panelsCount?: number;
+  backendOnline?: boolean;
+  notifications?: Notification[];
+  markNotificationAsRead?: (id: number) => void;
+  markAllNotificationsAsRead?: () => void;
+  deleteNotification?: (id: number) => void;
+  clearAllNotifications?: () => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
+  onNavigateToAll?: () => void;
+  onBackToApp?: () => void;
+  fetchWithInterceptor?: any;
+  navigateTo?: (path: string) => void;
+  user?: any;
+  addNotification?: (message: string, type?: string) => void;
+}
+
+const EditorPageHeader: React.FC<EditorPageHeaderProps> = ({
+  title,
+  subtitle,
+  onBackToApp,
+  onSave,
+  isSaving,
+  isDirty = false,
+  isFocusMode,
+  setIsFocusMode,
+  onToggleSidebar,
+  isSidebarCollapsed,
+  isSidebarOpen = false,
+  className,
+  style,
+  panelsCount = 0,
+  backendOnline = true,
+  notifications = [],
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
+  clearAllNotifications,
+  notificationsMuted = false,
+  setNotificationsMuted,
+  onNavigateToAll,
+  fetchWithInterceptor,
+  navigateTo,
+  user,
+  addNotification,
+}) => {
+  const isPlayerOpen = useImageEditorStore(
+    (state) => state.playerSettings.isPlayerOpen
+  );
+  const { activeProjectId, activeProjectData, setDrawerOpen } =
+    useProjectStore();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
+
+  // Smoothly slide out of view if the mobile/drawer sidebar is open
+  const headerVisibilityClass = isSidebarOpen
+    ? "-translate-y-full opacity-0 pointer-events-none"
+    : "opacity-100";
+
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showCreditsPopover, setShowCreditsPopover] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
+  const creditsRef = useRef<HTMLDivElement | null>(null);
+  const [credits, setCredits] = useState<number | null>(
+    user?.credits !== undefined ? user.credits : null
+  );
+
+  const handleClaimDailyBonus = async () => {
+    if (!fetchWithInterceptor) return;
+    try {
+      const res = await claimDailyCredits(fetchWithInterceptor);
+      if (res.success && typeof res.new_balance === "number") {
+        setCredits(res.new_balance);
+        if (addNotification) {
+          addNotification(res.message || "Claimed daily bonus!", "success");
+        }
+      }
+    } catch {
+      // silent
+    }
+  };
+
+  useEffect(() => {
+    if (!fetchWithInterceptor) return;
+    const pollCredits = async () => {
+      try {
+        const payload = await getUserCreditsPayload(fetchWithInterceptor);
+        if (payload !== null) setCredits(payload.credits);
+      } catch {
+        // silent
+      }
+    };
+    pollCredits();
+    const interval = setInterval(pollCredits, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchWithInterceptor]);
+
+  useEffect(() => {
+    if (user?.credits !== undefined) {
+      setCredits(user.credits);
+    }
+  }, [user?.credits]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+      if (
+        creditsRef.current &&
+        !creditsRef.current.contains(event.target as Node)
+      ) {
+        setShowCreditsPopover(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const project = activeProjectData?.project;
+  const projectUrl = project?.url;
+  const projectAuthor = project?.author;
+  const projectGenre = project?.genre;
+  const coverImage = project?.cover_image;
+
+  const websiteInfo = (() => {
+    if (!projectUrl) return null;
+    try {
+      const host = new URL(
+        projectUrl.startsWith("http") ? projectUrl : `https://${projectUrl}`
+      ).hostname
+        .toLowerCase()
+        .replace(/^www\./, "");
+
+      if (!host) return null;
+
+      // Dynamically format clean display name from root domain (e.g. webcomicsapp -> Webcomicsapp)
+      const domainParts = host.split(".");
+      const mainName =
+        domainParts.length > 1
+          ? domainParts[domainParts.length - 2]
+          : domainParts[0];
+      const displayName = mainName
+        .split(/[-_]/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+
+      return {
+        name: displayName,
+        domain: host,
+        badgeColor: "bg-neutral-900 border border-neutral-800 text-neutral-300",
+      };
+    } catch {
+      return null;
+    }
+  })();
+
+  return (
+    <header
+      className={`fixed top-0 left-0 right-0 z-[100] h-16 flex min-w-0 flex-nowrap items-center justify-between gap-1 sm:gap-2.5 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-3 sm:pr-6 md:pr-8 shadow-md shadow-black/20 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${headerVisibilityClass} ${
+        className || ""
+      }`}
+      style={style}
+    >
+      {/* Left Section - Menu Icon + Title + Metadata */}
+      <div className="flex items-center shrink-0 h-full">
+        {/* Match exactly the width and border of the mini-sidebar */}
+        <div className="w-14 sm:w-16 md:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full">
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="w-11 h-11 rounded-2xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-700 text-neutral-300 hover:text-white cursor-pointer transition-all duration-200 active:scale-95 flex items-center justify-center shadow-sm"
+              title={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
+              aria-label="Toggle navigation menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+
+        <div
+          className="flex items-center gap-2 sm:gap-3 cursor-pointer pl-3 sm:pl-4"
+          onClick={onBackToApp}
+        >
+          <SonikomaLogo iconOnly size="sm" />
+
+          <div className="min-w-0 hidden min-[540px]:block max-w-[180px] sm:max-w-[280px] md:max-w-[340px] lg:max-w-[420px]">
+            {/* Top Workspace & Source Website Badge */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="font-mono text-[9px] font-black uppercase tracking-[0.2em] text-neutral-400 leading-none">
+                Editor Workspace
+              </span>
+
+              {websiteInfo && (
+                <a
+                  href={projectUrl || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-bold tracking-wide transition-colors ${websiteInfo.badgeColor} hover:brightness-125`}
+                  title={`Source: ${websiteInfo.domain}`}
+                >
+                  <Globe className="w-2.5 h-2.5" />
+                  <span className="truncate max-w-[90px]">
+                    {websiteInfo.name}
+                  </span>
+                  <ExternalLink className="w-2 h-2 opacity-60" />
+                </a>
+              )}
+
+              {projectGenre && (
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-neutral-800/80 border border-neutral-700/50 text-[9px] font-medium text-neutral-300 truncate max-w-[90px]">
+                  <Tag className="w-2.5 h-2.5 text-neutral-400 shrink-0" />
+                  <span className="truncate">
+                    {projectGenre.split(",")[0].trim()}
+                  </span>
+                </span>
+              )}
+            </div>
+
+            {/* Title & Layout Icon */}
+            <div className="mt-1 flex items-center gap-1.5">
+              <LayoutPanelTop className="h-3.5 w-3.5 text-neutral-400 shrink-0" />
+              <h2 className="truncate text-sm font-bold text-white leading-none tracking-wide">
+                {title}
+              </h2>
+            </div>
+
+            {/* Subtitle & Author */}
+            <div className="mt-1 flex items-center gap-2 truncate text-[10px] text-neutral-400 font-mono leading-none">
+              {subtitle && <span className="truncate">{subtitle}</span>}
+              {projectAuthor && (
+                <span className="inline-flex items-center gap-1 text-neutral-500 shrink-0">
+                  <User className="w-2.5 h-2.5 text-neutral-500" />
+                  <span className="truncate">{projectAuthor}</span>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Section - Action Buttons */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-nowrap pr-0.5 sm:pr-1">
+        {/* 🟢 Server Status Indicator - Hidden on screens (<580px) */}
+        <div className="hidden min-[580px]:block">
+          <ServerStatusIndicator
+            status={backendStatus}
+            onClick={recheckBackend}
+          />
+        </div>
+
+        {/* 🤖 Global AI Model Selector - Hidden on narrow mobile (<640px) */}
+        <AIModelSelector compact className="hidden min-[640px]:flex shrink-0" />
+
+        {/* ⚡ Credits Pill & Popover */}
+        {credits !== null && (
+          <div className="relative shrink-0" ref={creditsRef}>
+            <Tooltip text="Credits & Daily Bonus" placement="bottom">
+              <button
+                onClick={() => {
+                  setShowCreditsPopover(!showCreditsPopover);
+                  setShowNotifications(false);
+                }}
+                aria-label="Your credit balance & daily rewards"
+                className="flex h-8.5 items-center gap-1 px-2.5 sm:px-3 rounded-xl border border-[#33353e] bg-[#202127] hover:bg-[#282a32] text-amber-400 hover:border-amber-500/40 text-[10px] sm:text-xs font-black font-mono select-none cursor-pointer transition-all shadow-sm shrink-0"
+              >
+                <Zap className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
+                <span className="font-bold text-amber-300 font-mono text-[11px]">
+                  {credits.toLocaleString()}
+                </span>
+              </button>
+            </Tooltip>
+
+            {showCreditsPopover && (
+              <div className="absolute right-0 top-full mt-2 z-50">
+                <HeaderCreditsPopover
+                  credits={credits}
+                  hasClaimedToday={user?.has_claimed_today}
+                  streakDays={user?.streak_days || 1}
+                  onClaimDaily={handleClaimDailyBonus}
+                  onNavigateToBilling={() => {
+                    setShowCreditsPopover(false);
+                    navigateTo?.("/profile?tab=billing");
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Player Toggle Button - Hidden on mobile (<640px) */}
+        <div className="hidden sm:block">
+          <Tooltip text="Toggle Floating Video Preview" placement="bottom">
+            <button
+              type="button"
+              onClick={() => {
+                const current =
+                  useImageEditorStore.getState().playerSettings.isPlayerOpen;
+                useImageEditorStore
+                  .getState()
+                  .setPlayerSettings({ isPlayerOpen: !current });
+              }}
+              aria-label="Toggle Floating Player"
+              className={`flex items-center justify-center h-8.5 w-8.5 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                isPlayerOpen
+                  ? "border-neutral-700 bg-neutral-800 text-white shadow-sm"
+                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white"
+              }`}
+            >
+              <Monitor className="h-4 w-4" />
+            </button>
+          </Tooltip>
+        </div>
+
+        {/* Focus Mode - Hidden on narrow screens (<520px) */}
+        <div className="hidden min-[520px]:block">
+          <Tooltip
+            text={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
+            placement="bottom"
+          >
+            <button
+              type="button"
+              onClick={() => setIsFocusMode((value) => !value)}
+              aria-label={isFocusMode ? "Exit Focus Mode" : "Focus Mode"}
+              className={`flex items-center justify-center h-8.5 w-8.5 rounded-xl border text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                isFocusMode
+                  ? "border-neutral-700 bg-neutral-800 text-white shadow-sm"
+                  : "border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white"
+              }`}
+            >
+              <Focus className="h-4 w-4" />
+            </button>
+          </Tooltip>
+        </div>
+
+        {/* Save Button */}
+        <Tooltip
+          text={isDirty ? "Save Unsaved Changes (Ctrl+S)" : "Project Saved"}
+          placement="bottom"
+        >
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            aria-label={isDirty ? "Save Unsaved Changes" : "Project Saved"}
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 h-8.5 rounded-xl text-xs font-bold font-mono transition-all active:scale-95 cursor-pointer border shrink-0 ${
+              isSaving
+                ? "bg-[#2A2A2A] border-[#3B82F6]/40 text-[#3B82F6] cursor-wait opacity-80"
+                : isDirty
+                ? "bg-[#3B82F6] hover:bg-[#2563EB] text-white border-blue-400/40 shadow-md shadow-blue-900/30 font-bold"
+                : "bg-[#202127] hover:bg-[#282a32] border-[#33353e] hover:border-[#4b4e5c] text-neutral-300 hover:text-white"
+            }`}
+          >
+            <Save
+              className={`h-3.5 w-3.5 ${
+                isSaving
+                  ? "animate-spin text-white"
+                  : isDirty
+                  ? "text-white"
+                  : "text-neutral-400"
+              }`}
+            />
+            <span className="hidden min-[480px]:inline font-sans text-[11px]">
+              {isSaving ? "Saving..." : isDirty ? "Save*" : "Save"}
+            </span>
+          </button>
+        </Tooltip>
+
+        {/* Notifications */}
+        <div className="relative shrink-0" ref={notificationsRef}>
+          <Tooltip text="Notifications" placement="bottom">
+            <button
+              onClick={() => setShowNotifications((v) => !v)}
+              aria-label="Notifications"
+              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
+            >
+              {notificationsMuted ? (
+                <BellOff className="h-4 w-4 text-rose-500" />
+              ) : (
+                <Bell className="h-4 w-4" />
+              )}
+              {notifications.filter((n) => !n.isRead).length > 0 && (
+                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-4 min-w-[16px] px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold">
+                  {notifications.filter((n) => !n.isRead).length}
+                </span>
+              )}
+            </button>
+          </Tooltip>
+          {showNotifications && (
+            <NotificationDropdown
+              notifications={notifications}
+              onClose={() => setShowNotifications(false)}
+              onMarkAsRead={(id: number) => markNotificationAsRead?.(id)}
+              onMarkAllAsRead={() => markAllNotificationsAsRead?.()}
+              onDelete={(id: number) => deleteNotification?.(id)}
+              onClearAll={() => clearAllNotifications?.()}
+              onNavigateToAll={() => onNavigateToAll?.()}
+              notificationsMuted={notificationsMuted}
+              onToggleMute={() => setNotificationsMuted?.(!notificationsMuted)}
+            />
+          )}
+        </div>
+
+        {/* Active Project Selector Icon Button - Hidden on narrow mobile (<480px) */}
+        <div className="hidden min-[480px]:block relative shrink-0">
+          <Tooltip
+            text={
+              activeProjectId && activeProjectData
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  }`
+                : "Select Active Project"
+            }
+            placement="bottom"
+          >
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="h-8.5 w-8.5 rounded-xl border border-[#33353e] bg-[#202127] text-neutral-300 hover:bg-[#282a32] hover:border-[#4b4e5c] hover:text-white transition-all cursor-pointer active:scale-95 flex items-center justify-center relative shrink-0"
+              aria-label="Active Project Selector"
+            >
+              <FolderSync className="h-4 w-4 text-neutral-400" />
+              {activeProjectId && activeProjectData && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-black animate-pulse" />
+              )}
+            </button>
+          </Tooltip>
+        </div>
+
+        {/* User Profile Pill at Far Right End */}
+        <Tooltip text="View Profile & Settings" placement="bottom">
+          <button
+            onClick={() => navigateTo?.("/profile")}
+            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            aria-label="Open User profile"
+          >
+            <span className="text-xs font-bold text-white group-hover:text-white truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+              {user?.full_name ||
+                user?.username ||
+                (user?.email ? user.email.split("@")[0] : "Studio Creator")}
+            </span>
+            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+              <img
+                key={user?.avatar_url || user?.full_name || "avatar"}
+                src={getUserAvatarUrl(user)}
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = DEFAULT_USER_AVATAR_DATA_URI;
+                }}
+                alt="User Avatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </button>
+        </Tooltip>
+      </div>
+    </header>
+  );
+};
+
+export default React.memo(EditorPageHeader);

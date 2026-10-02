@@ -81,8 +81,6 @@ class JobType(str, Enum):
     BATCH_DELETE = "BATCH_DELETE"               # Bulk project deletion
 
     # ── Platform / Maintenance ────────────────────────────────────────────────
-    CACHE_PURGE = "CACHE_PURGE"                 # LRU cache flush
-    TEMP_FLUSH = "TEMP_FLUSH"                   # Delete temp worker files
     COPYRIGHT_CHECK = "COPYRIGHT_CHECK"         # YouTube copyright check
 
 

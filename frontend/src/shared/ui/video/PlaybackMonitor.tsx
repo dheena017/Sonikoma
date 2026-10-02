@@ -10,7 +10,7 @@ import {
   Layers,
   Video,
 } from "lucide-react";
-import { GeneratedPanel } from "@/types";
+import { GeneratedPanel } from "@/shared/types";
 import { VideoPreviewHudHelp } from "./player/HudHelp";
 import { VideoPreviewSettingsMenu } from "./player/SettingsMenu";
 import { VideoPreviewChaptersMenu } from "./player/ChaptersMenu";
@@ -20,7 +20,7 @@ import VideoPreviewQuickActionOverlay from "./overlays/QuickActionOverlay";
 import {
   formatDisplayEpisodeLabel,
   getSortedEpisodeGroups,
-} from "@/features/editor_imported_images/components/ImportedImagesDeck";
+} from "@/features/workspace/imported-assets/components/ImportedAssetsDeck";
 import {
   startAmbientBackgroundMusic,
   stopAmbientBackgroundMusic,

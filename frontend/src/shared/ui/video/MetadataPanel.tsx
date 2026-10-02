@@ -14,7 +14,7 @@ import {
   FileAudio,
 } from "lucide-react";
 import { resolveDownloadNaming } from "@/shared/utils/downloadNaming";
-import YouTubeOfficialLogo from "@/features/creative_youtube/components/YouTubeOfficialLogo";
+import YouTubeOfficialLogo from "@/features/creative/youtube/components/YouTubeOfficialLogo";
 
 export interface VideoPreviewMetadataPanelProps {
   musicTheme: string;

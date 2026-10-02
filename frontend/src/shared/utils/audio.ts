@@ -40,6 +40,8 @@ export function setEngineVolume(volume: number, isMuted: boolean = false) {
   }
 }
 
+
+
 export function stopAmbientBackgroundMusic() {
   if (ambientOscillator) {
     ambientOscillator.stop();

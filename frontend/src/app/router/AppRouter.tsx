@@ -1,123 +1,123 @@
 import React from "react";
 import { Sliders, ArrowLeft } from "lucide-react";
-import { GeneratedPanel } from "@/types";
+import { GeneratedPanel } from "@/shared/types";
 import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
 
 // --- Custom Logic Hooks ---
-import { DEFAULT_SHORTCUTS } from "@/shared/hooks/useGlobalShortcuts";
+import { DEFAULT_SHORTCUTS } from "@/features/platform/shortcuts/hooks/useGlobalShortcuts";
 
 // --- Processing & Feedback Components ---
-import PageNotFound from "@/components/feedback/PageNotFound";
-import LoadingPage from "@/components/feedback/LoadingPage";
-import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
+import PageNotFound from "@/shared/ui/feedback/PageNotFound";
+import LoadingPage from "@/features/platform/shell/components/LoadingPage";
+import RouteLoadingFallback from "@/shared/ui/feedback/RouteLoadingFallback";
 
 // --- Authentication & Landing Views (Direct Imports for Instant Rendering) ---
-import LandingPage from "@/features/app_landing/pages/LandingPage";
-import LoginPage from "@/features/app_auth/pages/LoginPage";
-import RegisterPage from "@/features/app_auth/pages/RegisterPage";
-import ForgotPasswordPage from "@/features/app_auth/pages/ForgotPasswordPage";
-import AuthSuccessPage from "@/features/app_auth/pages/AuthSuccessPage";
+import LandingPage from "@/features/landing/pages/LandingPage";
+import LoginPage from "@/features/auth/pages/LoginPage";
+import RegisterPage from "@/features/auth/pages/RegisterPage";
+import ForgotPasswordPage from "@/features/auth/pages/ForgotPasswordPage";
+import AuthSuccessPage from "@/features/auth/pages/AuthSuccessPage";
 
 // --- Lazy Loaded Feature Pages & Modals ---
 const ScraperPage = React.lazy(
-  () => import("@/features/workspace_scraper/pages/ScraperPage")
+  () => import("@/features/platform/scraper/pages/ScraperPage")
 );
 const EditorPage = React.lazy(
-  () => import("@/features/editor_studio/pages/EditorPage")
+  () => import("@/features/workspace/shell/pages/EditorPage")
 );
 const AutoCropSettingsModal = React.lazy(
-  () => import("@/features/editor_auto_crop/components/AutoCropSettingsModal")
+  () => import("@/features/image-editor/auto-crop/components/AutoCropSettingsModal")
 );
 const AutoCropPreviewPage = React.lazy(
-  () => import("@/features/editor_auto_crop/pages/AutoCropPreviewPage")
+  () => import("@/features/image-editor/auto-crop/pages/AutoCropPreviewPage")
 );
 const ProjectsPage = React.lazy(
-  () => import("@/features/workspace_projects/pages/ProjectsPage")
+  () => import("@/features/platform/projects/pages/ProjectsPage")
 );
 const SeriesDetailsPage = React.lazy(
-  () => import("@/features/workspace_projects/pages/SeriesDetailsPage")
+  () => import("@/features/platform/projects/pages/SeriesDetailsPage")
 );
 const AISeriesStudioPage = React.lazy(
-  () => import("@/features/ai_generated_series/pages/AISeriesStudioPage")
+  () => import("@/features/intelligence/series/pages/AISeriesStudioPage")
 );
 const ShortcutsPage = React.lazy(
-  () => import("@/features/app_shortcuts/pages/ShortcutsPage")
+  () => import("@/features/platform/shortcuts/pages/ShortcutsPage")
 );
 const CreativeSuiteLayout = React.lazy(
-  () => import("@/features/creative_suite/components/CreativeSuiteLayout")
+  () => import("@/features/creative/suite/components/CreativeSuiteLayout")
 );
 const DashboardPage = React.lazy(
-  () => import("@/features/app_dashboard/pages/DashboardPage")
+  () => import("@/features/platform/dashboard/pages/DashboardPage")
 );
 const ImageEditorPage = React.lazy(
-  () => import("@/features/editor_image/pages/ImageEditorPage")
+  () => import("@/features/image-editor/canvas/pages/ImageEditorPage")
 );
 const YouTubePage = React.lazy(
-  () => import("@/features/creative_youtube/pages/YouTubePage")
+  () => import("@/features/creative/youtube/pages/YouTubePage")
 );
 const VoiceStudioPage = React.lazy(
-  () => import("@/features/creative_voice/pages/VoiceStudioPage")
+  () => import("@/features/creative/voice/pages/VoiceStudioPage")
 );
 const AIOptimizerPage = React.lazy(
-  () => import("@/features/creative_optimizer/pages/AIOptimizerPage")
+  () => import("@/features/creative/optimizer/pages/AIOptimizerPage")
 );
 const PanelAssistantPage = React.lazy(
-  () => import("@/features/creative_panel_assistant/pages/PanelAssistantPage")
+  () => import("@/features/creative/panel-assistant/pages/PanelAssistantPage")
 );
 const ProfilePage = React.lazy(
-  () => import("@/features/user_profile/pages/ProfilePage")
+  () => import("@/features/profile/pages/ProfilePage")
 );
 const SettingsAccountPage = React.lazy(
-  () => import("@/features/user_settings/pages/SettingsAccountPage")
+  () => import("@/features/profile/settings/pages/SettingsAccountPage")
 );
 const AudioSettingsPage = React.lazy(
-  () => import("@/features/editor_audio/pages/AudioSettingsPage")
+  () => import("@/features/video-editor/audio/pages/AudioSettingsPage")
 );
 const NotificationsPage = React.lazy(
-  () => import("@/features/app_notification/pages/NotificationsPage")
+  () => import("@/features/platform/notifications/pages/NotificationsPage")
 );
 const CreativeSuiteDashboardPage = React.lazy(
-  () => import("@/features/creative_suite/pages/CreativeSuiteDashboardPage")
+  () => import("@/features/creative/suite/pages/CreativeSuiteDashboardPage")
 );
 const ChapterScraperPage = React.lazy(() =>
   import(
-    "@/features/workspace_scraper/chapter-scraper/pages/ChapterScraperPage"
+    "@/features/platform/scraper/chapter-scraper/pages/ChapterScraperPage"
   ).then((m) => ({ default: m.ChapterScraperPage }))
 );
 const AdminPage = React.lazy(
-  () => import("@/features/system_admin/pages/AdminPage")
+  () => import("@/features/admin/pages/AdminPage")
 );
 const AdminDashboardPage = React.lazy(
-  () => import("@/features/system_admin/pages/AdminDashboardPage")
+  () => import("@/features/admin/pages/AdminDashboardPage")
 );
 const VideoEditorPage = React.lazy(
-  () => import("@/features/editor_video/pages/VideoEditorPage")
+  () => import("@/features/video-editor/video/pages/VideoEditorPage")
 );
 
 // --- AI Core Suite (Lazy Loaded) ---
 const AICoreLayout = React.lazy(
-  () => import("@/features/ai_core/components/AICoreLayout")
+  () => import("@/features/intelligence/core/components/AICoreLayout")
 );
 const AICoreOverviewPage = React.lazy(
-  () => import("@/features/ai_core/pages/AICoreOverviewPage")
+  () => import("@/features/intelligence/core/pages/AICoreOverviewPage")
 );
 const AIAPIKeysPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIAPIKeysPage")
+  () => import("@/features/intelligence/core/pages/AIAPIKeysPage")
 );
 const AIRateLimitsPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIRateLimitsPage")
+  () => import("@/features/intelligence/core/pages/AIRateLimitsPage")
 );
 const AIUsageAnalyticsPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIUsageAnalyticsPage")
+  () => import("@/features/intelligence/core/pages/AIUsageAnalyticsPage")
 );
 const AIRoutingPage = React.lazy(
-  () => import("@/features/ai_core/pages/AIRoutingPage")
+  () => import("@/features/intelligence/core/pages/AIRoutingPage")
 );
 const AICreditWalletPage = React.lazy(
-  () => import("@/features/ai_core/pages/AICreditWalletPage")
+  () => import("@/features/intelligence/core/pages/AICreditWalletPage")
 );
-import MainLayout from "@/components/layout/MainLayout";
-import { useProjectStore } from "@/shared/hooks";
+import MainLayout from "@/features/platform/shell/components/MainLayout";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
 
 /**
  * Validates whether an incoming path matches any registered app route.

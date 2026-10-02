@@ -1,0 +1,457 @@
+import React, { useState, useEffect, useRef } from "react";
+import {
+  X,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Bell,
+  BellOff,
+  Menu,
+  Zap,
+  FolderSync,
+  MoreHorizontal,
+} from "lucide-react";
+import { ImageTool } from "@/features/image-editor/canvas/hooks/useImageEditorState";
+import {
+  getUserAvatarUrl,
+  DEFAULT_USER_AVATAR_DATA_URI,
+} from "@/shared/utils/avatar";
+import NotificationDropdown from "@/features/platform/notifications/components/NotificationDropdown";
+import { HeaderCreditsPopover } from "@/features/intelligence/core";
+import ServerStatusIndicator from "@/shared/ui/status/ServerStatusIndicator";
+import { useBackendHealth } from "@/shared/api/hooks/useBackendHealth";
+import { getUserCreditsPayload, claimDailyCredits } from "@/features/auth/api/auth";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
+import { AIModelSelector } from "@/features/intelligence/core";
+import { SonikomaLogo } from "@/shared/ui/branding";
+
+interface ImageEditorHeaderProps {
+  editingImageIdx: number | null;
+  scrapedImages: string[];
+  handlePrevImage: () => void;
+  handleNextImage: () => void;
+  handleUndo: () => void;
+  historyLength: number;
+  handleRedo: () => void;
+  redoHistoryLength: number;
+  handleDeleteCurrentImage: () => void;
+  setEditingImageIdx: (idx: number | null) => void;
+  activeTab: ImageTool | string;
+  isPipMode: boolean;
+  setIsPipMode?: (val: boolean) => void;
+  slices: any[];
+  isToolsPanelOpen: boolean;
+  setIsToolsPanelOpen: (val: boolean | ((prev: boolean) => boolean)) => void;
+  handleExecuteSave?: () => void;
+
+  // New Header Props:
+  user?: any;
+  notifications?: any[];
+  markNotificationAsRead?: (id: number) => void;
+  markAllNotificationsAsRead?: () => void;
+  deleteNotification?: (id: number) => void;
+  clearAllNotifications?: () => void;
+  notificationsMuted?: boolean;
+  setNotificationsMuted?: (muted: boolean) => void;
+  themeMode?: "dark" | "light";
+  toggleThemeMode?: () => void;
+  onToggleSidebar?: () => void;
+  isSidebarOpen?: boolean;
+  navigateTo?: (path: string) => void;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+  fetchWithInterceptor?: any;
+  addNotification?: (message: string, type?: string) => void;
+}
+
+export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
+  editingImageIdx,
+  scrapedImages,
+  handlePrevImage,
+  handleNextImage,
+  handleUndo,
+  historyLength,
+  handleRedo,
+  redoHistoryLength,
+  handleDeleteCurrentImage,
+  setEditingImageIdx,
+  activeTab,
+  isPipMode,
+  setIsPipMode,
+  slices,
+  isToolsPanelOpen,
+  setIsToolsPanelOpen,
+  handleExecuteSave,
+
+  // New Header Props:
+  user,
+  notifications = [],
+  markNotificationAsRead = () => {},
+  markAllNotificationsAsRead = () => {},
+  deleteNotification = () => {},
+  clearAllNotifications = () => {},
+  notificationsMuted = false,
+  setNotificationsMuted,
+  themeMode = "dark",
+  toggleThemeMode,
+  onToggleSidebar,
+  isSidebarOpen = false,
+  navigateTo,
+  seriesSlug,
+  chapterSlug,
+  fetchWithInterceptor,
+  addNotification,
+}) => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showCreditsPopover, setShowCreditsPopover] = useState(false);
+  const [showMoreActions, setShowMoreActions] = useState(false);
+  const [credits, setCredits] = useState<number | null>(
+    user?.credits !== undefined ? user.credits : null
+  );
+
+  const { activeProjectId, activeProjectData, setDrawerOpen } =
+    useProjectStore();
+  const { status: backendStatus, checkHealth: recheckBackend } =
+    useBackendHealth();
+
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const creditsRef = useRef<HTMLDivElement>(null);
+  const moreActionsRef = useRef<HTMLDivElement>(null);
+
+  const handleClaimDailyBonus = async () => {
+    if (!fetchWithInterceptor) return;
+    try {
+      const res = await claimDailyCredits(fetchWithInterceptor);
+      if (res.success && typeof res.new_balance === "number") {
+        setCredits(res.new_balance);
+        if (addNotification) {
+          addNotification(res.message || "Claimed daily bonus!", "success");
+        }
+      }
+    } catch {
+      // silent
+    }
+  };
+
+  useEffect(() => {
+    if (!fetchWithInterceptor) return;
+    const pollCredits = async () => {
+      try {
+        const payload = await getUserCreditsPayload(fetchWithInterceptor);
+        if (payload !== null) setCredits(payload.credits);
+      } catch {
+        // silent
+      }
+    };
+    pollCredits();
+    const interval = setInterval(pollCredits, 30_000);
+    return () => clearInterval(interval);
+  }, [fetchWithInterceptor]);
+
+  useEffect(() => {
+    if (user?.credits !== undefined) {
+      setCredits(user.credits);
+    }
+  }, [user?.credits]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(target)
+      ) {
+        setShowNotifications(false);
+      }
+      if (creditsRef.current && !creditsRef.current.contains(target)) {
+        setShowCreditsPopover(false);
+      }
+      if (moreActionsRef.current && !moreActionsRef.current.contains(target)) {
+        setShowMoreActions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const handleLogoClick = () => {
+    const target = resolveWorkspaceReturnPath({
+      seriesSlug,
+      chapterSlug,
+      searchParams: window.location.search,
+    });
+    if (navigateTo) {
+      navigateTo(target);
+    } else {
+      window.history.pushState({}, "", target);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
+  const hasMultipleImages = scrapedImages.length > 1;
+
+  return (
+    <header
+      className={`sticky top-0 left-0 right-0 h-16 w-full min-w-0 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl flex items-center justify-between pl-0 pr-2 sm:pr-6 md:pr-8 gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+        isSidebarOpen ? "z-0 pointer-events-none" : "z-50"
+      }`}
+    >
+      {/* ── Left: Hamburger, Brand Logo, Mode Badge & Image Pagination ──── */}
+      <div className="flex items-center shrink-0 h-full">
+        <div className="w-14 sm:w-16 md:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full">
+          <button
+            onClick={() => {
+              if (onToggleSidebar) {
+                onToggleSidebar();
+              } else {
+                useProjectStore.getState().setDrawerOpen(true);
+              }
+            }}
+            className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
+            title="Toggle Navigation Menu"
+            aria-label="Toggle Navigation Menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-3 pl-3 sm:pl-4">
+          <SonikomaLogo
+            size="sm"
+            badge="Image Editor"
+            onClick={handleLogoClick}
+          />
+
+        {scrapedImages && scrapedImages.length > 0 && (
+          <div className="hidden min-[640px]:flex items-center space-x-1 bg-neutral-900/90 rounded-xl px-1.5 py-1 border border-white/8 shadow-xs shrink-0">
+            <button
+              onClick={handlePrevImage}
+              disabled={editingImageIdx === null || editingImageIdx <= 0}
+              className={`p-1 rounded-lg transition ${
+                editingImageIdx !== null && editingImageIdx > 0
+                  ? "text-neutral-300 hover:text-white hover:bg-white/10 cursor-pointer active:scale-95"
+                  : "text-neutral-600 cursor-not-allowed opacity-35"
+              }`}
+              title="Previous Image (← Left Arrow)"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-xs font-semibold text-neutral-300 min-w-[2.8rem] text-center font-mono">
+              {editingImageIdx !== null ? editingImageIdx + 1 : 1} /{" "}
+              {scrapedImages.length}
+            </span>
+            <button
+              onClick={handleNextImage}
+              disabled={
+                editingImageIdx === null ||
+                editingImageIdx >= scrapedImages.length - 1
+              }
+              className={`p-1 rounded-lg transition ${
+                editingImageIdx !== null &&
+                editingImageIdx < scrapedImages.length - 1
+                  ? "text-neutral-300 hover:text-white hover:bg-white/10 cursor-pointer active:scale-95"
+                  : "text-neutral-600 cursor-not-allowed opacity-35"
+              }`}
+              title="Next Image (→ Right Arrow)"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+        </div>
+      </div>
+
+      {/* ── Right: AI Routing, Credits, Notifications, Profile & Actions ─── */}
+      <div className="flex items-center gap-1 max-lg:gap-1.5 sm:gap-2 min-w-0 shrink-0 ml-auto">
+        {/* 🟢 Server Status Indicator - Hidden on narrow mobile (<580px) */}
+        <div className="hidden min-[580px]:flex items-center justify-center max-lg:[&>button]:px-2 max-lg:[&>button]:gap-1">
+          <ServerStatusIndicator
+            status={backendStatus}
+            onClick={recheckBackend}
+          />
+        </div>
+
+        {/* 🤖 Global AI Model Selector - Hidden on narrow mobile (<640px) */}
+        <AIModelSelector compact className="hidden min-[640px]:flex shrink-0" />
+
+        <div className="relative md:hidden" ref={moreActionsRef}>
+          <button
+            type="button"
+            onClick={() => {
+              setShowMoreActions((v) => !v);
+              setShowNotifications(false);
+              setShowCreditsPopover(false);
+            }}
+            className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative"
+            title="More actions"
+            aria-label="More actions"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+
+          {showMoreActions && (
+            <div className="absolute right-0 top-full mt-2 z-50 w-52 rounded-2xl border border-white/10 bg-[#141414]/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-2 space-y-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsToolsPanelOpen((prev) => !prev);
+                    setShowMoreActions(false);
+                  }}
+                  className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                >
+                  <Menu className="w-4 h-4 text-neutral-400" />
+                  {isToolsPanelOpen ? "Hide Tools" : "Show Tools"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPipMode?.(!isPipMode);
+                    setShowMoreActions(false);
+                  }}
+                  className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm text-neutral-200 hover:bg-white/5"
+                >
+                  <Check className="w-4 h-4 text-neutral-400" />
+                  {isPipMode ? "Exit PIP" : "Open PIP"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ⚡ Credits Pill & Popover */}
+        {credits !== null && (
+          <div className="relative shrink-0" ref={creditsRef}>
+            <button
+              onClick={() => {
+                setShowCreditsPopover(!showCreditsPopover);
+                setShowNotifications(false);
+              }}
+              title="Your credit balance & daily rewards — click to view"
+              className={`h-8.5 flex items-center gap-1.5 px-2.5 sm:px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
+                showCreditsPopover ? "border-amber-500 bg-[#2A2A2A]" : ""
+              }`}
+            >
+              <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
+              <span className="font-bold text-amber-300 font-mono text-[11px]">
+                {credits.toLocaleString()}
+              </span>
+            </button>
+
+            {showCreditsPopover && (
+              <div className="absolute right-0 top-full mt-2 z-50">
+                <HeaderCreditsPopover
+                  credits={credits}
+                  hasClaimedToday={user?.has_claimed_today}
+                  streakDays={user?.streak_days || 1}
+                  onClaimDaily={handleClaimDailyBonus}
+                  onNavigateToBilling={() => {
+                    setShowCreditsPopover(false);
+                    if (navigateTo) navigateTo("/profile?tab=billing");
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Notifications Bell */}
+        <div className="relative shrink-0" ref={notificationsRef}>
+          <button
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setShowCreditsPopover(false);
+            }}
+            className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
+              showNotifications ? "border-[#3B82F6] bg-[#2A2A2A]" : ""
+            }`}
+            title="Notifications"
+          >
+            {notificationsMuted ? (
+              <BellOff className="h-4 w-4 text-rose-400" />
+            ) : (
+              <Bell className="h-4 w-4" />
+            )}
+            {unreadCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF2D55] text-[10px] font-black text-white ring-2 ring-[#18191e] shadow-xs">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {showNotifications && (
+            <NotificationDropdown
+              notifications={notifications}
+              onClose={() => setShowNotifications(false)}
+              onMarkAsRead={markNotificationAsRead}
+              onMarkAllAsRead={markAllNotificationsAsRead}
+              onDelete={deleteNotification}
+              onClearAll={clearAllNotifications}
+              onNavigateToAll={() => {
+                setShowNotifications(false);
+                if (navigateTo) navigateTo("/notifications");
+              }}
+              notificationsMuted={notificationsMuted}
+              onToggleMute={() =>
+                setNotificationsMuted &&
+                setNotificationsMuted(!notificationsMuted)
+              }
+            />
+          )}
+        </div>
+
+        {/* Active Project Selector Icon Button - Hidden on narrow mobile (<480px) */}
+        <div className="hidden min-[480px]:block relative shrink-0">
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative"
+            title={
+              activeProjectId && activeProjectData
+                ? `Active Project: ${
+                    activeProjectData.project?.title || "Active"
+                  } — Click to switch`
+                : "Select Active Project"
+            }
+          >
+            <FolderSync className="h-4 w-4 text-[#3B82F6]" />
+            {activeProjectId && activeProjectData && (
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#10B981] ring-2 ring-black animate-pulse" />
+            )}
+          </button>
+        </div>
+
+        {/* User Profile Pill at Far Right */}
+        <button
+          onClick={() => navigateTo && navigateTo("/profile")}
+          className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+          data-no-transform
+          title="View Profile & Account Settings"
+          aria-label="Open User profile"
+        >
+          <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            {user?.full_name ||
+              user?.username ||
+              (user?.email ? user.email.split("@")[0] : "Studio Creator")}
+          </span>
+          <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+            <img
+              key={user?.avatar_url || user?.full_name || "avatar"}
+              src={getUserAvatarUrl(user)}
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.onerror = null;
+                target.src = DEFAULT_USER_AVATAR_DATA_URI;
+              }}
+              alt="User Avatar"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </button>
+      </div>
+    </header>
+  );
+};

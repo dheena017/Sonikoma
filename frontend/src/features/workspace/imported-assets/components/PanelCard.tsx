@@ -1,0 +1,357 @@
+import React from "react";
+import { ScraperDeckProps } from "./types";
+import * as api from "@/shared/api";
+import { PanelCardThumbnail } from "./PanelCardThumbnail";
+import { PanelCardControls } from "./PanelCardControls";
+import { PanelCardActions } from "./PanelCardActions";
+
+// 1. Cleaned up all unused Editor-related props
+interface PanelCardProps
+  extends Pick<
+    ScraperDeckProps,
+    | "setScrapedImages"
+    | "setSelectedScraped"
+    | "setConsoleLogs"
+    | "mergingIndices"
+    | "handleMergeWithNext"
+    | "scrapedImages"
+    | "bubbleCroppingImgUrl"
+  > {
+  imgUrl: string;
+  /** The original raw URL (matching scrapedImages entries) used for callbacks & selection state */
+  rawImgUrl: string;
+  idx: number;
+  displayIdx?: number;
+  isSelected: boolean;
+  isBatchCropping: boolean;
+  croppingImgUrl: string | null;
+  isInTimeline?: boolean;
+  addPanelsToStoryboard: (
+    urls: string[],
+    currentScrapedList?: string[],
+    shouldScroll?: boolean
+  ) => void;
+  addNotification: (
+    message: string,
+    type: "error" | "success" | "info" | "warning"
+  ) => void;
+  /** Called when the card is clicked. Parent handles selection + shift-range logic. */
+  onCardClick: (
+    idx: number,
+    imgUrl: string,
+    shiftKey: boolean,
+    ctrlOrMeta: boolean
+  ) => void;
+  onCardDoubleClick?: (idx: number, imgUrl: string) => void;
+  className?: string;
+  viewLayout?: "scroll" | "grid";
+  key?: React.Key;
+}
+
+function PanelCard({
+  imgUrl,
+  rawImgUrl,
+  idx,
+  displayIdx,
+  isSelected,
+  isBatchCropping,
+  croppingImgUrl,
+  isInTimeline,
+  bubbleCroppingImgUrl,
+  scrapedImages,
+  mergingIndices,
+  handleMergeWithNext,
+  setScrapedImages,
+  setSelectedScraped,
+  setConsoleLogs,
+  addPanelsToStoryboard,
+  addNotification,
+  onCardClick,
+  onCardDoubleClick,
+  className,
+  viewLayout = "scroll",
+}: PanelCardProps) {
+  const [isEditing, setIsEditing] = React.useState<boolean>(false);
+  const isProcessing =
+    croppingImgUrl === imgUrl || bubbleCroppingImgUrl === imgUrl || isEditing;
+
+  const [dimensions, setDimensions] = React.useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
+  const handleDimensionsLoaded = React.useCallback(
+    (dims: { width: number; height: number }) => {
+      setDimensions(dims);
+    },
+    []
+  );
+
+  const aspectRatioLabel = React.useMemo(() => {
+    if (!dimensions) return null;
+    const ratio = dimensions.width / dimensions.height;
+    if (ratio > 1.25) return "Landscape";
+    if (ratio < 0.28) return "Too Tall Strip";
+    if (ratio < 0.6) return "Tall Strip";
+    return "Portrait";
+  }, [dimensions]);
+
+  const aspectRatioBadgeClass = React.useMemo(() => {
+    switch (aspectRatioLabel) {
+      case "Too Tall Strip":
+        return "bg-rose-950/40 border-rose-800/40 text-rose-350 shadow-[0_0_8px_rgba(239,68,68,0.15)] animate-pulse";
+      case "Tall Strip":
+        return "bg-blue-950/40 border-blue-500/30 text-blue-400";
+      case "Landscape":
+        return "bg-emerald-950/40 border-emerald-500/30 text-emerald-300";
+      default:
+        return "bg-purple-950/30 border-purple-500/30 text-purple-300";
+    }
+  }, [aspectRatioLabel]);
+
+  const updateImageUrl = React.useCallback(
+    (nextUrl: string) => {
+      setScrapedImages?.((prev: any[]) =>
+        prev.map((img: any, i: number) => (i === idx ? nextUrl : img))
+      );
+      setSelectedScraped?.((prev: any[]) =>
+        prev.map((img: string) => (img === rawImgUrl ? nextUrl : img))
+      );
+    },
+    [idx, rawImgUrl, setScrapedImages, setSelectedScraped]
+  );
+
+  const addConsoleLog = React.useCallback(
+    (message: string) => {
+      setConsoleLogs?.((prev: any) => [message, ...prev]);
+    },
+    [setConsoleLogs]
+  );
+
+  const processCardClick = React.useCallback(
+    (shiftKey: boolean, ctrlOrMeta: boolean) => {
+      onCardClick(idx, rawImgUrl, shiftKey, ctrlOrMeta);
+    },
+    [idx, onCardClick, rawImgUrl]
+  );
+
+  const handleRotateClockwise = React.useCallback(async () => {
+    console.log(`[PanelCard] Rotating image #${idx + 1} clockwise`);
+    setIsEditing(true);
+    addConsoleLog(`[Image Editor] Rotating Panel #${idx + 1} 90° clockwise...`);
+    try {
+      const data = await api.submitImageEdits(fetch, {
+        url: rawImgUrl,
+        rotate: 90,
+        autoTrim: false,
+      });
+
+      updateImageUrl(data.url);
+      addConsoleLog(`[Image Editor] Successfully rotated Panel #${idx + 1}!`);
+    } catch (err: any) {
+      console.error(err);
+      addConsoleLog(`[Image Editor Error] Rotation failed: ${err.message}`);
+    } finally {
+      setIsEditing(false);
+    }
+  }, [idx, rawImgUrl, addConsoleLog, updateImageUrl]);
+
+  const handleFlipHorizontal = React.useCallback(async () => {
+    console.log(`[PanelCard] Flipping image #${idx + 1} horizontally`);
+    setIsEditing(true);
+    addConsoleLog(`[Image Editor] Flipping Panel #${idx + 1} horizontally...`);
+    try {
+      const data = await api.submitImageEdits(fetch, {
+        url: rawImgUrl,
+        flipHorizontal: true,
+        autoTrim: false,
+      });
+
+      updateImageUrl(data.url);
+      addConsoleLog(
+        `[Image Editor] Successfully flipped Panel #${idx + 1} horizontally!`
+      );
+    } catch (err: any) {
+      console.error(err);
+      addConsoleLog(`[Image Editor Error] Flipping failed: ${err.message}`);
+    } finally {
+      setIsEditing(false);
+    }
+  }, [idx, rawImgUrl, addConsoleLog, updateImageUrl]);
+
+  const handleUndo = React.useCallback(async () => {
+    console.log(`[PanelCard] Undoing last operation for image #${idx + 1}`);
+    setIsEditing(true);
+    addConsoleLog(
+      `[Image Editor] Restoring previous state for Panel #${idx + 1}...`
+    );
+    try {
+      const data = await api.undoImageEdit(fetch, { url: rawImgUrl });
+
+      if (data.success && data.previous_url) {
+        updateImageUrl(data.previous_url);
+        addConsoleLog(
+          `[Image Editor] Successfully restored previous state for Panel #${
+            idx + 1
+          }!`
+        );
+      } else {
+        throw new Error(data.error || "No previous state found");
+      }
+    } catch (err: any) {
+      console.error(err);
+      addConsoleLog(`[Image Editor Error] Undo failed: ${err.message}`);
+    } finally {
+      setIsEditing(false);
+    }
+  }, [idx, rawImgUrl, addConsoleLog, updateImageUrl]);
+
+  const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const shiftKey = e.shiftKey;
+    const ctrlOrMeta = e.ctrlKey || e.metaKey;
+
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+      clickTimeoutRef.current = null;
+      onCardDoubleClick?.(idx, rawImgUrl);
+    } else {
+      clickTimeoutRef.current = setTimeout(() => {
+        clickTimeoutRef.current = null;
+        processCardClick(shiftKey, ctrlOrMeta);
+      }, 250);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== "Enter" && e.key !== " ") {
+      return;
+    }
+    e.preventDefault();
+    processCardClick(e.shiftKey, e.ctrlKey || e.metaKey);
+  };
+
+  const handleCheckboxClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setSelectedScraped?.((prev: string[]) => {
+      // Use rawImgUrl to stay consistent with scrapedImages entries
+      if (prev.includes(rawImgUrl)) {
+        return prev.filter((x) => x !== rawImgUrl);
+      } else {
+        return [...prev, rawImgUrl];
+      }
+    });
+  };
+
+  return (
+    <div
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`Panel ${idx + 1}${isSelected ? ", selected" : ""}`}
+      aria-pressed={isSelected}
+      style={{
+        contentVisibility: "auto",
+        containIntrinsicSize:
+          viewLayout === "grid" ? "320px 460px" : "300px 460px",
+      }}
+      className={[
+        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-colors duration-150 text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-neutral-700 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950",
+        viewLayout === "grid"
+          ? "w-full min-w-0"
+          : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center",
+        isProcessing
+          ? "border-purple-500/60 bg-neutral-900/90 shadow-md ring-1 ring-purple-500/30"
+          : isSelected
+          ? "border-blue-500/80 bg-neutral-900/90 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/30"
+          : "border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60",
+        className || "",
+      ].join(" ")}
+    >
+      <PanelCardThumbnail
+        imgUrl={imgUrl}
+        idx={idx}
+        displayIdx={displayIdx}
+        isSelected={isSelected}
+        isProcessing={isProcessing}
+        isBatchCropping={isBatchCropping}
+        bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+        isInTimeline={isInTimeline}
+        handleRotateClockwise={handleRotateClockwise}
+        handleFlipHorizontal={handleFlipHorizontal}
+        handleUndo={handleUndo}
+        onCheckboxClick={handleCheckboxClick}
+        onLoadDimensions={handleDimensionsLoaded}
+        aspectRatioLabel={aspectRatioLabel}
+      />
+
+      {/* Dynamic Resolution & Aspect Ratio Badges */}
+      {dimensions && (
+        <div className="flex items-center justify-between gap-2 px-1 text-[9px] font-mono select-none">
+          <span className="text-neutral-500 font-bold bg-neutral-900 border border-neutral-800 px-1.5 py-0.5 rounded">
+            {dimensions.width} × {dimensions.height} px
+          </span>
+          {aspectRatioLabel && (
+            <span
+              className={[
+                "px-1.5 py-0.5 rounded font-bold border transition-colors duration-150",
+                aspectRatioBadgeClass,
+              ].join(" ")}
+            >
+              {aspectRatioLabel}
+            </span>
+          )}
+        </div>
+      )}
+
+      <PanelCardControls
+        imgUrl={imgUrl}
+        idx={idx}
+        scrapedImages={scrapedImages}
+        mergingIndices={mergingIndices}
+        handleMergeWithNext={handleMergeWithNext}
+        addPanelsToStoryboard={addPanelsToStoryboard}
+      />
+
+      {/* 3. PanelCardActions now only renders the Delete button (based on our previous step) */}
+      <PanelCardActions
+        idx={idx}
+        imgUrl={imgUrl}
+        rawImgUrl={rawImgUrl}
+        setScrapedImages={setScrapedImages}
+        setSelectedScraped={setSelectedScraped}
+        setConsoleLogs={setConsoleLogs}
+        addNotification={addNotification}
+      />
+    </div>
+  );
+}
+
+export default React.memo(PanelCard, (prev, next) => {
+  return (
+    prev.imgUrl === next.imgUrl &&
+    prev.rawImgUrl === next.rawImgUrl &&
+    prev.idx === next.idx &&
+    prev.displayIdx === next.displayIdx &&
+    prev.isSelected === next.isSelected &&
+    prev.isBatchCropping === next.isBatchCropping &&
+    prev.croppingImgUrl === next.croppingImgUrl &&
+    prev.bubbleCroppingImgUrl === next.bubbleCroppingImgUrl &&
+    prev.isInTimeline === next.isInTimeline &&
+    prev.viewLayout === next.viewLayout &&
+    prev.mergingIndices === next.mergingIndices
+  );
+});

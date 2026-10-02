@@ -49,7 +49,6 @@ PUBLIC_ROUTE_SET = {
     "/api/v1/health/ffmpeg",
     "/api/v1/system/health/ffmpeg",
     "/api/v1/metrics",
-    "/api/v1/system/metrics",
     "/api/v1/system/logs",            # Diagnostic log polling (system terminal panel)
     "/api/v1/system/system-logs",     # Alias
     "/api/v1/auth/register",
@@ -95,7 +94,6 @@ PUBLIC_ROUTE_PREFIXES = (
     "/playwright-report", # Playwright Interactive Visual Report assets & pages
     "/playwright-report/",
     "/api/v1/export/youtube/", # YouTube publisher routes (uses get_optional_current_user in router)
-    "/api/v1/system/logs/",   # SSE real-time log stream (/api/v1/system/logs/stream)
     "/api/v1/scraper/",
     "/api/v1/audio/",
     "/api/v1/ocr/",
@@ -110,12 +108,6 @@ PUBLIC_ROUTE_PREFIXES = (
 # Admin-only endpoints (require creator_role/admin)
 ADMIN_ROUTE_PREFIXES = (
     "/api/v1/auth/admin",             # Match without trailing slash to cover all subroutes cleanly
-    "/api/v1/system/metrics/purge-cache",
-    "/api/v1/metrics/purge-cache",
-    "/api/v1/system/metrics/flush-temp",
-    "/api/v1/metrics/flush-temp",
-    "/api/v1/system/metrics/emergency-stop",
-    "/api/v1/metrics/emergency-stop",
     "/api/v1/system/logs",
     "/api/v1/system/system-logs",
 )
@@ -173,7 +165,7 @@ client_request_log = {}
 async def rate_limiting_middleware(request: Request, call_next):
     # Bypass metrics, health, docs, openapi, and logs to prevent lockout or UI terminal interruption
     path = request.url.path
-    if any(p in path for p in ["/api/v1/system/logs", "/system-logs", "/api/v1/system/metrics", "/api/v1/system/health", "/api/v1/system/status", "/metrics", "/health", "/api/v1/docs", "/api/v1/openapi.json"]):
+    if any(p in path for p in ["/api/v1/system/logs", "/system-logs", "/api/v1/system/health", "/api/v1/system/status", "/metrics", "/health", "/api/v1/docs", "/api/v1/openapi.json"]):
         return await call_next(request)
 
     client_ip = request.client.host if request.client else "unknown"

@@ -20,12 +20,12 @@ import {
   Layout,
   Zap,
 } from "lucide-react";
-import { AIModelSelector } from "@/features/ai_core";
+import { AIModelSelector } from "@/features/intelligence/core";
 import {
   DEFAULT_AUTOCROP_SETTINGS,
   DEFAULT_TTS_VOICES,
   MUSIC_THEMES_CATALOG,
-} from "@/features/editor_studio/types/settings";
+} from "@/features/workspace/shell/types/settings";
 
 export interface VideoPreviewAdvancedSettingsProps {
   voiceActor: string;

@@ -155,7 +155,6 @@ class EndpointFilter(logging.Filter):
         "/system/logs",
         "/api/v1/system/logs",
         "/system/metrics",
-        "/api/v1/system/metrics",
         "/system/health",
         "/api/v1/system/health",
         "/system-logs",

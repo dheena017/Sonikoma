@@ -1,0 +1,1002 @@
+import React from "react";
+import ImportedAssetsDeck from "@/features/workspace/imported-assets/components/ImportedAssetsDeck";
+import StoryboardTimeline from "@/features/video-editor/timeline/components/StoryboardTimeline";
+import QuickVideoPreview from "@/features/workspace/viewer/components/QuickVideoPreview";
+import LayoutEditorPage from "@/features/workspace/shell/components/EditorPageLayout";
+import { VideoPreviewAdvancedSettings } from "@/shared/ui/video/AdvancedSettings";
+import { getUserCredits } from "@/features/auth/api/auth";
+import { Tv, Eye, Sliders, Save, X, Mic } from "lucide-react";
+import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+
+
+const AudioSettingsPage = React.lazy(
+  () => import("@/features/video-editor/audio/pages/AudioSettingsPage")
+);
+const VideoEditorPage = React.lazy(
+  () => import("@/features/video-editor/video/pages/VideoEditorPage")
+);
+const AutoCropSettingsModal = React.lazy(
+  () => import("@/features/image-editor/auto-crop/components/AutoCropSettingsModal")
+);
+const AutoCropPreviewPage = React.lazy(
+  () => import("@/features/image-editor/auto-crop/pages/AutoCropPreviewPage")
+);
+
+interface EditorPageProps {
+  appLogic: any;
+  navigateTo: (path: string) => void;
+  onRequestProjectConfirmation: () => void;
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+  rating?: number;
+  likes?: string;
+  views?: number;
+}
+
+const EditorPage: React.FC<EditorPageProps> = ({
+  appLogic,
+  navigateTo,
+  onRequestProjectConfirmation,
+  seriesSlug,
+  chapterSlug,
+  rating,
+  likes,
+  views,
+}: EditorPageProps) => {
+  void seriesSlug;
+  void chapterSlug;
+  const playerSettings = useImageEditorStore((state) => state.playerSettings);
+  // Read loading + dirty state from store
+  const isHydrating = useProjectStore(
+    (s) => s.isHydrating || s.projectState === "loading"
+  );
+  const isDirtyStore = useProjectStore((s) => s.isDirty);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(true);
+  const [currentSection, setCurrentSection] = React.useState("storyboard");
+  const [isFocusMode, setIsFocusMode] = React.useState(false);
+
+  const [activeTab, setActiveTab] = React.useState(() => {
+    return new URLSearchParams(window.location.search).get("tab") || "";
+  });
+
+  React.useEffect(() => {
+    const handleLocationChange = () => {
+      const tab = new URLSearchParams(window.location.search).get("tab") || "";
+      setActiveTab(tab);
+    };
+    window.addEventListener("popstate", handleLocationChange);
+    window.addEventListener("locationchange", handleLocationChange);
+    return () => {
+      window.removeEventListener("popstate", handleLocationChange);
+      window.removeEventListener("locationchange", handleLocationChange);
+    };
+  }, []);
+
+  // ── Unsaved Changes Warning ───────────────────────────────────────────────
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirtyStore) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirtyStore]);
+
+  const handleCloseSettings = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete("tab");
+    const searchStr = params.toString();
+    const newPath = `${window.location.pathname}${searchStr ? "?" + searchStr : ""
+      }`;
+    if (navigateTo) {
+      navigateTo(newPath);
+    } else {
+      window.history.pushState({}, "", newPath);
+      window.dispatchEvent(new Event("popstate"));
+    }
+  };
+
+  const {
+    projectId,
+    panels,
+    setPanels,
+    scrapedImages,
+    setScrapedImages,
+    selectedScraped,
+    setSelectedScraped,
+    activePreviewTab,
+    setActivePreviewTab,
+    setEditingImageIdx,
+    setEditCropTop,
+    setEditCropBottom,
+    setEditCropLeft,
+    setEditCropRight,
+    setEditAutoTrim,
+    showBubbleModal,
+    setShowBubbleModal,
+    playStoryboardAudio,
+    isCleaningBubbles,
+    cleanProgress,
+    bubbleCroppingImgUrl,
+    showAutoCropModal,
+    setShowAutoCropModal,
+    isBatchCropping,
+    batchProgress,
+    croppingImgUrl,
+    handleAutoCropSelected,
+    handleCleanBubblesSelected,
+    handleCancelBatch,
+    videoPlayerRef,
+    addNotification,
+    setErrorPopup,
+    fetchWithInterceptor,
+    targetUrl,
+    selectedSource,
+    selectedModel,
+    consoleLogs,
+    resetWorkspace,
+    frameRate,
+
+    isProcessing,
+    handleGenerateVideo,
+    isScraping,
+    mergingIndices,
+    handleStitchWithNext,
+    addPanelsToStoryboard,
+    progressStatus,
+    videoUrl,
+    setVideoUrl,
+    aspectRatio,
+    currentPanelIndex,
+    setCurrentPanelIndex,
+    playbackTime,
+    setPlaybackTime,
+    reprocessingPanelId,
+    storyboardPlaying,
+    setStoryboardPlaying,
+    toggleStoryboardPlayback,
+    resetStoryboardPlayback,
+    isMuted,
+    setIsMuted,
+    volume,
+    setVolume,
+    musicTheme,
+    voiceActor,
+    narrationStyle,
+    bubbleSensitivity,
+    setBubbleSensitivity,
+    bubbleDetectionStyle,
+    setBubbleDetectionStyle,
+    bubbleEraseMethod,
+    setBubbleEraseMethod,
+    bubbleDilation,
+    setBubbleDilation,
+    bubbleInpaintRadius,
+    cropSensitivity,
+    setCropSensitivity,
+    cropPaddingPx,
+    setCropPaddingPx,
+    cropGuidance,
+    setCropGuidance,
+    cropFocusMode,
+    setCropFocusMode,
+    cropBackgroundMode,
+    aspectRatioLock,
+    minPanelAreaPct,
+    overlapMergeThreshold,
+    useLocalCV,
+    autoSplitTallStrips,
+    cropModel,
+    setCropModel,
+    cropMinHeightPx,
+    cropCannyLow,
+    cropCannyHigh,
+    cropCloseKernelSize,
+    seriesTitle,
+    chapterNumber,
+    chapterTitle,
+    autoPlayAudio,
+    saveProject,
+    audioFeedback,
+    isRendering,
+    renderProgress,
+    handleRenderFinalVideo,
+  } = appLogic;
+
+  const [selectedPanelIds, setSelectedPanelIds] = React.useState<Set<number>>(
+    new Set()
+  );
+
+  // Clear timeline selection when assets are selected, and vice-versa
+  const handleSetSelectedScraped = React.useCallback(
+    (value: React.SetStateAction<string[]>) => {
+      setSelectedScraped(value);
+      if (
+        typeof value === "function" ||
+        (Array.isArray(value) && value.length > 0)
+      ) {
+        setSelectedPanelIds(new Set());
+      }
+    },
+    [setSelectedScraped, setSelectedPanelIds]
+  );
+
+  const handleSetSelectedPanelIds = React.useCallback(
+    (value: React.SetStateAction<Set<number>>) => {
+      setSelectedPanelIds(value);
+      if (
+        typeof value === "function" ||
+        (value instanceof Set && value.size > 0)
+      ) {
+        setSelectedScraped([]);
+      }
+    },
+    [setSelectedPanelIds, setSelectedScraped]
+  );
+
+  const [isSaving, setIsSaving] = React.useState(false);
+  const stableNoop = React.useCallback(() => { }, []);
+  const [userCredits, setUserCredits] = React.useState<number | null>(
+    appLogic.user?.credit_balance ?? appLogic.user?.credits ?? null
+  );
+
+
+  React.useEffect(() => {
+    let active = true;
+    const fetchCredits = async () => {
+      try {
+        const balance = await getUserCredits(fetchWithInterceptor);
+        if (active && balance !== null) {
+          setUserCredits(balance);
+        }
+      } catch (e) {
+        console.error("Failed to fetch user credits in EditorPage:", e);
+      }
+    };
+    fetchCredits();
+    return () => {
+      active = false;
+    };
+  }, [fetchWithInterceptor]);
+
+  const handleSave = () => {
+    onRequestProjectConfirmation();
+  };
+
+  const handleBackToApp = () => {
+    const slug = seriesSlug || appLogic.seriesSlugState;
+    if (slug) {
+      navigateTo(`/projects/${slug}`);
+    } else {
+      navigateTo("/projects");
+    }
+  };
+
+  // SCROLL RESTORATION: Restore the scroll position when returning from the Image Editor
+  React.useEffect(() => {
+    const savedWindowScroll = sessionStorage.getItem(
+      "editor_page_scroll_top_window"
+    );
+    const savedContainerScroll = sessionStorage.getItem(
+      "editor_page_scroll_top_container"
+    );
+    if (!savedWindowScroll && !savedContainerScroll) return;
+
+    const windowVal = savedWindowScroll ? parseInt(savedWindowScroll, 10) : 0;
+    const containerVal = savedContainerScroll
+      ? parseInt(savedContainerScroll, 10)
+      : 0;
+
+    const restoreScroll = () => {
+      if (savedWindowScroll) {
+        window.scrollTo(0, windowVal);
+      }
+      if (savedContainerScroll) {
+        const container = document.getElementById("main-scroll-container");
+        if (container) {
+          container.scrollTop = containerVal;
+        }
+      }
+    };
+
+    // Restore immediately on mount
+    restoreScroll();
+
+    // Restore at multiple intervals to handle async rendering and shifting heights
+    const t1 = setTimeout(restoreScroll, 50);
+    const t2 = setTimeout(restoreScroll, 150);
+    const t3 = setTimeout(restoreScroll, 300);
+    const t4 = setTimeout(restoreScroll, 600);
+
+    // Cleanup sessionStorage after applying the scroll
+    const tClean = setTimeout(() => {
+      sessionStorage.removeItem("editor_page_scroll_top_window");
+      sessionStorage.removeItem("editor_page_scroll_top_container");
+    }, 700);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+      clearTimeout(tClean);
+    };
+  }, []);
+
+  // LISTEN FOR THE EDIT BUTTON CLICK (tab switching via CustomEvent)
+  React.useEffect(() => {
+    const handleSwitchTab = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const detail = customEvent?.detail;
+      if (!detail) return;
+
+      if (detail === "image-editor") {
+        sessionStorage.setItem(
+          "editor_page_scroll_top_window",
+          String(window.scrollY)
+        );
+        const container = document.getElementById("main-scroll-container");
+        if (container) {
+          sessionStorage.setItem(
+            "editor_page_scroll_top_container",
+            String(container.scrollTop)
+          );
+        }
+
+        const idx =
+          useImageEditorStore.getState().editingImageIdx ??
+          appLogic.editingImageIdx ??
+          0;
+        navigateTo(`/image-editor?idx=${idx}`);
+      } else if (detail === "video-editor") {
+        navigateTo("/video-editor");
+      } else {
+        setCurrentSection(detail);
+      }
+    };
+
+    window.addEventListener("SWITCH_TAB", handleSwitchTab);
+    return () => window.removeEventListener("SWITCH_TAB", handleSwitchTab);
+  }, [seriesSlug, chapterSlug, navigateTo, appLogic.editingImageIdx]);
+
+  // Sync section with modals if needed
+  React.useEffect(() => {
+    if (currentSection === "autocrop") {
+      setShowAutoCropModal(true);
+      setCurrentSection("assets");
+    }
+    if (currentSection === "bubbles") {
+      setShowBubbleModal(true);
+      setCurrentSection("assets");
+    }
+  }, [currentSection]);
+
+  // ── Interactive Auto-Crop Preview & Confirmation ───────────────────────────
+  const [showAutoCropPreview, setShowAutoCropPreview] = React.useState(false);
+
+  const handleOpenAutoCropPreview = React.useCallback(() => {
+    const targetCount =
+      selectedScraped && selectedScraped.length > 0
+        ? selectedScraped.length
+        : scrapedImages.length;
+    if (targetCount === 0) {
+      addNotification?.(
+        "Please select or import comic frames to auto-crop.",
+        "info"
+      );
+      return;
+    }
+    setShowAutoCropPreview(true);
+  }, [selectedScraped, scrapedImages, addNotification]);
+
+  const handleConfirmAutoCropPreview = React.useCallback(
+    (confirmedMap?: Record<string, string[]>) => {
+      setShowAutoCropPreview(false);
+      if (confirmedMap && Object.keys(confirmedMap).length > 0) {
+        const selectedTargets =
+          selectedScraped && selectedScraped.length > 0
+            ? selectedScraped
+            : Object.keys(confirmedMap);
+        const selectedSet = new Set(selectedTargets);
+
+        setScrapedImages((prev: string[]) => {
+          let injected = false;
+          const copy: string[] = [];
+          prev.forEach((img: string) => {
+            if (confirmedMap[img]) {
+              if (selectedSet.has(img)) {
+                if (!injected) {
+                  Object.keys(confirmedMap).forEach((k) => {
+                    copy.push(...confirmedMap[k]);
+                  });
+                  injected = true;
+                }
+              } else {
+                copy.push(...confirmedMap[img]);
+              }
+            } else {
+              copy.push(img);
+            }
+          });
+          return copy;
+        });
+        setSelectedScraped([]);
+        addNotification?.(
+          "Successfully sliced & auto-cropped panels!",
+          "success"
+        );
+        audioFeedback?.playSuccess?.();
+      } else {
+        void handleAutoCropSelected();
+      }
+    },
+    [
+      selectedScraped,
+      setScrapedImages,
+      setSelectedScraped,
+      addNotification,
+      audioFeedback,
+      handleAutoCropSelected,
+    ]
+  );
+
+  const hasEnoughCredits = userCredits === null || userCredits >= 20;
+
+  if (currentSection === "video-editor" || activeTab === "video-editor") {
+    return (
+      <VideoEditorPage
+        appLogic={appLogic}
+        navigateTo={navigateTo}
+        onBackToApp={() => setCurrentSection("storyboard")}
+        projectTitle={
+          seriesTitle && chapterTitle
+            ? `${seriesTitle} · ${chapterTitle}`
+            : "Cyberpunk Story"
+        }
+      />
+    );
+  }
+
+  return (
+    <LayoutEditorPage
+      projectId={projectId}
+      seriesSlug={seriesSlug || appLogic.seriesSlugState}
+      chapterSlug={chapterSlug || appLogic.chapterSlugState}
+      isSidebarCollapsed={isSidebarCollapsed}
+      setIsSidebarCollapsed={setIsSidebarCollapsed}
+      currentSection={currentSection}
+      setCurrentSection={setCurrentSection}
+      onBackToApp={handleBackToApp}
+      scrapedCount={scrapedImages.length}
+      panelsCount={panels.length}
+      isBatchCropping={isBatchCropping}
+      isCleaningBubbles={isCleaningBubbles}
+      title={
+        seriesTitle && chapterTitle
+          ? `${seriesTitle} · ${chapterTitle}`
+          : "Storyboard Editor"
+      }
+      subtitle={
+        seriesTitle && chapterNumber
+          ? `Series ${seriesTitle} • Chapter ${chapterNumber}`
+          : undefined
+      }
+      onSave={handleSave}
+      isSaving={isSaving}
+      isDirty={appLogic.isDirty}
+      isFocusMode={isFocusMode}
+      setIsFocusMode={setIsFocusMode}
+      navigateTo={navigateTo}
+      notifications={appLogic.notifications}
+      markNotificationAsRead={appLogic.markNotificationAsRead}
+      markAllNotificationsAsRead={appLogic.markAllNotificationsAsRead}
+      deleteNotification={appLogic.deleteNotification}
+      clearAllNotifications={appLogic.clearAllNotifications}
+      notificationsMuted={appLogic.notificationsMuted}
+      setNotificationsMuted={appLogic.setNotificationsMuted}
+      onNavigateToAll={() =>
+        window.dispatchEvent(
+          new CustomEvent("navigate", { detail: { path: "/notifications" } })
+        )
+      }
+      fetchWithInterceptor={fetchWithInterceptor}
+      locationSearch={window.location.search}
+      user={appLogic.user}
+    >
+      <main className="flex-1 w-full relative bg-transparent min-w-0 flex flex-col">
+        {/* Scrolling Overlay Content (Storyboard, Assets, Meta) */}
+        <div
+          className={`relative z-10 bg-transparent min-h-0 min-w-0 flex-1 flex flex-col ${activeTab === "video-settings" ||
+              activeTab === "settings" ||
+              activeTab === "audio-settings" ||
+              activeTab === "autocrop-settings"
+              ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-5xl mx-auto"
+              : `border-t border-white/5 px-3 sm:px-5 lg:px-6 py-3 sm:py-4 flex flex-col gap-3.5 sm:gap-4 w-full max-w-[1720px] mx-auto flex-1 min-h-0 ${isFocusMode ? "hidden" : "flex flex-col flex-1"
+              }`
+            }`}
+        >
+          {activeTab === "video-settings" || activeTab === "settings" ? (
+            <div className="w-full space-y-6 rounded-3xl border border-neutral-800/80 bg-[#050508]/95 backdrop-blur-3xl shadow-2xl p-6 sm:p-8">
+              {/* Settings Header */}
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-[#3B82F6]/10 text-[#3B82F6] rounded-xl border border-[#3B82F6]/20">
+                    <Sliders className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-white tracking-wide">
+                      Video Settings
+                    </h2>
+                    <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                      Configure canvas aspect ratios, audio-reactive camera
+                      shake, and render output codecs
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={async () => {
+                      if (projectId) {
+                        const success = await useProjectStore
+                          .getState()
+                          .updateVideoSettings(
+                            {
+                              aspectRatio,
+                              frameRate,
+                              activeTheme: appLogic.activeTheme || "obsidian",
+                              audioReactiveShake: appLogic.audioReactiveShake,
+                              shakeIntensity: appLogic.shakeIntensity,
+                              videoFormat: appLogic.videoFormat,
+                              backgroundStyle: appLogic.backgroundStyle,
+                              subtitlesStyle: appLogic.subtitlesStyle,
+                              voiceActor,
+                              musicTheme,
+                            },
+                            fetchWithInterceptor
+                          );
+                        if (success) {
+                          addNotification?.(
+                            "Video settings saved successfully!",
+                            "success"
+                          );
+                        } else {
+                          addNotification?.(
+                            "Failed to save video settings",
+                            "error"
+                          );
+                        }
+                      }
+                    }}
+                    className="p-2 px-3 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] text-white transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold active:scale-95 shadow-md"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save Settings
+                  </button>
+                  <button
+                    onClick={handleCloseSettings}
+                    className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-2 cursor-pointer text-xs font-bold font-mono active:scale-95 shadow-sm"
+                  >
+                    <X className="h-4 w-4" />
+                    Close Settings
+                  </button>
+                </div>
+              </div>
+
+              {/* Render VideoPreviewAdvancedSettings */}
+              <div className="pt-2">
+                <VideoPreviewAdvancedSettings
+                  voiceActor={voiceActor}
+                  setVoiceActor={appLogic.setVoiceActor}
+                  musicTheme={musicTheme}
+                  setMusicTheme={appLogic.setMusicTheme}
+                  aspectRatio={aspectRatio}
+                  setAspectRatio={appLogic.setAspectRatio}
+                  frameRate={frameRate}
+                  setFrameRate={appLogic.setFrameRate}
+                  activeTheme={appLogic.activeTheme || "obsidian"}
+                  setActiveTheme={appLogic.setActiveTheme || (() => { })}
+                  targetUrl={targetUrl}
+                  selectedModel={selectedModel}
+                  selectedSource={selectedSource}
+                  addNotification={addNotification}
+                  fetchWithInterceptor={fetchWithInterceptor}
+                  audioReactiveShake={appLogic.audioReactiveShake}
+                  setAudioReactiveShake={appLogic.setAudioReactiveShake}
+                  shakeIntensity={appLogic.shakeIntensity}
+                  setShakeIntensity={appLogic.setShakeIntensity}
+                  videoFormat={appLogic.videoFormat}
+                  setVideoFormat={appLogic.setVideoFormat}
+                  backgroundStyle={appLogic.backgroundStyle}
+                  setBackgroundStyle={appLogic.setBackgroundStyle}
+                  subtitlesStyle={appLogic.subtitlesStyle}
+                  setSubtitlesStyle={appLogic.setSubtitlesStyle}
+                  // Crop Settings
+                  cropSensitivity={cropSensitivity}
+                  setCropSensitivity={setCropSensitivity}
+                  cropPaddingPx={cropPaddingPx}
+                  setCropPaddingPx={setCropPaddingPx}
+                  cropFocusMode={cropFocusMode}
+                  setCropFocusMode={setCropFocusMode}
+                  cropModel={cropModel}
+                  setCropModel={setCropModel}
+                  // Bubble Settings
+                  bubbleSensitivity={bubbleSensitivity}
+                  setBubbleSensitivity={setBubbleSensitivity}
+                  bubbleDilation={bubbleDilation}
+                  setBubbleDilation={setBubbleDilation}
+                  bubbleEraseMethod={bubbleEraseMethod}
+                  setBubbleEraseMethod={setBubbleEraseMethod}
+                  bubbleDetectionStyle={bubbleDetectionStyle}
+                  setBubbleDetectionStyle={setBubbleDetectionStyle}
+                />
+              </div>
+            </div>
+          ) : activeTab === "audio-settings" ? (
+            <div className="w-full space-y-6 rounded-3xl border border-neutral-800/80 bg-[#050508]/95 backdrop-blur-3xl shadow-2xl p-6 sm:p-8">
+              {/* Settings Header */}
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-[#3B82F6]/10 text-[#3B82F6] rounded-xl border border-[#3B82F6]/20">
+                    <Mic className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-white tracking-wide">
+                      Audio Settings
+                    </h2>
+                    <p className="text-xs text-neutral-400 font-mono mt-0.5">
+                      Synchronize narration character, configure pitch and rate,
+                      and mix sound loop presets
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseSettings}
+                  className="p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-all flex items-center gap-2 cursor-pointer text-xs font-bold font-mono active:scale-95 shadow-sm"
+                >
+                  <X className="h-4 w-4" />
+                  Close Settings
+                </button>
+              </div>
+
+              {/* Render AudioSettingsPage */}
+              <div className="pt-2">
+                <AudioSettingsPage
+                  projectId={projectId}
+                  onNavigateHome={handleCloseSettings}
+                  addNotification={addNotification}
+                  fetchWithInterceptor={fetchWithInterceptor}
+                  isEmbed={true}
+                  volume={appLogic.volume}
+                  setVolume={appLogic.setVolume}
+                  narrationVolume={appLogic.narrationVolume}
+                  setNarrationVolume={appLogic.setNarrationVolume}
+                  bgmVolume={appLogic.bgmVolume}
+                  setBgmVolume={appLogic.setBgmVolume}
+                  sfxVolume={appLogic.sfxVolume}
+                  setSfxVolume={appLogic.setSfxVolume}
+                  speechRate={appLogic.speechRate}
+                  setSpeechRate={appLogic.setSpeechRate}
+                  speechPitch={appLogic.speechPitch}
+                  setSpeechPitch={appLogic.setSpeechPitch}
+                  voiceActor={voiceActor}
+                  setVoiceActor={appLogic.setVoiceActor}
+                  musicTheme={musicTheme}
+                  setMusicTheme={appLogic.setMusicTheme}
+                  audioDucking={appLogic.audioDucking}
+                  setAudioDucking={appLogic.setAudioDucking}
+                  enableDialogueAudio={appLogic.enableDialogueAudio}
+                  setEnableDialogueAudio={appLogic.setEnableDialogueAudio}
+                  enableNarrativeAudio={appLogic.enableNarrativeAudio}
+                  setEnableNarrativeAudio={appLogic.setEnableNarrativeAudio}
+                />
+              </div>
+            </div>
+          ) : activeTab === "autocrop-settings" ? (
+            <div className="w-full space-y-6">
+              <React.Suspense fallback={null}>
+                <div className="rounded-3xl border border-neutral-800/80 overflow-hidden bg-[#050508] shadow-2xl">
+                  <AutoCropSettingsModal
+                    isPage={true}
+                    onClose={handleCloseSettings}
+                    onApply={async () => {
+                      if (projectId) {
+                        await useProjectStore.getState().updateAutoCropSettings(
+                          {
+                            sensitivity: cropSensitivity,
+                            padding: cropPaddingPx,
+                            backgroundColorMode: appLogic.cropBackgroundMode,
+                            autoSplitTallStrips: appLogic.autoSplitTallStrips,
+                            aspectRatioLock: appLogic.aspectRatioLock,
+                            minPanelAreaPct: appLogic.minPanelAreaPct,
+                            overlapMergeThreshold:
+                              appLogic.overlapMergeThreshold,
+                            useLocalCV: appLogic.useLocalCV,
+                            cropModel,
+                            cropMinHeightPx: appLogic.cropMinHeightPx,
+                            cropCannyLow: appLogic.cropCannyLow,
+                            cropCannyHigh: appLogic.cropCannyHigh,
+                            cropCloseKernelSize: appLogic.cropCloseKernelSize,
+                          },
+                          fetchWithInterceptor
+                        );
+                      }
+                      handleCloseSettings();
+                      handleAutoCropSelected();
+                    }}
+                    fetchWithInterceptor={fetchWithInterceptor}
+                    sensitivity={cropSensitivity}
+                    setSensitivity={setCropSensitivity}
+                    padding={cropPaddingPx}
+                    setPadding={setCropPaddingPx}
+                    backgroundColorMode={appLogic.cropBackgroundMode}
+                    setBackgroundColorMode={appLogic.setCropBackgroundMode}
+                    autoSplitTallStrips={appLogic.autoSplitTallStrips}
+                    setAutoSplitTallStrips={appLogic.setAutoSplitTallStrips}
+                    aspectRatioLock={appLogic.aspectRatioLock}
+                    setAspectRatioLock={appLogic.setAspectRatioLock}
+                    minPanelAreaPct={appLogic.minPanelAreaPct}
+                    setMinPanelAreaPct={appLogic.setMinPanelAreaPct}
+                    overlapMergeThreshold={appLogic.overlapMergeThreshold}
+                    setOverlapMergeThreshold={appLogic.setOverlapMergeThreshold}
+                    useLocalCV={appLogic.useLocalCV}
+                    setUseLocalCV={appLogic.setUseLocalCV}
+                    cropModel={cropModel}
+                    setCropModel={setCropModel}
+                    cropMinHeightPx={appLogic.cropMinHeightPx}
+                    setCropMinHeightPx={appLogic.setCropMinHeightPx}
+                    cropCannyLow={appLogic.cropCannyLow}
+                    setCropCannyLow={appLogic.setCropCannyLow}
+                    cropCannyHigh={appLogic.cropCannyHigh}
+                    setCropCannyHigh={appLogic.setCropCannyHigh}
+                    cropCloseKernelSize={appLogic.cropCloseKernelSize}
+                    setCropCloseKernelSize={appLogic.setCropCloseKernelSize}
+                    selectedCount={
+                      selectedScraped?.length || scrapedImages?.length || 0
+                    }
+                    isApplying={isBatchCropping}
+                    scrapedImages={scrapedImages}
+                    selectedScraped={selectedScraped}
+                    setSelectedScraped={setSelectedScraped}
+                    setConsoleLogs={appLogic.setConsoleLogs}
+                    addNotification={addNotification}
+                  />
+                </div>
+              </React.Suspense>
+            </div>
+          ) : (
+            <>
+              {/* TOP: Video Preview Player / Viewport Monitor */}
+              <div
+                id="section-monitor"
+                data-section="section-monitor"
+                className={`w-full scroll-mt-20 min-h-0 ${currentSection === "monitor"
+                    ? "flex flex-col flex-1 h-full min-h-[calc(100vh-180px)]"
+                    : "hidden lg:flex lg:flex-col"
+                  }`}
+              >
+                {playerSettings.isPlayerOpen ? (
+                  <QuickVideoPreview
+                    panels={panels}
+                    videoUrl={videoUrl}
+                    setVideoUrl={setVideoUrl}
+                    currentPanelIndex={currentPanelIndex}
+                    setCurrentPanelIndex={setCurrentPanelIndex}
+                    activePreviewTab={activePreviewTab}
+                    setActivePreviewTab={setActivePreviewTab}
+                    musicTheme={musicTheme}
+                    voiceActor={voiceActor}
+                    navigateTo={navigateTo}
+                    seriesTitle={seriesTitle}
+                    chapterNumber={chapterNumber}
+                    chapterTitle={chapterTitle}
+                    targetUrl={targetUrl}
+                    isRendering={isRendering}
+                    renderProgress={renderProgress}
+                    onExportVideo={handleRenderFinalVideo}
+                    handleRenderFinalVideo={handleRenderFinalVideo}
+                    onSave={handleSave}
+                    isSaving={isSaving}
+                    isDirty={appLogic?.isDirty}
+                    progressStatus={progressStatus}
+                    hasEnoughCredits={hasEnoughCredits}
+                    addNotification={addNotification}
+                    onOpenVideoEditor={() => setCurrentSection("video-editor")}
+                    seriesSlug={seriesSlug}
+                    chapterSlug={chapterSlug}
+                  />
+                ) : (
+                  <div className="w-full mb-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        useImageEditorStore
+                          .getState()
+                          .setPlayerSettings({ isPlayerOpen: true });
+                      }}
+                      className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-neutral-900/90 to-indigo-950/30 hover:from-blue-950/60 hover:to-indigo-950/50 border border-blue-500/30 hover:border-blue-500/50 text-blue-300 hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-md shadow-blue-500/25 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                          <Tv className="h-4 w-4" />
+                        </div>
+                        <div className="text-left">
+                          <span className="text-xs font-bold font-mono tracking-wider uppercase block text-white">
+                            Video Preview Viewport
+                          </span>
+                          <span className="text-[10px] text-neutral-400 font-mono">
+                            Click to expand video preview player & visual canvas
+                            monitor
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-xs font-mono text-white transition-colors shadow-md shadow-blue-500/25">
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>Expand Preview</span>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* MIDDLE: Storyboard Workspace */}
+              <div
+                id="section-storyboard"
+                data-section="section-timeline"
+                className={`w-full scroll-mt-20 min-h-0 ${currentSection === "storyboard" ||
+                    currentSection === "timeline"
+                    ? "flex flex-col min-h-0"
+                    : "hidden lg:flex lg:flex-col"
+                  }`}
+              >
+
+
+                <StoryboardTimeline
+                  isLoading={isHydrating}
+                  panels={panels}
+                  setPanels={setPanels}
+                  currentPanelIndex={currentPanelIndex}
+                  setCurrentPanelIndex={setCurrentPanelIndex}
+                  activePreviewTab={activePreviewTab}
+                  setActivePreviewTab={setActivePreviewTab}
+                  setPlaybackTime={setPlaybackTime}
+                  hasScrapedImages={scrapedImages.length > 0}
+                  setVideoUrl={setVideoUrl}
+                  addNotification={addNotification}
+                  targetUrl={targetUrl}
+                  fetchWithInterceptor={fetchWithInterceptor}
+                  selectedModel={selectedModel}
+                  setConsoleLogs={stableNoop}
+                  voiceActor={voiceActor}
+                  musicTheme={musicTheme}
+                  speechRate={appLogic.speechRate}
+                  speechPitch={appLogic.speechPitch}
+                  narrationStyle={narrationStyle}
+                  playStoryboardAudio={playStoryboardAudio}
+                  autoPlayAudio={autoPlayAudio}
+                  bubbleSensitivity={bubbleSensitivity}
+                  bubbleDetectionStyle={bubbleDetectionStyle}
+                  bubbleEraseMethod={bubbleEraseMethod}
+                  bubbleDilation={bubbleDilation}
+                  bubbleInpaintRadius={bubbleInpaintRadius}
+                  cropSensitivity={cropSensitivity}
+                  cropPaddingPx={cropPaddingPx}
+                  cropBackgroundMode={cropBackgroundMode}
+                  aspectRatioLock={aspectRatioLock}
+                  minPanelAreaPct={minPanelAreaPct}
+                  overlapMergeThreshold={overlapMergeThreshold}
+                  useLocalCV={useLocalCV}
+                  saveProject={saveProject}
+                  cropModel={cropModel}
+                  cropMinHeightPx={cropMinHeightPx}
+                  cropCannyLow={cropCannyLow}
+                  cropCannyHigh={cropCannyHigh}
+                  cropCloseKernelSize={cropCloseKernelSize}
+                  autoSplitTallStrips={autoSplitTallStrips}
+                  cropGuidance={cropGuidance}
+                  cropFocusMode={cropFocusMode}
+                  handleCancelBatch={handleCancelBatch}
+                  audioFeedback={audioFeedback}
+                  selectedPanelIds={selectedPanelIds}
+                  setSelectedPanelIds={handleSetSelectedPanelIds}
+                  enableDialogueAudio={appLogic.enableDialogueAudio}
+                  enableNarrativeAudio={appLogic.enableNarrativeAudio}
+                />
+              </div>
+
+              {/* BOTTOM: Imported Assets (Resource Pool) */}
+              <div
+                id="section-assets"
+                className={`w-full scroll-mt-20 min-h-0 ${currentSection === "assets" || currentSection === "raw-images"
+                    ? "flex flex-col min-h-0"
+                    : "hidden lg:flex lg:flex-col"
+                  }`}
+              >
+                <div className="bg-transparent flex-1 flex flex-col h-full min-h-0">
+                  <ImportedAssetsDeck
+                    isDashboardOnly={false}
+                    scrapedImages={scrapedImages}
+                    isScraping={isScraping}
+                    selectedScraped={selectedScraped}
+                    setSelectedScraped={handleSetSelectedScraped}
+                    setScrapedImages={setScrapedImages}
+                    mergingIndices={mergingIndices}
+                    setConsoleLogs={stableNoop}
+                    panels={panels}
+                    setPanels={setPanels}
+                    currentPanelIndex={currentPanelIndex}
+                    handleMergeWithNext={handleStitchWithNext}
+                    setEditingImageIdx={setEditingImageIdx}
+                    openEditingImageIdx={setEditingImageIdx}
+                    setEditCropTop={setEditCropTop}
+                    setEditCropBottom={setEditCropBottom}
+                    setEditCropLeft={setEditCropLeft}
+                    setEditCropRight={setEditCropRight}
+                    setEditAutoTrim={setEditAutoTrim}
+                    addNotification={addNotification}
+                    fetchWithInterceptor={fetchWithInterceptor}
+                    setErrorPopup={setErrorPopup}
+                    showBubbleModal={showBubbleModal}
+                    setShowBubbleModal={setShowBubbleModal}
+                    isCleaningBubbles={isCleaningBubbles}
+                    cleanProgress={cleanProgress}
+                    bubbleCroppingImgUrl={bubbleCroppingImgUrl}
+                    showAutoCropModal={showAutoCropModal}
+                    setShowAutoCropModal={setShowAutoCropModal}
+                    isBatchCropping={isBatchCropping}
+                    batchProgress={batchProgress}
+                    croppingImgUrl={croppingImgUrl}
+                    handleAutoCropSelected={handleOpenAutoCropPreview}
+                    handleCleanBubblesSelected={handleCleanBubblesSelected}
+                    handleCancelBatch={handleCancelBatch}
+                    addPanelsToStoryboard={addPanelsToStoryboard}
+                    audioFeedback={audioFeedback}
+                    seriesTitle={seriesTitle}
+                    chapterNumber={chapterNumber}
+                    chapterTitle={chapterTitle}
+                    targetUrl={targetUrl}
+                    selectedSource={selectedSource}
+                    selectedModel={selectedModel}
+                    consoleLogs={consoleLogs}
+                    resetWorkspace={resetWorkspace}
+                    rating={rating}
+                    likes={likes}
+                    views={views}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ✂️ Interactive Auto-Crop Preview & Panel Type Confirmation Modal */}
+          {showAutoCropPreview && (
+            <React.Suspense fallback={null}>
+              <AutoCropPreviewPage
+                isModal={true}
+                onClose={() => setShowAutoCropPreview(false)}
+                onConfirm={handleConfirmAutoCropPreview}
+                scrapedImages={scrapedImages}
+                selectedScraped={selectedScraped}
+                fetchWithInterceptor={fetchWithInterceptor}
+                addNotification={addNotification}
+                sensitivity={cropSensitivity}
+                padding={cropPaddingPx}
+                backgroundColorMode={appLogic.cropBackgroundMode}
+                autoSplitTallStrips={appLogic.autoSplitTallStrips}
+                aspectRatioLock={appLogic.aspectRatioLock}
+                overlapMergeThreshold={appLogic.overlapMergeThreshold}
+                minPanelHeightPx={appLogic.cropMinHeightPx}
+                isApplying={isBatchCropping}
+              />
+            </React.Suspense>
+          )}
+        </div>
+      </main>
+    </LayoutEditorPage>
+  );
+};
+
+export default React.memo(EditorPage);

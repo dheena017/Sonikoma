@@ -5,21 +5,19 @@
 import React from "react";
 
 // --- Custom Logic Hooks ---
-import {
-  useAppLogic,
-  useAppRouter,
-  useGlobalShortcuts,
-  useBackendHealth,
-  useThemeMode,
-  useProjectStore,
-} from "@/shared/hooks";
-import { useAutoSave } from "@/shared/hooks/useAutoSave";
+import { useThemeMode } from "@/shared/hooks";
+import { useAppLogic } from "@/features/platform/scraper/hooks/useChapterIngestion";
+import { useAppRouter } from "@/features/platform/shell/hooks/useAppRouter";
+import { useGlobalShortcuts } from "@/features/platform/shortcuts/hooks/useGlobalShortcuts";
+import { useBackendHealth } from "@/shared/api/hooks/useBackendHealth";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import { useAutoSave } from "@/features/workspace/shell/hooks/useProjectAutoSave";
 import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
-import * as api from "@/api";
+import * as api from "@/shared/api";
 
 // --- Components ---
 import AppRouter from "@/app/router/AppRouter";
-import { NotificationProvider } from "@/features/app_notification";
+import { NotificationProvider } from "@/features/platform/notifications";
 
 export default function App() {
   // --------------------------------------------------------------------------

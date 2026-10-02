@@ -1,0 +1,754 @@
+import React, { useEffect, useCallback } from "react";
+import { AlertTriangle, X } from "lucide-react";
+import * as api from "@/shared/api";
+
+import Header from "@/features/platform/shell/components/MainHeader";
+import Sidebar from "@/features/platform/shell/components/MainSidebar";
+import MiniSidebar from "@/features/platform/shell/components/MainMiniSidebar";
+import NotificationStack from "@/features/platform/notifications/components/NotificationStack";
+import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+
+// --- Lazy Loaded Heavy Conditional Components ---
+const ProjectConfirmModal = React.lazy(
+  () => import("@/features/platform/projects/components/ProjectConfirmModal")
+);
+const ConfirmModal = React.lazy(() => import("@/shared/ui/modal/ConfirmModal"));
+const TerminalLogs = React.lazy(
+  () => import("@/features/platform/terminal/components/TerminalLogs")
+);
+const AdminSidebar = React.lazy(
+  () => import("@/features/admin/components/AdminSidebar")
+);
+const AdminMiniSidebar = React.lazy(
+  () => import("@/features/admin/components/AdminMiniSidebar")
+);
+const AdminHeaderPage = React.lazy(
+  () => import("@/features/admin/pages/AdminHeaderPage")
+);
+const CreativeSuiteHeader = React.lazy(
+  () => import("@/features/creative/suite/components/CreativeSuiteHeader")
+);
+const CreativeSuiteSidebar = React.lazy(
+  () => import("@/features/creative/suite/components/CreativeSuiteSidebar")
+);
+const CreativeSuiteMiniSidebar = React.lazy(
+  () => import("@/features/creative/suite/components/CreativeSuiteMiniSidebar")
+);
+const AICoreHeader = React.lazy(
+  () => import("@/features/intelligence/core/components/AICoreHeader")
+);
+const AICoreSidebar = React.lazy(
+  () => import("@/features/intelligence/core/components/AICoreSidebar")
+);
+const AICoreMiniSidebar = React.lazy(
+  () => import("@/features/intelligence/core/components/AICoreMiniSidebar")
+);
+const ActiveProjectSelectorDrawer = React.lazy(
+  () => import("@/features/platform/projects/components/ActiveProjectSelectorDrawer")
+);
+const AutoCropSettingsModal = React.lazy(
+  () => import("@/features/image-editor/auto-crop/components/AutoCropSettingsModal")
+);
+
+export interface MainLayoutProps {
+  children: React.ReactNode;
+  currentPath: string;
+  navigateTo: (path: string) => void;
+  isAnyAdmin: boolean;
+  isCreativeSuitePath: boolean;
+  isAICorePath?: boolean;
+  isImageEditorPage: boolean;
+  isProEditorPage: boolean;
+  isVideoEditorPage: boolean;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (open: boolean) => void;
+  isTerminalOpen: boolean;
+  setIsTerminalOpen: (open: boolean) => void;
+  backendStatus: any;
+  recheckBackend: () => void;
+  themeMode: any;
+  toggleThemeMode: () => void;
+  isStartingBackend: boolean;
+  setIsStartingBackend: (starting: boolean) => void;
+  startBackendError: string | null;
+  setStartBackendError: (err: string | null) => void;
+  startBackend: () => void;
+  alertDialog: {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    accentColor?: string;
+    resolve: () => void;
+  } | null;
+  setAlertDialog: (dialog: any) => void;
+  confirmDialog: {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    accentColor?: string;
+    resolve: (val: boolean) => void;
+  } | null;
+  setConfirmDialog: (dialog: any) => void;
+  showScrapeConfirmModal: boolean;
+  setShowScrapeConfirmModal: (show: boolean) => void;
+  handleProjectConfirm: any;
+  user: any;
+  panels: any[];
+  scrapedImages: any[];
+  totalCalculatedDuration: number;
+  editingImageIdx: number;
+  lastEditorPath: string;
+  isBatchCropping: boolean;
+  isCleaningBubbles: boolean;
+  cleanProgress?: { current: number; total: number } | null;
+  batchProgress?: { current: number; total: number } | null;
+  projectId: string | null;
+  isWorkspaceDirty: boolean;
+  notifications: any[];
+  notificationsMuted: boolean;
+  setNotificationsMuted: (muted: boolean) => void;
+  markNotificationAsRead: any;
+  markAllNotificationsAsRead: () => void;
+  deleteNotification: any;
+  clearAllNotifications: () => void;
+  removeNotification: any;
+  fetchWithInterceptor: any;
+  narrationStyle: string;
+  setNarrationStyle: (style: string) => void;
+  selectedModel: string;
+  setSelectedModel: (model: string) => void;
+  volume: number;
+  setVolume: (vol: number) => void;
+  isMuted: boolean;
+  setIsMuted: (muted: boolean) => void;
+  autoPlayAudio: boolean;
+  setAutoPlayAudio: (play: boolean) => void;
+  appLogic: any;
+  headerProjectId: string | null;
+  headerSaveStatus: string;
+  headerIsDirty: boolean;
+  headerOnSave: () => void;
+  cropSensitivity: number;
+  setCropSensitivity: (val: number) => void;
+  cropPaddingPx: number;
+  setCropPaddingPx: (val: number) => void;
+  cropBackgroundMode: string;
+  setCropBackgroundMode: (val: string) => void;
+  autoSplitTallStrips: boolean;
+  setAutoSplitTallStrips: (val: boolean) => void;
+  aspectRatioLock: string;
+  setAspectRatioLock: (val: string) => void;
+  minPanelAreaPct: number;
+  setMinPanelAreaPct: (val: number) => void;
+  overlapMergeThreshold: number;
+  setOverlapMergeThreshold: (val: number) => void;
+  useLocalCV: boolean;
+  setUseLocalCV: (val: boolean) => void;
+  cropModel: string;
+  setCropModel: (val: string) => void;
+  cropMinHeightPx: number;
+  setCropMinHeightPx: (val: number) => void;
+  cropCannyLow: number;
+  setCropCannyLow: (val: number) => void;
+  cropCannyHigh: number;
+  setCropCannyHigh: (val: number) => void;
+  cropCloseKernelSize: number;
+  setCropCloseKernelSize: (val: number) => void;
+  activeAutoCropTab: string;
+  setActiveAutoCropTab: (val: string) => void;
+  selectedScraped: string[];
+  setSelectedScraped: React.Dispatch<React.SetStateAction<string[]>>;
+  setConsoleLogs: (val: any) => void;
+  addNotification: any;
+  cropGuidance: string;
+  setCropGuidance: (val: string) => void;
+  cropFocusMode: string;
+  setCropFocusMode: (val: string) => void;
+  handleAutoCropClose: () => void;
+  handleAutoCropApply: () => void;
+  seriesTitle: string;
+  chapterNumber: string;
+  chapterTitle: string;
+  scrapedGenre: string;
+  seriesAuthor: string;
+  seriesCoverImage: string;
+  seriesSynopsis: string;
+  consoleLogs: any[];
+  seriesSlugState: string | null;
+  chapterSlugState: string | null;
+  showAutoCropModal: boolean;
+  showBubbleModal?: boolean;
+}
+
+export default function MainLayout(props: MainLayoutProps) {
+  const {
+    children,
+    currentPath,
+    navigateTo,
+    isAnyAdmin,
+    isCreativeSuitePath,
+    isAICorePath = false,
+    isImageEditorPage,
+    isProEditorPage,
+    isVideoEditorPage,
+    isSidebarOpen,
+    setIsSidebarOpen,
+    isTerminalOpen,
+    setIsTerminalOpen,
+    backendStatus,
+    recheckBackend,
+    themeMode,
+    toggleThemeMode,
+    isStartingBackend,
+    setIsStartingBackend,
+    startBackendError,
+    setStartBackendError,
+    startBackend,
+    alertDialog,
+    setAlertDialog,
+    confirmDialog,
+    setConfirmDialog,
+    showScrapeConfirmModal,
+    setShowScrapeConfirmModal,
+    handleProjectConfirm,
+    user,
+    panels,
+    scrapedImages,
+    totalCalculatedDuration,
+    editingImageIdx,
+    lastEditorPath,
+    isBatchCropping,
+    isCleaningBubbles,
+    cleanProgress,
+    batchProgress,
+    projectId,
+    isWorkspaceDirty,
+    notifications,
+    notificationsMuted,
+    setNotificationsMuted,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    deleteNotification,
+    clearAllNotifications,
+    removeNotification,
+    fetchWithInterceptor,
+    narrationStyle,
+    setNarrationStyle,
+    selectedModel,
+    setSelectedModel,
+    volume,
+    setVolume,
+    isMuted,
+    setIsMuted,
+    autoPlayAudio,
+    setAutoPlayAudio,
+    appLogic,
+    headerProjectId,
+    headerSaveStatus,
+    headerIsDirty,
+    headerOnSave,
+    cropSensitivity,
+    setCropSensitivity,
+    cropPaddingPx,
+    setCropPaddingPx,
+    cropBackgroundMode,
+    setCropBackgroundMode,
+    autoSplitTallStrips,
+    setAutoSplitTallStrips,
+    aspectRatioLock,
+    setAspectRatioLock,
+    minPanelAreaPct,
+    setMinPanelAreaPct,
+    overlapMergeThreshold,
+    setOverlapMergeThreshold,
+    useLocalCV,
+    setUseLocalCV,
+    cropModel,
+    setCropModel,
+    cropMinHeightPx,
+    setCropMinHeightPx,
+    cropCannyLow,
+    setCropCannyLow,
+    cropCannyHigh,
+    setCropCannyHigh,
+    cropCloseKernelSize,
+    setCropCloseKernelSize,
+    activeAutoCropTab,
+    setActiveAutoCropTab,
+    selectedScraped,
+    setSelectedScraped,
+    setConsoleLogs,
+    addNotification,
+    cropGuidance,
+    setCropGuidance,
+    cropFocusMode,
+    setCropFocusMode,
+    handleAutoCropClose,
+    handleAutoCropApply,
+    seriesTitle,
+    chapterNumber,
+    chapterTitle,
+    scrapedGenre,
+    seriesAuthor,
+    seriesCoverImage,
+    seriesSynopsis,
+    consoleLogs,
+    seriesSlugState,
+    chapterSlugState,
+    showAutoCropModal,
+    showBubbleModal = false,
+  } = props;
+
+  const isWorkspacePath =
+    (currentPath === "/scraper" || currentPath === "/scraper/") &&
+    currentPath.match(/\/series\/[^\/]+\/chapters\/([^\/]+)/) === null;
+
+  const isAdminRestricted =
+    isAnyAdmin && (!user || user.creator_role !== "admin");
+  const showTopHeader =
+    !isSidebarOpen &&
+    !isProEditorPage &&
+    !isImageEditorPage &&
+    !isVideoEditorPage;
+
+  const isSeriesStudioRoute =
+    currentPath.startsWith("/studio/") ||
+    currentPath.startsWith("/watch/") ||
+    currentPath.startsWith("/read/") ||
+    currentPath.startsWith("/ai-series") ||
+    /^\/series\/[^/]+\/(manhwa|comic|anime)/.test(currentPath);
+
+  const isFullBleedNoScroll =
+    isImageEditorPage || isProEditorPage || isVideoEditorPage || isSeriesStudioRoute;
+
+  useEffect(() => {
+    if (currentPath !== "/auto-crop" && showAutoCropModal) {
+      if (appLogic?.setShowAutoCropModal) {
+        appLogic.setShowAutoCropModal(false);
+      }
+    }
+  }, [currentPath, showAutoCropModal, appLogic]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const queryId = params.get("id") || params.get("project_id");
+    const chapterSlugMatch = currentPath.match(
+      /\/series\/[^\/]+\/chapters\/([^\/]+)/
+    );
+    const routeChapterSlug = chapterSlugMatch ? chapterSlugMatch[1] : null;
+    const targetIdentifier = queryId || routeChapterSlug;
+
+    const storeState = useProjectStore.getState();
+    if (targetIdentifier) {
+      const currentActiveId = storeState.activeProjectId;
+      const currentChapterSlug =
+        storeState.activeProjectData?.project?.chapter_slug;
+
+      const isMismatch =
+        currentActiveId !== targetIdentifier &&
+        currentChapterSlug !== targetIdentifier;
+
+      if (
+        isMismatch ||
+        !storeState.activeProjectData ||
+        storeState.projectState !== "active"
+      ) {
+        storeState.setActiveProjectId(targetIdentifier);
+        storeState.hydrateActiveProject(targetIdentifier, fetchWithInterceptor);
+      }
+    } else {
+      if (storeState.activeProjectId && !storeState.activeProjectData) {
+        storeState.hydrateActiveProject(null, fetchWithInterceptor);
+      }
+    }
+  }, [currentPath, fetchWithInterceptor]);
+
+  const isDrawerOpen = useProjectStore((s) => s.isDrawerOpen);
+
+  const handleCloseSidebar = useCallback(
+    () => setIsSidebarOpen(false),
+    [setIsSidebarOpen]
+  );
+  const handleOpenSidebar = useCallback(
+    () => setIsSidebarOpen(true),
+    [setIsSidebarOpen]
+  );
+  const handleToggleSidebar = useCallback(
+    () => setIsSidebarOpen(!isSidebarOpen),
+    [isSidebarOpen, setIsSidebarOpen]
+  );
+
+  return (
+    <div
+      id="app_root"
+      className={`h-screen max-h-screen overflow-hidden max-w-full bg-[#07080c] bg-gradient-to-b from-[#07080c] via-[#090a10] to-[#06070a] text-neutral-100 flex flex-col selection:text-white relative ${
+        isAnyAdmin ? "selection:bg-violet-600" : "selection:bg-[#2A2A2A]"
+      }`}
+    >
+      {/* --- Page Navigation Sidebar --- */}
+      <React.Suspense fallback={null}>
+        {isAdminRestricted ? null : isAnyAdmin ? (
+          <>
+            <AdminSidebar
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
+            />
+            {!isSidebarOpen && !isDrawerOpen && (
+              <AdminMiniSidebar
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                onOpenSidebar={handleOpenSidebar}
+              />
+            )}
+          </>
+        ) : isAICorePath ? (
+          <>
+            <AICoreSidebar
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
+            />
+            {!isSidebarOpen && !isDrawerOpen && (
+              <AICoreMiniSidebar
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                onOpenSidebar={handleOpenSidebar}
+              />
+            )}
+          </>
+        ) : isCreativeSuitePath ? (
+          <>
+            <CreativeSuiteSidebar
+              currentPath={currentPath}
+              navigateTo={navigateTo}
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
+              panels={panels}
+            />
+            {!isSidebarOpen && !isDrawerOpen && (
+              <CreativeSuiteMiniSidebar
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                onOpenSidebar={handleOpenSidebar}
+                panels={panels}
+              />
+            )}
+          </>
+        ) : isImageEditorPage || isVideoEditorPage ? null : (
+          <>
+            <Sidebar
+              isProcessing={appLogic.isProcessing}
+              panels={panels}
+              scrapedImages={scrapedImages}
+              totalCalculatedDuration={totalCalculatedDuration}
+              currentPath={currentPath}
+              editingImageIdx={editingImageIdx}
+              lastEditorPath={lastEditorPath}
+              isBatchCropping={isBatchCropping}
+              isCleaningBubbles={isCleaningBubbles}
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
+              projectId={projectId}
+              isDirty={isWorkspaceDirty}
+              navigateTo={navigateTo}
+              notifications={notifications}
+              seriesSlug={seriesSlugState}
+              chapterSlug={chapterSlugState}
+              user={user}
+            />
+            {!isSidebarOpen &&
+              !isDrawerOpen &&
+              !isProEditorPage &&
+              !isAnyAdmin && (
+                <MiniSidebar
+                  currentPath={currentPath}
+                  navigateTo={navigateTo}
+                  notificationsCount={
+                    notifications.filter((n) => !n.isRead).length
+                  }
+                  projectId={projectId}
+                  seriesSlug={seriesSlugState}
+                  chapterSlug={chapterSlugState}
+                />
+              )}
+          </>
+        )}
+      </React.Suspense>
+
+      {/* --- Main Contents Controller & Router --- */}
+      <div
+        id="main-content-layout"
+        className={`relative z-10 h-screen max-h-screen overflow-hidden flex-1 flex flex-col max-w-full min-h-0 ${
+          showAutoCropModal || showBubbleModal ? "overflow-hidden" : ""
+        }`}
+      >
+        {/* Top Header */}
+        {showTopHeader && (
+          <React.Suspense fallback={null}>
+            {isAnyAdmin ? (
+              <AdminHeaderPage
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                fetchWithInterceptor={fetchWithInterceptor}
+                onToggleSidebar={handleToggleSidebar}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                isSidebarOpen={isSidebarOpen}
+                user={user}
+                addNotification={addNotification}
+              />
+            ) : isAICorePath ? (
+              <AICoreHeader
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                fetchWithInterceptor={fetchWithInterceptor}
+                onToggleSidebar={handleToggleSidebar}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                isSidebarOpen={isSidebarOpen}
+                user={user}
+                addNotification={addNotification}
+              />
+            ) : isCreativeSuitePath ? (
+              <CreativeSuiteHeader
+                currentPath={currentPath}
+                navigateTo={navigateTo}
+                fetchWithInterceptor={fetchWithInterceptor}
+                onToggleSidebar={handleToggleSidebar}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                isSidebarOpen={isSidebarOpen}
+                user={user}
+                addNotification={addNotification}
+              />
+            ) : (
+              <Header
+                isProcessing={appLogic.isProcessing}
+                panels={panels}
+                totalCalculatedDuration={totalCalculatedDuration}
+                currentPath={currentPath}
+                editingImageIdx={editingImageIdx}
+                lastEditorPath={lastEditorPath}
+                isBatchCropping={isBatchCropping}
+                isCleaningBubbles={isCleaningBubbles}
+                cleanProgress={cleanProgress}
+                batchProgress={batchProgress}
+                onToggleSidebar={handleToggleSidebar}
+                isSidebarOpen={isSidebarOpen}
+                backendStatus={backendStatus as any}
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
+                volume={volume}
+                setVolume={setVolume}
+                isMuted={isMuted}
+                setIsMuted={setIsMuted}
+                user={user}
+                notifications={notifications}
+                markNotificationAsRead={markNotificationAsRead as any}
+                markAllNotificationsAsRead={markAllNotificationsAsRead}
+                deleteNotification={deleteNotification as any}
+                clearAllNotifications={clearAllNotifications}
+                projectId={headerProjectId}
+                saveStatus={headerSaveStatus}
+                isDirty={headerIsDirty}
+                onSave={headerOnSave}
+                navigateTo={navigateTo}
+                notificationsMuted={notificationsMuted}
+                setNotificationsMuted={setNotificationsMuted}
+                fetchWithInterceptor={fetchWithInterceptor}
+              />
+            )}
+          </React.Suspense>
+        )}
+
+        {/* Global Floating Toast Notifications */}
+        <NotificationStack
+          notifications={notifications}
+          removeNotification={removeNotification}
+          notificationsMuted={notificationsMuted}
+        />
+
+        {/* Scrollable Main Children Page Area */}
+        <main
+          id="main-scrollable-area"
+          className={`flex-1 flex flex-col w-full relative min-h-0 custom-purple-scrollbar page-scrollbar ${
+            isFullBleedNoScroll
+              ? "overflow-hidden"
+              : "overflow-y-auto overflow-x-hidden"
+          }`}
+        >
+          {/* Admin Back to Admin Bar */}
+          {localStorage.getItem("sonikoma_admin_token") && (
+            <div className="bg-amber-600/90 text-white text-xs font-semibold py-1.5 px-4 flex items-center justify-between shadow-md z-40 w-full">
+              <span>
+                You are viewing Sonikoma in user mode via Admin Impersonation.
+              </span>
+              <button
+                onClick={() => {
+                  const adminToken = localStorage.getItem(
+                    "sonikoma_admin_token"
+                  );
+                  if (adminToken) {
+                    localStorage.setItem("sonikoma_token", adminToken);
+                    localStorage.removeItem("sonikoma_admin_token");
+                    sessionStorage.removeItem("sonikoma_token");
+                    window.location.href = "/admin";
+                  }
+                }}
+                className="bg-black/20 hover:bg-black/40 px-3 py-1 rounded transition-colors"
+              >
+                Return to Admin
+              </button>
+            </div>
+          )}
+
+          {/* Children Page Views */}
+          <div
+            key={currentPath}
+            className={`w-full max-w-full min-w-0 min-h-0 flex-1 flex flex-col ${
+              isFullBleedNoScroll
+                ? !isSidebarOpen && !isProEditorPage && !isImageEditorPage && !isVideoEditorPage
+                  ? "p-0 lg:pl-20 h-full min-h-0 overflow-hidden"
+                  : "p-0 h-full min-h-0 overflow-hidden"
+                : !isSidebarOpen
+                ? "pt-6 sm:pt-7 px-4 sm:px-6 lg:px-8 lg:pl-28 pb-8 page-view-transition stagger-container"
+                : "pt-6 sm:pt-7 px-4 sm:px-6 lg:px-8 pb-8 page-view-transition stagger-container"
+            }`}
+          >
+            {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (
+              <React.Suspense fallback={null}>
+                <AutoCropSettingsModal
+                  isPage={false}
+                  onClose={handleAutoCropClose}
+                  onApply={handleAutoCropApply}
+                  sensitivity={cropSensitivity}
+                  setSensitivity={setCropSensitivity}
+                  padding={cropPaddingPx}
+                  setPadding={setCropPaddingPx}
+                  backgroundColorMode={cropBackgroundMode}
+                  setBackgroundColorMode={setCropBackgroundMode}
+                  autoSplitTallStrips={autoSplitTallStrips}
+                  setAutoSplitTallStrips={setAutoSplitTallStrips}
+                  aspectRatioLock={aspectRatioLock}
+                  setAspectRatioLock={setAspectRatioLock}
+                  minPanelAreaPct={minPanelAreaPct}
+                  setMinPanelAreaPct={setMinPanelAreaPct}
+                  overlapMergeThreshold={overlapMergeThreshold}
+                  setOverlapMergeThreshold={setOverlapMergeThreshold}
+                  useLocalCV={useLocalCV}
+                  setUseLocalCV={setUseLocalCV}
+                  cropModel={cropModel}
+                  setCropModel={setCropModel}
+                  cropMinHeightPx={cropMinHeightPx}
+                  setCropMinHeightPx={setCropMinHeightPx}
+                  cropCannyLow={cropCannyLow}
+                  setCropCannyLow={setCropCannyLow}
+                  cropCannyHigh={cropCannyHigh}
+                  setCropCannyHigh={setCropCannyHigh}
+                  cropCloseKernelSize={cropCloseKernelSize}
+                  setCropCloseKernelSize={setCropCloseKernelSize}
+                  activeTab={activeAutoCropTab}
+                  setActiveTab={setActiveAutoCropTab}
+                  selectedCount={selectedScraped.length}
+                  isApplying={isBatchCropping}
+                  scrapedImages={scrapedImages}
+                  selectedScraped={selectedScraped}
+                  setSelectedScraped={setSelectedScraped}
+                  setConsoleLogs={setConsoleLogs}
+                  addNotification={addNotification}
+                  cropGuidance={cropGuidance}
+                  setCropGuidance={setCropGuidance}
+                  cropFocusMode={cropFocusMode}
+                  setCropFocusMode={setCropFocusMode}
+                />
+              </React.Suspense>
+            ) : (
+              children
+            )}
+          </div>
+        </main>
+      </div>
+
+      <React.Suspense fallback={null}>
+        {alertDialog && alertDialog.isOpen && (
+          <ConfirmModal
+            title={alertDialog.title}
+            message={alertDialog.message}
+            accentColor={alertDialog.accentColor}
+            isAlert={true}
+            onConfirm={() => {
+              alertDialog.resolve();
+              setAlertDialog(null);
+            }}
+            onCancel={() => {
+              alertDialog.resolve();
+              setAlertDialog(null);
+            }}
+          />
+        )}
+
+        {confirmDialog && confirmDialog.isOpen && (
+          <ConfirmModal
+            title={confirmDialog.title}
+            message={confirmDialog.message}
+            accentColor={confirmDialog.accentColor}
+            onConfirm={() => {
+              confirmDialog.resolve(true);
+              setConfirmDialog(null);
+            }}
+            onCancel={() => {
+              confirmDialog.resolve(false);
+              setConfirmDialog(null);
+            }}
+          />
+        )}
+
+        {showScrapeConfirmModal && (
+          <ProjectConfirmModal
+            isOpen={showScrapeConfirmModal}
+            onClose={() => setShowScrapeConfirmModal(false)}
+            onConfirm={handleProjectConfirm}
+            initialDetails={{
+              seriesTitle,
+              chapterNumber,
+              chapterTitle,
+              scrapedGenre,
+              seriesAuthor,
+              seriesCoverImage:
+                seriesCoverImage ||
+                scrapedImages?.[0] ||
+                panels?.[0]?.image_url ||
+                "",
+              seriesSynopsis,
+            }}
+          />
+        )}
+
+        {/* Global Active Project Activation Drawer */}
+        <ActiveProjectSelectorDrawer
+          fetchWithInterceptor={fetchWithInterceptor}
+          navigateTo={navigateTo}
+        />
+      </React.Suspense>
+    </div>
+  );
+}

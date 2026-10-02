@@ -1,0 +1,580 @@
+import React, { useState, useEffect } from "react";
+import { Film, FolderSync, Zap, Layers } from "lucide-react";
+// ── Subsystem imports (new architecture) ─────────────────────────────────────
+import VideoEditorHeader from "@/features/video-editor/video/shell/VideoEditorHeader";
+import VideoEditorSidebar from "@/features/video-editor/video/shell/VideoEditorSidebar";
+import { WorkspacePanel } from "@/features/video-editor/video/shell/WorkspacePanel";
+import { EditorViewport } from "@/features/video-editor/video/viewport/EditorViewport";
+import { Timeline } from "@/features/video-editor/video/timeline/Timeline";
+import { InspectorPanel } from "@/features/video-editor/video/inspector/InspectorPanel";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import { WorkspaceId } from "@/features/video-editor/video/types/workspace.types";
+
+interface VideoEditorPageProps {
+  appLogic?: any;
+  navigateTo?: (path: string) => void;
+  onBackToApp?: () => void;
+  projectTitle?: string;
+  user?: any;
+}
+
+const DEFAULT_LEFT_WIDTH = 380;
+const DEFAULT_RIGHT_WIDTH = 260;
+const DEFAULT_TIMELINE_HEIGHT = 280;
+
+const VideoEditorPage: React.FC<VideoEditorPageProps> = ({
+  appLogic,
+  navigateTo,
+  onBackToApp,
+  projectTitle,
+  user,
+}) => {
+  const [activeWorkspace, setActiveWorkspace] =
+    useState<WorkspaceId>("imported_assets");
+  const [layoutMode, setLayoutMode] = useState<
+    "standard" | "full_timeline" | "preview_only"
+  >("standard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [layoutConfig, setLayoutConfig] = useState({
+    mediaBin: true,
+    rightInspector: true,
+    timeline: true,
+  });
+
+  const handleSelectWorkspace = (id: WorkspaceId) => {
+    setActiveWorkspace(id);
+    if (!layoutConfig.mediaBin) {
+      setLayoutConfig((prev) => ({ ...prev, mediaBin: true }));
+    }
+  };
+  const [viewportZoom, setViewportZoom] = useState(100);
+
+  // ── Panel Resizing Dimensions & Persistence ──────────────────────────────
+  const [leftWidth, setLeftWidth] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sonikoma_left_panel_w");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 260 && parsed <= 650) return parsed;
+      }
+    }
+    return DEFAULT_LEFT_WIDTH;
+  });
+
+  const [rightWidth, setRightWidth] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sonikoma_right_panel_w");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 180 && parsed <= 500) return parsed;
+      }
+    }
+    return DEFAULT_RIGHT_WIDTH;
+  });
+
+  const [timelineHeight, setTimelineHeight] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sonikoma_timeline_h");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 160 && parsed <= 650) return parsed;
+      }
+    }
+    return DEFAULT_TIMELINE_HEIGHT;
+  });
+
+  const [isDraggingLeft, setIsDraggingLeft] = useState(false);
+  const [isDraggingRight, setIsDraggingRight] = useState(false);
+  const [isDraggingTimeline, setIsDraggingTimeline] = useState(false);
+
+  // ── Mouse Drag Handlers for Smooth Studio-Grade Resizing ─────────────────
+  const handleLeftResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingLeft(true);
+    const startX = e.clientX;
+    const startW = leftWidth;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const nextW = Math.min(650, Math.max(260, startW + delta));
+      setLeftWidth(nextW);
+      localStorage.setItem("sonikoma_left_panel_w", String(nextW));
+    };
+
+    const onMouseUp = () => {
+      setIsDraggingLeft(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const handleRightResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingRight(true);
+    const startX = e.clientX;
+    const startW = rightWidth;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = startX - moveEvent.clientX;
+      const nextW = Math.min(500, Math.max(180, startW + delta));
+      setRightWidth(nextW);
+      localStorage.setItem("sonikoma_right_panel_w", String(nextW));
+    };
+
+    const onMouseUp = () => {
+      setIsDraggingRight(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const handleTimelineResizeStart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDraggingTimeline(true);
+    const startY = e.clientY;
+    const startH = timelineHeight;
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = startY - moveEvent.clientY;
+      const nextH = Math.min(650, Math.max(160, startH + delta));
+      setTimelineHeight(nextH);
+      localStorage.setItem("sonikoma_timeline_h", String(nextH));
+    };
+
+    const onMouseUp = () => {
+      setIsDraggingTimeline(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
+
+  const handleZoomLevelChange = (nextZoom: number) => {
+    setViewportZoom(Math.min(300, Math.max(20, nextZoom)));
+  };
+
+  const handleZoomIn = () =>
+    setViewportZoom((prev) => Math.min(300, prev + 10));
+  const handleZoomOut = () =>
+    setViewportZoom((prev) => Math.max(20, prev - 10));
+  const handleZoomReset = () => setViewportZoom(100);
+
+  const handleTogglePanel = (
+    panel: "mediaBin" | "rightInspector" | "timeline"
+  ) => {
+    setLayoutConfig((prev) => ({ ...prev, [panel]: !prev[panel] }));
+  };
+
+  // ─── Destructure all live state from appLogic with store fallback ──────────────
+  const storeActiveProjectData = useProjectStore((s) => s.activeProjectData);
+  const panels =
+    appLogic?.panels && appLogic.panels.length > 0
+      ? appLogic.panels
+      : storeActiveProjectData?.panels ?? [];
+  const scrapedImages =
+    appLogic?.scrapedImages && appLogic.scrapedImages.length > 0
+      ? appLogic.scrapedImages
+      : storeActiveProjectData?.scrapedImages ?? [];
+  const videoUrl = appLogic?.videoUrl ?? null;
+  const setVideoUrl = appLogic?.setVideoUrl ?? (() => {});
+  const seriesTitle =
+    appLogic?.seriesTitle || storeActiveProjectData?.project?.title || "";
+  const chapterTitle =
+    appLogic?.chapterTitle ||
+    storeActiveProjectData?.project?.chapter_title ||
+    "";
+  const chapterNumber =
+    appLogic?.chapterNumber ||
+    storeActiveProjectData?.project?.chapter_number ||
+    "";
+  const targetUrl = appLogic?.targetUrl ?? "";
+  const isDirty = appLogic?.isDirty ?? false;
+  const isSaving = appLogic?.isSaving ?? false;
+  const isRendering = appLogic?.isRendering ?? false;
+  const renderProgress = appLogic?.renderProgress ?? 0;
+  const progressStatus = appLogic?.progressStatus ?? null;
+  const hasEnoughCredits = appLogic?.hasEnoughCredits ?? true;
+  const userCredits = appLogic?.userCredits ?? null;
+  const addNotification = appLogic?.addNotification ?? (() => {});
+
+  // Playback
+  const currentPanelIndex = appLogic?.currentPanelIndex ?? 0;
+  const setCurrentPanelIndex = appLogic?.setCurrentPanelIndex ?? (() => {});
+  const [activePreviewTab, setActivePreviewTab] = useState("editor");
+  const handleSetActivePreviewTab = (tab: string) => {
+    setActivePreviewTab(tab);
+    if (tab === "timeline") {
+      setLayoutConfig((prev) => ({ ...prev, timeline: true }));
+    }
+  };
+
+  // Audio / Video properties
+  const [currentAspectRatio, setCurrentAspectRatio] = useState<string>(() => {
+    return appLogic?.aspectRatio || "original";
+  });
+  const handleAspectRatioChange = (ratio: string) => {
+    setCurrentAspectRatio(ratio);
+    appLogic?.setAspectRatio?.(ratio);
+  };
+  const volume = appLogic?.volume ?? 80;
+  const setVolume = appLogic?.setVolume;
+  const voiceActor = appLogic?.voiceActor ?? "";
+  const setVoiceActor = appLogic?.setVoiceActor;
+  const musicTheme = appLogic?.musicTheme ?? "";
+  const setMusicTheme = appLogic?.setMusicTheme;
+  const frameRate = appLogic?.frameRate ?? null;
+  const setFrameRate = appLogic?.setFrameRate;
+
+  // Effects / Adjust
+  const cropSensitivity = appLogic?.cropSensitivity ?? 50;
+  const setCropSensitivity = appLogic?.setCropSensitivity;
+
+  const handleReturn = () => {
+    if (onBackToApp) {
+      onBackToApp();
+    } else if (navigateTo) {
+      navigateTo("/scraper/editor");
+    } else {
+      window.history.back();
+    }
+  };
+
+  const handleExport = () => {
+    if (appLogic?.handleRenderFinalVideo) {
+      appLogic.handleRenderFinalVideo();
+    } else {
+      alert("Starting high-resolution video export render…");
+    }
+  };
+
+  const handleSave = () => {
+    if (appLogic?.saveProject) {
+      appLogic.saveProject();
+    }
+  };
+
+  const [mobileTab, setMobileTab] = useState<
+    "player" | "assets" | "timeline" | "inspector"
+  >("player");
+
+  return (
+    <div className="flex flex-col h-screen w-screen bg-[#0A0A0A] text-white overflow-hidden select-none font-sans fixed inset-0 z-[100]">
+      {/* ── Top Header Bar ──────────────────────────────────────────────────── */}
+      <VideoEditorHeader
+        seriesTitle={seriesTitle}
+        chapterTitle={chapterTitle}
+        chapterNumber={chapterNumber ? String(chapterNumber) : undefined}
+        onBackToApp={handleReturn}
+        onExport={handleExport}
+        onSave={handleSave}
+        isRendering={isRendering}
+        renderProgress={renderProgress}
+        isSaving={isSaving}
+        isDirty={isDirty}
+        userCredits={userCredits}
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        layoutConfig={layoutConfig}
+        onTogglePanel={handleTogglePanel}
+        panelsCount={panels.length}
+        navigateTo={navigateTo}
+        user={user || appLogic?.user}
+        layoutMode={layoutMode}
+        onLayoutModeChange={setLayoutMode}
+      />
+
+      {/* ── Slide-Out Full Sidebar Drawer ───────────────────────────────────── */}
+      <VideoEditorSidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        activeWorkspace={activeWorkspace}
+        onSelectWorkspace={handleSelectWorkspace}
+        seriesTitle={seriesTitle}
+        chapterTitle={chapterTitle}
+        panelsCount={panels.length}
+        onBackToApp={handleReturn}
+        navigateTo={navigateTo}
+      />
+
+      {/* ── Main Workspace Row ───────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 relative select-none overflow-hidden">
+        {/* Left: Workspace Panel (MiniSidebar + active workspace) */}
+        <div
+          className={`h-full shrink-0 overflow-hidden transition-all duration-200 ${
+            mobileTab === "assets"
+              ? "flex w-full min-w-0"
+              : layoutConfig.mediaBin
+              ? "hidden md:flex"
+              : "hidden md:flex md:w-20"
+          }`}
+          style={{
+            width:
+              typeof window !== "undefined" && window.innerWidth >= 768
+                ? layoutConfig.mediaBin
+                  ? leftWidth
+                  : 80
+                : undefined,
+          }}
+        >
+          <WorkspacePanel
+            defaultWorkspace="imported_assets"
+            activeWorkspace={activeWorkspace}
+            onSelectWorkspace={handleSelectWorkspace}
+            onBackToApp={handleReturn}
+            navigateTo={navigateTo}
+            showContent={
+              typeof window !== "undefined" && window.innerWidth < 768
+                ? true
+                : layoutConfig.mediaBin
+            }
+            appLogic={appLogic}
+          />
+        </div>
+
+        {/* Left Vertical Resizer Splitter - Hidden on mobile */}
+        {layoutConfig.mediaBin && (
+          <div
+            onMouseDown={handleLeftResizeStart}
+            onDoubleClick={() => {
+              setLeftWidth(DEFAULT_LEFT_WIDTH);
+              localStorage.setItem(
+                "sonikoma_left_panel_w",
+                String(DEFAULT_LEFT_WIDTH)
+              );
+            }}
+            className={`hidden md:flex w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-l border-r border-white/5 ${
+              isDraggingLeft
+                ? "bg-[#2A2A2A] "
+                : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
+            }`}
+            title="Drag to resize Left Panel (Double click to reset)"
+          >
+            <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-[#2A2A2A] transition-colors" />
+          </div>
+        )}
+
+        {/* Studio Content Column (Preview Player Top + Timeline Bottom) */}
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+          {/* ── Upper Row: Preview Player + Right Inspector ───────────────── */}
+          {layoutMode !== "full_timeline" && (
+            <div
+              className={`flex-1 min-h-0 w-full overflow-hidden ${
+                mobileTab === "timeline" ? "hidden md:flex" : "flex"
+              }`}
+            >
+              {/* Center: Adaptation Player Viewport */}
+              <div
+                className={`min-h-0 overflow-hidden ${
+                  mobileTab === "player"
+                    ? "flex flex-1 w-full"
+                    : "hidden md:flex md:flex-1 md:min-w-0"
+                }`}
+              >
+                <EditorViewport
+                  panels={panels}
+                  videoUrl={videoUrl}
+                  setVideoUrl={setVideoUrl}
+                  currentPanelIndex={currentPanelIndex}
+                  setCurrentPanelIndex={setCurrentPanelIndex}
+                  activePreviewTab={activePreviewTab}
+                  setActivePreviewTab={handleSetActivePreviewTab}
+                  allowEditorTab={true}
+                  musicTheme={musicTheme}
+                  voiceActor={voiceActor}
+                  navigateTo={navigateTo ?? (() => {})}
+                  seriesTitle={seriesTitle}
+                  chapterNumber={chapterNumber}
+                  chapterTitle={chapterTitle}
+                  targetUrl={targetUrl}
+                  isRendering={isRendering}
+                  renderProgress={renderProgress}
+                  onExportVideo={handleExport}
+                  handleRenderFinalVideo={handleExport}
+                  onExport={handleExport}
+                  progressStatus={progressStatus}
+                  hasEnoughCredits={hasEnoughCredits}
+                  addNotification={addNotification}
+                  onOpenVideoEditor={() => {}}
+                  variant="embedded"
+                  zoomLevel={viewportZoom}
+                  onZoomLevelChange={handleZoomLevelChange}
+                  onZoomIn={handleZoomIn}
+                  onZoomOut={handleZoomOut}
+                  onZoomReset={handleZoomReset}
+                  onSave={handleSave}
+                  isSaving={isSaving}
+                  isDirty={isDirty}
+                  aspectRatio={currentAspectRatio}
+                  onAspectRatioChange={handleAspectRatioChange}
+                />
+              </div>
+
+              {/* Right Vertical Resizer Splitter - Hidden on mobile */}
+              {layoutConfig.rightInspector && (
+                <div
+                  onMouseDown={handleRightResizeStart}
+                  onDoubleClick={() => {
+                    setRightWidth(DEFAULT_RIGHT_WIDTH);
+                    localStorage.setItem(
+                      "sonikoma_right_panel_w",
+                      String(DEFAULT_RIGHT_WIDTH)
+                    );
+                  }}
+                  className={`hidden md:flex w-1.5 h-full relative cursor-col-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-l border-r border-white/5 ${
+                    isDraggingRight
+                      ? "bg-[#2A2A2A] "
+                      : "bg-white/[0.04] hover:bg-[#3B82F6]/50"
+                  }`}
+                  title="Drag to resize Inspector Panel (Double click to reset)"
+                >
+                  <div className="w-[2px] h-6 rounded-full bg-white/20 group-hover:bg-[#2A2A2A] transition-colors" />
+                </div>
+              )}
+
+              {/* Right: Inspector Panel */}
+              <div
+                className={`h-full shrink-0 overflow-hidden transition-all duration-200 ${
+                  mobileTab === "inspector"
+                    ? "flex flex-col w-full min-w-0"
+                    : layoutConfig.rightInspector
+                    ? "hidden md:flex md:flex-col md:w-full"
+                    : "hidden"
+                }`}
+                style={{
+                  width:
+                    typeof window !== "undefined" && window.innerWidth >= 768
+                      ? layoutConfig.rightInspector
+                        ? rightWidth
+                        : 0
+                      : undefined,
+                }}
+              >
+                <InspectorPanel />
+              </div>
+            </div>
+          )}
+
+          {/* Bottom Horizontal Resizer Splitter */}
+          {layoutMode === "standard" && layoutConfig.timeline && (
+            <div
+              onMouseDown={handleTimelineResizeStart}
+              onDoubleClick={() => {
+                setTimelineHeight(DEFAULT_TIMELINE_HEIGHT);
+                localStorage.setItem(
+                  "sonikoma_timeline_h",
+                  String(DEFAULT_TIMELINE_HEIGHT)
+                );
+              }}
+              className={`hidden md:flex h-2 w-full relative cursor-row-resize select-none shrink-0 z-20 group transition-colors duration-150 items-center justify-center border-t border-b border-white/[0.06] ${
+                isDraggingTimeline
+                  ? "bg-[#2A2A2A] "
+                  : "bg-[#121212] hover:bg-[#3B82F6]/30"
+              }`}
+              title="Drag to resize Timeline (Double click to reset)"
+            >
+              <div className="h-[2px] w-12 rounded-full bg-white/20 group-hover:bg-[#3B82F6] transition-colors" />
+            </div>
+          )}
+
+          {/* ── Bottom Multi-Track NLE Timeline ─────────────────────────────── */}
+          <div
+            className={`w-full overflow-hidden transition-all duration-150 ${
+              layoutMode === "full_timeline"
+                ? "flex flex-1 h-full"
+                : mobileTab === "timeline"
+                ? "flex flex-1 h-full"
+                : !layoutConfig.timeline
+                ? "hidden"
+                : mobileTab === "player"
+                ? "flex flex-col shrink-0 border-t border-white/10"
+                : "hidden md:flex md:flex-col shrink-0 border-t border-white/10"
+            }`}
+            style={{
+              height:
+                layoutMode === "full_timeline"
+                  ? "100%"
+                  : mobileTab === "timeline"
+                  ? "100%"
+                  : !layoutConfig.timeline
+                  ? 0
+                  : typeof window !== "undefined" && window.innerWidth >= 768
+                  ? timelineHeight
+                  : 240,
+            }}
+          >
+            <Timeline
+              panels={panels}
+              currentPanelIndex={currentPanelIndex}
+              setCurrentPanelIndex={setCurrentPanelIndex}
+              musicTheme={musicTheme}
+              voiceActor={voiceActor}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Mobile Viewport Bottom Studio Navigation Bar (< 768px) ────────── */}
+      <div className="flex md:hidden items-center justify-around bg-[#0B0C0E] border-t border-white/10 pt-2 pb-4.5 px-3 shrink-0 z-40 select-none shadow-2xl backdrop-blur-xl">
+        <button
+          type="button"
+          onClick={() => setMobileTab("player")}
+          className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[64px] ${
+            mobileTab === "player"
+              ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          <Film className="w-4 h-4 shrink-0" />
+          <span className="leading-none mt-0.5">Player</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileTab("assets")}
+          className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[64px] ${
+            mobileTab === "assets"
+              ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          <FolderSync className="w-4 h-4 shrink-0" />
+          <span className="leading-none mt-0.5">Assets</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileTab("inspector")}
+          className={`flex flex-col items-center justify-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold font-sans tracking-wide leading-none transition-all cursor-pointer min-w-[64px] ${
+            mobileTab === "inspector"
+              ? "text-[#3B82F6] bg-[#3B82F6]/15 border border-[#3B82F6]/30 shadow-xs"
+              : "text-neutral-400 hover:text-white"
+          }`}
+        >
+          <Layers className="w-4 h-4 shrink-0" />
+          <span className="leading-none mt-0.5">Inspector</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default React.memo(VideoEditorPage);

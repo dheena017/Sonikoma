@@ -1,4 +1,4 @@
-import { GeneratedPanel } from "@/types";
+import { GeneratedPanel } from "@/shared/types";
 
 // Compile custom image filters dynamically for instant in-browser live rendering
 export function getPanelFilterStyle(panel: GeneratedPanel) {
