@@ -42,13 +42,15 @@ interface CapabilityDefinition {
     | "Vision & Extraction"
     | "Audio & Speech"
     | "SEO & Marketing"
-    | "Image Diffusion";
+    | "Image Diffusion"
+    | "Kinetic Video";
   description: string;
   required_type:
     | "text_reasoning"
     | "vision_multimodal"
     | "audio_tts"
     | "image_diffusion"
+    | "video_generation"
     | "translation";
   default_primary: string;
   default_fallback: string;
@@ -73,6 +75,42 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     default_primary: "gemini-2.5-flash",
     default_fallback: "claude-3-5-sonnet-20241022",
     default_tertiary: "gpt-4o",
+  },
+  {
+    task: "manhwa_diffusion",
+    name: "Manhwa 2D Webtoon Image Synthesis",
+    emoji: "📱",
+    category: "Image Diffusion",
+    description:
+      "Synthesizes authentic 2D vertical Korean webtoon panels with radiant mana auras, Solo Leveling dark styling, and crisp digital lineart.",
+    required_type: "image_diffusion",
+    default_primary: "flux-anime",
+    default_fallback: "flux",
+    default_tertiary: "turbo",
+  },
+  {
+    task: "comic_diffusion",
+    name: "Comic & Manga 2D Screentone Synthesis",
+    emoji: "✒️",
+    category: "Image Diffusion",
+    description:
+      "Synthesizes authentic black-and-white manga pages with 50 LPI screentone halftones, crosshatching, explosive speedlines, and Kuro-beta ink.",
+    required_type: "image_diffusion",
+    default_primary: "stable-diffusion",
+    default_fallback: "flux-anime",
+    default_tertiary: "flux",
+  },
+  {
+    task: "anime_video",
+    name: "Anime Sakuga Kinetic Video Creation",
+    emoji: "🎬",
+    category: "Kinetic Video",
+    description:
+      "Transforms keyframe anime artwork into fluid 24fps Sakuga action sequences, dynamic camera pans, and cinematic anime video cuts.",
+    required_type: "video_generation",
+    default_primary: "tooncrafter",
+    default_fallback: "animatediff",
+    default_tertiary: "wan-video",
   },
   {
     task: "panel_analysis",
@@ -118,9 +156,9 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Generates character art, redraws speech bubbles, upscale panels, and performs background inpainting.",
     required_type: "image_diffusion",
-    default_primary: "FLUX.1-schnell",
-    default_fallback: "dall-e-3",
-    default_tertiary: "stable-diffusion-xl",
+    default_primary: "flux-anime",
+    default_fallback: "flux",
+    default_tertiary: "stable-diffusion",
   },
   {
     task: "speech_synthesis",
@@ -229,6 +267,12 @@ const CATEGORY_COLORS: Record<
     bg: "rgba(236, 72, 153, 0.08)",
     text: "#f9a8d4",
     dot: "#ec4899",
+  },
+  "Kinetic Video": {
+    border: "rgba(168, 85, 247, 0.35)",
+    bg: "rgba(168, 85, 247, 0.08)",
+    text: "#d8b4fe",
+    dot: "#a855f7",
   },
 };
 
@@ -559,6 +603,26 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           id.includes("sana") ||
           id.includes("pollinations") ||
           id.includes("image")
+        );
+      });
+    } else if (req === "video_generation") {
+      filtered = availableModels.filter((m) => {
+        const caps = m.capabilities || [];
+        const cat = (m.category || "").toLowerCase();
+        const id = m.id.toLowerCase();
+        return (
+          caps.includes("video_generation") ||
+          caps.includes("video") ||
+          caps.includes("keyframe_interpolation") ||
+          caps.includes("camera_pan") ||
+          cat.includes("video") ||
+          cat.includes("kinetic") ||
+          cat.includes("motion") ||
+          id.includes("tooncrafter") ||
+          id.includes("animatediff") ||
+          id.includes("wan") ||
+          id.includes("parallax") ||
+          id.includes("video")
         );
       });
     } else if (req === "vision_multimodal") {
@@ -958,6 +1022,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     "Audio & Speech",
     "SEO & Marketing",
     "Image Diffusion",
+    "Kinetic Video",
   ];
 
   // Filter routes based on Category and Search
@@ -984,7 +1049,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   }
 
   return (
-    <div className="flex-1 w-full max-w-7xl mx-auto animate-in fade-in duration-200 text-left">
+    <div className="flex-1 w-full max-w-7xl mx-auto py-5 sm:py-7 animate-in fade-in duration-200 text-left text-[#E5E5E5]">
       {/* ── MAIN COVER WRAPPER CARD ── */}
       <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden">
         {/* ── 1. HERO HEADER & TELEMETRY BANNER ──────────────────────────────── */}
@@ -1012,7 +1077,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
                 {activeViewTab === "matrix"
                   ? `${availableModels.length} ENGINES TRACKED`
-                  : "11 ACTIVE PIPELINES"}
+                  : `${CAPABILITY_DEFINITIONS.length} ACTIVE PIPELINES`}
               </span>
             </div>
             <p className="text-neutral-400 text-xs sm:text-sm max-w-3xl leading-relaxed">
@@ -1029,7 +1094,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                 type="button"
                 onClick={handleResetDefaults}
                 className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold font-mono text-[#E5E5E5] bg-[#1E1E1E] border border-[#2F2F2F] hover:bg-[#2A2A2A] transition-all cursor-pointer shadow-sm"
-                title="Reset all 11 task routes to default specialized configurations"
+                title={`Reset all ${CAPABILITY_DEFINITIONS.length} task routes to default specialized configurations`}
               >
                 <RotateCcw className="w-3.5 h-3.5 text-[#9CA3AF]" />
                 <span>Reset Defaults</span>

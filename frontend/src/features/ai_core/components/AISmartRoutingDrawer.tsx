@@ -33,7 +33,7 @@ export interface AISmartRoutingDrawerProps {
   fullWidth?: boolean;
 }
 
-// Full Comic Pipeline Task Definitions (Matching backend 11 Capabilities)
+// Full Comic Pipeline Task Definitions (14 Dynamic AI Pipelines)
 const PIPELINE_TASKS = [
   {
     id: "storyboard_narrative",
@@ -42,6 +42,30 @@ const PIPELINE_TASKS = [
     emoji: "📖",
     color: "#3B82F6",
     desc: "Episodic comic script & emotional voice acting cues",
+  },
+  {
+    id: "manhwa_diffusion",
+    name: "Manhwa 2D Webtoon Image Synthesis",
+    category: "Image",
+    emoji: "📱",
+    color: "#3B82F6",
+    desc: "Authentic Korean webtoon vertical panels with radiant mana aura & crisp lineart",
+  },
+  {
+    id: "comic_diffusion",
+    name: "Comic & Manga 2D Screentone Synthesis",
+    category: "Image",
+    emoji: "✒️",
+    color: "#A855F7",
+    desc: "Authentic black-and-white manga pages with 50 LPI screentones, crosshatching & speedlines",
+  },
+  {
+    id: "anime_video",
+    name: "Anime Sakuga Kinetic Video Creation",
+    category: "Video",
+    emoji: "🎬",
+    color: "#EF4444",
+    desc: "Keyframe anime artwork into fluid 24fps Sakuga action sequences & dynamic camera pans",
   },
   {
     id: "panel_analysis",
@@ -244,9 +268,10 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
     "All Pipelines",
     "★ Favorites",
     "Creative",
+    "Image",
+    "Video",
     "Vision & OCR",
     "Audio & Voice",
-    "Image",
     "SEO & Social",
   ];
 
@@ -313,7 +338,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
             compact ? "hidden lg:inline" : "hidden sm:inline"
           }`}
         >
-          11 Tasks
+          {PIPELINE_TASKS.length} Tasks
         </span>
         <ChevronDown
           className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 shrink-0 ${
@@ -382,7 +407,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
               <div className="px-5 py-3 border-b border-[#2F2F2F] bg-[#121212] flex items-center justify-between gap-2 shrink-0">
                 <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">
                   <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  <span>11 ACTIVE PIPELINES</span>
+                  <span>{PIPELINE_TASKS.length} ACTIVE PIPELINES</span>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full bg-[#1E1E1E] border border-[#2F2F2F] text-[10px] font-mono font-bold text-neutral-400">
                   Synchronized
@@ -587,7 +612,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
               <div className="p-4 border-t border-[#2F2F2F] bg-[#181818] flex items-center justify-between text-xs text-neutral-400 shrink-0">
                 <span className="flex items-center gap-1.5 text-emerald-400 font-mono font-bold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  11 / 11 Pipelines Synchronized
+                  {PIPELINE_TASKS.length} / {PIPELINE_TASKS.length} Pipelines Synchronized
                 </span>
 
                 <div className="flex items-center gap-3 font-mono">

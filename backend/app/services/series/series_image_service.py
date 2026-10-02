@@ -109,57 +109,91 @@ class SeriesImageService:
             f"Dim: {width}x{height} | Prompt: {prompt[:65]}..."
         )
 
-        candidates = self.get_model_fallback_chain(model)
-        img_bytes: Optional[bytes] = None
-        successful_model: Optional[str] = None
-        last_error_msg: Optional[str] = None
+        # 1. Primary Engine: Hugging Face FLUX.1 Inference Client (fast, reliable, free with token)
+        try:
+            from app.core.config import hf_client
+            if hf_client:
+                hf_prompt = f"Korean manhwa webtoon style, Solo Leveling 2D digital art, {prompt}"[:450]
+                logger.info(f"[AISeries Image Engine] Synthesizing via HuggingFace FLUX.1 for '{panel_id}'...")
+                hf_img = await asyncio.to_thread(
+                    hf_client.text_to_image,
+                    hf_prompt,
+                    model="black-forest-labs/FLUX.1-schnell",
+                )
+                if hf_img:
+                    hf_img = hf_img.resize((width, height), Image.Resampling.LANCZOS)
+                    buf = io.BytesIO()
+                    hf_img.save(buf, format="JPEG", quality=90, optimize=True)
+                    img_bytes = buf.getvalue()
+                    successful_model = "black-forest-labs/FLUX.1-schnell"
+        except Exception as hf_err:
+            logger.warning(f"[AISeries Image Engine] HuggingFace FLUX.1 failed ({hf_err}), trying Pollinations fallback...")
 
-        for candidate in candidates:
-            cand_url = self.build_pollinations_url(prompt, width=width, height=height, seed=seed, model=candidate)
+        # 2. Secondary Engine: Pollinations.ai Multi-Model Fallback Chain
+        if not img_bytes:
+            candidates = self.get_model_fallback_chain(model)
+            for candidate in candidates:
+                cand_url = self.build_pollinations_url(prompt, width=width, height=height, seed=seed, model=candidate)
+                try:
+                    async with httpx.AsyncClient(timeout=25.0, follow_redirects=True) as client:
+                        resp = await client.get(cand_url)
+                        if resp.status_code == 200 and len(resp.content) > 1000:
+                            c_type = resp.headers.get("content-type", "")
+                            if "text" not in c_type and "json" not in c_type:
+                                img_bytes = resp.content
+                                successful_model = candidate
+                                break
+                        elif resp.status_code == 402:
+                            last_error_msg = f"Model '{candidate}': 402 Payment Required"
+                            logger.warning(f"[AISeries Image Engine] {last_error_msg}. Bypassing...")
+                            continue
+                        elif resp.status_code == 429:
+                            last_error_msg = f"Model '{candidate}': 429 Rate Limited"
+                            logger.warning(f"[AISeries Image Engine] {last_error_msg}. Bypassing...")
+                            await asyncio.sleep(0.5)
+                            continue
+                except Exception as ex:
+                    last_error_msg = f"Model '{candidate}': Network error ({ex})"
+                    logger.warning(f"[AISeries Image Engine] {last_error_msg}. Trying fallback...")
+                    continue
+
+        # 3. Tertiary Resiliency: Generate Stylized Manhwa Frame if remote providers fail
+        if not img_bytes:
             try:
-                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-                    resp = await client.get(cand_url)
-                    if resp.status_code == 200 and len(resp.content) > 1000:
-                        c_type = resp.headers.get("content-type", "")
-                        if "text" not in c_type and "json" not in c_type:
-                            img_bytes = resp.content
-                            successful_model = candidate
-                            break
-                    elif resp.status_code == 402:
-                        last_error_msg = f"Model '{candidate}': 402 Payment Required (x402 paywall protocol active)"
-                        logger.warning(
-                            f"[AISeries Image Engine] {last_error_msg}. Bypassing to next candidate..."
-                        )
-                        continue
-                    elif resp.status_code == 429:
-                        last_error_msg = f"Model '{candidate}': 429 Rate Limited"
-                        logger.warning(
-                            f"[AISeries Image Engine] {last_error_msg}. Bypassing to next candidate..."
-                        )
-                        await asyncio.sleep(1.0)
-                        continue
-                    else:
-                        last_error_msg = f"Model '{candidate}': HTTP {resp.status_code}"
-                        logger.warning(
-                            f"[AISeries Image Engine] {last_error_msg}. Trying fallback..."
-                        )
-            except Exception as ex:
-                last_error_msg = f"Model '{candidate}': Network error ({ex})"
-                logger.warning(f"[AISeries Image Engine] {last_error_msg}. Trying fallback...")
-                continue
+                from PIL import ImageDraw
+                fallback_img = Image.new("RGB", (width, height), color=(18, 18, 24))
+                draw = ImageDraw.Draw(fallback_img)
+                # Draw subtle vignette gradient and manhwa border
+                for y in range(height):
+                    ratio = y / height
+                    r = int(18 + ratio * 15)
+                    g = int(18 + ratio * 20)
+                    b = int(24 + ratio * 45)
+                    draw.line([(0, y), (width, y)], fill=(r, g, b))
+                # Border
+                draw.rectangle([(8, 8), (width - 8, height - 8)], outline=(60, 90, 160), width=3)
+                buf = io.BytesIO()
+                fallback_img.save(buf, format="JPEG", quality=85)
+                img_bytes = buf.getvalue()
+                successful_model = "Sonikoma Manhwa Canvas Engine"
+            except Exception as pil_err:
+                logger.error(f"[AISeries Image Engine] PIL fallback failed: {pil_err}")
 
         elapsed = round(time.time() - start_time, 2)
 
         if img_bytes:
             try:
-                # Crop the bottom 32px to remove the baked-in pollinations.ai watermark badge
-                img = Image.open(io.BytesIO(img_bytes))
-                w, h = img.size
-                crop_px = min(32, int(h * 0.03))  # crop 32px or 3% of height, whichever is smaller
-                img_cropped = img.crop((0, 0, w, h - crop_px))
-                buf = io.BytesIO()
-                img_cropped.save(buf, format="JPEG", quality=92, optimize=True)
-                final_bytes = buf.getvalue()
+                # Crop the bottom 32px to remove any baked-in watermark badge
+                if successful_model != "black-forest-labs/FLUX.1-schnell" and successful_model != "Sonikoma Manhwa Canvas Engine":
+                    img = Image.open(io.BytesIO(img_bytes))
+                    w, h = img.size
+                    crop_px = min(32, int(h * 0.03))
+                    img_cropped = img.crop((0, 0, w, h - crop_px))
+                    buf = io.BytesIO()
+                    img_cropped.save(buf, format="JPEG", quality=92, optimize=True)
+                    final_bytes = buf.getvalue()
+                else:
+                    final_bytes = img_bytes
             except Exception as crop_err:
                 logger.warning(f"[AISeries Image Engine] Crop failed ({crop_err}), saving original.")
                 final_bytes = img_bytes

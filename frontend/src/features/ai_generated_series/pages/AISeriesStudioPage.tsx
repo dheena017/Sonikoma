@@ -51,7 +51,7 @@ import {
   CharacterDNA,
 } from "@/api/endpoints/aiSeries";
 import { NotificationType } from "@/features/app_notification";
-import ShotDirectorInspector from "../components/studio/ShotDirectorInspector";
+import RightSidePanelInspector from "../components/tabs/RightSidePanelInspector";
 import RouteLoadingFallback from "@/components/feedback/RouteLoadingFallback";
 import { SonikomaLogo } from "@/shared/ui/branding";
 
@@ -94,12 +94,14 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
     "stable-diffusion": "🖼️ SDXL",
     sana: "🌟 Sana",
   };
-  const modelLabel = imageModel ? (MODEL_LABELS[imageModel] ?? imageModel) : null;
+  const modelLabel = imageModel ? (MODEL_LABELS[imageModel] ?? imageModel) : "🎨 Flux Anime";
+
   const [imageState, setImageState] = useState<"loading" | "loaded" | "error">(
     src ? "loading" : "error"
   );
   const [isLocalReloading, setIsLocalReloading] = useState<boolean>(false);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
+  const [cacheBuster, setCacheBuster] = useState<number>(0);
 
   const isActuallyProcessing = isRegenerating || isLocalReloading;
 
@@ -124,160 +126,215 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
   useEffect(() => {
     if (!src) {
       setImageState("error");
-      return;
+    } else {
+      setImageState("loading");
     }
-    setImageState("loading");
-    let isCancelled = false;
+  }, [src, cacheBuster]);
 
-    // Remote CDN URLs (Pollinations.ai fallback) — skip JS preload, let the <img> element
-    // handle loading natively. JS Image() preload has no timeout & fails on slow CDN responses.
-    const isRemoteUrl = src.startsWith("http://") || src.startsWith("https://");
-    if (isRemoteUrl) {
-      // For remote URLs: just mark as loaded immediately so the <img> renders.
-      // The <img> element's own onError will handle failures.
-      setImageState("loaded");
-      return () => { isCancelled = true; };
-    }
+  // Multi-stage pipeline during active visual generation
+  const GENERATION_STAGES = [
+    { name: "Scene Direction", desc: "Analyzing angle, character DNA & composition" },
+    { name: "Latent Diffusion", desc: "Synthesizing high-res 2D manhwa lineart" },
+    { name: "Cel Shading & Tone", desc: "Applying screentones & dynamic lighting" },
+    { name: "Media Finalization", desc: "Encoding frame & caching to studio disk" },
+  ];
 
-    // Local /media/ URLs — use preload for instant feedback
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      if (!isCancelled) {
-        setImageState("loaded");
-        setIsLocalReloading(false);
-      }
-    };
-    img.onerror = () => {
-      if (!isCancelled) {
-        setImageState("error");
-        setIsLocalReloading(false);
-      }
-    };
-    // 30s timeout for local media that may not exist yet
-    const timeout = setTimeout(() => {
-      if (!isCancelled) setImageState("error");
-    }, 30000);
-    return () => {
-      isCancelled = true;
-      clearTimeout(timeout);
-    };
-  }, [src]);
+  const currentStageIndex =
+    elapsedSeconds >= 17 ? 3 :
+    elapsedSeconds >= 10 ? 2 :
+    elapsedSeconds >= 4 ? 1 : 0;
+  const currentStage = GENERATION_STAGES[currentStageIndex];
 
-  // Active AI Diffusion Generation / Processing State (Simplest Design with Website Logo)
+  // 1. ACTIVE AI GENERATION PROCESS STATE (Live multi-stage progress)
   if (isActuallyProcessing) {
-    const progressPercent = Math.min(96, Math.max(10, Math.round((elapsedSeconds / 22) * 90) + 10));
+    const progressPercent = Math.min(96, Math.max(10, Math.round((elapsedSeconds / 22) * 88) + 12));
 
     return (
       <div
-        className={`w-full h-full min-h-[280px] ${aspectRatioClass} flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-[#0e101d] to-[#07080e] relative overflow-hidden select-none border border-cyan-500/20`}
+        className={`w-full h-full min-h-[300px] ${aspectRatioClass} flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#181818] via-[#141414] to-[#101010] relative overflow-hidden select-none border border-cyan-500/30 shadow-[inset_0_0_30px_rgba(6,182,212,0.06)]`}
       >
-        {/* Ambient Glow & Website Logo with Spinner Ring */}
-        <div className="relative mb-3 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-cyan-500/10 blur-xl absolute pointer-events-none animate-pulse" />
-          <div className="relative z-10">
+        {/* Animated Scanning Beam */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent pointer-events-none animate-pulse" />
+
+        {/* Ambient Glow Pod & Logo with Dynamic Spinner Rings */}
+        <div className="relative mb-4 flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full bg-cyan-500/15 blur-2xl absolute pointer-events-none animate-pulse" />
+          <div className="relative z-10 p-2 rounded-2xl bg-[#1C1C1C] border border-cyan-500/30 shadow-lg">
             <SonikomaLogo iconOnly size="md" />
           </div>
-          <div className="absolute -inset-1.5 rounded-full border border-cyan-400/30 border-t-cyan-400 animate-spin pointer-events-none" />
+          <div className="absolute -inset-2 rounded-full border border-cyan-400/25 border-t-cyan-400 animate-spin pointer-events-none" />
+          <div className="absolute -inset-3.5 rounded-full border border-blue-500/20 border-b-blue-400 animate-spin [animation-duration:3s] pointer-events-none" />
         </div>
 
-        {/* Simplest Header */}
-        <div className="mb-3 space-y-0.5">
-          <span className="text-xs font-mono font-bold text-white block">
-            Creating Shot #{shotIndex + 1}...
-          </span>
-          {cameraAngle && (
-            <span className="text-[10px] font-mono text-neutral-400 block capitalize">
-              {cameraAngle.replace(/_/g, " ")}
+        {/* Active Stage & Title Header */}
+        <div className="mb-3 space-y-1 z-10 max-w-[280px]">
+          <div className="flex items-center justify-center gap-1.5">
+            <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-[10px] font-mono font-bold text-cyan-300">
+              Stage {currentStageIndex + 1}/4
             </span>
-          )}
+            <span className="px-2 py-0.5 rounded-full bg-blue-600/20 border border-blue-500/30 text-[10px] font-mono font-bold text-blue-300">
+              {modelLabel}
+            </span>
+          </div>
+
+          <span className="text-sm font-mono font-bold text-white block">
+            Creating Shot #{shotIndex + 1}
+          </span>
+          <span className="text-xs font-mono font-semibold text-cyan-400 block">
+            {currentStage.name}
+          </span>
+          <p className="text-[10px] font-mono text-neutral-400 truncate max-w-full">
+            {currentStage.desc}
+          </p>
         </div>
 
-        {/* Minimal Progress Bar & Seconds */}
-        <div className="w-36 space-y-1.5">
-          <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+        {/* 4-Stage Step Indicators */}
+        <div className="flex items-center gap-2 mb-3.5 z-10">
+          {GENERATION_STAGES.map((st, i) => (
             <div
-              className="h-full bg-cyan-400 rounded-full transition-all duration-500 ease-out"
+              key={st.name}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === currentStageIndex
+                  ? "w-8 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+                  : i < currentStageIndex
+                  ? "w-4 bg-blue-500/80"
+                  : "w-3 bg-white/15"
+              }`}
+              title={`Step ${i + 1}: ${st.name}`}
+            />
+          ))}
+        </div>
+
+        {/* Cyber Progress Bar & Timer */}
+        <div className="w-48 space-y-1.5 z-10">
+          <div className="h-1.5 w-full bg-[#252525] rounded-full overflow-hidden p-0.5 border border-white/10">
+            <div
+              className="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-indigo-500 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(6,182,212,0.6)]"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
           <div className="flex items-center justify-between text-[10px] font-mono text-neutral-400">
-            <span className="text-cyan-400 font-semibold">{elapsedSeconds}s</span>
-            <span>{progressPercent}%</span>
+            <span className="text-cyan-400 font-semibold">{elapsedSeconds}s elapsed</span>
+            <span className="text-neutral-300 font-bold">{progressPercent}%</span>
           </div>
         </div>
+
+        {/* Prompt Snippet Preview */}
+        {prompt && (
+          <div className="mt-4 px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 max-w-[280px] z-10">
+            <p className="text-[9px] font-mono text-neutral-400 line-clamp-2 italic text-left">
+              "{prompt}"
+            </p>
+          </div>
+        )}
       </div>
     );
   }
 
-  // Visual Asset In-Flight Download / Loading State (Simplest Design with Website Logo)
-  if (imageState === "loading") {
-    return (
-      <div
-        className={`w-full h-full min-h-[280px] ${aspectRatioClass} flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-[#10111D] to-[#07080E] relative overflow-hidden select-none`}
-      >
-        <div className="relative mb-3 flex items-center justify-center">
-          <SonikomaLogo iconOnly size="md" />
-          <div className="absolute -inset-1.5 rounded-full border border-blue-400/30 border-t-blue-400 animate-spin pointer-events-none" />
-        </div>
-        <span className="text-xs font-mono font-medium text-neutral-300 block">
-          Loading Visual...
-        </span>
-      </div>
-    );
-  }
-
-  // Fallback Storyboard Card (Simplest Empty State with Website Logo, Reload & Inspector)
-  if (imageState === "error" || !src) {
-    const handleReloadClick = async (e: React.MouseEvent) => {
+  // 2. STORYBOARD CARD AWAITING SYNTHESIS / PROCESS LAUNCHER
+  if (!src || imageState === "error") {
+    const handleGenerateClick = async (e: React.MouseEvent) => {
       e.stopPropagation();
       setIsLocalReloading(true);
+      setImageState("loading");
       try {
         if (onReload) {
           await onReload();
         }
       } catch (err) {
+        console.error("Visual generation failed:", err);
+      } finally {
         setIsLocalReloading(false);
       }
     };
 
+    const handleForceRetryUrl = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setImageState("loading");
+      setCacheBuster(Date.now());
+    };
+
     return (
       <div
-        className={`w-full h-full min-h-[280px] ${aspectRatioClass} flex flex-col items-center justify-center p-5 text-center bg-gradient-to-b from-[#10111D] to-[#07080E] border border-white/5 relative group select-none`}
+        className={`w-full h-full min-h-[320px] ${aspectRatioClass} flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-[#1A1A1A] via-[#141414] to-[#101010] border border-[#2F2F2F] hover:border-blue-500/40 relative group select-none transition-all duration-300`}
       >
-        {/* Website Logo in Empty State */}
-        <div className="mb-3 transform group-hover:scale-105 transition-transform duration-300">
-          <SonikomaLogo iconOnly size="md" />
+        {/* Subtle grid pattern background */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
+
+        {/* Website Logo with Ambient Pod */}
+        <div className="mb-3.5 relative transform group-hover:scale-105 transition-transform duration-300">
+          <div className="w-14 h-14 rounded-2xl bg-[#202020] border border-white/10 flex items-center justify-center shadow-lg group-hover:border-blue-500/50 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] transition-all">
+            <SonikomaLogo iconOnly size="md" />
+          </div>
         </div>
 
-        <div className="mb-4">
-          <span className="text-xs font-mono font-medium text-neutral-400 block">
-            Empty Shot
+        {/* Header & Status */}
+        <div className="mb-3 space-y-1 max-w-[280px] z-10">
+          <div className="flex items-center justify-center gap-1.5">
+            <span className="px-2 py-0.5 rounded-full bg-blue-600/20 border border-blue-500/30 text-[10px] font-mono font-bold text-blue-300">
+              Shot #{shotIndex + 1}
+            </span>
+            {cameraAngle && (
+              <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-mono text-neutral-300 capitalize truncate max-w-[140px]">
+                {cameraAngle.replace(/_/g, " ")}
+              </span>
+            )}
+          </div>
+          <span className="text-xs font-mono font-bold text-neutral-200 block pt-0.5">
+            Visual Awaiting Generation
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Generation Process Pipeline Overview */}
+        <div className="w-full max-w-[280px] mb-4.5 p-2.5 rounded-xl bg-[#181818]/90 border border-white/10 text-left space-y-1.5 z-10 shadow-sm">
+          <div className="flex items-center justify-between text-[10px] font-mono border-b border-white/5 pb-1 text-neutral-400">
+            <span className="text-neutral-300 font-semibold flex items-center gap-1">
+              <Zap className="w-3 h-3 text-cyan-400" />
+              Process Pipeline
+            </span>
+            <span className="text-blue-400 font-bold">{modelLabel}</span>
+          </div>
+
+          <div className="space-y-1 text-[10px] font-mono text-neutral-400">
+            <div className="flex items-center gap-1.5 text-neutral-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+              <span className="truncate">Ready: {cameraAngle?.replace(/_/g, " ") || "Standard Shot"}</span>
+            </div>
+            {prompt && (
+              <p className="text-[9px] text-neutral-400 line-clamp-2 pl-3 italic border-l border-white/10 my-0.5">
+                "{prompt}"
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center justify-center gap-2 z-10">
           {onReload && (
             <button
               type="button"
-              onClick={handleReloadClick}
+              onClick={handleGenerateClick}
               disabled={isActuallyProcessing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white text-xs font-mono font-semibold transition-all cursor-pointer shadow-lg shadow-blue-500/25 active:scale-95 disabled:pointer-events-none"
-              title="Reload / Generate Visual"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:bg-blue-600/50 text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-lg shadow-blue-500/25 active:scale-95 disabled:pointer-events-none hover:shadow-blue-500/40"
+              title="Synthesize Visual with AI Diffusion"
             >
-              {isActuallyProcessing ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Processing...</span>
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Reload</span>
-                </>
-              )}
+              <Zap className="w-3.5 h-3.5 text-yellow-300 fill-yellow-300" />
+              <span>Generate Shot #{shotIndex + 1}</span>
             </button>
           )}
+
+          {src && (
+            <button
+              type="button"
+              onClick={handleForceRetryUrl}
+              className="flex items-center gap-1 px-2.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 hover:text-white text-xs font-mono transition-all cursor-pointer active:scale-95"
+              title="Retry Image Link"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Retry</span>
+            </button>
+          )}
+
           {onOpenInspector && (
             <button
               type="button"
@@ -285,8 +342,8 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
                 e.stopPropagation();
                 onOpenInspector();
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-neutral-300 hover:text-white text-xs font-mono font-medium transition-all cursor-pointer active:scale-95"
-              title="Open Inspector"
+              className="flex items-center gap-1 px-2.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-neutral-300 hover:text-white text-xs font-mono font-medium transition-all cursor-pointer active:scale-95"
+              title="Open Shot Inspector"
             >
               <Sliders className="w-3.5 h-3.5" />
               <span>Inspector</span>
@@ -297,19 +354,48 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
     );
   }
 
-  // Loaded Artwork Frame
+  // 3. LOADED / BUFFERING ARTWORK FRAME
+  const finalSrc = cacheBuster > 0
+    ? (src.includes("?") ? `${src}&t=${cacheBuster}` : `${src}?t=${cacheBuster}`)
+    : src;
+
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={`w-auto h-full max-h-full max-w-full ${fitMode === "cover" ? "object-cover w-full h-full" : "object-contain"
-        } block transition-opacity duration-300 opacity-100 ${screentoneFilter ? "contrast-125 grayscale" : ""
-        }`}
-      loading="eager"
-      onError={() => setImageState("error")}
-    />
+    <div className={`w-full h-full relative overflow-hidden flex items-center justify-center ${aspectRatioClass}`}>
+      {/* Sleek skeleton while image is buffering over network */}
+      {imageState === "loading" && (
+        <div className="absolute inset-0 bg-gradient-to-b from-[#181818] via-[#141414] to-[#101010] flex flex-col items-center justify-center z-0 animate-pulse select-none">
+          <div className="relative mb-2 flex items-center justify-center">
+            <div className="p-2 rounded-2xl bg-[#1C1C1C] border border-white/10">
+              <SonikomaLogo iconOnly size="sm" />
+            </div>
+            <div className="absolute -inset-1.5 rounded-full border border-blue-400/30 border-t-blue-400 animate-spin pointer-events-none" />
+          </div>
+          <span className="text-[10px] font-mono text-neutral-400">Loading Shot #{shotIndex + 1}...</span>
+        </div>
+      )}
+
+      <img
+        src={finalSrc}
+        alt={alt}
+        className={`w-auto h-full max-h-full max-w-full ${
+          fitMode === "cover" ? "object-cover w-full h-full" : "object-contain"
+        } block transition-opacity duration-300 relative z-10 ${
+          imageState === "loaded" ? "opacity-100" : "opacity-0"
+        } ${screentoneFilter ? "contrast-125 grayscale" : ""}`}
+        loading="eager"
+        onLoad={() => {
+          setImageState("loaded");
+          setIsLocalReloading(false);
+        }}
+        onError={() => {
+          setImageState("error");
+          setIsLocalReloading(false);
+        }}
+      />
+    </div>
   );
 };
+
 
 interface FilmstripThumbnailProps {
   src?: string;
@@ -335,27 +421,9 @@ const FilmstripThumbnail: React.FC<FilmstripThumbnailProps> = ({
   useEffect(() => {
     if (!src) {
       setThumbState("error");
-      return;
+    } else {
+      setThumbState("loading");
     }
-    setThumbState("loading");
-    let cancelled = false;
-    // Remote CDN URLs: mark loaded immediately, let native <img> handle it
-    const isRemoteUrl = src.startsWith("http://") || src.startsWith("https://");
-    if (isRemoteUrl) {
-      setThumbState("loaded");
-      return () => { cancelled = true; };
-    }
-    const img = new Image();
-    img.src = src;
-    img.onload = () => {
-      if (!cancelled) setThumbState("loaded");
-    };
-    img.onerror = () => {
-      if (!cancelled) setThumbState("error");
-    };
-    return () => {
-      cancelled = true;
-    };
   }, [src]);
 
   return (
@@ -363,29 +431,34 @@ const FilmstripThumbnail: React.FC<FilmstripThumbnailProps> = ({
       id={`filmstrip-thumb-${shotIndex}`}
       type="button"
       onClick={onClick}
-      className={`relative shrink-0 w-16 h-11 rounded-lg overflow-hidden border transition-all cursor-pointer group bg-[#11121F] flex items-center justify-center ${isSelected
+      className={`relative shrink-0 w-16 h-11 rounded-lg overflow-hidden border transition-all cursor-pointer group bg-[#141414] flex items-center justify-center ${isSelected
         ? "ring-2 ring-blue-500 border-blue-400 scale-105 shadow-md shadow-blue-500/30"
         : "border-white/10 hover:border-white/30 opacity-75 hover:opacity-100"
         }`}
     >
       {(isRegenerating || thumbState === "loading") && (
-        <div className="absolute inset-0 bg-gradient-to-tr from-[#131422] to-[#1E1F30] flex items-center justify-center animate-pulse z-10">
+        <div className="absolute inset-0 bg-[#181818] flex items-center justify-center animate-pulse z-10">
           <Loader2 className="w-3.5 h-3.5 text-blue-400 animate-spin" />
         </div>
       )}
 
-      {thumbState === "loaded" && src && !isRegenerating && (
+      {src && !isRegenerating && (
         <img
+          key={src}
           src={src}
           alt={`#${shotIndex + 1}`}
-          className="w-full h-full object-cover relative z-10 transition-opacity duration-200"
+          className={`w-full h-full object-cover relative z-10 transition-opacity duration-200 ${
+            thumbState === "loaded" ? "opacity-100" : "opacity-0"
+          }`}
+          loading="eager"
+          onLoad={() => setThumbState("loaded")}
           onError={() => setThumbState("error")}
         />
       )}
 
       {thumbState === "error" && !isRegenerating && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-tr from-[#131422] to-[#1E1F30]">
-          <Sparkles className="w-3 h-3 text-purple-400/60" />
+        <div className="absolute inset-0 flex items-center justify-center bg-[#181818]">
+          <Sparkles className="w-3 h-3 text-neutral-500" />
         </div>
       )}
 
@@ -604,7 +677,18 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           selectedSessionNum,
           selectedChapterNum
         );
-        setCurrentChapter(freshChap);
+        const timestampedPanels = (freshChap.panels || []).map((p: any) => ({
+          ...p,
+          image_url: p.image_url
+            ? (p.image_url.includes("?")
+                ? `${p.image_url}&t=${Date.now()}`
+                : `${p.image_url}?t=${Date.now()}`)
+            : p.image_url,
+        }));
+        setCurrentChapter({
+          ...freshChap,
+          panels: timestampedPanels,
+        });
         addNotification("Chapter panels synthesized successfully!", "success");
       }
     } catch (err: any) {
@@ -663,10 +747,15 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         }
       );
       if (updatedPanel && currentChapter) {
+        const bustUrl = updatedPanel.image_url
+          ? (updatedPanel.image_url.includes("?")
+              ? `${updatedPanel.image_url}&t=${Date.now()}`
+              : `${updatedPanel.image_url}?t=${Date.now()}`)
+          : updatedPanel.image_url;
         const updatedPanels = [...currentChapter.panels];
         updatedPanels[idx] = {
           ...updatedPanels[idx],
-          image_url: updatedPanel.image_url,
+          image_url: bustUrl,
         };
         setCurrentChapter({
           ...currentChapter,
@@ -1248,7 +1337,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
 
       {/* ── RIGHT COLUMN: SHOT DIRECTOR INSPECTOR (FULL HEIGHT) ──────────── */}
       {isPanelInspectorOpen && (
-        <ShotDirectorInspector
+        <RightSidePanelInspector
           seriesId={resolvedSeriesId}
           seriesTitle={project?.title}
           formatType={project?.format_type}

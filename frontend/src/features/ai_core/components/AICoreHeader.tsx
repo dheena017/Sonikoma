@@ -188,15 +188,17 @@ export default function AICoreHeader({
   return (
     <header
       id="ai_core_header_pane"
-      className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 lg:pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-1.5 sm:gap-4 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {/* Left side: Hamburger and Brand */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0 h-full">
-        <div className="w-10 sm:w-12 lg:w-16 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-1 sm:mr-2">
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0 h-full">
+        {/* Wrapper added here to perfectly match the width of the mini sidebar */}
+        <div className="w-10 sm:w-16 lg:w-20 flex items-center justify-center shrink-0 border-r border-neutral-900/80 h-full mr-0.5 sm:mr-4">
           <button
             onClick={onToggleSidebar}
             className="h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0"
             title="Toggle AI Core Menu"
+            aria-label="Toggle Navigation Menu"
           >
             <Menu className="h-4 w-4" />
           </button>

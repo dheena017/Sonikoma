@@ -129,6 +129,8 @@ class SeriesOrchestrator:
             format_type=req.format_type,
             art_style=req.art_style,
             image_model=getattr(req, "image_model", "flux-anime") or "flux-anime",
+            storyboard_model=getattr(req, "storyboard_model", "gemini-2.5-flash") or "gemini-2.5-flash",
+            voice_model=getattr(req, "voice_model", "edge-tts") or "edge-tts",
             total_sessions=req.total_sessions,
             chapters_per_session=req.chapters_per_session,
             panels_per_chapter=getattr(req, "panels_per_chapter", 8) or 8,
@@ -534,6 +536,7 @@ class SeriesOrchestrator:
                 panels_per_chapter=getattr(req, "panels_per_chapter", 8) or 8,
                 pacing=req.pacing.value if hasattr(req.pacing, "value") else str(req.pacing),
                 dialogue_density=req.dialogue_density.value if hasattr(req.dialogue_density, "value") else str(req.dialogue_density),
+                model=getattr(req, "storyboard_model", None) or "gemini-2.5-flash",
             )
             if hasattr(raw_output, "model_dump"):
                 ai_data = raw_output.model_dump()

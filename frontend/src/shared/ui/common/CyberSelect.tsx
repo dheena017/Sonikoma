@@ -43,6 +43,7 @@ export interface CyberSelectProps {
   variant?: CyberSelectVariant;
   searchable?: boolean;
   ariaLabel?: string;
+  placement?: "bottom" | "top" | "auto";
 }
 
 const VARIANT_STYLES: Record<
@@ -103,22 +104,22 @@ const VARIANT_STYLES: Record<
     check: "text-emerald-400",
   },
   blue: {
-    openBorder: "border-blue-500/80 shadow-[0_0_20px_rgba(59,130,246,0.25)] ring-1 ring-blue-500/30",
-    focusBorder: "focus:border-blue-500/60",
-    text: "text-blue-200",
-    activeText: "text-blue-200 font-bold",
-    icon: "text-blue-400",
-    itemActive: "bg-blue-500/20 border border-blue-500/35 text-blue-200 font-bold shadow-sm",
-    check: "text-blue-400",
+    openBorder: "border-[#3B82F6] ring-1 ring-[#3B82F6]/30",
+    focusBorder: "focus:border-[#3B82F6]",
+    text: "text-[#E5E5E5]",
+    activeText: "text-white font-bold",
+    icon: "text-[#3B82F6]",
+    itemActive: "bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-white font-bold shadow-sm",
+    check: "text-[#3B82F6]",
   },
   default: {
-    openBorder: "border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.15)] ring-1 ring-white/20",
-    focusBorder: "focus:border-white/50",
-    text: "text-neutral-200",
+    openBorder: "border-neutral-600 ring-1 ring-neutral-500/20",
+    focusBorder: "focus:border-neutral-500",
+    text: "text-[#E5E5E5]",
     activeText: "text-white font-bold",
     icon: "text-neutral-400",
-    itemActive: "bg-white/15 border border-white/25 text-white font-bold shadow-sm",
-    check: "text-white",
+    itemActive: "bg-[#252525] border border-[#2F2F2F] text-white font-bold shadow-sm",
+    check: "text-[#3B82F6]",
   },
 };
 
@@ -135,12 +136,36 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
   variant = "red",
   searchable = false,
   ariaLabel,
+  placement = "auto",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [openUpward, setOpenUpward] = useState(placement === "top");
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-detect optimal placement (upward vs downward) based on available viewport space
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+    if (placement === "top") {
+      setOpenUpward(true);
+      return;
+    }
+    if (placement === "bottom") {
+      setOpenUpward(false);
+      return;
+    }
+    // placement === "auto"
+    const rect = containerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    if (spaceBelow < 260 && spaceAbove > spaceBelow) {
+      setOpenUpward(true);
+    } else {
+      setOpenUpward(false);
+    }
+  }, [isOpen, placement]);
 
   const currentTheme = VARIANT_STYLES[variant] || VARIANT_STYLES.red;
 
@@ -292,7 +317,7 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
   };
 
   return (
-    <div className={`relative ${className}`} ref={containerRef}>
+    <div className={`relative ${isOpen ? "z-50" : "z-10"} ${className}`} ref={containerRef}>
       {label && (
         <label className="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider block mb-1.5">
           {label}
@@ -316,8 +341,8 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
           disabled
             ? "bg-neutral-900/50 border border-neutral-800 text-neutral-600 cursor-not-allowed opacity-60"
             : isOpen
-            ? `bg-[#161622] ${currentTheme.openBorder} text-white`
-            : "bg-[#0E0E15]/90 hover:bg-[#151520] border border-white/[0.10] hover:border-white/[0.20] text-neutral-200 hover:text-white shadow-inner"
+            ? `bg-[#1E1E1E] ${currentTheme.openBorder} text-white`
+            : "bg-[#161616] hover:bg-[#1E1E1E] border border-[#2F2F2F] hover:border-neutral-600 text-[#E5E5E5] hover:text-white shadow-inner"
         }`}
       >
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -352,20 +377,22 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
       {isOpen && (
         <div
           ref={dropdownRef}
-          className={`absolute left-0 right-0 top-full mt-1.5 z-[150] bg-[#0E0E17]/98 backdrop-blur-2xl border border-white/[0.15] rounded-2xl shadow-[0_16px_50px_rgba(0,0,0,0.9)] p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150 font-mono ${dropdownClassName}`}
+          className={`absolute left-0 right-0 ${
+            openUpward ? "bottom-full mb-1.5" : "top-full mt-1.5"
+          } z-[200] bg-[#181818] border border-[#2F2F2F] rounded-xl shadow-2xl p-1.5 space-y-1 animate-in fade-in zoom-in-95 duration-150 font-mono ${dropdownClassName}`}
         >
           {/* Optional Search inside popup */}
           {(searchable || options.length > 7) && (
-            <div className="p-1.5 pb-2 border-b border-white/[0.08]">
+            <div className="p-1.5 pb-2 border-b border-[#2F2F2F]">
               <div className="relative">
-                <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-3.5 h-3.5 text-[#6B7280] absolute left-2.5 top-1/2 -translate-y-1/2" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search options..."
-                  className={`w-full bg-[#161622] border border-white/[0.08] ${currentTheme.focusBorder} rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none`}
+                  className={`w-full bg-[#141414] border border-[#2F2F2F] ${currentTheme.focusBorder} rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#E5E5E5] placeholder:text-[#6B7280] focus:outline-none`}
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -388,7 +415,7 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
                 return (
                   <React.Fragment key={`${opt.value}-${idx}`}>
                     {showGroupHeader && (
-                      <div className="px-2 pt-1.5 pb-0.5 text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400 border-b border-white/10 mt-1 first:mt-0">
+                      <div className="px-2 pt-1.5 pb-0.5 text-[10px] font-mono font-bold uppercase tracking-wider text-[#9CA3AF] border-b border-[#2F2F2F] mt-1 first:mt-0">
                         {opt.group}
                       </div>
                     )}
@@ -407,7 +434,7 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
                           ? "opacity-40 cursor-not-allowed text-neutral-600"
                           : isSelected
                           ? currentTheme.itemActive
-                          : "hover:bg-white/[0.07] text-neutral-300 hover:text-white border border-transparent"
+                          : "hover:bg-[#252525] text-neutral-300 hover:text-white border border-transparent"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">

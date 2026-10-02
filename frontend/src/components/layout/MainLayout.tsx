@@ -630,8 +630,8 @@ export default function MainLayout(props: MainLayoutProps) {
                   ? "p-0 lg:pl-20 h-full min-h-0 overflow-hidden"
                   : "p-0 h-full min-h-0 overflow-hidden"
                 : !isSidebarOpen
-                ? "px-4 sm:px-6 lg:px-8 lg:pl-28 pb-8 page-view-transition stagger-container"
-                : "px-4 sm:px-6 lg:px-8 pb-8 page-view-transition stagger-container"
+                ? "pt-6 sm:pt-7 px-4 sm:px-6 lg:px-8 lg:pl-28 pb-8 page-view-transition stagger-container"
+                : "pt-6 sm:pt-7 px-4 sm:px-6 lg:px-8 pb-8 page-view-transition stagger-container"
             }`}
           >
             {showAutoCropModal && !isProEditorPage && !isImageEditorPage ? (

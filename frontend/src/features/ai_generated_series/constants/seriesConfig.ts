@@ -169,19 +169,27 @@ export const GENRE_OPTIONS: string[] = [
   "Custom...",
 ];
 
+export const STORYBOARD_MODELS = [
+  { id: "gemini-2.5-flash", label: "⚡ Google Gemini 2.5 Flash — Ultra-Fast Sub-Second Narrative (Recommended)", provider: "Google Gemini" },
+  { id: "gemini-1.5-pro", label: "🧠 Google Gemini 1.5 Pro — 2M Context Deep Lore & Arc Architecture", provider: "Google Gemini" },
+  { id: "claude-3-5-sonnet-20241022", label: "🎭 Anthropic Claude 3.5 Sonnet — Nuanced Screenwriting & Persona Voice", provider: "Anthropic" },
+  { id: "gpt-4o", label: "✨ OpenAI GPT-4o — Episodic Screenplay & Cinematic Continuity", provider: "OpenAI" },
+  { id: "deepseek-chat", label: "🔥 DeepSeek-V3 — High-Throughput Creative Narration", provider: "DeepSeek" },
+  { id: "deepseek-reasoner", label: "💡 DeepSeek-R1 — Deep Strategic Narrative & Mystery Planning", provider: "DeepSeek" },
+  { id: "llama-3.3-70b-versatile", label: "⚡ Groq Llama 3.3 70B — Real-Time Inference (~180ms)", provider: "Groq" },
+];
+
 export const DIFFUSION_MODELS = [
-  // ── FAST (Pollinations Live, Cached in ~3-8s) ─────────────────────────────
-  { id: "turbo",            label: "⚡ SDXL Turbo — Ultra Fast (~3s, Best for Preview)", speed: "fast" },
-  { id: "flux",             label: "⚡ Flux.1 Schnell — Fast & Sharp (~5s, High Quality)", speed: "fast" },
-  { id: "flux-anime",       label: "🎨 Flux Anime — Authentic 2D Cel & Webtoon (~15s, Recommended)", speed: "medium" },
-  { id: "flux-realism",     label: "📸 Flux Realism — Photorealistic Style (~15s)", speed: "medium" },
-  { id: "stable-diffusion", label: "🖼️ Stable Diffusion XL — Classic Art Style (~20s)", speed: "slow" },
-  { id: "sana",             label: "🌟 Sana — Latest Pollinations Model (~20s)", speed: "slow" },
+  { id: "flux-anime", label: "🎨 Flux Anime — Authentic 2D Cel & Webtoon Manhwa (~12s, Recommended)", speed: "medium", provider: "Pollinations" },
+  { id: "flux", label: "⚡ Flux.1 Schnell — Fast & Razor Sharp 2D (~5s)", speed: "fast", provider: "Pollinations" },
+  { id: "turbo", label: "⚡ SDXL Turbo — Ultra-High Speed Draft (~3s)", speed: "fast", provider: "Pollinations" },
+  { id: "stable-diffusion", label: "🖼️ Stable Diffusion XL — Classic Manga Art Style (~15s)", speed: "medium", provider: "Pollinations" },
+  { id: "sana", label: "🌟 Sana Pollinations — 4K Efficient Generative Core (~15s)", speed: "medium", provider: "Pollinations" },
 ];
 
 export const ENHANCER_ENGINES = [
-  { id: "real-esrgan-anime", label: "Real-ESRGAN Anime 6B (4K Lineart & Screentone Super-Resolution • Beast)" },
-  { id: "comic-text-detector", label: "ComicTextDetector + IOPaint (Clean Speech Bubble Inpainting • Beast)" },
+  { id: "real-esrgan-anime", label: "Real-ESRGAN Anime 6B (4K Lineart & Screentone Super-Resolution)" },
+  { id: "comic-text-detector", label: "ComicTextDetector + IOPaint (Clean Speech Bubble Inpainting)" },
   { id: "manga-ocr", label: "Manga-OCR (Stylized Typography & SFX Reader)" },
 ];
 
@@ -215,7 +223,7 @@ export const PANELS_PER_CHAPTER_OPTIONS = [
 
 export const PACING_OPTIONS = [
   { value: "dynamic", label: "Dynamic Pacing (Balanced rising tension & climaxes)" },
-  { value: "action_fast", label: "Fast Action (High velocity, explosive beats • Beast)" },
+  { value: "action_fast", label: "Fast Action (High velocity, explosive beats)" },
   { value: "cinematic", label: "Cinematic (Atmospheric slow-burn, emotional depth)" },
 ];
 
@@ -226,10 +234,11 @@ export const DIALOGUE_OPTIONS = [
 ];
 
 export const VOICE_DUBBING_OPTIONS = [
-  { value: "gpt-sovits", label: "GPT-SoVITS (Zero-Shot Anime Character Voice Cloning • Beast)" },
-  { value: "cosyvoice", label: "CosyVoice / F5-TTS (High-Fidelity Expressive Dialogue • Beast)" },
-  { value: "edge-tts", label: "Edge-TTS Multi-Voice Dubbing (Included & Auto-Linked)" },
-  { value: "muted", label: "Muted / Visual Art & Text Bubbles Only" },
+  { value: "edge-tts", label: "Microsoft Edge Neural TTS — 300+ Voices (Built-in Zero Barrier)" },
+  { value: "gpt-sovits", label: "GPT-SoVITS — Zero-Shot Anime Character Voice Cloning" },
+  { value: "cosyvoice", label: "CosyVoice / F5-TTS — High-Fidelity Expressive Dialogue" },
+  { value: "elevenlabs", label: "ElevenLabs Multilingual v2 — Studio Grade Emotional Dubbing" },
+  { value: "muted", label: "Muted — Visual Art & Text Bubbles Only" },
 ];
 
 export const PRESET_IDEAS: PresetIdea[] = [
@@ -403,10 +412,11 @@ export const DEFAULT_SERIES_STATE = {
   logline: "",
   artStyle: "manhwa_action_hunter",
   imageModel: "flux-anime",
+  storyboardModel: "gemini-2.5-flash",
+  voiceDubbing: "edge-tts" as const,
   totalSessions: 1,
   chaptersPerSession: 8,
   panelsPerChapter: 8,
   pacing: "dynamic" as const,
   dialogueDensity: "balanced" as const,
-  voiceDubbing: "edge-tts" as const,
 };

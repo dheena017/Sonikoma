@@ -138,11 +138,10 @@ export default function AIUsageAnalyticsPage({
                 <button
                   key={tf}
                   onClick={() => setTimeframe(tf)}
-                  className={`px-3 py-1 rounded-lg text-xs font-medium uppercase transition-all cursor-pointer ${
-                    timeframe === tf
+                  className={`px-3 py-1 rounded-lg text-xs font-medium uppercase transition-all cursor-pointer ${timeframe === tf
                       ? "bg-[#2A2A2A] text-white font-bold shadow-sm"
                       : "text-neutral-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   {tf}
                 </button>

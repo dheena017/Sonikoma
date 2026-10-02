@@ -123,7 +123,7 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
           onMouseEnter={handleEnter}
           onMouseLeave={() => setHover(false)}
           aria-label={item.label}
-          className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none"
+          className="p-1 transition-all duration-200 cursor-pointer relative flex items-center justify-center group-active:scale-95 outline-none focus:outline-none"
         >
           <div
             className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 shadow-sm ${
@@ -152,7 +152,7 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
 
   return (
-    <aside className="fixed top-16 bottom-0 left-0 w-20 bg-[#121212] border-r border-[#2F2F2F] hidden lg:flex flex-col items-center py-3 z-40 shadow-xl select-none overflow-hidden">
+    <aside className="fixed top-16 bottom-0 left-0 w-20 shrink-0 bg-[#0A0A0A]/95 backdrop-blur-2xl border-r border-[#2F2F2F] hidden lg:flex flex-col items-center py-3 z-40 overflow-hidden select-none shadow-xl">
       {/* Navigation Groups */}
       <div className="flex-1 w-full overflow-y-auto overflow-x-hidden flex flex-col items-center space-y-1.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pt-2">
         {groups.map((group, groupIdx) => (
@@ -184,7 +184,7 @@ const AICoreMiniSidebarInner: React.FC<AICoreMiniSidebarProps> = ({
       </div>
 
       {/* Return to Creative Suite */}
-      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-[#2F2F2F] shrink-0">
+      <div className="mt-auto pt-3 flex justify-center w-full pb-2 border-t border-neutral-800/80 shrink-0">
         <div className="relative group w-full flex justify-center">
           <button
             onClick={() => navigateTo("/creative-suite")}

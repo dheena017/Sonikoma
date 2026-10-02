@@ -112,6 +112,8 @@ export interface AISeriesProject {
   total_episodes: number;
   pacing: string;
   image_model?: string;
+  storyboard_model?: string;
+  voice_model?: string;
   sessions: SeriesSession[];
   cover_image_url?: string;
   status: string;
@@ -127,6 +129,8 @@ export interface CreateAISeriesPayload {
   format_type: "manhwa" | "comic_manga" | "anime" | string;
   art_style: string;
   image_model?: string;
+  storyboard_model?: string;
+  voice_model?: string;
   total_sessions: number;
   chapters_per_session: number;
   panels_per_chapter?: number;
