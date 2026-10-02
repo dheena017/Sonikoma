@@ -1,8 +1,19 @@
 """
 backend/app/api/v1/ai/image.py
 ─────────────────────────────────────────────────────────────────────────────
-AI image analysis (panel narration, smart crop) and Stable Diffusion
-generation, inpainting, upscaling, and style transfer routes.
+AI Vision & Image Generation Routes:
+- POST /analyze-single-image   – Analyze a single panel (dialogue, SFX, narrative)
+- POST /analyze-batch          – Batch analyze up to 20 panels concurrently
+- POST /analyze-sequence       – Context-aware multi-panel sequence analysis
+- POST /analyze-all-panels     – Full storyboard analysis with rolling story memory
+- POST /ai-smart-crop          – Smart panel detection (CV + Gemini Vision)
+- POST /ai-smart-crop-batch    – Batch smart crop across multiple images
+- POST /detect-panels          – Alias for ai-smart-crop
+- POST /generate-ai            – Generate image(s) from text prompt (Stable Diffusion)
+- POST /inpaint                – Inpaint a masked region in an image
+- POST /upscale                – Upscale an image with SD super-resolution
+- POST /style-transfer         – Apply artistic style transfer to an image
+- POST /batch-generate         – Batch image generation from multiple prompts
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -13,12 +24,12 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.ai._deps import get_user_gemini_key, default_output_path
-from api.dependencies.auth import get_current_user, get_optional_current_user
+from app.api.v1.ai._deps import get_user_gemini_key, default_output_path
+from app.api.dependencies.auth import get_current_user, get_optional_current_user
 
-from services.user.credit_service import get_available_credits, record_credit_transaction
-from database.config import LOW_BALANCE_THRESHOLD
-from schemas.ai import (
+from app.services.user.credit_service import get_available_credits, record_credit_transaction
+from app.database.config import LOW_BALANCE_THRESHOLD
+from app.schemas.ai import (
     AnalyzeImageRequest,
     AnalyzeBatchRequest,
     AnalyzeSequenceRequest,
@@ -31,13 +42,13 @@ from schemas.ai import (
     StyleTransferRequest,
     BatchGenerateRequest,
 )
-from services.ai.facade import (
+from app.services.ai.facade import (
     facade_analyze_image,
     facade_analyze_batch,
     facade_analyze_narrative_sequence,
     facade_smart_crop,
 )
-from services.ai.orchestrator import AIOrchestrator
+from app.services.ai.orchestrator import AIOrchestrator
 
 
 logger = logging.getLogger("sonikoma.api.ai.image")
@@ -50,7 +61,7 @@ def _get_sd_engine():
     global stable_diffusion
     if stable_diffusion is None:
         try:
-            from providers.stable_diffusion import get_stable_diffusion_engine
+            from app.providers.stable_diffusion import get_stable_diffusion_engine
             stable_diffusion = get_stable_diffusion_engine()
         except Exception as e:
             logger.warning(f"Stable Diffusion engine could not be initialized: {e}")
@@ -261,7 +272,7 @@ async def analyze_panels(
                 rolling_memory = res["story_memory"]
             results.append({"id": panel.id, "url": panel.url, **res})
         except Exception as e:
-            from services.ai.orchestrator import AIExecutionError
+            from app.services.ai.orchestrator import AIExecutionError
             clean_msg = e.message if isinstance(e, AIExecutionError) else str(e)
             logger.warning(f"[AI Analysis] Panel {panel.id} analysis failed: {clean_msg}")
             results.append({

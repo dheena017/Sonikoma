@@ -1,123 +1,341 @@
 """
-api/v1/projects/settings.py
+backend/app/api/v1/projects/settings.py
 ─────────────────────────────────────────────────────────────────────────────
-Series management, bulk operations, and token analytics routes.
+Project Settings management routes:
+- GET/PUT/PATCH /{projectId}/settings          – Centralized settings (video, audio, autocrop)
+- GET/PUT/PATCH /{projectId}/settings/video    – Dedicated video rendering settings
+- GET/PUT/PATCH /{projectId}/settings/audio    – Dedicated audio & narration settings
+- GET/PUT/PATCH /{projectId}/settings/autocrop – Dedicated panel slicing & crop settings
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import logging
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Path, Body, Depends
 
-from fastapi import APIRouter, HTTPException, Path, Depends
-
-from api.dependencies.auth import get_current_user
-from schemas.project import BatchDeleteRequest
-from repositories.project import (
-    get_project,
-    delete_project,
-    get_token_logs,
-)
-from database.engine import get_db_connection
+try:
+    from app.api.dependencies.auth import get_current_user
+    from app.schemas.project import (
+        ProjectSettingsUpdateRequest,
+        VideoSettingsUpdateRequest,
+        AudioSettingsUpdateRequest,
+        AutoCropSettingsUpdateRequest,
+    )
+    from app.repositories.project import (
+        get_project,
+        get_project_by_slug,
+        get_project_settings,
+        update_project_settings,
+    )
+except ImportError:
+    from api.dependencies.auth import get_current_user
+    from schemas.project import (
+        ProjectSettingsUpdateRequest,
+        VideoSettingsUpdateRequest,
+        AudioSettingsUpdateRequest,
+        AutoCropSettingsUpdateRequest,
+    )
+    from repositories.project import (
+        get_project,
+        get_project_by_slug,
+        get_project_settings,
+        update_project_settings,
+    )
 
 logger = logging.getLogger("sonikoma.routes.projects.settings")
 router = APIRouter()
 
 
-@router.get("/series/{series_id_or_slug}", summary="Get series details")
-async def get_series_route(
-    series_id_or_slug: str = Path(...),
+# ── Centralized Settings ──────────────────────────────────────────────────
+
+@router.get("/{projectId}/settings", summary="Get centralized project settings (video, audio, autocrop)")
+async def get_project_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
     current_user: dict = Depends(get_current_user),
 ):
     try:
-        conn = get_db_connection()
-        row = conn.execute(
-            "SELECT * FROM series WHERE id = ?", (series_id_or_slug,)
-        ).fetchone()
-        if not row:
-            row = conn.execute(
-                "SELECT * FROM series WHERE slug = ?", (series_id_or_slug,)
-            ).fetchone()
-        conn.close()
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "settings": {
+                    "video_settings": {},
+                    "audio_settings": {},
+                    "autocrop_settings": {},
+                },
+            }
 
-        if not row:
-            raise HTTPException(status_code=404, detail="Series not found.")
-
-        series = dict(row)
-        if series["user_id"] != current_user["user_id"]:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
             raise HTTPException(status_code=403, detail="Access denied.")
-
-        return {"success": True, "series": series}
+        
+        settings = get_project_settings(project["project_id"])
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "settings": settings or {
+                "video_settings": {},
+                "audio_settings": {},
+                "autocrop_settings": {},
+            },
+        }
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to fetch series: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Failed to fetch project settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch project settings: {e}")
 
 
-@router.delete("/series/{seriesId}", summary="Delete a series and all its chapters")
-async def delete_series_route(
-    seriesId: str = Path(...),
+@router.put("/{projectId}/settings", summary="Update centralized project settings (video, audio, autocrop)")
+@router.patch("/{projectId}/settings", summary="Patch centralized project settings (video, audio, autocrop)")
+async def update_project_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    body: ProjectSettingsUpdateRequest = Body(...),
     current_user: dict = Depends(get_current_user),
 ):
     try:
-        logger.info(f"[Database] Deleting series for: {seriesId}")
-        conn = get_db_connection()
-        row = conn.execute(
-            "SELECT user_id FROM series WHERE id = ?", (seriesId,)
-        ).fetchone()
-        conn.close()
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "settings": {
+                    "video_settings": body.video_settings or {},
+                    "audio_settings": body.audio_settings or {},
+                    "autocrop_settings": body.autocrop_settings or {},
+                },
+            }
 
-        if not row:
-            raise HTTPException(status_code=404, detail="Series not found.")
-
-        if row["user_id"] != current_user["user_id"]:
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
             raise HTTPException(status_code=403, detail="Access denied.")
+        
+        updates = {}
+        if body.video_settings is not None:
+            updates["video_settings"] = body.video_settings
+        if body.audio_settings is not None:
+            updates["audio_settings"] = body.audio_settings
+        if body.autocrop_settings is not None:
+            updates["autocrop_settings"] = body.autocrop_settings
 
-        delete_project(seriesId)
-        logger.info(f"[Database] Deleted series successfully: {seriesId}")
-        return {"success": True}
+        updated_settings = update_project_settings(project["project_id"], updates)
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "settings": updated_settings,
+        }
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to delete series: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"Failed to delete series: {e}"
-        )
+        logger.error(f"Failed to update project settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update project settings: {e}")
 
 
-@router.post("/batch-delete", summary="Bulk delete multiple projects")
-async def batch_delete_projects(
-    body: BatchDeleteRequest,
+# ── Video Settings Dedicated Endpoints ─────────────────────────────────────
+
+@router.get("/{projectId}/settings/video", summary="Get dedicated Video & Canvas settings")
+async def get_video_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
     current_user: dict = Depends(get_current_user),
 ):
     try:
-        logger.info(
-            f"[Database] Bulk deleting {len(body.project_ids)} projects "
-            f"for user {current_user['user_id']}..."
-        )
-        deleted_count = 0
-        for pid in body.project_ids:
-            project = get_project(pid)
-            if project and project.get("user_id") == current_user["user_id"]:
-                delete_project(pid)
-                deleted_count += 1
-        logger.info(
-            f"[Database] Successfully deleted {deleted_count} of "
-            f"{len(body.project_ids)} requested projects."
-        )
-        return {"success": True, "deleted_count": deleted_count}
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "video_settings": {},
+            }
+
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        settings = get_project_settings(project["project_id"]) or {}
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "video_settings": settings.get("video_settings") or {},
+        }
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Failed to batch delete projects: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"Failed to batch delete projects: {e}"
-        )
+        logger.error(f"Failed to fetch video settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch video settings: {e}")
 
 
-@router.get("/analytics/tokens", summary="Get token usage history for user's projects")
-async def get_token_analytics(current_user: dict = Depends(get_current_user)):
+@router.put("/{projectId}/settings/video", summary="Update dedicated Video & Canvas settings")
+@router.patch("/{projectId}/settings/video", summary="Patch dedicated Video & Canvas settings")
+async def update_video_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    body: VideoSettingsUpdateRequest = Body(...),
+    current_user: dict = Depends(get_current_user),
+):
     try:
-        logger.info(f"Fetching token analytics for user: {current_user['user_id']}")
-        logs = get_token_logs(current_user["user_id"])
-        return {"success": True, "token_logs": logs}
+        video_payload = body.video_settings if body.video_settings is not None else body.dict(exclude_unset=True, exclude={"video_settings"})
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "video_settings": video_payload,
+            }
+
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        updated_settings = update_project_settings(project["project_id"], {"video_settings": video_payload})
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "video_settings": updated_settings.get("video_settings") or {},
+        }
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Failed to fetch token analytics: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to fetch token analytics")
+        logger.error(f"Failed to update video settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update video settings: {e}")
+
+
+# ── Audio Settings Dedicated Endpoints ─────────────────────────────────────
+
+@router.get("/{projectId}/settings/audio", summary="Get dedicated Audio & Narration settings")
+async def get_audio_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "audio_settings": {},
+            }
+
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        settings = get_project_settings(project["project_id"]) or {}
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "audio_settings": settings.get("audio_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch audio settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch audio settings: {e}")
+
+
+@router.put("/{projectId}/settings/audio", summary="Update dedicated Audio & Narration settings")
+@router.patch("/{projectId}/settings/audio", summary="Patch dedicated Audio & Narration settings")
+async def update_audio_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    body: AudioSettingsUpdateRequest = Body(...),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        audio_payload = body.audio_settings if body.audio_settings is not None else body.dict(exclude_unset=True, exclude={"audio_settings"})
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "audio_settings": audio_payload,
+            }
+
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        updated_settings = update_project_settings(project["project_id"], {"audio_settings": audio_payload})
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "audio_settings": updated_settings.get("audio_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update audio settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update audio settings: {e}")
+
+
+# ── AutoCrop Settings Dedicated Endpoints ──────────────────────────────────
+
+@router.get("/{projectId}/settings/autocrop", summary="Get dedicated Auto-Crop & Panel Slicing settings")
+async def get_autocrop_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "autocrop_settings": {},
+            }
+
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        settings = get_project_settings(project["project_id"]) or {}
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "autocrop_settings": settings.get("autocrop_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to fetch autocrop settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to fetch autocrop settings: {e}")
+
+
+@router.put("/{projectId}/settings/autocrop", summary="Update dedicated Auto-Crop & Panel Slicing settings")
+@router.patch("/{projectId}/settings/autocrop", summary="Patch dedicated Auto-Crop & Panel Slicing settings")
+async def update_autocrop_settings_endpoint(
+    projectId: str = Path(..., description="Target Project ID or Slug"),
+    body: AutoCropSettingsUpdateRequest = Body(...),
+    current_user: dict = Depends(get_current_user),
+):
+    try:
+        autocrop_payload = body.autocrop_settings if body.autocrop_settings is not None else body.dict(exclude_unset=True, exclude={"autocrop_settings"})
+        if projectId.startswith("temp_") or projectId.startswith("draft_"):
+            return {
+                "success": True,
+                "project_id": projectId,
+                "autocrop_settings": autocrop_payload,
+            }
+
+        project = get_project(projectId) or get_project_by_slug(projectId)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+        if project.get("user_id") != current_user["user_id"]:
+            raise HTTPException(status_code=403, detail="Access denied.")
+        
+        updated_settings = update_project_settings(project["project_id"], {"autocrop_settings": autocrop_payload})
+        return {
+            "success": True,
+            "project_id": project["project_id"],
+            "autocrop_settings": updated_settings.get("autocrop_settings") or {},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update autocrop settings: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to update autocrop settings: {e}")

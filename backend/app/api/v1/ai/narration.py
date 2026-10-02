@@ -1,19 +1,25 @@
 """
 backend/app/api/v1/ai/narration.py
 ─────────────────────────────────────────────────────────────────────────────
-Narrative sequence generation, SFX, BGM, shorts, and midroll routes.
+AI Narration & Audio Script Routes:
+- POST /skills/sfx-audio      – Generate SFX prompt for a panel or batch
+- POST /skills/bgm-vibe       – Recommend background music vibe
+- POST /skills/sfx-mix        – Schedule SFX overlays across scene
+- POST /skills/shorts-script  – Adapt storyboard for YouTube Shorts/Reels
+- POST /skills/shorts-hook    – Generate viral retention hook for Shorts
+- POST /skills/midrolls       – Calculate optimal midroll ad break placements
+- POST /skills/series-arc     – Architect series arc (manhwa, comic, anime)
+- POST /skills/series-arc/manhwa – Korean Webtoon Manhwa arc
+- POST /skills/series-arc/comic  – Japanese Manga & Graphic Comic arc
+- POST /skills/series-arc/anime  – Cinematic Sakuga Anime arc
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-import json
 import logging
 from fastapi import APIRouter, Depends, HTTPException
 
-from api.v1.ai._deps import get_user_gemini_key, run_md_skill
-from api.dependencies.auth import get_current_user
-
-from services.user.credit_service import get_available_credits, record_credit_transaction
-from schemas.ai import (
+from app.api.v1.ai._deps import get_user_gemini_key, run_md_skill
+from app.schemas.ai import (
     SFXAudioRequest,
     BGMVibeRequest,
     ShortsScriptRequest,

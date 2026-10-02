@@ -8,6 +8,7 @@ Public package barrel export for all AI Model & Engine Provider API Routers:
 """
 
 from app.api.v1.providers.router import providers_router
+from app.api.v1.providers.gateway import router as gateway_router
 from app.api.v1.providers.catalog import router as catalog_router
 from app.api.v1.providers.gemini import router as gemini_router
 from app.api.v1.providers.openai import router as openai_router

@@ -11,7 +11,10 @@ from typing import Optional
 from fastapi import Request, Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 
-from services.auth.auth_service import AuthService
+try:
+    from app.services.auth.auth_service import AuthService
+except ImportError:
+    from services.auth.auth_service import AuthService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token", auto_error=False)
 auth_service = AuthService()

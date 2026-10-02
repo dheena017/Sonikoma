@@ -25,7 +25,7 @@ from app.core.config import (
     GEMINI_MODEL_PRIMARY,
     GEMINI_FALLBACK_MODELS,
 )
-from database.engine import get_db_connection
+from app.database.engine import get_db_connection
 from app.services.user.credit_service import get_available_credits, get_credit_transactions
 
 logger = logging.getLogger("sonikoma.api.ai.analytics")
