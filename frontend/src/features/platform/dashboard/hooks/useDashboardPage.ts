@@ -2,6 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import * as api from "@/shared/api";
 import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import {
+  getAuthHeaders,
+  navigateToDashboardPath,
+  buildProjectEditorUrl,
+  extractProjectScrapedImages,
+  filterProjectsByQuery,
+  countProjectsByStatus,
+  calculateTotalPanels,
+  computeOnboardingTasks,
+} from "../utils/dashboardHelpers";
 
 export interface Project {
   project_id: string;
@@ -64,13 +74,7 @@ export default function useDashboardPage() {
       try {
         setError(null);
         const res = await fetch("/api/v1/projects", {
-          headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token") ||
-              ""
-            }`,
-          },
+          headers: getAuthHeaders(),
         });
         if (!res.ok) {
           throw new Error(`Failed to fetch projects (HTTP ${res.status})`);
@@ -105,13 +109,7 @@ export default function useDashboardPage() {
     const fetchAnalytics = async () => {
       try {
         const res = await fetch("/api/v1/auth/analytics", {
-          headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token") ||
-              ""
-            }`,
-          },
+          headers: getAuthHeaders(),
         });
         if (res.ok) {
           const data = await res.json();
@@ -135,13 +133,7 @@ export default function useDashboardPage() {
     const fetchProjects = async () => {
       try {
         const res = await fetch("/api/v1/projects", {
-          headers: {
-            Authorization: `Bearer ${
-              localStorage.getItem("sonikoma_token") ||
-              sessionStorage.getItem("sonikoma_token") ||
-              ""
-            }`,
-          },
+          headers: getAuthHeaders(),
         });
         if (!res.ok) throw new Error(`Failed to fetch (HTTP ${res.status})`);
         const data = await res.json();
@@ -165,39 +157,17 @@ export default function useDashboardPage() {
     localStorage.removeItem("auto_import_url");
     localStorage.removeItem("auto_import_batch");
 
-    const nav = (window as any).navigateTo;
-    if (typeof nav === "function") {
-      nav("/scraper");
-    } else {
-      window.history.pushState({}, "", "/scraper");
-      window.dispatchEvent(new Event("popstate"));
-    }
+    navigateToDashboardPath("/scraper");
   }, []);
 
   const handleOpenProject = useCallback(async (project: Project) => {
     try {
-      const token =
-        localStorage.getItem("sonikoma_token") ||
-        sessionStorage.getItem("sonikoma_token") ||
-        "";
-      const headers: Record<string, string> = {};
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
       const res = await fetch(`/api/v1/projects/${project.project_id}`, {
-        headers,
+        headers: getAuthHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
-        const loadedSettings = data.project.audio_settings || {};
-        const savedScrapedImages =
-          Array.isArray(data.scraped_images) && data.scraped_images.length > 0
-            ? data.scraped_images
-            : loadedSettings.scraped_images;
-        const scrapedImages =
-          Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0
-            ? savedScrapedImages
-            : (data.panels || []).map((p: any) => p.image_url).filter(Boolean);
+        const scrapedImages = extractProjectScrapedImages(data);
 
         useProjectStore.getState().setActiveProject({
           project: data.project,
@@ -212,55 +182,19 @@ export default function useDashboardPage() {
       );
     }
 
-    const nav = (window as any).navigateTo;
-    const jobId = project.job_id;
-    const target =
-      project.series_slug && project.chapter_slug
-        ? `/scraper/editor/series/${project.series_slug}/chapters/${
-            project.chapter_slug
-          }?project_id=${encodeURIComponent(project.project_id)}${
-            jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""
-          }`
-        : `/scraper/editor?project_id=${encodeURIComponent(
-            project.project_id
-          )}${jobId ? `&job_id=${encodeURIComponent(jobId)}` : ""}`;
-
-    if (typeof nav === "function") {
-      nav(target);
-    } else {
-      window.history.pushState({}, "", target);
-      window.dispatchEvent(new Event("popstate"));
-    }
+    navigateToDashboardPath(buildProjectEditorUrl(project));
   }, []);
 
   const handleOpenCreativeSuite = useCallback(
     async (e: React.MouseEvent, project: Project) => {
       e.stopPropagation();
       try {
-        const token =
-          localStorage.getItem("sonikoma_token") ||
-          sessionStorage.getItem("sonikoma_token") ||
-          "";
-        const headers: Record<string, string> = {};
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
-        }
         const res = await fetch(`/api/v1/projects/${project.project_id}`, {
-          headers,
+          headers: getAuthHeaders(),
         });
         if (res.ok) {
           const data = await res.json();
-          const loadedSettings = data.project.audio_settings || {};
-          const savedScrapedImages =
-            Array.isArray(data.scraped_images) && data.scraped_images.length > 0
-              ? data.scraped_images
-              : loadedSettings.scraped_images;
-          const scrapedImages =
-            Array.isArray(savedScrapedImages) && savedScrapedImages.length > 0
-              ? savedScrapedImages
-              : (data.panels || [])
-                  .map((p: any) => p.image_url)
-                  .filter(Boolean);
+          const scrapedImages = extractProjectScrapedImages(data);
 
           useProjectStore.getState().setActiveProject({
             project: data.project,
@@ -272,13 +206,7 @@ export default function useDashboardPage() {
         console.error("Failed to load project for Creative Suite:", err);
       }
 
-      const nav = (window as any).navigateTo;
-      if (typeof nav === "function") {
-        nav("/creative-suite");
-      } else {
-        window.history.pushState({}, "", "/creative-suite");
-        window.dispatchEvent(new Event("popstate"));
-      }
+      navigateToDashboardPath("/creative-suite");
     },
     []
   );
@@ -295,12 +223,9 @@ export default function useDashboardPage() {
         )
       ) {
         try {
-          const token =
-            localStorage.getItem("sonikoma_token") ||
-            sessionStorage.getItem("sonikoma_token");
           const res = await fetch(`/api/v1/projects/${projectId}`, {
             method: "DELETE",
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            headers: getAuthHeaders(),
           });
           if (res.ok) {
             setProjects((current) =>
@@ -318,14 +243,9 @@ export default function useDashboardPage() {
   const handleExport = useCallback((e: React.MouseEvent, project: Project) => {
     e.stopPropagation();
     setOpenMenuId(null);
-    const nav = (window as any).navigateTo;
-    const target = `/workspace?id=${project.project_id}&action=export`;
-    if (typeof nav === "function") {
-      nav(target);
-    } else {
-      window.history.pushState({}, "", target);
-      window.dispatchEvent(new Event("popstate"));
-    }
+    navigateToDashboardPath(
+      `/workspace?id=${project.project_id}&action=export`
+    );
   }, []);
 
   const handleRename = useCallback((e: React.MouseEvent, project: Project) => {
@@ -346,55 +266,29 @@ export default function useDashboardPage() {
   }, []);
 
   const completedCount = useMemo(
-    () =>
-      projects.filter((p) => p.status?.toLowerCase() === "completed").length,
+    () => countProjectsByStatus(projects, "completed"),
     [projects]
   );
 
   const processingCount = useMemo(
-    () =>
-      projects.filter((p) => p.status?.toLowerCase() === "processing").length,
+    () => countProjectsByStatus(projects, "processing"),
     [projects]
   );
 
   const filteredProjects = useMemo(
-    () =>
-      projects.filter(
-        (p) =>
-          (p.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (p.url || "").toLowerCase().includes(searchQuery.toLowerCase())
-      ),
+    () => filterProjectsByQuery(projects, searchQuery),
     [projects, searchQuery]
   );
 
   const totalPanels = useMemo(
-    () =>
-      projects.reduce(
-        (acc, p) => acc + (p.panels_count || p.imported_assets_count || 0),
-        0
-      ),
+    () => calculateTotalPanels(projects),
     [projects]
   );
 
   useEffect(() => {
-    if (projects.length > 0) {
-      setOnboardingTasks((prev) =>
-        prev.map((t) => (t.id === 1 ? { ...t, completed: true } : t))
-      );
-    }
-    const hasAnalyzed = projects.some(
-      (p) => (p.panels_count || p.imported_assets_count || 0) > 0
+    setOnboardingTasks((prev) =>
+      computeOnboardingTasks(prev, projects, completedCount)
     );
-    if (hasAnalyzed) {
-      setOnboardingTasks((prev) =>
-        prev.map((t) => (t.id === 2 ? { ...t, completed: true } : t))
-      );
-    }
-    if (completedCount > 0) {
-      setOnboardingTasks((prev) =>
-        prev.map((t) => (t.id === 4 ? { ...t, completed: true } : t))
-      );
-    }
   }, [projects, completedCount]);
 
   return {
