@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/core/middleware.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma FastAPI Middleware Stack
@@ -98,16 +98,16 @@ PUBLIC_ROUTE_PREFIXES = (
     "/media",          # Defensive: allow the exact mount path too
     "/playwright-report", # Playwright Interactive Visual Report assets & pages
     "/playwright-report/",
-    "/api/v1/export/youtube/", # YouTube publisher routes (uses get_optional_current_user in router)
-    "/api/v1/scraper/",
-    "/api/v1/audio/",
-    "/api/v1/ocr/",
-    "/api/v1/panels/",
-    "/api/v1/video/",
-    "/api/v1/jobs/",
-    "/api/v1/ai/",
-    "/api/v1/ai-series/",
-    "/api/v1/auth/google/",
+    "/api/v1/export",  # YouTube publisher & export routes
+    "/api/v1/scraper",
+    "/api/v1/audio",
+    "/api/v1/ocr",
+    "/api/v1/panels",
+    "/api/v1/video",
+    "/api/v1/jobs",
+    "/api/v1/ai",
+    "/api/v1/ai-series",
+    "/api/v1/auth/google",
 )
 
 # Admin-only endpoints (require creator_role/admin)

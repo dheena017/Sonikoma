@@ -8,7 +8,8 @@ Primary export router mounting the sub-routers and history route.
 import logging
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.core.dependencies.auth import get_current_user
+from typing import Optional
+from app.core.dependencies.auth import get_current_user, get_optional_current_user
 from features.creative.export.youtube import router as youtube_router
 from features.creative.export.profiles import router as profiles_router
 from features.creative.export.credentials import router as credentials_router
@@ -24,8 +25,8 @@ export_router.include_router(credentials_router, prefix="/youtube")
 
 
 @export_router.get("/youtube/history", summary="Get YouTube video upload history")
-async def get_youtube_history_endpoint(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id")
+async def get_youtube_history_endpoint(current_user: Optional[dict] = Depends(get_optional_current_user)):
+    user_id = (current_user.get("id") or current_user.get("user_id")) if current_user else "anonymous"
     try:
         history = export_service.get_publishing_history(user_id)
         return {"history": history}

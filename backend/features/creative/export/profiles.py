@@ -9,7 +9,8 @@ import logging
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.core.dependencies.auth import get_current_user
+from typing import Optional
+from app.core.dependencies.auth import get_current_user, get_optional_current_user
 from features.creative.export.schemas import YouTubeProfileRequest
 from features.creative.repositories import save_youtube_profile, get_youtube_profiles, delete_youtube_profile
 
@@ -18,8 +19,8 @@ router = APIRouter()
 
 
 @router.get("/profiles", summary="Get custom YouTube publishing profiles")
-async def api_get_youtube_profiles(current_user: dict = Depends(get_current_user)):
-    user_id = current_user.get("id") or current_user.get("user_id") or current_user.get("sub")
+async def api_get_youtube_profiles(current_user: Optional[dict] = Depends(get_optional_current_user)):
+    user_id = (current_user.get("id") or current_user.get("user_id") or current_user.get("sub")) if current_user else "anonymous"
     try:
         profiles = get_youtube_profiles(user_id)
         return {"profiles": profiles}
