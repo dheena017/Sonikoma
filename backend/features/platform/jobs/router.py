@@ -1,0 +1,93 @@
+"""
+backend/app/features/platform/jobs/router.py
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+FastAPI router for platform jobs monitoring, filtering, and cancellation.
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+"""
+
+import logging
+from typing import Optional
+from fastapi import APIRouter, HTTPException, Query, Depends
+
+from app.core.dependencies.auth import get_current_user, get_optional_current_user
+from .service import job_manager
+from .schemas import JobStatusResponse, JobListResponse
+
+logger = logging.getLogger("sonikoma.features.platform.jobs")
+
+router = APIRouter(prefix="/jobs", tags=["Platform Jobs"])
+jobs_router = router
+
+
+@router.get(
+    "/{job_id}",
+    response_model=JobStatusResponse,
+    summary="Get job status, progress, stage, execution, and result",
+    description="Returns the full execution state of a specific job including provider, model, attempt, stage, progress, project_id, and chapter_id."
+)
+async def get_job_status_endpoint(job_id: str, current_user: Optional[dict] = Depends(get_optional_current_user)):
+    job = job_manager.get_job(job_id)
+    if not job:
+        logger.warning(f"[Jobs API] Job '{job_id}' not found")
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    user_id = (current_user.get("user_id") or current_user.get("id")) if current_user else "anonymous"
+    if job.user_id != user_id and (not current_user or current_user.get("role") != "admin") and job.user_id != "anonymous":
+        logger.warning(f"[Jobs API] User '{user_id}' unauthorized for job '{job_id}'")
+        raise HTTPException(status_code=403, detail="Not authorized to access this job.")
+    return job.to_status_response()
+
+
+@router.post(
+    "/{job_id}/cancel",
+    response_model=JobStatusResponse,
+    summary="Cancel a running or queued job",
+    description="Cancels an active background execution task."
+)
+async def cancel_job_endpoint(job_id: str, current_user: dict = Depends(get_current_user)):
+    job = job_manager.get_job(job_id)
+    if not job:
+        logger.warning(f"[Jobs API] Cancel request for non-existent job '{job_id}'")
+        raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found.")
+    user_id = current_user.get("user_id") or current_user.get("id") or "anonymous"
+    if job.user_id != user_id and current_user.get("role") != "admin":
+        logger.warning(f"[Jobs API] User '{user_id}' unauthorized to cancel job '{job_id}'")
+        raise HTTPException(status_code=403, detail="Not authorized to cancel this job.")
+    logger.info(f"[Jobs API] Cancelling job '{job_id}' (requested by '{user_id}')")
+    cancelled_job = job_manager.cancel_job(job_id)
+    if not cancelled_job:
+        cancelled_job = job_manager.get_job(job_id) or job
+    logger.info(f"[Jobs API] Successfully cancelled job '{job_id}'")
+    return cancelled_job.to_status_response()
+
+
+@router.get(
+    "/",
+    response_model=JobListResponse,
+    summary="List jobs with filtering and pagination",
+    description="Retrieves a paginated list of background execution jobs for the authenticated user, filterable by project_id, chapter_id, status, and job_type."
+)
+async def list_jobs_endpoint(
+    project_id: Optional[str] = Query(None, description="Filter by parent Project/Series ID"),
+    chapter_id: Optional[str] = Query(None, description="Filter by Chapter/Episode ID"),
+    status: Optional[str] = Query(None, description="Filter by status: QUEUED, RUNNING, COMPLETED, FAILED, CANCELLED"),
+    job_type: Optional[str] = Query(None, description="Filter by Job Type (e.g. SCRAPE_CHAPTER, PANEL_SPLIT, GENERATE_STORYBOARD, RENDER_VIDEO)"),
+    limit: int = Query(50, ge=1, le=200, description="Max number of jobs to return"),
+    offset: int = Query(0, ge=0, description="Pagination offset"),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    user_id = (current_user.get("user_id") or current_user.get("id")) if current_user else "anonymous"
+    jobs = job_manager.list_jobs(
+        user_id=user_id,
+        project_id=project_id,
+        chapter_id=chapter_id,
+        status=status,
+        job_type=job_type,
+        limit=limit,
+        offset=offset
+    )
+    return JobListResponse(
+        success=True,
+        total=len(jobs),
+        jobs=[j.to_status_response() for j in jobs],
+    )
+

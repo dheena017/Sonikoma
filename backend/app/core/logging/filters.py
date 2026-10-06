@@ -1,5 +1,5 @@
 """
-backend/app/core/logging/filters.py
+backend/core/logging/filters.py
 ─────────────────────────────────────────────────────────────────────────────
 High-performance logging filter suite providing:
   1. EndpointFilter: Smart HTTP route suppression, error/mutation pass-through,

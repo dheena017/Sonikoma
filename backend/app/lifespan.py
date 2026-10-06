@@ -12,24 +12,12 @@ import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from app.core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT
 from app.core.utils.banner import _print_startup_banner
 from app.core.logging import logger, ColoredFormatter, setup_logging
+from app.core.logging.filters import EndpointFilter
 from app.core.logging.handlers import UIStreamLogHandler
 
 SERVER_START = time.time()
-
-
-class EndpointFilter(logging.Filter):
-    """Filter noisy system-logs and status endpoints."""
-    def filter(self, record: logging.LogRecord) -> bool:
-        try:
-            msg = record.getMessage()
-            if any(path in msg for path in ["/api/v1/jobs", "/api/v1/system/logs", "/system-logs", "/api/v1/system/health", "/api/v1/system/status", "/api/v1/auth/credits"]):
-                return False
-        except Exception:
-            pass
-        return True
 
 
 def _clean_temp_workspace():
@@ -67,13 +55,13 @@ async def lifespan(app: FastAPI):
     logging.getLogger().addFilter(EndpointFilter())
 
     # Initialize database inside the worker process
-    from app.database.bootstrap import init_db
+    from database.bootstrap import init_db
     init_db()
 
     # Clean up stale training lock file on startup
     try:
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.abspath(os.path.join(base_dir, "..", ".."))
+        project_root = os.path.abspath(os.path.join(base_dir, ".."))
         training_dir = os.path.join(project_root, "data", "training_data")
         lock_file = os.path.join(training_dir, "training.lock")
         if os.path.exists(lock_file):
@@ -85,7 +73,7 @@ async def lifespan(app: FastAPI):
     # Run startup maintenance asynchronously so the API can start responding quickly
     async def _startup_maintenance():
         try:
-            from app.repositories.system.logs import prune_system_logs
+            from features.platform.dashboard.repositories.logs import prune_system_logs
             pruned = prune_system_logs()
             if pruned > 0:
                 logger.info(f"[System] Startup maintenance: Pruned {pruned} old log entries.")
@@ -93,7 +81,7 @@ async def lifespan(app: FastAPI):
             logger.warning(f"[System] Log pruning failed during startup: {e}")
 
         try:
-            from app.services.ai.skills import registry
+            from ai_engine.skills import registry
             registry.load_skills()
         except Exception as e:
             logger.warning(f"[System] Skill registry initialization failed during startup: {e}")
@@ -105,9 +93,9 @@ async def lifespan(app: FastAPI):
         )
         if not skip_prewarm:
             try:
-                from app.services.image.layer_separation.sam import get_rembg_session
-                from app.services.image.panel_detection.speech_bubble_detector import get_yolo_speech_bubble_model
-                from app.services.image.ocr.ocr_engine import _load_ocr_reader
+                from features.image_editor.services.layer_separation.sam import get_rembg_session
+                from features.image_editor.services.panel_detection.speech_bubble_detector import get_yolo_speech_bubble_model
+                from features.image_editor.services.ocr.ocr_engine import _load_ocr_reader
                 await asyncio.to_thread(get_rembg_session)
                 await asyncio.to_thread(get_yolo_speech_bubble_model)
                 await asyncio.to_thread(_load_ocr_reader, ["en"])
@@ -119,7 +107,7 @@ async def lifespan(app: FastAPI):
         # Start automatic training background monitor service if enabled
         if os.getenv("ENABLE_TRAINING_MONITOR", "false").lower() == "true":
             try:
-                from app.services.training.training_monitor import start_background_monitor
+                from features.intelligence.services_training.training_monitor import start_background_monitor
                 start_background_monitor()
             except Exception as e:
                 logger.warning(f"[Startup] Failed to start training data monitor service: {e}")

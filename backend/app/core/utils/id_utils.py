@@ -1,5 +1,5 @@
 """
-backend/app/core/utils/id_utils.py
+backend/core/utils/id_utils.py
 ─────────────────────────────────────────────────────────────────────────────
 Standardized Project ID and UUID generator utilities.
 ─────────────────────────────────────────────────────────────────────────────

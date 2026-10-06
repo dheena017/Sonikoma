@@ -1,5 +1,5 @@
 """
-backend/app/core/exceptions.py
+backend/core/exceptions.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma Base Exceptions & FastAPI Global Exception Handlers.
 ─────────────────────────────────────────────────────────────────────────────

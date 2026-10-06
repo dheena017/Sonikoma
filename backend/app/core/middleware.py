@@ -1,5 +1,5 @@
-"""
-backend/app/core/middleware.py
+﻿"""
+backend/core/middleware.py
 ─────────────────────────────────────────────────────────────────────────────
 Sonikoma FastAPI Middleware Stack
 ─────────────────────────────────────────────────────────────────────────────
@@ -15,11 +15,11 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.logging import logger, set_current_request_id, set_current_user_id
 from app.core.config import APP_URL, BACKEND_PORT, FRONTEND_PORT, NODE_ENV, API_VERSION
-from app.api.dependencies.auth import get_current_user
+from app.core.dependencies.auth import get_current_user
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # CORS CONFIGURATION
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 ALLOWED_ORIGINS = []
 if NODE_ENV == "production":
     if APP_URL:
@@ -36,9 +36,9 @@ else:
         if app_url_clean not in ALLOWED_ORIGINS:
             ALLOWED_ORIGINS.append(app_url_clean)
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # AUTHORIZATION MIDDLEWARE (3-tier hierarchy)
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 # Public routes (no Authorization header required)
 PUBLIC_ROUTE_SET = {
@@ -58,6 +58,11 @@ PUBLIC_ROUTE_SET = {
     "/api/v1/auth/google/callback",
     "/api/v1/auth/google/session",
     "/api/v1/export/youtube/oauth/callback",
+    "/api/v1/landing/overview",
+    "/api/v1/landing/showcase",
+    "/api/v1/landing/pricing",
+    "/api/v1/platform/shell/config",
+    "/api/v1/platform/shell/state",
     "/api/v1/auth/token",             # Swagger Authorize button
     "/api/v1/ai/models/catalog",      # AI Model Catalog metadata
     "/api/v1/ai/models/routing",      # AI Task-to-Model Routing configuration
@@ -116,7 +121,7 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
-        # 0) Always pass CORS preflight OPTIONS requests through — CORSMiddleware handles them.
+        # 0) Always pass CORS preflight OPTIONS requests through â€” CORSMiddleware handles them.
         if request.method == "OPTIONS":
             return await call_next(request)
 
@@ -156,9 +161,9 @@ class AuthorizationMiddleware(BaseHTTPMiddleware):
         request.state.user = user
         return await call_next(request)
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # RATE LIMITING
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 RATE_LIMIT_RPM = int(os.getenv("RATE_LIMIT_RPM", "120"))
 client_request_log = {}
 
@@ -214,9 +219,9 @@ async def rate_limiting_middleware(request: Request, call_next):
 
     return await call_next(request)
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # ADD PROCESS TIME HEADER & REQUEST LOGGING
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async def add_process_time_header(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4())[:8])
     set_current_request_id(request_id)
@@ -262,9 +267,9 @@ async def add_process_time_header(request: Request, call_next):
         )
     return response
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # MIDDLEWARE SETUP WIRING
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def setup_middleware(app: FastAPI):
     # 1. Request tracing & timing middleware (BaseHTTPMiddleware)
     app.add_middleware(BaseHTTPMiddleware, dispatch=add_process_time_header)
@@ -285,3 +290,4 @@ def setup_middleware(app: FastAPI):
         allow_headers=["*"],
         expose_headers=["X-Request-ID", "X-Process-Time", "X-API-Version"],
     )
+

@@ -1,5 +1,5 @@
 """
-backend/app/core/logging/logger.py
+backend/core/logging/logger.py
 ─────────────────────────────────────────────────────────────────────────────
 High-performance centralized logging infrastructure for Sonikoma.
 Features:
@@ -177,7 +177,7 @@ def setup_logging():
     try:
         from app.core.config import IS_PRODUCTION
     except ImportError:
-        from core.config import IS_PRODUCTION
+        from app.core.config import IS_PRODUCTION
 
     log_level_name = os.getenv("LOG_LEVEL", "INFO" if IS_PRODUCTION else "DEBUG").upper()
     log_level = getattr(logging, log_level_name, logging.DEBUG if not IS_PRODUCTION else logging.INFO)
@@ -208,7 +208,7 @@ def setup_logging():
     # 3. Rotating File Handler (Persistent logs under data/logs/sonikoma.log)
     try:
         base_dir = os.path.dirname(__file__)
-        project_root = os.path.abspath(os.path.join(base_dir, "..", "..", "..", ".."))
+        project_root = os.path.abspath(os.path.join(base_dir, "..", "..", ".."))
         log_dir = os.path.join(project_root, "data", "logs")
         os.makedirs(log_dir, exist_ok=True)
         log_file_path = os.path.join(log_dir, "sonikoma.log")

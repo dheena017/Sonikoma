@@ -1,5 +1,5 @@
 """
-backend/app/core/constants.py
+backend/core/constants.py
 ─────────────────────────────────────────────────────────────────────────────
 Global constants for the Sonikoma computational engine.
 ─────────────────────────────────────────────────────────────────────────────

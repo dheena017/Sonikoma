@@ -1,5 +1,5 @@
 """
-backend/app/core/responses.py
+backend/core/responses.py
 ─────────────────────────────────────────────────────────────────────────────
 Custom Pretty-Printed JSON Response Class for FastAPI
 Ensures all API endpoints return clean, human-readable indented JSON (indent=2)

@@ -1,5 +1,5 @@
 """
-backend/app/core/logging/formatters.py
+backend/core/logging/formatters.py
 ─────────────────────────────────────────────────────────────────────────────
 Custom log formatting and ANSI colorization for HTTP requests, URLs, and levels.
 ─────────────────────────────────────────────────────────────────────────────

@@ -52,6 +52,6 @@ ENV PORT=5173
 
 EXPOSE 5173
 
-# Launch FastAPI computational engine from backend/app
-WORKDIR /app/backend/app
+# Launch FastAPI computational engine from backend
+WORKDIR /app/backend
 CMD ["python", "main.py"]

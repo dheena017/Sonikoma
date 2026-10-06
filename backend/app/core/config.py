@@ -1,5 +1,5 @@
 """
-backend/app/core/config.py
+backend/core/config.py
 ─────────────────────────────────────────────────────────────────────────────
 Centralized configuration validation hub and AI client initialization.
 Consolidates environment variables, ports, URLs, API keys, limits, and AI clients.
@@ -18,11 +18,14 @@ from dotenv import load_dotenv
 logger = logging.getLogger("sonikoma.core.config")
 
 # Project root calculation & dotenv loading
-APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-BACKEND_DIR = os.path.abspath(os.path.join(APP_DIR, ".."))
-PROJECT_ROOT = os.path.abspath(os.path.join(BACKEND_DIR, ".."))
+BACKEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+APP_DIR = os.path.abspath(os.path.join(BACKEND_DIR, "app"))
+# PROJECT_ROOT points to backend/ — data/ now lives at backend/data/
+PROJECT_ROOT = BACKEND_DIR
+_SONIKOMA_ROOT = os.path.abspath(os.path.join(BACKEND_DIR, ".."))
 
-dotenv_path = os.path.join(PROJECT_ROOT, ".env")
+# Load .env from project root (Sonikoma/) first, then from backend/ if present
+dotenv_path = os.path.join(_SONIKOMA_ROOT, ".env")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path=dotenv_path)
 load_dotenv(dotenv_path=os.path.join(BACKEND_DIR, ".env"))
@@ -32,10 +35,13 @@ NODE_ENV = os.getenv("NODE_ENV", "development")
 IS_PRODUCTION = (NODE_ENV.lower() == "production")
 API_VERSION = os.getenv("API_VERSION", "1.0.0")
 
-# Setup temp directory
+# Setup temp & storage directories
 import tempfile
 tempfile.tempdir = os.path.join(PROJECT_ROOT, "data", "temp")
 os.makedirs(tempfile.tempdir, exist_ok=True)
+
+STORAGE_DIR = os.path.join(PROJECT_ROOT, "data", "storage")
+os.makedirs(STORAGE_DIR, exist_ok=True)
 
 
 def _normalize_frontend_host(value: Optional[str]) -> Optional[str]:

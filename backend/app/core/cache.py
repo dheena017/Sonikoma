@@ -1,5 +1,5 @@
 """
-backend/app/core/cache.py
+backend/core/cache.py
 ─────────────────────────────────────────────────────────────────────────────
 Shared in-memory caches with TTL eviction, hit/miss tracking, and stats.
 ─────────────────────────────────────────────────────────────────────────────
@@ -19,7 +19,7 @@ T = TypeVar('T')
 # so it survives server restarts (unlike tempfile.gettempdir() which Windows may clear)
 _BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 _PROJECT_ROOT = os.path.abspath(os.path.join(_BACKEND_ROOT, '..'))
-PERSISTENT_CACHE_DIR = os.path.join(_PROJECT_ROOT, 'data', 'image_cache')
+PERSISTENT_CACHE_DIR = os.path.join(_BACKEND_ROOT, 'data', 'image_cache')
 
 
 class CacheEntry(Generic[T]):
@@ -384,7 +384,7 @@ def get_total_storage_size_bytes() -> int:
                     except OSError:
                         pass
     try:
-        from app.database.config import DB_PATH
+        from database.config import DB_PATH
         if os.path.exists(DB_PATH):
             total_size += os.path.getsize(DB_PATH)
     except Exception:
@@ -404,3 +404,11 @@ def purge_all_expired() -> None:
     total = m + e + z + p
     if total > 0:
         logger.info(f"[Cache] ♻️  Purged {total} expired entries (merged:{m} edits:{e} zips:{z} proxy:{p})")
+
+
+def clear_all_caches() -> None:
+    stitched_cache.clear()
+    edit_history.clear()
+    zip_cache.clear()
+    proxy_cache.clear()
+    logger.info("[Cache] Cleared all memory and disk caches.")

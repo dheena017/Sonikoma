@@ -93,7 +93,7 @@ const pythonPath =
   process.platform === "win32"
     ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
     : "python3";
-const backendDir = path.resolve(__dirname, "../backend/app");
+const backendDir = path.resolve(__dirname, "../backend");
 const projectRootDir = path.resolve(__dirname, "../");
 const pythonImportRoot = projectRootDir;
 const pythonPathEnv = [backendDir, projectRootDir].join(path.delimiter);

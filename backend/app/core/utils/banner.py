@@ -1,5 +1,5 @@
 """
-backend/app/core/utils/banner.py
+backend/core/utils/banner.py
 ─────────────────────────────────────────────────────────────────────────────
 Comprehensive, developer-centric, pixel-perfect aligned startup banner.
 Includes real-time package installation audit checks for developer workspace.
@@ -12,7 +12,7 @@ import platform
 import re
 
 try:
-    from core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT, APP_URL, RATE_LIMIT_RPM, MAX_PROXY_MB
+    from app.core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT, APP_URL, RATE_LIMIT_RPM, MAX_PROXY_MB
 except ImportError:
     from app.core.config import IS_PRODUCTION, API_VERSION, BACKEND_PORT, APP_URL, RATE_LIMIT_RPM, MAX_PROXY_MB
 
@@ -148,7 +148,7 @@ def _print_startup_banner():
     line_hw    = _format_line(f"● {CLR_MUTED}Hardware & ML     :{CLR_RESET} {cpu_cores} CPUs  │  {ram_total} RAM  │  {pytorch_st}")
     
     try:
-        from app.database import config as db_config
+        from database import config as db_config
         if getattr(db_config, "NODE_ENV", "") == "production":
             db_status = "Supabase/PostgreSQL"
         else:

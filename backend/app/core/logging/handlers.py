@@ -1,5 +1,5 @@
 """
-backend/app/core/logging/handlers.py
+backend/core/logging/handlers.py
 ─────────────────────────────────────────────────────────────────────────────
 SSE Log stream buffer and UI logging handler.
 ─────────────────────────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ class UIStreamLogHandler(logging.Handler):
 
             # Persist to Database asynchronously (lazy import to avoid circular dependency)
             try:
-                from app.repositories.system.logs import insert_system_log
+                from features.system.logs import insert_system_log
                 insert_system_log(
                     level,
                     module,
