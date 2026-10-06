@@ -343,13 +343,10 @@ async def analyze_panels(
     }
 
 
-@router.post("/ai-smart-crop", summary="Crop panels automatically using local CV or Gemini")
-@router.post("/detect-panels")
-@router.post("/ai-detect-panels")
-async def ai_smart_crop(
+async def _execute_smart_crop(
     body: SmartCropRequest,
-    user_api_key: dict = Depends(get_user_gemini_key),
-    current_user: dict = Depends(get_current_user)
+    user_api_key: dict,
+    current_user: dict
 ):
     COST = 5
     if get_available_credits(current_user["user_id"]) < COST:
@@ -381,12 +378,37 @@ async def ai_smart_crop(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/ai-smart-crop-batch", summary="Batch crop panels automatically using local CV or Gemini")
-@router.post("/detect-panels-batch")
-async def ai_smart_crop_batch(
-    body: SmartCropBatchRequest,
+@router.post("/ai-smart-crop", summary="Crop panels automatically using local CV or Gemini")
+async def ai_smart_crop(
+    body: SmartCropRequest,
     user_api_key: dict = Depends(get_user_gemini_key),
     current_user: dict = Depends(get_current_user)
+):
+    return await _execute_smart_crop(body, user_api_key, current_user)
+
+
+@router.post("/detect-panels", summary="Detect panels using smart crop")
+async def detect_panels(
+    body: SmartCropRequest,
+    user_api_key: dict = Depends(get_user_gemini_key),
+    current_user: dict = Depends(get_current_user)
+):
+    return await _execute_smart_crop(body, user_api_key, current_user)
+
+
+@router.post("/ai-detect-panels", summary="AI detect panels using vision models")
+async def ai_detect_panels(
+    body: SmartCropRequest,
+    user_api_key: dict = Depends(get_user_gemini_key),
+    current_user: dict = Depends(get_current_user)
+):
+    return await _execute_smart_crop(body, user_api_key, current_user)
+
+
+async def _execute_smart_crop_batch(
+    body: SmartCropBatchRequest,
+    user_api_key: dict,
+    current_user: dict
 ):
     if not body.urls:
         raise HTTPException(status_code=400, detail="Field 'urls' must be a non-empty list.")
@@ -420,6 +442,24 @@ async def ai_smart_crop_batch(
             results.append({"url": url, "success": False, "error": str(e)})
     record_credit_transaction(current_user["user_id"], -COST, "ai_smart_crop_batch")
     return {"success": True, "results": results}
+
+
+@router.post("/ai-smart-crop-batch", summary="Batch crop panels automatically using local CV or Gemini")
+async def ai_smart_crop_batch(
+    body: SmartCropBatchRequest,
+    user_api_key: dict = Depends(get_user_gemini_key),
+    current_user: dict = Depends(get_current_user)
+):
+    return await _execute_smart_crop_batch(body, user_api_key, current_user)
+
+
+@router.post("/detect-panels-batch", summary="Batch detect panels using local CV or Gemini")
+async def detect_panels_batch(
+    body: SmartCropBatchRequest,
+    user_api_key: dict = Depends(get_user_gemini_key),
+    current_user: dict = Depends(get_current_user)
+):
+    return await _execute_smart_crop_batch(body, user_api_key, current_user)
 
 
 # â”€â”€â”€ Stable Diffusion Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

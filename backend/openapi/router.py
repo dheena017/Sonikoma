@@ -149,16 +149,11 @@ def register_docs_routes(app: FastAPI):
         schema = get_category_openapi_schema(app, category)
         return JSONResponse(content=schema)
 
-    @app.get("/api/v1/docs", include_in_schema=False)
-    @app.get("/api/v1/docs/{category}", include_in_schema=False)
-    async def custom_swagger_ui(category: str = "all"):
+    def _render_swagger_ui_html(category: str = "all") -> HTMLResponse:
         category_clean = (category or "all").lower()
         valid_ids = [c["id"] for c in CATEGORY_METADATA]
         if category_clean not in valid_ids:
             category_clean = "all"
-
-        openapi_url = f"/api/v1/openapi/{category_clean}.json" if category_clean != "all" else "/api/v1/openapi.json"
-        current_label = next((c["label"] for c in CATEGORY_METADATA if c["id"] == category_clean), "API Console")
 
         if category_clean == "schemas":
             schemas_html = get_schemas_explorer_html()
@@ -197,9 +192,25 @@ def register_docs_routes(app: FastAPI):
         content = content.replace("<body>", f"<body>\n{custom_navbar_html}")
         return HTMLResponse(content=content)
 
-    @app.get("/api/v1/redoc", include_in_schema=False)
-    @app.get("/api/v1/redoc/{category}", include_in_schema=False)
-    async def custom_redoc_html(category: str = "all"):
+    @app.get("/api/v1/docs", include_in_schema=False)
+    async def custom_swagger_ui_default():
+        return _render_swagger_ui_html("all")
+
+    @app.get("/api/v1/docs/{category}", include_in_schema=False)
+    async def custom_swagger_ui_category(category: str):
+        return _render_swagger_ui_html(category)
+
+    @app.get("/api/docs", include_in_schema=False)
+    async def redirect_api_docs():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/api/v1/docs")
+
+    @app.get("/docs", include_in_schema=False)
+    async def redirect_docs():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/api/v1/docs")
+
+    def _render_redoc_doc_html(category: str = "all") -> HTMLResponse:
         category_clean = (category or "all").lower().strip()
         valid_ids = [c["id"] for c in CATEGORY_METADATA]
         if category_clean not in valid_ids:
@@ -212,14 +223,31 @@ def register_docs_routes(app: FastAPI):
         from fastapi.openapi.docs import get_redoc_html
         return get_redoc_html(
             openapi_url=f"/api/v1/openapi/{category_clean}.json" if category_clean != "all" else "/api/v1/openapi.json",
-            title=f"Sonikoma - ReDoc Reference",
+            title="Sonikoma - ReDoc Reference",
             redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.1.3/bundles/redoc.standalone.js",
             redoc_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
         )
 
+    @app.get("/api/v1/redoc", include_in_schema=False)
+    async def custom_redoc_default():
+        return _render_redoc_doc_html("all")
+
+    @app.get("/api/v1/redoc/{category}", include_in_schema=False)
+    async def custom_redoc_category(category: str):
+        return _render_redoc_doc_html(category)
+
+    @app.get("/redoc", include_in_schema=False)
+    async def redirect_redoc():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/api/v1/redoc")
+
     @app.get("/admin", include_in_schema=False)
-    @app.get("/admin/dashboard", include_in_schema=False)
     async def redirect_admin_to_docs():
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url="/api/v1/docs/system")
+
+    @app.get("/admin/dashboard", include_in_schema=False)
+    async def redirect_admin_dashboard_to_docs():
         from fastapi.responses import RedirectResponse
         return RedirectResponse(url="/api/v1/docs/system")
 
@@ -233,14 +261,21 @@ def register_docs_routes(app: FastAPI):
         from fastapi.responses import RedirectResponse
         return RedirectResponse(url="/api/v1/docs/ai")
 
-    @app.get("/tests", include_in_schema=False)
-    @app.get("/api/v1/tests", include_in_schema=False)
-    @app.get("/testing", include_in_schema=False)
-    @app.get("/test-portal", include_in_schema=False)
-    @app.get("/api/v1/docs/tests", include_in_schema=False)
-    async def custom_test_portal_html():
+    def _render_test_portal_page() -> HTMLResponse:
         portal_html = get_test_portal_html()
         if portal_html:
             return HTMLResponse(content=portal_html)
         return HTMLResponse(content="<h1>Sonikoma Test Portal</h1><p>Run 'npm test' or 'npm run test:report' to view automated test reports.</p>")
+
+    @app.get("/api/v1/tests", include_in_schema=False)
+    async def custom_test_portal_v1():
+        return _render_test_portal_page()
+
+    @app.get("/api/v1/docs/tests", include_in_schema=False)
+    async def custom_test_portal_docs():
+        return _render_test_portal_page()
+
+    @app.get("/test-portal", include_in_schema=False)
+    async def custom_test_portal_alias():
+        return _render_test_portal_page()
 

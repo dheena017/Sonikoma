@@ -42,6 +42,22 @@ else:
 
 # Public routes (no Authorization header required)
 PUBLIC_ROUTE_SET = {
+    "/api/docs",
+    "/api/v1/docs",
+    "/docs",
+    "/api/redoc",
+    "/api/v1/redoc",
+    "/redoc",
+    "/api/openapi.json",
+    "/api/v1/openapi.json",
+    "/openapi.json",
+    "/api/tests",
+    "/api/v1/tests",
+    "/tests",
+    "/testing",
+    "/test-portal",
+    "/api/docs/tests",
+    "/api/v1/docs/tests",
     "/api/v1/health",
     "/api/v1/system/health",
     "/api/v1/status",
@@ -77,34 +93,34 @@ PUBLIC_ROUTE_SET = {
     "/api/v1/scraper/series",
     "/api/v1/scraper/separate-url",
     "/api/v1/scraper/detect-platform",
-    "/api/v1/docs",
-    "/api/v1/redoc",
-    "/api/v1/openapi.json",
-    "/api/v1/tests",
-    "/api/v1/docs/tests",
 }
 
 PUBLIC_ROUTE_PREFIXES = (
-    "/api/v1/openapi/",   # Category-filtered OpenAPI JSONs (/api/v1/openapi/projects.json, etc.)
-    "/api/v1/projects/public/",
+    "/api/v1/openapi",    # Category-filtered OpenAPI JSONs
+    "/api/openapi",
+    "/openapi",
+    "/api/v1/docs",       # Documentation consoles
+    "/api/docs",
+    "/docs",
+    "/api/v1/redoc",      # ReDoc consoles
+    "/api/redoc",
+    "/redoc",
+    "/api/v1/projects/public",
     "/api/v1/projects/transfer",
-    "/static/",        # Swagger UI local CSS/JS assets
-    "/api/v1/docs/",
-    "/api/v1/images/",
-    "/api/v1/images/cached/",
-    "/api/v1/proxy/",
-    "/videos/",        # Generated videos serving
-    "/media/",         # Local processed panel layers served via <img src="/media/...">
-    "/media",          # Defensive: allow the exact mount path too
+    "/static",            # Swagger UI local CSS/JS assets
+    "/api/v1/images",
+    "/api/v1/proxy",
+    "/videos",            # Generated videos serving
+    "/media",             # Local processed panel layers served via <img src="/media/...">
     "/playwright-report", # Playwright Interactive Visual Report assets & pages
-    "/playwright-report/",
-    "/api/v1/export",  # YouTube publisher & export routes
+    "/api/v1/export",     # YouTube publisher & export routes
     "/api/v1/scraper",
     "/api/v1/audio",
     "/api/v1/ocr",
     "/api/v1/panels",
     "/api/v1/video",
     "/api/v1/jobs",
+    "/api/jobs",
     "/api/v1/ai",
     "/api/v1/ai-series",
     "/api/v1/auth/google",

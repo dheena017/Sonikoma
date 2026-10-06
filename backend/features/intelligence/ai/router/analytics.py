@@ -564,11 +564,9 @@ async def test_provider_key(payload: dict, current_user: Optional[dict] = Depend
 # 3. REAL TOKEN ANALYTICS & USAGE SUMMARY
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-@router.get("/usage/summary", summary="Get real aggregated AI token consumption, latency, and tool metrics")
-@router.get("/analytics/summary", summary="Get real aggregated AI token consumption, latency, and tool metrics")
-async def get_ai_analytics_summary(
-    timeframe: Optional[str] = Query("24h"),
-    current_user: Optional[dict] = Depends(get_optional_current_user)
+async def _execute_ai_analytics_summary(
+    timeframe: Optional[str] = "24h",
+    current_user: Optional[dict] = None
 ):
     """
     Returns REAL database-backed telemetry of AI operations across all modules in Sonikoma.
@@ -810,12 +808,26 @@ async def get_ai_analytics_summary(
         conn.close()
 
 
-@router.get("/usage/metrics", summary="Get bucketed timeseries metrics for analytics graphs")
-@router.get("/analytics/metrics", summary="Get bucketed timeseries metrics for analytics graphs")
-async def get_usage_metrics(
-    time_range: Optional[str] = Query("24h"),
-    model: Optional[str] = Query(None),
+@router.get("/usage/summary", summary="Get real aggregated AI token consumption, latency, and tool metrics")
+async def get_ai_usage_summary(
+    timeframe: Optional[str] = Query("24h"),
     current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    return await _execute_ai_analytics_summary(timeframe, current_user)
+
+
+@router.get("/analytics/summary", summary="Get real aggregated AI token consumption, latency, and tool metrics")
+async def get_ai_analytics_summary(
+    timeframe: Optional[str] = Query("24h"),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    return await _execute_ai_analytics_summary(timeframe, current_user)
+
+
+async def _execute_usage_metrics(
+    time_range: Optional[str] = "24h",
+    model: Optional[str] = None,
+    current_user: Optional[dict] = None
 ):
     """Returns database-computed timeseries points for the visual analytics chart."""
     conn = get_db_connection()
@@ -866,6 +878,24 @@ async def get_usage_metrics(
         }
     finally:
         conn.close()
+
+
+@router.get("/usage/metrics", summary="Get bucketed timeseries metrics for analytics graphs")
+async def get_usage_metrics(
+    time_range: Optional[str] = Query("24h"),
+    model: Optional[str] = Query(None),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    return await _execute_usage_metrics(time_range, model, current_user)
+
+
+@router.get("/analytics/metrics", summary="Get bucketed timeseries metrics for analytics graphs")
+async def get_analytics_metrics(
+    time_range: Optional[str] = Query("24h"),
+    model: Optional[str] = Query(None),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    return await _execute_usage_metrics(time_range, model, current_user)
 
 
 @router.get("/usage/export", summary="Export real usage logs as CSV or JSON")
@@ -1009,9 +1039,7 @@ async def get_models_catalog(
     }
 
 
-@router.get("/models/routing", summary="Get active task-to-model routing configuration")
-@router.get("/routing", summary="Canonical alias for get_model_routing")
-async def get_model_routing():
+def _get_model_routing_payload() -> dict:
     """Returns active routing mappings for all 11 capabilities dynamically derived from ModelRegistry."""
     from ai_engine.core.orchestrator import AIOrchestrator
     from ai_engine.core.registry import ModelRegistry
@@ -1051,10 +1079,17 @@ async def get_model_routing():
     }
 
 
+@router.get("/models/routing", summary="Get active task-to-model routing configuration")
+async def get_model_routing():
+    return _get_model_routing_payload()
 
-@router.put("/routing", summary="Save customized task-to-model routing configuration")
-@router.post("/models/routing", summary="Save customized task-to-model routing configuration")
-async def update_model_routing(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
+
+@router.get("/routing", summary="Canonical alias for get_model_routing")
+async def get_routing_alias():
+    return _get_model_routing_payload()
+
+
+def _execute_update_model_routing(payload: dict) -> dict:
     """Saves customized routing mappings and syncs with central AIOrchestrator."""
     from ai_engine.core.orchestrator import AIOrchestrator
 
@@ -1069,9 +1104,17 @@ async def update_model_routing(payload: dict, current_user: Optional[dict] = Dep
     }
 
 
-@router.post("/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
-@router.post("/models/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
-async def simulate_model_routing(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
+@router.put("/routing", summary="Save customized task-to-model routing configuration")
+async def update_routing_put(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
+    return _execute_update_model_routing(payload)
+
+
+@router.post("/models/routing", summary="Save customized task-to-model routing configuration")
+async def update_model_routing_post(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
+    return _execute_update_model_routing(payload)
+
+
+async def _execute_simulate_model_routing(payload: dict) -> dict:
     """Simulates real execution dispatch through Tier 1, Tier 2, and Tier 3 cascade routing with real round-trip latency."""
     import time
     import httpx
@@ -1149,6 +1192,16 @@ async def simulate_model_routing(payload: dict, current_user: Optional[dict] = D
         "message": message,
         "timestamp": time.time(),
     }
+
+
+@router.post("/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
+async def simulate_routing_post(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
+    return await _execute_simulate_model_routing(payload)
+
+
+@router.post("/models/routing/simulate", summary="Simulate dynamic cascade dispatch for a task")
+async def simulate_model_routing_post(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
+    return await _execute_simulate_model_routing(payload)
 
 
 
@@ -1372,14 +1425,12 @@ async def export_ai_analytics_ledger(
 # 7. LIVE TOKEN MODELS BREAKDOWN & TELEMETRY TIMESERIES
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-@router.get("/tokens/models-breakdown", summary="Get model-by-model token consumption and live RPM/TPM meters")
-@router.get("/models", summary="Get comprehensive model catalog with live RPM/TPM limits, pricing, and utilization")
-async def get_models_breakdown(
-    project_id: Optional[str] = Query(None),
-    time_range: Optional[str] = Query("24h"),
-    configured_only: Optional[bool] = Query(False),
-    active_only: Optional[bool] = Query(False),
-    current_user: Optional[dict] = Depends(get_optional_current_user)
+async def _execute_models_breakdown(
+    project_id: Optional[str] = None,
+    time_range: Optional[str] = "24h",
+    configured_only: Optional[bool] = False,
+    active_only: Optional[bool] = False,
+    current_user: Optional[dict] = None
 ):
     """Returns enriched models breakdown with pricing, observed token usage, RPM/TPM limits and meters."""
     from ai_engine.core.registry import ModelRegistry
@@ -1566,9 +1617,29 @@ async def get_models_breakdown(
     }
 
 
-@router.post("/models/sync", summary="Probe and synchronize live quotas and latency")
-@router.post("/tokens/sync-live-quotas", summary="Alias for sync live quotas")
-async def sync_live_quotas(current_user: Optional[dict] = Depends(get_optional_current_user)):
+@router.get("/tokens/models-breakdown", summary="Get model-by-model token consumption and live RPM/TPM meters")
+async def get_tokens_models_breakdown(
+    project_id: Optional[str] = Query(None),
+    time_range: Optional[str] = Query("24h"),
+    configured_only: Optional[bool] = Query(False),
+    active_only: Optional[bool] = Query(False),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    return await _execute_models_breakdown(project_id, time_range, configured_only, active_only, current_user)
+
+
+@router.get("/models", summary="Get comprehensive model catalog with live RPM/TPM limits, pricing, and utilization")
+async def get_models_breakdown(
+    project_id: Optional[str] = Query(None),
+    time_range: Optional[str] = Query("24h"),
+    configured_only: Optional[bool] = Query(False),
+    active_only: Optional[bool] = Query(False),
+    current_user: Optional[dict] = Depends(get_optional_current_user)
+):
+    return await _execute_models_breakdown(project_id, time_range, configured_only, active_only, current_user)
+
+
+async def _execute_sync_live_quotas(current_user: Optional[dict] = None) -> dict:
     """Probes active providers and returns refreshed models breakdown with live latency metrics."""
     t0 = time.perf_counter()
     from ai_engine.core.registry import ModelRegistry
@@ -1585,7 +1656,7 @@ async def sync_live_quotas(current_user: Optional[dict] = Depends(get_optional_c
         probes["groq"] = {"status": "ONLINE", "latency_ms": 88.6, "jitter_ms": 4.2}
 
     sync_lat = round((time.perf_counter() - t0) * 1000, 2)
-    breakdown_data = await get_models_breakdown(current_user=current_user)
+    breakdown_data = await _execute_models_breakdown(current_user=current_user)
 
     return {
         "success": True,
@@ -1617,6 +1688,16 @@ async def sync_live_quotas(current_user: Optional[dict] = Depends(get_optional_c
             },
         },
     }
+
+
+@router.post("/models/sync", summary="Probe and synchronize live quotas and latency")
+async def sync_models_quotas(current_user: Optional[dict] = Depends(get_optional_current_user)):
+    return await _execute_sync_live_quotas(current_user)
+
+
+@router.post("/tokens/sync-live-quotas", summary="Alias for sync live quotas")
+async def sync_live_quotas(current_user: Optional[dict] = Depends(get_optional_current_user)):
+    return await _execute_sync_live_quotas(current_user)
 
 
 @router.get("/analytics/telemetry-timeseries", summary="Historical granular timeseries for token consumption and latency")

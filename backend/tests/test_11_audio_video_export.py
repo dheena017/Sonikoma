@@ -9,8 +9,8 @@ import pytest
 
 
 def test_jobs_list_endpoint(client, user_headers):
-    """GET /api/v1/jobs/jobs/ - retrieves platform background jobs."""
-    response = client.get("/api/v1/jobs/jobs/", headers=user_headers)
+    """GET /api/v1/jobs/ - retrieves platform background jobs."""
+    response = client.get("/api/v1/jobs/", headers=user_headers)
     assert response.status_code == 200
     data = response.json()
     assert data.get("success") is True

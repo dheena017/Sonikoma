@@ -155,9 +155,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
 # 2. MODEL CATALOG & CAPABILITIES
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-@router.get("/models", summary="Get comprehensive model catalog across all AI providers")
-@router.get("/catalog", summary="Alias for comprehensive model catalog")
-async def get_model_catalog():
+def _get_model_catalog_payload():
     """Returns canonical catalog of all supported models, token pricing, and capabilities."""
     catalog = [
         # Google Gemini
@@ -343,6 +341,16 @@ async def get_model_catalog():
         "total_models": len(catalog),
         "models": catalog
     }
+
+
+@router.get("/models", summary="Get comprehensive model catalog across all AI providers")
+async def get_model_catalog():
+    return _get_model_catalog_payload()
+
+
+@router.get("/catalog", summary="Alias for comprehensive model catalog")
+async def get_catalog_alias():
+    return _get_model_catalog_payload()
 
 
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

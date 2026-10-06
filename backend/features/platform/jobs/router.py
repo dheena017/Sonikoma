@@ -15,7 +15,7 @@ from .schemas import JobStatusResponse, JobListResponse
 
 logger = logging.getLogger("sonikoma.features.platform.jobs")
 
-router = APIRouter(prefix="/jobs", tags=["Platform Jobs"])
+router = APIRouter(tags=["Platform Jobs"])
 jobs_router = router
 
 
