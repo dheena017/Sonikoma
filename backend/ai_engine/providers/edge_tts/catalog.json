@@ -17,6 +17,8 @@
       "multilingual_audio",
       "speed_pitch_control"
     ],
+    "tags": ["Text-to-Speech"],
+    "free_tier": true,
     "recommended_for": [
       "Fast Narration Generation",
       "Free Audio Fallback"

@@ -18,6 +18,8 @@
       "transcription",
       "timestamping"
     ],
+    "tags": ["Speech-to-Text"],
+    "free_tier": true,
     "recommended_for": [
       "Voiceover Transcription",
       "Subtitle Alignment"

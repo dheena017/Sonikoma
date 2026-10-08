@@ -28,6 +28,9 @@ export interface DynamicModelOption {
   context_window?: number | string;
   max_output_tokens?: number;
   capabilities?: string[];
+  tags?: string[];
+  is_free_tier?: boolean;
+  free_tier?: boolean | { rpm?: number; tpm?: number; rpd?: number };
   status?: string;
   recommended_for?: string[];
 }
@@ -40,6 +43,7 @@ interface TierModelCardProps {
   availableModels: DynamicModelOption[];
   onModelChange: (modelId: string) => void;
   disabled?: boolean;
+  requiredTag?: string;
 }
 
 const TIER_CONFIG: Record<
@@ -239,12 +243,51 @@ export const isProviderKeyConfiguredInVault = (providerKey: string = "") => {
   return false;
 };
 
+export const isModelFree = (m?: DynamicModelOption | any) => {
+  if (!m) return false;
+  if (m.is_free_tier === true || m.free_tier === true) return true;
+  const p = (m.provider || "").toLowerCase();
+  if (p === "pollinations" || p === "edgetts" || p === "whisper" || m.id === "parallax") return true;
+  if (
+    (m.price_per_image === 0 || m.price_per_image === undefined) &&
+    (m.cost_per_1m_prompt === 0 || m.cost_per_1m_prompt === undefined) &&
+    (m.price_per_1k_chars === 0 || m.price_per_1k_chars === undefined)
+  ) {
+    if (m.prompt_price_per_1m === 0 && m.completion_price_per_1m === 0) return true;
+  }
+  return false;
+};
+
+export const renderTagBadge = (tag: string) => {
+  const tagColors: Record<string, { bg: string; text: string; border: string }> = {
+    "Text-to-Image": { bg: "rgba(168, 85, 247, 0.15)", text: "#c084fc", border: "rgba(168, 85, 247, 0.35)" },
+    "Image-to-Text": { bg: "rgba(6, 182, 212, 0.15)", text: "#22d3ee", border: "rgba(6, 182, 212, 0.35)" },
+    "Text-to-Text": { bg: "rgba(59, 130, 246, 0.15)", text: "#60a5fa", border: "rgba(59, 130, 246, 0.35)" },
+    "Text-to-Video": { bg: "rgba(245, 158, 11, 0.15)", text: "#fbbf24", border: "rgba(245, 158, 11, 0.35)" },
+    "Image-to-Video": { bg: "rgba(249, 115, 22, 0.15)", text: "#fb923c", border: "rgba(249, 115, 22, 0.35)" },
+    "Text-to-Speech": { bg: "rgba(236, 72, 153, 0.15)", text: "#f472b6", border: "rgba(236, 72, 153, 0.35)" },
+    "Speech-to-Text": { bg: "rgba(16, 185, 129, 0.15)", text: "#34d399", border: "rgba(16, 185, 129, 0.35)" },
+    "Translation": { bg: "rgba(14, 165, 233, 0.15)", text: "#38bdf8", border: "rgba(14, 165, 233, 0.35)" },
+  };
+  const color = tagColors[tag] || { bg: "rgba(255, 255, 255, 0.08)", text: "#e5e7eb", border: "rgba(255, 255, 255, 0.15)" };
+  return (
+    <span
+      key={tag}
+      className="px-1.5 py-0.5 rounded text-[8.5px] font-mono font-bold uppercase tracking-wider shrink-0"
+      style={{ backgroundColor: color.bg, color: color.text, border: `1px solid ${color.border}` }}
+    >
+      {tag}
+    </span>
+  );
+};
+
 export default function TierModelCard({
   tierType,
   modelId,
   availableModels,
   onModelChange,
   disabled = false,
+  requiredTag,
 }: TierModelCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -465,7 +508,7 @@ export default function TierModelCard({
           }}
         >
           <div className="flex items-center justify-between gap-2 mb-1">
-            {/* 1. PROVIDER BADGE */}
+            {/* 1. PROVIDER BADGE & MODALITY BADGES */}
             {hasModel ? (
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span
@@ -478,6 +521,12 @@ export default function TierModelCard({
                 >
                   {provTheme.name}
                 </span>
+                {selectedModel?.tags?.[0] && renderTagBadge(selectedModel.tags[0])}
+                {isModelFree(selectedModel) && (
+                  <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-sm shrink-0">
+                    100% FREE
+                  </span>
+                )}
                 {!isKeyConfigured && (
                   <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300">
                     KEY REQUIRED
@@ -563,6 +612,19 @@ export default function TierModelCard({
             boxShadow: `0 20px 40px rgba(0, 0, 0, 0.8), 0 0 15px ${cfg.color}25`,
           }}
         >
+          {/* Strict Modality Filter Notice */}
+          {requiredTag && (
+            <div className="flex items-center justify-between px-3.5 py-1.5 bg-purple-950/40 border-b border-purple-500/20 text-[10.5px] font-mono text-purple-300">
+              <span className="flex items-center gap-1.5 font-bold">
+                <Sparkles className="w-3 h-3 text-purple-400" />
+                Required Modality: {requiredTag}
+              </span>
+              <span className="text-[8.5px] text-purple-200/60 uppercase tracking-wider font-semibold">
+                Strict Zero-Leakage Filter
+              </span>
+            </div>
+          )}
+
           {/* Enhanced Cyber Search Box */}
           <div className="p-2.5 border-b border-white/10 bg-neutral-950/80">
             <div
@@ -735,7 +797,7 @@ export default function TierModelCard({
                     }}
                   >
                     <div className="min-w-0 flex-1 space-y-0.5">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span
                           className="text-xs font-bold truncate"
                           style={{
@@ -744,6 +806,14 @@ export default function TierModelCard({
                         >
                           {m.name}
                         </span>
+                        {/* Canonical Modality Tag Badges */}
+                        {m.tags && m.tags.map((t: string) => renderTagBadge(t))}
+                        {/* 100% Free Indicator */}
+                        {isModelFree(m) && (
+                          <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-sm shrink-0">
+                            100% FREE
+                          </span>
+                        )}
                         {!hasKey && (
                           <span className="text-[8px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">
                             Key Required

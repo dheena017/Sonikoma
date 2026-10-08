@@ -18,6 +18,8 @@
       "complex_narrative",
       "text"
     ],
+    "tags": ["Text-to-Text", "Image-to-Text"],
+    "free_tier": false,
     "recommended_for": [
       "Creative Manga Dramatization",
       "Epic Script Writing"
@@ -41,6 +43,8 @@
       "creative_dialogue",
       "text"
     ],
+    "tags": ["Text-to-Text"],
+    "free_tier": false,
     "recommended_for": [
       "Fast Narration Iterations",
       "Quick Fallback"

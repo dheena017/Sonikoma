@@ -17,6 +17,8 @@ export interface AIModelInfo {
     | "local"
     | string;
   capabilities: string[];
+  tags?: string[];
+  is_free_tier?: boolean;
   speedRating: "ultra-fast" | "fast" | "medium" | "slow";
   badge?: string;
   description?: string;
@@ -359,6 +361,8 @@ export const useAIModelStore = create<AIModelState>((set, get) => {
                     ? "Flagship"
                     : m.speed_rating,
                 description: m.category,
+                tags: m.tags || [],
+                is_free_tier: Boolean(m.is_free_tier || m.free_tier === true),
               })
             );
             set({ dynamicModels: mapped });

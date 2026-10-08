@@ -387,6 +387,37 @@ class AIOrchestrator:
         return ModelRegistry.get_primary_model_for_capability(capability)
 
     @classmethod
+    def get_task_cascade(cls, capability: str) -> Dict[str, str]:
+        """Returns the full 3-tier cascade mapping (primary, fallback, tertiary) for a task."""
+        if not cls._custom_capability_routing:
+            cls.load_custom_routing()
+        custom_entry = cls._custom_capability_routing.get(capability, {})
+        primary = None
+        fallback = None
+        tertiary = None
+        if isinstance(custom_entry, dict):
+            primary = custom_entry.get("primary") or custom_entry.get("primary_model")
+            fallback = custom_entry.get("fallback") or custom_entry.get("fallback_model")
+            tertiary = custom_entry.get("tertiary") or custom_entry.get("tertiary_model")
+        elif isinstance(custom_entry, str):
+            primary = custom_entry
+
+        if not primary:
+            primary = cls.DEFAULT_CAPABILITY_ROUTING.get(capability) or ModelRegistry.get_primary_model_for_capability(capability)
+        
+        return {
+            "primary": primary or "gemini-2.5-flash",
+            "fallback": fallback or "gpt-4o-mini",
+            "tertiary": tertiary or "deepseek-chat",
+        }
+
+    @classmethod
+    def resolve_model_for_task(cls, capability: str, tier: str = "primary") -> str:
+        """Resolves the configured AI model for a capability at the requested tier level."""
+        cascade = cls.get_task_cascade(capability)
+        return cascade.get(tier) or cascade.get("primary") or "gemini-2.5-flash"
+
+    @classmethod
     def resolve_execution_candidates(
         cls,
         capability: str,

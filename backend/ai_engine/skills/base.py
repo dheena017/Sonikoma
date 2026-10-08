@@ -41,7 +41,7 @@ from ai_engine.skills.utils import (
 )
 
 # Import fallbacks
-from ai_engine.skills.coordinator import FallbackCoordinator
+# Fallback handling managed via AIOrchestrator
 
 logger = logging.getLogger("sonikoma.skills.base")
 

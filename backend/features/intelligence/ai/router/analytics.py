@@ -1574,6 +1574,9 @@ async def _execute_models_breakdown(
                 {"name": "Google Maps Grounding", "limit": "600 RPD (Free)", "used": "0 RPD"},
             ]
 
+        tags = meta.get("tags") or m.get("tags", [])
+        is_free_tier = bool(m.get("free_tier", False)) or (m.get("prompt_price_per_1m", 0) == 0 and m.get("price_per_image", 0) == 0 and m.get("price_per_1k_chars", 0) == 0)
+
         breakdown_list.append({
             "id": m_id,
             "name": meta.get("name") or m.get("name", m_id),
@@ -1581,6 +1584,8 @@ async def _execute_models_breakdown(
             "provider_name": provider_name,
             "provider_badge": provider_badge,
             "category": meta.get("category") or m.get("category", "General AI Intelligence"),
+            "tags": tags,
+            "is_free_tier": is_free_tier,
             "free_tier": free_tier,
             "paid_tier": paid_tier,
             "limit_rpm": limit_rpm,

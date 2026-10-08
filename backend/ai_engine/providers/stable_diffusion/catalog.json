@@ -19,6 +19,8 @@
       "upscaling",
       "style_transfer"
     ],
+    "tags": ["Text-to-Image"],
+    "free_tier": true,
     "recommended_for": [
       "Offline Artwork Generation",
       "Panel Inpainting"

@@ -19,6 +19,8 @@
       "anime_motion",
       "24fps"
     ],
+    "tags": ["Image-to-Video"],
+    "free_tier": false,
     "recommended_for": [
       "Anime Action Cuts",
       "Panel-to-Panel Morphing Transitions"
@@ -44,6 +46,8 @@
       "camera_motion",
       "motion_lora"
     ],
+    "tags": ["Image-to-Video"],
+    "free_tier": false,
     "recommended_for": [
       "Explosive Battle Sequences",
       "Dynamic Hair & Aura Flutter"
@@ -69,6 +73,8 @@
       "high_fidelity_temporal",
       "wide_angle"
     ],
+    "tags": ["Text-to-Video", "Image-to-Video"],
+    "free_tier": false,
     "recommended_for": [
       "Cinematic Establishing Shots",
       "Opening Video Traversal"
@@ -94,6 +100,8 @@
       "depth_mapping",
       "zero_cost"
     ],
+    "tags": ["Image-to-Video"],
+    "free_tier": true,
     "recommended_for": [
       "Webtoon Vertical Scroll Animations",
       "Multi-Layer Depth Scans"
@@ -119,6 +127,8 @@
       "halftone_enhancement",
       "lineart_sharp"
     ],
+    "tags": ["Text-to-Image"],
+    "free_tier": false,
     "recommended_for": [
       "Ultra-Crisp 4K Manga Panels",
       "Print-Ready Webtoon Lineart"
@@ -144,6 +154,8 @@
       "text_erasure",
       "background_restore"
     ],
+    "tags": ["Text-to-Image"],
+    "free_tier": false,
     "recommended_for": [
       "Clean Manga Translation Typesetting",
       "Bubble Inpainting"
@@ -169,6 +181,8 @@
       "vertical_japanese_ocr",
       "sound_effects"
     ],
+    "tags": ["Image-to-Text"],
+    "free_tier": true,
     "recommended_for": [
       "Vertical Japanese SFX Detection",
       "Manga Onomatopoeia Parsing"

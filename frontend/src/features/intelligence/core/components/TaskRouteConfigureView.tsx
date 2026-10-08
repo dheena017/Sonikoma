@@ -31,6 +31,7 @@ export interface CapabilityDefinition {
   category: string;
   description: string;
   required_type: string;
+  required_tag?: string;
   default_primary: string;
   default_fallback: string;
   default_tertiary: string;
@@ -78,9 +79,22 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [simResult, setSimResult] = useState<any>(null);
 
-  // Filter suitable models for this specific task
+  // Filter suitable models for this specific task based on canonical tag
   const suitableModels = useMemo(() => {
     if (!availableModels.length) return [];
+    const targetTag = taskRoute.required_tag;
+    if (targetTag) {
+      return availableModels.filter((m) => {
+        if (Array.isArray(m.tags) && m.tags.length > 0) {
+          if (targetTag === "Image-to-Video" || targetTag === "Text-to-Video") {
+            return m.tags.includes("Image-to-Video") || m.tags.includes("Text-to-Video");
+          }
+          return m.tags.includes(targetTag);
+        }
+        return true;
+      });
+    }
+
     switch (taskRoute.required_type) {
       case "audio_tts":
         return availableModels.filter(
@@ -127,7 +141,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
       default:
         return availableModels.filter((m) => m.provider !== "edgetts");
     }
-  }, [availableModels, taskRoute.required_type]);
+  }, [availableModels, taskRoute.required_type, taskRoute.required_tag]);
 
   const hasUserKey = useMemo(() => {
     return Boolean(
@@ -393,6 +407,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               tierType="primary"
               modelId={taskRoute.primary_model}
               availableModels={suitableModels}
+              requiredTag={taskRoute.required_tag}
               onModelChange={(modelId) =>
                 onModelChange(taskRoute.task, "primary_model", modelId)
               }
@@ -417,6 +432,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               tierType="fallback"
               modelId={taskRoute.fallback_model}
               availableModels={suitableModels}
+              requiredTag={taskRoute.required_tag}
               onModelChange={(modelId) =>
                 onModelChange(taskRoute.task, "fallback_model", modelId)
               }
@@ -441,6 +457,7 @@ export const TaskRouteConfigureView: React.FC<TaskRouteConfigureViewProps> = ({
               tierType="tertiary"
               modelId={taskRoute.tertiary_model}
               availableModels={suitableModels}
+              requiredTag={taskRoute.required_tag}
               onModelChange={(modelId) =>
                 onModelChange(taskRoute.task, "tertiary_model", modelId)
               }

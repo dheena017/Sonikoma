@@ -33,6 +33,16 @@ interface AIRoutingPageProps {
   addNotification?: (msg: string, type?: string) => void;
 }
 
+export type ModalityTag =
+  | "Text-to-Image"
+  | "Image-to-Text"
+  | "Text-to-Text"
+  | "Text-to-Video"
+  | "Image-to-Video"
+  | "Text-to-Speech"
+  | "Speech-to-Text"
+  | "Translation";
+
 interface CapabilityDefinition {
   task: string;
   name: string;
@@ -52,6 +62,7 @@ interface CapabilityDefinition {
     | "image_diffusion"
     | "video_generation"
     | "translation";
+  required_tag: ModalityTag;
   default_primary: string;
   default_fallback: string;
   default_tertiary: string;
@@ -72,6 +83,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Generates episodic comic script, panel breakdown, and emotional voice acting cues with deep narrative reasoning.",
     required_type: "text_reasoning",
+    required_tag: "Text-to-Text",
     default_primary: "gemini-2.5-flash",
     default_fallback: "claude-3-5-sonnet-20241022",
     default_tertiary: "gpt-4o",
@@ -84,6 +96,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Synthesizes authentic 2D vertical Korean webtoon panels with radiant mana auras, Solo Leveling dark styling, and crisp digital lineart.",
     required_type: "image_diffusion",
+    required_tag: "Text-to-Image",
     default_primary: "flux-anime",
     default_fallback: "flux",
     default_tertiary: "turbo",
@@ -96,6 +109,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Synthesizes authentic black-and-white manga pages with 50 LPI screentone halftones, crosshatching, explosive speedlines, and Kuro-beta ink.",
     required_type: "image_diffusion",
+    required_tag: "Text-to-Image",
     default_primary: "stable-diffusion",
     default_fallback: "flux-anime",
     default_tertiary: "flux",
@@ -108,6 +122,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Transforms keyframe anime artwork into fluid 24fps Sakuga action sequences, dynamic camera pans, and cinematic anime video cuts.",
     required_type: "video_generation",
+    required_tag: "Image-to-Video",
     default_primary: "tooncrafter",
     default_fallback: "animatediff",
     default_tertiary: "wan-video",
@@ -120,6 +135,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Detects speech bubble coordinates, panel boundaries, character presence, and visual manga reading direction.",
     required_type: "vision_multimodal",
+    required_tag: "Image-to-Text",
     default_primary: "gemini-2.5-flash",
     default_fallback: "gemini-3.5-flash-lite",
     default_tertiary: "gpt-4o",
@@ -132,6 +148,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Analyzes webtoon DOM structures, extracts chapter metadata, episode titles, and high-resolution comic pages.",
     required_type: "vision_multimodal",
+    required_tag: "Image-to-Text",
     default_primary: "gemini-2.5-flash",
     default_fallback: "gpt-4o-mini",
     default_tertiary: "deepseek-chat",
@@ -144,6 +161,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Refines visual prompts for Stable Diffusion & FLUX with anime lighting, cinematic angles, and Japanese aesthetics.",
     required_type: "text_reasoning",
+    required_tag: "Text-to-Text",
     default_primary: "gemini-2.5-flash",
     default_fallback: "gpt-4o-mini",
     default_tertiary: "claude-3-5-haiku-20241022",
@@ -156,6 +174,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Generates character art, redraws speech bubbles, upscale panels, and performs background inpainting.",
     required_type: "image_diffusion",
+    required_tag: "Text-to-Image",
     default_primary: "flux-anime",
     default_fallback: "flux",
     default_tertiary: "stable-diffusion",
@@ -168,6 +187,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Synthesizes expressive Japanese, English, and multilingual dialogue narration with emotion and pitch control.",
     required_type: "audio_tts",
+    required_tag: "Text-to-Speech",
     default_primary: "edge-tts-neural",
     default_fallback: "eleven_multilingual_v2",
     default_tertiary: "tts-1-hd",
@@ -180,6 +200,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Translates webtoon speech bubbles preserving Japanese onomatopoeia nuances across English, Korean, and Chinese.",
     required_type: "translation",
+    required_tag: "Translation",
     default_primary: "gemini-2.5-flash",
     default_fallback: "deepl-pro",
     default_tertiary: "gpt-4o-mini",
@@ -192,6 +213,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Extracts character identities, personality traits, and recommends matching voice actors from audio samples.",
     required_type: "text_reasoning",
+    required_tag: "Text-to-Text",
     default_primary: "claude-3-5-sonnet-20241022",
     default_fallback: "gpt-4o",
     default_tertiary: "gemini-2.5-flash",
@@ -204,6 +226,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Generates high-CTR YouTube titles, timestamps, video descriptions, tags, and hashtag recommendations.",
     required_type: "text_reasoning",
+    required_tag: "Text-to-Text",
     default_primary: "gpt-4o-mini",
     default_fallback: "gemini-2.5-flash",
     default_tertiary: "deepseek-chat",
@@ -216,6 +239,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Detects onomatopoeia action sounds (*BAM*, *WHOOSH*, *DOKI*) and recommends matched sound effects.",
     required_type: "text_reasoning",
+    required_tag: "Text-to-Text",
     default_primary: "gemini-2.5-flash",
     default_fallback: "gpt-4o-mini",
     default_tertiary: "claude-3-5-haiku-20241022",
@@ -228,6 +252,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     description:
       "Calculates optimal 9:16 vertical Shorts and 16:9 widescreen panel focus bounding boxes with zero head clipping.",
     required_type: "vision_multimodal",
+    required_tag: "Image-to-Text",
     default_primary: "gemini-2.5-flash",
     default_fallback: "gemini-3.5-flash-lite",
     default_tertiary: "gpt-4o",
@@ -534,6 +559,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [simResult, setSimResult] = useState<any>(null);
 
   // Return all compatible models from the full catalog for this specific task
+  // Return strictly compatible models matching the route's canonical Modality Tag
   const getTierModelsForTask = (
     route: CapabilityRoute
   ): DynamicModelOption[] => {
@@ -562,155 +588,67 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
       });
     }
 
-    const req = route.required_type;
-    let filtered = availableModels;
+    const targetTag = route.required_tag;
+    const filtered = availableModels.filter((m) => {
+      // 1. Strict Canonical Tag Matching if tags array exists
+      if (Array.isArray(m.tags) && m.tags.length > 0) {
+        if (targetTag === "Image-to-Video" || targetTag === "Text-to-Video") {
+          return (
+            m.tags.includes("Image-to-Video") || m.tags.includes("Text-to-Video")
+          );
+        }
+        return m.tags.includes(targetTag);
+      }
 
-    if (req === "audio_tts") {
-      filtered = availableModels.filter((m) => {
-        const caps = m.capabilities || [];
-        const cat = (m.category || "").toLowerCase();
-        const id = m.id.toLowerCase();
-        return (
-          caps.includes("tts") ||
-          caps.includes("audio") ||
-          caps.includes("voice_cloning") ||
-          cat.includes("speech") ||
-          cat.includes("audio") ||
-          cat.includes("voice") ||
-          id.includes("tts") ||
-          id.includes("eleven") ||
-          id.includes("edge") ||
-          id.includes("sovits") ||
-          id.includes("cosyvoice")
-        );
-      });
-    } else if (req === "image_diffusion") {
-      filtered = availableModels.filter((m) => {
-        const caps = m.capabilities || [];
-        const cat = (m.category || "").toLowerCase();
-        const id = m.id.toLowerCase();
+      // 2. Strict Fallback only if model has no tags
+      const caps = m.capabilities || [];
+      const id = m.id.toLowerCase();
+
+      if (targetTag === "Text-to-Image") {
         return (
           caps.includes("image_generation") ||
-          caps.includes("high_res_image") ||
-          caps.includes("inpainting") ||
-          cat.includes("diffusion") ||
-          cat.includes("visual") ||
-          cat.includes("image") ||
           id.includes("flux") ||
-          id.includes("dall") ||
-          id.includes("stable") ||
           id.includes("turbo") ||
-          id.includes("sana") ||
-          id.includes("pollinations") ||
-          id.includes("image")
+          id.includes("stable-diffusion") ||
+          id.includes("sana")
         );
-      });
-    } else if (req === "video_generation") {
-      filtered = availableModels.filter((m) => {
-        const caps = m.capabilities || [];
-        const cat = (m.category || "").toLowerCase();
-        const id = m.id.toLowerCase();
+      }
+      if (targetTag === "Image-to-Video" || targetTag === "Text-to-Video") {
         return (
           caps.includes("video_generation") ||
-          caps.includes("video") ||
-          caps.includes("keyframe_interpolation") ||
-          caps.includes("camera_pan") ||
-          cat.includes("video") ||
-          cat.includes("kinetic") ||
-          cat.includes("motion") ||
           id.includes("tooncrafter") ||
           id.includes("animatediff") ||
           id.includes("wan") ||
-          id.includes("parallax") ||
-          id.includes("video")
+          id.includes("parallax")
         );
-      });
-    } else if (req === "vision_multimodal") {
-      filtered = availableModels.filter((m) => {
-        const caps = m.capabilities || [];
-        const cat = (m.category || "").toLowerCase();
-        const id = m.id.toLowerCase();
+      }
+      if (targetTag === "Text-to-Speech") {
+        return (
+          caps.includes("tts") ||
+          caps.includes("voice_cloning") ||
+          id.includes("edge") ||
+          id.includes("eleven") ||
+          id.includes("sovits") ||
+          id.includes("cosyvoice")
+        );
+      }
+      if (targetTag === "Speech-to-Text") {
+        return caps.includes("stt") || id.includes("whisper");
+      }
+      if (targetTag === "Image-to-Text") {
         return (
           caps.includes("vision") ||
-          caps.includes("multimodal") ||
-          cat.includes("vision") ||
-          cat.includes("multimodal") ||
-          cat.includes("ocr") ||
-          id.includes("gemini") ||
-          id.includes("gpt-4o") ||
-          id.includes("claude-3-5-sonnet") ||
-          id.includes("manga-ocr") ||
-          id.includes("comic-text")
+          caps.includes("ocr") ||
+          id.includes("manga-ocr")
         );
-      });
-    } else if (req === "translation") {
-      filtered = availableModels.filter((m) => {
-        const caps = m.capabilities || [];
-        const cat = (m.category || "").toLowerCase();
-        const id = m.id.toLowerCase();
-        return (
-          caps.includes("translation") ||
-          caps.includes("text") ||
-          caps.includes("multilingual") ||
-          id.includes("deepl") ||
-          id.includes("gemini") ||
-          id.includes("gpt") ||
-          id.includes("claude") ||
-          id.includes("deepseek") ||
-          id.includes("llama")
-        );
-      });
-    } else {
-      // General LLM / text reasoning tasks - exclude pure audio/image models
-      filtered = availableModels.filter((m) => {
-        const id = m.id.toLowerCase();
-        const isPureAudioOrImage =
-          (id.includes("tts") && !id.includes("gemini")) ||
-          id.includes("eleven") ||
-          id.includes("flux") ||
-          id.includes("stable-diffusion") ||
-          id.includes("dall-e") ||
-          id.includes("turbo") ||
-          id.includes("sana") ||
-          id.includes("tooncrafter") ||
-          id.includes("animatediff") ||
-          id.includes("wan-video") ||
-          id.includes("parallax") ||
-          id.includes("sovits") ||
-          id.includes("cosyvoice");
-        return !isPureAudioOrImage;
-      });
-    }
-
-    // Ensure currently selected/default models are always included in the dropdown options
-    const existingIds = new Set(filtered.map((m) => m.id.toLowerCase()));
-    const missingModels: DynamicModelOption[] = [];
-
-    for (const id of taskCurrentIds) {
-      if (!existingIds.has(id.toLowerCase())) {
-        const found = availableModels.find(
-          (m) => m.id.toLowerCase() === id.toLowerCase()
-        );
-        if (found) {
-          missingModels.push(found);
-          existingIds.add(id.toLowerCase());
-        } else {
-          const info = inferModelProviderInfo(id);
-          missingModels.push({
-            id,
-            name: id,
-            provider: info.provider,
-            provider_name: info.provider_name,
-            category: route.category,
-            speed_rating: "Ultra Fast",
-            context_window: "1M Tokens",
-          });
-          existingIds.add(id.toLowerCase());
-        }
       }
-    }
+      if (targetTag === "Translation") {
+        return caps.includes("translation") || id.includes("deepl");
+      }
+      return true;
+    });
 
-    return [...filtered, ...missingModels];
+    return filtered;
   };
 
   // Load Models and Routing Matrix on Mount
@@ -1755,6 +1693,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                     tierType="primary"
                     modelId={route.primary_model}
                     availableModels={tierModels}
+                    requiredTag={route.required_tag}
                     onModelChange={(val) =>
                       handleModelChange(route.task, "primary_model", val)
                     }
@@ -1765,6 +1704,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                     tierType="fallback"
                     modelId={route.fallback_model}
                     availableModels={tierModels}
+                    requiredTag={route.required_tag}
                     onModelChange={(val) =>
                       handleModelChange(route.task, "fallback_model", val)
                     }
@@ -1775,6 +1715,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                     tierType="tertiary"
                     modelId={route.tertiary_model}
                     availableModels={tierModels}
+                    requiredTag={route.required_tag}
                     onModelChange={(val) =>
                       handleModelChange(route.task, "tertiary_model", val)
                     }

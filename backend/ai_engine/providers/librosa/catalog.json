@@ -19,6 +19,8 @@
       "beat_tracking",
       "silence_detection"
     ],
+    "tags": ["Audio-Processing"],
+    "free_tier": true,
     "recommended_for": [
       "Silence Detection",
       "Audio Energy Segmentation",

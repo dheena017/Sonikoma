@@ -17,6 +17,8 @@
       "json_mode",
       "text"
     ],
+    "tags": ["Text-to-Text"],
+    "free_tier": false,
     "recommended_for": [
       "Cost-Effective Story Analysis",
       "Complex Script Structure"
@@ -40,6 +42,8 @@
       "complex_reasoning",
       "text"
     ],
+    "tags": ["Text-to-Text"],
+    "free_tier": false,
     "recommended_for": [
       "Complex Plot Outlining",
       "Story Logic Verification"

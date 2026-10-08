@@ -18,6 +18,8 @@
       "structured_outputs",
       "text"
     ],
+    "tags": ["Text-to-Text", "Image-to-Text"],
+    "free_tier": false,
     "recommended_for": [
       "Nuanced Script Polishing",
       "Character Dialogue"
@@ -42,6 +44,8 @@
       "speed_optimized",
       "text"
     ],
+    "tags": ["Text-to-Text", "Image-to-Text"],
+    "free_tier": false,
     "recommended_for": [
       "High-volume metadata",
       "Summary Generation",
@@ -66,6 +70,8 @@
       "deep_thinking",
       "text"
     ],
+    "tags": ["Text-to-Text"],
+    "free_tier": false,
     "recommended_for": [
       "Complex Plot Mechanics",
       "Worldbuilding Architecture"
@@ -89,6 +95,8 @@
       "json_mode",
       "text"
     ],
+    "tags": ["Text-to-Text"],
+    "free_tier": false,
     "recommended_for": [
       "Storyboard Episode Breakdown",
       "Dialogue Logic Polish"
@@ -112,6 +120,8 @@
       "image_generation",
       "high_res_image"
     ],
+    "tags": ["Text-to-Image"],
+    "free_tier": false,
     "recommended_for": [
       "Thumbnail Generation",
       "Poster Art"
@@ -136,6 +146,8 @@
       "multilingual_audio",
       "high_fidelity"
     ],
+    "tags": ["Text-to-Speech"],
+    "free_tier": false,
     "recommended_for": [
       "Expressive Voiceover",
       "Character Lines"

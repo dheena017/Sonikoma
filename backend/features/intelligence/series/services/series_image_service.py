@@ -18,6 +18,7 @@ from PIL import Image
 from common.image import create_svg_placeholder
 from features.intelligence.series.repositories import ai_series_repo
 from features.intelligence.series.schemas import ChapterSession, AISeriesPanel
+from ai_engine.core.orchestrator import AIOrchestrator
 
 logger = logging.getLogger("sonikoma.services.series.image")
 
@@ -37,20 +38,22 @@ class SeriesImageService:
         return s_dir
 
     def build_pollinations_url(
-        self, prompt: str, width: int = 768, height: int = 1024, seed: Optional[int] = None, model: str = "flux-anime"
+        self, prompt: str, width: int = 768, height: int = 1024, seed: Optional[int] = None, model: Optional[str] = None
     ) -> str:
-        """Construct high-speed Pollinations.ai image URL supporting Flux-Anime, Flux.1, and SDXL Turbo."""
+        """Construct high-speed Pollinations.ai image URL supporting dynamic AI Core model cascade."""
         clean_prompt = prompt.replace("\n", " ").strip()
         # Cap prompt length to 600 chars — shorter prompts are faster to encode/transfer
         if len(clean_prompt) > 600:
             clean_prompt = clean_prompt[:600]
 
+        target_model = model or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
+
         encoded_prompt = urllib.parse.quote(clean_prompt)
         url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&nologo=true&enhance=false"
         if seed is not None:
             url += f"&seed={seed}"
-        if model:
-            url += f"&model={model}"
+        if target_model:
+            url += f"&model={target_model}"
         return url
 
     def build_svg_fallback(self, title: str, subtitle: str, color_hex: str = "#6366F1", width: int = 768, height: int = 1024) -> str:
@@ -93,7 +96,7 @@ class SeriesImageService:
         prompt: Optional[str] = None,
         width: int = 768,
         height: int = 1024,
-        model: str = "flux-anime",
+        model: Optional[str] = None,
         save_local: bool = True,
         force_regenerate: bool = False,
     ) -> Any:

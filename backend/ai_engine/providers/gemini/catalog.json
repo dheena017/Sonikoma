@@ -32,7 +32,12 @@
       "Complex Manga Scripting",
       "Agentic Comic Workflows",
       "High-Speed Analysis"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-3.6-flash",
@@ -62,7 +67,12 @@
     "recommended_for": [
       "Everyday Comic Tasks",
       "Fast Panel Narration"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-3.5-flash",
@@ -92,7 +102,12 @@
     "recommended_for": [
       "High-Volume Routine Processing",
       "Batch Chapter Ingestion"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-3.5-flash-lite",
@@ -122,7 +137,12 @@
     "recommended_for": [
       "Instant Bubble OCR Extraction",
       "Real-Time Panel Verification"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-3.1-flash-lite",
@@ -152,7 +172,12 @@
     "recommended_for": [
       "High-Frequency Lightweight Tasks",
       "Low Cost Multi-Volume Processing"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-3.1-pro-preview",
@@ -183,7 +208,12 @@
     "recommended_for": [
       "Complex Manga Architecture",
       "Vibe Coding & Logic Generation"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-3-flash-preview",
@@ -212,7 +242,12 @@
     "recommended_for": [
       "Early Access Multimodal Features",
       "Next-Gen Benchmarks"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-3.5-live-translate-preview",
@@ -236,7 +271,13 @@
     "recommended_for": [
       "Live Anime Dubbing",
       "Real-Time Multi-Language Chapter Narration"
-    ]
+    ],
+    "tags": [
+      "Translation",
+      "Speech-to-Text",
+      "Text-to-Speech"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-3.1-flash-live-preview",
@@ -259,7 +300,12 @@
     "recommended_for": [
       "Voice-First Manga Companion",
       "Live Dialogue Directing"
-    ]
+    ],
+    "tags": [
+      "Speech-to-Text",
+      "Text-to-Speech"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-3.1-flash-tts-preview",
@@ -282,7 +328,11 @@
     "recommended_for": [
       "Manga Character Voiceover",
       "Dynamic Emotional Narration"
-    ]
+    ],
+    "tags": [
+      "Text-to-Speech"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-3.1-flash-image",
@@ -307,7 +357,11 @@
     "recommended_for": [
       "High-Volume Manga Art",
       "Panel Scene Generation"
-    ]
+    ],
+    "tags": [
+      "Text-to-Image"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-3.1-flash-lite-image",
@@ -331,7 +385,11 @@
     "recommended_for": [
       "Real-Time Thumbnail Inpainting",
       "Interactive Art Previews"
-    ]
+    ],
+    "tags": [
+      "Text-to-Image"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-3-pro-image",
@@ -357,7 +415,11 @@
     "recommended_for": [
       "Manga Cover Art",
       "High-Resolution Double Page Spreads"
-    ]
+    ],
+    "tags": [
+      "Text-to-Image"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-2.5-flash-image",
@@ -381,7 +443,11 @@
     "recommended_for": [
       "Comic Visuals",
       "Panel Background Replacement"
-    ]
+    ],
+    "tags": [
+      "Text-to-Image"
+    ],
+    "free_tier": false
   },
   {
     "id": "veo-3.1-generate-preview",
@@ -407,7 +473,12 @@
     "recommended_for": [
       "Animated Manga Trailers",
       "Cinematic Scene Motion"
-    ]
+    ],
+    "tags": [
+      "Text-to-Video",
+      "Image-to-Video"
+    ],
+    "free_tier": false
   },
   {
     "id": "veo-3.1-lite-generate-preview",
@@ -431,7 +502,12 @@
     "recommended_for": [
       "Short Social Teasers",
       "Fast Video Previews"
-    ]
+    ],
+    "tags": [
+      "Text-to-Video",
+      "Image-to-Video"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-omni-flash",
@@ -455,7 +531,12 @@
     "recommended_for": [
       "Interactive Scene Editing",
       "Natural Language Video Iteration"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-2.5-flash",
@@ -487,7 +568,12 @@
       "Script Generation",
       "Panel OCR Extraction",
       "Fast YouTube SEO"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-2.5-flash-lite",
@@ -517,7 +603,12 @@
     "recommended_for": [
       "Low-Latency Bubble Detection",
       "High-Volume Metadata Parsing"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-2.5-pro",
@@ -548,7 +639,12 @@
     "recommended_for": [
       "Complex Plot Outlining",
       "Nuanced Character Dialogue"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-2.5-flash-native-audio-preview-12-2025",
@@ -572,7 +668,12 @@
     "recommended_for": [
       "Bidirectional Voice Directing",
       "Interactive Dialogue Studio"
-    ]
+    ],
+    "tags": [
+      "Speech-to-Text",
+      "Text-to-Speech"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-2.5-flash-preview-tts",
@@ -595,7 +696,11 @@
     "recommended_for": [
       "Fast Chapter Voiceover",
       "Cost-Efficient Speech Assistants"
-    ]
+    ],
+    "tags": [
+      "Text-to-Speech"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-2.5-pro-preview-tts",
@@ -619,7 +724,11 @@
     "recommended_for": [
       "Full Audiobook Narration",
       "Studio Quality Episode Podcasts"
-    ]
+    ],
+    "tags": [
+      "Text-to-Speech"
+    ],
+    "free_tier": false
   },
   {
     "id": "lyria-3-pro-preview",
@@ -643,7 +752,11 @@
     "recommended_for": [
       "Manga Theme Music",
       "Episodic BGM Generation"
-    ]
+    ],
+    "tags": [
+      "Audio-Music"
+    ],
+    "free_tier": false
   },
   {
     "id": "lyria-3-clip-preview",
@@ -667,7 +780,11 @@
     "recommended_for": [
       "Background Action SFX Beats",
       "Short Scene Jingles"
-    ]
+    ],
+    "tags": [
+      "Audio-Music"
+    ],
+    "free_tier": false
   },
   {
     "id": "lyria-realtime-exp",
@@ -691,7 +808,11 @@
     "recommended_for": [
       "Interactive Dynamic Soundtrack",
       "Live Stream Music Generation"
-    ]
+    ],
+    "tags": [
+      "Audio-Music"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-2.5-computer-use-preview-10-2025",
@@ -715,7 +836,12 @@
     "recommended_for": [
       "Automated Comic Scraping",
       "Browser UI Automation"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": false
   },
   {
     "id": "deep-research-preview-04-2026",
@@ -738,7 +864,12 @@
     "recommended_for": [
       "Lore & History Research",
       "Complex Script Continuity Audits"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": false
   },
   {
     "id": "deep-research-max-preview-04-2026",
@@ -762,7 +893,12 @@
     "recommended_for": [
       "Exhaustive Industry Research",
       "Comprehensive Lore Universe Compilation"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": false
   },
   {
     "id": "antigravity-preview-05-2026",
@@ -787,7 +923,12 @@
     "recommended_for": [
       "Autonomous Coding & Architecture",
       "End-to-End Pipeline Execution"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-embedding-2-preview",
@@ -816,7 +957,11 @@
     "recommended_for": [
       "Multimodal Comic RAG Search",
       "Panel Similarity Matching"
-    ]
+    ],
+    "tags": [
+      "Embedding"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-embedding-001",
@@ -843,7 +988,11 @@
     "recommended_for": [
       "Text Semantic Search",
       "Tag Indexing"
-    ]
+    ],
+    "tags": [
+      "Embedding"
+    ],
+    "free_tier": true
   },
   {
     "id": "gemini-robotics-er-2-preview",
@@ -867,7 +1016,12 @@
     "recommended_for": [
       "Spatial Layout Planning",
       "Physical Interaction Modeling"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": false
   },
   {
     "id": "gemini-robotics-er-1.6-preview",
@@ -890,7 +1044,12 @@
     "recommended_for": [
       "Instrument Reading",
       "Physical Space Planning"
-    ]
+    ],
+    "tags": [
+      "Text-to-Text",
+      "Image-to-Text"
+    ],
+    "free_tier": false
   },
   {
     "id": "deepl-pro",
@@ -913,6 +1072,10 @@
     "recommended_for": [
       "Speech Bubble Translation",
       "Manga Localization"
-    ]
+    ],
+    "tags": [
+      "Translation"
+    ],
+    "free_tier": false
   }
 ]

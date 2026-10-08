@@ -244,9 +244,9 @@ class AISeriesProject(BaseModel):
     video_mode: Optional[str] = Field("image_to_video")
     art_style: Union[SeriesArtStyle, str] = Field(SeriesArtStyle.MANHWA_ACTION_HUNTER)
     audio_language: str = Field("ja-JP")
-    image_model: str = Field("flux-anime")
-    storyboard_model: Optional[str] = Field("gemini-2.5-flash")
-    voice_model: Optional[str] = Field("edge-tts")
+    image_model: Optional[str] = Field(None)
+    storyboard_model: Optional[str] = Field(None)
+    voice_model: Optional[str] = Field(None)
     cast: List[CharacterDNA] = Field(default_factory=list)
     character_cast: List[CharacterDNA] = Field(default_factory=list)
     world_bible: Dict[str, Any] = Field(default_factory=dict)
@@ -281,6 +281,24 @@ class AISeriesProject(BaseModel):
         elif not self.synopsis and self.logline:
             self.synopsis = self.logline
         self.total_episodes = self.total_sessions * self.chapters_per_session
+        if not self.image_model:
+            try:
+                from ai_engine.core.orchestrator import AIOrchestrator
+                self.image_model = AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
+            except Exception:
+                self.image_model = "flux-anime"
+        if not self.storyboard_model:
+            try:
+                from ai_engine.core.orchestrator import AIOrchestrator
+                self.storyboard_model = AIOrchestrator.resolve_model_for_task("storyboard_narrative", "primary")
+            except Exception:
+                self.storyboard_model = "gemini-2.5-flash"
+        if not self.voice_model:
+            try:
+                from ai_engine.core.orchestrator import AIOrchestrator
+                self.voice_model = AIOrchestrator.resolve_model_for_task("speech_synthesis", "primary")
+            except Exception:
+                self.voice_model = "edge-tts-neural"
 
 
 class CreateAISeriesRequest(BaseModel):
@@ -292,9 +310,9 @@ class CreateAISeriesRequest(BaseModel):
     format_type: Union[SeriesFormatType, str] = Field(SeriesFormatType.MANHWA)
     medium_type: Optional[str] = Field("manhwa")
     art_style: Union[SeriesArtStyle, str] = Field(SeriesArtStyle.MANHWA_ACTION_HUNTER)
-    image_model: Optional[str] = Field("flux-anime")
-    storyboard_model: Optional[str] = Field("gemini-2.5-flash")
-    voice_model: Optional[str] = Field("edge-tts")
+    image_model: Optional[str] = Field(None)
+    storyboard_model: Optional[str] = Field(None)
+    voice_model: Optional[str] = Field(None)
     video_mode: Optional[str] = Field("image_to_video")
     total_sessions: int = Field(1, ge=1, le=5)
     chapters_per_session: int = Field(5, ge=1, le=25)

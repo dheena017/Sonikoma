@@ -19,6 +19,8 @@
       "emotion_control",
       "tts"
     ],
+    "tags": ["Text-to-Speech"],
+    "free_tier": false,
     "recommended_for": [
       "Character Voice Acting",
       "Studio Narration"
@@ -44,6 +46,8 @@
       "anime_intonation",
       "japanese_korean_voice"
     ],
+    "tags": ["Text-to-Speech"],
+    "free_tier": true,
     "recommended_for": [
       "Character Persona Voice Dubbing",
       "Zero-Shot Character Acting"
@@ -69,6 +73,8 @@
       "expressive_prosody",
       "whisper_shout_control"
     ],
+    "tags": ["Text-to-Speech"],
+    "free_tier": true,
     "recommended_for": [
       "Intense Battle Shouts",
       "Emotional Monologues"
@@ -94,6 +100,8 @@
       "free_tier",
       "high_reliability"
     ],
+    "tags": ["Text-to-Speech"],
+    "free_tier": true,
     "recommended_for": [
       "Rapid Speech Synthesis",
       "Full Episode Dubbing at Zero Cost"

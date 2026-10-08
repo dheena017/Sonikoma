@@ -12,6 +12,8 @@
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
     "price_per_image": 0.0,
+    "free_tier": true,
+    "tags": ["Text-to-Image"],
     "speed_rating": "Ultra Fast (~3s)",
     "capabilities": [
       "image_generation",
@@ -37,6 +39,8 @@
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
     "price_per_image": 0.0,
+    "free_tier": true,
+    "tags": ["Text-to-Image"],
     "speed_rating": "Fast (~5s)",
     "capabilities": [
       "image_generation",
@@ -62,6 +66,8 @@
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
     "price_per_image": 0.0,
+    "free_tier": true,
+    "tags": ["Text-to-Image"],
     "speed_rating": "Balanced (~15s)",
     "capabilities": [
       "image_generation",
@@ -88,6 +94,8 @@
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
     "price_per_image": 0.0,
+    "free_tier": true,
+    "tags": ["Text-to-Image"],
     "speed_rating": "Balanced (~15s)",
     "capabilities": [
       "image_generation",
@@ -113,6 +121,8 @@
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
     "price_per_image": 0.0,
+    "free_tier": true,
+    "tags": ["Text-to-Image"],
     "speed_rating": "Standard (~20s)",
     "capabilities": [
       "image_generation",
@@ -138,6 +148,8 @@
     "prompt_price_per_1m": 0.0,
     "completion_price_per_1m": 0.0,
     "price_per_image": 0.0,
+    "free_tier": true,
+    "tags": ["Text-to-Image"],
     "speed_rating": "Standard (~20s)",
     "capabilities": [
       "image_generation",

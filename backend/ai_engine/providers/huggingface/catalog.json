@@ -19,6 +19,8 @@
       "anime_fidelity",
       "fast_steps"
     ],
+    "tags": ["Text-to-Image"],
+    "free_tier": false,
     "recommended_for": [
       "YouTube Thumbnail Base Artwork",
       "Poster Design"

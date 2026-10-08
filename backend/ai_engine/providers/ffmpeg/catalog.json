@@ -19,6 +19,8 @@
       "filtering",
       "concatenation"
     ],
+    "tags": ["Video-Processing"],
+    "free_tier": true,
     "recommended_for": [
       "Multi-Track Audio Mixing",
       "SubRip Subtitle Burning",

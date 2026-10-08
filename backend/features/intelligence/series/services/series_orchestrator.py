@@ -37,6 +37,7 @@ from features.intelligence.series.repositories import ai_series_repo
 from features.intelligence.series.services.series_memory_engine import series_memory_engine
 from features.intelligence.series.services.series_image_service import series_image_service
 from ai_engine.skills.registry import registry
+from ai_engine.core.orchestrator import AIOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -117,12 +118,13 @@ class SeriesOrchestrator:
         self.active_jobs: Dict[str, Dict[str, Any]] = {}
 
     def _build_pollinations_url(
-        self, prompt: str, width: int = 768, height: int = 1024, seed: Optional[int] = None, model: str = "flux-anime"
+        self, prompt: str, width: int = 768, height: int = 1024, seed: Optional[int] = None, model: Optional[str] = None
     ) -> str:
-        """Construct free, high-speed Pollinations.ai image URL supporting Flux-Anime, Flux.1, and SDXL Turbo."""
+        """Construct free, high-speed Pollinations.ai image URL supporting dynamic AI Core model cascade."""
         from ai_engine.providers import PollinationsProvider
+        active_model = model or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
         return PollinationsProvider.build_url(
-            prompt=prompt, width=width, height=height, seed=seed, model=model
+            prompt=prompt, width=width, height=height, seed=seed, model=active_model
         )
 
     async def create_series_project(self, req: CreateAISeriesRequest) -> AISeriesProject:
@@ -132,16 +134,16 @@ class SeriesOrchestrator:
         # 1. Generate cast and arc structure using format-specific AI skill
         cast, world_bible, sessions = await self._architect_series_arc(req, series_id)
 
-        # 2. Construct Project Entity
+        # 2. Construct Project Entity with dynamic AI Core models
         project = AISeriesProject(
             series_id=series_id,
             title=req.title,
             logline=req.logline,
             format_type=req.format_type,
             art_style=req.art_style,
-            image_model=getattr(req, "image_model", "flux-anime") or "flux-anime",
-            storyboard_model=getattr(req, "storyboard_model", "gemini-2.5-flash") or "gemini-2.5-flash",
-            voice_model=getattr(req, "voice_model", "edge-tts") or "edge-tts",
+            image_model=getattr(req, "image_model", None) or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary"),
+            storyboard_model=getattr(req, "storyboard_model", None) or AIOrchestrator.resolve_model_for_task("storyboard_narrative", "primary"),
+            voice_model=getattr(req, "voice_model", None) or AIOrchestrator.resolve_model_for_task("speech_synthesis", "primary"),
             total_sessions=req.total_sessions,
             chapters_per_session=req.chapters_per_session,
             panels_per_chapter=getattr(req, "panels_per_chapter", 8) or 8,
@@ -184,10 +186,11 @@ class SeriesOrchestrator:
         panel_count: int = 8,
         genre: str = "",
         logline: str = "",
-        image_model: str = "flux-anime",
+        image_model: Optional[str] = None,
         suggested_scene_prompts: Optional[List[Any]] = None,
     ) -> List[AISeriesPanel]:
         """Synthesize authentic 2D artwork panels, Pollinations URLs, dialogue bubbles, and camera directions."""
+        actual_image_model = image_model or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
         art_style_key = art_style.value if hasattr(art_style, "value") else str(art_style)
         style_prefix = ART_STYLE_PROMPT_PREFIXES.get(
             art_style_key,
@@ -431,7 +434,7 @@ class SeriesOrchestrator:
             s_num = int(session_number) if str(session_number).isdigit() else 1
             c_num = int(chapter_number) if str(chapter_number).isdigit() else 1
             seed = (s_num * 10000) + (c_num * 333) + (p_idx * 47)
-            image_url = self._build_pollinations_url(enhanced_prompt, width=w, height=h, seed=seed, model=image_model)
+            image_url = self._build_pollinations_url(enhanced_prompt, width=w, height=h, seed=seed, model=actual_image_model)
 
             # Interactive Vector Speech Bubbles (Overlaid via SVG on frontend canvas)
             bubbles: List[InteractiveSpeechBubble] = []
@@ -587,7 +590,7 @@ class SeriesOrchestrator:
                 panels_per_chapter=getattr(req, "panels_per_chapter", 8) or 8,
                 pacing=req.pacing.value if hasattr(req.pacing, "value") else str(req.pacing),
                 dialogue_density=req.dialogue_density.value if hasattr(req.dialogue_density, "value") else str(req.dialogue_density),
-                model=getattr(req, "storyboard_model", None) or "gemini-2.5-flash",
+                model=getattr(req, "storyboard_model", None) or AIOrchestrator.resolve_model_for_task("storyboard_narrative", "primary"),
             )
             if hasattr(raw_output, "model_dump"):
                 ai_data = raw_output.model_dump()
@@ -741,7 +744,7 @@ class SeriesOrchestrator:
                     panel_count=panels_per_chapter,
                     genre=getattr(req, "genre", ""),
                     logline=getattr(req, "logline", ""),
-                    image_model=getattr(req, "image_model", "flux-anime") or "flux-anime",
+                    image_model=getattr(req, "image_model", None) or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary"),
                     suggested_scene_prompts=suggested_scenes,
                 )
 
@@ -793,7 +796,7 @@ class SeriesOrchestrator:
         hero = project.cast[0] if project.cast else None
         hero_name = hero.name if hero else "Character"
 
-        model_to_use = image_model or getattr(project, "image_model", "flux-anime") or "flux-anime"
+        model_to_use = image_model or getattr(project, "image_model", None) or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
         if image_model:
             project.image_model = image_model
             ai_series_repo.update_project(project)
