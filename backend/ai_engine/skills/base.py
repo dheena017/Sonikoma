@@ -40,9 +40,6 @@ from ai_engine.skills.utils import (
     SkillLogger
 )
 
-# Import fallbacks
-from ai_engine.skills.coordinator import FallbackCoordinator
-
 logger = logging.getLogger("sonikoma.skills.base")
 
 

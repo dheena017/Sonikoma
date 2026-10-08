@@ -24,53 +24,6 @@ from ai_engine.skills.utils import resolve_api_key
 logger = logging.getLogger("sonikoma.skills.coordinator")
 
 
-class FallbackCoordinator:
-    """Dynamic fallback provider for gracefully handling API failures."""
-
-    @staticmethod
-    def get_programmatic_fallback(skill_name: str, **kwargs) -> dict:
-        if skill_name == "panel_analysis":
-            return {
-                "speech_text": "Cinematic panel capture.",
-                "sfx": "[Impact]",
-                "duration": None,
-                "motion_type": "",
-                "visual_description": "Static panel segment rendering."
-            }
-        elif skill_name == "translation":
-            return {"translated_text": kwargs.get("text", "Text translation unavailable."), "accuracy_rating": 0.0}
-        elif skill_name == "storyboard_narrative":
-            return {
-                "panels": [
-                    {"speech_text": f"Chapter segment recap: {kwargs.get('title', 'Untitled')}.", "sfx": "[Sound]", "motion_type": ""}
-                    for _ in range(kwargs.get("active_slices_count", 5))
-                ]
-            }
-        elif skill_name == "video_seo_metadata":
-            title = kwargs.get("title", "Webtoon Story Recap")
-            genre = kwargs.get("genre", "Fantasy Action")
-            return {
-                "youtube_title": f"{title} [Official Recap]",
-                "youtube_description": f"Full recap of {title}. Watch the ultimate battle unfold step by step!",
-                "tags": [genre.lower(), "webtoon recap", "manhwa recap", "anime recap"],
-                "timestamps": ["00:00 - Introduction & Awakening", "01:30 - The Climax Battle", "03:45 - Ending Hook"]
-            }
-        elif skill_name in ("series_arc_director", "series_arc_manhwa", "series_arc_comic", "series_arc_anime"):
-            return {
-                "title": kwargs.get("title", "Webtoon Series"),
-                "logline": kwargs.get("logline", "An epic adventure unfolds."),
-                "episodes": [
-                    {"episode": 1, "hook": "The Awakening", "pacing": "rising", "cliffhanger": "A dark power emerges"}
-                ]
-            }
-        elif skill_name == "script_dramatization":
-            return {
-                "dramatized_scripts": [
-                    "Stop right there! You have no idea what power you're messing with!",
-                    "I am the sovereign of the dark realm, and your time has expired."
-                ]
-            }
-        return {"success": False, "source": "fallback:error"}
 
 
 async def execute_provider_call(
@@ -202,18 +155,14 @@ async def execute_provider_call(
                 )
             else:
                 raise RuntimeError(f"Gemini API request failed for model '{effective_model_id}': {gemini_err}")
-
         if not response:
-            skill_name = getattr(skill, "name", "ai_capability") if skill else "ai_capability"
-            fallback_payload = FallbackCoordinator.get_programmatic_fallback(skill_name, **kwargs)
-            fallback_payload.setdefault("success", False)
-            fallback_payload.setdefault("source", "fallback:error")
-            fallback_payload["error"] = f"Gemini returned an empty response for model '{effective_model_id}'."
-            raw_text = json.dumps(fallback_payload)
             if skill:
                 skill.last_input_tokens = 0
                 skill.last_output_tokens = 0
-            return raw_text
+            return json.dumps({
+                "success": False,
+                "error": f"Gemini returned an empty response for model '{effective_model_id}'."
+            })
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
         raw_text = ""
