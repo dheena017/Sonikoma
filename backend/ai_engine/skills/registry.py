@@ -57,8 +57,6 @@ class SkillRegistry:
 
         loaded_count = 0
         for filepath in md_files:
-            if os.path.basename(filepath).lower().startswith("readme"):
-                continue
             try:
                 skill = BaseAISkill(filepath)
                 if skill.name:

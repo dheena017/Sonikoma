@@ -155,14 +155,18 @@ async def execute_provider_call(
                 )
             else:
                 raise RuntimeError(f"Gemini API request failed for model '{effective_model_id}': {gemini_err}")
+
         if not response:
+            skill_name = getattr(skill, "name", "ai_capability") if skill else "ai_capability"
+            fallback_payload = FallbackCoordinator.get_programmatic_fallback(skill_name, **kwargs)
+            fallback_payload.setdefault("success", False)
+            fallback_payload.setdefault("source", "fallback:error")
+            fallback_payload["error"] = f"Gemini returned an empty response for model '{effective_model_id}'."
+            raw_text = json.dumps(fallback_payload)
             if skill:
                 skill.last_input_tokens = 0
                 skill.last_output_tokens = 0
-            return json.dumps({
-                "success": False,
-                "error": f"Gemini returned an empty response for model '{effective_model_id}'."
-            })
+            return raw_text
 
         elapsed_ms = int((time.monotonic() - start_time) * 1000)
         raw_text = ""
