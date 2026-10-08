@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import http from "http";
@@ -63,6 +63,23 @@ if (!backendPortStr) {
   );
   logger.error("Please configure them in your .env file.");
   process.exit(1);
+}
+
+function resolvePythonPath() {
+  if (process.env.PYTHON_PATH) return process.env.PYTHON_PATH;
+  const venvPython =
+    process.platform === "win32"
+      ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
+      : path.resolve(__dirname, "../.venv/bin/python");
+  if (fs.existsSync(venvPython)) {
+    try {
+      execSync(`"${venvPython}" --version`, { stdio: "ignore" });
+      return venvPython;
+    } catch {
+      // venv is blocked or unusable (e.g. Windows Application Control policy)
+    }
+  }
+  return process.platform === "win32" ? "python" : "python3";
 }
 const port = parseInt(backendPortStr, 10);
 if (isNaN(port)) {
@@ -335,10 +352,7 @@ async function restartBackend(changedFile) {
     });
   }
 
-  const pythonPath =
-    process.platform === "win32"
-      ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
-      : "python3";
+  const pythonPath = resolvePythonPath();
   const backendDir = path.resolve(__dirname, "../backend");
 
   pyProcess = spawn(pythonPath, ["main.py"], {
@@ -433,10 +447,7 @@ async function start() {
       );
     } else {
       logger.info(`Backend is not running. Launching backend in background...`);
-      const pythonPath =
-        process.platform === "win32"
-          ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
-          : "python3";
+      const pythonPath = resolvePythonPath();
       const backendDir = path.resolve(__dirname, "../backend");
 
       pyProcess = spawn(pythonPath, ["main.py"], {

@@ -89,10 +89,24 @@ if (!geminiApiKey) {
   process.exit(1);
 }
 
-const pythonPath =
-  process.platform === "win32"
-    ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
-    : "python3";
+function resolvePythonPath() {
+  if (process.env.PYTHON_PATH) return process.env.PYTHON_PATH;
+  const venvPython =
+    process.platform === "win32"
+      ? path.resolve(__dirname, "../.venv/Scripts/python.exe")
+      : path.resolve(__dirname, "../.venv/bin/python");
+  if (fs.existsSync(venvPython)) {
+    try {
+      execSync(`"${venvPython}" --version`, { stdio: "ignore" });
+      return venvPython;
+    } catch {
+      // venv is blocked or unusable (e.g. Windows Application Control policy)
+    }
+  }
+  return process.platform === "win32" ? "python" : "python3";
+}
+
+const pythonPath = resolvePythonPath();
 const backendDir = path.resolve(__dirname, "../backend");
 const projectRootDir = path.resolve(__dirname, "../");
 const pythonImportRoot = projectRootDir;
