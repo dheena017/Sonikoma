@@ -23,7 +23,6 @@ from app.core.config import (
     ANTHROPIC_API_KEY,
     HUGGINGFACE_API_KEY,
     GEMINI_MODEL_PRIMARY,
-    GEMINI_FALLBACK_MODELS,
 )
 from database.engine import get_db_connection
 from features.profile.services.credit_service import get_available_credits, get_credit_transactions

@@ -51,7 +51,6 @@ from app.core.config import (
     ai_initialized,
     genai_client,
     GEMINI_MODEL_PRIMARY,
-    GEMINI_FALLBACK_MODELS,
     call_gemini_with_retry,
 )
 from ai_engine.core.hub import AIHub
@@ -128,7 +127,7 @@ Return STRICT JSON:
 
     # 1. Try Gemini
     if ai_initialized and genai_client:
-        models_to_try = [model] if model else [GEMINI_MODEL_PRIMARY] + [m for m in GEMINI_FALLBACK_MODELS if m != GEMINI_MODEL_PRIMARY]
+        models_to_try = [model or GEMINI_MODEL_PRIMARY]
         for m_name in models_to_try:
             if not m_name:
                 continue

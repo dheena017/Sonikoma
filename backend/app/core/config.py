@@ -130,13 +130,13 @@ except ValueError:
 # Models directory setup
 MODELS_DIR = os.path.join(PROJECT_ROOT, "data", "models")
 
-# AI Model Configuration
+# AI Model Configuration — Unified single Gemini model
 GEMINI_MODEL_PRIMARY: str = os.getenv("GEMINI_MODEL_PRIMARY", "gemini-2.5-flash")
 _fallback_env = os.getenv("GEMINI_FALLBACK_MODELS", "")
 GEMINI_FALLBACK_MODELS: list = (
     [m.strip() for m in _fallback_env.split(",") if m.strip()]
     if _fallback_env
-    else ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.7-flash", "gemini-2.5-flash"]
+    else [GEMINI_MODEL_PRIMARY]
 )
 
 # ── Gemini Client Initialization (Lazy-Loaded to reduce startup time) ─────────

@@ -49,7 +49,6 @@ from app.core.config import (
     ai_initialized,
     genai_client,
     GEMINI_MODEL_PRIMARY,
-    GEMINI_FALLBACK_MODELS,
     call_gemini_with_retry,
 )
 
@@ -124,9 +123,7 @@ class AutonomousAgentWorkflow:
         """Calls real AI LLMs with multi-provider fallback (Gemini API -> AIHub / Multi-Provider)."""
         # 1. Try Google Gemini API across primary and fallback models
         if ai_initialized and genai_client:
-            models_to_try = [GEMINI_MODEL_PRIMARY] + [
-                m for m in GEMINI_FALLBACK_MODELS if m != GEMINI_MODEL_PRIMARY
-            ]
+            models_to_try = [GEMINI_MODEL_PRIMARY]
             for model_name in models_to_try:
                 async def _invoke():
                     full_p = f"{system_instruction}\n\n{prompt}" if system_instruction else prompt

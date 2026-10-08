@@ -555,7 +555,7 @@ class YouTubeService:
         """
         import json
         import re
-        from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+        from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY
 
         prompt_text = (prompt or "").strip()
         videos = videos or []
@@ -706,7 +706,7 @@ class YouTubeService:
         """
         import json
         import re
-        from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY, GEMINI_FALLBACK_MODELS
+        from app.core.config import call_gemini_with_retry, genai_client, ai_initialized, GEMINI_MODEL_PRIMARY
 
         v_title = (title or "Epic Webtoon Action Recap").strip()
         v_synopsis = (synopsis or "").strip()

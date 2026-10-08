@@ -15,7 +15,6 @@ from app.core.config import (
     ai_initialized,
     genai_client,
     GEMINI_MODEL_PRIMARY,
-    GEMINI_FALLBACK_MODELS,
     call_gemini_with_retry,
 )
 from ai_engine.core.hub import AIHub
@@ -54,9 +53,7 @@ class CreativeTranslationService:
     async def _call_llm(self, prompt: str, system_instruction: Optional[str] = None) -> Optional[str]:
         """Calls Gemini API across fallback models, then falls back to AIHub."""
         if ai_initialized and genai_client:
-            models_to_try = [GEMINI_MODEL_PRIMARY] + [
-                m for m in GEMINI_FALLBACK_MODELS if m != GEMINI_MODEL_PRIMARY
-            ]
+            models_to_try = [GEMINI_MODEL_PRIMARY]
             for model_name in models_to_try:
                 async def _invoke():
                     full_p = f"{system_instruction}\n\n{prompt}" if system_instruction else prompt
