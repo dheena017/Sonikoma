@@ -12,7 +12,7 @@ import time
 import json
 import logging
 import asyncio
-from typing import Any, Optional, Type
+from typing import Any, Optional, Type, Union, List
 from pydantic import BaseModel
 
 from app.core.config import ai_initialized, call_gemini_with_retry, genai_client
@@ -104,7 +104,7 @@ class BaseAISkill:
     async def execute(
         self,
         model: Optional[str] = None,
-        image_bytes: Optional[bytes] = None,
+        image_bytes: Optional[Union[bytes, List[bytes]]] = None,
         api_key: Optional[str] = None,
         user_keys: Optional[dict] = None,
         user_id: Optional[str] = None,

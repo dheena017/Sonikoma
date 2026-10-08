@@ -73,7 +73,7 @@ async def compile_video_from_panels(
 
     # Look up database panels if project_id is available to ensure existing audio is discovered
     db_panels_map: Dict[str, Dict[str, Any]] = {}
-    if project_id and not str(project_id).startswith("job_"):
+    if project_id and not project_id.startswith("job_"):
         try:
             db_proj = get_project(project_id) or get_project_by_slug(project_id)
             if db_proj and isinstance(db_proj.get("panels"), list):
@@ -152,6 +152,7 @@ async def compile_video_from_panels(
         audio_path = os.path.join(temp_dir, f"{series_slug}_ep{ep_num}_p{panel_id}_audio_{uuid.uuid4().hex[:6]}.mp3")
         actual_duration = suggested_duration
         has_audio = False
+        duration: float = float(suggested_duration)
 
         # Step 1: Re-use pre-synthesized audio if present
         if audio_target and isinstance(audio_target, str) and audio_target.strip():

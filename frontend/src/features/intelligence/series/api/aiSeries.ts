@@ -57,6 +57,7 @@ export interface AISeriesPanel {
   panel_index: number;
   order_index?: number;
   image_url: string;
+  image_model?: string;
   prompt: string;
   negative_prompt?: string;
   camera_angle?: string;

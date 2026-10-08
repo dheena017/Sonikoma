@@ -47,8 +47,9 @@ class SeriesMemoryEngine:
         self._init_tables()
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=30.0)
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL;")
         return conn
 
     def _init_tables(self) -> None:
@@ -114,39 +115,41 @@ class SeriesMemoryEngine:
 
     def get_continuity(self, series_id: str) -> FranchiseContinuityMemory:
         """Retrieve persistent canon continuity state for a series."""
+        row = None
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM series_continuity_memory WHERE series_id = ?", (series_id,))
             row = cursor.fetchone()
-            if not row:
-                mem = FranchiseContinuityMemory(series_id=series_id)
-                self.save_continuity(mem)
-                return mem
 
-            row_keys = row.keys()
-            def _parse_json(col_name: str, fallback_col: Optional[str] = None, default_val: Any = None):
-                if col_name in row_keys and row[col_name]:
-                    try:
-                        return json.loads(row[col_name])
-                    except Exception:
-                        pass
-                if fallback_col and fallback_col in row_keys and row[fallback_col]:
-                    try:
-                        return json.loads(row[fallback_col])
-                    except Exception:
-                        pass
-                return default_val
+        if not row:
+            mem = FranchiseContinuityMemory(series_id=series_id)
+            self.save_continuity(mem)
+            return mem
 
-            return FranchiseContinuityMemory(
-                series_id=row["series_id"],
-                active_characters=_parse_json("active_characters", "character_states", {}),
-                world_rules=_parse_json("world_rules", "canon_facts", []),
-                lore_revelations=_parse_json("lore_revelations", None, []),
-                unresolved_threads=_parse_json("unresolved_threads", None, []),
-                resolved_threads=_parse_json("resolved_threads", None, []),
-                canonical_locations=_parse_json("canonical_locations", "recurring_motifs", {}),
-                updated_at=datetime.fromisoformat(row["last_synced_at"]) if ("last_synced_at" in row_keys and row["last_synced_at"]) else datetime.utcnow(),
-            )
+        row_keys = row.keys()
+        def _parse_json(col_name: str, fallback_col: Optional[str] = None, default_val: Any = None):
+            if col_name in row_keys and row[col_name]:
+                try:
+                    return json.loads(row[col_name])
+                except Exception:
+                    pass
+            if fallback_col and fallback_col in row_keys and row[fallback_col]:
+                try:
+                    return json.loads(row[fallback_col])
+                except Exception:
+                    pass
+            return default_val
+
+        return FranchiseContinuityMemory(
+            series_id=row["series_id"],
+            active_characters=_parse_json("active_characters", "character_states", {}),
+            world_rules=_parse_json("world_rules", "canon_facts", []),
+            lore_revelations=_parse_json("lore_revelations", None, []),
+            unresolved_threads=_parse_json("unresolved_threads", None, []),
+            resolved_threads=_parse_json("resolved_threads", None, []),
+            canonical_locations=_parse_json("canonical_locations", "recurring_motifs", {}),
+            updated_at=datetime.fromisoformat(row["last_synced_at"]) if ("last_synced_at" in row_keys and row["last_synced_at"]) else datetime.utcnow(),
+        )
 
     get_continuity_memory = get_continuity
 
@@ -284,23 +287,25 @@ class SeriesMemoryEngine:
 
     def get_creator_style(self, creator_id: str = "default_creator") -> CreatorStyleProfile:
         """Fetch creator's global learned aesthetic profile."""
+        row = None
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM creator_style_profiles WHERE creator_id = ?", (creator_id,))
             row = cursor.fetchone()
-            if not row:
-                profile = CreatorStyleProfile(creator_id=creator_id)
-                self.save_creator_style(profile)
-                return profile
 
-            return CreatorStyleProfile(
-                creator_id=row["creator_id"],
-                preferred_art_styles=json.loads(row["preferred_art_styles"] or "[]"),
-                pacing_bias=row["pacing_bias"] or "balanced",
-                dialogue_density_bias=row["dialogue_density_bias"] or "medium",
-                favorite_genres=json.loads(row["favorite_genres"] or "[]"),
-                negative_prompt_additions=json.loads(row["negative_prompt_additions"] or "[]"),
-            )
+        if not row:
+            profile = CreatorStyleProfile(creator_id=creator_id)
+            self.save_creator_style(profile)
+            return profile
+
+        return CreatorStyleProfile(
+            creator_id=row["creator_id"],
+            preferred_art_styles=json.loads(row["preferred_art_styles"] or "[]"),
+            pacing_bias=row["pacing_bias"] or "balanced",
+            dialogue_density_bias=row["dialogue_density_bias"] or "medium",
+            favorite_genres=json.loads(row["favorite_genres"] or "[]"),
+            negative_prompt_additions=json.loads(row["negative_prompt_additions"] or "[]"),
+        )
 
     get_style_profile = get_creator_style
 

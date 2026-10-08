@@ -25,10 +25,14 @@ class SkillRegistry:
             self.load_skills()
         
         alias_map = {
-            "series_arc_manhwa": "series_arc_director",
-            "series_arc_comic": "series_arc_director",
-            "series_arc_anime": "series_arc_director",
+            "series_arc_director": "series_arc_manhwa",
+            "manga": "series_arc_comic",
+            "comic": "series_arc_comic",
+            "anime": "series_arc_anime",
+            "manhwa": "series_arc_manhwa",
         }
+
+
         resolved = alias_map.get(name, name)
         if resolved not in self._skills:
             if name in self._skills:

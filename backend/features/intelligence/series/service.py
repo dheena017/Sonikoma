@@ -10,6 +10,8 @@ vocal dubbing, and continuity memory.
 from features.intelligence.series.services.series_orchestrator import (
     SeriesOrchestrator,
     series_orchestrator,
+)
+from features.intelligence.series.styles import (
     ART_STYLE_PROMPT_PREFIXES,
     KINETIC_MOTION_PRESETS,
 )

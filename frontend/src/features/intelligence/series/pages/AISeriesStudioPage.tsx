@@ -71,6 +71,24 @@ interface StudioPanelImageProps {
   onReload?: () => void | Promise<void>;
 }
 
+export const formatModelBadge = (m?: string): string => {
+  if (!m) return "🎨 FLUX Anime";
+  const lower = m.toLowerCase();
+  if (lower.includes("flux.1") || lower.includes("schnell")) return "⚡ FLUX.1 Schnell";
+  if (lower.includes("flux-anime") || lower === "flux_anime") return "🎨 FLUX Anime";
+  if (lower.includes("flux-realism")) return "📸 FLUX Real";
+  if (lower.includes("flux-pro")) return "✨ FLUX Pro";
+  if (lower.includes("flux")) return "⚡ FLUX";
+  if (lower.includes("sdxl") || lower.includes("stable-diffusion-xl")) return "🖼️ SDXL";
+  if (lower.includes("stable-diffusion") || lower.includes("diffusers")) return "🖼️ Stable Diffusion";
+  if (lower.includes("turbo")) return "⚡ Turbo";
+  if (lower.includes("dall-e")) return "🎨 DALL-E 3";
+  if (lower.includes("midjourney")) return "🌌 Midjourney";
+  if (lower.includes("gemini")) return "✨ Gemini Vision";
+  const clean = m.includes("/") ? m.split("/").pop() || m : m;
+  return `⚡ ${clean}`;
+};
+
 const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
   src,
   alt,
@@ -85,16 +103,7 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
   onOpenInspector,
   onReload,
 }) => {
-  // Short display names for AI model watermark
-  const MODEL_LABELS: Record<string, string> = {
-    turbo: "⚡ Turbo",
-    flux: "⚡ Flux",
-    "flux-anime": "🎨 Flux Anime",
-    "flux-realism": "📸 Flux Real",
-    "stable-diffusion": "🖼️ SDXL",
-    sana: "🌟 Sana",
-  };
-  const modelLabel = imageModel ? (MODEL_LABELS[imageModel] ?? imageModel) : "🎨 Flux Anime";
+  const modelLabel = formatModelBadge(imageModel);
 
   const [imageState, setImageState] = useState<"loading" | "loaded" | "error">(
     src ? "loading" : "error"
@@ -399,6 +408,16 @@ const StudioPanelImage: React.FC<StudioPanelImageProps> = ({
           setIsLocalReloading(false);
         }}
       />
+
+      {/* ── AI Smart Routing Model Badge Displayed Directly on Image ── */}
+      {imageState === "loaded" && (
+        <div className="absolute top-3 right-3 z-20 pointer-events-none transition-all duration-300">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold text-white shadow-xl transition-all">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span>{modelLabel}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -934,6 +953,32 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                 <span>Bubbles {showSpeechBubbles ? "ON" : "OFF"}</span>
               </button>
             </div>
+
+            {/* Active AI Smart Routing Pipeline Indicator */}
+            {project.image_model && (
+              <div className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#141525] border border-cyan-500/25 text-[10px] font-mono shadow-sm">
+                <span className="flex items-center gap-1 text-cyan-300 font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  {formatModelBadge(project.image_model)}
+                </span>
+                {project.storyboard_model && (
+                  <>
+                    <span className="text-neutral-600">•</span>
+                    <span className="text-neutral-400 truncate max-w-[120px]" title={project.storyboard_model}>
+                      {formatModelBadge(project.storyboard_model)}
+                    </span>
+                  </>
+                )}
+                {project.voice_model && project.voice_model !== "muted" && (
+                  <>
+                    <span className="text-neutral-600">•</span>
+                    <span className="text-emerald-400 truncate max-w-[100px]" title={project.voice_model}>
+                      🎙️ {project.voice_model.includes("eleven") ? "ElevenLabs" : "Edge-TTS"}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right: Session and Episode / Chapter Selector */}
@@ -1104,7 +1149,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                       shotIndex={idx}
                       cameraAngle={panel.camera_angle}
                       prompt={panel.prompt}
-                      imageModel={project?.image_model}
+                      imageModel={panel.image_model || project?.image_model}
                       isRegenerating={
                         regeneratingPanelIdx === idx ||
                         (isRegeneratingPanel && isSelected) ||
@@ -1217,7 +1262,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                         shotIndex={idx}
                         cameraAngle={panel.camera_angle}
                         prompt={panel.prompt}
-                        imageModel={project?.image_model}
+                        imageModel={panel.image_model || project?.image_model}
                         isRegenerating={
                           regeneratingPanelIdx === idx ||
                           (isRegeneratingPanel && selectedPanelIdx === idx) ||
@@ -1275,7 +1320,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
                     shotIndex={selectedPanelIdx}
                     cameraAngle={activePanel.camera_angle}
                     prompt={activePanel.prompt}
-                    imageModel={project?.image_model}
+                    imageModel={activePanel.image_model || project?.image_model}
                     isRegenerating={
                       regeneratingPanelIdx === selectedPanelIdx ||
                       isRegeneratingPanel ||

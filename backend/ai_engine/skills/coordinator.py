@@ -158,10 +158,12 @@ async def execute_provider_call(
 
         if not response:
             skill_name = getattr(skill, "name", "ai_capability") if skill else "ai_capability"
-            fallback_payload = FallbackCoordinator.get_programmatic_fallback(skill_name, **kwargs)
-            fallback_payload.setdefault("success", False)
-            fallback_payload.setdefault("source", "fallback:error")
-            fallback_payload["error"] = f"Gemini returned an empty response for model '{effective_model_id}'."
+            fallback_payload = {
+                "success": False,
+                "source": "error",
+                "skill": skill_name,
+                "error": f"Gemini returned an empty response for model '{effective_model_id}'."
+            }
             raw_text = json.dumps(fallback_payload)
             if skill:
                 skill.last_input_tokens = 0
@@ -635,9 +637,14 @@ async def execute_provider_call(
     elif provider in ("stablediffusion", "stable_diffusion"):
         from ai_engine.providers.stable_diffusion import get_stable_diffusion_engine
         engine = get_stable_diffusion_engine()
-        output_path = kwargs.get("output_path") or os.path.join(tempfile.gettempdir(), f"sd_{uuid.uuid4().hex[:8]}.png")
-        engine.generate_image(prompt=prompt, output_path=output_path, width=kwargs.get("width", 1024), height=kwargs.get("height", 1024))
-        return json.dumps({"image_path": output_path})
+        output_dir = kwargs.get("output_dir") or tempfile.gettempdir()
+        result = await engine.generate_image(
+            prompt=prompt,
+            width=kwargs.get("width", 1024),
+            height=kwargs.get("height", 1024),
+            output_dir=output_dir,
+        )
+        return json.dumps({"image_path": result.image_path})
 
     elif provider == "whisper":
         from ai_engine.providers.whisper import get_whisper_engine

@@ -20,7 +20,8 @@ import uuid
 import base64
 import asyncio
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from features.creative.agent.schemas import (
@@ -38,6 +39,7 @@ from features.image_editor.services.utils.image_utils import (
 )
 from features.image_editor.services.panel_detection.panel_detector import (
     detect_vertical_strip_panels,
+    _detect_bg_color_and_threshold,
 )
 from features.video_editor.audio.services.tts import generate_tts_audio
 from features.video_editor.video.services.video_compiler import compile_video_from_panels
@@ -107,7 +109,7 @@ class AutonomousAgentWorkflow:
             updated_at=now,
         )
 
-    def log(self, stage: str, message: str, level: str = "info", progress: Optional[int] = None):
+    def log(self, stage: str, message: str, level: Literal["error", "info", "success", "warning"] = "info", progress: Optional[int] = None):
         """Appends a timestamped log entry and updates real-time status."""
         now = time.time()
         self.state.updated_at = now
@@ -150,8 +152,8 @@ class AutonomousAgentWorkflow:
         # 2. Try AIHub multi-provider orchestrator (OpenAI, Claude, HuggingFace, Pollinations, etc.)
         try:
             hub_result = await AIHub().chat(prompt=prompt, system_instruction=system_instruction)
-            if hub_result and len(str(hub_result).strip()) > 5:
-                return str(hub_result)
+            if hub_result and len(hub_result.strip()) > 5:
+                return hub_result
         except Exception as hub_err:
             logger.debug(f"[Agent {self.run_id}] AIHub chat provider attempt notice: {hub_err}")
 
@@ -246,7 +248,16 @@ class AutonomousAgentWorkflow:
 
                         boxes = []
                         try:
-                            det_res = detect_vertical_strip_panels(stitched_strip)
+                            gray_arr = np.array(pil_strip.convert("L"))
+                            bg_res = _detect_bg_color_and_threshold(gray_arr)
+                            is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
+                            det_res = detect_vertical_strip_panels(
+                                gray_arr=gray_arr,
+                                is_white_bg=is_white_bg,
+                                threshold_val=threshold_val,
+                                min_height_px=60,
+                                min_width_pct=0.15,
+                            )
                             if det_res and getattr(det_res, "panels", None):
                                 boxes = det_res.panels
                         except Exception:

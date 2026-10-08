@@ -28,6 +28,15 @@ class TranscriptionSegment:
     text: str
     confidence: Optional[float] = None
 
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "start_time": self.start_time,
+            "end_time": self.end_time,
+            "text": self.text,
+            "confidence": self.confidence,
+        }
+
 
 @dataclass
 class TranscriptionResult:

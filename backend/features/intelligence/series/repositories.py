@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -36,7 +36,7 @@ class AISeriesRepository:
     def __init__(self, db_path: Optional[str] = None):
         if db_path is None:
             if DEFAULT_DB_PATH and os.path.exists(os.path.dirname(DEFAULT_DB_PATH)):
-                self.db_path = str(DEFAULT_DB_PATH)
+                self.db_path = DEFAULT_DB_PATH
             else:
                 base_dir = Path(__file__).resolve().parent.parent.parent / "data"
                 base_dir.mkdir(parents=True, exist_ok=True)
@@ -48,8 +48,9 @@ class AISeriesRepository:
         self._init_db()
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, check_same_thread=False, timeout=30.0)
         conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL;")
         return conn
 
     def _init_db(self) -> None:
@@ -86,8 +87,8 @@ class AISeriesRepository:
 
     def create_project(self, project: AISeriesProject) -> AISeriesProject:
         """Insert a newly created AI Series project."""
-        project.created_at = datetime.utcnow()
-        project.updated_at = datetime.utcnow()
+        project.created_at = datetime.now(timezone.utc)
+        project.updated_at = datetime.now(timezone.utc)
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -127,7 +128,7 @@ class AISeriesRepository:
 
     def update_project(self, project: AISeriesProject) -> AISeriesProject:
         """Update full project state."""
-        project.updated_at = datetime.utcnow()
+        project.updated_at = datetime.now(timezone.utc)
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -199,7 +200,7 @@ class AISeriesRepository:
     def get_chapter(
         self, series_id: str, session_number: int, chapter_number: int
     ) -> Optional[ChapterSession]:
-        """Direct access to a specific chapter."""
+        """Direct access to a specific chapter by session number and chapter number."""
         project = self.get_project(series_id)
         if not project:
             return None
@@ -211,6 +212,20 @@ class AISeriesRepository:
                         return chap
         return None
 
+    def get_chapter_by_id(
+        self, series_id: str, chapter_id: str
+    ) -> Optional[ChapterSession]:
+        """Direct access to a specific chapter by unique chapter_id."""
+        project = self.get_project(series_id)
+        if not project:
+            return None
+
+        for sess in project.sessions:
+            for chap in sess.chapters:
+                if chap.chapter_id == chapter_id or chap.id == chapter_id:
+                    return chap
+        return None
+
     def update_chapter(
         self, series_id: str, updated_chapter: ChapterSession
     ) -> Optional[AISeriesProject]:
@@ -220,16 +235,24 @@ class AISeriesRepository:
             return None
 
         updated = False
+        target_id = updated_chapter.chapter_id or updated_chapter.id
         for sess in project.sessions:
-            if sess.session_number == updated_chapter.session_number:
-                for idx, chap in enumerate(sess.chapters):
-                    if chap.chapter_id == updated_chapter.chapter_id:
-                        sess.chapters[idx] = updated_chapter
-                        updated = True
-                        break
+            for idx, chap in enumerate(sess.chapters):
+                if (chap.chapter_id == target_id or chap.id == target_id) or (
+                    chap.session_number == updated_chapter.session_number
+                    and chap.chapter_number == updated_chapter.chapter_number
+                ):
+                    sess.chapters[idx] = updated_chapter
+                    updated = True
+                    break
+            if updated:
+                break
         if updated:
             return self.update_project(project)
         return None
+
+    save_chapter = update_chapter
+
 
     def update_panel_speech_bubble(
         self,

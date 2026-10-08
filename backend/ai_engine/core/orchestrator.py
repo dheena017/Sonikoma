@@ -15,7 +15,7 @@ import asyncio
 import logging
 from enum import Enum
 from collections import defaultdict
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List, Tuple, Union
 
 from ai_engine.core.registry import ModelRegistry, MODEL_CATALOG_DETAILED
 
@@ -629,7 +629,7 @@ class AIOrchestrator:
         capability: str,
         prompt: str = "",
         model: Optional[str] = None,
-        image_bytes: Optional[bytes] = None,
+        image_bytes: Optional[Union[bytes, List[bytes]]] = None,
         audio_bytes: Optional[bytes] = None,
         api_key: Optional[str] = None,
         user_keys: Optional[dict] = None,
@@ -768,7 +768,7 @@ class AIOrchestrator:
                 elif classified.error_code == AIErrorCode.TIMEOUT:
                     short_reason = "Request timed out"
                 else:
-                    short_reason = str(classified.message)[:45]
+                    short_reason = classified.message[:45]
 
                 next_idx = tier_idx + 1
                 next_label = f"Tier {next_idx}" if next_idx <= len(candidates) else "next model"

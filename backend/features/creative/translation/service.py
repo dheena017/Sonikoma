@@ -79,8 +79,8 @@ class CreativeTranslationService:
 
         try:
             hub_result = await AIHub().chat(prompt=prompt, system_instruction=system_instruction)
-            if hub_result and len(str(hub_result).strip()) > 1:
-                return str(hub_result)
+            if hub_result and len(hub_result.strip()) > 1:
+                return hub_result
         except Exception as hub_err:
             logger.debug(f"[TranslationService] AIHub chat attempt notice: {hub_err}")
 

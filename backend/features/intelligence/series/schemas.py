@@ -7,10 +7,14 @@ Anime Episodes (Video), Manhwa Webtoons (Vertical Strip), and Comic/Manga (Grids
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Literal, Optional, Union
 from pydantic import BaseModel, Field
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class SeriesFormatType(str, Enum):
@@ -20,6 +24,44 @@ class SeriesFormatType(str, Enum):
 
 
 class SeriesArtStyle(str, Enum):
+    # Recommended UI Presets
+    ACTION_SHONEN = "action_shonen"
+    DARK_SEINEN = "dark_seinen"
+    MODERN_ANIME = "modern_anime"
+    MANHWA_HUNTER = "manhwa_hunter"
+    ROMANCE_WEBTOON = "romance_webtoon"
+    MODERN_AMERICAN_COMIC = "modern_american_comic"
+    RETRO_90S_ANIME = "retro_90s_anime"
+
+    # Japanese Manga Sub-styles
+    CLASSIC_SHONEN_ACTION = "classic_shonen_action"
+    DARK_GRITTY_SEINEN = "dark_gritty_seinen"
+    SHOJO_JOSEI_ROMANCE = "shojo_josei_romance"
+    MOE_CHIBI_SLICE_OF_LIFE = "moe_chibi_slice_of_life"
+    GEKIGA_RETRO = "gekiga_retro"
+
+    # Anime Animation Sub-styles
+    MODERN_CEL_SHADED = "modern_cel_shaded"
+    KYOTO_ANIMATION_SOFT = "kyoto_animation_soft"
+    RETRO_90S_CEL = "retro_90s_cel"
+    MAKOTO_SHINKAI_CINEMATIC = "makoto_shinkai_cinematic"
+    STYLIZED_POP_ACTION = "stylized_pop_action"
+
+    # Korean Webtoon Manhwa Sub-styles
+    ACTION_SYSTEM_LEVELING = "action_system_leveling"
+    OTOME_ISEKAI_ROFAN = "otome_isekai_rofan"
+    PAINTERLY_WEBTOON = "painterly_webtoon"
+    REALISTIC_MODERN_DRAMA = "realistic_modern_drama"
+    ROUGH_INK_MURIM = "rough_ink_murim"
+
+    # Western Comics Sub-styles
+    MODERN_SUPERHERO = "modern_superhero"
+    GOLDEN_SILVER_CLASSIC = "golden_silver_classic"
+    NOIR_HEAVY_SHADOW = "noir_heavy_shadow"
+    LIGNE_CLAIRE = "ligne_claire"
+    DARK_INDIE_GRAPHIC_NOVEL = "dark_indie_graphic_novel"
+
+    # Legacy enum values
     MANHWA_SLICE_OF_LIFE = "manhwa_slice_of_life"
     MANHWA_PASTEL_ROMANCE = "manhwa_pastel_romance"
     MANHWA_ACTION_HUNTER = "manhwa_action_hunter"
@@ -140,6 +182,7 @@ class AISeriesPanel(BaseModel):
     panel_index: int = Field(1)
     order_index: int = Field(1)
     image_url: str = Field("")
+    image_model: Optional[str] = Field(None, description="Diffusion model used to synthesize panel frame")
     prompt: str = Field("")
     negative_prompt: str = Field("")
     camera_angle: Optional[str] = Field(None)
@@ -164,6 +207,14 @@ class AISeriesPanel(BaseModel):
             self.order_index = self.panel_index
         elif self.order_index and not self.panel_index:
             self.panel_index = self.order_index
+
+    @property
+    def panel_number(self) -> int:
+        return self.panel_index
+
+    @property
+    def dialogue(self) -> Optional[str]:
+        return self.speech_text
 
 
 class ComicPage(BaseModel):
@@ -262,8 +313,8 @@ class AISeriesProject(BaseModel):
     cover_image_url: Optional[str] = Field(None)
     user_id: str = Field("creator_default")
     status: Union[ProjectStatus, str] = Field(ProjectStatus.PLANNING)
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    created_at: Optional[datetime] = Field(default_factory=utc_now)
+    updated_at: Optional[datetime] = Field(default_factory=utc_now)
 
     def model_post_init(self, __context: Any) -> None:
         if not self.id and self.series_id:
@@ -354,7 +405,7 @@ class CreatorStyleProfile(BaseModel):
         }
     )
     total_generations_rated: int = 0
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=utc_now)
 
 
 class FranchiseContinuityMemory(BaseModel):
@@ -384,7 +435,7 @@ class FranchiseContinuityMemory(BaseModel):
         default_factory=dict,
         description="Key locations, architectural traits, visual references"
     )
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=utc_now)
 
 
 class GenerationFeedbackEvent(BaseModel):
@@ -398,7 +449,7 @@ class GenerationFeedbackEvent(BaseModel):
     adjusted_value: Any = None
     rating: Optional[int] = None  # 1 to 5 stars
     creator_notes: Optional[str] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=utc_now)
 
 
 class MemoryOptimizationSuggestion(BaseModel):

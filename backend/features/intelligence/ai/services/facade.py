@@ -25,6 +25,7 @@ from ai_engine.skills.registry import registry
 from ai_engine.skills.base import get_provider_and_model, resolve_api_key
 from ai_engine.skills.utils import robust_parse_json
 from ai_engine.core.orchestrator import AIOrchestrator, AIErrorCode
+from ai_engine.core.registry import ModelRegistry
 from features.image_editor.services.utils.panel_box_utils import PanelBounds
 from app.core.cache import stitched_cache, edit_history
 from features.video_editor.audio.services import generate_panel_audio
@@ -386,6 +387,8 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
             })
         return {"success": True, "provider": provider, "total": len(result_list), "models": result_list}
 
+    return {"success": False, "error": f"Unsupported provider: {provider}"}
+
 async def _synthesize_tts_to_cache(text: str, voice: str, target_dur: float) -> Tuple[Optional[str], Optional[float]]:
     """Synthesizes text using Edge TTS and saves to stitched_cache, returning (cached_url, actual_duration)."""
     # Safety cap: truncate extremely long text to prevent native memory crashes in pydub
@@ -679,6 +682,8 @@ async def _fallback_individual_batch(
     async def _analyze_single(i, p):
         p_id = getattr(p, "id", None) if not isinstance(p, dict) else p.get("id")
         p_url = getattr(p, "url", None) if not isinstance(p, dict) else p.get("url")
+        if not p_url:
+            return {"id": p_id, "url": "", "success": False, "error": "Missing panel image URL"}
         p_voice = getattr(p, "voice", None) or voice
         p_context = getattr(p, "story_context", None)
         try:
@@ -747,6 +752,8 @@ async def facade_analyze_batch(
     # 1. Concurrently resolve all image buffers
     async def _resolve_one(p):
         p_url = getattr(p, "url", None) if not isinstance(p, dict) else p.get("url")
+        if not p_url:
+            return None
         try:
             res = await img_utils.resolve_image_to_buffer(p_url)
             return res["data"]
@@ -1192,15 +1199,15 @@ async def facade_smart_crop(
         insets = final_pb.to_inset_percentages(safe_w, safe_h)
 
         final_panels.append({
-            "x": int(final_pb.x),
-            "y": int(final_pb.y),
-            "width": int(final_pb.width),
-            "height": int(final_pb.height),
+            "x": final_pb.x,
+            "y": final_pb.y,
+            "width": final_pb.width,
+            "height": final_pb.height,
             "cropTop": insets["cropTop"],
             "cropBottom": insets["cropBottom"],
             "cropLeft": insets["cropLeft"],
             "cropRight": insets["cropRight"],
-            "area": int(final_pb.area)
+            "area": final_pb.area
         })
 
     # Sort strictly top-to-bottom (by pixel y), then left-to-right (by pixel x).
@@ -1258,7 +1265,7 @@ async def facade_analyze_narrative_sequence(
         except Exception:
             narrative_texts = [raw_res]
     else:
-        narrative_texts = [str(v) for v in visual_descriptions]
+        narrative_texts = list(visual_descriptions)
 
     semaphore = asyncio.Semaphore(5)
 

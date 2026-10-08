@@ -16,6 +16,11 @@ backend/features/intelligence/series/
 ├── service.py                # SeriesService facade class & singleton series_service
 ├── schemas.py                # Pydantic schemas (chapters, panels, characters, continuity memory)
 ├── repositories.py           # AISeriesRepository & ai_series_repo SQLite persistence
+├── skills/                   # Dedicated AI Skills (.md protocols)
+│   ├── series_arc_manhwa.md  # Korean Webtoon Manhwa Arc Director (ManhwaArcDirectorModel)
+│   ├── series_arc_comic.md   # Japanese Manga & Graphic Novels Arc Director (ComicArcDirectorModel)
+│   ├── series_arc_anime.md   # Cinematic Anime Arc Director (AnimeArcDirectorModel)
+│   └── generate_chapter.md   # Multi-Panel Chapter Synthesis Director (ChapterSynthesisModel)
 ├── router/                   # Modular sub-routers
 │   ├── __init__.py           # ai_series_master_router, series_router, router
 │   ├── projects.py           # /projects (create, list, get, delete)
@@ -30,11 +35,21 @@ backend/features/intelligence/series/
 │   └── export.py             # /export (PDF, EPUB, Webtoon vertical strip compilation)
 ├── services/                 # Specialized domain services
 │   ├── __init__.py           # Services aggregator
-│   ├── series_orchestrator.py# Progressive generation director & Turbo synthesizer
+│   ├── series_orchestrator.py# Progressive generation director & production coordinator
+│   ├── arc_architect.py      # Multi-session story architecture, cast DNA, world bible
+│   ├── panel_synthesizer.py  # Authentic 2D panel synthesis, speech bubbles, camera blocking
 │   ├── series_image_service.py # 2D illustration rendering & disk caching
 │   ├── series_audio_service.py # Multi-character vocal dubbing & auditions
 │   └── series_memory_engine.py # Franchise continuity memory & style learning
+├── styles/                   # Modular Art Style Engines & Prompt Builders (Python)
+│   ├── manga.py              # Japanese Manga (Shonen, Seinen, Shojo, Moe, Gekiga)
+│   ├── anime.py              # Anime (Modern Cel, KyoAni, Retro 90s, Shinkai, Trigger Pop)
+│   ├── manhwa.py             # Korean Manhwa (Hunter, Rofan, Painterly, Drama, Murim)
+│   ├── western_comic.py      # Western Comics (Superhero, Kirby Classic, Noir, Ligne Claire)
+│   └── presets.py            # UI Presets & Data-Driven Style Dispatcher
 └── README.md                 # Domain documentation
+
+
 ```
 
 ---

@@ -77,7 +77,7 @@ async def generate_gemini_text(
         client = GeminiClient.get_client(api_key=key)
         
         # Build generation configuration
-        config_dict = {
+        config_dict: Dict[str, Any] = {
             "temperature": body.temperature,
             "max_output_tokens": body.max_output_tokens,
         }
@@ -108,7 +108,18 @@ async def analyze_panel_image(
     user_keys: dict = Depends(get_all_user_keys)
 ):
     key = user_keys.get("gemini") or GEMINI_API_KEY
-    result = await facade_analyze_image(body, api_key=key)
+    keys_dict = {"gemini": key} if key else None
+    result = await facade_analyze_image(
+        url=body.url,
+        model=body.model,
+        voice=getattr(body, "voice", None),
+        narration_style=getattr(body, "narration_style", None),
+        user_keys=keys_dict,
+        story_context=getattr(body, "story_context", None),
+        story_memory=getattr(body, "story_memory", None),
+        panel_index=getattr(body, "panel_index", 0),
+        generate_audio=getattr(body, "generate_audio", True),
+    )
     if not result.get("success"):
         raise HTTPException(status_code=400, detail=result.get("error", "Analysis failed"))
     return result
@@ -120,5 +131,12 @@ async def smart_crop_panels(
     user_keys: dict = Depends(get_all_user_keys)
 ):
     key = user_keys.get("gemini") or GEMINI_API_KEY
-    return await facade_smart_crop(body, api_key=key)
+    keys_dict = {"gemini": key} if key else None
+    return await facade_smart_crop(
+        url=body.url,
+        aspect_ratio=getattr(body, "aspect_ratio", "free"),
+        model=getattr(body, "model", None),
+        user_keys=keys_dict,
+        strategy=getattr(body, "strategy", "local-cv"),
+    )
 

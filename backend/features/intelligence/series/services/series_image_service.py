@@ -41,20 +41,17 @@ class SeriesImageService:
         self, prompt: str, width: int = 768, height: int = 1024, seed: Optional[int] = None, model: Optional[str] = None
     ) -> str:
         """Construct high-speed Pollinations.ai image URL supporting dynamic AI Core model cascade."""
-        clean_prompt = prompt.replace("\n", " ").strip()
-        # Cap prompt length to 600 chars — shorter prompts are faster to encode/transfer
-        if len(clean_prompt) > 600:
-            clean_prompt = clean_prompt[:600]
-
+        from ai_engine.providers.pollinations import build_pollinations_url as centralized_build_url
         target_model = model or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
-
-        encoded_prompt = urllib.parse.quote(clean_prompt)
-        url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&nologo=true&enhance=false"
-        if seed is not None:
-            url += f"&seed={seed}"
-        if target_model:
-            url += f"&model={target_model}"
-        return url
+        return centralized_build_url(
+            prompt=prompt[:600] if len(prompt) > 600 else prompt,
+            width=width,
+            height=height,
+            seed=seed,
+            model=target_model or "flux-anime",
+            enhance=False,
+            nologo=True,
+        )
 
     def build_svg_fallback(self, title: str, subtitle: str, color_hex: str = "#6366F1", width: int = 768, height: int = 1024) -> str:
         """Generate high-contrast, polished SVG visual fallback placeholder."""
@@ -140,6 +137,11 @@ class SeriesImageService:
         save_local: bool = True
     ) -> Dict[str, Any]:
         """Asynchronously render all panels in a chapter using a bounded concurrency semaphore."""
+        project = ai_series_repo.get_project(series_id)
+        fmt = (project.format_type.value if hasattr(project.format_type, "value") else str(getattr(project, "format_type", "manhwa"))).lower() if project else "manhwa"
+        w, h = (1024, 576) if "anime" in fmt else ((768, 1024) if ("comic" in fmt or "manga" in fmt) else (768, 1152))
+        model = getattr(project, "image_model", None)
+
         sem = asyncio.Semaphore(concurrency)
         total = len(chapter.panels)
         rendered = 0
@@ -147,15 +149,28 @@ class SeriesImageService:
 
         async def _worker(panel: AISeriesPanel):
             nonlocal rendered, failed
+            p_id = panel.panel_id or panel.id or "panel"
+            p_idx = panel.panel_index or panel.order_index or 1
             async with sem:
                 try:
-                    await self.render_panel_image(series_id, panel, save_local=save_local)
+                    await self.render_panel_image(
+                        series_id,
+                        panel=panel,
+                        panel_id=p_id,
+                        prompt=panel.prompt,
+                        width=w,
+                        height=h,
+                        model=model,
+                        save_local=save_local,
+                    )
                     rendered += 1
                 except Exception as e:
-                    logger.error(f"[SeriesImageService] Error rendering panel {panel.id}: {e}")
+                    logger.error(f"[SeriesImageService] Error rendering panel {p_id}: {e}")
                     panel.image_url = self.build_svg_fallback(
-                        f"Panel {panel.panel_number}",
-                        panel.dialogue[:50] if panel.dialogue else "Visual placeholder"
+                        f"Panel {p_idx}",
+                        panel.prompt[:50] if panel.prompt else "Visual placeholder",
+                        width=w,
+                        height=h,
                     )
                     failed += 1
 
@@ -163,20 +178,60 @@ class SeriesImageService:
         await asyncio.gather(*tasks)
 
         # Persist updated panels back to database
-        ai_series_repo.save_chapter(chapter)
+        ai_series_repo.save_chapter(series_id, chapter)
         logger.info(
-            f"[SeriesImageService] Batch render complete for chapter {chapter.id}: "
+            f"[SeriesImageService] Batch render complete for chapter {chapter.chapter_id or chapter.id}: "
             f"{rendered}/{total} rendered, {failed} fallbacks."
         )
 
         return {
             "status": "completed",
             "series_id": series_id,
-            "chapter_id": chapter.id,
+            "chapter_id": chapter.chapter_id or chapter.id,
             "total_panels": total,
             "rendered": rendered,
             "failed": failed
         }
+
+    async def render_chapter_images(
+        self,
+        series_id: str,
+        session_number: int,
+        chapter_number: int,
+        model: Optional[str] = None,
+        force_regenerate: bool = False,
+    ) -> ChapterSession:
+        """Batch render and locally cache all panel images for a chapter using the chosen AI model."""
+        project = ai_series_repo.get_project(series_id)
+        if not project:
+            raise ValueError(f"AI Series '{series_id}' not found.")
+
+        chapter = ai_series_repo.get_chapter(series_id, session_number, chapter_number)
+        if not chapter:
+            raise ValueError(f"Chapter S{session_number}:C{chapter_number} not found in series '{series_id}'.")
+
+        fmt = (project.format_type.value if hasattr(project.format_type, "value") else str(project.format_type)).lower()
+        w, h = (1024, 576) if "anime" in fmt else ((768, 1024) if ("comic" in fmt or "manga" in fmt) else (768, 1152))
+
+        for panel in chapter.panels:
+            if panel.image_url and "/media/series_images/" in panel.image_url and not force_regenerate:
+                continue
+            await self.render_panel_image(
+                series_id=series_id,
+                panel=panel,
+                panel_id=panel.panel_id or panel.id,
+                prompt=panel.prompt,
+                width=w,
+                height=h,
+                model=model,
+                save_local=True,
+                force_regenerate=force_regenerate,
+            )
+
+        ai_series_repo.save_chapter(series_id, chapter)
+        logger.info(f"[SeriesImageService] Rendered all panel images for Chapter S{session_number}:C{chapter_number} ({series_id}).")
+        return chapter
+
 
 
 series_image_service = SeriesImageService()

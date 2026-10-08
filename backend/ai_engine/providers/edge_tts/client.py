@@ -32,6 +32,25 @@ except ImportError:
 class EdgeTTSProvider:
     """Wrapper provider for Microsoft Edge Neural TTS speech synthesis."""
 
+    def __init__(self, voice: str = "en-US-ChristopherNeural"):
+        self.voice = voice
+
+    async def generate_to_file(
+        self,
+        text: str,
+        output_path: str,
+        rate: str = "+0%",
+        pitch: str = "+0Hz",
+    ) -> Optional[bytes]:
+        """Synthesize text and save directly to file using instance voice."""
+        return await self.synthesize(
+            text=text,
+            voice=self.voice,
+            output_path=output_path,
+            rate=rate,
+            pitch=pitch,
+        )
+
     @staticmethod
     def is_available() -> bool:
         return EDGE_TTS_AVAILABLE and edge_tts is not None

@@ -33,3 +33,5 @@ VOICE_LIST: List[Dict[str, str]] = [
     {"id": "ko-KR-InJoonNeural", "name": "InJoon (Korean Manhwa Male)", "gender": "male", "lang": "Korean"},
     {"id": "ko-KR-SunHiNeural", "name": "SunHi (Korean Manhwa Female)", "gender": "female", "lang": "Korean"},
 ]
+
+VOICE_MAP: Dict[str, str] = {v["id"]: v["name"] for v in VOICE_LIST}

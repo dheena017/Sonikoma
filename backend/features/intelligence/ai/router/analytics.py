@@ -10,6 +10,7 @@ HuggingFace, ElevenLabs, DeepL, Groq, DeepSeek, and Local Stable Diffusion.
 import time
 import os
 import uuid
+import json
 import asyncio
 import logging
 from typing import Dict, Any, Optional, List
@@ -75,7 +76,7 @@ def log_ai_token_usage(
     status: str = "SUCCESS"
 ) -> Dict[str, Any]:
     """Records an AI transaction with real prompt/output token accounting."""
-    total_tokens = int(prompt_tokens) + int(completion_tokens)
+    total_tokens = prompt_tokens + completion_tokens
     
     # Calculate real estimated cost based on blended rates
     cost_usd = round((prompt_tokens * 0.000075 / 1000) + (completion_tokens * 0.0003 / 1000), 6)
@@ -279,7 +280,7 @@ async def get_providers_status(current_user: Optional[dict] = Depends(get_option
 
     status_list = []
     for p in SUPPORTED_PROVIDERS:
-        pid = p["id"]
+        pid = str(p["id"])
         is_configured = server_keys.get(pid, False)
         status_list.append({
             **p,
@@ -365,7 +366,7 @@ async def test_provider_key(payload: dict, current_user: Optional[dict] = Depend
                     "latency_ms": latency,
                     "model_tested": "gemini-2.5-flash",
                     "status": "HEALTHY",
-                    "sample_response": resp.text.strip() if hasattr(resp, "text") else "OK",
+                    "sample_response": resp.text.strip() if hasattr(resp, "text") and resp.text else "OK",
                 }
             except Exception as gemini_err:
                 latency = round((time.perf_counter() - start_time) * 1000, 2)
@@ -736,7 +737,7 @@ async def _execute_ai_analytics_summary(
             })
 
         # Get Real User Credit Balance
-        user_id = current_user.get("id") if current_user else "user_default"
+        user_id = str(current_user.get("id")) if (current_user and current_user.get("id")) else "user_default"
         real_credits = get_available_credits(user_id)
 
         # Recent logs preview
@@ -1135,7 +1136,7 @@ async def _execute_simulate_model_routing(payload: dict) -> dict:
     
     def find_model_meta(model_id: str):
         for m in catalog:
-            if m.get("id", "").lower() == str(model_id).lower():
+            if m.get("id", "").lower() == model_id.lower():
                 return m
         return {"id": model_id, "name": model_id, "provider": "google", "context_window": "200K"}
 
@@ -1893,7 +1894,7 @@ async def run_playground_execution(payload: dict, current_user: Optional[dict] =
 @router.get("/wallet/balance", summary="Get available credits balance")
 async def get_wallet_balance(current_user: Optional[dict] = Depends(get_optional_current_user)):
     """Returns available credits for current user."""
-    user_id = current_user.get("id") if current_user else "user_default"
+    user_id = str(current_user.get("id")) if (current_user and current_user.get("id")) else "user_default"
     credits = get_available_credits(user_id)
     txs = get_credit_transactions(user_id, limit=20)
     return {

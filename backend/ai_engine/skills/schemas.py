@@ -368,6 +368,34 @@ class AnimeArcDirectorModel(SeriesArcDirectorModel):
     cinematic_camera_style: str = Field(default="orbital_3d_tracking")
 
 
+class ChapterPanelSynthesisModel(BaseModel):
+    panel_index: int = Field(default=1, description="1-based panel index in sequential progression")
+    camera_angle: str = Field(default="cinematic_wide", description="Camera shot angle or framing")
+    visual_description: str = Field(default="", description="Vivid prompt describing characters, environment, action, and lighting")
+    motion_prompt: Optional[str] = Field(default=None, description="Kinetic motion description for video synthesis")
+    sfx_text: Optional[str] = Field(default=None, description="Sound effect bracketed text, e.g. [IMPACT!]")
+    dialogue: List[SeriesArcDialogueTurn] = Field(default_factory=list, description="Dialogue spoken in this panel")
+
+
+class ChapterSynthesisModel(BaseModel):
+    chapter_number: int = Field(default=1)
+    chapter_title: str = Field(default="")
+    summary: str = Field(default="")
+    pacing_role: str = Field(default="rising_action")
+    panels: List[ChapterPanelSynthesisModel] = Field(default_factory=list)
+
+
+class ArtStylePromptModel(BaseModel):
+    medium: str = Field(default="", description="manga | anime | manhwa | western_comic")
+    sub_style: str = Field(default="", description="Specific sub-style identifier")
+    visual_engine_focus: str = Field(default="", description="e.g. 'Black & White ink', 'Digital full color'")
+    positive_prompt: str = Field(default="", description="Optimized positive image generation prompt")
+    negative_prompt: str = Field(default="", description="Optimized negative image generation prompt")
+    key_keywords: List[str] = Field(default_factory=list, description="Target model keywords")
+    recommended_aspect_ratio: str = Field(default="3:4", description="e.g. '2:3', '3:4', '16:9'")
+    palette_and_lighting: str = Field(default="", description="Lighting and color palette guidance")
+
+
 SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
     "GeminiAnalysisModel":     GeminiAnalysisModel,
     "BatchPanelAnalysisModel": BatchPanelAnalysisModel,
@@ -391,5 +419,7 @@ SCHEMA_MAP: Dict[str, Type[BaseModel]] = {
     "ManhwaArcDirectorModel":  ManhwaArcDirectorModel,
     "ComicArcDirectorModel":   ComicArcDirectorModel,
     "AnimeArcDirectorModel":   AnimeArcDirectorModel,
+    "ChapterSynthesisModel":   ChapterSynthesisModel,
+    "ArtStylePromptModel":     ArtStylePromptModel,
 }
 

@@ -13,5 +13,4 @@ __all__ = [
     "SCHEMA_MAP",
     "registry",
     "SkillRegistry",
-    "execute_skill_pipeline",
 ]

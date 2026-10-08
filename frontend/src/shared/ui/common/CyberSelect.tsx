@@ -353,6 +353,7 @@ export const CyberSelect: React.FC<CyberSelectProps> = ({
               </span>
             )}
           <span
+            title={selectedOption ? selectedOption.label : placeholder}
             className={`truncate ${
               !selectedOption ? "text-neutral-500" : currentTheme.activeText
             }`}
