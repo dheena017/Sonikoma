@@ -219,42 +219,40 @@ class ModelRegistry:
 
         return "gemini", m
 
-    RECOMMENDED_CAPABILITY_CHAINS: Dict[str, List[Tuple[str, str]]] = {
-        "storyboard_narrative": [("gemini", "gemini-2.5-flash"), ("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o")],
-        "panel_analysis": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
-        "batch_panel_analysis": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
-        "scraper_blueprint": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("deepseek", "deepseek-chat")],
-        "prompt_enhancement": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
-        "image_diffusion": [("pollinations", "flux"), ("huggingface", "FLUX.1-schnell"), ("openai", "dall-e-3"), ("stablediffusion", "stable-diffusion-xl")],
-        "speech_synthesis": [("edgetts", "edge-tts-neural"), ("elevenlabs", "eleven_multilingual_v2"), ("openai", "tts-1-hd")],
-        "translate": [("deepl", "deepl-pro"), ("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini")],
-        "character_persona": [("anthropic", "claude-3-5-sonnet-20241022"), ("openai", "gpt-4o"), ("gemini", "gemini-2.5-flash")],
-        "seo_optimization": [("openai", "gpt-4o-mini"), ("gemini", "gemini-2.5-flash"), ("deepseek", "deepseek-chat")],
-        "sfx_audio": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
-        "smart_crop": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
-        "text": [("gemini", "gemini-3.5-flash-lite"), ("gemini", "gemini-3.5-flash"), ("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini")],
-    }
-
     @classmethod
     def get_cross_provider_fallback_chain(cls, capability: str) -> List[Tuple[str, str]]:
-        """Returns capability-aware cross-provider fallbacks."""
-        cap = capability.lower()
-        if cap in cls.RECOMMENDED_CAPABILITY_CHAINS:
-            return cls.RECOMMENDED_CAPABILITY_CHAINS[cap]
+        """Returns capability-aware cross-provider fallbacks dynamically resolved from AI Core Orchestrator."""
+        from ai_engine.core.orchestrator import AIOrchestrator
+        cascade = AIOrchestrator.get_task_cascade(capability)
+        chain: List[Tuple[str, str]] = []
+
+        for tier in ("primary", "fallback", "tertiary"):
+            model_id = cascade.get(tier)
+            if model_id:
+                provider, clean_id = cls.resolve_model_provider(model_id)
+                if (provider, clean_id) not in chain:
+                    chain.append((provider, clean_id))
+
+        if chain:
+            return chain
 
         matching: List[Tuple[str, str]] = []
         for m in cls.get_catalog():
+            m_tags = [t.lower() for t in m.get("tags", [])]
             m_caps = [c.lower() for c in m.get("capabilities", [])]
-            m_cat = m.get("category", "").lower()
-            if cap in m_caps or cap in m_cat or (cap in ("text", "script", "dramatization", "seo", "sfx", "storyboard_narrative") and "text" in m_caps):
+            if any(capability.lower() in t for t in m_tags) or any(capability.lower() in c for c in m_caps):
                 matching.append((m["provider"], m["id"]))
 
         if matching:
             return matching
-        return [(m["provider"], m["id"]) for m in cls.get_catalog()[:5]]
+        return [(m["provider"], m["id"]) for m in cls.get_catalog()[:3]]
 
     @classmethod
     def get_primary_model_for_capability(cls, capability: str) -> str:
-        """Dynamically finds the best primary model for any capability."""
+        """Dynamically finds the best primary model for any capability using AI Orchestrator."""
+        from ai_engine.core.orchestrator import AIOrchestrator
+        resolved = AIOrchestrator.resolve_model_for_task(capability, "primary")
+        if resolved:
+            return resolved
         chain = cls.get_cross_provider_fallback_chain(capability)
-        return chain[0][1] if chain else "gemini-2.5-flash"
+        return chain[0][1] if chain else (cls.get_catalog()[0]["id"] if cls.get_catalog() else "gemini-2.5-flash")

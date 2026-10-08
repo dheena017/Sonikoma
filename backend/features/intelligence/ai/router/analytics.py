@@ -975,8 +975,10 @@ async def record_client_ai_log(
     current_user: Optional[dict] = Depends(get_optional_current_user)
 ):
     """Allows UI components to report actual tokens or operations."""
+    from ai_engine.core.orchestrator import AIOrchestrator
+    default_model = AIOrchestrator.resolve_model_for_task("storyboard_narrative", "primary")
     provider = payload.get("provider", "google")
-    model = payload.get("model", "gemini-2.5-flash")
+    model = payload.get("model") or default_model
     feature = payload.get("feature", "AI Studio Feature")
     prompt_tokens = payload.get("prompt_tokens", 0)
     completion_tokens = payload.get("completion_tokens", 0)
@@ -1299,9 +1301,11 @@ async def update_safety_quotas(payload: dict, current_user: Optional[dict] = Dep
 @router.post("/calculator/estimate", summary="Calculate precise token and dollar estimate for an AI workload")
 async def estimate_tokens_and_cost(payload: dict):
     """Calculates exact input/output tokens and USD cost estimate for given prompt length."""
+    from ai_engine.core.orchestrator import AIOrchestrator
+    default_model = AIOrchestrator.resolve_model_for_task("storyboard_narrative", "primary")
     prompt_text = payload.get("prompt", "")
     expected_output_chars = payload.get("expected_output_chars", 1000)
-    model_id = payload.get("model", "gemini-2.5-flash")
+    model_id = payload.get("model") or default_model
 
     # Approx 4 chars per token
     prompt_tokens = max(1, len(prompt_text) // 4)
@@ -1326,8 +1330,10 @@ async def estimate_tokens_and_cost(payload: dict):
 @router.post("/playground/completion", summary="Interactive multi-model playground test endpoint")
 async def playground_completion(payload: dict, current_user: Optional[dict] = Depends(get_optional_current_user)):
     """Executes a prompt across any selected model and logs exact response latency and token count."""
+    from ai_engine.core.orchestrator import AIOrchestrator
+    default_model = AIOrchestrator.resolve_model_for_task("storyboard_narrative", "primary")
     prompt = payload.get("prompt", "Summarize this webtoon panel in one sentence.")
-    model = payload.get("model", "gemini-2.5-flash")
+    model = payload.get("model") or default_model
     temperature = float(payload.get("temperature", 0.7))
     system_prompt = payload.get("system_prompt", "You are an expert anime and webtoon creative director.")
 
@@ -1866,8 +1872,9 @@ async def run_playground_execution(payload: dict, current_user: Optional[dict] =
     from ai_engine.core.orchestrator import AIOrchestrator
     
     prompt = payload.get("prompt", "")
-    model = payload.get("model", "gemini-2.5-flash")
     capability = payload.get("capability", "text")
+    default_model = AIOrchestrator.resolve_model_for_task(capability, "primary")
+    model = payload.get("model") or default_model
     api_key = payload.get("api_key")
     user_id = current_user.get("id") if current_user else "user_default"
 

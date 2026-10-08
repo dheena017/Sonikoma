@@ -32,6 +32,7 @@ import {
   VOICE_DUBBING_OPTIONS,
 } from "../constants/seriesConfig";
 import CyberSelect from "@/shared/ui/common/CyberSelect";
+import { useAIModelStore } from "@/features/intelligence/core/hooks/useAIModelStore";
 
 export interface AIGeneratedSeriesProps {
   addNotification: (message: string, type: NotificationType) => void;
@@ -43,6 +44,63 @@ export const AIGeneratedSeries: React.FC<AIGeneratedSeriesProps> = ({
   onSeriesCreated,
 }) => {
   const { navigate } = useSeriesNavigation();
+  const { getAvailableModels, loadCatalogFromBackend } = useAIModelStore();
+
+  useEffect(() => {
+    loadCatalogFromBackend();
+  }, [loadCatalogFromBackend]);
+
+  const allAvailableModels = getAvailableModels();
+
+  const dynamicStoryboardOptions = useMemo(() => {
+    const list = allAvailableModels.filter(
+      (m) =>
+        (m.tags || []).includes("Text-to-Text") ||
+        (m.tags || []).includes("Image-to-Text")
+    );
+    if (list.length > 0) {
+      return list.map((m) => ({
+        value: m.id,
+        label: `${m.name} (${m.provider.toUpperCase()})${
+          m.is_free_tier ? " [100% FREE]" : ""
+        }`,
+      }));
+    }
+    return STORYBOARD_MODELS.map((m) => ({ value: m.id, label: m.label }));
+  }, [allAvailableModels]);
+
+  const dynamicDiffusionOptions = useMemo(() => {
+    const list = allAvailableModels.filter((m) =>
+      (m.tags || []).includes("Text-to-Image")
+    );
+    if (list.length > 0) {
+      return list.map((m) => ({
+        value: m.id,
+        label: `${m.name} (${m.provider.toUpperCase()})${
+          m.is_free_tier ? " [100% FREE]" : ""
+        }`,
+      }));
+    }
+    return DIFFUSION_MODELS.map((m) => ({ value: m.id, label: m.label }));
+  }, [allAvailableModels]);
+
+  const dynamicVoiceOptions = useMemo(() => {
+    const list = allAvailableModels.filter((m) =>
+      (m.tags || []).includes("Text-to-Speech")
+    );
+    if (list.length > 0) {
+      return [
+        ...list.map((m) => ({
+          value: m.id,
+          label: `${m.name} (${m.provider.toUpperCase()})${
+            m.is_free_tier ? " [100% FREE]" : ""
+          }`,
+        })),
+        { value: "muted", label: "Muted — Visual Art & Text Bubbles Only" },
+      ];
+    }
+    return VOICE_DUBBING_OPTIONS.map((m) => ({ value: m.value, label: m.label }));
+  }, [allAvailableModels]);
 
   // Core Series State
   const [formatType, setFormatType] = useState<"manhwa" | "comic_manga" | "anime">(
@@ -334,10 +392,7 @@ export const AIGeneratedSeries: React.FC<AIGeneratedSeriesProps> = ({
               <CyberSelect
                 value={storyboardModel}
                 onChange={setStoryboardModel}
-                options={STORYBOARD_MODELS.map((m) => ({
-                  value: m.id,
-                  label: m.label,
-                }))}
+                options={dynamicStoryboardOptions}
                 variant="blue"
               />
             </div>
@@ -356,10 +411,7 @@ export const AIGeneratedSeries: React.FC<AIGeneratedSeriesProps> = ({
               <CyberSelect
                 value={imageModel}
                 onChange={setImageModel}
-                options={DIFFUSION_MODELS.map((m) => ({
-                  value: m.id,
-                  label: m.label,
-                }))}
+                options={dynamicDiffusionOptions}
                 variant="purple"
               />
             </div>
@@ -378,10 +430,7 @@ export const AIGeneratedSeries: React.FC<AIGeneratedSeriesProps> = ({
               <CyberSelect
                 value={voiceModel}
                 onChange={setVoiceModel}
-                options={VOICE_DUBBING_OPTIONS.map((m) => ({
-                  value: m.value,
-                  label: m.label,
-                }))}
+                options={dynamicVoiceOptions}
                 variant="emerald"
               />
             </div>

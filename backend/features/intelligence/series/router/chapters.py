@@ -98,17 +98,19 @@ async def render_chapter_images_endpoint(
     series_id: str,
     session_number: int,
     chapter_number: int,
-    image_model: str = Query("flux-anime", description="Model: flux-anime, turbo, flux, stable-diffusion"),
+    image_model: Optional[str] = Query(None, description="Image generation model ID"),
     force: bool = Query(False, description="Force re-rendering even if cached"),
 ):
     """Batch render and locally cache all panel images for a chapter using the chosen AI model."""
     from features.intelligence.series.services.series_image_service import series_image_service
+    from ai_engine.core.orchestrator import AIOrchestrator
     try:
+        resolved_model = image_model or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
         chapter = await series_image_service.render_chapter_images(
             series_id=series_id,
             session_number=session_number,
             chapter_number=chapter_number,
-            model=image_model,
+            model=resolved_model,
             force_regenerate=force,
         )
         return _enrich_chapter_image_timestamps(series_id, chapter)
@@ -119,7 +121,7 @@ async def render_chapter_images_endpoint(
 class RenderPanelRequest(BaseModel):
     panel_id: str
     prompt: Optional[str] = None
-    image_model: Optional[str] = "flux-anime"
+    image_model: Optional[str] = None
     session_number: int = 1
     chapter_number: int = 1
 
@@ -144,6 +146,8 @@ async def render_single_panel_image(series_id: str, panel_id: str, req: RenderPa
     fmt = (project.format_type.value if hasattr(project.format_type, "value") else str(project.format_type)).lower()
     w, h = (1024, 576) if "anime" in fmt else ((768, 1024) if ("comic" in fmt or "manga" in fmt) else (768, 1152))
 
+    from ai_engine.core.orchestrator import AIOrchestrator
+    resolved_model = req.image_model or AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
     res = await series_image_service.render_panel_image(
         series_id=series_id,
         panel=panel,
@@ -151,7 +155,7 @@ async def render_single_panel_image(series_id: str, panel_id: str, req: RenderPa
         prompt=prompt,
         width=w,
         height=h,
-        model=req.image_model or "flux-anime",
+        model=resolved_model,
         force_regenerate=True,
     )
 

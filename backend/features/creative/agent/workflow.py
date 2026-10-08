@@ -319,9 +319,11 @@ class AutonomousAgentWorkflow:
                             height=1024,
                         )
                         if not ai_bytes:
+                            from ai_engine.core.orchestrator import AIOrchestrator
+                            diff_model = AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
                             ai_bytes, _, _ = await PollinationsClient.generate_image(
                                 prompt=diffusion_prompt,
-                                model="flux-anime",
+                                model=diff_model,
                                 width=768,
                                 height=1024,
                                 seed=42 + i * 17,

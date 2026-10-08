@@ -234,6 +234,30 @@ export function useAIModels() {
           }
         }
 
+        if (aggregatedLiveModels.length === 0) {
+          try {
+            const res = await fetch("/api/v1/ai/models");
+            if (res.ok) {
+              const data = await res.json();
+              if (data.success && Array.isArray(data.models_breakdown)) {
+                aggregatedLiveModels = data.models_breakdown.map((m: any) => ({
+                  id: m.id,
+                  name: m.name,
+                  type: (m.free_tier || m.is_free_tier ? "free" : "paid") as "free" | "paid",
+                  provider: m.provider,
+                  category: m.category || "General AI",
+                  context_window: 1048576,
+                  max_output_tokens: 8192,
+                  speed_rating: m.speed_rating || "Standard",
+                  capabilities: m.capabilities || ["text"],
+                }));
+              }
+            }
+          } catch (e) {
+            console.warn("Failed to fetch fallback catalog from /api/v1/ai/models", e);
+          }
+        }
+
         cachedModels = aggregatedLiveModels;
         return aggregatedLiveModels;
       } catch (err) {

@@ -634,7 +634,7 @@ async def facade_analyze_image(
 
     elapsed = int((time.time() - start_time) * 1000)
     meta = getattr(skill, "last_execution_meta", {}) or {}
-    model_used = meta.get("model") or model or "gemini-2.5-flash"
+    model_used = meta.get("model") or model or AIOrchestrator.resolve_model_for_task("panel_analysis", "primary")
     narrative_val = analysis.get("narrative") or ""
 
     return {
@@ -674,7 +674,7 @@ async def _fallback_individual_batch(
 ) -> Dict[str, Any]:
     """Helper to concurrently process panels with facade_analyze_image if batch execution fails."""
     rolling_memory = story_memory or ({"current_scene": story_context} if story_context else None)
-    used_model = model or "gemini-2.5-flash"
+    used_model = model or AIOrchestrator.resolve_model_for_task("batch_panel_analysis", "primary")
 
     async def _analyze_single(i, p):
         p_id = getattr(p, "id", None) if not isinstance(p, dict) else p.get("id")
@@ -829,7 +829,7 @@ async def facade_analyze_batch(
 
     # 3. Assemble results and update rolling memory
     meta = getattr(skill, "last_execution_meta", {}) or {}
-    model_used = meta.get("model") or model or "gemini-2.5-flash"
+    model_used = meta.get("model") or model or AIOrchestrator.resolve_model_for_task("batch_panel_analysis", "primary")
     elapsed = int((time.time() - start_time) * 1000)
 
     results = []

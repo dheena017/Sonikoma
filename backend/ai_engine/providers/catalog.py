@@ -359,53 +359,29 @@ async def get_catalog_alias():
 
 @router.get("/routing", summary="Get task-to-model routing configuration")
 async def get_routing_config():
-    """Returns optimal model routing strategy for each platform workflow."""
+    """Returns optimal model routing strategy dynamically resolved from AI Core Orchestrator."""
+    from ai_engine.core.orchestrator import AIOrchestrator
+    tasks = [
+        ("panel_detection", "panel_analysis", "AI-guided panel boundary discovery"),
+        ("storyboard_generation", "storyboard_narrative", "Multimodal visual storyboarding"),
+        ("script_dramatization", "storyboard_narrative", "Cinematic script dramatization & punch-up"),
+        ("translation", "translate", "Multilingual webtoon dialogue translation"),
+        ("image_generation", "image_diffusion", "Webtoon panel and character regeneration"),
+        ("voice_synthesis", "speech_synthesis", "Fast neural character voice dubbing"),
+        ("audio_transcription", "speech_synthesis", "Speech-to-text timing and subtitle alignment"),
+    ]
+    routing = {}
+    for key, cap, desc in tasks:
+        cascade = AIOrchestrator.get_task_cascade(cap)
+        routing[key] = {
+            "primary": cascade.get("primary", "gemini-2.5-flash"),
+            "fallback": cascade.get("fallback", "gpt-4o-mini"),
+            "tertiary": cascade.get("tertiary", "deepseek-chat"),
+            "description": desc,
+        }
     return {
         "success": True,
-        "routing": {
-            "panel_detection": {
-                "primary": "gemini-2.5-flash",
-                "fallback": "opencv_canny",
-                "provider": "gemini",
-                "description": "AI-guided panel boundary discovery"
-            },
-            "storyboard_generation": {
-                "primary": "gemini-2.5-flash",
-                "fallback": "gemini-2.0-flash",
-                "provider": "gemini",
-                "description": "Multimodal visual storyboarding"
-            },
-            "script_dramatization": {
-                "primary": "gemini-2.5-flash",
-                "fallback": "claude-3-5-sonnet-20241022",
-                "provider": "gemini",
-                "description": "Cinematic script dramatization & punch-up"
-            },
-            "translation": {
-                "primary": "gemini-2.5-flash",
-                "fallback": "gpt-4o-mini",
-                "provider": "gemini",
-                "description": "Multilingual webtoon dialogue translation"
-            },
-            "image_generation": {
-                "primary": "flux-anime",
-                "fallback": "runwayml/stable-diffusion-v1-5",
-                "provider": "pollinations",
-                "description": "Webtoon panel and character regeneration"
-            },
-            "voice_synthesis": {
-                "primary": "en-US-GuyNeural",
-                "fallback": "eleven_multilingual_v2",
-                "provider": "edge_tts",
-                "description": "Fast neural character voice dubbing"
-            },
-            "audio_transcription": {
-                "primary": "whisper-base",
-                "fallback": "gemini-2.5-flash",
-                "provider": "whisper",
-                "description": "Speech-to-text timing and subtitle alignment"
-            },
-        }
+        "routing": routing,
     }
 
 
