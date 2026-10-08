@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/providers/deepseek.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 DeepSeek AI Provider API Routes:
@@ -29,17 +29,19 @@ class DeepSeekChatRequest(BaseModel):
 
 @router.get("/status", summary="Check DeepSeek provider status and configuration")
 async def get_deepseek_status(user_keys: dict = Depends(get_all_user_keys)):
+    from ai_engine.core.registry import ModelRegistry
     user_key = clean_api_key(user_keys.get("deepseek")) or DeepSeekClient.get_api_key()
+    models = ModelRegistry.get_catalog_by_provider("deepseek")
+    model_ids = [m["id"] for m in models]
+    primary = model_ids[0] if model_ids else "deepseek-chat"
     return {
         "success": True,
         "provider": "deepseek",
         "available": True,
         "configured": bool(user_key),
-        "primary_model": "deepseek-chat",
-        "supported_models": [
-            "deepseek-chat",
-            "deepseek-reasoner",
-        ],
+        "primary_model": primary,
+        "supported_models": model_ids,
+        "models": models,
     }
 
 

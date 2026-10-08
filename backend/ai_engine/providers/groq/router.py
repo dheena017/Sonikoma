@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/providers/groq.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Groq LPU Fast Inference Provider API Routes:
@@ -29,18 +29,19 @@ class GroqChatRequest(BaseModel):
 
 @router.get("/status", summary="Check Groq LPU provider status and configuration")
 async def get_groq_status(user_keys: dict = Depends(get_all_user_keys)):
+    from ai_engine.core.registry import ModelRegistry
     user_key = clean_api_key(user_keys.get("groq")) or GroqClient.get_api_key()
+    models = ModelRegistry.get_catalog_by_provider("groq")
+    model_ids = [m["id"] for m in models]
+    primary = model_ids[0] if model_ids else "llama-3.3-70b-versatile"
     return {
         "success": True,
         "provider": "groq",
         "available": True,
         "configured": bool(user_key),
-        "primary_model": "llama-3.3-70b-versatile",
-        "supported_models": [
-            "llama-3.3-70b-versatile",
-            "llama-3.1-8b-instant",
-            "mixtral-8x7b-32768",
-        ],
+        "primary_model": primary,
+        "supported_models": model_ids,
+        "models": models,
     }
 
 

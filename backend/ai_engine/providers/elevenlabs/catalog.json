@@ -28,7 +28,7 @@
   },
   {
     "id": "gpt-sovits",
-    "provider": "voice_cloning",
+    "provider": "elevenlabs",
     "name": "GPT-SoVITS (Zero-Shot Anime Voice Cloning • Beast)",
     "category": "Voice & Speech Studios",
     "context_window": 4096,
@@ -55,7 +55,7 @@
   },
   {
     "id": "cosyvoice",
-    "provider": "voice_cloning",
+    "provider": "elevenlabs",
     "name": "CosyVoice / F5-TTS (High-Fidelity Expressive Dialogue • Beast)",
     "category": "Voice & Speech Studios",
     "context_window": 4096,
@@ -82,7 +82,7 @@
   },
   {
     "id": "edge-tts",
-    "provider": "voice_cloning",
+    "provider": "elevenlabs",
     "name": "Microsoft Edge Neural TTS (Multi-Voice Studio)",
     "category": "Voice & Speech Studios",
     "context_window": 8192,

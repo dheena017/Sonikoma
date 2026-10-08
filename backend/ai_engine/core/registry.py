@@ -51,12 +51,12 @@ def load_catalog_from_providers() -> List[Dict[str, Any]]:
             try:
                 with open(cat_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    if isinstance(data, list):
-                        for m in data:
-                            m_id = m.get("id")
-                            if m_id and m_id not in seen_ids:
-                                seen_ids.add(m_id)
-                                all_models.append(m)
+                    items = data if isinstance(data, list) else (data.get("models", []) if isinstance(data, dict) else [])
+                    for m in items:
+                        m_id = m.get("id")
+                        if m_id and m_id not in seen_ids:
+                            seen_ids.add(m_id)
+                            all_models.append(m)
             except Exception as e:
                 logger.error(f"Failed to load catalog for provider '{prov_name}': {e}")
 
@@ -81,8 +81,18 @@ class ModelRegistry:
     @classmethod
     def get_catalog_by_provider(cls, provider: str) -> List[Dict[str, Any]]:
         """Returns models exclusively for the specified provider (e.g. 'gemini' / 'google')."""
-        p = provider.lower().replace("google", "gemini")
-        return [m for m in cls.get_catalog() if m.get("provider", "").lower() == p]
+        norm = provider.lower().replace("google", "gemini").replace("-", "_")
+        aliases = {
+            "edgetts": "edge_tts",
+            "stablediffusion": "stable_diffusion",
+            "videokinetic": "video",
+            "video_kinetic": "video",
+        }
+        target = aliases.get(norm, norm)
+        return [
+            m for m in cls.get_catalog()
+            if m.get("provider", "").lower().replace("-", "_") in (target, target.replace("_", ""))
+        ]
 
     @classmethod
     def reload_catalog(cls) -> List[Dict[str, Any]]:

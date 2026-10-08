@@ -1,7 +1,7 @@
 [
   {
     "id": "tooncrafter",
-    "provider": "video_kinetic",
+    "provider": "video",
     "name": "ToonCrafter (Anime Keyframe Interpolation • Beast)",
     "category": "Kinetic & Motion Synthesis",
     "context_window": 512,
@@ -28,7 +28,7 @@
   },
   {
     "id": "animatediff",
-    "provider": "video_kinetic",
+    "provider": "video",
     "name": "AnimateDiff v3 (24fps Dynamic Sakuga • Beast)",
     "category": "Kinetic & Motion Synthesis",
     "context_window": 512,
@@ -55,7 +55,7 @@
   },
   {
     "id": "wan-video",
-    "provider": "video_kinetic",
+    "provider": "video",
     "name": "Wan2.1 (Cinematic AI Video Generation • Beast)",
     "category": "Kinetic & Motion Synthesis",
     "context_window": 512,
@@ -82,7 +82,7 @@
   },
   {
     "id": "parallax",
-    "provider": "video_kinetic",
+    "provider": "video",
     "name": "2.5D Parallax Optical Pan & Scan",
     "category": "Kinetic & Motion Synthesis",
     "context_window": 512,
@@ -109,7 +109,7 @@
   },
   {
     "id": "real-esrgan-anime",
-    "provider": "video_kinetic",
+    "provider": "video",
     "name": "Real-ESRGAN Anime 6B (4K Super-Resolution • Beast)",
     "category": "Enhancement & Upscaling",
     "context_window": 512,
@@ -136,7 +136,7 @@
   },
   {
     "id": "comic-text-detector",
-    "provider": "video_kinetic",
+    "provider": "video",
     "name": "ComicTextDetector + IOPaint (Clean Speech Inpainting • Beast)",
     "category": "Enhancement & Upscaling",
     "context_window": 512,
@@ -163,7 +163,7 @@
   },
   {
     "id": "manga-ocr",
-    "provider": "video_kinetic",
+    "provider": "video",
     "name": "Manga-OCR (Stylized Typography & SFX Reader)",
     "category": "Enhancement & Upscaling",
     "context_window": 512,

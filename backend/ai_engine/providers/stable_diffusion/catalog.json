@@ -1,7 +1,7 @@
 [
   {
     "id": "stable-diffusion-xl",
-    "provider": "stablediffusion",
+    "provider": "stable_diffusion",
     "name": "Local Stable Diffusion XL",
     "category": "Local GPU Generation",
     "context_window": 512,

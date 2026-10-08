@@ -48,6 +48,12 @@ router = APIRouter()
 @router.get("/status", summary="Get status and configuration of all AI providers")
 async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
     """Returns real-time availability and key status across all foundation and media engines."""
+    from ai_engine.core.registry import ModelRegistry
+
+    def _get_primary(prov: str, fallback: str) -> str:
+        models = ModelRegistry.get_catalog_by_provider(prov)
+        return models[0]["id"] if models else fallback
+
     return {
         "success": True,
         "providers": {
@@ -56,7 +62,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "foundation_multimodal",
                 "available": GEMINI_AVAILABLE,
                 "configured": bool(clean_api_key(user_keys.get("gemini")) or GEMINI_API_KEY),
-                "primary_model": GEMINI_MODEL_PRIMARY,
+                "primary_model": _get_primary("gemini", GEMINI_MODEL_PRIMARY),
                 "supported_modalities": ["text", "vision", "audio", "video_understanding"],
             },
             "openai": {
@@ -64,7 +70,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "foundation_llm",
                 "available": OPENAI_AVAILABLE,
                 "configured": bool(clean_api_key(user_keys.get("openai")) or OPENAI_API_KEY),
-                "primary_model": "gpt-4o",
+                "primary_model": _get_primary("openai", "gpt-4o"),
                 "supported_modalities": ["text", "vision", "speech"],
             },
             "anthropic": {
@@ -72,7 +78,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "foundation_reasoning",
                 "available": ANTHROPIC_AVAILABLE,
                 "configured": bool(clean_api_key(user_keys.get("anthropic")) or ANTHROPIC_API_KEY),
-                "primary_model": "claude-3-5-sonnet-20241022",
+                "primary_model": _get_primary("anthropic", "claude-3-5-sonnet"),
                 "supported_modalities": ["text", "vision"],
             },
             "deepseek": {
@@ -80,7 +86,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "foundation_reasoning",
                 "available": True,
                 "configured": bool(clean_api_key(user_keys.get("deepseek"))),
-                "primary_model": "deepseek-chat",
+                "primary_model": _get_primary("deepseek", "deepseek-chat"),
                 "supported_modalities": ["text", "code", "reasoning"],
             },
             "groq": {
@@ -88,7 +94,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "fast_inference",
                 "available": True,
                 "configured": bool(clean_api_key(user_keys.get("groq"))),
-                "primary_model": "llama-3.3-70b-versatile",
+                "primary_model": _get_primary("groq", "llama-3.3-70b-versatile"),
                 "supported_modalities": ["text"],
             },
             "huggingface": {
@@ -96,7 +102,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "image_diffusion",
                 "available": HUGGINGFACE_AVAILABLE,
                 "configured": bool(clean_api_key(user_keys.get("huggingface")) or HUGGINGFACE_API_KEY),
-                "primary_model": "black-forest-labs/FLUX.1-schnell",
+                "primary_model": _get_primary("huggingface", "FLUX.1-schnell"),
                 "supported_modalities": ["text_to_image"],
             },
             "pollinations": {
@@ -104,7 +110,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "image_diffusion",
                 "available": True,
                 "configured": True,  # Free public API
-                "primary_model": "flux-anime",
+                "primary_model": _get_primary("pollinations", "flux"),
                 "supported_modalities": ["text_to_image"],
             },
             "stable_diffusion": {
@@ -112,7 +118,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "image_diffusion",
                 "available": DIFFUSERS_AVAILABLE,
                 "configured": DIFFUSERS_AVAILABLE,
-                "primary_model": "runwayml/stable-diffusion-v1-5",
+                "primary_model": _get_primary("stable_diffusion", "stable-diffusion-xl"),
                 "supported_modalities": ["text_to_image", "inpaint", "upscale"],
             },
             "edge_tts": {
@@ -120,7 +126,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "speech_synthesis",
                 "available": EDGE_TTS_AVAILABLE,
                 "configured": EDGE_TTS_AVAILABLE,
-                "primary_model": "en-US-GuyNeural",
+                "primary_model": _get_primary("edge_tts", "edge-tts-neural"),
                 "supported_modalities": ["text_to_speech"],
             },
             "elevenlabs": {
@@ -128,7 +134,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "speech_synthesis",
                 "available": True,
                 "configured": bool(clean_api_key(user_keys.get("elevenlabs"))),
-                "primary_model": "eleven_multilingual_v2",
+                "primary_model": _get_primary("elevenlabs", "eleven_multilingual_v2"),
                 "supported_modalities": ["text_to_speech", "voice_cloning"],
             },
             "whisper": {
@@ -136,7 +142,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "speech_transcription",
                 "available": WHISPER_AVAILABLE,
                 "configured": WHISPER_AVAILABLE,
-                "primary_model": "base",
+                "primary_model": _get_primary("whisper", "whisper-1"),
                 "supported_modalities": ["speech_to_text", "subtitles"],
             },
             "librosa": {
@@ -144,7 +150,7 @@ async def get_providers_status(user_keys: dict = Depends(get_all_user_keys)):
                 "category": "audio_analysis",
                 "available": LIBROSA_AVAILABLE,
                 "configured": LIBROSA_AVAILABLE,
-                "primary_model": "librosa-dsp",
+                "primary_model": _get_primary("librosa", "librosa-dsp"),
                 "supported_modalities": ["beat_detection", "bpm", "onset_detection"],
             },
         }

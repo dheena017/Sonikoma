@@ -43,21 +43,20 @@ class GeminiGenerateRequest(BaseModel):
 
 @router.get("/status", summary="Check Gemini provider status and configuration")
 async def get_gemini_status(user_keys: dict = Depends(get_all_user_keys)):
+    from ai_engine.core.registry import ModelRegistry
     user_key = clean_api_key(user_keys.get("gemini"))
     configured = bool(user_key or GEMINI_API_KEY)
+    models = ModelRegistry.get_catalog_by_provider("gemini")
+    model_ids = [m["id"] for m in models]
+    primary = model_ids[0] if model_ids else GEMINI_MODEL_PRIMARY
     return {
         "success": True,
         "provider": "gemini",
         "available": GEMINI_AVAILABLE,
         "configured": configured,
-        "primary_model": GEMINI_MODEL_PRIMARY,
-        "supported_models": [
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-            "gemini-2.0-flash",
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
-        ],
+        "primary_model": primary,
+        "supported_models": model_ids,
+        "models": models,
     }
 
 

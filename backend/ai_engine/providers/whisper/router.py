@@ -37,19 +37,18 @@ class WhisperSubtitlesRequest(BaseModel):
 
 @router.get("/status", summary="Check Whisper speech-to-text provider status")
 async def get_whisper_status():
+    from ai_engine.core.registry import ModelRegistry
+    models = ModelRegistry.get_catalog_by_provider("whisper")
+    model_ids = [m["id"] for m in models]
+    primary = model_ids[0] if model_ids else "whisper-1"
     return {
         "success": True,
         "provider": "whisper",
         "available": WHISPER_AVAILABLE,
         "configured": WHISPER_AVAILABLE,
-        "primary_model": "base",
-        "supported_models": [
-            "tiny",
-            "base",
-            "small",
-            "medium",
-            "large",
-        ],
+        "primary_model": primary,
+        "supported_models": model_ids,
+        "models": models,
     }
 
 

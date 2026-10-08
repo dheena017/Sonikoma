@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/providers/openai.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 OpenAI Provider API Routes:
@@ -38,21 +38,20 @@ class OpenAIVisionRequest(BaseModel):
 
 @router.get("/status", summary="Check OpenAI provider status and configuration")
 async def get_openai_status(user_keys: dict = Depends(get_all_user_keys)):
+    from ai_engine.core.registry import ModelRegistry
     user_key = clean_api_key(user_keys.get("openai"))
     configured = bool(user_key or OPENAI_API_KEY)
+    models = ModelRegistry.get_catalog_by_provider("openai")
+    model_ids = [m["id"] for m in models]
+    primary = model_ids[0] if model_ids else "gpt-4o"
     return {
         "success": True,
         "provider": "openai",
         "available": OPENAI_AVAILABLE,
         "configured": configured,
-        "primary_model": "gpt-4o",
-        "supported_models": [
-            "gpt-4o",
-            "gpt-4o-mini",
-            "o1",
-            "o1-mini",
-            "o3-mini",
-        ],
+        "primary_model": primary,
+        "supported_models": model_ids,
+        "models": models,
     }
 
 

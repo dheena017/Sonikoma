@@ -1,7 +1,7 @@
 [
   {
     "id": "edge-tts-neural",
-    "provider": "edgetts",
+    "provider": "edge_tts",
     "name": "Microsoft Edge Neural TTS",
     "category": "Neural Speech & Emotion",
     "context_window": 10000,

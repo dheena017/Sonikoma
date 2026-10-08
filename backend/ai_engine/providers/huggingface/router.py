@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/providers/huggingface.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Hugging Face Inference API Provider Routes:
@@ -34,19 +34,20 @@ class HuggingFaceImageRequest(BaseModel):
 
 @router.get("/status", summary="Check Hugging Face provider status and configuration")
 async def get_huggingface_status(user_keys: dict = Depends(get_all_user_keys)):
+    from ai_engine.core.registry import ModelRegistry
     user_key = clean_api_key(user_keys.get("huggingface"))
     configured = bool(user_key or HUGGINGFACE_API_KEY)
+    models = ModelRegistry.get_catalog_by_provider("huggingface")
+    model_ids = [m["id"] for m in models]
+    primary = model_ids[0] if model_ids else "FLUX.1-schnell"
     return {
         "success": True,
         "provider": "huggingface",
         "available": HUGGINGFACE_AVAILABLE,
         "configured": configured,
-        "primary_model": "black-forest-labs/FLUX.1-schnell",
-        "supported_models": [
-            "black-forest-labs/FLUX.1-schnell",
-            "black-forest-labs/FLUX.1-dev",
-            "stabilityai/stable-diffusion-xl-base-1.0",
-        ],
+        "primary_model": primary,
+        "supported_models": model_ids,
+        "models": models,
     }
 
 

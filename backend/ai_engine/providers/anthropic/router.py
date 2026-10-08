@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/providers/anthropic.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Anthropic Claude Provider API Routes:
@@ -31,19 +31,20 @@ class AnthropicMessageRequest(BaseModel):
 
 @router.get("/status", summary="Check Anthropic Claude provider status")
 async def get_anthropic_status(user_keys: dict = Depends(get_all_user_keys)):
+    from ai_engine.core.registry import ModelRegistry
     user_key = clean_api_key(user_keys.get("anthropic"))
     configured = bool(user_key or ANTHROPIC_API_KEY)
+    models = ModelRegistry.get_catalog_by_provider("anthropic")
+    model_ids = [m["id"] for m in models]
+    primary = model_ids[0] if model_ids else "claude-3-5-sonnet-20241022"
     return {
         "success": True,
         "provider": "anthropic",
         "available": ANTHROPIC_AVAILABLE,
         "configured": configured,
-        "primary_model": "claude-3-5-sonnet-20241022",
-        "supported_models": [
-            "claude-3-5-sonnet-20241022",
-            "claude-3-5-haiku-20241022",
-            "claude-3-opus-20240229",
-        ],
+        "primary_model": primary,
+        "supported_models": model_ids,
+        "models": models,
     }
 
 
