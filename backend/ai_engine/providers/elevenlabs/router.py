@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/providers/elevenlabs.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 ElevenLabs Neural Voice AI Provider API Routes:
@@ -40,12 +40,15 @@ class ElevenLabsSynthesizeRequest(BaseModel):
 @router.get("/status", summary="Check ElevenLabs provider status and configuration")
 async def get_elevenlabs_status(user_keys: dict = Depends(get_all_user_keys)):
     user_key = clean_api_key(user_keys.get("elevenlabs")) or ElevenLabsClient.get_api_key()
+    from ai_engine.core.registry import ModelRegistry
+    el_models = ModelRegistry.get_catalog_by_provider("elevenlabs")
+    primary_model = el_models[0]["id"] if el_models else "eleven_multilingual_v2"
     return {
         "success": True,
         "provider": "elevenlabs",
         "available": True,
         "configured": bool(user_key),
-        "primary_model": "eleven_multilingual_v2",
+        "primary_model": primary_model,
         "default_voice": "21m00Tcm4TlvDq8ikWAM",
     }
 

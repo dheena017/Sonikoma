@@ -30,8 +30,6 @@ let _catalogLoaded = false;
 let _isCatalogFetching = false;
 let _lastCatalogFetch = 0;
 
-export const AVAILABLE_AI_MODELS: AIModelInfo[] = [];
-
 export const getConfiguredProviders = (): Set<string> => {
   const configured = new Set<string>();
   configured.add("local"); // Local edge-tts and local tools always available

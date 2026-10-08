@@ -13,8 +13,6 @@ export interface AIModel {
   recommended_for?: string[];
 }
 
-export const AI_MODELS: AIModel[] = [];
-
 export interface PanelLayers {
   background_url: string;
   character_url: string;

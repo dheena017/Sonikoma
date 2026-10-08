@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { AIModel, AI_MODELS as FALLBACK_MODELS } from "@/shared/types/models";
+import { AIModel } from "@/shared/types/models";
 import * as api from "@/shared/api";
 
 let cachedModels: AIModel[] | null = null;
@@ -8,7 +8,7 @@ let fetchPromise: Promise<AIModel[]> | null = null;
 
 export function useAIModels() {
   const [models, setModels] = useState<AIModel[]>(
-    cachedModels || FALLBACK_MODELS
+    cachedModels || []
   );
   const [loading, setLoading] = useState<boolean>(!cachedModels);
 

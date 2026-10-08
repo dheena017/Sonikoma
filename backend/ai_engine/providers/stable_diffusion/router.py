@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/providers/stable_diffusion.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Local Stable Diffusion / Diffusers Generative Engine Provider API Routes:
@@ -63,13 +63,17 @@ async def get_stable_diffusion_status():
     except Exception:
         pass
 
+    from ai_engine.core.registry import ModelRegistry
+    sd_models = ModelRegistry.get_catalog_by_provider("stable_diffusion")
+    default_model = sd_models[0]["id"] if sd_models else "runwayml/stable-diffusion-v1-5"
+
     return {
         "success": True,
         "provider": "stable_diffusion",
         "available": DIFFUSERS_AVAILABLE,
         "cuda_available": cuda_available,
         "device": device_name,
-        "default_model": "runwayml/stable-diffusion-v1-5",
+        "default_model": default_model,
         "supported_operations": [
             "text_to_image",
             "inpaint",

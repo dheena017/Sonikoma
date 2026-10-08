@@ -362,9 +362,12 @@ async def unified_generate_image(body: ImageRequest, user_keys: dict = Depends(g
     # â”€â”€ Pollinations (free, no key needed) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if provider == "pollinations":
         from ai_engine.providers.pollinations import PollinationsClient
+        from ai_engine.core.registry import ModelRegistry
+        pm_list = ModelRegistry.get_catalog_by_provider("pollinations")
+        default_poll_model = pm_list[0]["id"] if pm_list else "flux-anime"
         img_bytes, used_model, err = await PollinationsClient.generate_image(
             prompt=body.prompt,
-            model=body.model or "flux-anime",
+            model=body.model or default_poll_model,
             width=body.width or 768,
             height=body.height or 1024,
             seed=body.seed,
@@ -689,93 +692,103 @@ async def gateway_health(user_keys: dict = Depends(get_all_user_keys)):
     def _kc(provider: str) -> bool:
         return bool(user_keys.get(provider))
 
+    def _pm(prov: str, fallback: str) -> str:
+        try:
+            from ai_engine.core.registry import ModelRegistry
+            models = ModelRegistry.get_catalog_by_provider(prov)
+            if models and len(models) > 0:
+                return models[0]["id"]
+        except Exception:
+            pass
+        return fallback
+
     providers = {
-        # â”€â”€ LLMs â”€â”€
+        # ── LLMs ──
         "gemini": {
             "category": "llm",
             "package_installed": GEMINI_AVAILABLE,
             "key_configured": _kc("gemini"),
             "ready": GEMINI_AVAILABLE and _kc("gemini"),
-            "primary_model": "gemini-2.5-flash",
+            "primary_model": _pm("gemini", "gemini-2.5-flash"),
         },
         "openai": {
             "category": "llm",
             "package_installed": OPENAI_AVAILABLE,
             "key_configured": _kc("openai"),
             "ready": OPENAI_AVAILABLE and _kc("openai"),
-            "primary_model": "gpt-4o",
+            "primary_model": _pm("openai", "gpt-4o"),
         },
         "anthropic": {
             "category": "llm",
             "package_installed": ANTHROPIC_AVAILABLE,
             "key_configured": _kc("anthropic"),
             "ready": ANTHROPIC_AVAILABLE and _kc("anthropic"),
-            "primary_model": "claude-3-5-sonnet-20241022",
+            "primary_model": _pm("anthropic", "claude-3-5-sonnet-20241022"),
         },
         "deepseek": {
             "category": "llm",
             "package_installed": True,   # pure HTTP, no SDK needed
             "key_configured": _kc("deepseek"),
             "ready": _kc("deepseek"),
-            "primary_model": "deepseek-chat",
+            "primary_model": _pm("deepseek", "deepseek-chat"),
         },
         "groq": {
             "category": "llm",
             "package_installed": True,
             "key_configured": _kc("groq"),
             "ready": _kc("groq"),
-            "primary_model": "llama-3.3-70b-versatile",
+            "primary_model": _pm("groq", "llama-3.3-70b-versatile"),
         },
-        # â”€â”€ Image â”€â”€
+        # ── Image ──
         "pollinations": {
             "category": "image",
             "package_installed": True,
             "key_configured": True,      # free public API
             "ready": True,
-            "primary_model": "flux-anime",
+            "primary_model": _pm("pollinations", "flux-anime"),
         },
         "huggingface": {
             "category": "image",
             "package_installed": HUGGINGFACE_AVAILABLE,
             "key_configured": _kc("huggingface"),
             "ready": HUGGINGFACE_AVAILABLE and _kc("huggingface"),
-            "primary_model": "black-forest-labs/FLUX.1-schnell",
+            "primary_model": _pm("huggingface", "black-forest-labs/FLUX.1-schnell"),
         },
         "stable_diffusion": {
             "category": "image",
             "package_installed": DIFFUSERS_AVAILABLE,
             "key_configured": True,      # local, no key
             "ready": DIFFUSERS_AVAILABLE,
-            "primary_model": "runwayml/stable-diffusion-v1-5",
+            "primary_model": _pm("stable_diffusion", "runwayml/stable-diffusion-v1-5"),
         },
-        # â”€â”€ Audio â”€â”€
+        # ── Audio ──
         "edge_tts": {
             "category": "tts",
             "package_installed": EDGE_TTS_AVAILABLE,
             "key_configured": True,
             "ready": EDGE_TTS_AVAILABLE,
-            "primary_model": "en-US-GuyNeural",
+            "primary_model": _pm("edge_tts", "en-US-GuyNeural"),
         },
         "elevenlabs": {
             "category": "tts",
             "package_installed": True,
             "key_configured": _kc("elevenlabs"),
             "ready": _kc("elevenlabs"),
-            "primary_model": "eleven_multilingual_v2",
+            "primary_model": _pm("elevenlabs", "eleven_multilingual_v2"),
         },
         "whisper": {
             "category": "stt",
             "package_installed": WHISPER_AVAILABLE,
             "key_configured": True,
             "ready": WHISPER_AVAILABLE,
-            "primary_model": "base",
+            "primary_model": _pm("whisper", "base"),
         },
         "librosa": {
             "category": "audio_analysis",
             "package_installed": LIBROSA_AVAILABLE,
             "key_configured": True,
             "ready": LIBROSA_AVAILABLE,
-            "primary_model": "librosa-dsp",
+            "primary_model": _pm("librosa", "librosa-dsp"),
         },
     }
 
