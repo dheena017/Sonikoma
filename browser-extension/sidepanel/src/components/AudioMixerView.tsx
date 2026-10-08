@@ -32,27 +32,27 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
   onTestVoice,
 }) => {
   return (
-    <div className="p-3.5 flex flex-col gap-3.5 overflow-y-auto">
+    <div className="p-3.5 flex flex-col gap-3.5 overflow-y-auto bg-[#0a0a0a]">
       {/* ── Primary Voice Actor ── */}
-      <div className="bg-[#121827] border border-[#1e293b] rounded-xl p-3 flex flex-col gap-3 shadow-sm">
+      <div className="bg-[#181818] border border-[#2f2f2f] rounded-xl p-3 flex flex-col gap-3 shadow-sm">
         <div className="flex items-center gap-2">
-          <Mic size={15} className="text-sky-400" />
+          <Mic size={15} className="text-blue-400" />
           <div>
-            <h3 className="text-xs font-bold text-white">Neural Voice Actor</h3>
-            <p className="text-[10px] text-slate-400">
+            <h3 className="text-xs font-bold text-[#e5e5e5]">Neural Voice Actor</h3>
+            <p className="text-[10px] text-[#9ca3af]">
               Microsoft Azure Neural voice dubbing
             </p>
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+          <label className="text-[9px] font-bold text-[#9ca3af] uppercase tracking-wider">
             Voice Model
           </label>
           <select
             value={selectedVoice}
             onChange={(e) => onVoiceChange(e.target.value)}
-            className="bg-[#0c101d] border border-[#1e293b] rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none cursor-pointer"
+            className="bg-[#121212] border border-[#2f2f2f] rounded-lg px-2.5 py-1.5 text-xs text-[#e5e5e5] outline-none cursor-pointer focus:border-blue-500"
           >
             {voices.length > 0 ? (
               voices.map((v) => (
@@ -82,11 +82,11 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 pt-1 border-t border-[#182236]">
+        <div className="grid grid-cols-2 gap-3 pt-1 border-t border-[#262626]">
           <div className="flex flex-col gap-1">
-            <div className="flex justify-between text-[9px] text-slate-400">
+            <div className="flex justify-between text-[9px] text-[#9ca3af]">
               <span className="font-bold uppercase">Speech Rate</span>
-              <span className="font-mono text-sky-400">{speechRate}x</span>
+              <span className="font-mono text-blue-400">{speechRate}x</span>
             </div>
             <input
               type="range"
@@ -95,14 +95,14 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
               step={0.1}
               value={speechRate}
               onChange={(e) => onSpeechRateChange(parseFloat(e.target.value))}
-              className="accent-sky-500 bg-[#1e293b] h-1.5 rounded-lg cursor-pointer"
+              className="accent-blue-500 bg-[#262626] h-1.5 rounded-lg cursor-pointer"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <div className="flex justify-between text-[9px] text-slate-400">
+            <div className="flex justify-between text-[9px] text-[#9ca3af]">
               <span className="font-bold uppercase">Pitch Shift</span>
-              <span className="font-mono text-sky-400">{speechPitch}x</span>
+              <span className="font-mono text-blue-400">{speechPitch}x</span>
             </div>
             <input
               type="range"
@@ -111,7 +111,7 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
               step={0.1}
               value={speechPitch}
               onChange={(e) => onSpeechPitchChange(parseFloat(e.target.value))}
-              className="accent-sky-500 bg-[#1e293b] h-1.5 rounded-lg cursor-pointer"
+              className="accent-blue-500 bg-[#262626] h-1.5 rounded-lg cursor-pointer"
             />
           </div>
         </div>
@@ -119,7 +119,7 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
         <button
           type="button"
           onClick={onTestVoice}
-          className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-[#162033] hover:bg-sky-600 hover:text-white border border-[#253652] text-sky-300 font-semibold text-xs transition-colors cursor-pointer"
+          className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-[#222222] hover:bg-blue-600 hover:text-white border border-[#2f2f2f] text-blue-400 font-semibold text-xs transition-colors cursor-pointer"
         >
           <Play size={11} />
           <span>Test Voice Narration</span>
@@ -127,14 +127,14 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
       </div>
 
       {/* ── Background Music ── */}
-      <div className="bg-[#121827] border border-[#1e293b] rounded-xl p-3 flex flex-col gap-3 shadow-sm">
+      <div className="bg-[#181818] border border-[#2f2f2f] rounded-xl p-3 flex flex-col gap-3 shadow-sm">
         <div className="flex items-center gap-2">
           <Music size={15} className="text-emerald-400" />
           <div>
-            <h3 className="text-xs font-bold text-white">
+            <h3 className="text-xs font-bold text-[#e5e5e5]">
               Cinematic BGM Soundtrack
             </h3>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[10px] text-[#9ca3af]">
               Procedural mood scoring synced with scene transitions
             </p>
           </div>
@@ -148,20 +148,20 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
               onClick={() => onBgmMoodChange(mood.id)}
               className={`flex flex-col text-left p-2 rounded-lg border transition-all cursor-pointer ${
                 bgmMood === mood.id
-                  ? "bg-sky-950/60 border-sky-500 text-white shadow-sm"
-                  : "bg-[#0c101d] border-[#1e293b] text-slate-300 hover:border-slate-600"
+                  ? "bg-blue-600/20 border-blue-500 text-white shadow-sm"
+                  : "bg-[#121212] border-[#2f2f2f] text-[#9ca3af] hover:border-[#3f3f3f] hover:text-[#e5e5e5]"
               }`}
             >
               <span className="font-bold text-[11px]">{mood.label}</span>
-              <span className="text-[9px] text-slate-400 line-clamp-1 mt-0.5">
+              <span className="text-[9px] text-[#9ca3af] line-clamp-1 mt-0.5">
                 {mood.desc}
               </span>
             </button>
           ))}
         </div>
 
-        <div className="flex flex-col gap-1 pt-1 border-t border-[#182236]">
-          <div className="flex justify-between text-[10px] text-slate-400">
+        <div className="flex flex-col gap-1 pt-1 border-t border-[#262626]">
+          <div className="flex justify-between text-[10px] text-[#9ca3af]">
             <span className="font-bold uppercase text-[9px]">
               BGM Master Volume
             </span>
@@ -173,7 +173,7 @@ export const AudioMixerView: React.FC<AudioMixerViewProps> = ({
             max={100}
             value={bgmVolume}
             onChange={(e) => onBgmVolumeChange(parseInt(e.target.value))}
-            className="accent-emerald-400 bg-[#1e293b] h-1.5 rounded-lg cursor-pointer"
+            className="accent-emerald-400 bg-[#262626] h-1.5 rounded-lg cursor-pointer"
           />
         </div>
       </div>

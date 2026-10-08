@@ -55,14 +55,14 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ error, onClose }) => {
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-sm bg-[#0f1422] border-2 border-rose-500/50 rounded-2xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 p-4">
+      <div className="relative w-full max-w-sm bg-[#181818] border border-rose-500/40 rounded-2xl shadow-2xl overflow-hidden z-10 animate-in zoom-in-95 duration-200 p-4">
         {/* Top Glow bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent" />
 
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-slate-400 hover:text-white p-1 rounded-full bg-slate-900/60 hover:bg-slate-800 transition-colors cursor-pointer"
+          className="absolute top-3 right-3 text-[#9ca3af] hover:text-white p-1 rounded-full bg-[#222222] hover:bg-[#2a2a2a] border border-[#2f2f2f] transition-colors cursor-pointer"
           title="Close dialog"
         >
           <X size={14} />
@@ -77,7 +77,7 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ error, onClose }) => {
             <span className="text-[9px] uppercase tracking-wider font-bold font-mono px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 border border-rose-500/20">
               System Error
             </span>
-            <h3 className="text-sm font-bold text-white mt-1 leading-snug">
+            <h3 className="text-sm font-bold text-[#e5e5e5] mt-1 leading-snug">
               {error.title}
             </h3>
           </div>
@@ -102,14 +102,14 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ error, onClose }) => {
             <button
               type="button"
               onClick={() => setExpanded(!expanded)}
-              className="flex items-center justify-between w-full py-1 text-[11px] text-slate-400 hover:text-slate-200 font-mono transition-colors cursor-pointer"
+              className="flex items-center justify-between w-full py-1 text-[11px] text-[#9ca3af] hover:text-[#e5e5e5] font-mono transition-colors cursor-pointer"
             >
               <span>{expanded ? "Hide Details" : "View Technical Logs"}</span>
               {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
             </button>
 
             {expanded && (
-              <pre className="mt-1 bg-black/60 border border-slate-800 rounded-lg p-2 text-[10px] text-slate-300 font-mono overflow-x-auto max-h-24 whitespace-pre-wrap break-all select-text">
+              <pre className="mt-1 bg-[#121212] border border-[#2f2f2f] rounded-lg p-2 text-[10px] text-[#e5e5e5] font-mono overflow-x-auto max-h-24 whitespace-pre-wrap break-all select-text">
                 {error.technicalDetails}
               </pre>
             )}
@@ -117,11 +117,11 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ error, onClose }) => {
         )}
 
         {/* Footer Actions */}
-        <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
+        <div className="mt-4 pt-3 border-t border-[#262626] flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800/70 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium transition-colors cursor-pointer border border-slate-700/50"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#222222] hover:bg-[#2a2a2a] text-[#9ca3af] hover:text-white text-[11px] font-medium transition-colors cursor-pointer border border-[#2f2f2f]"
             title="Copy error diagnosis to clipboard"
           >
             {copied ? (
@@ -146,7 +146,7 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({ error, onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-[11px] font-medium transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-[#222222] hover:bg-[#2a2a2a] text-[#e5e5e5] hover:text-white text-[11px] font-medium transition-colors cursor-pointer border border-[#2f2f2f]"
             >
               Dismiss
             </button>

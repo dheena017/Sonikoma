@@ -98,7 +98,7 @@ export default function RegisterForm({
 
 
 
-          <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 shadow-2xl space-y-4">
+          <div className="rounded-[30px] border border-[#2F2F2F]/90 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),transparent_32%),linear-gradient(180deg,#1a1a1d_0%,#141517_48%,#0d0e11_100%)] p-4 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] ring-1 ring-white/5 space-y-4">
             <form noValidate className="space-y-4" onSubmit={handleSubmit}>
               {error && (
                 <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs text-center font-medium">
@@ -126,8 +126,8 @@ export default function RegisterForm({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
-                    placeholder="Your Name"
+                    className="w-full bg-[#121417] border border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]"
+                    placeholder="Enter your full name"
                   />
                 </div>
               </div>
@@ -157,8 +157,8 @@ export default function RegisterForm({
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
-                    placeholder="name@example.com"
+                    className="w-full bg-[#121417] border border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]"
+                    placeholder="Enter your email address"
                   />
                 </div>
               </div>
@@ -177,8 +177,8 @@ export default function RegisterForm({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
-                    placeholder="Create password (8+ characters)"
+                    className="w-full bg-[#121417] border border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]"
+                    placeholder="Enter your password"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
                     <Tooltip
@@ -245,7 +245,7 @@ export default function RegisterForm({
                 <button
                   type="submit"
                   disabled={isLoading || !isFormValid}
-                  className="w-full bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
+                  className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-[0_12px_28px_rgba(59,130,246,0.35)] hover:shadow-[0_16px_36px_rgba(59,130,246,0.45)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 group cursor-pointer text-sm"
                 >
                   {isLoading ? (
                     <>

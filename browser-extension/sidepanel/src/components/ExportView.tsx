@@ -21,11 +21,11 @@ export const ExportView: React.FC<ExportViewProps> = ({
   onShowSubtitlesChange,
 }) => {
   return (
-    <div className="p-3.5 flex flex-col gap-3.5 overflow-y-auto">
+    <div className="p-3.5 flex flex-col gap-3.5 overflow-y-auto bg-[#0a0a0a]">
       {/* ── Target Video Format ── */}
-      <div className="bg-[#121827] border border-[#1e293b] rounded-xl p-3 flex flex-col gap-3 shadow-sm">
-        <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-          <Tv size={14} className="text-sky-400" />
+      <div className="bg-[#181818] border border-[#2f2f2f] rounded-xl p-3 flex flex-col gap-3 shadow-sm">
+        <h3 className="text-xs font-bold text-[#e5e5e5] flex items-center gap-1.5">
+          <Tv size={14} className="text-blue-400" />
           <span>Target Video Format</span>
         </h3>
 
@@ -35,12 +35,12 @@ export const ExportView: React.FC<ExportViewProps> = ({
             onClick={() => onAspectRatioChange("16:9")}
             className={`flex flex-col items-center p-2 rounded-lg border text-center transition-all cursor-pointer ${
               aspectRatio === "16:9"
-                ? "bg-blue-950/80 border-blue-500 text-white shadow-sm"
-                : "bg-[#0c101d] border-[#1e293b] text-slate-400 hover:text-slate-200"
+                ? "bg-blue-600/20 border-blue-500 text-white shadow-sm"
+                : "bg-[#121212] border-[#2f2f2f] text-[#9ca3af] hover:text-[#e5e5e5] hover:border-[#3f3f3f]"
             }`}
           >
             <span className="font-mono font-bold text-xs">16:9</span>
-            <span className="text-[8px] text-slate-400 mt-0.5">YouTube</span>
+            <span className="text-[8px] text-[#9ca3af] mt-0.5">YouTube</span>
           </button>
 
           <button
@@ -48,12 +48,12 @@ export const ExportView: React.FC<ExportViewProps> = ({
             onClick={() => onAspectRatioChange("9:16")}
             className={`flex flex-col items-center p-2 rounded-lg border text-center transition-all cursor-pointer ${
               aspectRatio === "9:16"
-                ? "bg-blue-950/80 border-blue-500 text-white shadow-sm"
-                : "bg-[#0c101d] border-[#1e293b] text-slate-400 hover:text-slate-200"
+                ? "bg-blue-600/20 border-blue-500 text-white shadow-sm"
+                : "bg-[#121212] border-[#2f2f2f] text-[#9ca3af] hover:text-[#e5e5e5] hover:border-[#3f3f3f]"
             }`}
           >
             <span className="font-mono font-bold text-xs">9:16</span>
-            <span className="text-[8px] text-slate-400 mt-0.5">
+            <span className="text-[8px] text-[#9ca3af] mt-0.5">
               Shorts/Reels
             </span>
           </button>
@@ -63,21 +63,21 @@ export const ExportView: React.FC<ExportViewProps> = ({
             onClick={() => onAspectRatioChange("1:1")}
             className={`flex flex-col items-center p-2 rounded-lg border text-center transition-all cursor-pointer ${
               aspectRatio === "1:1"
-                ? "bg-blue-950/80 border-blue-500 text-white shadow-sm"
-                : "bg-[#0c101d] border-[#1e293b] text-slate-400 hover:text-slate-200"
+                ? "bg-blue-600/20 border-blue-500 text-white shadow-sm"
+                : "bg-[#121212] border-[#2f2f2f] text-[#9ca3af] hover:text-[#e5e5e5] hover:border-[#3f3f3f]"
             }`}
           >
             <span className="font-mono font-bold text-xs">1:1</span>
-            <span className="text-[8px] text-slate-400 mt-0.5">Square</span>
+            <span className="text-[8px] text-[#9ca3af] mt-0.5">Square</span>
           </button>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-[#182236]">
+        <div className="flex items-center justify-between pt-2 border-t border-[#262626]">
           <div>
-            <span className="text-xs font-semibold text-slate-200 block">
+            <span className="text-xs font-semibold text-[#e5e5e5] block">
               Burn-in Animated Subtitles
             </span>
-            <span className="text-[9px] text-slate-400">
+            <span className="text-[9px] text-[#9ca3af]">
               Render anime dialogue captions on-screen
             </span>
           </div>
@@ -85,38 +85,38 @@ export const ExportView: React.FC<ExportViewProps> = ({
             type="checkbox"
             checked={showSubtitles}
             onChange={(e) => onShowSubtitlesChange(e.target.checked)}
-            className="w-4 h-4 accent-sky-500 cursor-pointer"
+            className="w-4 h-4 accent-blue-500 cursor-pointer"
           />
         </div>
       </div>
 
       {/* ── Production Blueprint ── */}
-      <div className="bg-[#121827] border border-[#1e293b] rounded-xl p-3 flex flex-col gap-2 shadow-sm">
-        <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-          <Film size={14} className="text-amber-400" />
+      <div className="bg-[#181818] border border-[#2f2f2f] rounded-xl p-3 flex flex-col gap-2 shadow-sm">
+        <h3 className="text-xs font-bold text-[#e5e5e5] flex items-center gap-1.5">
+          <Film size={14} className="text-blue-400" />
           <span>Production Blueprint</span>
         </h3>
 
-        <div className="flex flex-col gap-1 text-[10px] text-slate-300 font-mono bg-[#0c101d] p-2.5 rounded-lg border border-[#1e293b]">
+        <div className="flex flex-col gap-1 text-[10px] text-[#e5e5e5] font-mono bg-[#121212] p-2.5 rounded-lg border border-[#2f2f2f]">
           <div className="flex justify-between">
-            <span className="text-slate-500">Active Scenes:</span>
-            <span className="text-white font-bold">{enabledCount} Scenes</span>
+            <span className="text-[#9ca3af]">Active Scenes:</span>
+            <span className="text-[#e5e5e5] font-bold">{enabledCount} Scenes</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Total Duration:</span>
-            <span className="text-sky-400 font-bold">
+            <span className="text-[#9ca3af]">Total Duration:</span>
+            <span className="text-blue-400 font-bold">
               {totalDuration.toFixed(1)}s
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Soundtrack Mood:</span>
+            <span className="text-[#9ca3af]">Soundtrack Mood:</span>
             <span className="text-emerald-400 font-bold capitalize">
               {bgmMood}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Video Aspect:</span>
-            <span className="text-white font-bold">{aspectRatio}</span>
+            <span className="text-[#9ca3af]">Video Aspect:</span>
+            <span className="text-[#e5e5e5] font-bold">{aspectRatio}</span>
           </div>
         </div>
       </div>

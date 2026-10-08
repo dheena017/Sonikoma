@@ -88,25 +88,46 @@ class SeriesImageService:
     async def render_panel_image(
         self,
         series_id: str,
-        panel: AISeriesPanel,
+        panel: Optional[Any] = None,
+        panel_id: Optional[str] = None,
+        prompt: Optional[str] = None,
         width: int = 768,
         height: int = 1024,
         model: str = "flux-anime",
-        save_local: bool = True
-    ) -> str:
+        save_local: bool = True,
+        force_regenerate: bool = False,
+    ) -> Any:
         """Render a single panel image using Pollinations URL with optional local caching and SVG fallback."""
-        prompt = panel.image_prompt or panel.description or "Dynamic 2D manhwa panel, detailed anime illustration"
-        url = self.build_pollinations_url(prompt, width=width, height=height, model=model)
+        actual_panel_id = panel_id or (getattr(panel, "panel_id", None) or getattr(panel, "id", None) or "panel")
+        actual_prompt = prompt or (
+            getattr(panel, "image_prompt", None)
+            or getattr(panel, "prompt", None)
+            or getattr(panel, "description", None)
+            or "Dynamic 2D manhwa panel, detailed anime illustration"
+        )
 
+        seed = int(time.time() * 1000) % 1000000 if force_regenerate else None
+        url = self.build_pollinations_url(actual_prompt, width=width, height=height, model=model, seed=seed)
+
+        final_url = url
         if save_local:
-            local_url = await self.fetch_and_save_image(url, series_id, panel.id, timeout=45.0)
+            local_url = await self.fetch_and_save_image(url, series_id, actual_panel_id, timeout=45.0)
             if local_url:
-                panel.image_url = local_url
-                return local_url
+                final_url = local_url
 
-        # Fallback to direct remote URL if local download failed or was skipped
-        panel.image_url = url
-        return url
+        if panel and hasattr(panel, "image_url"):
+            panel.image_url = final_url
+
+        # Return dict if requested via single panel endpoint
+        if panel_id is not None or prompt is not None or force_regenerate:
+            return {
+                "status": "success",
+                "image_url": final_url,
+                "panel_id": actual_panel_id,
+                "prompt": actual_prompt,
+            }
+
+        return final_url
 
     async def render_chapter_panels_batch(
         self,

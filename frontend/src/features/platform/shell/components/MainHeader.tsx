@@ -31,7 +31,6 @@ import {
 import { getUserCreditsPayload, claimDailyCredits } from "@/features/auth/api/auth";
 import { getProjects } from "@/features/platform/projects/api/projects";
 import { HeaderCreditsPopover } from "@/features/intelligence/core";
-import { useAIModels } from "@/features/intelligence/core/hooks/useAIModels";
 import ServerStatusIndicator from "@/shared/ui/status/ServerStatusIndicator";
 import { AIModelSelector } from "@/features/intelligence/core";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
@@ -138,8 +137,6 @@ const HeaderInner = ({
   const creditsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const { modelsByProvider } = useAIModels();
 
   // Credits state — polled from server every 30 s and on mount
   const [credits, setCredits] = useState<number | null>(
@@ -384,7 +381,11 @@ const HeaderInner = ({
 
   useEffect(() => {
     let isMounted = true;
-    if (fetchWithInterceptor) {
+    if (
+      fetchWithInterceptor &&
+      searchQuery.trim().length > 0 &&
+      allProjects.length === 0
+    ) {
       setIsLoadingProjects(true);
       getProjects(fetchWithInterceptor)
         .then((res: any) => {
@@ -400,7 +401,7 @@ const HeaderInner = ({
     return () => {
       isMounted = false;
     };
-  }, [fetchWithInterceptor]);
+  }, [fetchWithInterceptor, searchQuery, allProjects.length]);
 
   const q = searchQuery.trim().toLowerCase();
 
@@ -644,21 +645,21 @@ const HeaderInner = ({
         <Tooltip text="View Profile & Settings" placement="bottom">
           <button
             onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
+            className="group flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3.5 rounded-full border border-[#2b2d35] bg-[#171a20] hover:border-[#3b82f6]/40 hover:bg-[#1c2028] transition-all duration-200 cursor-pointer select-none shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
             data-no-transform
             aria-label="Open User profile"
           >
-            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden sm:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+            <span className="hidden sm:inline-flex max-w-[130px] truncate items-center rounded-full border border-white/5 bg-[#1f2430] px-2.5 py-1 text-[11px] font-bold tracking-[0.08em] text-white/90 uppercase transition-colors group-hover:text-[#c7d2fe]">
               {user?.full_name ||
                 user?.username ||
                 (user?.email ? user.email.split("@")[0] : "Studio Creator")}
             </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+            <div className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#2f3440] bg-[#1a1d25] transition-all duration-200 group-hover:border-[#3b82f6]/50">
               <img
                 key={user?.avatar_url || user?.full_name || "avatar"}
                 src={getUserAvatarUrl(user)}
                 referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover"
                 alt="User Avatar"
               />
             </div>

@@ -136,6 +136,7 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
             currentPath.startsWith("/creative-suite/") ||
             (currentPath.startsWith("/ai-") &&
               !currentPath.startsWith("/ai-core")) ||
+            currentPath === "/translation" ||
             currentPath === "/panel-assistant" ||
             currentPath === "/youtube",
           path: "/creative-suite",

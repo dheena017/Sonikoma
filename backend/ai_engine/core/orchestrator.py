@@ -430,6 +430,21 @@ class AIOrchestrator:
                     seen.add(key)
                     candidates.append((prov, resolved_m))
 
+        # Resilient failover: if primary is Gemini, ensure stable Gemini fallback models exist
+        if any(c[0] == "gemini" for c in candidates):
+            for stable_m in ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"]:
+                key = ("gemini", stable_m)
+                if key not in seen:
+                    seen.add(key)
+                    candidates.append(key)
+
+        # Cross-provider fallbacks if available
+        for prov, m in ModelRegistry.get_cross_provider_fallback_chain(capability):
+            key = (prov.lower(), m.lower())
+            if key not in seen:
+                seen.add(key)
+                candidates.append(key)
+
         return candidates
 
     @classmethod
@@ -442,7 +457,7 @@ class AIOrchestrator:
         candidates = cls.resolve_execution_candidates(capability, mode=mode, requested_model=requested_model)
         if candidates:
             return candidates[0]
-        return "gemini", "gemini-2.0-flash"
+        return "gemini", "gemini-3.5-flash-lite"
 
 
 

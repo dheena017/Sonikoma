@@ -13,6 +13,11 @@ import {
   computeOnboardingTasks,
 } from "../utils/dashboardHelpers";
 
+import {
+  getCachedProjects,
+  setGlobalCachedProjects,
+} from "@/features/platform/projects/hooks/useProjectsData";
+
 export interface Project {
   project_id: string;
   job_id?: string | null;
@@ -36,14 +41,22 @@ export interface OnboardingTask {
 }
 
 let cachedDashboardProjects: Project[] = [];
+let cachedAnalytics: any = null;
 
 export default function useDashboardPage() {
   const { themeMode } = useThemeMode();
-  const [projects, setProjects] = useState<Project[]>(cachedDashboardProjects);
-  const [loading, setLoading] = useState(cachedDashboardProjects.length === 0);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    if (cachedDashboardProjects.length > 0) return cachedDashboardProjects;
+    const globalCached = getCachedProjects();
+    if (globalCached && globalCached.length > 0) return globalCached as any;
+    return [];
+  });
+  const [loading, setLoading] = useState(() => {
+    return cachedDashboardProjects.length === 0 && getCachedProjects().length === 0;
+  });
   const [error, setError] = useState<string | null>(null);
   const [latency, setLatency] = useState<number | null>(null);
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<any>(cachedAnalytics);
   const [searchQuery, setSearchQuery] = useState("");
   const [onboardingTasks, setOnboardingTasks] = useState<OnboardingTask[]>([
     { id: 1, text: "Create your first project", completed: false },
@@ -82,6 +95,7 @@ export default function useDashboardPage() {
         const data = await res.json();
         const list = data.projects || [];
         cachedDashboardProjects = list;
+        setGlobalCachedProjects(list as any);
         setProjects(list);
       } catch (err: any) {
         console.error("Failed to fetch projects", err);
@@ -113,6 +127,7 @@ export default function useDashboardPage() {
         });
         if (res.ok) {
           const data = await res.json();
+          cachedAnalytics = data.analytics;
           setAnalytics(data.analytics);
         }
       } catch (err) {
@@ -121,8 +136,11 @@ export default function useDashboardPage() {
     };
 
     fetchProjects();
-    testLatency();
     fetchAnalytics();
+    if (typeof window !== "undefined") {
+      const idleFn = (window as any).requestIdleCallback || ((cb: () => void) => setTimeout(cb, 500));
+      idleFn(() => testLatency());
+    }
     return undefined;
   }, []);
 

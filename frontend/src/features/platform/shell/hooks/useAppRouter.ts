@@ -45,17 +45,23 @@ const ROUTE_PREFETCH_MAP: Record<string, () => Promise<any>> = {
   "/auth/launch": () => import("@/features/auth/pages/AuthSuccessPage"),
   "/dashboard": () => import("@/features/platform/dashboard/pages/DashboardPage"),
   "/projects": () => import("@/features/platform/projects/pages/ProjectsPage"),
+  "/ai-series": () =>
+    import("@/features/intelligence/series/pages/AISeriesStudioPage"),
+  "/ai-series-studio": () =>
+    import("@/features/intelligence/series/pages/AISeriesStudioPage"),
+  "/studio/ai-series": () =>
+    import("@/features/intelligence/series/pages/AISeriesStudioPage"),
   "/scraper": () => import("@/features/platform/scraper/pages/ScraperPage"),
   "/editor": () => import("@/features/workspace/shell/pages/EditorPage"),
   "/shortcuts": () => import("@/features/platform/shortcuts/pages/ShortcutsPage"),
   "/creative-suite": () =>
     import("@/features/creative/suite/components/CreativeSuiteLayout"),
-  "/creative-suite/ai-voice": () =>
-    import("@/features/creative/voice/pages/VoiceStudioPage"),
-  "/creative-suite/ai-optimizer": () =>
-    import("@/features/creative/optimizer/pages/AIOptimizerPage"),
+  "/creative-suite/translation": () =>
+    import("@/features/creative/translation/pages/TranslationPage"),
+  "/translation": () =>
+    import("@/features/creative/translation/pages/TranslationPage"),
   "/creative-suite/panel-assistant": () =>
-    import("@/features/creative/panel-assistant/pages/PanelAssistantPage"),
+    import("@/features/creative/translation/pages/TranslationPage"),
   "/creative-suite/youtube": () =>
     import("@/features/creative/youtube/pages/YouTubePage"),
   "/settings/account": () =>
@@ -116,6 +122,41 @@ export function useAppRouter(props?: UseAppRouterProps) {
       localStorage.setItem("ai_comic_theme", activeTheme);
     }
   }, [activeTheme]);
+
+  // Idle prefetch primary route code bundles for instantaneous (0ms) page switches
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const idleFn =
+      (window as any).requestIdleCallback ||
+      ((cb: () => void) => setTimeout(cb, 1000));
+
+    const id = idleFn(() => {
+      const topRoutes = [
+        "/dashboard",
+        "/projects",
+        "/ai-series",
+        "/editor",
+        "/scraper",
+        "/creative-suite",
+        "/profile",
+        "/settings/account",
+        "/shortcuts",
+        "/notifications",
+        "/ai-core",
+      ];
+      topRoutes.forEach((route, idx) => {
+        setTimeout(() => {
+          prefetchRoute(route);
+        }, idx * 120);
+      });
+    });
+
+    return () => {
+      if ((window as any).cancelIdleCallback && typeof id === "number") {
+        (window as any).cancelIdleCallback(id);
+      }
+    };
+  }, []);
 
   // Sync settings and state URL query parameters on initial mount
   useEffect(() => {

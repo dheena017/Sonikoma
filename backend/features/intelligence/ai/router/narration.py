@@ -5,9 +5,6 @@ AI Narration & Audio Script Routes:
 - POST /skills/sfx-audio      – Generate SFX prompt for a panel or batch
 - POST /skills/bgm-vibe       – Recommend background music vibe
 - POST /skills/sfx-mix        – Schedule SFX overlays across scene
-- POST /skills/shorts-script  – Adapt storyboard for YouTube Shorts/Reels
-- POST /skills/shorts-hook    – Generate viral retention hook for Shorts
-- POST /skills/midrolls       – Calculate optimal midroll ad break placements
 - POST /skills/series-arc     – Architect series arc (manhwa, comic, anime)
 - POST /skills/series-arc/manhwa – Korean Webtoon Manhwa arc
 - POST /skills/series-arc/comic  – Japanese Manga & Graphic Comic arc
@@ -22,10 +19,7 @@ from features.intelligence.ai.services._deps import get_user_gemini_key, run_md_
 from features.intelligence.ai.schemas import (
     SFXAudioRequest,
     BGMVibeRequest,
-    ShortsScriptRequest,
     SFXOverlayRequest,
-    ShortsHookRequest,
-    MidrollPlacementRequest,
     SeriesArcRequest,
 )
 
@@ -106,48 +100,6 @@ async def get_sfx_mix(body: SFXOverlayRequest, user_api_key: dict = Depends(get_
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/skills/shorts-script", summary="Adapt storyboard script for YouTube Shorts/Reels")
-async def get_shorts_script(body: ShortsScriptRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        summary = body.storyboard_summary.strip() if body.storyboard_summary else "Action webtoon storyline summary."
-        logger.info(f"[Shorts Script Skill] Adapting script for short-form video...")
-        return await run_md_skill("shorts_script_adapter", body.model, api_key=user_api_key,
-                                  storyboard_summary=summary)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[Shorts Script Skill Error]: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/skills/shorts-hook", summary="Generate viral retention hook for Shorts")
-async def get_shorts_hook(body: ShortsHookRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        title = body.title.strip() if body.title else "Webtoon MC Story"
-        event = body.key_event.strip() if body.key_event else "High stakes betrayal scene"
-        logger.info(f"[Shorts Hook Skill] Generating hook for title='{title}'...")
-        return await run_md_skill("shorts_retention_hook", body.model, api_key=user_api_key,
-                                  title=title, key_event=event)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[Shorts Hook Skill Error]: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/skills/midrolls", summary="Calculate optimal midroll ad break placements")
-async def get_midrolls(body: MidrollPlacementRequest, user_api_key: dict = Depends(get_user_gemini_key)):
-    try:
-        script = body.compiled_script.strip() if body.compiled_script else "00:00 - Story Intro"
-        max_ads = body.max_ads if body.max_ads and body.max_ads > 0 else 3
-        logger.info(f"[Midroll Placement Skill] Calculating ad slots (max={max_ads})...")
-        return await run_md_skill("midroll_placement_ref", body.model, api_key=user_api_key,
-                                  compiled_script=script, max_ads=max_ads)
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"[Midroll Placement Skill Error]: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ── AI Series Arc Director Skills (Manhwa, Comic/Manga, Anime) ────────────────

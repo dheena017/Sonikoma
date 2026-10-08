@@ -55,14 +55,14 @@ const ImageEditorPage = React.lazy(
 const YouTubePage = React.lazy(
   () => import("@/features/creative/youtube/pages/YouTubePage")
 );
-const VoiceStudioPage = React.lazy(
-  () => import("@/features/creative/voice/pages/VoiceStudioPage")
+const TranslationPage = React.lazy(
+  () => import("@/features/creative/translation/pages/TranslationPage")
 );
-const AIOptimizerPage = React.lazy(
-  () => import("@/features/creative/optimizer/pages/AIOptimizerPage")
+const CreativeAgentPage = React.lazy(
+  () => import("@/features/creative/agent/pages/CreativeAgentPage")
 );
-const PanelAssistantPage = React.lazy(
-  () => import("@/features/creative/panel-assistant/pages/PanelAssistantPage")
+const CreativeThumbnailPage = React.lazy(
+  () => import("@/features/creative/thumbnails/pages/CreativeThumbnailPage")
 );
 const ProfilePage = React.lazy(
   () => import("@/features/profile/pages/ProfilePage")
@@ -196,18 +196,23 @@ export function isKnownRoute(path: string): boolean {
   if (
     clean === "/creative-suite" ||
     clean === "/creative-suite-dashboard" ||
-    clean === "/creative-suite/ai-optimizer" ||
-    clean === "/creative-suite/panel-assistant" ||
-    clean === "/creative-suite/ai-characters" ||
-    clean === "/creative-suite/ai-thumbnails" ||
-    clean === "/creative-suite/ai-voice" ||
-    clean === "/creative-suite/youtube" ||
-    clean === "/ai-optimizer" ||
+    clean.startsWith("/creative-suite/") ||
+    clean === "/creative-agent" ||
+    clean.startsWith("/creative-agent/") ||
+    clean === "/translation" ||
+    clean.startsWith("/translation/") ||
     clean === "/panel-assistant" ||
+    clean.startsWith("/panel-assistant/") ||
     clean === "/ai-characters" ||
+    clean.startsWith("/ai-characters/") ||
     clean === "/ai-thumbnails" ||
-    clean === "/ai-voice" ||
-    clean === "/youtube"
+    clean.startsWith("/ai-thumbnails/") ||
+    clean === "/thumbnails" ||
+    clean.startsWith("/thumbnails/") ||
+    clean === "/thumbnail-generator" ||
+    clean.startsWith("/thumbnail-generator/") ||
+    clean === "/youtube" ||
+    clean.startsWith("/youtube/")
   ) {
     return true;
   }
@@ -759,6 +764,21 @@ export default function AppRouter(props: AppRouterProps) {
     );
   }
 
+  // --- Guard: Legacy AI Suite Redirects (Optimizer & Voice) ---
+  if (
+    currentPath === "/creative-suite/ai-optimizer" ||
+    currentPath.startsWith("/creative-suite/ai-optimizer") ||
+    currentPath === "/ai-optimizer" ||
+    currentPath.startsWith("/ai-optimizer") ||
+    currentPath === "/creative-suite/ai-voice" ||
+    currentPath.startsWith("/creative-suite/ai-voice") ||
+    currentPath === "/ai-voice" ||
+    currentPath.startsWith("/ai-voice")
+  ) {
+    setTimeout(() => navigateTo("/creative-suite"), 0);
+    return <RouteLoadingFallback />;
+  }
+
   // --- Guard: OAuth Callback Launch Screen ---
   if (
     currentPath === "/auth-success" ||
@@ -801,7 +821,10 @@ export default function AppRouter(props: AppRouterProps) {
     !currentPath.startsWith("/studio/") &&
     !currentPath.startsWith("/series/") &&
     !currentPath.startsWith("/watch/") &&
-    !currentPath.startsWith("/read/")
+    !currentPath.startsWith("/read/") &&
+    !currentPath.startsWith("/creative-suite") &&
+    !currentPath.startsWith("/creative-agent") &&
+    !currentPath.startsWith("/thumbnails")
   ) {
     setTimeout(() => navigateTo("/"), 0);
     return null;
@@ -872,24 +895,23 @@ export default function AppRouter(props: AppRouterProps) {
           (chapterPathMatch !== null && !isDetailsMode)),
       isShortcutsPath: currentPath === "/shortcuts",
       isAudioSettingsPath: currentPath === "/scraper/audio-settings",
-      isOptimizerPath:
-        currentPath === "/creative-suite/ai-optimizer" ||
-        currentPath.startsWith("/creative-suite/ai-optimizer?") ||
-        currentPath.startsWith("/creative-suite/ai-optimizer/") ||
-        currentPath === "/ai-optimizer",
       isPanelAssistantPath:
+        currentPath.startsWith("/creative-suite/translation") ||
+        currentPath.startsWith("/translation") ||
         currentPath.startsWith("/creative-suite/panel-assistant") ||
         currentPath.startsWith("/panel-assistant"),
+      isCreativeAgentPath:
+        currentPath.startsWith("/creative-suite/agent") ||
+        currentPath.startsWith("/creative-agent"),
+      isThumbnailStudioPath:
+        currentPath.startsWith("/creative-suite/thumbnails") ||
+        currentPath.startsWith("/creative-suite/thumbnail-generator") ||
+        currentPath.startsWith("/thumbnails"),
       isCharacterPath:
         currentPath === "/creative-suite/ai-characters" ||
         currentPath.startsWith("/creative-suite/ai-characters?") ||
         currentPath.startsWith("/creative-suite/ai-characters/") ||
         currentPath === "/ai-characters",
-      isVoicePath:
-        currentPath === "/creative-suite/ai-voice" ||
-        currentPath.startsWith("/creative-suite/ai-voice?") ||
-        currentPath.startsWith("/creative-suite/ai-voice/") ||
-        currentPath === "/ai-voice",
       isYouTubePath:
         currentPath === "/creative-suite/youtube" ||
         currentPath.startsWith("/creative-suite/youtube?") ||
@@ -921,11 +943,16 @@ export default function AppRouter(props: AppRouterProps) {
         currentPath === "/creative-suite/" ||
         currentPath === "/creative-suite-dashboard" ||
         currentPath.startsWith("/creative-suite/") ||
-        currentPath === "/ai-optimizer" ||
+        currentPath === "/creative-agent" ||
+        currentPath.startsWith("/creative-agent/") ||
+        currentPath === "/translation" ||
         currentPath === "/panel-assistant" ||
         currentPath === "/ai-characters" ||
         currentPath === "/ai-thumbnails" ||
-        currentPath === "/ai-voice" ||
+        currentPath === "/thumbnails" ||
+        currentPath.startsWith("/thumbnails/") ||
+        currentPath === "/thumbnail-generator" ||
+        currentPath.startsWith("/thumbnail-generator/") ||
         currentPath === "/youtube",
       isAICorePath:
         currentPath === "/ai-core" ||
@@ -983,10 +1010,10 @@ export default function AppRouter(props: AppRouterProps) {
     isEditorPath,
     isShortcutsPath,
     isAudioSettingsPath,
-    isOptimizerPath,
     isPanelAssistantPath,
+    isCreativeAgentPath,
+    isThumbnailStudioPath,
     isCharacterPath,
-    isVoicePath,
     isYouTubePath,
     isProfilePath,
     isNotificationsPath,
@@ -1562,32 +1589,27 @@ export default function AppRouter(props: AppRouterProps) {
                   panels={panels}
                   setPanels={setPanels}
                 />
-              ) : isOptimizerPath ? (
-                <AIOptimizerPage
-                  panels={panels}
-                  setPanels={setPanels}
-                  onNavigateHome={handleNavigateHome}
+              ) : isCreativeAgentPath ? (
+                <CreativeAgentPage
+                  fetchWithInterceptor={fetchWithInterceptor}
                   addNotification={addNotification}
-                  scrapedTitle={seriesTitle}
-                  scrapedGenre={scrapedGenre}
-                  videoUrl={videoUrl}
+                  navigateTo={navigateTo}
+                />
+              ) : isThumbnailStudioPath ? (
+                <CreativeThumbnailPage
+                  fetchWithInterceptor={fetchWithInterceptor}
+                  panels={panels}
+                  addNotification={addNotification}
+                  navigateTo={navigateTo}
                 />
               ) : isPanelAssistantPath ? (
-                <PanelAssistantPage
+                <TranslationPage
                   panels={panels}
                   setPanels={setPanels}
                   onNavigateHome={handleNavigateHome}
                   addNotification={addNotification}
                 />
-              ) : isVoicePath ? (
-                <VoiceStudioPage
-                  panels={panels}
-                  setPanels={setPanels}
-                  onNavigateHome={handleNavigateHome}
-                  addNotification={addNotification}
-                  scrapedGenre={scrapedGenre}
-                  setMusicTheme={setMusicTheme}
-                />
+
               ) : isYouTubePath ? (
                 <YouTubePage
                   panels={panels}

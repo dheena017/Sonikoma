@@ -44,18 +44,41 @@ class MoviePyCompileLogger(ProgressBarLogger):
                         self.report_progress(round(prog, 1))
 
 
+class SubtitleOverlay:
+    """Precomputed subtitle banner overlay that applies alpha blending with minimal CPU ops."""
+    def __init__(self, rgb: np.ndarray, alpha: np.ndarray, banner_h: int):
+        self.rgb = rgb
+        self.alpha = alpha
+        self.rgb_alpha = (rgb * alpha)
+        self.inv_alpha = (1.0 - alpha)
+        self.height = banner_h
+
+    def apply_to(self, frame: np.ndarray, target_width: int):
+        h = self.height
+        frame[-h:, 0:target_width] = (
+            frame[-h:, 0:target_width] * self.inv_alpha + self.rgb_alpha
+        ).astype(np.uint8)
+
+    def __iter__(self):
+        return iter((self.rgb, self.alpha))
+
+
 def build_panel_frame_image(
     background_image: Image.Image,
     foreground_image: Image.Image,
     target_width: int = 1920,
     target_height: int = 1080,
 ) -> Image.Image:
-    """Combines foreground panel centered over a blurred background fill."""
+    """Combines foreground panel centered over a blurred background fill with fast downscaled blur."""
     target_width = max(1, target_width)
     target_height = max(1, target_height)
 
-    bg_img = background_image.resize((target_width, target_height), Image.Resampling.LANCZOS)
-    bg_img = bg_img.filter(ImageFilter.GaussianBlur(30))
+    # Fast downscaled gaussian blur: downsample by 4x, apply radius 6, resize back
+    blur_w = max(16, target_width // 4)
+    blur_h = max(16, target_height // 4)
+    bg_small = background_image.resize((blur_w, blur_h), Image.Resampling.BILINEAR)
+    bg_blurred = bg_small.filter(ImageFilter.GaussianBlur(6))
+    bg_img = bg_blurred.resize((target_width, target_height), Image.Resampling.BILINEAR)
 
     img_w, img_h = foreground_image.size
     img_w = max(1, img_w)
@@ -73,7 +96,7 @@ def build_panel_frame_image(
     return frame.convert("RGB")
 
 
-def create_subtitle_overlay(text: str, target_width: int = 1920) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+def create_subtitle_overlay(text: str, target_width: int = 1920) -> Optional[SubtitleOverlay]:
     """Renders a sleek cinematic subtitle overlay banner to blend onto frames."""
     if not text or not text.strip():
         return None
@@ -113,13 +136,14 @@ def create_subtitle_overlay(text: str, target_width: int = 1920) -> Optional[Tup
     banner_np = np.array(banner, dtype=np.float32)
     alpha = banner_np[:, :, 3:4] / 255.0
     rgb = banner_np[:, :, :3]
-    return rgb, alpha
+    return SubtitleOverlay(rgb=rgb, alpha=alpha, banner_h=banner_h)
 
 
 __all__ = [
     "_PROJECT_ROOT",
     "_VIDEO_OUTPUT_DIR",
     "MoviePyCompileLogger",
+    "SubtitleOverlay",
     "build_panel_frame_image",
     "create_subtitle_overlay",
 ]

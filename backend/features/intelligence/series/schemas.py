@@ -20,7 +20,10 @@ class SeriesFormatType(str, Enum):
 
 
 class SeriesArtStyle(str, Enum):
+    MANHWA_SLICE_OF_LIFE = "manhwa_slice_of_life"
+    MANHWA_PASTEL_ROMANCE = "manhwa_pastel_romance"
     MANHWA_ACTION_HUNTER = "manhwa_action_hunter"
+    MANHWA_OVERPOWERED_REGRESSION = "manhwa_overpowered_regression"
     MANHWA_OTOME_ISEKAI = "manhwa_otome_isekai"
     MANHWA_MURIM_WUXIA = "manhwa_murim_wuxia"
     MANGA_SHONEN_JUMP = "manga_shonen_jump"

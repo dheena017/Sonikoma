@@ -342,7 +342,7 @@ const StoryboardCard = ({
     window.history.pushState(
       {},
       "",
-      `/creative-suite/panel-assistant?idx=${idx}`
+      `/creative-suite/translation?idx=${idx}`
     );
     window.dispatchEvent(new Event("popstate"));
   };

@@ -528,7 +528,7 @@ export default function SeriesDetailsPage({
                 </button>
 
                 <button
-                  onClick={() => navigateTo("/creative-suite/ai-voice")}
+                  onClick={() => navigateTo("/creative-suite")}
                   className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/5 hover:text-white xl:justify-start"
                 >
                   <Volume2 className="h-4 w-4 text-amber-400" />

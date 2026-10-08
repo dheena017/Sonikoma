@@ -146,6 +146,7 @@ async def render_single_panel_image(series_id: str, panel_id: str, req: RenderPa
 
     res = await series_image_service.render_panel_image(
         series_id=series_id,
+        panel=panel,
         panel_id=panel_id,
         prompt=prompt,
         width=w,

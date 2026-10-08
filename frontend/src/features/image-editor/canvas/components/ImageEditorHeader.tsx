@@ -195,7 +195,7 @@ export const ImageEditorHeader: React.FC<ImageEditorHeaderProps> = ({
 
   return (
     <header
-      className={`sticky top-0 left-0 right-0 h-16 w-full min-w-0 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl flex items-center justify-between pl-0 pr-2 sm:pr-6 md:pr-8 gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+      className={`sticky top-0 left-0 right-0 h-16 w-full min-w-0 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl flex items-center justify-between pl-0 pr-2 sm:pr-6 md:pr-8 gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-visible ${
         isSidebarOpen ? "z-0 pointer-events-none" : "z-50"
       }`}
     >

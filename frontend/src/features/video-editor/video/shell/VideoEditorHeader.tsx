@@ -236,7 +236,7 @@ const VideoEditorHeader: React.FC<VideoEditorHeaderProps> = ({
 
   return (
     <>
-      <header className="w-full min-w-0 h-16 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden z-30">
+      <header className="relative w-full min-w-0 h-16 shrink-0 border-b border-[#2F2F2F] bg-neutral-950/80 backdrop-blur-xl pl-0 pr-2 sm:pr-6 md:pr-8 flex items-center justify-between gap-2 sm:gap-4 select-none shadow-md shadow-black/20 overflow-visible z-50">
         <div className="flex items-center shrink-0 h-full">
           <div className="w-14 sm:w-16 md:w-20 flex items-center justify-center shrink-0 border-r border-[#2F2F2F] h-full">
             <button

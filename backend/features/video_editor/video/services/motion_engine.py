@@ -89,7 +89,7 @@ def build_cinematic_motion_clip(
         scale = target_width / img_w
         scaled_w = target_width
         scaled_h = max(target_height, int(img_h * scale))
-        scaled_img = img.resize((scaled_w, scaled_h), Image.Resampling.LANCZOS)
+        scaled_img = img.resize((scaled_w, scaled_h), Image.Resampling.BILINEAR)
         arr = np.array(scaled_img, dtype=np.uint8)
         max_scroll_y = max(0, scaled_h - target_height)
 
@@ -105,11 +105,14 @@ def build_cinematic_motion_clip(
             else:
                 frame = arr[scaled_h - target_height:scaled_h, 0:target_width].copy()
             if sub_overlay:
-                rgb, alpha = sub_overlay
-                h_b = rgb.shape[0]
-                frame[-h_b:, 0:target_width] = (
-                    frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
-                ).astype(np.uint8)
+                if hasattr(sub_overlay, "apply_to"):
+                    sub_overlay.apply_to(frame, target_width)
+                else:
+                    rgb, alpha = sub_overlay
+                    h_b = rgb.shape[0]
+                    frame[-h_b:, 0:target_width] = (
+                        frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
+                    ).astype(np.uint8)
             return frame
 
         return VideoClip(make_frame_scroll, duration=duration), effective_motion
@@ -118,7 +121,7 @@ def build_cinematic_motion_clip(
     elif effective_motion in ("pan_down", "pan_up"):
         composite_frame = build_panel_frame_image(img, img, target_width, target_height)
         oversize_h = int(target_height * 1.12)
-        oversized = composite_frame.resize((target_width, oversize_h), Image.Resampling.LANCZOS)
+        oversized = composite_frame.resize((target_width, oversize_h), Image.Resampling.BILINEAR)
         arr = np.array(oversized, dtype=np.uint8)
         max_dy = oversize_h - target_height
 
@@ -130,11 +133,14 @@ def build_cinematic_motion_clip(
             y0 = int(ease * max_dy)
             frame = arr[y0:y0 + target_height, 0:target_width].copy()
             if sub_overlay:
-                rgb, alpha = sub_overlay
-                h_b = rgb.shape[0]
-                frame[-h_b:, 0:target_width] = (
-                    frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
-                ).astype(np.uint8)
+                if hasattr(sub_overlay, "apply_to"):
+                    sub_overlay.apply_to(frame, target_width)
+                else:
+                    rgb, alpha = sub_overlay
+                    h_b = rgb.shape[0]
+                    frame[-h_b:, 0:target_width] = (
+                        frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
+                    ).astype(np.uint8)
             return frame
 
         return VideoClip(make_frame_v_pan, duration=duration), effective_motion
@@ -143,7 +149,7 @@ def build_cinematic_motion_clip(
     elif effective_motion in ("pan_right", "pan_left"):
         composite_frame = build_panel_frame_image(img, img, target_width, target_height)
         oversize_w = int(target_width * 1.12)
-        oversized = composite_frame.resize((oversize_w, target_height), Image.Resampling.LANCZOS)
+        oversized = composite_frame.resize((oversize_w, target_height), Image.Resampling.BILINEAR)
         arr = np.array(oversized, dtype=np.uint8)
         max_dx = oversize_w - target_width
 
@@ -155,11 +161,14 @@ def build_cinematic_motion_clip(
             x0 = int(ease * max_dx)
             frame = arr[0:target_height, x0:x0 + target_width].copy()
             if sub_overlay:
-                rgb, alpha = sub_overlay
-                h_b = rgb.shape[0]
-                frame[-h_b:, 0:target_width] = (
-                    frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
-                ).astype(np.uint8)
+                if hasattr(sub_overlay, "apply_to"):
+                    sub_overlay.apply_to(frame, target_width)
+                else:
+                    rgb, alpha = sub_overlay
+                    h_b = rgb.shape[0]
+                    frame[-h_b:, 0:target_width] = (
+                        frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
+                    ).astype(np.uint8)
             return frame
 
         return VideoClip(make_frame_h_pan, duration=duration), effective_motion
@@ -191,11 +200,14 @@ def build_cinematic_motion_clip(
                 )
 
             if sub_overlay:
-                rgb, alpha = sub_overlay
-                h_b = rgb.shape[0]
-                frame[-h_b:, 0:target_width] = (
-                    frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
-                ).astype(np.uint8)
+                if hasattr(sub_overlay, "apply_to"):
+                    sub_overlay.apply_to(frame, target_width)
+                else:
+                    rgb, alpha = sub_overlay
+                    h_b = rgb.shape[0]
+                    frame[-h_b:, 0:target_width] = (
+                        frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
+                    ).astype(np.uint8)
             return frame
 
         return VideoClip(make_frame_zoom, duration=duration), effective_motion
@@ -205,7 +217,7 @@ def build_cinematic_motion_clip(
         composite_frame = build_panel_frame_image(img, img, target_width, target_height)
         oversize_w = int(target_width * 1.06)
         oversize_h = int(target_height * 1.06)
-        oversized = composite_frame.resize((oversize_w, oversize_h), Image.Resampling.LANCZOS)
+        oversized = composite_frame.resize((oversize_w, oversize_h), Image.Resampling.BILINEAR)
         arr = np.array(oversized, dtype=np.uint8)
         base_x = (oversize_w - target_width) // 2
         base_y = (oversize_h - target_height) // 2
@@ -219,11 +231,14 @@ def build_cinematic_motion_clip(
             y0 = max(0, min(oversize_h - target_height, base_y + dy))
             frame = arr[y0:y0 + target_height, x0:x0 + target_width].copy()
             if sub_overlay:
-                rgb, alpha = sub_overlay
-                h_b = rgb.shape[0]
-                frame[-h_b:, 0:target_width] = (
-                    frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
-                ).astype(np.uint8)
+                if hasattr(sub_overlay, "apply_to"):
+                    sub_overlay.apply_to(frame, target_width)
+                else:
+                    rgb, alpha = sub_overlay
+                    h_b = rgb.shape[0]
+                    frame[-h_b:, 0:target_width] = (
+                        frame[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
+                    ).astype(np.uint8)
             return frame
 
         return VideoClip(make_frame_shake, duration=duration), effective_motion
@@ -233,11 +248,14 @@ def build_cinematic_motion_clip(
         composite_frame = build_panel_frame_image(img, img, target_width, target_height)
         arr = np.array(composite_frame, dtype=np.uint8)
         if sub_overlay:
-            rgb, alpha = sub_overlay
-            h_b = rgb.shape[0]
-            arr[-h_b:, 0:target_width] = (
-                arr[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
-            ).astype(np.uint8)
+            if hasattr(sub_overlay, "apply_to"):
+                sub_overlay.apply_to(arr, target_width)
+            else:
+                rgb, alpha = sub_overlay
+                h_b = rgb.shape[0]
+                arr[-h_b:, 0:target_width] = (
+                    arr[-h_b:, 0:target_width] * (1.0 - alpha) + rgb * alpha
+                ).astype(np.uint8)
 
         return ImageClip(arr).set_duration(duration), "static"
 

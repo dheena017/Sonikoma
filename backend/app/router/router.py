@@ -26,6 +26,7 @@ from features.video_editor.audio import audio_router
 from features.video_editor.video.router import video_router
 from features.platform.jobs import jobs_router
 from features.creative.export.router import export_router
+from features.creative.router import creative_router
 from features.platform.health import health_router
 from features.intelligence.series.router import ai_series_master_router
 from ai_engine.providers.router import providers_router
@@ -47,6 +48,7 @@ api_router.include_router(audio_router,          prefix="/api/v1/audio", tags=["
 api_router.include_router(video_router,          prefix="/api/v1/video", tags=["10. Video Rendering Engine"])
 api_router.include_router(jobs_router,           prefix="/api/v1/jobs", tags=["11. Background Jobs"])
 api_router.include_router(export_router,         prefix="/api/v1/export", tags=["12. Export & Archiving"])
+api_router.include_router(creative_router,       prefix="/api/v1", tags=["Creative: Suite & Agent"])
 api_router.include_router(health_router,         prefix="/api/v1/system", tags=["13. System Health & Telemetry"])
 api_router.include_router(ai_series_master_router, prefix="/api/v1/ai-series", tags=["14. AI Generated Series"])
 

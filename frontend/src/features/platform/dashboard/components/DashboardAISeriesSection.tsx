@@ -13,23 +13,36 @@ import {
 import { aiSeriesApi, AISeriesProject } from "@/features/intelligence/series/api/aiSeries";
 import { useSeriesNavigation } from "@/features/intelligence/series/hooks/useSeriesNavigation";
 
+let cachedSeriesList: AISeriesProject[] = [];
+let cachedSeriesLoaded = false;
+
 export const DashboardAISeriesSection: React.FC = () => {
   const { navigate } = useSeriesNavigation();
-  const [seriesList, setSeriesList] = useState<AISeriesProject[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [seriesList, setSeriesList] = useState<AISeriesProject[]>(cachedSeriesList);
+  const [loading, setLoading] = useState(!cachedSeriesLoaded && cachedSeriesList.length === 0);
 
   useEffect(() => {
+    let isMounted = true;
     const load = async () => {
       try {
         const data = await aiSeriesApi.listSeries();
-        setSeriesList(data);
+        if (isMounted) {
+          cachedSeriesList = data || [];
+          cachedSeriesLoaded = true;
+          setSeriesList(cachedSeriesList);
+        }
       } catch (err) {
         console.warn("No AI series found or server offline");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     load();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const getFormatBadge = (fmt: string) => {

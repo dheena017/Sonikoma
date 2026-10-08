@@ -32,31 +32,31 @@ const SIZE_CONFIGS: Record<
   }
 > = {
   xs: {
-    boxSize: "w-7 h-7",
+    boxSize: "w-8 h-8",
     textSize: "text-sm font-bold tracking-tight",
     subtextSize: "text-[9px]",
     gap: "gap-2",
   },
   sm: {
-    boxSize: "w-8.5 h-8.5",
-    textSize: "text-base font-bold tracking-tight",
+    boxSize: "w-10 h-10",
+    textSize: "text-base sm:text-lg font-bold tracking-tight",
     subtextSize: "text-[10px]",
     gap: "gap-2.5",
   },
   md: {
-    boxSize: "w-10 h-10",
-    textSize: "text-lg font-bold tracking-tight",
+    boxSize: "w-12 h-12",
+    textSize: "text-lg sm:text-xl font-bold tracking-tight",
     subtextSize: "text-[11px]",
     gap: "gap-3",
   },
   lg: {
-    boxSize: "w-12 h-12",
-    textSize: "text-2xl font-bold tracking-tight",
+    boxSize: "w-14 h-14",
+    textSize: "text-2xl sm:text-3xl font-bold tracking-tight",
     subtextSize: "text-xs",
     gap: "gap-3.5",
   },
   xl: {
-    boxSize: "w-14 h-14",
+    boxSize: "w-16 h-16",
     textSize: "text-3xl font-bold tracking-tight",
     subtextSize: "text-sm",
     gap: "gap-4",
@@ -84,7 +84,7 @@ export function SonikomaLogo({
   return (
     <div
       onClick={onClick}
-      className={`inline-flex items-center ${config.gap} select-none ${
+      className={`inline-flex items-center ${config.gap} select-none whitespace-nowrap ${
         isInteractive
           ? "cursor-pointer group hover:opacity-90 transition-all duration-200"
           : ""
@@ -96,8 +96,8 @@ export function SonikomaLogo({
           config.boxSize
         } rounded-full flex items-center justify-center overflow-hidden shrink-0 border transition-all duration-200 shadow-sm ${
           isLight
-            ? "border-slate-300 bg-white group-hover:border-slate-400"
-            : "border-[#2F2F2F] bg-[#0A0B0E] group-hover:border-neutral-500"
+            ? "border-slate-300 bg-white"
+            : "border-[#2F2F2F] bg-[#0A0B0E]"
         }`}
       >
         <img
@@ -113,12 +113,12 @@ export function SonikomaLogo({
 
       {/* 2. Professional Brand Typography */}
       {!iconOnly && (
-        <div className="flex flex-col text-left leading-tight">
+        <div className="flex flex-col text-left leading-none">
           <div className="flex items-center gap-2">
             <span
               className={`${
                 config.textSize
-              } transition-colors duration-200 hidden min-[380px]:inline-block ${
+              } transition-colors duration-200 inline-block ${
                 isLight
                   ? "text-slate-900 group-hover:text-blue-600"
                   : "text-white group-hover:text-neutral-200"

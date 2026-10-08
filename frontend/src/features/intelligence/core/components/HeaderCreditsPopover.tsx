@@ -42,7 +42,7 @@ export const HeaderCreditsPopover: React.FC<HeaderCreditsPopoverProps> = ({
   };
 
   return (
-    <div className="w-80 bg-neutral-955/95 backdrop-blur-xl border border-neutral-800/80 rounded-2xl shadow-2xl p-4 text-white font-sans z-50 animate-in fade-in zoom-in-95 duration-150">
+    <div className="w-80 bg-[#161616] border border-neutral-800 rounded-2xl shadow-2xl p-4 text-white font-sans z-[9999] animate-in fade-in zoom-in-95 duration-150">
       {/* Top Banner */}
       <div className="flex items-center justify-between border-b border-neutral-800/60 pb-3 mb-3">
         <div className="flex items-center gap-2">

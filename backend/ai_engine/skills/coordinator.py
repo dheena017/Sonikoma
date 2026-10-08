@@ -46,65 +46,22 @@ class FallbackCoordinator:
                     for _ in range(kwargs.get("active_slices_count", 5))
                 ]
             }
-        elif skill_name == "copyright_scrubber":
-            return {
-                "contains_violation": False,
-                "violation_type": "none",
-                "sanitized_text": kwargs.get("text", "Clean narration."),
-                "explanation": "Narration conforms to PG-13 community guidelines."
-            }
-        elif skill_name == "midroll_placement_ref":
-            return {
-                "placements": [
-                    {"timestamp": "01:15", "tension_reason": "High cliffhanger point before revelation."}
-                ]
-            }
-        elif skill_name == "shorts_retention_hook":
-            return {
-                "hook_sentence": "This S-Rank just unlocked absolute ruin!",
-                "psychological_trigger": "curiosity"
-            }
-        elif skill_name == "thumbnail_visual_comp":
-            return {
-                "background_style": "Dark radial purple smoke",
-                "split_screen_ratio": "50/50",
-                "highlight_borders": ["yellow glow", "red overlay arrow"],
-                "layout_margins": "safe bottom right corner"
-            }
         elif skill_name == "video_seo_metadata":
             title = kwargs.get("title", "Webtoon Story Recap")
             genre = kwargs.get("genre", "Fantasy Action")
             return {
-                "youtube_title": f"He Was F-Rank, Until He Unlocked {title}! [{genre} RECAP]",
+                "youtube_title": f"{title} [Official Recap]",
                 "youtube_description": f"Full recap of {title}. Watch the ultimate battle unfold step by step!",
-                "tags": [genre.lower(), "webtoon recap", "op mc", "manhwa recap", "anime recap"],
+                "tags": [genre.lower(), "webtoon recap", "manhwa recap", "anime recap"],
                 "timestamps": ["00:00 - Introduction & Awakening", "01:30 - The Climax Battle", "03:45 - Ending Hook"]
             }
-        elif skill_name == "shorts_script_adapter":
+        elif skill_name in ("series_arc_director", "series_arc_manhwa", "series_arc_comic", "series_arc_anime"):
             return {
-                "voiceover_script": "He thought he was just another F-rank hunter... until the system chose HIM!",
-                "on_screen_captions": ["F-RANK AWAKENING", "POWER LEVEL 9999+"],
-                "estimated_duration_sec": 45
-            }
-        elif skill_name == "sfx_audio_prompt":
-            return {
-                "audio_prompt": "Cinematic low-frequency impact boom with sharp energy distortion pulse",
-                "suggested_volume": 0.85
-            }
-        elif skill_name == "bgm_vibe_selector":
-            return {
-                "music_genre": "Dark Cyberpunk Synthwave",
-                "bpm": 128,
-                "mood_keywords": ["intense", "suspenseful", "power-fantasy"],
-                "suggested_tracks": ["Midnight Cyber Drive", "Obsidian Awakening"]
-            }
-        elif skill_name == "voice_casting":
-            return {
-                "gender": "male",
-                "suggested_age": "20s",
-                "voice_tone": "confident antihero with deep resonance",
-                "speech_tempo": 1.1,
-                "accent": "neutral english"
+                "title": kwargs.get("title", "Webtoon Series"),
+                "logline": kwargs.get("logline", "An epic adventure unfolds."),
+                "episodes": [
+                    {"episode": 1, "hook": "The Awakening", "pacing": "rising", "cliffhanger": "A dark power emerges"}
+                ]
             }
         elif skill_name == "script_dramatization":
             return {

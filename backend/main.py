@@ -7,8 +7,6 @@ Sonikoma Webtoon-to-Video Compiler — FastAPI Computational Engine & API Server
 
 import os
 import sys
-import uvicorn
-from fastapi import FastAPI
 
 # Ensure backend directory is on sys.path for top-level package resolution
 BACKEND_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -22,47 +20,15 @@ for p in [BACKEND_DIR, APP_DIR, PROJECT_ROOT]:
 from app.core.config import API_VERSION, IS_PRODUCTION, BACKEND_PORT
 from app.core.logging import ColoredFormatter, setup_logging, logger
 from app.core.logging.filters import EndpointFilter
-from app.core.exceptions import global_exception_handler
-from app.core.responses import PrettyJSONResponse
-from app.core.middleware import setup_middleware
-from app.router import register_routers
-from openapi.config import OPENAPI_TAGS, API_DESCRIPTION
-from openapi.router import register_docs_routes
-from app.lifespan import lifespan
-
-# Create FastAPI app instance with default Pretty-Printed JSON output
-app = FastAPI(
-    title="Sonikoma API Engine",
-    description=API_DESCRIPTION,
-    version=API_VERSION,
-    openapi_tags=OPENAPI_TAGS,
-    default_response_class=PrettyJSONResponse,
-    docs_url=None,  # Custom Swagger documentation console mounted via docs router
-    redoc_url=None,  # Custom ReDoc documentation console mounted via docs router
-    openapi_url="/api/v1/openapi.json",
-    lifespan=lifespan,
-)
-
-# Initialize global logging early
-setup_logging()
-
-# Setup middlewares
-setup_middleware(app)
-
-# Register exception handlers
-app.add_exception_handler(Exception, global_exception_handler)
-
-# Register interactive docs & category-filtered OpenAPI schemas
-register_docs_routes(app)
-
-# Register API routes, static media mounts & SPA fallback
-register_routers(app)
-
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ENTRYPOINT
+# CLI ENTRYPOINT (Supervisor Process)
+# Fast path: launch uvicorn immediately without loading routers/ML libraries
+# in the supervisor process. The worker process will load main:app once.
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+    import uvicorn
+
     log_level_name = os.getenv("LOG_LEVEL", "info" if IS_PRODUCTION else "debug").lower()
 
     custom_log_config = {
@@ -177,3 +143,45 @@ if __name__ == "__main__":
         run_args["workers"] = 1
 
     uvicorn.run(**run_args)
+    sys.exit(0)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# APPLICATION INSTANTIATION (Worker Process / Imported as main:app)
+# ─────────────────────────────────────────────────────────────────────────────
+from fastapi import FastAPI
+from app.core.exceptions import global_exception_handler
+from app.core.responses import PrettyJSONResponse
+from app.core.middleware import setup_middleware
+from app.router import register_routers
+from openapi.config import OPENAPI_TAGS, API_DESCRIPTION
+from openapi.router import register_docs_routes
+from app.lifespan import lifespan
+
+# Create FastAPI app instance with default Pretty-Printed JSON output
+app = FastAPI(
+    title="Sonikoma API Engine",
+    description=API_DESCRIPTION,
+    version=API_VERSION,
+    openapi_tags=OPENAPI_TAGS,
+    default_response_class=PrettyJSONResponse,
+    docs_url=None,  # Custom Swagger documentation console mounted via docs router
+    redoc_url=None,  # Custom ReDoc documentation console mounted via docs router
+    openapi_url="/api/v1/openapi.json",
+    lifespan=lifespan,
+)
+
+# Initialize global logging early
+setup_logging()
+
+# Setup middlewares
+setup_middleware(app)
+
+# Register exception handlers
+app.add_exception_handler(Exception, global_exception_handler)
+
+# Register interactive docs & category-filtered OpenAPI schemas
+register_docs_routes(app)
+
+# Register API routes, static media mounts & SPA fallback
+register_routers(app)

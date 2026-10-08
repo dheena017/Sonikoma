@@ -1,15 +1,15 @@
 import React, { useEffect } from "react";
 import {
   LayoutGrid,
-  Film,
   Globe,
-  Mic,
   Youtube,
   ArrowLeft,
   X,
   Zap,
   FolderOpen,
   FolderSync,
+  Bot,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
@@ -160,35 +160,30 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
           path: "/creative-suite",
           requiresPanels: false,
         },
+        {
+          id: "agent",
+          label: "1-Click AI Agent",
+          icon: Bot,
+          path: "/creative-suite/agent",
+          requiresPanels: false,
+        },
       ],
     },
     {
       name: "Visuals",
       items: [
         {
-          id: "optimizer",
-          label: "Video Optimizer",
-          icon: Film,
-          path: "/creative-suite/ai-optimizer",
-          requiresPanels: true,
+          id: "thumbnails",
+          label: "Thumbnail Studio",
+          icon: ImageIcon,
+          path: "/creative-suite/thumbnails",
+          requiresPanels: false,
         },
         {
-          id: "assistant",
-          label: "Translation Studio",
+          id: "translation",
+          label: "Translation",
           icon: Globe,
-          path: "/creative-suite/panel-assistant",
-          requiresPanels: true,
-        },
-      ],
-    },
-    {
-      name: "Audio",
-      items: [
-        {
-          id: "voice",
-          label: "Voice & Sound Studio",
-          icon: Mic,
-          path: "/creative-suite/ai-voice",
+          path: "/creative-suite/translation",
           requiresPanels: true,
         },
       ],
@@ -213,6 +208,16 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
         currentPath === "/creative-suite" ||
         currentPath === "/creative-suite/" ||
         currentPath === "/creative-suite-dashboard"
+      );
+    }
+    if (path === "/creative-suite/translation") {
+      return (
+        currentPath === "/creative-suite/translation" ||
+        currentPath.startsWith("/creative-suite/translation") ||
+        currentPath === "/creative-suite/panel-assistant" ||
+        currentPath.startsWith("/creative-suite/panel-assistant") ||
+        currentPath === "/translation" ||
+        currentPath === "/panel-assistant"
       );
     }
     return (

@@ -425,6 +425,345 @@ async function handleIncomingMessage(
       }
     }
 
+    case "API_MERGE_PANELS": {
+      try {
+        const base = await getApiBaseUrl();
+        const apiBase = base
+          ? base.replace(/\/+$/, "")
+          : "http://localhost:5173";
+        const urls = payload?.urls || [];
+        if (!Array.isArray(urls) || urls.length === 0) {
+          return { success: false, error: "No panel URLs provided to merge." };
+        }
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60000);
+
+        const res = await fetch(`${apiBase}/api/v1/images/merge`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            urls,
+            layout: payload?.layout || "vertical",
+            spacing: payload?.spacing || 0,
+            spacingColor: payload?.spacingColor || "white",
+            scaleToFit: payload?.scaleToFit !== false,
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          return {
+            success: false,
+            error: `Stitch merge failed (${res.status}): ${errText}`,
+          };
+        }
+
+        const data = await res.json();
+        let mergedUrl = data.url || data.supabase_url || "";
+        if (mergedUrl && mergedUrl.startsWith("/")) {
+          mergedUrl = `${apiBase}${mergedUrl}`;
+        }
+
+        return {
+          success: true,
+          url: mergedUrl,
+          totalPanelsMerged: urls.length,
+          data,
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          isOffline: true,
+          error: err?.message || String(err),
+        };
+      }
+    }
+
+    case "API_AUTO_CROP": {
+      try {
+        const base = await getApiBaseUrl();
+        const apiBase = base
+          ? base.replace(/\/+$/, "")
+          : "http://localhost:5173";
+        const url = payload?.url;
+        if (!url) {
+          return {
+            success: false,
+            error: "Image URL is required for auto-crop.",
+          };
+        }
+
+        // 1. Detect panel bounding boxes on merged webtoon strip
+        let detectedBoxes: any[] = [];
+        try {
+          const detectController = new AbortController();
+          const detectTimeout = setTimeout(
+            () => detectController.abort(),
+            45000
+          );
+          const detectRes = await fetch(
+            `${apiBase}/api/v1/panels/detect/long-panels`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({
+                url,
+                engine_mode: "cv_yolo",
+                sensitivity: payload?.sensitivity || 30.0,
+                auto_split: true,
+                bleed_padding_px: 5,
+              }),
+              signal: detectController.signal,
+            }
+          );
+          clearTimeout(detectTimeout);
+
+          if (detectRes.ok) {
+            const detectData = await detectRes.json();
+            if (
+              Array.isArray(detectData?.panels) &&
+              detectData.panels.length > 0
+            ) {
+              detectedBoxes = detectData.panels;
+            }
+          }
+        } catch (dErr) {
+          console.warn("[API_AUTO_CROP] detect/long-panels error:", dErr);
+        }
+
+        // Fallback detection via cv-yolo if long-panels produced no boxes
+        if (detectedBoxes.length === 0) {
+          try {
+            const cvController = new AbortController();
+            const cvTimeout = setTimeout(() => cvController.abort(), 30000);
+            const cvRes = await fetch(
+              `${apiBase}/api/v1/panels/detect/cv-yolo`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Accept: "application/json",
+                },
+                body: JSON.stringify({ url, sensitivity: 30.0 }),
+                signal: cvController.signal,
+              }
+            );
+            clearTimeout(cvTimeout);
+
+            if (cvRes.ok) {
+              const cvData = await cvRes.json();
+              if (Array.isArray(cvData?.panels) && cvData.panels.length > 0) {
+                detectedBoxes = cvData.panels;
+              }
+            }
+          } catch (cErr) {
+            console.warn(
+              "[API_AUTO_CROP] detect/cv-yolo fallback error:",
+              cErr
+            );
+          }
+        }
+
+        // If no discrete boxes were separated, return the image itself as 1 panel
+        if (detectedBoxes.length === 0) {
+          return {
+            success: true,
+            totalSlices: 1,
+            slices: [{ index: 0, url: url }],
+          };
+        }
+
+        // 2. Perform high-speed multi-panel batch slicing via /api/v1/images/crop/long-panels
+        const cropController = new AbortController();
+        const cropTimeout = setTimeout(() => cropController.abort(), 60000);
+        const cropRes = await fetch(
+          `${apiBase}/api/v1/images/crop/long-panels`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              url,
+              panels: detectedBoxes,
+              bleed_guard_px: 5,
+              background_mode: "auto",
+              output_format: "webp",
+              quality: 90,
+            }),
+            signal: cropController.signal,
+          }
+        );
+        clearTimeout(cropTimeout);
+
+        if (!cropRes.ok) {
+          const errText = await cropRes.text().catch(() => "");
+          return {
+            success: true,
+            totalSlices: 1,
+            slices: [{ index: 0, url }],
+            warning: `Slicing warning (${cropRes.status}): ${errText}`,
+          };
+        }
+
+        const cropData = await cropRes.json();
+        const rawSlices = Array.isArray(cropData.slices) ? cropData.slices : [];
+        const normalizedSlices = rawSlices.map((s: any, idx: number) => {
+          let sliceUrl = s.url || "";
+          if (sliceUrl && sliceUrl.startsWith("/")) {
+            sliceUrl = `${apiBase}${sliceUrl}`;
+          }
+          return {
+            index: s.index !== undefined ? s.index : idx,
+            url: sliceUrl,
+            width: s.width,
+            height: s.height,
+            aspect_ratio: s.aspect_ratio,
+          };
+        });
+
+        return {
+          success: true,
+          totalSlices: normalizedSlices.length,
+          slices:
+            normalizedSlices.length > 0
+              ? normalizedSlices
+              : [{ index: 0, url }],
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          error: err?.message || String(err),
+        };
+      }
+    }
+
+    case "API_GENERATE_TTS_BATCH": {
+      try {
+        const base = await getApiBaseUrl();
+        const apiBase = base
+          ? base.replace(/\/+$/, "")
+          : "http://localhost:5173";
+        const inputPanels = Array.isArray(payload?.panels)
+          ? payload.panels
+          : [];
+        if (inputPanels.length === 0) {
+          return { success: true, results: [] };
+        }
+
+        // Try batch endpoint first
+        let batchSuccess = false;
+        let batchResults: any[] = [];
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 60000);
+          const res = await fetch(
+            `${apiBase}/api/v1/audio/synthesize-all-panel-audio`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
+              body: JSON.stringify({
+                panels: inputPanels.map((p: any) => ({
+                  id: p.id,
+                  text: p.text || p.speech_text || "",
+                  dialogue_list: p.dialogue_list || [
+                    p.text || p.speech_text || "",
+                  ],
+                  voice: p.voice || payload?.voice || "en-US-GuyNeural",
+                })),
+                voice: payload?.voice || "en-US-GuyNeural",
+                speech_rate: payload?.speech_rate || 1.0,
+                speech_pitch: payload?.speech_pitch || 1.0,
+                generate_dialogue_audio: true,
+                generate_narrative_audio: false,
+              }),
+              signal: controller.signal,
+            }
+          );
+          clearTimeout(timeout);
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.results)) {
+              batchResults = data.results.map((r: any) => {
+                let audioUrl = r.audio_url || "";
+                if (audioUrl && audioUrl.startsWith("/")) {
+                  audioUrl = `${apiBase}${audioUrl}`;
+                }
+                return {
+                  id: r.id,
+                  audio_url: audioUrl,
+                  duration: r.duration || 3.0,
+                };
+              });
+              batchSuccess = true;
+            }
+          }
+        } catch (bErr) {
+          console.warn(
+            "[API_GENERATE_TTS_BATCH] Batch endpoint failed, falling back to sequential:",
+            bErr
+          );
+        }
+
+        // If batch failed or returned empty, fallback to synthesize-panel-audio per panel
+        if (!batchSuccess) {
+          batchResults = [];
+          for (const p of inputPanels) {
+            const dialogue = p.text || p.speech_text || "";
+            if (!dialogue.trim()) continue;
+            try {
+              const res = await fetch(
+                `${apiBase}/api/v1/audio/synthesize-panel-audio`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    dialogue_list: [dialogue],
+                    voice: p.voice || payload?.voice || "en-US-GuyNeural",
+                    speech_rate: payload?.speech_rate || 1.0,
+                    speech_pitch: payload?.speech_pitch || 1.0,
+                    return_base64: true,
+                  }),
+                }
+              );
+              if (res.ok) {
+                const data = await res.json();
+                let audioUrl = data.audio_url || "";
+                if (audioUrl && audioUrl.startsWith("/")) {
+                  audioUrl = `${apiBase}${audioUrl}`;
+                } else if (!audioUrl && data.audio_base64) {
+                  audioUrl = `data:audio/mp3;base64,${data.audio_base64}`;
+                }
+                batchResults.push({
+                  id: p.id,
+                  audio_url: audioUrl,
+                  duration: data.duration || 3.5,
+                });
+              }
+            } catch (_) {}
+          }
+        }
+
+        return { success: true, results: batchResults };
+      } catch (err: any) {
+        return { success: false, error: err?.message || String(err) };
+      }
+    }
+
     case "API_ANALYZE_PANEL": {
       try {
         const base = await getApiBaseUrl();

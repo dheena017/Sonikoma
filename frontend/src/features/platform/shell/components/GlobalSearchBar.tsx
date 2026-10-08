@@ -64,8 +64,9 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
   const activeProjectId = useProjectStore((state) => state.activeProjectId);
   const { getAvailableModels, loadCatalogFromBackend } = useAIModelStore();
 
-  // Load available AI models and real projects on mount
+  // Load available AI models and real projects only when the search modal is opened
   useEffect(() => {
+    if (!isOpen) return;
     loadCatalogFromBackend();
     const token =
       localStorage.getItem("sonikoma_token") ||
@@ -73,7 +74,7 @@ export const GlobalSearchBar: React.FC<GlobalSearchBarProps> = ({
     if (token) {
       fetchRealProjects();
     }
-  }, [loadCatalogFromBackend]);
+  }, [isOpen, loadCatalogFromBackend]);
 
   const fetchRealProjects = async () => {
     setIsLoadingProjects(true);

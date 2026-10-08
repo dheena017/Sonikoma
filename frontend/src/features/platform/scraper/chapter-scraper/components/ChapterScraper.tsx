@@ -997,7 +997,7 @@ export const ChapterScraper: React.FC<ChapterScraperProps> = ({
                   onClick={() => {
                     const nav = (window as any).navigateTo;
                     if (typeof nav === "function")
-                      nav("/creative-suite/ai-voice");
+                      nav("/creative-suite");
                   }}
                   className="flex items-center gap-2 bg-neutral-955 border border-transparent hover:border-neutral-700 text-neutral-200 hover:text-white px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer active:scale-95"
                 >

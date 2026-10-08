@@ -92,7 +92,7 @@ export default function EnhancementsPanel({
     window.history.pushState(
       {},
       "",
-      `/creative-suite/panel-assistant?idx=${editingImageIdx}`
+      `/creative-suite/translation?idx=${editingImageIdx}`
     );
     window.dispatchEvent(new Event("popstate"));
   };

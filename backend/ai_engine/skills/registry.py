@@ -26,15 +26,18 @@ class SkillRegistry:
         
         # Support format aliases and alternative skill names
         alias_map = {
-            "manhwa_arc_director": "series_arc_manhwa",
-            "comic_arc_director": "series_arc_comic",
-            "anime_arc_director": "series_arc_anime",
-            "manhwa": "series_arc_manhwa",
-            "comic": "series_arc_comic",
-            "manga": "series_arc_comic",
-            "comic_manga": "series_arc_comic",
-            "anime": "series_arc_anime",
-            "anime_sakuga": "series_arc_anime",
+            "series_arc_manhwa": "series_arc_director",
+            "series_arc_comic": "series_arc_director",
+            "series_arc_anime": "series_arc_director",
+            "manhwa_arc_director": "series_arc_director",
+            "comic_arc_director": "series_arc_director",
+            "anime_arc_director": "series_arc_director",
+            "manhwa": "series_arc_director",
+            "comic": "series_arc_director",
+            "manga": "series_arc_director",
+            "comic_manga": "series_arc_director",
+            "anime": "series_arc_director",
+            "anime_sakuga": "series_arc_director",
         }
         resolved = alias_map.get(name, name)
         if resolved not in self._skills:
@@ -54,11 +57,13 @@ class SkillRegistry:
         current_dir = os.path.dirname(os.path.abspath(__file__))
         templates_dir = os.path.join(current_dir, "templates")
         prompts_dir = os.path.join(current_dir, "prompts")
+        creative_dir = os.path.abspath(os.path.join(current_dir, "..", "..", "features", "creative"))
 
         md_files = (
             glob.glob(os.path.join(templates_dir, "*.md"))
             + glob.glob(os.path.join(prompts_dir, "*.md"))
             + glob.glob(os.path.join(current_dir, "*.md"))
+            + glob.glob(os.path.join(creative_dir, "**", "*.md"), recursive=True)
         )
 
         loaded_count = 0

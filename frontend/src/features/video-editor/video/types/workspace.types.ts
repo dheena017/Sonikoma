@@ -89,8 +89,7 @@ export interface AudioTrack {
     | "sfx"
     | "ambient"
     | "mixer"
-    | "recorder"
-    | "ai-voice";
+    | "recorder";
   duration: string;
   mood?: string;
   genre?: string;

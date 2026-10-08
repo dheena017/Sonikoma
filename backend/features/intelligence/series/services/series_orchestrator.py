@@ -44,17 +44,27 @@ logger = logging.getLogger(__name__)
 # Preset artistic style prompt builders - Strictly 2D Webtoon & Comic Art
 ART_STYLE_PROMPT_PREFIXES: Dict[str, str] = {
     "manhwa_slice_of_life": (
-        "authentic 2D Korean webtoon comic strip panel, slice of life manhwa drawing, "
-        "crisp clean anime line art, soft pastel color palette, warm expressive character design, "
-        "Naver Webtoon aesthetic, 2D digital illustration only, bright natural daylight, no 3D, no realism"
+        "authentic 2D Korean webtoon comic strip panel, soft pastel watercolor aesthetic, "
+        "delicate clean anime line art, pale lavender and cream palette, tender emotional facial expressions, "
+        "soft natural daylight through window, Naver Webtoon romance slice of life style, Clip Studio Paint 2D digital illustration, "
+        "subtle blush, gentle cel shading with soft watercolor wash, beautiful expressive eyes, no 3D render, no CGI, no photorealism"
+    ),
+    "manhwa_pastel_romance": (
+        "authentic 2D Korean romance webtoon panel, soft pastel watercolor coloring, delicate refined anime lineart, "
+        "warm peach and pale lilac tones, subtle emotional acting, gentle natural ambient lighting, "
+        "Naver Webtoon drama aesthetic, beautiful expressive eyes, clean 2D digital drawing, no 3D, no harsh shadows, no CGI"
     ),
     "manhwa_action_hunter": (
         "authentic 2D Korean manhwa comic panel, clean crisp 2D anime lineart, Solo Leveling 2D drawing style, "
         "vibrant 2D cel shading, sharp digital ink lines, webtoon comic art, flat colors with dynamic cel shading, no 3D, no CGI"
     ),
+    "manhwa_overpowered_regression": (
+        "authentic 2D Korean webtoon action panel, modern hunter manhwa drawing, sharp digital lineart, "
+        "cyan holographic system window interface, dynamic perspective, vibrant cel shading, clean 2D webtoon art, no 3D, no CGI"
+    ),
     "manhwa_otome_isekai": (
-        "authentic Korean romance manhwa webtoon panel, 2D shojo anime drawing, clean digital lineart, "
-        "soft pastel jewel tones, sparkling floral flourishes, expressive emotional eyes, 2D comic art, no 3D"
+        "authentic Korean romance manhwa webtoon panel, 2D shojo anime drawing, delicate digital lineart, "
+        "soft pastel jewel tones, sparkling floral flourishes, expressive emotional eyes, gentle watercolor warmth, 2D comic art, no 3D"
     ),
     "manhwa_murim_wuxia": (
         "authentic martial arts manhwa comic panel, 2D digital drawing, dynamic ink brush lineart, "
@@ -204,8 +214,9 @@ class SeriesOrchestrator:
             )
         else: # manhwa
             style_prefix = (
-                "authentic 2D Korean webtoon comic strip panel, clean anime line art, soft pastel color palette, soft cel shading, "
-                "Clip Studio Paint, vibrant flat colors with glowing violet mana aura, modern webtoon digital illustration, no 3D render"
+                "authentic 2D Korean webtoon comic strip panel, delicate clean anime line art, soft pastel watercolor palette, "
+                "pale lilac and cream tones, soft cel shading, Clip Studio Paint, gentle natural ambient lighting, expressive anime eyes, "
+                "modern Naver Webtoon digital illustration, no 3D render, no CGI, no photorealism"
             )
 
         # Format-specific Canvas Dimensions
@@ -310,30 +321,62 @@ class SeriesOrchestrator:
                 # Dynamic Korean Webtoon (Manhwa) panel generation based on chapter, hero, genre, and panel progression
                 progress = p_idx / max(panel_count, 1)
                 context_hint = f", context: {logline[:100]}" if logline else ""
-                if p_idx == 1:
-                    camera = "vertical_webtoon_establishing"
-                    action = f"vibrant 2D Korean webtoon establishing panel of {clean_hero} in the setting of '{chapter_title}'{context_hint}, sharp digital line art, atmospheric ambient lighting, webtoon style"
-                    dialogue_text = f"The curtain rises on '{chapter_title}'..."
-                elif p_idx == panel_count and is_series_finale:
-                    camera = "celestial_epilogue_splash"
-                    action = f"emotional full-color manhwa climax illustration of {clean_hero} bathed in radiant celestial light, peaceful smile, glowing aura, high-resolution webtoon masterpiece"
-                    dialogue_text = "All conflicts are resolved. Peace has returned."
-                elif p_idx == panel_count:
-                    camera = "vertical_scroll_reveal"
-                    action = f"high-tension vertical webtoon scroll cliffhanger of {clean_hero} facing the pivotal moment of '{chapter_title}', intense glowing eyes, dramatic webtoon lighting"
-                    dialogue_text = "This story has only just begun..."
-                elif progress <= 0.35:
-                    camera = "manhwa_medium_portrait"
-                    action = f"character-centric manhwa panel of {clean_hero} in '{chapter_title}', expressive anime eyes, sleek modern webtoon attire, stylish composition"
-                    dialogue_text = "We need to analyze the situation carefully."
-                elif progress <= 0.70:
-                    camera = "manhwa_dramatic_close_up"
-                    action = f"intense manhwa confrontation portrait of {clean_hero}, sharp determined gaze, vibrant lighting accents, high-stakes emotional tension"
-                    dialogue_text = "I won't let anyone stand in my way."
+                is_gentle_manhwa = (
+                    is_slice_of_life
+                    or any(kw in theme_str for kw in ["romance", "drama", "school", "daily", "pastel", "love"])
+                    or art_style_key in ("manhwa_slice_of_life", "manhwa_pastel_romance", "manhwa_otome_isekai")
+                )
+
+                if is_gentle_manhwa:
+                    if p_idx == 1:
+                        camera = "vertical_webtoon_establishing"
+                        action = f"serene 2D Korean webtoon vertical panel of {clean_hero} in the quiet setting of '{chapter_title}'{context_hint}, delicate clean line art, soft pastel watercolor tones, morning window daylight, peaceful atmosphere"
+                        dialogue_text = f"A new day begins in '{chapter_title}'..."
+                    elif p_idx == panel_count and is_series_finale:
+                        camera = "warm_golden_epilogue_splash"
+                        action = f"emotional full-color manhwa closure panel of {clean_hero} smiling softly with gentle teary eyes, soft pastel watercolor hues, warm afternoon sunlight, tender emotional closure, beautiful 2D webtoon art"
+                        dialogue_text = "Everything was worth it. We found our happiness."
+                    elif p_idx == panel_count:
+                        camera = "vertical_scroll_emotional_hook"
+                        action = f"heartfelt vertical webtoon cliffhanger of {clean_hero} looking back with tender longing, wind gently fluttering hair, warm pastel sunset glow, delicate emotional expression"
+                        dialogue_text = "I couldn't help but wonder what comes next..."
+                    elif progress <= 0.35:
+                        camera = "manhwa_medium_portrait"
+                        action = f"tender character portrait of {clean_hero} in '{chapter_title}', standing near window with soft daylight and green plant, delicate facial features, subtle blush, soft lilac and cream pastel tones"
+                        dialogue_text = "Sometimes the quiet moments speak the loudest."
+                    elif progress <= 0.70:
+                        camera = "manhwa_emotional_close_up"
+                        action = f"delicate emotional close-up panel in '{chapter_title}', {clean_hero} with thoughtful expressive eyes, subtle surprise or contemplation, soft watercolor background wash, modern Korean webtoon drama"
+                        dialogue_text = "There's something I need to tell you."
+                    else:
+                        camera = "manhwa_interaction_two_shot"
+                        action = f"heartwarming two-shot webtoon panel of {clean_hero} interacting with another character, gentle body language, cozy indoor or cafe street ambiance, soft pastel lighting"
+                        dialogue_text = "Let's walk together for a while."
                 else:
-                    camera = "dynamic_vertical_action"
-                    action = f"dynamic vertical webtoon action shot of {clean_hero} executing a decisive strike, glowing energy effects, sharp cel-shaded shadows, dramatic speed trails"
-                    dialogue_text = "Now! Everything rides on this moment!"
+                    if p_idx == 1:
+                        camera = "vertical_webtoon_establishing"
+                        action = f"vibrant 2D Korean webtoon establishing panel of {clean_hero} in the setting of '{chapter_title}'{context_hint}, sharp digital line art, atmospheric ambient lighting, webtoon style"
+                        dialogue_text = f"The curtain rises on '{chapter_title}'..."
+                    elif p_idx == panel_count and is_series_finale:
+                        camera = "celestial_epilogue_splash"
+                        action = f"emotional full-color manhwa climax illustration of {clean_hero} bathed in radiant celestial light, peaceful smile, victorious presence, high-resolution webtoon masterpiece"
+                        dialogue_text = "All conflicts are resolved. Peace has returned."
+                    elif p_idx == panel_count:
+                        camera = "vertical_scroll_reveal"
+                        action = f"high-tension vertical webtoon scroll cliffhanger of {clean_hero} facing the pivotal moment of '{chapter_title}', intense determined gaze, dramatic webtoon lighting"
+                        dialogue_text = "This story has only just begun..."
+                    elif progress <= 0.35:
+                        camera = "manhwa_medium_portrait"
+                        action = f"character-centric manhwa panel of {clean_hero} in '{chapter_title}', expressive anime eyes, sleek modern webtoon attire, stylish composition"
+                        dialogue_text = "We need to analyze the situation carefully."
+                    elif progress <= 0.70:
+                        camera = "manhwa_dramatic_close_up"
+                        action = f"intense manhwa confrontation portrait of {clean_hero}, sharp determined gaze, vibrant lighting accents, high-stakes emotional tension"
+                        dialogue_text = "I won't let anyone stand in my way."
+                    else:
+                        camera = "dynamic_vertical_action"
+                        action = f"dynamic vertical webtoon action shot of {clean_hero} executing a decisive strike, glowing energy effects, sharp cel-shaded shadows, dramatic speed trails"
+                        dialogue_text = "Now! Everything rides on this moment!"
 
             # Construct TOTALLY DISTINCT prompt and negative prompt per format
             if is_anime:
@@ -361,16 +404,23 @@ class SeriesOrchestrator:
                     "dialog balloon, caption box, watermark, signature, blurry, bad anatomy, deformed limbs"
                 )
             else: # manhwa
+                is_action_manhwa = any(kw in theme_str for kw in ["hunter", "action", "murim", "dungeon", "leveling", "system", "combat"]) and not is_gentle_manhwa
+                lighting_desc = (
+                    "dynamic dramatic lighting, vibrant cel-shaded contrast, sharp particle accents"
+                    if is_action_manhwa
+                    else "soft diffused natural daylight, delicate watercolor gradients, gentle pastel highlights"
+                )
                 base_prompt = (
                     f"{style_prefix}, {action}, {camera} angle, vertical Korean webtoon panel, "
-                    f"clean sharp digital manhwa lineart, soft pastel gradient coloring, luminous glowing mana lighting, "
-                    f"expressive anime eyes, stylish modern webtoon aesthetic, masterpiece digital illustration, "
+                    f"delicate clean digital manhwa lineart, soft pastel watercolor coloring, {lighting_desc}, "
+                    f"tender expressive anime eyes, stylish modern Naver webtoon aesthetic, masterpiece 2D digital illustration, "
                     f"no 3D render, no CGI, no photorealism"
                 )
                 negative_prompt = (
                     "monochrome, black and white, grayscale, manga screentone, comic book halftone dots, "
                     "photorealistic, 3D render, CGI, octane render, realism, photo, realistic skin, "
-                    "text, words, letters, font, speech bubble, dialog balloon, caption box, watermark, signature, blurry, bad anatomy"
+                    "text, words, letters, font, speech bubble, dialog balloon, caption box, watermark, signature, blurry, bad anatomy, "
+                    "harsh 3D CGI, western comic style, neon oversaturation, deformed faces, ugly eyes"
                 )
 
             enhanced_prompt = series_memory_engine.generate_prompt_enhancements(

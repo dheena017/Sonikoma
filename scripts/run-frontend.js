@@ -456,7 +456,7 @@ async function start() {
         handleBackendExit(initialProcess, code);
       });
 
-      // Poll backend health and wait for it to be ready before starting frontend
+      // Poll backend health and wait for it to be online before launching frontend dev server
       await new Promise((resolve) => {
         function pollBackendHealth() {
           if (initialProcess.exitCode !== null) {

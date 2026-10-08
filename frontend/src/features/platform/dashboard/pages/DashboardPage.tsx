@@ -110,7 +110,7 @@ export default function DashboardPage() {
           <DashboardQuickLinks
             onGoToWorkspace={handleNewSeries}
             onGoToAudioLab={() =>
-              (window as any).navigateTo?.("/creative-suite/ai-voice")
+              (window as any).navigateTo?.("/creative-suite")
             }
             onGoToCharacters={() => (window as any).navigateTo?.("/characters")}
           />

@@ -25,6 +25,88 @@ import { CinemaPlayer } from "./cinema-player";
     return cinemaPlayerInstance;
   }
 
+  // Persistent Pill & Native Distraction Killer
+  function suppressNativeDistractionPills() {
+    try {
+      const candidates = document.querySelectorAll(
+        "div, button, a, span, aside, nav, footer, p, i, section"
+      );
+      candidates.forEach((node) => {
+        const el = node as HTMLElement;
+        if (!el || typeof el.getBoundingClientRect !== "function") return;
+        if (el.closest("[id^='sonikoma-'], [class*='sonikoma']")) return;
+        if (
+          el.id?.startsWith("sonikoma") ||
+          el.className?.toString().includes("sonikoma")
+        )
+          return;
+
+        const tag = el.tagName.toUpperCase();
+        if (["IMG", "CANVAS", "VIDEO", "AUDIO", "PICTURE"].includes(tag))
+          return;
+
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        // Matches bottom capsule pills (like the drawer pull bar)
+        const isPillShape =
+          rect.width >= 20 &&
+          rect.width <= 160 &&
+          rect.height >= 4 &&
+          rect.height <= 50;
+
+        const isNearBottomCenter =
+          (rect.bottom >= window.innerHeight - 220 ||
+            rect.top >= window.innerHeight - 220) &&
+          Math.abs(rect.left + rect.width / 2 - window.innerWidth / 2) < 220;
+
+        const text = (el.textContent || "").trim();
+        const hasLittleText = text.length <= 4;
+
+        if (isPillShape && isNearBottomCenter && hasLittleText) {
+          el.classList.add("sonikoma-native-distraction-hidden");
+          el.style.setProperty("display", "none", "important");
+          el.style.setProperty("opacity", "0", "important");
+          el.style.setProperty("visibility", "hidden", "important");
+          el.style.setProperty("pointer-events", "none", "important");
+          el.style.setProperty("box-shadow", "none", "important");
+
+          const parent = el.parentElement;
+          if (
+            parent &&
+            parent.children.length === 1 &&
+            !parent.closest("[id^='sonikoma-'], [class*='sonikoma']")
+          ) {
+            const pRect = parent.getBoundingClientRect();
+            if (pRect.height <= 70) {
+              parent.classList.add("sonikoma-native-distraction-hidden");
+              parent.style.setProperty("display", "none", "important");
+            }
+          }
+        }
+      });
+    } catch (_) {}
+  }
+
+  // Run immediately and repeatedly on load
+  suppressNativeDistractionPills();
+  setTimeout(suppressNativeDistractionPills, 400);
+  setTimeout(suppressNativeDistractionPills, 1200);
+  setTimeout(suppressNativeDistractionPills, 2500);
+  window.addEventListener("scroll", suppressNativeDistractionPills, {
+    passive: true,
+  });
+
+  try {
+    const observer = new MutationObserver(() => {
+      suppressNativeDistractionPills();
+    });
+    observer.observe(document.body || document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  } catch (_) {}
+
   // Auto-Scan page for reading history
   setTimeout(() => {
     try {
@@ -63,7 +145,7 @@ import { CinemaPlayer } from "./cinema-player";
         try {
           const player = getCinemaPlayer();
           player.start();
-          sendResponse({ success: true, isPlaying: true });
+          sendResponse({ success: true, isPlaying: false });
         } catch (err: any) {
           sendResponse({ success: false, error: err?.message || String(err) });
         }

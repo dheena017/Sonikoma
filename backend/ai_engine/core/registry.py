@@ -232,6 +232,7 @@ class ModelRegistry:
         "seo_optimization": [("openai", "gpt-4o-mini"), ("gemini", "gemini-2.5-flash"), ("deepseek", "deepseek-chat")],
         "sfx_audio": [("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini"), ("anthropic", "claude-3-5-haiku-20241022")],
         "smart_crop": [("gemini", "gemini-2.5-flash"), ("gemini", "gemini-3.5-flash-lite"), ("openai", "gpt-4o")],
+        "text": [("gemini", "gemini-3.5-flash-lite"), ("gemini", "gemini-3.5-flash"), ("gemini", "gemini-2.5-flash"), ("openai", "gpt-4o-mini")],
     }
 
     @classmethod

@@ -35,7 +35,7 @@ export const FORMAT_DEFINITIONS: FormatDefinition[] = [
     label: "Manhwa",
     formatLabel: "Manhwa",
     aspectTag: "2:3 Webtoon Scroll",
-    defaultStyle: "manhwa_action_hunter",
+    defaultStyle: "manhwa_slice_of_life",
   },
   {
     id: "comic_manga",
@@ -56,6 +56,24 @@ export const FORMAT_DEFINITIONS: FormatDefinition[] = [
 export const FORMAT_STYLES_MAP: Record<"manhwa" | "comic_manga" | "anime", FormatStyle[]> = {
   manhwa: [
     {
+      id: "manhwa_slice_of_life",
+      name: "Naver Webtoon Slice of Life",
+      desc: "Soft pastel watercolor, delicate 2D anime lineart, tender emotional acting, window daylight",
+      badge: "Authentic Pastel • SOTA",
+    },
+    {
+      id: "manhwa_pastel_romance",
+      name: "Soft Pastel Romance Webtoon",
+      desc: "Pale lilac & peach watercolor, delicate expressions, gentle natural lighting, modern drama",
+      badge: "Pure Romance",
+    },
+    {
+      id: "manhwa_otome_isekai",
+      name: "Otome Isekai Romance",
+      desc: "Pastel jewel tones, sparkling floral flourishes, royal filigree",
+      badge: "Pastel Luxe",
+    },
+    {
       id: "manhwa_action_hunter",
       name: "Solo Leveling Action Hunter",
       desc: "Obsidian tones, glowing violet mana auras, razor linework",
@@ -68,22 +86,10 @@ export const FORMAT_STYLES_MAP: Record<"manhwa" | "comic_manga" | "anime", Forma
       badge: "System UI • Beast",
     },
     {
-      id: "manhwa_otome_isekai",
-      name: "Otome Isekai Romance",
-      desc: "Pastel jewel tones, sparkling floral flourishes, royal filigree",
-      badge: "Pastel Luxe",
-    },
-    {
       id: "manhwa_murim_wuxia",
       name: "Murim Wuxia Martial Arts",
       desc: "Dynamic ink brushwork, soaring mountain precipices, chi strikes",
       badge: "Ink Dynasty",
-    },
-    {
-      id: "manhwa_slice_of_life",
-      name: "Naver Slice of Life",
-      desc: "Warm pastel palette, tender facial expressions, domestic warmth",
-      badge: "Warm Cozy",
     },
   ],
   comic_manga: [

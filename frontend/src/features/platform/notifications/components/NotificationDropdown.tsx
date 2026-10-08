@@ -43,7 +43,7 @@ export default function NotificationDropdown({
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-[400px] bg-[#181818] border border-[#2F2F2F] rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in origin-top sm:origin-top-right">
+    <div className="fixed left-1/2 -translate-x-1/2 top-16 sm:absolute sm:left-auto sm:translate-x-0 sm:right-0 sm:top-full sm:mt-2 w-[calc(100vw-1rem)] sm:w-96 max-w-[400px] bg-[#161616] border border-neutral-800 rounded-2xl shadow-2xl z-[9999] overflow-hidden animate-fade-in origin-top sm:origin-top-right">
       <div className="px-4 py-3 border-b border-[#2F2F2F] flex items-center justify-between bg-[#141414]">
         <div className="flex items-center gap-2">
           {notificationsMuted ? (

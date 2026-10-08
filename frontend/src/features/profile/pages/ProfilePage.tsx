@@ -16,8 +16,8 @@ import {
   Award,
   Flame,
   ChevronRight,
-  Camera,
   Globe,
+  Pencil,
 } from "lucide-react";
 
 import {
@@ -149,29 +149,29 @@ export default function ProfilePage(props: ProfilePageProps) {
       {/* ── MAIN COVER WRAPPER CARD ── */}
       <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-7 relative overflow-hidden text-left">
         {/* Compact Breadcrumb & Quick Actions Bar */}
-        <div className="flex items-center justify-between border-b border-[#2F2F2F] pb-3">
-          <div className="flex items-center gap-2 text-xs font-mono text-[#9CA3AF]">
+        <div className="flex items-center justify-between border-b border-neutral-800 pb-3.5">
+          <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
             <Tooltip text="Return to Main Dashboard" placement="bottom">
               <button
                 onClick={onNavigateHome}
-                className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-900/70 border border-neutral-800 hover:border-neutral-700 hover:text-white transition-all cursor-pointer text-neutral-400 shadow-sm"
                 aria-label="Dashboard Home"
               >
-                <Home className="w-3.5 h-3.5" />
+                <Home className="w-3.5 h-3.5 text-[#3B82F6]" />
                 <span>Dashboard</span>
               </button>
             </Tooltip>
-            <ChevronRight className="w-3.5 h-3.5 text-[#6B7280]" />
-            <span className="text-[#3B82F6] font-semibold">
+            <ChevronRight className="w-3.5 h-3.5 text-neutral-600" />
+            <span className="px-2.5 py-1 rounded-lg bg-[#3B82F6]/10 border border-[#3B82F6]/25 text-[#60A5FA] font-bold">
               User Profile & Settings
             </span>
           </div>
 
           {onLogout && (
-            <Tooltip text="Log out of your account" placement="bottom">
+            <Tooltip text="Safely sign out of your creator session" placement="bottom">
               <button
                 onClick={handleSignOutClick}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-[#EF4444]/20 bg-[#EF4444]/10 text-[#EF4444] hover:bg-[#EF4444]/20 text-xs font-medium transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-800 bg-neutral-900/80 hover:bg-rose-500/10 hover:border-rose-500/30 text-neutral-400 hover:text-rose-400 text-xs font-mono font-medium transition-all cursor-pointer shadow-sm"
                 aria-label="Sign Out"
               >
                 <LogOut className="w-3.5 h-3.5" />
@@ -181,93 +181,97 @@ export default function ProfilePage(props: ProfilePageProps) {
           )}
         </div>
 
-        {/* Compact Glassmorphic Hero Banner */}
-        <div className="relative w-full rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-4 sm:p-5 shadow-md overflow-hidden">
-          <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]" />
+        {/* Premium Glassmorphic Hero Banner */}
+        <div className="relative w-full rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900/90 via-neutral-900/50 to-neutral-950 p-5 sm:p-6 shadow-xl overflow-hidden">
+          {/* Subtle top ambient glow line */}
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[#3B82F6]/40 to-transparent" />
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            {/* User Profile Block */}
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl p-0.5 bg-gradient-to-tr from-blue-600 via-indigo-500 to-pink-500 shadow-md overflow-hidden shrink-0">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+            {/* User Profile Identity Block */}
+            <div className="flex items-center gap-4 sm:gap-5">
+              <div className="relative group shrink-0">
+                <div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-neutral-700/80 bg-neutral-900 shadow-sm sm:h-20 sm:w-20">
                   <img
                     src={state.profileUser.avatarUrl}
                     alt={state.profileUser.fullName}
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover rounded-[10px] bg-neutral-900"
+                    className="h-full w-full rounded-2xl object-cover bg-neutral-900"
                     onError={(e) => {
                       const target = e.currentTarget as HTMLImageElement;
                       target.onerror = null;
                       target.src = DEFAULT_USER_AVATAR_DATA_URI;
                     }}
                   />
-                  <Tooltip
-                    text="Change avatar in Account settings"
-                    placement="top"
-                  >
-                    <button
-                      onClick={() => state.setActiveTab("account")}
-                      aria-label="Edit Avatar"
-                      className="!absolute !top-auto bottom-1 right-1 !z-10 p-1.5 rounded-lg bg-neutral-950/95 border border-white/30 text-[#60A5FA] hover:text-white transition-all shadow-md cursor-pointer"
-                    >
-                      <Camera className="w-4 h-4" />
-                    </button>
-                  </Tooltip>
                 </div>
+                <Tooltip text="Change avatar image" placement="top">
+                  <button
+                    onClick={() => state.setActiveTab("account")}
+                    aria-label="Edit Avatar"
+                    className="absolute -bottom-1.5 -right-1.5 flex h-6 w-6 items-center justify-center rounded-full border border-neutral-700 bg-[#111827] text-neutral-200 shadow-[0_0_0_2px_rgba(17,24,39,1)] transition-all duration-200 hover:border-neutral-500 hover:bg-neutral-800 hover:text-white cursor-pointer sm:h-7 sm:w-7"
+                  >
+                    <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  </button>
+                </Tooltip>
               </div>
 
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#E5E5E5]">
-                    {state.profileUser.fullName}
+              <div className="space-y-1">
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-sans">
+                    {state.profileUser.fullName || "Creator"}
                   </h1>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono tracking-wider uppercase font-semibold bg-[#121212] text-[#3B82F6] border border-[#3B82F6]/30 flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono tracking-wider uppercase font-bold bg-[#3B82F6]/15 text-[#60A5FA] border border-[#3B82F6]/30 flex items-center gap-1.5 shadow-sm">
                     <Sparkles className="w-3 h-3 text-[#3B82F6]" />
-                    {state.subscriptionTier}
+                    {state.subscriptionTier || "Free"} Tier
                   </span>
                 </div>
-                <p className="text-xs text-[#9CA3AF] font-mono">
-                  {state.profileUser.email}
-                </p>
-                <p className="text-[11px] text-[#9CA3AF] flex items-center gap-1">
-                  <Globe className="w-3 h-3 text-[#3B82F6]" />
-                  <span>{state.profileUser.role}</span>
-                </p>
+                <div className="flex items-center gap-3 text-xs text-neutral-400 font-mono flex-wrap">
+                  <span className="text-neutral-300 font-medium">
+                    {state.profileUser.email}
+                  </span>
+                  <span className="text-neutral-700">•</span>
+                  <span className="flex items-center gap-1.5 text-neutral-400">
+                    <Globe className="w-3 h-3 text-[#3B82F6]" />
+                    <span className="capitalize">{state.profileUser.role || "Creator"}</span>
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Compact Quick Stats Pills */}
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              <div className="bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-1.5 text-center min-w-[75px]">
-                <div className="flex items-center justify-center gap-1 text-[10px] text-[#9CA3AF] font-mono">
-                  <Zap className="w-3 h-3 text-[#F59E0B]" />
+            {/* Quick Stats Metric Cards */}
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3 shrink-0">
+              {/* CREDITS CARD */}
+              <div className="bg-neutral-950/80 border border-amber-500/20 hover:border-amber-500/40 rounded-xl px-3.5 py-2.5 transition-all text-left min-w-[90px] shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] text-amber-400 font-mono font-bold uppercase tracking-wider">
+                  <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
                   <span>Credits</span>
                 </div>
-                <p className="text-sm font-bold text-[#E5E5E5] mt-0.5 font-mono">
-                  {state.userCredits}{" "}
-                  <span className="text-[10px] text-[#3B82F6] font-normal">
-                    CR
-                  </span>
+                <p className="text-base sm:text-lg font-black text-white mt-0.5 font-mono flex items-baseline gap-1">
+                  {state.userCredits}
+                  <span className="text-[10px] text-amber-400 font-normal">CR</span>
                 </p>
               </div>
 
-              <div className="bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-1.5 text-center min-w-[75px]">
-                <div className="flex items-center justify-center gap-1 text-[10px] text-[#9CA3AF] font-mono">
-                  <Flame className="w-3 h-3 text-[#EF4444]" />
+              {/* STREAK CARD */}
+              <div className="bg-neutral-950/80 border border-rose-500/20 hover:border-rose-500/40 rounded-xl px-3.5 py-2.5 transition-all text-left min-w-[90px] shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] text-rose-400 font-mono font-bold uppercase tracking-wider">
+                  <Flame className="w-3.5 h-3.5 text-rose-400 fill-rose-400/20" />
                   <span>Streak</span>
                 </div>
-                <p className="text-sm font-bold text-[#E5E5E5] mt-0.5 font-mono">
-                  {state.streakDays}d
+                <p className="text-base sm:text-lg font-black text-white mt-0.5 font-mono flex items-baseline gap-1">
+                  {state.streakDays}
+                  <span className="text-[10px] text-rose-400 font-normal">d</span>
                 </p>
               </div>
 
-              <div className="bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-1.5 text-center min-w-[75px]">
-                <div className="flex items-center justify-center gap-1 text-[10px] text-[#9CA3AF] font-mono">
-                  <Award className="w-3 h-3 text-[#10B981]" />
+              {/* XP CARD */}
+              <div className="bg-neutral-950/80 border border-emerald-500/20 hover:border-emerald-500/40 rounded-xl px-3.5 py-2.5 transition-all text-left min-w-[90px] shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono font-bold uppercase tracking-wider">
+                  <Award className="w-3.5 h-3.5 text-emerald-400" />
                   <span>XP</span>
                 </div>
-                <p className="text-sm font-bold text-[#E5E5E5] mt-0.5 font-mono">
+                <p className="text-base sm:text-lg font-black text-white mt-0.5 font-mono flex items-baseline gap-1">
                   {state.achievementPoints}
+                  <span className="text-[10px] text-emerald-400 font-normal">pts</span>
                 </p>
               </div>
             </div>
@@ -275,20 +279,20 @@ export default function ProfilePage(props: ProfilePageProps) {
 
           {/* Daily Reward Alert Banner */}
           {!state.hasClaimedToday && (
-            <div className="mt-3 pt-3 border-t border-[#2F2F2F] flex items-center justify-between gap-2 bg-[#121212] border border-[#2F2F2F] rounded-xl px-3 py-2">
-              <div className="flex items-center gap-2 text-xs">
-                <Flame className="w-4 h-4 text-[#F59E0B] animate-pulse shrink-0" />
-                <span className="text-[#E5E5E5]">
-                  Daily Bonus Ready: Claim +25 free credits today!
+            <div className="mt-4 pt-3.5 border-t border-neutral-800 flex items-center justify-between gap-3 bg-gradient-to-r from-amber-500/10 via-neutral-950 to-neutral-950 border border-amber-500/20 rounded-xl px-4 py-2.5">
+              <div className="flex items-center gap-2.5 text-xs">
+                <Flame className="w-4 h-4 text-amber-400 animate-pulse shrink-0 fill-amber-400/20" />
+                <span className="text-neutral-200 font-medium">
+                  Daily Creator Bonus: <strong className="text-white">+25 free credits</strong> waiting for today!
                 </span>
               </div>
               <Tooltip text="Claim daily login bonus" placement="top">
                 <button
                   onClick={state.handleClaimCredits}
-                  className="btn-primary px-3 py-1 rounded-lg text-xs font-bold shrink-0 flex items-center gap-1 uppercase tracking-wider cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black text-xs font-mono font-bold shrink-0 flex items-center gap-1.5 uppercase tracking-wider cursor-pointer shadow-md shadow-amber-500/20 transition-all"
                   aria-label="Claim Daily Credits"
                 >
-                  <Zap className="w-3 h-3 text-amber-300 fill-amber-300" />
+                  <Zap className="w-3.5 h-3.5 fill-black" />
                   <span>Claim</span>
                 </button>
               </Tooltip>
@@ -296,9 +300,9 @@ export default function ProfilePage(props: ProfilePageProps) {
           )}
         </div>
 
-        {/* Sleek Navigation Bar */}
-        <div className="w-full border-b border-[#2F2F2F] pb-1 overflow-x-auto no-scrollbar">
-          <nav className="flex items-center gap-1.5 min-w-max">
+        {/* Modern Segmented Navigation Bar */}
+        <div className="w-full">
+          <div className="bg-neutral-950/90 p-1.5 rounded-2xl border border-neutral-800/90 inline-flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto no-scrollbar shadow-inner">
             {tabsList.map((tab) => {
               const Icon = tab.icon;
               const isActive = state.activeTab === tab.id;
@@ -306,24 +310,24 @@ export default function ProfilePage(props: ProfilePageProps) {
                 <button
                   key={tab.id}
                   onClick={() => state.setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-medium text-xs transition-all duration-200 cursor-pointer ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap ${
                     isActive
-                      ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 shadow-sm font-bold"
-                      : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#262626] border border-transparent"
+                      ? "bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white shadow-md shadow-blue-500/25 border border-blue-400/30 font-bold"
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-900 border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 ${
-                      isActive ? "text-white" : "text-[#9CA3AF]"
+                      isActive ? "text-white" : "text-neutral-400"
                     }`}
                   />
                   <span>{tab.label}</span>
                   {tab.badge !== null && (
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                         isActive
                           ? "bg-white/20 text-white"
-                          : "bg-[#121212] text-[#9CA3AF] border border-[#2F2F2F]"
+                          : "bg-neutral-900 text-neutral-400 border border-neutral-800"
                       }`}
                     >
                       {tab.badge}
@@ -332,7 +336,7 @@ export default function ProfilePage(props: ProfilePageProps) {
                 </button>
               );
             })}
-          </nav>
+          </div>
         </div>
 
         {/* Tab Canvas Area */}

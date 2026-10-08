@@ -24,6 +24,10 @@ export interface AIModelInfo {
 
 export const SYSTEM_DEFAULT_MODEL = "gemini-2.5-flash";
 
+let _catalogLoaded = false;
+let _isCatalogFetching = false;
+let _lastCatalogFetch = 0;
+
 export const AVAILABLE_AI_MODELS: AIModelInfo[] = [
   {
     id: "gemini-2.5-flash",
@@ -329,6 +333,11 @@ export const useAIModelStore = create<AIModelState>((set, get) => {
     dynamicModels: AVAILABLE_AI_MODELS,
 
     loadCatalogFromBackend: async () => {
+      // Prevent duplicate fetches if already loaded recently or currently fetching
+      if (_catalogLoaded && Date.now() - _lastCatalogFetch < 30000) return;
+      if (_isCatalogFetching) return;
+      _isCatalogFetching = true;
+
       try {
         const res = await fetch("/api/v1/ai/models");
         if (res.ok) {
@@ -353,10 +362,14 @@ export const useAIModelStore = create<AIModelState>((set, get) => {
               })
             );
             set({ dynamicModels: mapped });
+            _catalogLoaded = true;
+            _lastCatalogFetch = Date.now();
           }
         }
       } catch {
         // Fallback to static catalog
+      } finally {
+        _isCatalogFetching = false;
       }
     },
 

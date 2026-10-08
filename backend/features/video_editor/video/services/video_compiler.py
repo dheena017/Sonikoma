@@ -220,6 +220,17 @@ async def compile_video_from_panels(
                     except Exception:
                         pass
 
+        narrative_text = (panel.get("narrative") or panel.get("narrativeText") or db_p.get("narrative") or "").strip()
+        speech_text = (panel.get("speech_text") or db_p.get("speech_text") or "").strip()
+
+        text_to_speak = ""
+        if narrative_preferred and narrative_text:
+            text_to_speak = narrative_text
+        elif speech_text:
+            text_to_speak = speech_text
+        elif narrative_text:
+            text_to_speak = narrative_text
+
         # Step 2: Determine if audio is present or must be synthesized
         if has_audio:
             try:
@@ -237,17 +248,6 @@ async def compile_video_from_panels(
                 f"Reusing existing pre-generated audio ({duration:.1f}s) - Skipping synthesis."
             )
         else:
-            narrative_text = (panel.get("narrative") or panel.get("narrativeText") or db_p.get("narrative") or "").strip()
-            speech_text = (panel.get("speech_text") or db_p.get("speech_text") or "").strip()
-
-            text_to_speak = ""
-            if narrative_preferred and narrative_text:
-                text_to_speak = narrative_text
-            elif speech_text:
-                text_to_speak = speech_text
-            elif narrative_text:
-                text_to_speak = narrative_text
-
             if text_to_speak:
                 panel_voice = panel.get("voice") or voice or "en-US-GuyNeural"
                 audio_kind = "Narrative" if text_to_speak == narrative_text else "Dialogue"
@@ -318,9 +318,16 @@ async def compile_video_from_panels(
                 )
 
                 if has_audio:
-                    audio_clip = AudioFileClip(audio_path)
-                    audio_clip = audio_clip.set_duration(duration)
-                    composite_clip = composite_clip.set_audio(audio_clip)
+                    try:
+                        audio_clip = AudioFileClip(audio_path)
+                        a_dur = audio_clip.duration or duration
+                        if a_dur < duration:
+                            audio_clip = audio_clip.set_duration(duration)
+                        else:
+                            audio_clip = audio_clip.subclip(0, min(a_dur, duration)).set_duration(duration)
+                        composite_clip = composite_clip.set_audio(audio_clip)
+                    except Exception as a_err:
+                        logger.warning(f"[Video Compiler] Panel {panel_id}: Audio attach warning: {a_err}")
 
                 clips.append(composite_clip)
                 logger.info(
@@ -352,16 +359,22 @@ async def compile_video_from_panels(
         def render_video():
             temp_mpy_sound = os.path.join(temp_dir, f"temp_mpy_{uuid.uuid4().hex[:8]}_snd.m4a")
             mpy_logger = MoviePyCompileLogger(report_progress=report_progress)
+            cpu_threads = max(2, (os.cpu_count() or 4))
+            logger.info(f"[Video Compiler] Initiating FFmpeg write with {cpu_threads} CPU threads and 'veryfast' preset...")
             final_video.write_videofile(
                 output_path,
                 fps=24,
                 codec="libx264",
                 audio_codec="aac",
-                threads=4,
-                preset="fast",
-                ffmpeg_params=["-pix_fmt", "yuv420p", "-crf", "19", "-movflags", "+faststart"],
+                threads=cpu_threads,
+                preset="veryfast",
+                ffmpeg_params=[
+                    "-pix_fmt", "yuv420p",
+                    "-crf", "21",
+                    "-movflags", "+faststart",
+                    "-tune", "animation",
+                ],
                 logger=mpy_logger,
-                bitrate="12000k",
                 temp_audiofile=temp_mpy_sound,
                 remove_temp=True
             )

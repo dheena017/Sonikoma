@@ -10,7 +10,7 @@ import { SidepanelHeader } from "./components/SidepanelHeader";
 import { StoryboardView } from "./components/StoryboardView";
 import { AudioMixerView } from "./components/AudioMixerView";
 import { ExportView } from "./components/ExportView";
-import { SidepanelFooter } from "./components/SidepanelFooter";
+import { SidepanelFooter, AutoPipelineStepInfo } from "./components/SidepanelFooter";
 import { ErrorModal, ErrorModalData } from "./components/ErrorModal";
 import {
   Layers,
@@ -39,6 +39,10 @@ export const SidepanelApp: React.FC = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [renderProgress, setRenderProgress] = useState<number>(0);
+  const [isAutoPipelineRunning, setIsAutoPipelineRunning] =
+    useState<boolean>(false);
+  const [autoPipelineStep, setAutoPipelineStep] =
+    useState<AutoPipelineStepInfo | null>(null);
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [errorModal, setErrorModal] = useState<ErrorModalData | null>(null);
 
@@ -409,6 +413,26 @@ export const SidepanelApp: React.FC = () => {
             if (apiRes?.isInternal) {
               setIsScanning(false);
               isScanningRef.current = false;
+              return;
+            }
+
+            if (
+              apiRes?.error &&
+              (apiRes.error.includes("series episode list") ||
+                apiRes.error.includes("viewer URL"))
+            ) {
+              setIsScanning(false);
+              isScanningRef.current = false;
+              showToast(
+                "⚠️ Series episode list detected. Please open any episode/chapter to scan panels!",
+                "warning"
+              );
+              setChapterInfo({
+                title: tab.title || "Webtoon Series",
+                chapterName: "Click into an episode to scan",
+                url: tab.url,
+                hasDetectedChapter: false,
+              });
               return;
             }
 
@@ -1100,6 +1124,457 @@ export const SidepanelApp: React.FC = () => {
     }
   };
 
+  // Full End-to-End Automated Pipeline:
+  // Step 1: Merge panels vertically (/api/v1/images/merge)
+  // Step 2: Auto crop into distinct scenes (/api/v1/panels/detect/long-panels & /api/v1/images/crop/long-panels)
+  // Step 3: AI Vision & Dialogue sequence analysis (/api/v1/ai/analyze-all-panels)
+  // Step 4: Synthesize Neural Voice audio for scenes (/api/v1/audio/synthesize-all-panel-audio)
+  // Step 5: Render final video with motion, audio & BGM (/api/v1/video/render + polling)
+  const handleAutoFullPipeline = async () => {
+    const activePanels = panels.filter((p) => p.enabled);
+    if (activePanels.length === 0) {
+      showToast("Please enable or scan at least 1 comic scene first", "warning");
+      return;
+    }
+
+    if (isAutoPipelineRunning || isRendering) {
+      showToast("A generation pipeline is already running", "info");
+      return;
+    }
+
+    setIsAutoPipelineRunning(true);
+
+    try {
+      // ═════════════════════════════════════════════════════════════════════════
+      // ── Step 1/5: MERGE PANELS INTO CONTINUOUS STRIP (/api/v1/images/merge) ──
+      // ═════════════════════════════════════════════════════════════════════════
+      setAutoPipelineStep({
+        step: 1,
+        total: 5,
+        title: "Merge Panels",
+        detail: `Stitching ${activePanels.length} panels into continuous webtoon canvas...`,
+        progress: 12,
+      });
+      showToast("🔗 Step 1/5: Merging comic panels...", "info");
+
+      let mergedUrl: string = "";
+      try {
+        const mergeRes = await new Promise<any>((resolve, reject) => {
+          chrome.runtime.sendMessage(
+            {
+              type: "API_MERGE_PANELS",
+              payload: {
+                urls: activePanels.map((p) => p.imageUrl),
+                layout: "vertical",
+                spacing: 0,
+                spacingColor: "white",
+                scaleToFit: true,
+              },
+            },
+            (res) => {
+              if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+              } else {
+                resolve(res);
+              }
+            }
+          );
+        });
+
+        if (mergeRes && mergeRes.success && mergeRes.url) {
+          mergedUrl = mergeRes.url;
+          showToast("✓ Merged panels into continuous strip", "success");
+        } else {
+          console.warn("[AutoPipeline] Merge fallback:", mergeRes?.error);
+          mergedUrl = activePanels[0].imageUrl;
+        }
+      } catch (mErr: any) {
+        console.warn("[AutoPipeline] Merge warning:", mErr);
+        mergedUrl = activePanels[0].imageUrl;
+      }
+
+      // ═════════════════════════════════════════════════════════════════════════
+      // ── Step 2/5: AUTO CROP PANELS (/api/v1/images/crop/long-panels) ─────────
+      // ═════════════════════════════════════════════════════════════════════════
+      setAutoPipelineStep({
+        step: 2,
+        total: 5,
+        title: "Auto-Crop",
+        detail: "Detecting frames & slicing into clean, cropped panels...",
+        progress: 30,
+      });
+      showToast("✂️ Step 2/5: Auto-cropping & slicing comic frames...", "info");
+
+      let croppedPanels: StoryboardPanel[] = [...activePanels];
+      try {
+        const cropRes = await new Promise<any>((resolve, reject) => {
+          chrome.runtime.sendMessage(
+            {
+              type: "API_AUTO_CROP",
+              payload: {
+                url: mergedUrl,
+                sensitivity: 30.0,
+              },
+            },
+            (res) => {
+              if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+              } else {
+                resolve(res);
+              }
+            }
+          );
+        });
+
+        if (
+          cropRes &&
+          cropRes.success &&
+          Array.isArray(cropRes.slices) &&
+          cropRes.slices.length > 0
+        ) {
+          const timestamp = Date.now();
+          croppedPanels = cropRes.slices.map((s: any, idx: number) => {
+            const existing: Partial<StoryboardPanel> =
+              activePanels[idx] || activePanels[0] || {};
+            return {
+              id: `auto-crop-${timestamp}-${idx + 1}`,
+              index: idx + 1,
+              imageUrl: s.url,
+              dialogueText: existing.dialogueText || "",
+              narrativeText: existing.narrativeText || "",
+              visualDescription: existing.visualDescription || "",
+              motionPreset: existing.motionPreset || "zoom_in",
+              duration: existing.duration || 3.5,
+              enabled: true,
+              sfx: existing.sfx || "",
+              audioUrl: undefined,
+              narrativeAudioUrl: undefined,
+              aspectRatio: aspectRatio,
+            };
+          });
+          setPanels(croppedPanels);
+          showToast(
+            `✓ Sliced & cropped ${croppedPanels.length} clean panels`,
+            "success"
+          );
+        }
+      } catch (cErr: any) {
+        console.warn("[AutoPipeline] Auto-crop fallback to original panels:", cErr);
+      }
+
+      // ═════════════════════════════════════════════════════════════════════════
+      // ── Step 3/5: AI ANALYZE ALL PANELS (/api/v1/ai/analyze-all-panels) ──────
+      // ═════════════════════════════════════════════════════════════════════════
+      setAutoPipelineStep({
+        step: 3,
+        total: 5,
+        title: "AI Analysis",
+        detail: `Analyzing dialogue OCR, emotions & camera motion for ${croppedPanels.length} panels...`,
+        progress: 52,
+      });
+      showToast("🧠 Step 3/5: AI analyzing dialogue & camera motions...", "info");
+
+      let analyzedPanels: StoryboardPanel[] = [...croppedPanels];
+      try {
+        const analyzeRes = await new Promise<any>((resolve, reject) => {
+          chrome.runtime.sendMessage(
+            {
+              type: "API_ANALYZE_ALL_PANELS",
+              payload: {
+                panels: croppedPanels.map((p) => ({
+                  id: p.id,
+                  url: p.imageUrl,
+                })),
+                voice: selectedVoice,
+                model: "gemini-2.5-flash",
+                narrationStyle: "long",
+              },
+            },
+            (res) => {
+              if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+              } else {
+                resolve(res);
+              }
+            }
+          );
+        });
+
+        if (
+          analyzeRes &&
+          analyzeRes.success &&
+          Array.isArray(analyzeRes.results)
+        ) {
+          const resultsById = new Map<string, any>();
+          analyzeRes.results.forEach((r: any, idx: number) => {
+            if (r.id !== undefined && r.id !== null) {
+              resultsById.set(String(r.id), r);
+            }
+            if (croppedPanels[idx]) {
+              resultsById.set(String(croppedPanels[idx].id), r);
+            }
+          });
+
+          analyzedPanels = croppedPanels.map((p) => {
+            const result = resultsById.get(String(p.id));
+            if (!result) return p;
+            const analysis = result.analysis || result;
+
+            return {
+              ...p,
+              dialogueText: analysis.speech_text
+                ? analysis.speech_text
+                : p.dialogueText,
+              motionPreset:
+                analysis.motion_type || p.motionPreset || "zoom_in",
+              duration: analysis.duration
+                ? Number(analysis.duration)
+                : p.duration || 3.5,
+              visualDescription:
+                analysis.visual_description || p.visualDescription,
+              narrativeText:
+                result.narrative ||
+                result.narrativeText ||
+                analysis.narrative ||
+                p.narrativeText,
+              sfx: analysis.sfx || p.sfx,
+              audioUrl:
+                result.audio_url || analysis.audio_url || p.audioUrl,
+              narrativeAudioUrl:
+                result.narrative_audio_url ||
+                analysis.narrative_audio_url ||
+                p.narrativeAudioUrl,
+            };
+          });
+          setPanels(analyzedPanels);
+          showToast(
+            `✓ AI analysis completed for all ${analyzedPanels.length} scenes`,
+            "success"
+          );
+        }
+      } catch (aErr: any) {
+        console.warn("[AutoPipeline] AI Analysis warning:", aErr);
+      }
+
+      // ═════════════════════════════════════════════════════════════════════════
+      // ── Step 4/5: CREATE AUDIO (TTS) (/api/v1/audio/synthesize-panel-audio) ──
+      // ═════════════════════════════════════════════════════════════════════════
+      setAutoPipelineStep({
+        step: 4,
+        total: 5,
+        title: "Voice Audio",
+        detail: "Synthesizing neural voice acting for dialogue scenes...",
+        progress: 74,
+      });
+      showToast("🎙️ Step 4/5: Synthesizing voice audio...", "info");
+
+      let audioPanels: StoryboardPanel[] = [...analyzedPanels];
+      try {
+        const panelsNeedingAudio = analyzedPanels.filter(
+          (p) => (p.dialogueText || p.narrativeText) && !p.audioUrl
+        );
+
+        if (panelsNeedingAudio.length > 0) {
+          const audioRes = await new Promise<any>((resolve, reject) => {
+            chrome.runtime.sendMessage(
+              {
+                type: "API_GENERATE_TTS_BATCH",
+                payload: {
+                  panels: panelsNeedingAudio.map((p) => ({
+                    id: p.id,
+                    text: p.dialogueText || p.narrativeText || "",
+                    dialogue_list: [p.dialogueText || p.narrativeText || ""],
+                    voice: selectedVoice,
+                  })),
+                  voice: selectedVoice,
+                  speech_rate: speechRate,
+                  speech_pitch: speechPitch,
+                },
+              },
+              (res) => {
+                if (chrome.runtime.lastError) {
+                  reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                  resolve(res);
+                }
+              }
+            );
+          });
+
+          if (
+            audioRes &&
+            audioRes.success &&
+            Array.isArray(audioRes.results)
+          ) {
+            const audioMap = new Map<string, any>();
+            audioRes.results.forEach((r: any, idx: number) => {
+              if (r.id !== undefined && r.id !== null) {
+                audioMap.set(String(r.id), r);
+              }
+              if (panelsNeedingAudio[idx]) {
+                audioMap.set(String(panelsNeedingAudio[idx].id), r);
+              }
+            });
+
+            audioPanels = analyzedPanels.map((p) => {
+              const match = audioMap.get(String(p.id));
+              if (match && match.audio_url) {
+                return {
+                  ...p,
+                  audioUrl: match.audio_url,
+                  duration: match.duration
+                    ? Math.max(p.duration || 0, match.duration + 0.5)
+                    : p.duration,
+                };
+              }
+              return p;
+            });
+            setPanels(audioPanels);
+            showToast("✓ Spoken voice tracks generated", "success");
+          }
+        }
+      } catch (auErr: any) {
+        console.warn("[AutoPipeline] Audio synthesis warning:", auErr);
+      }
+
+      // ═════════════════════════════════════════════════════════════════════════
+      // ── Step 5/5: CREATE FINAL VIDEO (/api/v1/video/render) ──────────────────
+      // ═════════════════════════════════════════════════════════════════════════
+      setAutoPipelineStep({
+        step: 5,
+        total: 5,
+        title: "Render Video",
+        detail: "Synthesizing final cinematic motion comic with FFmpeg...",
+        progress: 88,
+      });
+      showToast("🎬 Step 5/5: Compiling & rendering final video...", "info");
+
+      const renderRes = await new Promise<any>((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          {
+            type: "API_RENDER_VIDEO",
+            payload: {
+              project_id: "ext-auto-" + Date.now(),
+              panels: audioPanels.map((p, idx) => ({
+                id: idx + 1,
+                image_url: p.imageUrl,
+                duration: p.duration || 3.0,
+                speech_text: p.dialogueText || p.narrativeText || "",
+                motion_type: p.motionPreset || "zoom_in",
+                audio_url: p.audioUrl || p.narrativeAudioUrl || "",
+                sfx: p.sfx || "",
+              })),
+              voice: selectedVoice,
+              music_theme: bgmMood,
+              aspect_ratio: aspectRatio,
+              subtitles_style: showSubtitles ? "burn-in" : "none",
+              bgm_volume: bgmVolume / 100,
+              speech_rate: speechRate,
+              speech_pitch: speechPitch,
+            },
+          },
+          (res) => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+            } else {
+              resolve(res);
+            }
+          }
+        );
+      });
+
+      if (!renderRes || !renderRes.success || !renderRes.job_id) {
+        throw new Error(
+          renderRes?.error ||
+            renderRes?.detail ||
+            "Video render failed to initiate on backend engine."
+        );
+      }
+
+      const jobId = renderRes.job_id;
+
+      // Poll backend job status until complete
+      await new Promise<void>((resolve, reject) => {
+        const poll = setInterval(() => {
+          chrome.runtime.sendMessage(
+            {
+              type: "API_GET_JOB_STATUS",
+              payload: { job_id: jobId },
+            },
+            (statusRes) => {
+              if (
+                chrome.runtime.lastError ||
+                !statusRes ||
+                !statusRes.success
+              ) {
+                return;
+              }
+
+              if (typeof statusRes.progress === "number") {
+                const scaledProg = Math.max(
+                  88,
+                  Math.min(99, Math.round(88 + statusRes.progress * 0.11))
+                );
+                setAutoPipelineStep((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        progress: scaledProg,
+                        detail: `Rendering video: ${Math.round(
+                          statusRes.progress
+                        )}%`,
+                      }
+                    : prev
+                );
+              }
+
+              const status = (statusRes.status || "").toUpperCase();
+              if (status === "COMPLETED") {
+                clearInterval(poll);
+                setAutoPipelineStep({
+                  step: 5,
+                  total: 5,
+                  title: "Completed",
+                  detail: "Final video rendered successfully!",
+                  progress: 100,
+                });
+                showToast(
+                  "🎉 Full Auto Motion Comic generated successfully!",
+                  "success"
+                );
+
+                const videoUrl =
+                  statusRes.result?.video_url || statusRes.url || "";
+                if (videoUrl) {
+                  chrome.tabs.create({ url: videoUrl });
+                }
+                resolve();
+              } else if (status === "FAILED" || status === "CANCELLED") {
+                clearInterval(poll);
+                reject(
+                  new Error(
+                    statusRes.error ||
+                      statusRes.result?.error ||
+                      "FFmpeg video compilation failed"
+                  )
+                );
+              }
+            }
+          );
+        }, 1500);
+      });
+    } catch (err: any) {
+      const errMsg = err?.message || String(err);
+      showToast(`Auto pipeline error: ${errMsg}`, "error");
+      showErrorModal("Auto Pipeline Error", errMsg);
+    } finally {
+      setIsAutoPipelineRunning(false);
+      setTimeout(() => {
+        setAutoPipelineStep(null);
+      }, 4000);
+    }
+  };
+
   // Download ZIP
   const handleDownloadZip = () => {
     if (typeof chrome !== "undefined" && chrome.tabs) {
@@ -1135,7 +1610,7 @@ export const SidepanelApp: React.FC = () => {
     .reduce((acc, p) => acc + (p.duration || 0), 0);
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#0b0f19] text-[#f8fafc] text-xs font-sans select-none overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-[#0a0a0a] text-[#e5e5e5] text-xs font-sans select-none overflow-hidden">
       {/* ── 1. Top Header Component ── */}
       <SidepanelHeader
         isBackendOnline={isBackendOnline}
@@ -1163,15 +1638,15 @@ export const SidepanelApp: React.FC = () => {
         </div>
       )}
 
-      {/* ── 2. Segmented Navigation Tabs ── */}
-      <nav className="flex items-center bg-[#0d1322] border-b border-[#1e293b] p-1.5 gap-1 shrink-0">
+      {/* ── 2. Segmented Navigation Tabs (Matching Website) ── */}
+      <nav className="flex items-center bg-[#121212] border-b border-[#2f2f2f] p-1.5 gap-1 shrink-0">
         <button
           type="button"
           onClick={() => setActiveTab("storyboard")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer ${
             activeTab === "storyboard"
-              ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#141b2c]"
+              ? "bg-[#3b82f6] text-white shadow-md shadow-blue-900/30 border border-blue-400/30"
+              : "text-[#9ca3af] hover:text-[#e5e5e5] hover:bg-[#1e1e1e]"
           }`}
         >
           <Layers size={12} />
@@ -1183,8 +1658,8 @@ export const SidepanelApp: React.FC = () => {
           onClick={() => setActiveTab("mixer")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer ${
             activeTab === "mixer"
-              ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#141b2c]"
+              ? "bg-[#3b82f6] text-white shadow-md shadow-blue-900/30 border border-blue-400/30"
+              : "text-[#9ca3af] hover:text-[#e5e5e5] hover:bg-[#1e1e1e]"
           }`}
         >
           <Sliders size={12} />
@@ -1196,8 +1671,8 @@ export const SidepanelApp: React.FC = () => {
           onClick={() => setActiveTab("export")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold rounded-md transition-all cursor-pointer ${
             activeTab === "export"
-              ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm"
-              : "text-slate-400 hover:text-slate-200 hover:bg-[#141b2c]"
+              ? "bg-[#3b82f6] text-white shadow-md shadow-blue-900/30 border border-blue-400/30"
+              : "text-[#9ca3af] hover:text-[#e5e5e5] hover:bg-[#1e1e1e]"
           }`}
         >
           <Settings size={12} />
@@ -1333,7 +1808,10 @@ export const SidepanelApp: React.FC = () => {
         enabledCount={enabledCount}
         totalDuration={totalDuration}
         isScanning={isScanning}
+        isAutoPipelineRunning={isAutoPipelineRunning}
+        autoPipelineStep={autoPipelineStep}
         onRender={handleRenderVideo}
+        onAutoPipeline={handleAutoFullPipeline}
         onDownloadZip={handleDownloadZip}
         onScan={scanChapter}
       />

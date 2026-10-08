@@ -136,34 +136,52 @@ _fallback_env = os.getenv("GEMINI_FALLBACK_MODELS", "")
 GEMINI_FALLBACK_MODELS: list = (
     [m.strip() for m in _fallback_env.split(",") if m.strip()]
     if _fallback_env
-    else ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+    else ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.7-flash", "gemini-2.5-flash"]
 )
 
-# ── Gemini Client Initialization ──────────────────────────────────────────────
-ai_initialized = False
-genai_client = None
-try:
+# ── Gemini Client Initialization (Lazy-Loaded to reduce startup time) ─────────
+_raw_genai_client = None
+ai_initialized = bool(GEMINI_API_KEY or os.getenv("GEMINI_API_KEY"))
+
+def get_genai_client():
+    global _raw_genai_client
+    if _raw_genai_client is not None:
+        return _raw_genai_client
     api_key = GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")
     if not api_key:
         logger.warning("GEMINI_API_KEY is missing from environment variables.")
-    else:
+        return None
+    try:
+        from google import genai
+        _raw_genai_client = genai.Client(api_key=api_key)
+        return _raw_genai_client
+    except Exception as e:
         try:
-            from google import genai
-            genai_client = genai.Client(api_key=api_key)
-            ai_initialized = True
-        except Exception as e:
-            try:
-                import warnings
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", category=FutureWarning)
-                    import google.generativeai as legacy_genai
-                legacy_genai.configure(api_key=api_key)
-                genai_client = legacy_genai
-                ai_initialized = True
-            except Exception as e2:
-                logger.warning(f"Could not initialize google-genai or google.generativeai: {e2}")
-except Exception as e:
-    logger.warning(f"Gemini client initialization skipped: {e}")
+            import warnings
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=FutureWarning)
+                import google.generativeai as legacy_genai
+            legacy_genai.configure(api_key=api_key)
+            _raw_genai_client = legacy_genai
+            return _raw_genai_client
+        except Exception as e2:
+            logger.warning(f"Could not initialize google-genai or google.generativeai: {e2}")
+            return None
+
+class _GenAIProxy:
+    def __getattr__(self, name):
+        client = get_genai_client()
+        if client is None:
+            raise RuntimeError("Gemini client is not initialized. Please ensure GEMINI_API_KEY is set.")
+        return getattr(client, name)
+
+    def __bool__(self):
+        return bool(GEMINI_API_KEY or os.getenv("GEMINI_API_KEY"))
+
+    def __repr__(self):
+        return f"<LazyGenAIClient initialized={_raw_genai_client is not None}>"
+
+genai_client = _GenAIProxy()
 
 # ── HuggingFace Client Initialization ─────────────────────────────────────────
 hf_client = None

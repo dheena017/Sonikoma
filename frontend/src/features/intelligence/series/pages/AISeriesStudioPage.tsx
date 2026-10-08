@@ -491,6 +491,9 @@ export interface AISeriesStudioPageProps {
   fetchWithInterceptor?: typeof fetch;
 }
 
+const studioSeriesProjectCache = new Map<string, AISeriesProject>();
+const studioChapterCache = new Map<string, ChapterSession>();
+
 export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   seriesIdFromRoute,
   navigateTo,
@@ -517,14 +520,20 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   }, [seriesIdFromRoute]);
 
   // ── Core Project State ───────────────────────────────────────────────
-  const [project, setProject] = useState<AISeriesProject | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [project, setProject] = useState<AISeriesProject | null>(() => {
+    return resolvedSeriesId ? (studioSeriesProjectCache.get(resolvedSeriesId) || null) : null;
+  });
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    return resolvedSeriesId ? !studioSeriesProjectCache.has(resolvedSeriesId) : true;
+  });
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // ── Navigation & Selection State ─────────────────────────────────────
   const [selectedSessionNum, setSelectedSessionNum] = useState<number>(1);
   const [selectedChapterNum, setSelectedChapterNum] = useState<number>(1);
-  const [currentChapter, setCurrentChapter] = useState<ChapterSession | null>(null);
+  const [currentChapter, setCurrentChapter] = useState<ChapterSession | null>(() => {
+    return resolvedSeriesId ? (studioChapterCache.get(`${resolvedSeriesId}_1_1`) || null) : null;
+  });
   const [selectedPanelIdx, setSelectedPanelIdx] = useState<number>(0);
 
   // ── Viewport Controls ────────────────────────────────────────────────
@@ -578,9 +587,12 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   // ── Fetch Project & Initialize Chapter ───────────────────────────────
   const fetchProjectData = useCallback(async (sId: string) => {
     try {
-      setIsLoading(true);
+      if (!studioSeriesProjectCache.has(sId)) {
+        setIsLoading(true);
+      }
       setLoadError(null);
       const proj = await aiSeriesApi.getSeries(sId);
+      studioSeriesProjectCache.set(sId, proj);
       setProject(proj);
 
       // Default format viewport mapping
@@ -596,6 +608,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
 
       // Load initial Chapter 1
       const chap = await aiSeriesApi.getChapter(sId, 1, 1);
+      studioChapterCache.set(`${sId}_1_1`, chap);
       setCurrentChapter(chap);
       if (chap.panels && chap.panels.length > 0) {
         setSelectedPanelIdx(0);

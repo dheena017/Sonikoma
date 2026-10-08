@@ -10,7 +10,7 @@ Creative Feature Module:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from .router import router, creative_router, export_router
+from .router import router, creative_router, export_router, agent_router
 from .service import CreativeService, creative_service
 from . import schemas
 
@@ -18,6 +18,7 @@ __all__ = [
     "router",
     "creative_router",
     "export_router",
+    "agent_router",
     "CreativeService",
     "creative_service",
     "schemas",

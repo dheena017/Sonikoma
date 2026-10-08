@@ -9,8 +9,12 @@ import {
   FolderOpen,
   FolderSync,
   Activity,
-  Film,
   X,
+  User,
+  LogOut,
+  CreditCard,
+  ShieldCheck,
+  BarChart3,
 } from "lucide-react";
 import * as api from "@/shared/api";
 import { getUserCreditsPayload, claimDailyCredits } from "@/features/auth/api/auth";
@@ -75,6 +79,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreditsPopover, setShowCreditsPopover] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [credits, setCredits] = useState<number | null>(
@@ -88,6 +93,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const creditsRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
   const handleClaimDailyBonus = async () => {
@@ -138,6 +144,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
       if (creditsRef.current && !creditsRef.current.contains(target)) {
         setShowCreditsPopover(false);
       }
+      if (profileRef.current && !profileRef.current.contains(target)) {
+        setShowProfileDropdown(false);
+      }
       if (searchRef.current && !searchRef.current.contains(target)) {
         setShowSearchDropdown(false);
       }
@@ -155,20 +164,9 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
       keyword: "home dashboard overview creative suite hub",
     },
     {
-      label: "AI Video Optimizer",
-      path: "/creative-suite/ai-optimizer",
-      keyword: "video optimizer resolution pacing scenes compile",
-    },
-    {
-      label: "AI Panel Assistant",
-      path: "/creative-suite/panel-assistant",
-      keyword: "panel editing speech bubble clean crop repaint",
-    },
-    {
-      label: "AI Voice & Sound Studio",
-      path: "/creative-suite/ai-voice",
-      keyword:
-        "voice synthesis narrator sound design bgm sfx casting speed pitch",
+      label: "Translation",
+      path: "/creative-suite/translation",
+      keyword: "translation localize dialogue speech narrative languages",
     },
     {
       label: "YouTube Publisher Studio",
@@ -186,7 +184,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
   return (
     <header
       id="creative_header_pane"
-      className="w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/80 backdrop-blur-xl z-50 pl-2 sm:pl-4 pr-3 sm:pr-6 md:pr-8 flex items-center justify-between gap-1 sm:gap-3 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="relative w-full min-w-0 h-16 shrink-0 border-b border-white/10 bg-neutral-950/90 backdrop-blur-xl z-[100] pl-2 sm:pl-4 pr-3 sm:pr-6 md:pr-8 flex items-center justify-between gap-1 sm:gap-3 selection:bg-[#2A2A2A] shadow-md shadow-black/20 overflow-visible"
     >
       {/* Left side: Hamburger and Brand */}
       <div className="flex items-center gap-1 sm:gap-2.5 shrink-0 min-w-0 h-full">
@@ -208,7 +206,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
       </div>
 
       {/* Right side: Standardized Controls Suite */}
-      <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 shrink-0 overflow-x-visible pr-0.5 sm:pr-1">
+      <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 shrink-0 overflow-visible pr-0.5 sm:pr-1">
         {/* Server Status Indicator - Hidden on ultra-small screens (<480px) */}
         <div className="hidden min-[480px]:block">
           <ServerStatusIndicator
@@ -228,6 +226,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
                 onClick={() => {
                   setShowCreditsPopover(!showCreditsPopover);
                   setShowNotifications(false);
+                  setShowProfileDropdown(false);
                 }}
                 aria-label="Your credit balance & daily rewards"
                 className={`h-8.5 flex items-center gap-1 px-2.5 sm:px-3 rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-xs font-medium text-white transition-all shadow-2xs select-none shrink-0 cursor-pointer active:scale-95 ${
@@ -244,7 +243,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
             </Tooltip>
 
             {showCreditsPopover && (
-              <div className="absolute right-0 top-full mt-2 z-50">
+              <div className="absolute right-0 top-full mt-2 z-[9999]">
                 <HeaderCreditsPopover
                   credits={credits}
                   hasClaimedToday={user?.has_claimed_today}
@@ -267,6 +266,7 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
               onClick={() => {
                 setShowNotifications(!showNotifications);
                 setShowCreditsPopover(false);
+                setShowProfileDropdown(false);
               }}
               className={`h-8.5 w-8.5 flex items-center justify-center rounded-xl bg-[#202127] hover:bg-[#282a32] border border-[#33353e] hover:border-[#4b4e5c] text-white transition-all shadow-2xs cursor-pointer active:scale-95 shrink-0 relative ${
                 showNotifications
@@ -334,44 +334,154 @@ const CreativeSuiteHeader: React.FC<CreativeSuiteHeaderProps> = ({
           </Tooltip>
         </div>
 
-        {/* User Profile Pill at Far Right End */}
-        <Tooltip text="View Profile & Settings" placement="bottom">
-          <button
-            onClick={() => navigateTo && navigateTo("/profile")}
-            className="flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3 rounded-full bg-[#18191e] border border-[#2b2d35] hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07080c]"
-            aria-label="Open User profile"
-          >
-            <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
-              {activeUser?.full_name ||
-                activeUser?.username ||
-                (activeUser?.email
-                  ? activeUser.email.split("@")[0]
-                  : "Studio Creator")}
-            </span>
-            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
-              <img
-                key={
-                  activeUser?.avatar_url || activeUser?.full_name || "avatar"
-                }
-                src={getUserAvatarUrl(activeUser)}
-                referrerPolicy="no-referrer"
-                onLoad={(e) => {
-                  e.currentTarget.classList.remove("opacity-0");
-                  e.currentTarget.classList.add("opacity-100");
-                }}
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement;
-                  target.onerror = null;
-                  target.src = DEFAULT_USER_AVATAR_DATA_URI;
-                  target.classList.remove("opacity-0");
-                  target.classList.add("opacity-100");
-                }}
-                alt="User Avatar"
-                className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
-              />
+        {/* User Profile Pill & Dropdown at Far Right End */}
+        <div className="relative" ref={profileRef}>
+          <Tooltip text="User Profile & Settings" placement="bottom">
+            <button
+              onClick={() => {
+                setShowProfileDropdown(!showProfileDropdown);
+                setShowNotifications(false);
+                setShowCreditsPopover(false);
+              }}
+              className={`flex items-center gap-1.5 sm:gap-2 p-1 pl-1.5 sm:pl-3 rounded-full bg-[#18191e] border hover:border-neutral-700 hover:bg-[#202127] transition-all cursor-pointer select-none group shrink-0 ml-0.5 sm:ml-1 shadow-sm active:scale-95 focus-visible:outline-none ${
+                showProfileDropdown
+                  ? "border-[#3B82F6] ring-2 ring-[#3B82F6]/30 bg-[#202127]"
+                  : "border-[#2b2d35]"
+              }`}
+              aria-label="Open User Profile Menu"
+            >
+              <span className="text-xs font-bold text-white group-hover:text-[#3B82F6] truncate max-w-[130px] hidden md:inline font-sans px-2.5 py-1 rounded-lg bg-[#24252c] border border-white/5">
+                {activeUser?.full_name ||
+                  activeUser?.username ||
+                  (activeUser?.email
+                    ? activeUser.email.split("@")[0]
+                    : "Studio Creator")}
+              </span>
+              <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-[#8b5cf6] bg-[#201833] shrink-0 shadow-[0_0_8px_rgba(139,92,246,0.35)] flex items-center justify-center group-hover:border-neutral-700 transition-all duration-300">
+                <img
+                  key={
+                    activeUser?.avatar_url || activeUser?.full_name || "avatar"
+                  }
+                  src={getUserAvatarUrl(activeUser)}
+                  referrerPolicy="no-referrer"
+                  onLoad={(e) => {
+                    e.currentTarget.classList.remove("opacity-0");
+                    e.currentTarget.classList.add("opacity-100");
+                  }}
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    target.onerror = null;
+                    target.src = DEFAULT_USER_AVATAR_DATA_URI;
+                    target.classList.remove("opacity-0");
+                    target.classList.add("opacity-100");
+                  }}
+                  alt="User Avatar"
+                  className="w-full h-full object-cover opacity-0 transition-opacity duration-300"
+                />
+              </div>
+            </button>
+          </Tooltip>
+
+          {showProfileDropdown && (
+            <div className="absolute right-0 top-full mt-2 w-72 bg-[#161616] border border-neutral-800 rounded-2xl shadow-2xl p-3 z-[9999] animate-in fade-in zoom-in-95 duration-150 text-left">
+              {/* User Identity Header */}
+              <div className="p-2.5 bg-neutral-900/80 rounded-xl border border-neutral-800/80 mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl overflow-hidden border border-[#8b5cf6]/50 bg-neutral-950 shrink-0">
+                    <img
+                      src={getUserAvatarUrl(activeUser)}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src =
+                          DEFAULT_USER_AVATAR_DATA_URI;
+                      }}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-white truncate">
+                      {activeUser?.full_name ||
+                        activeUser?.username ||
+                        "Studio Creator"}
+                    </p>
+                    <p className="text-[11px] text-neutral-400 font-mono truncate">
+                      {activeUser?.email || "creator@sonikoma.ai"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-2.5 pt-2 border-t border-neutral-800 flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-neutral-400">Balance:</span>
+                  <span className="text-amber-400 font-bold flex items-center gap-1">
+                    <Zap className="w-3 h-3 fill-amber-400" />
+                    {credits !== null ? credits.toLocaleString() : "--"} CR
+                  </span>
+                </div>
+              </div>
+
+              {/* Navigation Items */}
+              <div className="space-y-1">
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    navigateTo("/profile");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-neutral-850 transition-colors cursor-pointer text-left"
+                >
+                  <User className="w-4 h-4 text-[#3B82F6]" />
+                  <span>Account & Profile</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    navigateTo("/profile?tab=billing");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-neutral-850 transition-colors cursor-pointer text-left"
+                >
+                  <CreditCard className="w-4 h-4 text-emerald-400" />
+                  <span>Billing & Credits</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    navigateTo("/profile?tab=analytics");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-neutral-850 transition-colors cursor-pointer text-left"
+                >
+                  <BarChart3 className="w-4 h-4 text-purple-400" />
+                  <span>Analytics & Usage</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    navigateTo("/profile?tab=security");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-neutral-300 hover:text-white hover:bg-neutral-850 transition-colors cursor-pointer text-left"
+                >
+                  <ShieldCheck className="w-4 h-4 text-blue-400" />
+                  <span>Security & Sessions</span>
+                </button>
+              </div>
+
+              {/* Divider & Sign Out */}
+              <div className="mt-2 pt-2 border-t border-neutral-800">
+                <button
+                  onClick={() => {
+                    setShowProfileDropdown(false);
+                    navigateTo("/profile");
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors cursor-pointer text-left"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
             </div>
-          </button>
-        </Tooltip>
+          )}
+        </div>
       </div>
     </header>
   );

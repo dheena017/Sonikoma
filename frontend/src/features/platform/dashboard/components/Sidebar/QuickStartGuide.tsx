@@ -14,8 +14,8 @@ interface QuickStartGuideProps {
 
 const taskNavigationMap: Record<number, string> = {
   1: "/creative-suite",
-  2: "/creative-suite/panel-assistant",
-  3: "/creative-suite/ai-voice",
+  2: "/creative-suite/translation",
+  3: "/creative-suite",
   4: "/creative-suite/youtube",
 };
 

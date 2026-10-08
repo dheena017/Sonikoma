@@ -6,9 +6,12 @@ Endpoints for rendering projects, compiling motion comics, and ffmpeg operations
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import os
 import logging
 from typing import Optional
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi.responses import FileResponse
+from features.video_editor.video.services.frame_builder import _VIDEO_OUTPUT_DIR
 
 from app.core.dependencies.auth import get_optional_current_user
 from features.profile.services.credit_service import get_available_credits, record_credit_transaction
@@ -111,6 +114,20 @@ async def render_video_endpoint(
         "workspace_job_id": request.job_id,
         "low_balance": new_balance < LOW_BALANCE_THRESHOLD,
     }
+
+
+@video_router.get("/stream/{video_filename}", summary="Stream compiled video file")
+async def stream_video_endpoint(video_filename: str):
+    """Streams a rendered MP4 video file by filename."""
+    candidate_paths = [
+        os.path.join(_VIDEO_OUTPUT_DIR, video_filename),
+        os.path.join(os.path.abspath(os.path.join(_VIDEO_OUTPUT_DIR, "..", "local_media")), video_filename),
+    ]
+    for p in candidate_paths:
+        if os.path.exists(p) and os.path.isfile(p):
+            return FileResponse(p, media_type="video/mp4", filename=video_filename)
+
+    raise HTTPException(status_code=404, detail=f"Video file '{video_filename}' not found.")
 
 
 render_router = video_router

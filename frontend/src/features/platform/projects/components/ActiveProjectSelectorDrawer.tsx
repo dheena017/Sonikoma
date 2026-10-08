@@ -643,21 +643,6 @@ export const ActiveProjectSelectorDrawer: React.FC<
                         <span>Image</span>
                       </button>
 
-                      <button
-                        onClick={() => {
-                          setDrawerOpen(false);
-                          navigateTo(
-                            `/creative-suite/ai-voice?project_id=${encodeURIComponent(
-                              activeProjectId!
-                            )}`
-                          );
-                        }}
-                        className="btn-secondary px-2.5 py-1.5 rounded-xl text-[11px] font-bold flex items-center gap-1.5 justify-center"
-                        title="Open AI Voice Studio"
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
-                        <span>Voice</span>
-                      </button>
 
                       {proj?.series_slug ? (
                         <button

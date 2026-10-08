@@ -426,10 +426,10 @@ export default function LandingPage({
               />
 
               <div
-                className={`relative rounded-[28px] border transition-all duration-300 p-4 sm:p-6 backdrop-blur-2xl shadow-2xl space-y-4 ${
+                className={`relative rounded-[30px] border transition-all duration-300 p-4 sm:p-6 backdrop-blur-2xl shadow-[0_24px_70px_rgba(0,0,0,0.38)] space-y-4 ${
                   isLight
-                    ? "bg-white/95 border-slate-200/90 shadow-slate-200/50"
-                    : "bg-[#121318]/95 border-white/10 shadow-black/80"
+                    ? "bg-white/95 border-slate-200/90 shadow-slate-200/60"
+                    : "bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.1),transparent_35%),rgba(18,19,24,0.96)] border-white/10 shadow-black/80"
                 }`}
               >
                 {/* Mode Selector Tabs (URL vs Upload) */}
@@ -575,7 +575,7 @@ export default function LandingPage({
                     <button
                       disabled={isNavigating}
                       onClick={() => handleAction(onGetStarted)}
-                      className="group relative flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-60 text-white font-black text-sm rounded-2xl transition-all duration-300 active:scale-[0.98] cursor-pointer shrink-0 shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 hover:shadow-xl select-none"
+                      className="group relative flex items-center justify-center gap-2.5 px-6 sm:px-8 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-400 disabled:opacity-60 text-white font-black text-sm rounded-2xl transition-all duration-300 active:scale-[0.98] cursor-pointer shrink-0 shadow-[0_18px_40px_rgba(59,130,246,0.35)] hover:shadow-[0_22px_50px_rgba(59,130,246,0.45)] select-none"
                     >
                       {isNavigating ? (
                         <>

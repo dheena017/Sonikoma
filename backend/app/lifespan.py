@@ -86,9 +86,11 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"[System] Skill registry initialization failed during startup: {e}")
 
-        # Pre-warm vision models unless disabled
+        # Pre-warm vision models unless disabled (default to lazy-loading in development for fast startup)
+        from app.core.config import IS_PRODUCTION
+        default_skip = "false" if IS_PRODUCTION else "true"
         skip_prewarm = (
-            os.getenv("SKIP_MODEL_PREWARM", "").lower() in ("1", "true", "yes")
+            os.getenv("SKIP_MODEL_PREWARM", default_skip).lower() in ("1", "true", "yes")
             or os.getenv("RENDER") is not None
         )
         if not skip_prewarm:

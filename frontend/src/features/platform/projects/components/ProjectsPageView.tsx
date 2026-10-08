@@ -56,6 +56,8 @@ export interface ProjectsPageViewProps {
   saveProjectName: (projectId: string, newName: string) => Promise<void>;
 }
 
+let cachedProjectsAiSeriesList: AISeriesProject[] = [];
+
 export default function ProjectsPageView({
   projectsLength,
   filteredProjects,
@@ -93,14 +95,18 @@ export default function ProjectsPageView({
   clearSelection,
   saveProjectName,
 }: ProjectsPageViewProps) {
-  const [aiSeriesList, setAiSeriesList] = useState<AISeriesProject[]>([]);
-  const [loadingAiSeries, setLoadingAiSeries] = useState(false);
+  const [aiSeriesList, setAiSeriesList] = useState<AISeriesProject[]>(cachedProjectsAiSeriesList);
+  const [loadingAiSeries, setLoadingAiSeries] = useState(cachedProjectsAiSeriesList.length === 0);
 
   const fetchAiSeries = useCallback(async () => {
     try {
-      setLoadingAiSeries(true);
+      if (cachedProjectsAiSeriesList.length === 0) {
+        setLoadingAiSeries(true);
+      }
       const list = await aiSeriesApi.listSeries();
-      setAiSeriesList(list || []);
+      const finalList = list || [];
+      cachedProjectsAiSeriesList = finalList;
+      setAiSeriesList(finalList);
     } catch (err) {
       console.warn("Failed to fetch AI series in Projects page:", err);
     } finally {

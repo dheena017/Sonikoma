@@ -90,7 +90,7 @@ export default function ForgotPasswordPage({
             </div>
 
             {/* Form Card */}
-            <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 shadow-2xl space-y-5">
+            <div className="rounded-[30px] border border-[#2F2F2F]/90 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.12),transparent_32%),linear-gradient(180deg,#1a1a1d_0%,#141517_48%,#0d0e11_100%)] p-4 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.45)] ring-1 ring-white/5 space-y-5">
               {isCompleted ? (
                 <div className="text-center space-y-4 py-4">
                   <div className="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto">
@@ -106,7 +106,7 @@ export default function ForgotPasswordPage({
                   <Tooltip text="Go to Sign In" placement="bottom">
                     <button
                       onClick={onNavigateToLogin}
-                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 transition-all cursor-pointer text-sm"
+                      className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] text-white font-bold py-3.5 rounded-xl shadow-[0_12px_28px_rgba(59,130,246,0.35)] hover:shadow-[0_16px_36px_rgba(59,130,246,0.45)] transition-all cursor-pointer text-sm"
                     >
                       Go to Login
                     </button>
@@ -133,7 +133,7 @@ export default function ForgotPasswordPage({
                       required
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-mono tracking-widest text-center"
+                      className="w-full bg-[#121417] border border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 rounded-xl py-3 px-4 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-mono tracking-widest text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]"
                       placeholder="6-digit code"
                     />
                   </div>
@@ -151,8 +151,8 @@ export default function ForgotPasswordPage({
                         required
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
-                        placeholder="Enter new password"
+                        className="w-full bg-[#121417] border border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]"
+                        placeholder="Enter your new password"
                       />
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center">
                         <Tooltip
@@ -193,8 +193,8 @@ export default function ForgotPasswordPage({
                         required
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
-                        placeholder="Confirm new password"
+                        className="w-full bg-[#121417] border border-[#2F2F2F] hover:border-blue-500/40 focus:border-blue-400 rounded-xl py-3 pl-11 pr-11 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]"
+                        placeholder="Confirm your new password"
                       />
                     </div>
                   </div>
@@ -251,8 +251,8 @@ export default function ForgotPasswordPage({
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
-                        placeholder="name@example.com"
+                        className="w-full bg-[#181818] border border-[#2F2F2F] hover:border-neutral-600 focus:border-neutral-600 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-neutral-500 hover:placeholder:text-neutral-400 focus:placeholder:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-neutral-700 transition-all font-medium"
+                        placeholder="Enter your email address"
                       />
                     </div>
                   </div>
@@ -264,7 +264,7 @@ export default function ForgotPasswordPage({
                     <button
                       type="submit"
                       disabled={isLoading || !isEmailValid}
-                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-blue-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
+                      className="w-full bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#1D4ED8] hover:from-[#4F8EF7] hover:via-[#3B82F6] hover:to-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl shadow-[0_12px_28px_rgba(59,130,246,0.35)] hover:shadow-[0_16px_36px_rgba(59,130,246,0.45)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm"
                     >
                       {isLoading ? (
                         <>

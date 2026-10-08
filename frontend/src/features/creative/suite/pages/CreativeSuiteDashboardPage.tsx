@@ -5,9 +5,10 @@ import {
   Film,
   Globe,
   Music,
-  Mic,
   BarChart3,
   Youtube,
+  Bot,
+  Image as ImageIcon,
 } from "lucide-react";
 import CreativeSuiteDashboardStats from "@/features/creative/suite/components/CreativeSuiteDashboardStats";
 import CreativeSuiteDashboardTools from "@/features/creative/suite/components/CreativeSuiteDashboardTools";
@@ -116,31 +117,31 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
 
   const tools = [
     {
-      id: "optimizer",
-      label: "Video Optimizer",
-      desc: "Configure dimensions, sync frame timings, and render video outputs.",
-      icon: Film,
-      path: "/creative-suite/ai-optimizer",
-      requiresPanels: true,
-      badge: "Visual",
+      id: "agent",
+      label: "1-Click AI Agent",
+      desc: "Zero-touch URL to YouTube pipeline: scrapes, crops panels, narrates & publishes video.",
+      icon: Bot,
+      path: "/creative-suite/agent",
+      requiresPanels: false,
+      badge: "Auto-Pilot",
     },
     {
-      id: "assistant",
-      label: "Translation Studio",
+      id: "thumbnails",
+      label: "AI Thumbnail Studio",
+      desc: "Prompt-driven 3 or 6 image packages mapping chapter panels & high-CTR sticker text.",
+      icon: ImageIcon,
+      path: "/creative-suite/thumbnails",
+      requiresPanels: false,
+      badge: "Vision AI",
+    },
+    {
+      id: "translation",
+      label: "Translation",
       desc: "Multi-language dialogue and narrative translator per panel frame.",
       icon: Globe,
-      path: "/creative-suite/panel-assistant",
+      path: "/creative-suite/translation",
       requiresPanels: true,
       badge: "Visual",
-    },
-    {
-      id: "voice",
-      label: "Voice & Sound Studio",
-      desc: "Cast AI voice actors, dramatize dialogue scripts, select background soundtrack loops, and schedule SFX overlays.",
-      icon: Mic,
-      path: "/creative-suite/ai-voice",
-      requiresPanels: true,
-      badge: "Audio Production",
     },
     {
       id: "youtube",

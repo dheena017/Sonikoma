@@ -159,9 +159,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
 }) => {
   const { loadCatalogFromBackend, getAvailableModels } = useAIModelStore();
 
-  useEffect(() => {
-    loadCatalogFromBackend();
-  }, [loadCatalogFromBackend]);
+  // Catalog and routing configuration are loaded only when drawer is opened
 
   const [isOpen, setIsOpen] = useState(false);
   const [routingMap, setRoutingMap] = useState<
@@ -222,8 +220,11 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
   };
 
   useEffect(() => {
-    fetchRoutingConfig();
-  }, []);
+    if (isOpen) {
+      loadCatalogFromBackend();
+      fetchRoutingConfig();
+    }
+  }, [isOpen, loadCatalogFromBackend]);
 
   // Handle ESC key to close side panel
   useEffect(() => {

@@ -19,10 +19,11 @@ export default function AuthPageShell({
 }: AuthPageShellProps) {
   return (
     <div className="min-h-screen flex bg-[#0A0A0A] text-[#E5E5E5] font-sans overflow-hidden relative">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(99,102,241,0.12),transparent_30%)]" />
       <AuthShowcase activeTheme={activeTheme} iconType={iconType} />
 
       {/* RIGHT PANEL */}
-      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12] relative border-l border-[#2F2F2F] text-left">
+      <div className="w-full lg:w-1/2 h-screen flex flex-col bg-[#0D0E12]/95 relative border-l border-[#2F2F2F] text-left backdrop-blur-sm">
         {/* Pinned header — never scrolls */}
         <div className="relative z-10 px-4 sm:px-8 lg:px-16 pt-4 sm:pt-8 lg:pt-10 flex-shrink-0">
           {rightHeader}

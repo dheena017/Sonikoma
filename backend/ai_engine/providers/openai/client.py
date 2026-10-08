@@ -66,6 +66,45 @@ class OpenAIClient:
             logger.error(f"[OpenAIClient] Chat completion error: {exc}")
             return None
 
+    @classmethod
+    async def generate_image(
+        cls,
+        prompt: str,
+        model: str = "dall-e-3",
+        size: str = "1792x1024",
+        quality: str = "standard",
+        api_key: Optional[str] = None,
+    ) -> Optional[bytes]:
+        """
+        Synthesize an image via OpenAI DALL-E 3.
+        Returns JPEG/PNG bytes or None if generation failed.
+        """
+        client = cls.get_client(api_key)
+        if not client:
+            logger.warning("[OpenAIClient] Cannot generate image: No OpenAI API key configured.")
+            return None
+
+        try:
+            import base64
+            clean_prompt = prompt.strip()[:1000]
+            logger.info(f"[OpenAIClient] Synthesizing '{model}' ({size}) for prompt: {clean_prompt[:60]}...")
+            resp = await client.images.generate(
+                model=model,
+                prompt=clean_prompt,
+                size=size,
+                quality=quality,
+                n=1,
+                response_format="b64_json",
+            )
+            if resp.data and len(resp.data) > 0 and resp.data[0].b64_json:
+                return base64.b64decode(resp.data[0].b64_json)
+        except Exception as exc:
+            logger.warning(f"[OpenAIClient] DALL-E 3 generation failed: {exc}")
+            return None
+
+        return None
+
 
 # Backward compatibility alias
 OpenAIProvider = OpenAIClient
+

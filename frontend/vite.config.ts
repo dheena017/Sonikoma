@@ -371,7 +371,6 @@ export default defineConfig(({ mode, command }) => {
         "jszip",
         "file-saver",
         "fabric",
-        "react-rnd",
       ],
     },
     build: {

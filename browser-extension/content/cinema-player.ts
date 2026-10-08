@@ -120,6 +120,24 @@ class AmbientSoundscapeEngine {
   private activeNodes: (AudioNode & { stop?: () => void })[] = [];
   public volume: number = 0.65;
 
+  constructor() {
+    this.unlockAudioOnGesture();
+  }
+
+  private unlockAudioOnGesture() {
+    const unlock = () => {
+      if (this.ctx && this.ctx.state === "suspended") {
+        this.ctx.resume();
+      }
+      window.removeEventListener("click", unlock);
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("pointerdown", unlock);
+    };
+    window.addEventListener("click", unlock, { once: true, passive: true });
+    window.addEventListener("keydown", unlock, { once: true, passive: true });
+    window.addEventListener("pointerdown", unlock, { once: true, passive: true });
+  }
+
   public cycleMood(): MoodConfig {
     const idx = SOUNDSCAPE_MOODS.findIndex((m) => m.id === this.currentMood);
     const nextIdx = (idx + 1) % SOUNDSCAPE_MOODS.length;
@@ -140,98 +158,116 @@ class AmbientSoundscapeEngine {
     this.volume = Math.max(0, Math.min(1, val));
     if (this.masterGain && this.ctx) {
       try {
+        const targetGain = this.volume === 0 ? 0 : this.volume * 0.35;
         this.masterGain.gain.setValueAtTime(
-          0.08 * this.volume,
+          targetGain,
           this.ctx.currentTime
         );
       } catch (_) {}
     }
   }
 
-  private initCtx() {
-    if (!this.ctx) {
+  private initCtx(): AudioContext {
+    if (!this.ctx || this.ctx.state === "closed") {
       const AudioCtx =
         window.AudioContext || (window as any).webkitAudioContext;
       this.ctx = new AudioCtx();
     }
     if (this.ctx.state === "suspended") {
-      this.ctx.resume();
+      this.ctx.resume().catch(() => {});
     }
+    return this.ctx;
+  }
+
+  private stopActiveNodes() {
+    this.activeNodes.forEach((node) => {
+      try {
+        if (typeof node.stop === "function") node.stop();
+        node.disconnect();
+      } catch (_) {}
+    });
+    this.activeNodes = [];
   }
 
   private startMood(mood: SoundscapeMood) {
     try {
-      this.initCtx();
-      this.stop();
+      const ctx = this.initCtx();
+      if (ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+      }
 
-      this.masterGain = this.ctx!.createGain();
-      this.masterGain.gain.setValueAtTime(0.001, this.ctx!.currentTime);
-      const targetGain = 0.08 * this.volume;
-      this.masterGain.gain.exponentialRampToValueAtTime(
+      // Synchronously stop previous mood nodes immediately (no delayed timer destruction!)
+      this.stopActiveNodes();
+
+      if (this.masterGain) {
+        try {
+          this.masterGain.disconnect();
+        } catch (_) {}
+      }
+
+      this.masterGain = ctx.createGain();
+      const targetGain = this.volume === 0 ? 0 : this.volume * 0.35;
+      this.masterGain.gain.setValueAtTime(0.02, ctx.currentTime);
+      this.masterGain.gain.linearRampToValueAtTime(
         targetGain,
-        this.ctx!.currentTime + 2.0
+        ctx.currentTime + 0.25
       );
-      this.masterGain.connect(this.ctx!.destination);
+      this.masterGain.connect(ctx.destination);
 
       if (mood === "lofi") {
-        const freqs = [65.41, 130.81, 196.0, 311.13, 392.0];
+        // Cmaj9 warm jazz ambient chord
+        const freqs = [130.81, 164.81, 196.0, 246.94, 293.66];
         freqs.forEach((f, i) => {
-          const osc = this.ctx!.createOscillator();
-          osc.type = i === 0 ? "sine" : i % 2 === 0 ? "triangle" : "sine";
-          osc.frequency.setValueAtTime(f, this.ctx!.currentTime);
+          const osc = ctx.createOscillator();
+          osc.type = i === 0 ? "triangle" : "sine";
+          osc.frequency.setValueAtTime(f, ctx.currentTime);
 
-          const lfo = this.ctx!.createOscillator();
-          const lfoGain = this.ctx!.createGain();
-          lfo.frequency.setValueAtTime(0.08 + i * 0.03, this.ctx!.currentTime);
-          lfoGain.gain.setValueAtTime(1.5, this.ctx!.currentTime);
+          const filter = ctx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(1400, ctx.currentTime);
+
+          const lfo = ctx.createOscillator();
+          const lfoGain = ctx.createGain();
+          lfo.frequency.setValueAtTime(0.12 + i * 0.04, ctx.currentTime);
+          lfoGain.gain.setValueAtTime(2.5, ctx.currentTime);
           lfo.connect(lfoGain);
           lfoGain.connect(osc.frequency);
           lfo.start();
 
-          osc.connect(this.masterGain!);
+          osc.connect(filter);
+          filter.connect(this.masterGain!);
           osc.start();
-          this.activeNodes.push(osc, lfo, lfoGain);
+          this.activeNodes.push(osc, filter, lfo, lfoGain);
         });
       } else if (mood === "rain") {
-        const bufferSize = this.ctx!.sampleRate * 2;
-        const noiseBuffer = this.ctx!.createBuffer(
+        // Organic Brownian rainfall swell
+        const bufferSize = Math.floor(ctx.sampleRate * 2);
+        const noiseBuffer = ctx.createBuffer(
           1,
           bufferSize,
-          this.ctx!.sampleRate
+          ctx.sampleRate
         );
         const output = noiseBuffer.getChannelData(0);
-        let b0 = 0,
-          b1 = 0,
-          b2 = 0,
-          b3 = 0,
-          b4 = 0,
-          b5 = 0,
-          b6 = 0;
+        let lastOut = 0.0;
         for (let i = 0; i < bufferSize; i++) {
           const white = Math.random() * 2 - 1;
-          b0 = 0.99886 * b0 + white * 0.0555179;
-          b1 = 0.99332 * b1 + white * 0.0750759;
-          b2 = 0.969 * b2 + white * 0.153852;
-          b3 = 0.8665 * b3 + white * 0.3104856;
-          b4 = 0.55 * b4 + white * 0.5329522;
-          b5 = -0.7616 * b5 - white * 0.016898;
-          output[i] =
-            (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.08;
-          b6 = white * 0.115926;
+          output[i] = (lastOut + 0.02 * white) / 1.02;
+          lastOut = output[i];
+          output[i] *= 3.5;
         }
 
-        const whiteNoise = this.ctx!.createBufferSource();
+        const whiteNoise = ctx.createBufferSource();
         whiteNoise.buffer = noiseBuffer;
         whiteNoise.loop = true;
 
-        const filter = this.ctx!.createBiquadFilter();
+        const filter = ctx.createBiquadFilter();
         filter.type = "lowpass";
-        filter.frequency.setValueAtTime(800, this.ctx!.currentTime);
+        filter.frequency.setValueAtTime(950, ctx.currentTime);
 
-        const lfo = this.ctx!.createOscillator();
-        lfo.frequency.setValueAtTime(0.15, this.ctx!.currentTime);
-        const lfoGain = this.ctx!.createGain();
-        lfoGain.gain.setValueAtTime(300, this.ctx!.currentTime);
+        const lfo = ctx.createOscillator();
+        lfo.frequency.setValueAtTime(0.18, ctx.currentTime);
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.setValueAtTime(320, ctx.currentTime);
         lfo.connect(lfoGain);
         lfoGain.connect(filter.frequency);
         lfo.start();
@@ -241,44 +277,37 @@ class AmbientSoundscapeEngine {
         whiteNoise.start();
         this.activeNodes.push(whiteNoise, filter, lfo, lfoGain);
       } else if (mood === "space") {
+        // 432Hz deep cosmic harmonic drone
         const freqs = [108, 216, 432, 648];
         freqs.forEach((f, i) => {
-          const osc = this.ctx!.createOscillator();
+          const osc = ctx.createOscillator();
           osc.type = "sine";
-          osc.frequency.setValueAtTime(f, this.ctx!.currentTime);
+          osc.frequency.setValueAtTime(f, ctx.currentTime);
 
-          const pan = this.ctx!.createStereoPanner
-            ? this.ctx!.createStereoPanner()
-            : null;
-          if (pan) {
-            pan.pan.setValueAtTime(
-              i % 2 === 0 ? -0.4 : 0.4,
-              this.ctx!.currentTime
-            );
-            osc.connect(pan);
-            pan.connect(this.masterGain!);
-            this.activeNodes.push(pan);
-          } else {
-            osc.connect(this.masterGain!);
-          }
+          const subGain = ctx.createGain();
+          subGain.gain.setValueAtTime(0.35 / (i + 1), ctx.currentTime);
+
+          osc.connect(subGain);
+          subGain.connect(this.masterGain!);
           osc.start();
-          this.activeNodes.push(osc);
+          this.activeNodes.push(osc, subGain);
         });
       } else if (mood === "pulse") {
-        const osc = this.ctx!.createOscillator();
+        // Action pulse sub-bass rhythm
+        const osc = ctx.createOscillator();
         osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(55, this.ctx!.currentTime);
+        osc.frequency.setValueAtTime(55, ctx.currentTime);
 
-        const filter = this.ctx!.createBiquadFilter();
+        const filter = ctx.createBiquadFilter();
         filter.type = "lowpass";
-        filter.frequency.setValueAtTime(220, this.ctx!.currentTime);
-        filter.Q.setValueAtTime(4, this.ctx!.currentTime);
+        filter.frequency.setValueAtTime(240, ctx.currentTime);
+        filter.Q.setValueAtTime(5, ctx.currentTime);
 
-        const lfo = this.ctx!.createOscillator();
+        const lfo = ctx.createOscillator();
         lfo.type = "square";
-        lfo.frequency.setValueAtTime(2.0, this.ctx!.currentTime);
-        const lfoGain = this.ctx!.createGain();
-        lfoGain.gain.setValueAtTime(140, this.ctx!.currentTime);
+        lfo.frequency.setValueAtTime(2.0, ctx.currentTime);
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.setValueAtTime(160, ctx.currentTime);
         lfo.connect(lfoGain);
         lfoGain.connect(filter.frequency);
         lfo.start();
@@ -288,19 +317,20 @@ class AmbientSoundscapeEngine {
         osc.start();
         this.activeNodes.push(osc, filter, lfo, lfoGain);
       } else if (mood === "zen") {
-        const harmonics = [144, 288, 432, 576, 864];
+        // Japanese Insen harmonic chimes (D, A, D, F#, A)
+        const harmonics = [146.83, 220.0, 293.66, 369.99, 440.0];
         harmonics.forEach((f, i) => {
-          const osc = this.ctx!.createOscillator();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(f, this.ctx!.currentTime);
+          const osc = ctx.createOscillator();
+          osc.type = i === 0 ? "triangle" : "sine";
+          osc.frequency.setValueAtTime(f, ctx.currentTime);
 
-          const subGain = this.ctx!.createGain();
-          subGain.gain.setValueAtTime(1 / (i + 1.5), this.ctx!.currentTime);
+          const subGain = ctx.createGain();
+          subGain.gain.setValueAtTime(0.3 / (i + 1), ctx.currentTime);
 
-          const lfo = this.ctx!.createOscillator();
-          lfo.frequency.setValueAtTime(0.05 + i * 0.02, this.ctx!.currentTime);
-          const lfoGain = this.ctx!.createGain();
-          lfoGain.gain.setValueAtTime(0.3, this.ctx!.currentTime);
+          const lfo = ctx.createOscillator();
+          lfo.frequency.setValueAtTime(0.08 + i * 0.03, ctx.currentTime);
+          const lfoGain = ctx.createGain();
+          lfoGain.gain.setValueAtTime(0.09, ctx.currentTime);
           lfo.connect(lfoGain);
           lfoGain.connect(subGain.gain);
           lfo.start();
@@ -311,26 +341,19 @@ class AmbientSoundscapeEngine {
           this.activeNodes.push(osc, subGain, lfo, lfoGain);
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      console.warn("[Sonikoma Audio] Failed to start mood:", e);
+    }
   }
 
   public stop() {
+    this.currentMood = "off";
     if (this.masterGain && this.ctx) {
       try {
-        this.masterGain.gain.linearRampToValueAtTime(
-          0.001,
-          this.ctx.currentTime + 0.3
-        );
+        this.masterGain.gain.setValueAtTime(0, this.ctx.currentTime);
       } catch (_) {}
     }
-    setTimeout(() => {
-      this.activeNodes.forEach((node) => {
-        try {
-          if (typeof node.stop === "function") node.stop();
-        } catch (_) {}
-      });
-      this.activeNodes = [];
-    }, 350);
+    this.stopActiveNodes();
   }
 }
 
@@ -426,6 +449,10 @@ export class CinemaPlayer {
   private isSpotlight: boolean = false;
   private isAdaptivePacing: boolean = true;
   private isAutoDimHud: boolean = true;
+  private isHideDistractions: boolean = true;
+  private isAutoAdvanceChapter: boolean = true;
+  private isNightInvert: boolean = false;
+  private currentStripWidth: "fit" | "comfort" | "cinematic" | "compact" = "fit";
   private isDockTop: boolean = true;
   private isSettingsOpen: boolean = false;
   private isTemporarilyPausedForUser: boolean = false;
@@ -537,13 +564,13 @@ export class CinemaPlayer {
     const handleUserScroll = () => {
       if (!this.isPlaying || this.isTemporarilyPausedForUser) return;
       this.isTemporarilyPausedForUser = true;
-      this.updateStatusBadge("Paused", "⏸");
+      this.updateStatusBadge("Manual", "↕");
 
       if (this.manualScrollTimeout) clearTimeout(this.manualScrollTimeout);
       this.manualScrollTimeout = setTimeout(() => {
         this.isTemporarilyPausedForUser = false;
         if (this.isPlaying) {
-          this.updateStatusBadge("Playing", "▶");
+          this.updateStatusBadge("Pause", "⏸");
           this.lastTimestamp = performance.now();
         }
       }, 1300);
@@ -668,8 +695,8 @@ export class CinemaPlayer {
 
           <!-- Play/Pause Toggle -->
           <button type="button" id="sonikoma-btn-cinema-toggle" class="sonikoma-hud-btn-primary" title="Play / Pause Auto-Scroll (Spacebar)">
-            <span id="sonikoma-cinema-icon">⏸</span>
-            <span id="sonikoma-cinema-status">Pause</span>
+            <span id="sonikoma-cinema-icon">▶</span>
+            <span id="sonikoma-cinema-status">Play</span>
           </button>
 
           <div class="sonikoma-cinema-divider"></div>
@@ -756,62 +783,139 @@ export class CinemaPlayer {
         </div>
 
         <!-- Settings & AI Director Flyout Drawer -->
-        <div id="sonikoma-cinema-flyout" class="sonikoma-cinema-flyout sonikoma-hidden">
+        <div id="sonikoma-cinema-flyout" class="sonikoma-cinema-flyout sonikoma-hidden" style="color-scheme: dark !important;">
           <div id="sonikoma-flyout-drag-header" class="sonikoma-flyout-header" title="Drag to move Settings anywhere">
             <div class="sonikoma-flyout-title-box">
               <span class="sonikoma-drag-icon">⠿</span>
               <span>Cinema Studio Master Controls</span>
             </div>
-            <button type="button" id="sonikoma-btn-close-flyout" class="sonikoma-flyout-close">✕</button>
+            <button type="button" id="sonikoma-btn-close-flyout" class="sonikoma-flyout-close" title="Close Settings">✕</button>
           </div>
 
-          <div class="sonikoma-flyout-row">
-            <span class="sonikoma-flyout-label">AI Director Adaptive Pacing</span>
-            <button type="button" id="sonikoma-btn-toggle-pacing" class="sonikoma-toggle-switch sonikoma-active">ON</button>
-          </div>
+          <!-- Fixed Scrollable Settings Body -->
+          <div class="sonikoma-flyout-body" style="color-scheme: dark !important; scrollbar-color: #3f3f3f #181818 !important;">
+            <!-- SECTION 1: PACING & MOTION -->
+            <div class="sonikoma-flyout-section-title">⚡ PACING & MOTION</div>
 
-          <div class="sonikoma-flyout-row">
-            <span class="sonikoma-flyout-label">HUD Auto-Dimming (Immersion)</span>
-            <button type="button" id="sonikoma-btn-toggle-autodim" class="sonikoma-toggle-switch sonikoma-active">ON</button>
-          </div>
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Scroll Speed Presets</span>
+              <div class="sonikoma-flyout-speed-group">
+                <button type="button" class="sonikoma-pill-btn" data-speed="0.5">0.5x</button>
+                <button type="button" class="sonikoma-pill-btn sonikoma-active" data-speed="1.0">1.0x</button>
+                <button type="button" class="sonikoma-pill-btn" data-speed="1.5">1.5x</button>
+                <button type="button" class="sonikoma-pill-btn" data-speed="2.0">2.0x</button>
+              </div>
+            </div>
 
-          <div class="sonikoma-flyout-row">
-            <span class="sonikoma-flyout-label">Soundscape Mode</span>
-            <span id="sonikoma-flyout-soundscape-name" class="sonikoma-flyout-val">Lo-Fi Chords</span>
-          </div>
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">AI Adaptive Pacing</span>
+              <button type="button" id="sonikoma-btn-toggle-pacing" class="sonikoma-toggle-switch sonikoma-active" title="Slows automatically for dense speech bubbles">ON</button>
+            </div>
 
-          <div class="sonikoma-flyout-row">
-            <span class="sonikoma-flyout-label">Audio Volume</span>
-            <input type="range" id="sonikoma-volume-slider" min="0" max="100" value="65" class="sonikoma-slider-input" />
-          </div>
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">HUD Auto-Dimming</span>
+              <button type="button" id="sonikoma-btn-toggle-autodim" class="sonikoma-toggle-switch sonikoma-active" title="Fades HUD during uninterrupted reading">ON</button>
+            </div>
 
-          <div class="sonikoma-flyout-row">
-            <span class="sonikoma-flyout-label">Visual Shader Filter</span>
-            <span id="sonikoma-flyout-shader-name" class="sonikoma-flyout-val">Natural</span>
-          </div>
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Distraction-Free Immersion</span>
+              <button type="button" id="sonikoma-btn-toggle-distractions" class="sonikoma-toggle-switch sonikoma-active" title="Hides native website drawers, pills & floating buttons">ON</button>
+            </div>
 
-          <div class="sonikoma-flyout-row">
-            <span class="sonikoma-flyout-label">AI Voice Narrator</span>
-            <span id="sonikoma-flyout-voice-status" class="sonikoma-flyout-val">OFF</span>
-          </div>
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Auto-Advance Next Chapter</span>
+              <button type="button" id="sonikoma-btn-toggle-autonext" class="sonikoma-toggle-switch sonikoma-active" title="Prompts & auto-loads next episode on chapter finish">ON</button>
+            </div>
 
-          <div class="sonikoma-flyout-row">
-            <span class="sonikoma-flyout-label">Remaining Reading Time</span>
-            <span id="sonikoma-flyout-eta" class="sonikoma-flyout-val">~2 min left</span>
-          </div>
+            <!-- SECTION 2: VISUALS & DISPLAY -->
+            <div class="sonikoma-flyout-section-title">🎨 VISUALS & DISPLAY</div>
 
-          <div class="sonikoma-flyout-shortcuts">
-            <span class="sonikoma-shortcut-tag"><kbd>Space</kbd> Play/Pause</span>
-            <span class="sonikoma-shortcut-tag"><kbd>↑/↓</kbd> Speed</span>
-            <span class="sonikoma-shortcut-tag"><kbd>←/→</kbd> Panel</span>
-            <span class="sonikoma-shortcut-tag"><kbd>M</kbd> Music</span>
-            <span class="sonikoma-shortcut-tag"><kbd>C</kbd> Shader</span>
-            <span class="sonikoma-shortcut-tag"><kbd>V</kbd> Voice</span>
-            <span class="sonikoma-shortcut-tag"><kbd>L</kbd> Light</span>
-            <span class="sonikoma-shortcut-tag"><kbd>D</kbd> Dimmer</span>
-            <span class="sonikoma-shortcut-tag"><kbd>S</kbd> Snip</span>
-            <span class="sonikoma-shortcut-tag"><kbd>B</kbd> Bookmark</span>
-            <span class="sonikoma-shortcut-tag"><kbd>F</kbd> Fullscreen</span>
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Visual Shader Filter</span>
+              <button type="button" id="sonikoma-flyout-btn-shader" class="sonikoma-flyout-btn-action" title="Click to cycle shaders (C)">🎨 Natural</button>
+            </div>
+
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Strip Column Width</span>
+              <button type="button" id="sonikoma-flyout-btn-width" class="sonikoma-flyout-btn-action" title="Click to cycle reading strip width clamp">Fit Screen</button>
+            </div>
+
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Spotlight Focus Lamp</span>
+              <button type="button" id="sonikoma-btn-toggle-spotlight" class="sonikoma-toggle-switch" title="Center reading spotlight focus (L)">OFF</button>
+            </div>
+
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Theater Ambient Dimmer</span>
+              <button type="button" id="sonikoma-btn-toggle-dimmer" class="sonikoma-toggle-switch" title="Darkens background border regions (D)">OFF</button>
+            </div>
+
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Night Manga Inversion</span>
+              <button type="button" id="sonikoma-btn-toggle-invert" class="sonikoma-toggle-switch" title="High-contrast dark mode inversion for white panels">OFF</button>
+            </div>
+
+            <!-- SECTION 3: AUDIO & SOUNDSCAPE -->
+            <div class="sonikoma-flyout-section-title">🎵 SOUNDSCAPE & AI VOICE</div>
+
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Soundscape Mood</span>
+              <button type="button" id="sonikoma-flyout-btn-soundscape" class="sonikoma-flyout-btn-action" title="Click to cycle soundscapes (M)">🎵 Lo-Fi Chords</button>
+            </div>
+
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Audio Volume</span>
+              <div class="sonikoma-flyout-vol-box">
+                <input type="range" id="sonikoma-volume-slider" min="0" max="100" value="65" class="sonikoma-slider-input" />
+                <span id="sonikoma-volume-readout" class="sonikoma-volume-readout">65%</span>
+              </div>
+            </div>
+
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">AI Voice Narrator</span>
+              <button type="button" id="sonikoma-flyout-btn-voice" class="sonikoma-toggle-switch" title="Text-to-speech scene reading (V)">OFF</button>
+            </div>
+
+            <!-- SECTION 4: READING PROGRESS & STATS -->
+            <div class="sonikoma-flyout-section-title">📊 PROGRESS & TIMING</div>
+
+            <div class="sonikoma-flyout-row">
+              <span class="sonikoma-flyout-label">Est. Time Remaining</span>
+              <span id="sonikoma-flyout-eta" class="sonikoma-flyout-val">~2 min left (0%)</span>
+            </div>
+
+            <!-- SECTION 5: STUDIO QUICK ACTIONS -->
+            <div class="sonikoma-flyout-section-title">🛠️ STUDIO QUICK ACTIONS</div>
+
+            <div class="sonikoma-flyout-tools-row">
+              <button type="button" id="sonikoma-flyout-act-snip" class="sonikoma-flyout-tool-btn" title="Snip Active Scene (S)">
+                <span>📸</span> Snip
+              </button>
+              <button type="button" id="sonikoma-flyout-act-bookmark" class="sonikoma-flyout-tool-btn" title="Save Bookmark (B)">
+                <span>📌</span> Bookmark
+              </button>
+              <button type="button" id="sonikoma-flyout-act-fullscreen" class="sonikoma-flyout-tool-btn" title="Toggle Fullscreen (F)">
+                <span>⛶</span> Fullscreen
+              </button>
+              <button type="button" id="sonikoma-flyout-act-dock" class="sonikoma-flyout-tool-btn" title="Switch Top/Bottom Dock Position">
+                <span>↕</span> Dock
+              </button>
+            </div>
+
+            <!-- KEYBOARD SHORTCUTS REFERENCE -->
+            <div class="sonikoma-flyout-shortcuts">
+              <span class="sonikoma-shortcut-tag"><kbd>Space</kbd> Play/Pause</span>
+              <span class="sonikoma-shortcut-tag"><kbd>↑/↓</kbd> Speed</span>
+              <span class="sonikoma-shortcut-tag"><kbd>←/→</kbd> Panel</span>
+              <span class="sonikoma-shortcut-tag"><kbd>M</kbd> Music</span>
+              <span class="sonikoma-shortcut-tag"><kbd>C</kbd> Shader</span>
+              <span class="sonikoma-shortcut-tag"><kbd>V</kbd> Voice</span>
+              <span class="sonikoma-shortcut-tag"><kbd>L</kbd> Light</span>
+              <span class="sonikoma-shortcut-tag"><kbd>D</kbd> Dimmer</span>
+              <span class="sonikoma-shortcut-tag"><kbd>S</kbd> Snip</span>
+              <span class="sonikoma-shortcut-tag"><kbd>B</kbd> Bookmark</span>
+              <span class="sonikoma-shortcut-tag"><kbd>F</kbd> Fullscreen</span>
+            </div>
           </div>
         </div>
       `;
@@ -924,6 +1028,14 @@ export class CinemaPlayer {
         });
       }
 
+      // Speed Preset Pills in Flyout
+      hud.querySelectorAll(".sonikoma-pill-btn[data-speed]").forEach((btn) => {
+        btn.addEventListener("click", (e: any) => {
+          const spd = parseFloat(e.target.getAttribute("data-speed") || "1");
+          this.setSpeed(spd);
+        });
+      });
+
       // Adaptive Pacing Switch
       hud
         .querySelector("#sonikoma-btn-toggle-pacing")
@@ -939,6 +1051,114 @@ export class CinemaPlayer {
           );
         });
 
+      // HUD Auto-Dimming Switch
+      hud
+        .querySelector("#sonikoma-btn-toggle-autodim")
+        ?.addEventListener("click", (e: any) => {
+          this.isAutoDimHud = !this.isAutoDimHud;
+          e.target.textContent = this.isAutoDimHud ? "ON" : "OFF";
+          if (this.isAutoDimHud) e.target.classList.add("sonikoma-active");
+          else {
+            e.target.classList.remove("sonikoma-active");
+            if (this.hudElement) this.hudElement.style.opacity = "1";
+          }
+          this.showToast(
+            this.isAutoDimHud ? "HUD Auto-Dimming ON" : "HUD Auto-Dimming OFF"
+          );
+        });
+
+      // Distraction-Free Immersion Switch
+      hud
+        .querySelector("#sonikoma-btn-toggle-distractions")
+        ?.addEventListener("click", (e: any) => {
+          this.isHideDistractions = !this.isHideDistractions;
+          e.target.textContent = this.isHideDistractions ? "ON" : "OFF";
+          if (this.isHideDistractions) {
+            e.target.classList.add("sonikoma-active");
+            this.hideNativeDistractions();
+            this.showToast("Distraction-Free Immersion ON");
+          } else {
+            e.target.classList.remove("sonikoma-active");
+            this.restoreNativeDistractions();
+            this.showToast("Distraction-Free Immersion OFF");
+          }
+        });
+
+      // Auto-Advance Next Chapter Switch
+      hud
+        .querySelector("#sonikoma-btn-toggle-autonext")
+        ?.addEventListener("click", (e: any) => {
+          this.isAutoAdvanceChapter = !this.isAutoAdvanceChapter;
+          e.target.textContent = this.isAutoAdvanceChapter ? "ON" : "OFF";
+          if (this.isAutoAdvanceChapter)
+            e.target.classList.add("sonikoma-active");
+          else e.target.classList.remove("sonikoma-active");
+          this.showToast(
+            this.isAutoAdvanceChapter
+              ? "Auto-Advance Next Chapter ON"
+              : "Auto-Advance Next Chapter OFF"
+          );
+        });
+
+      // Flyout Interactive Shader Cycle Button
+      hud
+        .querySelector("#sonikoma-flyout-btn-shader")
+        ?.addEventListener("click", () => this.cycleShader());
+
+      // Flyout Strip Column Width Cycle Button
+      hud
+        .querySelector("#sonikoma-flyout-btn-width")
+        ?.addEventListener("click", () => this.setStripWidth());
+
+      // Spotlight Focus Toggle in Flyout
+      hud
+        .querySelector("#sonikoma-btn-toggle-spotlight")
+        ?.addEventListener("click", () => this.toggleSpotlight());
+
+      // Theater Dimmer Toggle in Flyout
+      hud
+        .querySelector("#sonikoma-btn-toggle-dimmer")
+        ?.addEventListener("click", () => this.toggleTheaterDimmer());
+
+      // Night Manga Invert Toggle in Flyout
+      hud
+        .querySelector("#sonikoma-btn-toggle-invert")
+        ?.addEventListener("click", () => this.toggleNightInvert());
+
+      // Flyout Interactive Soundscape Cycle Button
+      hud
+        .querySelector("#sonikoma-flyout-btn-soundscape")
+        ?.addEventListener("click", () => this.cycleSoundscape());
+
+      // Flyout AI Voice Narrator Toggle Button
+      hud
+        .querySelector("#sonikoma-flyout-btn-voice")
+        ?.addEventListener("click", () => this.toggleVoiceNarrator());
+
+      // Volume Slider with live percentage readout
+      hud
+        .querySelector("#sonikoma-volume-slider")
+        ?.addEventListener("input", (e: any) => {
+          const val = parseInt(e.target.value, 10);
+          this.soundscape.setVolume(val / 100);
+          const ro = document.getElementById("sonikoma-volume-readout");
+          if (ro) ro.textContent = `${val}%`;
+        });
+
+      // Studio Quick Action Buttons
+      hud
+        .querySelector("#sonikoma-flyout-act-snip")
+        ?.addEventListener("click", () => this.snipActiveScene());
+      hud
+        .querySelector("#sonikoma-flyout-act-bookmark")
+        ?.addEventListener("click", () => this.bookmarkActiveScene());
+      hud
+        .querySelector("#sonikoma-flyout-act-fullscreen")
+        ?.addEventListener("click", () => this.toggleFullscreen());
+      hud
+        .querySelector("#sonikoma-flyout-act-dock")
+        ?.addEventListener("click", () => this.toggleDockPosition());
+
       // Make both Cinema HUD and Settings Flyout Draggable & Moveable
       const hudDragHandle = hud.querySelector(
         "#sonikoma-hud-drag-handle"
@@ -946,12 +1166,20 @@ export class CinemaPlayer {
       const cinemaBar = hud.querySelector(
         ".sonikoma-cinema-bar"
       ) as HTMLElement;
-      this.enableDraggable(hud, hudDragHandle || cinemaBar);
+      if (cinemaBar) {
+        this.enableDraggable(hud, cinemaBar);
+      }
+      if (hudDragHandle) {
+        this.enableDraggable(hud, hudDragHandle);
+      }
 
       const flyout = hud.querySelector(
         "#sonikoma-cinema-flyout"
       ) as HTMLElement;
-      const flyoutHeader = hud.querySelector(
+      if (flyout) {
+        (document.body || document.documentElement).appendChild(flyout);
+      }
+      const flyoutHeader = (flyout || hud).querySelector(
         "#sonikoma-flyout-drag-header"
       ) as HTMLElement;
       if (flyout && flyoutHeader) {
@@ -963,21 +1191,44 @@ export class CinemaPlayer {
   }
 
   private enableDraggable(target: HTMLElement, handle: HTMLElement) {
-    handle.style.cursor = "grab";
+    const isExplicitHandle =
+      handle.id === "sonikoma-hud-drag-handle" ||
+      handle.classList.contains("sonikoma-drag-handle") ||
+      handle.classList.contains("sonikoma-flyout-header");
 
-    handle.addEventListener("mousedown", (e: MouseEvent) => {
-      const clickTarget = e.target as HTMLElement;
+    if (isExplicitHandle) {
+      handle.style.cursor = "grab";
+    }
+
+    handle.addEventListener("pointerdown", (e: PointerEvent) => {
+      // Don't drag on non-primary mouse clicks (e.g. right-click, middle-click)
+      if (e.button !== 0 && e.pointerType === "mouse") {
+        return;
+      }
+
+      // Don't drag if user clicked an interactive control or button
+      const clickTarget = e.target as HTMLElement | null;
       if (
         clickTarget &&
         (clickTarget.tagName === "BUTTON" ||
           clickTarget.tagName === "INPUT" ||
-          clickTarget.closest("button") ||
-          clickTarget.classList.contains("sonikoma-flyout-close"))
+          clickTarget.tagName === "SELECT" ||
+          clickTarget.tagName === "A" ||
+          clickTarget.closest(
+            "button, input, select, a, [role='button'], .sonikoma-hud-progress-track, .sonikoma-flyout-close"
+          ))
       ) {
         return;
       }
 
       e.preventDefault();
+      e.stopPropagation();
+
+      const pointerId = e.pointerId;
+      try {
+        handle.setPointerCapture(pointerId);
+      } catch (_) {}
+
       let isDragging = true;
       const startX = e.clientX;
       const startY = e.clientY;
@@ -986,52 +1237,91 @@ export class CinemaPlayer {
       const initialLeft = rect.left;
       const initialTop = rect.top;
 
+      // Immediately freeze transition & set absolute viewport coordinates to avoid jump
+      target.style.setProperty("transition", "none", "important");
       target.style.setProperty("position", "fixed", "important");
       target.style.setProperty("margin", "0", "important");
       target.style.setProperty("transform", "none", "important");
-      target.style.setProperty("left", `${initialLeft}px`, "important");
-      target.style.setProperty("top", `${initialTop}px`, "important");
+      target.style.setProperty("left", `${Math.round(initialLeft)}px`, "important");
+      target.style.setProperty("top", `${Math.round(initialTop)}px`, "important");
       target.style.setProperty("right", "auto", "important");
       target.style.setProperty("bottom", "auto", "important");
       target.classList.remove("sonikoma-dock-top", "sonikoma-dock-bottom");
 
-      handle.style.cursor = "grabbing";
       target.classList.add("sonikoma-dragging");
+      document.documentElement.classList.add("sonikoma-dragging-active");
       document.body.style.userSelect = "none";
 
-      const onMouseMove = (me: MouseEvent) => {
+      let rafId: number | null = null;
+      let lastClientX = startX;
+      let lastClientY = startY;
+
+      const updatePosition = () => {
         if (!isDragging) return;
-        const dx = me.clientX - startX;
-        const dy = me.clientY - startY;
-        const newLeft = Math.max(
+        const dx = lastClientX - startX;
+        const dy = lastClientY - startY;
+
+        const maxLeft = Math.max(10, window.innerWidth - target.offsetWidth - 10);
+        // Ensure at least 80px of top header remains reachable on screen
+        const maxTop = Math.max(
           10,
-          Math.min(
-            window.innerWidth - target.offsetWidth - 10,
-            initialLeft + dx
-          )
+          window.innerHeight - Math.min(target.offsetHeight, 80) - 10
         );
-        const newTop = Math.max(
-          10,
-          Math.min(
-            window.innerHeight - target.offsetHeight - 10,
-            initialTop + dy
-          )
-        );
-        target.style.setProperty("left", `${newLeft}px`, "important");
-        target.style.setProperty("top", `${newTop}px`, "important");
+
+        const newLeft = Math.min(Math.max(10, initialLeft + dx), maxLeft);
+        const newTop = Math.min(Math.max(10, initialTop + dy), maxTop);
+
+        target.style.setProperty("left", `${Math.round(newLeft)}px`, "important");
+        target.style.setProperty("top", `${Math.round(newTop)}px`, "important");
+        rafId = null;
       };
 
-      const onMouseUp = () => {
+      const onPointerMove = (pe: PointerEvent) => {
+        if (!isDragging) return;
+        pe.preventDefault();
+        lastClientX = pe.clientX;
+        lastClientY = pe.clientY;
+
+        if (rafId === null) {
+          rafId = requestAnimationFrame(updatePosition);
+        }
+      };
+
+      const onPointerEnd = (pe: PointerEvent) => {
+        if (!isDragging) return;
         isDragging = false;
-        handle.style.cursor = "grab";
+
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
+
+        try {
+          handle.releasePointerCapture(pointerId);
+        } catch (_) {}
+
+        handle.removeEventListener("pointermove", onPointerMove);
+        handle.removeEventListener("pointerup", onPointerEnd);
+        handle.removeEventListener("pointercancel", onPointerEnd);
+
+        if (isExplicitHandle) {
+          handle.style.cursor = "grab";
+        } else {
+          handle.style.removeProperty("cursor");
+        }
+
         target.classList.remove("sonikoma-dragging");
+        document.documentElement.classList.remove("sonikoma-dragging-active");
         document.body.style.userSelect = "";
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
+
+        // Mark that this element has been manually dragged by the user
+        target.setAttribute("data-sk-dragged", "true");
+        target.style.removeProperty("transition");
       };
 
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
+      handle.addEventListener("pointermove", onPointerMove);
+      handle.addEventListener("pointerup", onPointerEnd);
+      handle.addEventListener("pointercancel", onPointerEnd);
     });
   }
 
@@ -1048,19 +1338,97 @@ export class CinemaPlayer {
     this.scrollSpeed = speeds[currentIndex];
     const readout = document.getElementById("sonikoma-speed-readout");
     if (readout) readout.textContent = `${this.scrollSpeed}x`;
+    this.updateSpeedPills();
     this.showToast(`Speed: ${this.scrollSpeed}x`);
+  }
+
+  setSpeed(targetSpeed: number) {
+    this.scrollSpeed = Math.max(0.25, Math.min(4.0, targetSpeed));
+    const readout = document.getElementById("sonikoma-speed-readout");
+    if (readout) readout.textContent = `${this.scrollSpeed}x`;
+    this.updateSpeedPills();
+    this.showToast(`Speed: ${this.scrollSpeed}x`);
+  }
+
+  private updateSpeedPills() {
+    document
+      .querySelectorAll(".sonikoma-pill-btn[data-speed]")
+      .forEach((btn) => {
+        const spd = parseFloat(btn.getAttribute("data-speed") || "1");
+        if (Math.abs(spd - this.scrollSpeed) < 0.05) {
+          btn.classList.add("sonikoma-active");
+        } else {
+          btn.classList.remove("sonikoma-active");
+        }
+      });
+  }
+
+  setStripWidth(mode?: "fit" | "comfort" | "cinematic" | "compact") {
+    const modes: Array<"fit" | "comfort" | "cinematic" | "compact"> = [
+      "fit",
+      "comfort",
+      "cinematic",
+      "compact",
+    ];
+    if (mode) {
+      this.currentStripWidth = mode;
+    } else {
+      const idx = modes.indexOf(this.currentStripWidth);
+      this.currentStripWidth = modes[(idx + 1) % modes.length];
+    }
+
+    document.body.classList.remove(
+      "sonikoma-strip-comfort",
+      "sonikoma-strip-cinematic",
+      "sonikoma-strip-compact"
+    );
+
+    const labels: Record<string, string> = {
+      fit: "Fit Screen",
+      comfort: "Comfort (850px)",
+      cinematic: "Cinematic (1050px)",
+      compact: "Compact (680px)",
+    };
+
+    if (this.currentStripWidth === "comfort") {
+      document.body.classList.add("sonikoma-strip-comfort");
+    } else if (this.currentStripWidth === "cinematic") {
+      document.body.classList.add("sonikoma-strip-cinematic");
+    } else if (this.currentStripWidth === "compact") {
+      document.body.classList.add("sonikoma-strip-compact");
+    }
+
+    const btn = document.getElementById("sonikoma-flyout-btn-width");
+    if (btn) {
+      btn.textContent = labels[this.currentStripWidth] || "Fit Screen";
+    }
+    this.showToast(`Strip Width: ${labels[this.currentStripWidth]}`);
+  }
+
+  toggleNightInvert() {
+    this.isNightInvert = !this.isNightInvert;
+    if (this.isNightInvert) {
+      document.body.classList.add("sonikoma-night-invert");
+    } else {
+      document.body.classList.remove("sonikoma-night-invert");
+    }
+    const btn = document.getElementById("sonikoma-btn-toggle-invert");
+    if (btn) {
+      btn.textContent = this.isNightInvert ? "ON" : "OFF";
+      if (this.isNightInvert) btn.classList.add("sonikoma-active");
+      else btn.classList.remove("sonikoma-active");
+    }
+    this.showToast(this.isNightInvert ? "Night Invert ON" : "Night Invert OFF");
   }
 
   cycleSoundscape() {
     const mood = this.soundscape.cycleMood();
     const btn = document.getElementById("sonikoma-btn-cinema-bgm");
     const icon = document.getElementById("sonikoma-bgm-icon");
-    const flyoutName = document.getElementById(
-      "sonikoma-flyout-soundscape-name"
-    );
+    const flyoutBtn = document.getElementById("sonikoma-flyout-btn-soundscape");
 
     if (icon) icon.textContent = mood.icon;
-    if (flyoutName) flyoutName.textContent = mood.name;
+    if (flyoutBtn) flyoutBtn.textContent = `${mood.icon} ${mood.name}`;
 
     if (btn) {
       if (mood.id !== "off") btn.classList.add("sonikoma-active");
@@ -1084,8 +1452,8 @@ export class CinemaPlayer {
     }
 
     const btn = document.getElementById("sonikoma-btn-cinema-shader");
-    const flyoutName = document.getElementById("sonikoma-flyout-shader-name");
-    if (flyoutName) flyoutName.textContent = shader.name;
+    const flyoutBtn = document.getElementById("sonikoma-flyout-btn-shader");
+    if (flyoutBtn) flyoutBtn.textContent = `${shader.icon} ${shader.name}`;
 
     if (btn) {
       if (shader.id !== "normal") btn.classList.add("sonikoma-active");
@@ -1097,16 +1465,16 @@ export class CinemaPlayer {
   toggleVoiceNarrator() {
     const active = this.voiceNarrator.toggle();
     const btn = document.getElementById("sonikoma-btn-cinema-voice");
-    const flyoutStatus = document.getElementById(
-      "sonikoma-flyout-voice-status"
-    );
+    const flyoutBtn = document.getElementById("sonikoma-flyout-btn-voice");
 
     if (btn) {
       if (active) btn.classList.add("sonikoma-active");
       else btn.classList.remove("sonikoma-active");
     }
-    if (flyoutStatus) {
-      flyoutStatus.textContent = active ? "ON" : "OFF";
+    if (flyoutBtn) {
+      flyoutBtn.textContent = active ? "ON" : "OFF";
+      if (active) flyoutBtn.classList.add("sonikoma-active");
+      else flyoutBtn.classList.remove("sonikoma-active");
     }
 
     this.showToast(
@@ -1127,6 +1495,7 @@ export class CinemaPlayer {
   toggleTheaterDimmer() {
     this.isDimmed = !this.isDimmed;
     const btn = document.getElementById("sonikoma-btn-cinema-dimmer");
+    const flyoutBtn = document.getElementById("sonikoma-btn-toggle-dimmer");
     if (this.dimmerElement) {
       if (this.isDimmed) {
         this.dimmerElement.classList.remove("sonikoma-hidden");
@@ -1140,12 +1509,18 @@ export class CinemaPlayer {
       if (this.isDimmed) btn.classList.add("sonikoma-active");
       else btn.classList.remove("sonikoma-active");
     }
+    if (flyoutBtn) {
+      flyoutBtn.textContent = this.isDimmed ? "ON" : "OFF";
+      if (this.isDimmed) flyoutBtn.classList.add("sonikoma-active");
+      else flyoutBtn.classList.remove("sonikoma-active");
+    }
     this.showToast(this.isDimmed ? "Theater Dimmer ON" : "Theater Dimmer OFF");
   }
 
   toggleSpotlight() {
     this.isSpotlight = !this.isSpotlight;
     const btn = document.getElementById("sonikoma-btn-cinema-spotlight");
+    const flyoutBtn = document.getElementById("sonikoma-btn-toggle-spotlight");
     if (this.spotlightElement) {
       if (this.isSpotlight) {
         this.spotlightElement.classList.remove("sonikoma-hidden");
@@ -1162,6 +1537,11 @@ export class CinemaPlayer {
     if (btn) {
       if (this.isSpotlight) btn.classList.add("sonikoma-active");
       else btn.classList.remove("sonikoma-active");
+    }
+    if (flyoutBtn) {
+      flyoutBtn.textContent = this.isSpotlight ? "ON" : "OFF";
+      if (this.isSpotlight) flyoutBtn.classList.add("sonikoma-active");
+      else flyoutBtn.classList.remove("sonikoma-active");
     }
     this.showToast(
       this.isSpotlight ? "Spotlight Focus ON" : "Spotlight Focus OFF"
@@ -1251,6 +1631,31 @@ export class CinemaPlayer {
     if (this.isSettingsOpen) {
       flyout.classList.remove("sonikoma-hidden");
       flyout.style.setProperty("display", "flex", "important");
+      flyout.style.setProperty("visibility", "visible", "important");
+      flyout.style.setProperty("opacity", "1", "important");
+
+      // Position neatly right near HUD if not dragged yet
+      if (!flyout.getAttribute("data-sk-dragged") && this.hudElement) {
+        const hudRect = this.hudElement.getBoundingClientRect();
+        const flyoutWidth = flyout.offsetWidth || 320;
+        const left = Math.max(
+          10,
+          Math.min(
+            window.innerWidth - flyoutWidth - 10,
+            hudRect.right - flyoutWidth
+          )
+        );
+        const top = this.isDockTop
+          ? hudRect.bottom + 12
+          : Math.max(10, hudRect.top - 520);
+
+        flyout.style.setProperty("position", "fixed", "important");
+        flyout.style.setProperty("left", `${Math.round(left)}px`, "important");
+        flyout.style.setProperty("top", `${Math.round(top)}px`, "important");
+        flyout.style.setProperty("right", "auto", "important");
+        flyout.style.setProperty("bottom", "auto", "important");
+        flyout.style.setProperty("transform", "none", "important");
+      }
     } else {
       flyout.classList.add("sonikoma-hidden");
       flyout.style.setProperty("display", "none", "important");
@@ -1260,6 +1665,7 @@ export class CinemaPlayer {
   toggleDockPosition() {
     this.isDockTop = !this.isDockTop;
     if (this.hudElement) {
+      this.hudElement.removeAttribute("data-sk-dragged");
       this.hudElement.style.removeProperty("left");
       this.hudElement.style.removeProperty("top");
       this.hudElement.style.removeProperty("right");
@@ -1358,6 +1764,7 @@ export class CinemaPlayer {
   }
 
   private triggerNextChapterPrompt() {
+    if (!this.isAutoAdvanceChapter) return;
     if (this.nextChapterBanner) return;
 
     const banner = document.createElement("div");
@@ -1480,11 +1887,12 @@ export class CinemaPlayer {
       this.cycleSoundscape();
     }
 
-    this.isPlaying = true;
-    this.updateStatusBadge("Pause", "⏸");
-    this.lastTimestamp = performance.now();
+    this.isPlaying = false;
+    this.updateStatusBadge("Play", "▶");
     this.subpixelAccumulator = 0;
-    this.loop(this.lastTimestamp);
+    this.hideNativeDistractions();
+    setTimeout(() => this.hideNativeDistractions(), 800);
+    this.showToast("Cinema Mode Ready • Click Play or Space to Scroll");
   }
 
   play() {
@@ -1531,6 +1939,141 @@ export class CinemaPlayer {
       this.subtitleElement.classList.add("sonikoma-hidden");
       this.subtitleElement.style.setProperty("display", "none", "important");
     }
+
+    document.body.classList.remove(
+      "sonikoma-night-invert",
+      "sonikoma-strip-comfort",
+      "sonikoma-strip-cinematic",
+      "sonikoma-strip-compact"
+    );
+
+    this.restoreNativeDistractions();
+  }
+
+  private hideNativeDistractions() {
+    if (!this.isHideDistractions) return;
+    document.body.classList.add("sonikoma-cinema-immersion-active");
+    document.documentElement.classList.add("sonikoma-cinema-immersion-active");
+
+    try {
+      const candidates = document.querySelectorAll(
+        "div, button, a, span, aside, nav, footer, p, i, section"
+      );
+      candidates.forEach((node) => {
+        const el = node as HTMLElement;
+        if (!el || typeof el.getBoundingClientRect !== "function") return;
+        if (el.closest("[id^='sonikoma-'], [class*='sonikoma']")) return;
+        if (
+          el.id?.startsWith("sonikoma") ||
+          el.className?.toString().includes("sonikoma")
+        )
+          return;
+
+        const tag = el.tagName.toUpperCase();
+        if (["IMG", "CANVAS", "VIDEO", "AUDIO", "PICTURE"].includes(tag))
+          return;
+
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        // 1. Precise match for bottom capsule pills (e.g. drawer pull bar shown in screenshot)
+        const isPillShape =
+          rect.width >= 20 &&
+          rect.width <= 160 &&
+          rect.height >= 4 &&
+          rect.height <= 50;
+
+        const isNearBottomCenter =
+          (rect.bottom >= window.innerHeight - 220 ||
+            rect.top >= window.innerHeight - 220) &&
+          Math.abs(rect.left + rect.width / 2 - window.innerWidth / 2) < 220;
+
+        const text = (el.textContent || "").trim();
+        const hasLittleText = text.length <= 4;
+
+        if (isPillShape && isNearBottomCenter && hasLittleText) {
+          el.classList.add("sonikoma-native-distraction-hidden");
+          el.setAttribute("data-sk-distraction", "true");
+          el.style.setProperty("display", "none", "important");
+          el.style.setProperty("opacity", "0", "important");
+          el.style.setProperty("visibility", "hidden", "important");
+          el.style.setProperty("pointer-events", "none", "important");
+          el.style.setProperty("box-shadow", "none", "important");
+
+          const parent = el.parentElement;
+          if (
+            parent &&
+            parent.children.length === 1 &&
+            !parent.closest("[id^='sonikoma-'], [class*='sonikoma']")
+          ) {
+            const pRect = parent.getBoundingClientRect();
+            if (pRect.height <= 70) {
+              parent.classList.add("sonikoma-native-distraction-hidden");
+              parent.setAttribute("data-sk-distraction", "true");
+              parent.style.setProperty("display", "none", "important");
+            }
+          }
+          return;
+        }
+
+        // 2. Fixed & Sticky floating widgets (drawers, scroll-to-top buttons)
+        const style = window.getComputedStyle(el);
+        if (
+          style.position === "fixed" ||
+          style.position === "sticky" ||
+          style.position === "absolute"
+        ) {
+          const isBottomDocked =
+            rect.bottom >= window.innerHeight - 120 && rect.height <= 140;
+          const isCornerFloat =
+            rect.width > 0 &&
+            rect.width <= 110 &&
+            rect.height > 0 &&
+            rect.height <= 110 &&
+            (rect.bottom >= window.innerHeight - 150 ||
+              rect.right >= window.innerWidth - 120 ||
+              rect.left <= 120);
+
+          const cls = (el.className || "").toString().toLowerCase();
+          const id = (el.id || "").toLowerCase();
+          const isDrawerOrHandle =
+            cls.includes("handle") ||
+            cls.includes("drawer") ||
+            cls.includes("pull") ||
+            cls.includes("drag") ||
+            cls.includes("indicator") ||
+            cls.includes("pill") ||
+            id.includes("handle") ||
+            id.includes("drawer") ||
+            id.includes("pull");
+
+          if (isBottomDocked || isCornerFloat || isDrawerOrHandle) {
+            el.classList.add("sonikoma-native-distraction-hidden");
+            el.setAttribute("data-sk-distraction", "true");
+            el.style.setProperty("display", "none", "important");
+            el.style.setProperty("opacity", "0", "important");
+            el.style.setProperty("visibility", "hidden", "important");
+            el.style.setProperty("box-shadow", "none", "important");
+          }
+        }
+      });
+    } catch {
+      // Ignore query errors
+    }
+  }
+
+  private restoreNativeDistractions() {
+    document.body.classList.remove("sonikoma-cinema-immersion-active");
+    document.documentElement.classList.remove("sonikoma-cinema-immersion-active");
+    try {
+      const hiddenElements = document.querySelectorAll(
+        "[data-sk-distraction='true']"
+      );
+      hiddenElements.forEach((node) => {
+        node.classList.remove("sonikoma-native-distraction-hidden");
+        node.removeAttribute("data-sk-distraction");
+      });
+    } catch {}
   }
 
   private loop(timestamp: number) {

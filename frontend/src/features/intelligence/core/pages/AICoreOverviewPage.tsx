@@ -22,13 +22,18 @@ interface AICoreOverviewPageProps {
   addNotification?: (msg: string, type?: string) => void;
 }
 
+let cachedProviders: any[] = [];
+let cachedSummary: any = null;
+
 export default function AICoreOverviewPage({
   navigateTo,
   addNotification,
 }: AICoreOverviewPageProps) {
-  const [providers, setProviders] = useState<any[]>([]);
-  const [summary, setSummary] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [providers, setProviders] = useState<any[]>(cachedProviders);
+  const [summary, setSummary] = useState<any>(cachedSummary);
+  const [isLoading, setIsLoading] = useState<boolean>(
+    !cachedSummary && cachedProviders.length === 0
+  );
 
   const handleNav = (path: string) => {
     if (navigateTo) {
@@ -48,11 +53,18 @@ export default function AICoreOverviewPage({
         ]);
         if (resProviders.ok) {
           const data = await resProviders.json();
-          if (data.success) setProviders(data.providers || []);
+          if (data.success) {
+            const list = data.providers || [];
+            cachedProviders = list;
+            setProviders(list);
+          }
         }
         if (resSummary.ok) {
           const data = await resSummary.json();
-          if (data.success) setSummary(data);
+          if (data.success) {
+            cachedSummary = data;
+            setSummary(data);
+          }
         }
       } catch {
         // Fallback handled
