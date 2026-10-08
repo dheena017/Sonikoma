@@ -239,6 +239,11 @@ class SeriesOrchestrator:
             art_style_key == "manhwa_slice_of_life"
             or any(kw in theme_str for kw in ["slice of life", "family", "baby", "hospital", "parent", "home", "daily", "warmth", "miracle", "romance", "child", "angel", "life"])
         )
+        is_gentle_manhwa = (
+            is_slice_of_life
+            or any(kw in theme_str for kw in ["romance", "drama", "school", "daily", "pastel", "love"])
+            or art_style_key in ("manhwa_slice_of_life", "manhwa_pastel_romance", "manhwa_otome_isekai")
+        )
 
         logger.info(
             f"[AISeries] Synthesizing S{session_number}:C{chapter_number} '{chapter_title}' "
@@ -324,11 +329,6 @@ class SeriesOrchestrator:
                 # Dynamic Korean Webtoon (Manhwa) panel generation based on chapter, hero, genre, and panel progression
                 progress = p_idx / max(panel_count, 1)
                 context_hint = f", context: {logline[:100]}" if logline else ""
-                is_gentle_manhwa = (
-                    is_slice_of_life
-                    or any(kw in theme_str for kw in ["romance", "drama", "school", "daily", "pastel", "love"])
-                    or art_style_key in ("manhwa_slice_of_life", "manhwa_pastel_romance", "manhwa_otome_isekai")
-                )
 
                 if is_gentle_manhwa:
                     if p_idx == 1:
