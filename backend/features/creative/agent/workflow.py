@@ -316,14 +316,28 @@ class AutonomousAgentWorkflow:
                 for p in self.state.panels
             ]
             try:
-                analyze_res = await facade_analyze_batch(
-                    panels=panel_dict_list,
-                    voice=self.request.voice,
-                    narration_style="dramatic_recap",
-                    story_context=f"Title: {title}. Script Language: {self.request.language}",
-                    generate_audio=False,
-                )
-                results_map = {r.get("id"): r for r in (analyze_res.get("results") or [])}
+                # Chunk panels in batches of up to 10 for high-performance and reliable AI vision analysis
+                CHUNK_SIZE = 10
+                chunks = [
+                    panel_dict_list[i : i + CHUNK_SIZE]
+                    for i in range(0, len(panel_dict_list), CHUNK_SIZE)
+                ]
+                all_analyze_results = []
+                for chunk_idx, chunk in enumerate(chunks):
+                    try:
+                        chunk_res = await facade_analyze_batch(
+                            panels=chunk,
+                            voice=self.request.voice,
+                            narration_style="dramatic_recap",
+                            story_context=f"Title: {title}. Script Language: {self.request.language}. Part {chunk_idx + 1} of {len(chunks)}.",
+                            generate_audio=False,
+                        )
+                        if chunk_res and chunk_res.get("results"):
+                            all_analyze_results.extend(chunk_res["results"])
+                    except Exception as chunk_err:
+                        logger.warning(f"[Agent AI Analyze] Chunk {chunk_idx + 1} notice: {chunk_err}")
+
+                results_map = {r.get("id"): r for r in all_analyze_results}
                 for idx, p in enumerate(self.state.panels):
                     r_item = results_map.get(f"panel_{p.index}") or {}
                     speech = r_item.get("dialogue") or r_item.get("narrative") or r_item.get("speech_text")

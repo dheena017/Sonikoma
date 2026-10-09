@@ -31,7 +31,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
   const [voice, setVoice] = useState("alloy");
   const [privacyStatus, setPrivacyStatus] = useState<PrivacyStatus>("unlisted");
   const [reviewMode, setReviewMode] = useState(false);
-  const [maxPanels, setMaxPanels] = useState(10);
+  const [maxPanels, setMaxPanels] = useState<number | undefined>(undefined);
   const [titleOverride, setTitleOverride] = useState("");
 
   // Execution state
@@ -115,7 +115,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
         voice,
         privacy_status: privacyStatus,
         review_mode: reviewMode,
-        max_panels: maxPanels > 0 ? maxPanels : undefined,
+        max_panels: maxPanels && maxPanels > 0 ? maxPanels : undefined,
         title_override: titleOverride?.trim() || undefined,
       };
 
