@@ -48,11 +48,7 @@ export default function YouTubeAppNavBar({
   isEmbedded = false,
 }: YouTubeAppNavBarProps) {
   return (
-    <header
-      className={`relative w-full shrink-0 ${
-        isEmbedded ? "pb-0" : "border-b border-white/[0.08] pb-4"
-      }`}
-    >
+    <header className="relative w-full shrink-0">
       <div className="w-full flex items-center justify-between gap-2 sm:gap-3 lg:gap-4">
         {/* ── LEFT: BRAND & CHANNEL SELECTOR ── */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">

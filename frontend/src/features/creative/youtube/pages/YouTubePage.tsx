@@ -330,7 +330,7 @@ const YouTubePage = React.memo(
         {/* ── MAIN TAB CANVAS CONTAINER (KEEP-ALIVE SPA PERSISTENCE) ──────── */}
         <div className="rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl min-h-[600px] space-y-6">
           {/* ── TOP APP NAVIGATION BAR (Always present on all pages) ─────── */}
-          <div className="w-full px-4 sm:px-6 py-3 bg-[#0c0c12]/95 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-lg">
+          <div className="w-full">
             <YouTubeAppNavBar
               activeTab={activeTab}
               onTabChange={(tab) => handleTabChange(tab as AppTab)}
