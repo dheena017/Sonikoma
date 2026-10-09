@@ -3,26 +3,23 @@ backend/features/creative/agent/workflow.py
 ─────────────────────────────────────────────────────────────────────────────
 Autonomous End-to-End Execution Workflow for the One-Click Creative AI Agent:
 1. URL Scraping: Extracts raw comic/webtoon images and chapter metadata via real scraper
-2. Image Stitching & Smart Slicing: Merges & crops individual comic panels with OpenCV detector
-3. Real AI Narrative & Script Generation: Synthesizes dramatic script & translations via Gemini API
-4. Neural Voiceover Synthesis: Synthesizes timed audio tracks per panel using Microsoft EdgeTTS
-5. Video Compilation: Renders cinematic MP4 video with pan/zoom motion via FFmpeg compiler
-6. Real YouTube Publication: Generates viral SEO headers with AI and uploads to YouTube channel
+2. Merge Panels: POST /api/v1/images/merge (stitches sliced images into continuous chapter strip)
+3. Auto Crop: POST /api/v1/panels/detect/long-panels + POST /api/v1/images/crop/long-panels
+4. AI Analyze: POST /api/v1/ai/analyze-all-panels (dialogue, SFX, scene context & motion cues)
+5. Voice Audio: POST /api/v1/audio/synthesize-all-panel-audio (batch EdgeTTS synthesis)
+6. Render Video: POST /api/v1/video/render (compiles cinematic MP4 video with pan/zoom motion)
+7. YouTube Publication: Real AI viral SEO headers and upload to YouTube channel
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import os
-import io
 import re
 import time
 import json
 import uuid
-import base64
 import asyncio
 import logging
 from typing import List, Dict, Any, Optional, Literal
-import numpy as np
-from PIL import Image, ImageDraw, ImageFont
 
 from features.creative.agent.schemas import (
     AgentRunRequest,
@@ -32,22 +29,17 @@ from features.creative.agent.schemas import (
     AgentYouTubeMetadata,
 )
 from features.platform.scraper.services.scraper_service import scrape_chapter_service
-from features.image_editor.services.utils.image_utils import (
-    download_image_to_memory,
-    stitch_images_together,
-    save_image_to_cache,
-)
-from features.image_editor.services.panel_detection.panel_detector import (
-    detect_vertical_strip_panels,
-    _detect_bg_color_and_threshold,
-)
-from features.video_editor.audio.services.tts import generate_tts_audio
+from features.image_editor.services.processing.compose import merge_images_service
+from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels_boxes
+from features.platform.projects.schemas_project import DetectLongPanelsRequest
+from features.image_editor.services.crop.long_panels_crop_service import crop_long_panels_batch
+from features.image_editor.schemas import LongPanelsCropRequest
+from features.intelligence.ai.services.facade import facade_analyze_batch
+from features.video_editor.audio.services.tts import batch_synthesize_panels_service
 from features.video_editor.video.services.video_compiler import compile_video_from_panels
 from features.creative.service import creative_service
 from ai_engine.core.hub import AIHub
-from ai_engine.providers.pollinations.client import PollinationsClient
 from app.core.config import (
-    APP_URL,
     ai_initialized,
     genai_client,
     GEMINI_MODEL_PRIMARY,
@@ -198,277 +190,206 @@ class AutonomousAgentWorkflow:
                 progress=25,
             )
 
-            # ── STAGE 2: PROCESS & SMART-CROP PANELS (OPENCV DETECTOR) ────────
-            self.state.status = "processing_images"
-            self.log("process_images", "Downloading and stitching image strips for smart panel extraction...", progress=30)
-
-            raw_buffers: List[bytes] = []
+            # ── STAGE 1 (MERGE): POST /api/v1/images/merge ─────────────────────
+            merged_strip_url = None
             if raw_image_urls:
-                sem = asyncio.Semaphore(10)
-                async def _download(url: str):
-                    async with sem:
-                        try:
-                            d = await download_image_to_memory(url)
-                            if d and len(d) > 500:
-                                return d
-                        except Exception as dl_err:
-                            logger.debug(f"[Agent Workflow] Buffer download skip: {dl_err}")
-                        return None
+                self.log(
+                    "merge_panels",
+                    f"[Merge Panels: POST /api/v1/images/merge] Stitching {len(raw_image_urls)} page slices into vertical chapter strip...",
+                    progress=25,
+                )
+                try:
+                    merge_res = await merge_images_service(
+                        urls=raw_image_urls,
+                        layout="vertical",
+                        spacing=0,
+                        spacingColor="white",
+                        scaleToFit=True,
+                        alignMode="center",
+                        padding=0,
+                    )
+                    merged_strip_url = merge_res.get("imageUrl") or merge_res.get("url")
+                    self.log(
+                        "merge_panels",
+                        f"[Merge Panels: POST /api/v1/images/merge] Stitched full continuous strip: {merged_strip_url}",
+                        level="success",
+                        progress=35,
+                    )
+                except Exception as merge_err:
+                    self.log("merge_panels", f"Merge notice: {merge_err}. Using original slices.", level="warning")
+                    merged_strip_url = raw_image_urls[0]
 
-                downloaded = await asyncio.gather(*[_download(u) for u in raw_image_urls])
-                raw_buffers = [b for b in downloaded if b is not None]
+            # ── STAGE 2 (AUTO CROP): POST /api/v1/panels/detect/long-panels + POST /api/v1/images/crop/long-panels ──
+            self.state.status = "processing_images"
+            self.log(
+                "auto_crop",
+                "[Auto Crop: POST /api/v1/panels/detect/long-panels] Detecting panel boundaries from vertical strip...",
+                progress=40,
+            )
+
+            detected_boxes = []
+            if merged_strip_url:
+                try:
+                    detect_req = DetectLongPanelsRequest(url=merged_strip_url)
+                    detect_res = await detect_long_panels_boxes(detect_req)
+                    detected_boxes = detect_res.panels or []
+                    self.log(
+                        "auto_crop",
+                        f"[Auto Crop: POST /api/v1/panels/detect/long-panels] Detected {len(detected_boxes)} panels.",
+                        level="success",
+                        progress=45,
+                    )
+                except Exception as det_err:
+                    self.log("auto_crop", f"Panel detection notice: {det_err}", level="warning")
 
             panels_data: List[AgentPanel] = []
-            max_panels = self.request.max_panels  # None means no limit, use all panels
+            cropped_slices = []
 
-            if raw_buffers:
-                if len(raw_buffers) >= 4:
-                    slices_to_use = raw_buffers[:max_panels] if (max_panels and max_panels > 0) else raw_buffers
-                    for idx, buf in enumerate(slices_to_use):
-                        filename = f"agent_panel_{self.run_id}_{idx + 1}.png"
-                        save_image_to_cache(buf, filename)
-                        panel_url = f"/api/v1/images/cached/{filename}"
-                        panels_data.append(
-                            AgentPanel(
-                                index=idx + 1,
-                                image_url=panel_url,
-                                speech_text="",
-                                motion_type="zoom_in" if idx % 2 == 0 else "pan_down",
-                            )
-                        )
-                else:
-                    try:
-                        stitched_strip = stitch_images_together(raw_buffers, layout="vertical")
-                    except Exception:
-                        stitched_strip = raw_buffers[0]
+            if merged_strip_url and detected_boxes:
+                try:
+                    self.log(
+                        "auto_crop",
+                        f"[Auto Crop: POST /api/v1/images/crop/long-panels] Batch-cropping {len(detected_boxes)} panel frames...",
+                        progress=50,
+                    )
+                    crop_req = LongPanelsCropRequest(
+                        url=merged_strip_url,
+                        panels=[b.model_dump() if hasattr(b, "model_dump") else (b.dict() if hasattr(b, "dict") else b) for b in detected_boxes],
+                        output_format="png",
+                        quality=95,
+                    )
+                    crop_res = await crop_long_panels_batch(crop_req)
+                    cropped_slices = crop_res.slices or []
+                    self.log(
+                        "auto_crop",
+                        f"[Auto Crop: POST /api/v1/images/crop/long-panels] Cropped {len(cropped_slices)} clean panel frames.",
+                        level="success",
+                        progress=55,
+                    )
+                except Exception as crop_err:
+                    self.log("auto_crop", f"Batch crop notice: {crop_err}", level="warning")
 
-                    try:
-                        pil_strip = Image.open(io.BytesIO(stitched_strip)).convert("RGB")
-                        w, h = pil_strip.size
+            max_panels = self.request.max_panels
 
-                        boxes = []
-                        try:
-                            gray_arr = np.array(pil_strip.convert("L"))
-                            bg_res = _detect_bg_color_and_threshold(gray_arr)
-                            is_white_bg, threshold_val, median_bg, bg_std, top_med, bot_med, bg_rgb = bg_res
-                            det_res = detect_vertical_strip_panels(
-                                gray_arr=gray_arr,
-                                is_white_bg=is_white_bg,
-                                threshold_val=threshold_val,
-                                min_height_px=60,
-                                min_width_pct=0.15,
-                            )
-                            if det_res and getattr(det_res, "panels", None):
-                                boxes = det_res.panels
-                        except Exception:
-                            boxes = []
-
-                        if boxes and len(boxes) >= 2:
-                            boxes_to_use = boxes[:max_panels] if (max_panels and max_panels > 0) else boxes
-                            for idx, b in enumerate(boxes_to_use):
-                                bx = max(0, int(b.get("x", 0)))
-                                by = max(0, int(b.get("y", 0)))
-                                bw = min(w - bx, int(b.get("w", w)))
-                                bh = min(h - by, int(b.get("h", h)))
-                                if bw > 50 and bh > 50:
-                                    cropped_img = pil_strip.crop((bx, by, bx + bw, by + bh))
-                                    buf = io.BytesIO()
-                                    cropped_img.save(buf, format="PNG")
-                                    filename = f"agent_panel_{self.run_id}_{idx + 1}.png"
-                                    save_image_to_cache(buf.getvalue(), filename)
-                                    panel_url = f"/api/v1/images/cached/{filename}"
-                                    panels_data.append(
-                                        AgentPanel(
-                                            index=idx + 1,
-                                            image_url=panel_url,
-                                            speech_text="",
-                                            motion_type="zoom_in" if idx % 2 == 0 else "pan_down",
-                                        )
-                                    )
-
-                        if not panels_data:
-                            slice_count = max_panels if (max_panels and max_panels > 0) else max(3, h // 900)
-                            slice_h = h // slice_count
-                            for idx in range(slice_count):
-                                y1 = idx * slice_h
-                                y2 = min(h, (idx + 1) * slice_h)
-                                cropped_img = pil_strip.crop((0, y1, w, y2))
-                                buf = io.BytesIO()
-                                cropped_img.save(buf, format="PNG")
-                                filename = f"agent_panel_{self.run_id}_{idx + 1}.png"
-                                save_image_to_cache(buf.getvalue(), filename)
-                                panel_url = f"/api/v1/images/cached/{filename}"
-                                panels_data.append(
-                                    AgentPanel(
-                                        index=idx + 1,
-                                        image_url=panel_url,
-                                        speech_text="",
-                                        motion_type="zoom_in" if idx % 2 == 0 else "pan_down",
-                                    )
-                                )
-                    except Exception as crop_err:
-                        self.log("process_images", f"Image slicing notice: {crop_err}", level="warning")
-
-            if not panels_data:
-                # Real Generative AI Diffusion for high-resolution chapter storyboard frames
-                self.log("process_images", f"Synthesizing dynamic anime storyboard panels for '{title}' via AI diffusion...", level="info")
-                count_to_make = max_panels if (max_panels and max_panels > 0) else 4
-                for i in range(count_to_make):
-                    ai_bytes = None
-                    try:
-                        diffusion_prompt = (
-                            f"masterpiece anime webtoon manga panel, {title}, climax sequence scene {i + 1}, "
-                            f"epic cinematic lighting, dramatic angle, high detail manhwa art"
-                        )
-                        from ai_engine.providers.huggingface.client import HuggingFaceClient
-                        ai_bytes = await HuggingFaceClient.generate_image(
-                            prompt=diffusion_prompt,
-                            width=768,
-                            height=1024,
-                        )
-                        if not ai_bytes:
-                            from ai_engine.core.orchestrator import AIOrchestrator
-                            diff_model = AIOrchestrator.resolve_model_for_task("image_diffusion", "primary")
-                            ai_bytes, _, _ = await PollinationsClient.generate_image(
-                                prompt=diffusion_prompt,
-                                model=diff_model,
-                                width=768,
-                                height=1024,
-                                seed=42 + i * 17,
-                                timeout=20.0,
-                            )
-                    except Exception as diff_err:
-                        logger.debug(f"[Agent Diffusion] Image synthesis notice: {diff_err}")
-
-                    fn = f"agent_panel_{self.run_id}_{i + 1}.png"
-                    if ai_bytes and len(ai_bytes) > 1000:
-                        save_image_to_cache(ai_bytes, fn)
-                    else:
-                        img = Image.new("RGB", (1080, 1080), color=(14 + i * 4, 16 + i * 5, 26 + i * 6))
-                        draw = ImageDraw.Draw(img)
-                        draw.rectangle([40, 40, 1040, 1040], outline=(59, 130, 246), width=4)
-                        draw.text((80, 80), f"{title.upper()}", fill=(255, 255, 255))
-                        draw.text((80, 140), f"FRAME #{i + 1} - CLIMAX SEQUENCE", fill=(156, 163, 175))
-                        buf = io.BytesIO()
-                        img.save(buf, format="PNG")
-                        save_image_to_cache(buf.getvalue(), fn)
-
+            if cropped_slices:
+                slices_to_use = cropped_slices[:max_panels] if (max_panels and max_panels > 0) else cropped_slices
+                for idx, s in enumerate(slices_to_use):
+                    p_url = getattr(s, "url", None) or getattr(s, "imageUrl", None) or (s.get("url") if isinstance(s, dict) else None)
                     panels_data.append(
                         AgentPanel(
-                            index=i + 1,
-                            image_url=f"/api/v1/images/cached/{fn}",
+                            index=idx + 1,
+                            image_url=p_url or f"/api/v1/images/cached/panel_{idx+1}.png",
                             speech_text="",
-                            motion_type="zoom_in" if i % 2 == 0 else "pan_down",
+                            motion_type="zoom_in" if idx % 2 == 0 else "pan_down",
+                        )
+                    )
+            elif raw_image_urls:
+                slices_to_use = raw_image_urls[:max_panels] if (max_panels and max_panels > 0) else raw_image_urls
+                for idx, u in enumerate(slices_to_use):
+                    panels_data.append(
+                        AgentPanel(
+                            index=idx + 1,
+                            image_url=u,
+                            speech_text="",
+                            motion_type="zoom_in" if idx % 2 == 0 else "pan_down",
                         )
                     )
 
             self.state.panels = panels_data
             self.log(
                 "process_images",
-                f"Extracted & prepared {len(panels_data)} clean comic storyboard frames.",
-                level="success",
-                progress=45,
-            )
-
-            # ── STAGE 3: REAL AI NARRATIVE & SCRIPT GENERATION (GEMINI API) ────
-            self.state.status = "generating_narrative"
-            self.log("narrative", f"Calling Gemini AI to generate high-retention narration script in '{self.request.language}'...", progress=50)
-
-            num_panels = len(self.state.panels)
-            system_narrative_prompt = f"""You are a top-tier Webtoon & Anime YouTube recap director and scriptwriter.
-Generate an engaging, emotionally intense panel-by-panel spoken narration script for:
-- Story Title: "{title}"
-- Total Panels: {num_panels}
-- Target Language: "{self.request.language}"
-
-Requirements:
-1. Provide a continuous narrative arc across {num_panels} panels (Introduction Hook -> Rising Confrontation -> Climax Shock -> Cliffhanger).
-2. Each panel must have:
-   - "speech_text": 1-2 dramatic sentences of spoken voiceover narration in "{self.request.language}".
-   - "motion_type": Camera motion ("zoom_in", "pan_down", "zoom_out", "pan_up", "ken_burns").
-   - "sfx": Sound effect cue (e.g. "[Impact Boom]", "[Blade Clang]", "[Dark Resonance]").
-3. Keep spoken lines punchy, natural, and rhythmically suited for fast-paced video recaps.
-
-Return STRICT JSON as a list of {num_panels} objects:
-[
-  {{
-    "speech_text": "...",
-    "motion_type": "zoom_in",
-    "sfx": "[Impact Boom]"
-  }}
-]
-"""
-
-            ai_script = None
-            try:
-                raw_ai_text = await self._call_llm(
-                    prompt=system_narrative_prompt,
-                    system_instruction="You are a top-tier Webtoon & Anime YouTube recap director.",
-                )
-                if raw_ai_text:
-                    parsed_script = json.loads(_clean_json_text(raw_ai_text))
-                    if isinstance(parsed_script, list) and len(parsed_script) > 0:
-                        ai_script = parsed_script
-            except Exception as e:
-                logger.warning(f"[Agent {self.run_id}] AI narrative generation notice: {e}")
-
-            motion_styles = ["zoom_in", "pan_down", "zoom_out", "pan_up", "ken_burns"]
-
-            for idx, p in enumerate(self.state.panels):
-                if ai_script and idx < len(ai_script):
-                    item = ai_script[idx]
-                    p.speech_text = item.get("speech_text", f"As {title} reaches the critical turning point, everything changes.")
-                    p.motion_type = item.get("motion_type", motion_styles[idx % len(motion_styles)])
-                    p.sfx = item.get("sfx", "[Impact]")
-                else:
-                    # Dynamic procedural synthesis if Gemini offline
-                    if idx == 0:
-                        p.speech_text = f"In the shadows of {title}, an impossible awakening was about to unfold."
-                    elif idx == num_panels - 1:
-                        p.speech_text = f"The true power has awakened, leaving every enemy frozen in absolute dread!"
-                    else:
-                        p.speech_text = f"With no way out, our hero shatters the final seal, changing fate forever."
-                    p.motion_type = motion_styles[idx % len(motion_styles)]
-                    p.sfx = "[Impact Boom]"
-
-                word_count = len(p.speech_text.split())
-                p.duration = max(3.5, round(word_count / 2.3, 1))
-
-            self.log(
-                "narrative",
-                f"AI successfully scripted {len(self.state.panels)} panels with dynamic narrative cues.",
+                f"Prepared {len(panels_data)} clean comic panels for storyboard.",
                 level="success",
                 progress=60,
             )
 
-            # ── STAGE 4: NEURAL VOICEOVER SYNTHESIS (REAL EDGETTS) ─────────────
+            # ── STAGE 3: AI ANALYZE (POST /api/v1/ai/analyze-all-panels) ──────────
+            self.state.status = "generating_narrative"
+            self.log(
+                "narrative",
+                f"[AI Analyze: POST /api/v1/ai/analyze-all-panels] Analyzing all panels in '{self.request.language}'...",
+                progress=65,
+            )
+
+            panel_dict_list = [
+                {"id": f"panel_{p.index}", "url": p.image_url, "index": p.index}
+                for p in self.state.panels
+            ]
+            try:
+                analyze_res = await facade_analyze_batch(
+                    panels=panel_dict_list,
+                    voice=self.request.voice,
+                    narration_style="dramatic_recap",
+                    story_context=f"Title: {title}. Script Language: {self.request.language}",
+                    generate_audio=False,
+                )
+                results_map = {r.get("id"): r for r in (analyze_res.get("results") or [])}
+                for idx, p in enumerate(self.state.panels):
+                    r_item = results_map.get(f"panel_{p.index}") or {}
+                    speech = r_item.get("dialogue") or r_item.get("narrative") or r_item.get("speech_text")
+                    if speech and str(speech).strip():
+                        p.speech_text = str(speech).strip()
+                    else:
+                        p.speech_text = f"In this crucial moment of {title}, destiny shifts."
+                    p.motion_type = r_item.get("motion") or r_item.get("motion_type") or ("zoom_in" if idx % 2 == 0 else "pan_down")
+                    p.sfx = r_item.get("sfx") or "[Impact]"
+                    p.duration = float(r_item.get("duration") or max(3.5, round(len(p.speech_text.split()) / 2.3, 1)))
+                self.log(
+                    "narrative",
+                    f"[AI Analyze: POST /api/v1/ai/analyze-all-panels] Synthesized script and motion cues across all {len(self.state.panels)} panels.",
+                    level="success",
+                    progress=70,
+                )
+            except Exception as ai_err:
+                self.log("narrative", f"AI analyze fallback: {ai_err}", level="warning")
+                for idx, p in enumerate(self.state.panels):
+                    p.speech_text = f"As {title} reaches the critical turning point, everything changes."
+                    p.motion_type = "zoom_in" if idx % 2 == 0 else "pan_down"
+                    p.duration = 3.5
+
+            # ── STAGE 4: VOICE AUDIO (POST /api/v1/audio/synthesize-all-panel-audio) ──
             self.state.status = "synthesizing_audio"
-            self.log("audio", f"Synthesizing neural voiceover via EdgeTTS using voice model '{self.request.voice}'...", progress=65)
-
-            for idx, p in enumerate(self.state.panels):
-                try:
-                    tts_res = await generate_tts_audio(
-                        dialogue_list=[p.speech_text],
-                        target_duration=p.duration,
-                        voice=self.request.voice or "en-US-GuyNeural",
-                        return_base64=True,
-                    )
-                    if tts_res and tts_res.get("audio_base64"):
-                        fn = f"agent_audio_{self.run_id}_{idx + 1}.mp3"
-                        raw_bytes = base64.b64decode(tts_res["audio_base64"])
-                        save_image_to_cache(raw_bytes, fn, content_type="audio/mpeg")
-                        p.audio_url = f"/api/v1/images/cached/{fn}"
-                        if tts_res.get("duration_actual_s"):
-                            p.duration = float(tts_res["duration_actual_s"])
-                except Exception as tts_err:
-                    logger.debug(f"[Agent TTS] Neural audio synthesis notice: {tts_err}")
-
             self.log(
                 "audio",
-                "Neural voiceover audio synthesized and time-synchronized across panels.",
-                level="success",
+                f"[Voice Audio: POST /api/v1/audio/synthesize-all-panel-audio] Synthesizing neural TTS using voice '{self.request.voice}'...",
                 progress=75,
             )
+
+            audio_panel_inputs = [
+                {
+                    "id": f"panel_{p.index}",
+                    "index": p.index,
+                    "dialogues": [p.speech_text] if p.speech_text else [],
+                    "narrative": p.speech_text or "",
+                    "target_duration": p.duration or 3.5,
+                }
+                for p in self.state.panels
+            ]
+            try:
+                audio_res = await batch_synthesize_panels_service(
+                    panels=audio_panel_inputs,
+                    voice=self.request.voice or "en-US-GuyNeural",
+                    speech_rate=1.0,
+                    speech_pitch=1.0,
+                    generate_dialogue_audio=True,
+                    generate_narrative_audio=True,
+                    force_regenerate=True,
+                )
+                audio_map = {r.get("id"): r for r in (audio_res or [])}
+                for p in self.state.panels:
+                    r_audio = audio_map.get(f"panel_{p.index}") or {}
+                    if r_audio.get("audio_url") or r_audio.get("narrative_audio_url"):
+                        p.audio_url = r_audio.get("audio_url") or r_audio.get("narrative_audio_url")
+                    if r_audio.get("duration"):
+                        p.duration = float(r_audio["duration"])
+                self.log(
+                    "audio",
+                    f"[Voice Audio: POST /api/v1/audio/synthesize-all-panel-audio] Neural audio tracks generated and synchronized.",
+                    level="success",
+                    progress=80,
+                )
+            except Exception as audio_err:
+                self.log("audio", f"Audio synthesis notice: {audio_err}", level="warning")
 
             # ── CHECKPOINT: REVIEW MODE (IF REQUESTED) ────────────────────────
             if self.request.review_mode:
@@ -477,11 +398,11 @@ Return STRICT JSON as a list of {num_panels} objects:
                     "review",
                     "Agent paused at review checkpoint. Review panels and narrative, then click 'Approve & Publish' to compile video.",
                     level="info",
-                    progress=75,
+                    progress=80,
                 )
                 return self.state
 
-            # Proceed immediately with real video render & publication
+            # ── STAGE 5: RENDER VIDEO (POST /api/v1/video/render) & YOUTUBE ───
             await self._render_and_publish()
             return self.state
 
@@ -503,8 +424,8 @@ Return STRICT JSON as a list of {num_panels} objects:
 
         self.log(
             "video_render",
-            f"Compiling cinematic video in {format_label} resolution ({target_w}x{target_h})...",
-            progress=80,
+            f"[Render Video: POST /api/v1/video/render] Compiling cinematic video in {format_label} resolution ({target_w}x{target_h})...",
+            progress=85,
         )
 
         panels_payload = [p.model_dump() for p in self.state.panels]
@@ -526,7 +447,7 @@ Return STRICT JSON as a list of {num_panels} objects:
         self.state.video_url = f"/api/v1/video/stream/{video_filename}"
         self.log(
             "video_render",
-            f"Video rendered successfully: {video_filename}",
+            f"[Render Video: POST /api/v1/video/render] Video rendered successfully: {video_filename}",
             level="success",
             progress=90,
         )
