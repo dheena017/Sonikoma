@@ -1061,6 +1061,8 @@ def _get_model_routing_payload() -> dict:
         "seo_optimization",
         "sfx_audio",
         "smart_crop",
+        "copyright_scrubber",
+        "thumbnail_generation",
     ]
 
     dynamic_routing = {}

@@ -320,11 +320,7 @@ export function TranslationTool({
             </span>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-mono text-neutral-400">
-                AI Engine: <strong className="text-[#60A5FA]">{localStorage.getItem("ai_comic_model") || "Auto-Routed (Smart)"}</strong>
-              </span>
-              <span className="text-neutral-600">&bull;</span>
-              <span className="text-[10px] font-mono text-neutral-400">
-                Selected: <strong className="text-white">{lang}</strong>
+                <strong className="text-white">{lang}</strong>
               </span>
             </div>
           </div>

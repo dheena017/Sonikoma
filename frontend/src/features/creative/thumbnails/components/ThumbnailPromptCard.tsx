@@ -1,30 +1,22 @@
 import React, { useMemo } from "react";
 import {
   Sparkles,
-  Layers,
   Wand2,
   Film,
-  Zap,
 } from "lucide-react";
-import { ThumbnailCount } from "../types";
 import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 interface ThumbnailPromptCardProps {
   prompt: string;
   setPrompt: (p: string) => void;
-  count: ThumbnailCount;
-  setCount: (c: ThumbnailCount) => void;
   seriesTitle: string;
   setSeriesTitle: (s: string) => void;
   genre: string;
   setGenre: (g: string) => void;
   style?: string;
   setStyle?: (s: string) => void;
-  engine?: string;
-  setEngine?: (e: string) => void;
   onGenerate: () => void;
   isGenerating: boolean;
-  activePanelsCount: number;
 }
 
 interface StyleOption {
@@ -84,84 +76,18 @@ const STYLE_OPTIONS: StyleOption[] = [
 
 
 
-const ENGINE_OPTIONS = [
-  {
-    id: "flux_schnell",
-    label: "FLUX.1 Schnell (Recommended)",
-    badge: "16:9 Ultra Fast",
-    desc: "Black Forest Labs FLUX.1 • High fidelity cinematic diffusion",
-    icon: "⚡",
-    provider: "Hugging Face",
-  },
-  {
-    id: "flux_dev",
-    label: "FLUX.1 Dev Studio",
-    badge: "Ultra Detail",
-    desc: "FLUX.1 Dev photorealism • Deep render shadows & reflections",
-    icon: "🎨",
-    provider: "Hugging Face",
-  },
-  {
-    id: "dall_e_3",
-    label: "OpenAI DALL-E 3",
-    badge: "Cinematic HD",
-    desc: "OpenAI DALL-E 3 • Narrative composition & typography fidelity",
-    icon: "🌟",
-    provider: "OpenAI",
-  },
-  {
-    id: "sdxl",
-    label: "Stable Diffusion XL",
-    badge: "Anime Core",
-    desc: "Stability AI SDXL 1.0 • Classic graphic novel and comic rendering",
-    icon: "🖼️",
-    provider: "Stability AI",
-  },
-  {
-    id: "panel_compositor",
-    label: "Chapter Panel FX Compositor",
-    badge: "Zero Latency",
-    desc: "Direct chapter panel composition with dynamic neon grading & lighting",
-    icon: "🎬",
-    provider: "Local FX Core",
-  },
-];
-
 export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
-  prompt,
-  setPrompt,
-  count,
-  setCount,
-  seriesTitle,
-  setSeriesTitle,
-  genre,
-  setGenre,
+  prompt = "",
+  setPrompt = () => { },
+  seriesTitle = "",
+  setSeriesTitle = () => { },
+  genre = "",
+  setGenre = () => { },
   style = "anime_manhwa",
-  setStyle,
-  engine = "flux_schnell",
-  setEngine,
-  onGenerate,
-  isGenerating,
-  activePanelsCount,
+  setStyle = () => { },
+  onGenerate = () => { },
+  isGenerating = false,
 }) => {
-  const activeStyleObj = useMemo(() => {
-    return STYLE_OPTIONS.find((opt) => opt.id === style) || STYLE_OPTIONS[0];
-  }, [style]);
-
-  const activeEngineObj = useMemo(() => {
-    return ENGINE_OPTIONS.find((e) => e.id === engine) || ENGINE_OPTIONS[0];
-  }, [engine]);
-
-  const engineSelectOptions = useMemo(() => {
-    return ENGINE_OPTIONS.map((e) => ({
-      value: e.id,
-      label: e.label,
-      description: e.desc,
-      badge: e.badge,
-      icon: <span className="text-sm shrink-0">{e.icon}</span>,
-    }));
-  }, []);
-
   const styleSelectOptions = useMemo(() => {
     return STYLE_OPTIONS.map((opt) => ({
       value: opt.id,
@@ -175,53 +101,19 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
 
   return (
     <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 sm:p-7 shadow-md space-y-6">
-      {/* ── Top Controls: Series Title & Count Selector ───────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
-        <div className="sm:col-span-8 space-y-1.5">
-          <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
-            <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
-            Series / Chapter Title
-          </label>
-          <input
-            type="text"
-            value={seriesTitle}
-            onChange={(e) => setSeriesTitle(e.target.value)}
-            placeholder="e.g. Solo Leveling Chapter 1 Climax"
-            className="w-full px-4 py-3 bg-[#121212] border border-[#2F2F2F] rounded-xl text-sm text-[#E5E5E5] placeholder-[#6B7280] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 transition-all font-sans"
-          />
-        </div>
-
-        {/* 3 or 6 Count Toggle */}
-        <div className="sm:col-span-4 space-y-1.5">
-          <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
-            Generation Count
-          </label>
-          <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#121212] border border-[#2F2F2F] rounded-xl">
-            <button
-              type="button"
-              onClick={() => setCount(3)}
-              className={`py-2 px-3 rounded-lg text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
-                count === 3
-                  ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/30"
-                  : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#1E1E1E]"
-              }`}
-            >
-              3 Images
-            </button>
-            <button
-              type="button"
-              onClick={() => setCount(6)}
-              className={`py-2 px-3 rounded-lg text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
-                count === 6
-                  ? "bg-[#3B82F6] text-white shadow-md shadow-[#3B82F6]/30"
-                  : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#1E1E1E]"
-              }`}
-            >
-              6 Images
-            </button>
-          </div>
-        </div>
+      {/* ── Top Controls: Series / Chapter Title ─────────────────────────── */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
+          <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
+          Series / Chapter Title
+        </label>
+        <input
+          type="text"
+          value={seriesTitle}
+          onChange={(e) => setSeriesTitle(e.target.value)}
+          placeholder="e.g. Solo Leveling Chapter 1 Climax"
+          className="w-full px-4 py-3 bg-[#121212] border border-[#2F2F2F] rounded-xl text-sm text-[#E5E5E5] placeholder-[#6B7280] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 transition-all font-sans"
+        />
       </div>
 
       {/* ── Art & Visual Style Selector (CyberSelect Dropdown) ─────────────── */}
@@ -231,9 +123,6 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
             <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
             Visual Art Style ({STYLE_OPTIONS.length} Styles)
           </label>
-          <span className="text-[11px] font-mono text-[#6B7280]">
-            Group: <span className="text-[#3B82F6] font-semibold">{activeStyleObj.category}</span>
-          </span>
         </div>
 
         <CyberSelect
@@ -245,12 +134,6 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
           searchable={true}
           placeholder="Select Visual Art Style..."
         />
-
-        <div className="px-3.5 py-2 rounded-xl bg-[#121212] border border-[#2F2F2F] flex items-center gap-2 text-xs font-mono text-[#9CA3AF]">
-          <span className="text-sm shrink-0">{activeStyleObj.icon}</span>
-          <span className="text-white font-semibold shrink-0">{activeStyleObj.label}:</span>
-          <span className="text-[#9CA3AF] truncate">{activeStyleObj.desc}</span>
-        </div>
       </div>
 
       {/* ── AI Prompt Textarea & Quick Preset Suggestions ─────────────────── */}
@@ -282,45 +165,6 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
 
       </div>
 
-      {/* ── Source Panels & AI Diffusion Engine Status ───────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-mono font-bold uppercase text-[#9CA3AF] flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-[#10B981]" />
-            Source Panels Status
-          </label>
-          <div className="px-3.5 py-2.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-xs text-[#E5E5E5] flex items-center justify-between font-mono">
-            <span className="truncate">
-              {activePanelsCount > 0
-                ? `${activePanelsCount} Active Chapter Panels Mapped`
-                : "Using High-Action Story Presets"}
-            </span>
-            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse shrink-0 ml-2" />
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-[11px] font-mono font-bold uppercase text-[#9CA3AF] flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
-              AI Diffusion Engine
-            </label>
-            <span className="text-[10px] font-mono text-[#3B82F6] font-semibold">
-              {activeEngineObj.provider}
-            </span>
-          </div>
-          <CyberSelect
-            value={engine}
-            onChange={(val) => setEngine?.(val)}
-            options={engineSelectOptions}
-            variant="blue"
-            size="md"
-            searchable={false}
-            placeholder="Select AI Engine..."
-          />
-        </div>
-      </div>
-
       {/* ── GENERATE BUTTON ────────────────────────────────────────────────── */}
       <div className="pt-2">
         <button
@@ -332,12 +176,12 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
           {isGenerating ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Synthesizing {count} AI Thumbnails (1280x720 HD)...</span>
+              <span>Synthesizing AI Thumbnails (1280x720 HD)...</span>
             </>
           ) : (
             <>
               <Sparkles className="w-4 h-4 text-white" />
-              <span>Generate {count} High-CTR YouTube Thumbnails</span>
+              <span>Generate High-CTR YouTube Thumbnails</span>
             </>
           )}
         </button>

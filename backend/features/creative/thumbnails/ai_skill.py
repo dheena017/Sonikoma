@@ -72,7 +72,7 @@ class ThumbnailAISkill:
         genre: str,
         user_prompt: str,
         panels: List[ThumbnailPanelInput],
-        count: int = 3,
+        count: int = 1,
         hook_override: Optional[str] = None,
         style: Optional[str] = None,
     ) -> List[DynamicThumbnailConcept]:
@@ -96,14 +96,20 @@ class ThumbnailAISkill:
             base_prompt = f"{style_desc}, {title} {genre_str} climax scene, dynamic heroic pose, glowing aura, cinematic lighting, 8k resolution, anime masterpiece"
 
         concepts: List[DynamicThumbnailConcept] = []
-        for i in range(count):
+        for i in range(max(1, count)):
             index = i + 1
-            hook = hook_override or f"{title.upper()} #{index}"
+            if count == 1:
+                hook = hook_override or title.upper()
+                label = "Master 16:9 Climax"
+            else:
+                hook = hook_override or f"{title.upper()} #{index}"
+                label = f"Concept #{index}"
+
             concepts.append(
                 DynamicThumbnailConcept(
                     index=index,
                     archetype_id=f"concept_{index}",
-                    archetype_label=f"Concept #{index}",
+                    archetype_label=label,
                     hook_text=hook,
                     visual_prompt=base_prompt,
                     palette=["#0A0E17", "#3B82F6", "#FFD700"],

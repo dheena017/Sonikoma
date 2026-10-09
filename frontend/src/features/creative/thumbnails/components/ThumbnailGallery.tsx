@@ -30,10 +30,12 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
         <div>
           <h2 className="text-base sm:text-lg font-bold text-[#E5E5E5] flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#3B82F6]" />
-            Generated Thumbnail Package ({thumbnails.length} Variants)
+            {thumbnails.length === 1
+              ? "Generated YouTube Thumbnail (16:9 HD)"
+              : `Generated Thumbnail Package (${thumbnails.length} Variants)`}
           </h2>
           <p className="text-xs text-[#9CA3AF] mt-0.5">
-            Click any thumbnail for full-resolution preview, instant HD download, or direct YouTube export
+            Click thumbnail for full-resolution preview, instant HD download, or direct YouTube export
           </p>
         </div>
         <div className="px-3.5 py-1.5 rounded-full bg-[#121212] border border-[#2F2F2F] text-[#9CA3AF] text-xs font-mono flex items-center gap-2">
@@ -42,7 +44,13 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div
+        className={
+          thumbnails.length === 1
+            ? "max-w-2xl mx-auto w-full"
+            : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+        }
+      >
         {thumbnails.map((item, index) => (
           <div
             key={item.id}
@@ -61,7 +69,7 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
 
               {/* Overlay Badges */}
               <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#121212]/90 backdrop-blur-md text-[10px] font-mono font-bold text-[#E5E5E5] uppercase border border-[#2F2F2F]">
-                Option #{index + 1}
+                {thumbnails.length === 1 ? "16:9 Master" : `Option #${index + 1}`}
               </div>
 
               <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-[#3B82F6] text-white backdrop-blur-md text-[10px] font-mono font-bold uppercase shadow-md">
@@ -121,6 +129,28 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
                 <p className="text-[11px] text-[#9CA3AF] mt-0.5 line-clamp-1 font-mono">
                   Archetype: {item.archetype_label}
                 </p>
+
+                {/* AI Smart Routing Tier & Telemetry Badges */}
+                <div className="mt-2.5 pt-2 border-t border-[#2F2F2F]/60 flex flex-wrap items-center gap-1.5">
+                  <span className="px-2 py-0.5 rounded-md bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[#93c5fd] text-[10px] font-mono font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+                    {item.tier_used || "Tier 1: Primary"}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-[#10B981]/15 border border-[#10B981]/30 text-[#6ee7b7] text-[10px] font-mono font-semibold">
+                    {item.model_used || "flux-anime"}
+                  </span>
+                  {item.provider_used && (
+                    <span className="px-2 py-0.5 rounded-md bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 text-[#c4b5fd] text-[10px] font-mono">
+                      {item.provider_used}
+                    </span>
+                  )}
+                </div>
+
+                {item.cascade_path && item.cascade_path.includes("->") && (
+                  <p className="text-[10px] text-[#9CA3AF] font-mono truncate mt-1" title={item.cascade_path}>
+                    <span className="text-amber-400 font-bold">Route:</span> {item.cascade_path}
+                  </p>
+                )}
               </div>
 
               {/* Action Buttons */}

@@ -33,9 +33,11 @@ async def generate_thumbnails_endpoint(request: ThumbnailGenerateRequest):
     try:
         response = await thumbnail_service.generate_batch(request)
         return response
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"[Thumbnail Router] Generation error: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 thumbnails_router = router

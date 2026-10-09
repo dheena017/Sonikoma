@@ -33,16 +33,12 @@ export const CreativeThumbnailPage: React.FC<CreativeThumbnailPageProps> = ({
   const {
     prompt,
     setPrompt,
-    count,
-    setCount,
     seriesTitle: currentTitle,
     setSeriesTitle,
     genre,
     setGenre,
     style,
     setStyle,
-    engine,
-    setEngine,
     thumbnails,
     isGenerating,
     previewItem,
@@ -77,19 +73,14 @@ export const CreativeThumbnailPage: React.FC<CreativeThumbnailPageProps> = ({
         <ThumbnailPromptCard
           prompt={prompt}
           setPrompt={setPrompt}
-          count={count}
-          setCount={setCount}
           seriesTitle={currentTitle}
           setSeriesTitle={setSeriesTitle}
           genre={genre}
           setGenre={setGenre}
           style={style}
           setStyle={setStyle}
-          engine={engine}
-          setEngine={setEngine}
           onGenerate={handleGenerate}
           isGenerating={isGenerating}
-          activePanelsCount={activePanels.length}
         />
 
         {/* ── Generated 3 or 6 Thumbnails Gallery ── */}

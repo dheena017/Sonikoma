@@ -29,8 +29,8 @@ class ThumbnailGenerateRequest(BaseModel):
         description="User custom prompt or concept describing desired thumbnail mood, text, or focus"
     )
     count: Optional[int] = Field(
-        default=3,
-        description="Number of thumbnails to generate: 3 or 6 images"
+        default=1,
+        description="Number of thumbnails to generate: 1 image"
     )
     series_title: Optional[str] = Field(
         default="Webtoon Climax",
@@ -56,10 +56,6 @@ class ThumbnailGenerateRequest(BaseModel):
         default=None,
         description="Visual style direction"
     )
-    engine: Optional[str] = Field(
-        default="flux_schnell",
-        description="AI Diffusion Engine selection"
-    )
 
 
 class GeneratedThumbnailItem(BaseModel):
@@ -75,16 +71,26 @@ class GeneratedThumbnailItem(BaseModel):
     width: int = 1280
     height: int = 720
     created_at: float
+    tier_used: Optional[str] = "Tier 1: Primary"
+    model_used: Optional[str] = "flux-anime"
+    provider_used: Optional[str] = "Pollinations AI"
+    cascade_path: Optional[str] = None
+    routing_message: Optional[str] = None
 
 
 class ThumbnailGenerateResponse(BaseModel):
-    """Response containing the generated 3 or 6 thumbnail package."""
+    """Response containing the generated thumbnail package and AI cascade telemetry."""
     success: bool = True
     count: int
     prompt: str
     series_title: str
     thumbnails: List[GeneratedThumbnailItem]
     execution_time_ms: float
+    tier_used: Optional[str] = "Tier 1: Primary"
+    model_used: Optional[str] = "flux-anime"
+    provider_used: Optional[str] = "Pollinations AI"
+    cascade_path: Optional[str] = None
+    routing_message: Optional[str] = None
 
 
 __all__ = [

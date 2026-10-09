@@ -82,6 +82,16 @@ const DEFAULT_CASCADES: Record<string, AITierCascade> = {
     fallback: "gpt-4o-mini",
     emergency: "opencv-local",
   },
+  copyright_scrubber: {
+    primary: "gemini-2.5-flash",
+    fallback: "gemini-2.0-flash",
+    emergency: "gemini-1.5-flash",
+  },
+  thumbnail_generation: {
+    primary: "flux-anime",
+    fallback: "flux-realism",
+    emergency: "turbo",
+  },
 };
 
 /**

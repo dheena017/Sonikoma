@@ -58,6 +58,7 @@ class HuggingFaceClient:
         height: int = 1024,
         quality: int = 90,
         api_key: Optional[str] = None,
+        raise_on_error: bool = False,
     ) -> Optional[bytes]:
         """
         Synthesize an image via HuggingFace Inference API in an async thread pool.
@@ -65,6 +66,8 @@ class HuggingFaceClient:
         """
         client = cls.get_client(api_key)
         if not client:
+            if raise_on_error:
+                raise RuntimeError("Hugging Face client is not configured or HUGGINGFACE_API_KEY is missing.")
             return None
 
         model_str = model.value if isinstance(model, HuggingFaceModel) else str(model)
@@ -75,10 +78,10 @@ class HuggingFaceClient:
 
             text_to_image_fn = getattr(client, "text_to_image", None)
             if not callable(text_to_image_fn):
-                logger.warning(
-                    "[HuggingFaceClient] InferenceClient.text_to_image is not available. "
-                    "Upgrade huggingface_hub: pip install -U huggingface_hub"
-                )
+                msg = "[HuggingFaceClient] InferenceClient.text_to_image is not available."
+                logger.warning(msg)
+                if raise_on_error:
+                    raise RuntimeError(msg)
                 return None
 
             raw_img = await asyncio.to_thread(
@@ -93,6 +96,8 @@ class HuggingFaceClient:
 
         except Exception as exc:
             logger.warning(f"[HuggingFaceClient] Image synthesis failed on '{model_str}': {exc}")
+            if raise_on_error:
+                raise exc
             return None
 
         return None

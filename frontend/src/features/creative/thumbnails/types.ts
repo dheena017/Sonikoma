@@ -1,4 +1,4 @@
-export type ThumbnailCount = 3 | 6;
+export type ThumbnailCount = 1 | 3 | 6;
 
 export type ThumbnailStylePreset =
   | "anime_manhwa"
@@ -20,13 +20,12 @@ export interface ThumbnailPanelInput {
 
 export interface ThumbnailGenerateRequest {
   prompt?: string;
-  count: ThumbnailCount;
+  count?: ThumbnailCount | number;
   series_title?: string;
   genre?: string;
   panels?: ThumbnailPanelInput[];
   video_url?: string;
   style?: ThumbnailStylePreset;
-  engine?: string;
 }
 
 export interface GeneratedThumbnailItem {
@@ -41,6 +40,11 @@ export interface GeneratedThumbnailItem {
   width: number;
   height: number;
   created_at: number;
+  tier_used?: string;
+  model_used?: string;
+  provider_used?: string;
+  cascade_path?: string;
+  routing_message?: string;
 }
 
 export interface ThumbnailGenerateResponse {
@@ -50,4 +54,10 @@ export interface ThumbnailGenerateResponse {
   series_title: string;
   thumbnails: GeneratedThumbnailItem[];
   execution_time_ms: number;
+  tier_used?: string;
+  model_used?: string;
+  provider_used?: string;
+  cascade_path?: string;
+  routing_message?: string;
 }
+

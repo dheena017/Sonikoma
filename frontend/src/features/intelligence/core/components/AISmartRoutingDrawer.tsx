@@ -35,7 +35,7 @@ export interface AISmartRoutingDrawerProps {
   fullWidth?: boolean;
 }
 
-// Full Comic Pipeline Task Definitions (14 Dynamic AI Pipelines)
+// Full Comic Pipeline Task Definitions (16 Dynamic AI Pipelines)
 const PIPELINE_TASKS = [
   {
     id: "storyboard_narrative",
@@ -148,6 +148,22 @@ const PIPELINE_TASKS = [
     emoji: "💥",
     color: "#F97316",
     desc: "Onomatopoeia action sound detection & SFX mapping",
+  },
+  {
+    id: "copyright_scrubber",
+    name: "Dialogue Compliance & Copyright Scrubber",
+    category: "Creative",
+    emoji: "🛡️",
+    color: "#10B981",
+    desc: "Scans translated dialogue for trademark, policy violations and toxic text",
+  },
+  {
+    id: "thumbnail_generation",
+    name: "YouTube 16:9 Thumbnail Synthesis",
+    category: "Image",
+    emoji: "🖼️",
+    color: "#3B82F6",
+    desc: "High-CTR 16:9 YouTube thumbnail packages with centered hero and viral typography",
   },
 ];
 

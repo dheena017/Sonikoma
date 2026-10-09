@@ -262,6 +262,32 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     default_fallback: "gemini-2.0-flash",
     default_tertiary: "gemini-1.5-flash",
   },
+  {
+    task: "copyright_scrubber",
+    name: "Dialogue Compliance & Copyright Scrubber",
+    emoji: "🛡️",
+    category: "Creative Narration",
+    description:
+      "Scans webtoon translations and scripts for trademark risks, safety policy violations, and toxic language.",
+    required_type: "text_reasoning",
+    required_tag: "Text-to-Text",
+    default_primary: "gemini-2.5-flash",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
+  },
+  {
+    task: "thumbnail_generation",
+    name: "YouTube 16:9 Thumbnail Synthesis",
+    emoji: "🖼️",
+    category: "Image Diffusion",
+    description:
+      "Synthesizes high-CTR 16:9 YouTube thumbnail packages combining hero character awakenings and viral layouts.",
+    required_type: "image_diffusion",
+    required_tag: "Text-to-Image",
+    default_primary: "flux-anime",
+    default_fallback: "flux-realism",
+    default_tertiary: "turbo",
+  },
 ];
 
 const CATEGORY_COLORS: Record<

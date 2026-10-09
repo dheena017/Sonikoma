@@ -24,6 +24,6 @@ MODEL_FALLBACK_CHAINS: Dict[str, List[str]] = {
     "turbo": ["turbo", "flux-anime", "flux"],
     "flux": ["flux", "flux-anime", "turbo"],
     "flux-realism": ["flux-realism", "flux-anime", "turbo"],
-    "stable-diffusion": ["flux-anime", "turbo", "flux"],
-    "sana": ["flux-anime", "turbo", "flux"],
+    "stable-diffusion": ["stable-diffusion", "flux-anime", "turbo"],
+    "sana": ["sana", "flux-anime", "turbo"],
 }

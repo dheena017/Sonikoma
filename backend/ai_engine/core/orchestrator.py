@@ -53,6 +53,7 @@ CAPABILITY_HUMAN_NAMES: Dict[str, str] = {
     "thumbnail_concept": "Thumbnail Concept",
     "thumbnail_layout": "Thumbnail Layout",
     "thumbnail_visual_comp": "Thumbnail Visual",
+    "thumbnail_generation": "YouTube Thumbnail Synthesis",
     "video_seo_metadata": "Video SEO",
 }
 
@@ -313,8 +314,10 @@ class AIOrchestrator:
     _custom_capability_routing: Dict[str, Dict[str, Any]] = {}
 
     @classmethod
-    def load_custom_routing(cls):
+    def load_custom_routing(cls, force: bool = False):
         """Loads persistent custom routing from database platform_settings if available."""
+        if cls._custom_capability_routing and not force:
+            return
         try:
             from database.engine import get_db_connection
             conn = get_db_connection()
@@ -405,6 +408,9 @@ class AIOrchestrator:
         "sfx_audio": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
         "bgm_vibe": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
         "smart_crop": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "copyright_scrubber": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "thumbnail_generation": {"primary": "flux-anime", "fallback": "flux-realism", "tertiary": "turbo"},
+        "thumbnail_concept": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
         "chat_completion": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
         "text": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
         "series_arc_director": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
@@ -416,8 +422,7 @@ class AIOrchestrator:
     @classmethod
     def get_task_cascade(cls, capability: str) -> Dict[str, str]:
         """Returns the full 3-tier cascade mapping (primary, fallback, tertiary) for a task."""
-        if not cls._custom_capability_routing:
-            cls.load_custom_routing()
+        cls.load_custom_routing(force=True)
         custom_entry = cls._custom_capability_routing.get(capability, {})
         primary = None
         fallback = None

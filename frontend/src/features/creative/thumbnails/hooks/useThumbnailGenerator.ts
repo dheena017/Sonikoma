@@ -14,11 +14,10 @@ export function useThumbnailGenerator(
   addNotification?: any
 ) {
   const [prompt, setPrompt] = useState("");
-  const [count, setCount] = useState<ThumbnailCount>(3);
+  const [count, setCount] = useState<ThumbnailCount>(1);
   const [seriesTitle, setSeriesTitle] = useState(initialTitle);
   const [genre, setGenre] = useState("Action Fantasy");
   const [style, setStyle] = useState<string>("anime_manhwa");
-  const [engine, setEngine] = useState<string>("flux_schnell");
 
   const [thumbnails, setThumbnails] = useState<GeneratedThumbnailItem[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -40,20 +39,27 @@ export function useThumbnailGenerator(
 
       const request: ThumbnailGenerateRequest = {
         prompt: prompt.trim() || undefined,
-        count,
+        count: 1,
         series_title: seriesTitle.trim() || "Webtoon Climax",
         genre,
         panels: mappedPanels,
         style,
-        engine,
       };
 
       const res = await generateThumbnails(fetchWithInterceptor, request);
       setThumbnails(res.thumbnails || []);
-      addNotification?.(
-        `Successfully generated ${res.thumbnails.length} high-CTR thumbnails!`,
-        "success"
-      );
+      const topItem = res.thumbnails?.[0];
+      const tierUsed = res.tier_used || topItem?.tier_used || "Tier 1: Primary";
+      const modelUsed = res.model_used || topItem?.model_used || "flux-anime";
+      const providerUsed = res.provider_used || topItem?.provider_used || "Pollinations AI (100% Free)";
+      const seconds = res.execution_time_ms ? ` in ${(res.execution_time_ms / 1000).toFixed(1)}s` : "";
+
+      const detailedMsg =
+        res.routing_message ||
+        topItem?.routing_message ||
+        `✨ Generated 16:9 thumbnail via ${tierUsed}: ${modelUsed} (${providerUsed})${seconds}`;
+
+      addNotification?.(detailedMsg, "success");
     } catch (err: any) {
       addNotification?.(err.message || "Failed to generate thumbnails.", "error");
     } finally {
@@ -65,7 +71,6 @@ export function useThumbnailGenerator(
     seriesTitle,
     genre,
     style,
-    engine,
     activePanels,
     fetchWithInterceptor,
     addNotification,
@@ -92,8 +97,6 @@ export function useThumbnailGenerator(
     setGenre,
     style,
     setStyle,
-    engine,
-    setEngine,
     thumbnails,
     isGenerating,
     previewItem,
