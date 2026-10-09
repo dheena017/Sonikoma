@@ -95,6 +95,14 @@ class AgentRunResponse(BaseModel):
     current_action: str = ""
     logs: List[AgentLogMessage] = Field(default_factory=list)
     scraped_title: Optional[str] = None
+    series_title: Optional[str] = None
+    chapter_title: Optional[str] = None
+    source_url: Optional[str] = None
+    video_format: Optional[str] = "shorts"
+    language: Optional[str] = "en"
+    voice: Optional[str] = "alloy"
+    cover_image: Optional[str] = None
+    duration: Optional[float] = None
     raw_images_count: int = 0
     panels: List[AgentPanel] = Field(default_factory=list)
     video_filename: Optional[str] = None

@@ -67,6 +67,36 @@ def _clean_json_text(text: str) -> str:
     return text
 
 
+def extract_title_from_url(url: str) -> str:
+    """Extracts a clean, human-readable series title and episode from Webtoon, Manga, or comic URLs."""
+    if not url:
+        return "Webtoon Story Recap"
+    try:
+        from urllib.parse import urlparse, unquote
+        parsed = urlparse(url)
+        path = unquote(parsed.path).strip("/")
+        parts = [p for p in path.split("/") if p]
+
+        # Webtoons format: /en/{genre}/{series_slug}/{episode_slug}/viewer
+        if "webtoons.com" in parsed.netloc and len(parts) >= 3:
+            series_raw = parts[-3] if parts[-1] == "viewer" else (parts[-2] if len(parts) >= 2 else parts[0])
+            ep_raw = parts[-2] if parts[-1] == "viewer" else parts[-1]
+            s_clean = re.sub(r"[-_]+", " ", series_raw).strip().title()
+            e_clean = re.sub(r"[-_]+", " ", ep_raw).strip()
+            e_clean = re.sub(r"^ep\s*(\d+)", r"Episode \1", e_clean, flags=re.IGNORECASE).title()
+            return f"{s_clean}: {e_clean}"
+
+        # Generic slug extraction from URL path
+        if parts:
+            for part in reversed(parts):
+                if part.lower() not in ("viewer", "read", "chapter", "manga", "comic") and len(part) > 2:
+                    clean = re.sub(r"[-_]+", " ", part).strip().title()
+                    return clean
+    except Exception:
+        pass
+    return "Webtoon Story Recap"
+
+
 class AutonomousAgentWorkflow:
     """Manages the full lifecycle of an autonomous Webtoon-to-YouTube agent run with real APIs."""
 
@@ -75,21 +105,33 @@ class AutonomousAgentWorkflow:
         self.request = request
         self.user_id = user_id
         now = time.time()
+        initial_title = request.title_override or extract_title_from_url(request.url)
+        series_name = initial_title.split(":")[0].strip() if ":" in initial_title else initial_title
+        ep_name = initial_title.split(":")[1].strip() if ":" in initial_title else None
+
         self.state = AgentRunResponse(
             run_id=run_id,
             user_id=user_id,
             status="initializing",
             progress=0,
-            current_action="Autonomous agent created. Initializing pipeline...",
+            current_action=f"Autonomous agent created for '{initial_title}'. Initializing pipeline...",
             logs=[
                 AgentLogMessage(
                     timestamp=now,
                     stage="init",
                     level="info",
-                    message=f"Autonomous Agent launched for URL: {request.url}",
+                    message=f"Autonomous Agent launched for: {initial_title} ({request.url})",
                 )
             ],
-            scraped_title=None,
+            scraped_title=initial_title,
+            series_title=series_name,
+            chapter_title=ep_name,
+            source_url=request.url,
+            video_format=request.video_format,
+            language=request.language,
+            voice=request.voice,
+            cover_image=None,
+            duration=None,
             raw_images_count=0,
             panels=[],
             video_filename=None,
@@ -172,14 +214,47 @@ class AutonomousAgentWorkflow:
                 self.log("scrape", f"Scraper notice: {scrape_err}. Utilizing direct extraction.", level="warning")
 
             raw_image_urls: List[str] = []
-            title = self.request.title_override or "Webtoon Chapter Climax"
+            title = self.request.title_override or self.state.scraped_title or "Webtoon Story Recap"
 
             if chapter_result and getattr(chapter_result, "images", None):
                 raw_image_urls = [img.url for img in chapter_result.images if getattr(img, "url", None)]
-                if getattr(chapter_result, "title", None) and not self.request.title_override:
-                    title = chapter_result.title
-                elif getattr(chapter_result, "series_title", None) and not self.request.title_override:
-                    title = chapter_result.series_title
+                s_title = None
+                if getattr(chapter_result, "series", None) and getattr(chapter_result.series, "title", None):
+                    s_title = str(chapter_result.series.title).strip()
+
+                c_title = None
+                if getattr(chapter_result, "chapter", None):
+                    c_title = getattr(chapter_result.chapter, "title", None) or getattr(chapter_result.chapter, "episode", None)
+                    if c_title:
+                        c_title = str(c_title).strip()
+                    elif getattr(chapter_result.chapter, "number", None):
+                        c_title = f"Episode {chapter_result.chapter.number}"
+
+                if s_title and c_title:
+                    title = f"{s_title}: {c_title}"
+                elif s_title:
+                    title = s_title
+                elif c_title:
+                    title = c_title
+                elif getattr(chapter_result, "title", None):
+                    title = str(chapter_result.title).strip()
+
+                if self.request.title_override:
+                    title = self.request.title_override
+
+                if s_title:
+                    self.state.series_title = s_title
+                if c_title:
+                    self.state.chapter_title = c_title
+
+                # Discover best cover image
+                cover = getattr(chapter_result, "cover_image", None)
+                if not cover and getattr(chapter_result, "series", None):
+                    cover = getattr(chapter_result.series, "cover_image", None)
+                if not cover and raw_image_urls:
+                    cover = raw_image_urls[0]
+                if cover:
+                    self.state.cover_image = cover
 
             self.state.scraped_title = title
             self.state.raw_images_count = len(raw_image_urls)
@@ -296,6 +371,10 @@ class AutonomousAgentWorkflow:
                     )
 
             self.state.panels = panels_data
+            if panels_data and not self.state.cover_image:
+                self.state.cover_image = panels_data[0].image_url
+            self.state.duration = round(sum(p.duration for p in panels_data if p.duration), 1)
+
             self.log(
                 "process_images",
                 f"Prepared {len(panels_data)} clean comic panels for storyboard.",
@@ -396,9 +475,10 @@ class AutonomousAgentWorkflow:
                         p.audio_url = r_audio.get("audio_url") or r_audio.get("narrative_audio_url")
                     if r_audio.get("duration"):
                         p.duration = float(r_audio["duration"])
+                self.state.duration = round(sum(p.duration for p in self.state.panels if p.duration), 1)
                 self.log(
                     "audio",
-                    f"[Voice Audio: POST /api/v1/audio/synthesize-all-panel-audio] Neural audio tracks generated and synchronized.",
+                    f"[Voice Audio: POST /api/v1/audio/synthesize-all-panel-audio] Neural audio tracks generated and synchronized ({self.state.duration}s total).",
                     level="success",
                     progress=80,
                 )

@@ -59,6 +59,14 @@ export interface AgentRunResponse {
   current_action: string;
   logs: AgentLogMessage[];
   scraped_title?: string;
+  series_title?: string;
+  chapter_title?: string;
+  source_url?: string;
+  video_format?: VideoFormat;
+  language?: string;
+  voice?: string;
+  cover_image?: string;
+  duration?: number;
   raw_images_count: number;
   panels: AgentPanel[];
   video_filename?: string;
