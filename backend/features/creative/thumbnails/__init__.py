@@ -18,7 +18,7 @@ from .schemas import (
 )
 from .service import CreativeThumbnailService, thumbnail_service
 from .router import thumbnails_router, router
-from .generator import generate_thumbnail_package
+from .generator import generate_thumbnail_package, generate_thumbnail
 from .ai_skill import thumbnail_ai_skill, DynamicThumbnailConcept
 
 __all__ = [
@@ -30,6 +30,7 @@ __all__ = [
     "thumbnail_service",
     "thumbnails_router",
     "router",
+    "generate_thumbnail",
     "generate_thumbnail_package",
     "thumbnail_ai_skill",
     "DynamicThumbnailConcept",

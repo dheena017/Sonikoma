@@ -9,6 +9,29 @@ Tests for the AI Thumbnail Generator Studio:
 import pytest
 
 
+def test_generate_single_thumbnail(client, user_headers):
+    """POST /api/v1/creative/thumbnails/generate - generates 1 distinct 16:9 thumbnail by default."""
+    payload = {
+        "prompt": "Solo Leveling Awakening, electric gold aura, shock reaction",
+        "series_title": "Solo Leveling",
+        "genre": "Action Fantasy",
+    }
+    response = client.post("/api/v1/creative/thumbnails/generate", json=payload, headers=user_headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["count"] == 1
+    assert len(data["thumbnails"]) == 1
+    thumb = data["thumbnails"][0]
+    assert thumb["id"].startswith("thumb_")
+    assert thumb["image_url"].startswith("/api/v1/images/cached/")
+    assert thumb["width"] == 1280
+    assert thumb["height"] == 720
+    assert "tier_used" in data
+    assert "model_used" in data
+    assert "provider_used" in data
+
+
 def test_generate_thumbnails_3_pack(client, user_headers):
     """POST /api/v1/creative/thumbnails/generate - generates 3 distinct thumbnails."""
     payload = {

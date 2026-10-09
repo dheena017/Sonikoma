@@ -2,51 +2,33 @@
 backend/features/creative/thumbnails/service.py
 ─────────────────────────────────────────────────────────────────────────────
 Service layer for AI Thumbnail Generator Studio:
-Orchestrates batch generation (3 or 6 variants) and metadata caching.
+Orchestrates single 16:9 YouTube thumbnail generation and metadata caching.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import time
 import logging
-from typing import List, Dict, Any, Optional
 
 from features.creative.thumbnails.schemas import (
     ThumbnailGenerateRequest,
     ThumbnailGenerateResponse,
-    GeneratedThumbnailItem,
 )
 from features.creative.thumbnails.generator import generate_thumbnail_package
-from features.creative.thumbnails.ai_skill import thumbnail_ai_skill
 
 logger = logging.getLogger("sonikoma.creative.thumbnails.service")
 
 
 class CreativeThumbnailService:
-    """Service facade for managing thumbnail generation via AI Skill."""
+    """Service facade for managing single 16:9 YouTube thumbnail generation."""
 
-    def __init__(self):
-        self._history: Dict[str, GeneratedThumbnailItem] = {}
-
-    async def generate_batch(
+    async def generate_thumbnail(
         self, request: ThumbnailGenerateRequest
     ) -> ThumbnailGenerateResponse:
-        """Generates 3 or 6 distinct thumbnail images based on panels and AI prompt."""
+        """Generates 1 high-CTR 16:9 YouTube thumbnail directly from AI prompt."""
         start_time = time.perf_counter()
 
-        # 1. Synthesize non-hardcoded AI concepts with Vision/LLM
-        concepts = await thumbnail_ai_skill.generate_thumbnail_concepts(
-            series_title=request.series_title,
-            genre=request.genre,
-            user_prompt=request.prompt,
-            panels=request.panels or [],
-            count=request.count,
-        )
-
-        # 2. Render 1280x720 HD compositions using the AI concepts
-        thumbnails = await generate_thumbnail_package(request, concepts=concepts)
-
-        for t in thumbnails:
-            self._history[t.id] = t
+        # Render 1280x720 HD composition directly using central Smart Routing
+        thumbnails = await generate_thumbnail_package(request)
 
         top_item = thumbnails[0] if thumbnails else None
         tier_used = getattr(top_item, "tier_used", "Tier 1: Primary")

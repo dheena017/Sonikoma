@@ -22,16 +22,15 @@ router = APIRouter()
 @router.post(
     "/generate",
     response_model=ThumbnailGenerateResponse,
-    summary="Generate 3 or 6 High-CTR Thumbnails",
+    summary="Generate High-CTR 16:9 YouTube Thumbnail",
 )
 async def generate_thumbnails_endpoint(request: ThumbnailGenerateRequest):
     """
-    Takes an AI prompt and comic panel images (or chapter references),
-    maps character visuals and cinematic lighting, and generates a package of
-    3 or 6 distinct high-CTR YouTube thumbnails.
+    Takes an AI prompt and comic panel references, maps character visuals
+    and cinematic lighting, and generates a high-CTR 16:9 YouTube thumbnail.
     """
     try:
-        response = await thumbnail_service.generate_batch(request)
+        response = await thumbnail_service.generate_thumbnail(request)
         return response
     except HTTPException:
         raise

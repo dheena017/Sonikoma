@@ -8,7 +8,7 @@ Pydantic schemas for the AI Thumbnail Generator Studio:
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-from typing import List, Optional, Any, Dict
+from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
 
