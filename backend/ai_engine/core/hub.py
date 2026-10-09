@@ -16,7 +16,6 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional, List, Union
 
-from ai_engine.core.config import ai_config
 from ai_engine.core.registry import ModelRegistry
 from ai_engine.core.orchestrator import AIOrchestrator, AIErrorCode, AIExecutionError
 from ai_engine.skills.registry import registry as skills_registry
@@ -46,7 +45,6 @@ class AIHub:
     """
 
     def __init__(self):
-        self.config = ai_config
         self.registry = ModelRegistry
         self.orchestrator = AIOrchestrator
         self.skills = AIHubSkillsAccessor(self)
@@ -65,12 +63,11 @@ class AIHub:
         Generates text or conversational responses using the active/requested model
         with automatic multi-provider fallback.
         """
-        target_model = model or self.config.DEFAULT_TEXT_MODEL
         res = await self.orchestrator.execute_capability(
             capability="chat_completion",
             prompt=prompt,
             system_instruction=system_instruction,
-            requested_model=target_model,
+            requested_model=model,
             temperature=temperature,
             max_tokens=max_tokens,
         )
@@ -92,12 +89,11 @@ class AIHub:
         """
         Generates an image via Pollinations, HuggingFace Flux, OpenAI DALL-E, or Stable Diffusion.
         """
-        target_model = model or self.config.DEFAULT_IMAGE_MODEL
         res = await self.orchestrator.execute_capability(
             capability="image_diffusion",
             prompt=prompt,
             negative_prompt=negative_prompt,
-            requested_model=target_model,
+            requested_model=model,
             width=width,
             height=height,
             output_path=output_path,
@@ -116,13 +112,12 @@ class AIHub:
         """
         Synthesizes spoken audio from text using EdgeTTS or ElevenLabs.
         """
-        target_model = model or self.config.DEFAULT_TTS_MODEL
         res = await self.orchestrator.execute_capability(
             capability="speech_synthesis",
             text=text,
             voice=voice,
             output_path=output_path,
-            requested_model=target_model,
+            requested_model=model,
         )
         return res if isinstance(res, dict) else {"result": res}
 
@@ -137,12 +132,11 @@ class AIHub:
         """
         Transcribes speech from an audio file using Whisper.
         """
-        target_model = model or self.config.DEFAULT_TRANSCRIBE_MODEL
         res = await self.orchestrator.execute_capability(
             capability="speech_to_text",
             audio_path=audio_path,
             language=language,
-            requested_model=target_model,
+            requested_model=model,
         )
         return res if isinstance(res, dict) else {"text": str(res)}
 
@@ -157,12 +151,11 @@ class AIHub:
         """
         Analyzes an image using Vision LLMs (Gemini / GPT-4o / Claude).
         """
-        target_model = model or self.config.DEFAULT_VISION_MODEL
         res = await self.orchestrator.execute_capability(
             capability="panel_analysis",
             image_path=image_path,
             prompt=prompt or "Analyze this image in detail.",
-            requested_model=target_model,
+            requested_model=model,
         )
         return res if isinstance(res, dict) else {"result": res}
 
@@ -178,13 +171,12 @@ class AIHub:
         """
         Translates dialogue or text while preserving tone, slang, and context.
         """
-        target_model = model or self.config.DEFAULT_TEXT_MODEL
         res = await self.orchestrator.execute_capability(
             capability="translate",
             text=text,
             target_language=target_language,
             source_language=source_language,
-            requested_model=target_model,
+            requested_model=model,
         )
         return res if isinstance(res, dict) else {"translated_text": str(res)}
 

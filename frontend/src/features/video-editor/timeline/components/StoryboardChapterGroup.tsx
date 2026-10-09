@@ -40,7 +40,7 @@ interface StoryboardChapterGroupProps {
   handleModifySFX: (idx: any, value: string) => void;
   handleModifyVisualDescription: (idx: any, value: string) => void;
   handleModifyNarrative: (idx: any, value: string) => void;
-  handleAnalyzePanel: (panelId: any, imageUrl: string) => void;
+  handleAnalyzePanel: (panelId: any, imageUrl: string, panelIndex?: number) => void;
   handleCancelAnalysis?: () => void;
   playStoryboardAudio?: (idx: number, forcePlay?: boolean) => void;
   autoPlayAudio?: boolean;

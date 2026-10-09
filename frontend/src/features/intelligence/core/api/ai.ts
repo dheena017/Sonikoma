@@ -1,5 +1,6 @@
 import { apiRequest } from "@/shared/api/client/request";
 import { FetchClient, ApiResponse } from "@/shared/api/types";
+import { logAITaskCascade, logAITaskCompletion } from "@/shared/utils/aiTierLogger";
 
 export const analyzeImage = async (
   fetchWithInterceptor: FetchClient,
@@ -7,6 +8,11 @@ export const analyzeImage = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
+  logAITaskCascade("Panel Analysis", {
+    taskKey: "panel_analysis",
+    requestedModel: data?.model,
+    details: `url=${data?.url?.slice(0, 40)}...`,
+  });
   console.log(
     `[AI Endpoint] POST /api/v1/ai/analyze-single-image url=${data?.url?.slice(
       0,
@@ -27,6 +33,13 @@ export const analyzeImage = async (
       }
     );
     const elapsed = Math.round(performance.now() - start);
+    logAITaskCompletion("Panel Analysis", {
+      tier_display: res?.tier_display,
+      tier_used: res?.tier_used,
+      model: res?.model || data?.model,
+      latency_ms: elapsed,
+      cascade: res?.cascade,
+    });
     console.log(
       `[AI Endpoint] /api/v1/ai/analyze-single-image success (${elapsed}ms):`,
       res
@@ -47,6 +60,11 @@ export const analyzeAllPanels = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
+  logAITaskCascade("Batch Panel Analysis", {
+    taskKey: "batch_panel_analysis",
+    requestedModel: data?.model,
+    details: `${data?.urls?.length || data?.panels?.length || 0} panels`,
+  });
   console.log(
     `[AI Endpoint] POST /api/v1/ai/analyze-all-panels urls=${
       data?.urls?.length || 0
@@ -67,6 +85,13 @@ export const analyzeAllPanels = async (
       }
     );
     const elapsed = Math.round(performance.now() - start);
+    logAITaskCompletion("Batch Panel Analysis", {
+      tier_display: res?.tier_display,
+      tier_used: res?.tier_used,
+      model: res?.model || data?.model,
+      latency_ms: elapsed,
+      cascade: res?.cascade,
+    });
     console.log(
       `[AI Endpoint] /api/v1/ai/analyze-all-panels output (${elapsed}ms):`,
       res
@@ -87,6 +112,10 @@ export const generateSpeechText = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
+  logAITaskCascade("Voiceover Narration", {
+    taskKey: "speech_synthesis",
+    requestedModel: data?.model,
+  });
   console.log(`[AI Endpoint] POST /api/v1/ai/generate-speech-text:`, data);
   try {
     const res = await apiRequest(
@@ -100,6 +129,13 @@ export const generateSpeechText = async (
       }
     );
     const elapsed = Math.round(performance.now() - start);
+    logAITaskCompletion("Voiceover Narration", {
+      tier_display: res?.tier_display,
+      tier_used: res?.tier_used,
+      model: res?.model || data?.model,
+      latency_ms: elapsed,
+      cascade: res?.cascade,
+    });
     console.log(
       `[AI Endpoint] /api/v1/ai/generate-speech-text success (${elapsed}ms):`,
       res
@@ -117,6 +153,10 @@ export const aiDetectPanels = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
+  logAITaskCascade("Smart Crop & Panel Detection", {
+    taskKey: "smart_crop",
+    requestedModel: data?.model,
+  });
   console.log(
     `[AI Endpoint] POST /api/v1/ai/ai-detect-panels url=${data?.url?.slice(
       0,
@@ -135,6 +175,13 @@ export const aiDetectPanels = async (
       }
     );
     const elapsed = Math.round(performance.now() - start);
+    logAITaskCompletion("Smart Crop & Panel Detection", {
+      tier_display: res?.tier_display,
+      tier_used: res?.tier_used,
+      model: res?.model || data?.model,
+      latency_ms: elapsed,
+      cascade: res?.cascade,
+    });
     console.log(
       `[AI Endpoint] /api/v1/ai/ai-detect-panels success (${elapsed}ms):`,
       res
@@ -224,6 +271,11 @@ export const executeSkill = async (
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
   const start = performance.now();
+  const rawSkillName = endpoint.split("/").pop() || "ai_skill";
+  logAITaskCascade(`Skill: ${rawSkillName}`, {
+    taskKey: rawSkillName,
+    requestedModel: payload?.model,
+  });
   console.log(`[AI Skill Request] POST ${endpoint}:`, payload);
   try {
     const res = await apiRequest(fetchWithInterceptor, endpoint, {
@@ -235,6 +287,13 @@ export const executeSkill = async (
       ...options,
     });
     const elapsed = Math.round(performance.now() - start);
+    logAITaskCompletion(`Skill: ${rawSkillName}`, {
+      tier_display: res?.tier_display,
+      tier_used: res?.tier_used,
+      model: res?.model || payload?.model,
+      latency_ms: elapsed,
+      cascade: res?.cascade,
+    });
     console.log(`[AI Skill Response] ${endpoint} (${elapsed}ms):`, res);
     return res;
   } catch (err) {

@@ -129,8 +129,6 @@ PUBLIC_ROUTE_PREFIXES = (
 # Admin-only endpoints (require creator_role/admin)
 ADMIN_ROUTE_PREFIXES = (
     "/api/v1/auth/admin",             # Match without trailing slash to cover all subroutes cleanly
-    "/api/v1/system/logs",
-    "/api/v1/system/system-logs",
 )
 
 class AuthorizationMiddleware(BaseHTTPMiddleware):

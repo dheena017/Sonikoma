@@ -20,10 +20,10 @@ class PollinationsModel(str, Enum):
 
 
 MODEL_FALLBACK_CHAINS: Dict[str, List[str]] = {
-    "flux-anime": ["flux-anime", "turbo", "stable-diffusion", "flux"],
-    "turbo": ["turbo", "flux-anime", "stable-diffusion", "flux"],
-    "flux": ["flux", "flux-anime", "turbo", "stable-diffusion"],
-    "flux-realism": ["flux-realism", "flux", "turbo"],
-    "stable-diffusion": ["stable-diffusion", "turbo", "flux-anime"],
-    "sana": ["sana", "turbo", "flux-anime"],
+    "flux-anime": ["flux-anime", "turbo", "flux"],
+    "turbo": ["turbo", "flux-anime", "flux"],
+    "flux": ["flux", "flux-anime", "turbo"],
+    "flux-realism": ["flux-realism", "flux-anime", "turbo"],
+    "stable-diffusion": ["flux-anime", "turbo", "flux"],
+    "sana": ["flux-anime", "turbo", "flux"],
 }

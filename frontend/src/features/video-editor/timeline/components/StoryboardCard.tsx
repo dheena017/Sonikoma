@@ -50,7 +50,7 @@ interface StoryboardCardProps {
   handleModifySFX: (id: any, val: string) => void;
   handleModifyVisualDescription: (id: any, val: string) => void;
   handleModifyNarrative?: (id: any, val: string) => void;
-  handleAnalyzePanel: (id: any, url: string) => void;
+  handleAnalyzePanel: (id: any, url: string, idx?: number) => void;
   handleCancelAnalysis?: () => void;
   isSelected: boolean;
   onToggleSelect: () => void;
@@ -909,6 +909,13 @@ const StoryboardCard = ({
   const isThisPanelAnalyzing =
     Boolean(panel.isAnalyzing) ||
     (analyzingPanelId !== null &&
+      analyzingPanelId !== undefined &&
+      analyzingPanelId !== "undefined" &&
+      analyzingPanelId !== "NaN" &&
+      panel.id !== null &&
+      panel.id !== undefined &&
+      (panel.id as any) !== "undefined" &&
+      (panel.id as any) !== "NaN" &&
       String(analyzingPanelId) === String(panel.id));
 
   const cardRef = React.useRef<HTMLDivElement>(null);
@@ -1573,9 +1580,16 @@ const StoryboardCard = ({
               type="button"
               disabled={
                 analyzingPanelId !== null &&
+                analyzingPanelId !== undefined &&
+                analyzingPanelId !== "undefined" &&
+                analyzingPanelId !== "NaN" &&
+                panel.id !== null &&
+                panel.id !== undefined &&
+                (panel.id as any) !== "undefined" &&
+                (panel.id as any) !== "NaN" &&
                 String(analyzingPanelId) !== String(panel.id)
               }
-              onClick={() => handleAnalyzePanel(panel.id, panel.image_url)}
+              onClick={() => handleAnalyzePanel(panel.id, panel.image_url, idx)}
               className="h-7.5 rounded-lg border border-blue-500/30 bg-blue-950/30 hover:bg-blue-900/40 text-blue-300 hover:text-white text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors duration-75 active:scale-95 active:duration-75 [touch-action:manipulation] disabled:opacity-40 outline-none focus:outline-none focus:ring-0"
               title="Analyze Scene"
             >
@@ -1625,14 +1639,27 @@ export default React.memo(StoryboardCard, (prevProps, nextProps) => {
   const nextIsCurrent = nextProps.currentPanelIndex === nextProps.idx;
   if (prevIsCurrent !== nextIsCurrent) return false;
 
+  const isValidPrev =
+    prevProps.panel.id != null &&
+    (prevProps.panel.id as any) !== "undefined" &&
+    (prevProps.panel.id as any) !== "NaN" &&
+    prevProps.analyzingPanelId != null &&
+    prevProps.analyzingPanelId !== "undefined" &&
+    prevProps.analyzingPanelId !== "NaN";
   const prevIsAnalyzing =
     Boolean(prevProps.panel.isAnalyzing) ||
-    (prevProps.analyzingPanelId !== null &&
-      String(prevProps.analyzingPanelId) === String(prevProps.panel.id));
+    (isValidPrev && String(prevProps.analyzingPanelId) === String(prevProps.panel.id));
+
+  const isValidNext =
+    nextProps.panel.id != null &&
+    (nextProps.panel.id as any) !== "undefined" &&
+    (nextProps.panel.id as any) !== "NaN" &&
+    nextProps.analyzingPanelId != null &&
+    nextProps.analyzingPanelId !== "undefined" &&
+    nextProps.analyzingPanelId !== "NaN";
   const nextIsAnalyzing =
     Boolean(nextProps.panel.isAnalyzing) ||
-    (nextProps.analyzingPanelId !== null &&
-      String(nextProps.analyzingPanelId) === String(nextProps.panel.id));
+    (isValidNext && String(nextProps.analyzingPanelId) === String(nextProps.panel.id));
   if (prevIsAnalyzing !== nextIsAnalyzing) return false;
 
   return (

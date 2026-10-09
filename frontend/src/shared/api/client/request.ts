@@ -12,13 +12,9 @@ export async function apiRequest<T = any>(
 ): Promise<ApiResponse<T>> {
   const method = (options?.method || "GET").toUpperCase();
   const hasBody = options?.body !== undefined && options.body !== null;
-console.log("options", options);
-console.log("method", method);
-  // Build merged headers — inject Content-Type for JSON-body requests if not already set
   const existingHeaders = new Headers(
     options?.headers as HeadersInit | undefined
   );
-  console.log("existingHeaders", existingHeaders);
   if (
     hasBody &&
     ["POST", "PUT", "PATCH"].includes(method) &&

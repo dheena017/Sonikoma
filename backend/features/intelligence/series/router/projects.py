@@ -32,7 +32,7 @@ async def list_ai_series(
     """List all AI Generated Series in Sonikoma with optional format filtering."""
     format_str = format_type.value if format_type else None
     projects = ai_series_repo.list_projects(format_filter=format_str, limit=limit, offset=offset)
-    logger.debug(f"[Projects] Listed {len(projects)} series projects (format: {format_str}).")
+    logger.info(f"[Projects] Listed {len(projects)} series projects (format: {format_str or 'all'}).")
     return projects
 
 
@@ -62,6 +62,7 @@ async def get_ai_series(series_id: str):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"AI Series '{series_id}' not found in database.",
         )
+    logger.info(f"[Projects] Retrieved series '{series_id}' ('{project.title}') with {len(project.sessions)} sessions.")
     return project
 
 

@@ -242,19 +242,37 @@ function handleShutdown() {
       : `👋 Frontend dev server stopped cleanly.`
   );
 
-  if (pyProcess) {
+  function killTree(proc) {
+    if (!proc || !proc.pid) return;
     try {
-      pyProcess.kill();
+      if (process.platform === "win32") {
+        execSync(`taskkill /F /T /PID ${proc.pid}`, { stdio: "ignore" });
+      } else {
+        proc.kill("SIGTERM");
+      }
     } catch (e) {}
+  }
+
+  if (pyProcess) {
+    killTree(pyProcess);
     pyProcess = null;
   }
   if (viteProcess) {
-    try {
-      viteProcess.kill();
-    } catch (e) {}
+    killTree(viteProcess);
     viteProcess = null;
   }
   process.exit(0);
+}
+
+// Windows readline trap so Ctrl+C in PowerShell immediately triggers SIGINT
+if (process.platform === "win32") {
+  try {
+    const winRl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    winRl.on("SIGINT", () => handleShutdown());
+  } catch (e) {}
 }
 
 process.on("SIGINT", () => handleShutdown());

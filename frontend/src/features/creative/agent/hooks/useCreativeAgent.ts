@@ -61,7 +61,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     }
   }, [fetchWithInterceptor]);
 
-  // Status Polling Effect
+  // Status & Logs Polling Effect
   useEffect(() => {
     if (!activeRun?.run_id) {
       stopPolling();
@@ -88,7 +88,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
           addNotification?.("Agent reached review checkpoint. Awaiting your approval.", "info");
         }
       } catch (err: any) {
-        console.error("Agent polling error:", err);
+        console.error("Agent logs/status polling error:", err);
       }
     }, 1500);
 
@@ -115,11 +115,14 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
         voice,
         privacy_status: privacyStatus,
         review_mode: reviewMode,
+        max_panels: maxPanels > 0 ? maxPanels : undefined,
+        title_override: titleOverride?.trim() || undefined,
       };
 
       const initialRun = await launchAgent(fetchWithInterceptor, payload);
       setActiveRun(initialRun);
-      addNotification?.("Autonomous AI Agent launched!", "success");
+      addNotification?.("Autonomous AI Agent launched! Generating episode...", "info");
+      fetchHistory();
     } catch (err: any) {
       addNotification?.(err.message || "Failed to launch agent.", "error");
     } finally {
@@ -136,6 +139,7 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     titleOverride,
     fetchWithInterceptor,
     addNotification,
+    fetchHistory,
   ]);
 
   const handleApprove = useCallback(async (customTitle?: string) => {
@@ -149,12 +153,13 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
       const resumed = await approveAgent(fetchWithInterceptor, activeRun.run_id, approvePayload);
       setActiveRun(resumed);
       addNotification?.("Checkpoint approved! Video compiling & publishing...", "success");
+      fetchHistory();
     } catch (err: any) {
       addNotification?.(err.message || "Failed to approve agent checkpoint.", "error");
     } finally {
       setIsLoading(false);
     }
-  }, [activeRun?.run_id, titleOverride, privacyStatus, fetchWithInterceptor, addNotification]);
+  }, [activeRun?.run_id, titleOverride, privacyStatus, fetchWithInterceptor, addNotification, fetchHistory]);
 
   const handleReset = useCallback(() => {
     stopPolling();
@@ -183,15 +188,15 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     setMaxPanels,
     titleOverride,
     setTitleOverride,
-    // Operations
     activeRun,
     isLoading,
-    isHistoryLoading,
     history,
+    isHistoryLoading,
     handleLaunch,
     handleApprove,
     handleReset,
     selectHistoryRun,
-    refreshHistory: fetchHistory,
   };
 }
+
+export default useCreativeAgent;

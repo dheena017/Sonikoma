@@ -758,7 +758,7 @@ const StoryboardTimeline = React.memo(
     ) => {
       setShowAutoCropPreview(false);
       if (confirmedMap && Object.keys(confirmedMap).length > 0) {
-        let nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
+        let nextId = Math.max(...panels.map((p) => Number(p.id) || 0), 0) + 1;
         const updatedPanels = panels.flatMap((p) => {
           if (!selectedPanelIds.has(p.id)) return [p];
           const slices = confirmedMap[p.image_url];
@@ -796,7 +796,7 @@ const StoryboardTimeline = React.memo(
       ]);
 
       const activeFetch = fetchWithInterceptor || fetch;
-      let nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
+      let nextId = Math.max(...panels.map((p) => Number(p.id) || 0), 0) + 1;
 
       try {
         let successCount = 0;
@@ -996,7 +996,7 @@ const StoryboardTimeline = React.memo(
           );
           const firstPanel = panels[firstPanelIdx];
 
-          const nextId = Math.max(...panels.map((p) => p.id), 0) + 1;
+          const nextId = Math.max(...panels.map((p) => Number(p.id) || 0), 0) + 1;
           const stitchedPanel: GeneratedPanel = {
             ...firstPanel,
             id: nextId,

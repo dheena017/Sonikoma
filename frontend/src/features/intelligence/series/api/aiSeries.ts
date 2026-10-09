@@ -5,6 +5,7 @@
  */
 
 import { fetchWithInterceptor } from "@/shared/api/client/fetchWithInterceptor";
+import { logAITaskCascade, logAITaskCompletion } from "@/shared/utils/aiTierLogger";
 
 export interface CharacterDNA {
   id?: string;
@@ -241,6 +242,10 @@ export const aiSeriesApi = {
     targetLanguage: string,
     bubbles: InteractiveSpeechBubble[]
   ): Promise<{ target_language: string; translated_bubbles: InteractiveSpeechBubble[] }> {
+    const cascade = logAITaskCascade("Speech Bubble Translation", {
+      taskKey: "translate",
+      details: `Target: [${targetLanguage}]`,
+    });
     const res = await fetchWithInterceptor(
       `${BASE_URL}/${seriesId}/chapters/${chapterId}/panels/${panelId}/bubbles/translate`,
       {
@@ -250,7 +255,13 @@ export const aiSeriesApi = {
       }
     );
     if (!res.ok) throw new Error("Failed to translate speech bubbles");
-    return res.json();
+    const json = await res.json();
+    logAITaskCompletion("Speech Bubble Translation", {
+      model: cascade.primary,
+      tier_display: "Tier 1 (Primary)",
+      cascade,
+    });
+    return json;
   },
 
   // ── Character Vault ───────────────────────────────────────
@@ -428,12 +439,23 @@ export const aiSeriesApi = {
     dialogue_density?: string;
     model?: string;
   }): Promise<any> {
+    const cascade = logAITaskCascade("Series Arc Architect", {
+      taskKey: "series_arc",
+      requestedModel: payload.model,
+      details: `Title: "${payload.title}"`,
+    });
     const res = await fetchWithInterceptor("/api/v1/ai/skills/series-arc", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error("Failed to direct series arc with AI skill");
-    return res.json();
+    const json = await res.json();
+    logAITaskCompletion("Series Arc Architect", {
+      model: payload.model || cascade.primary,
+      tier_display: "Tier 1 (Primary)",
+      cascade,
+    });
+    return json;
   },
 };

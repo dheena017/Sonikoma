@@ -54,6 +54,7 @@ import { NotificationType } from "@/features/platform/notifications";
 import RightSidePanelInspector from "../components/tabs/RightSidePanelInspector";
 import RouteLoadingFallback from "@/shared/ui/feedback/RouteLoadingFallback";
 import { SonikomaLogo } from "@/shared/ui/branding";
+import { logAITaskCascade, logAITaskCompletion } from "@/shared/utils/aiTierLogger";
 
 // ── Stateful Studio Image Components with Dynamic Processing State ───────
 interface StudioPanelImageProps {
@@ -72,16 +73,16 @@ interface StudioPanelImageProps {
 }
 
 export const formatModelBadge = (m?: string): string => {
-  if (!m) return "🎨 FLUX Anime";
+  if (!m) return "⚡ Sonikoma Studio 2D";
   const lower = m.toLowerCase();
-  if (lower.includes("flux.1") || lower.includes("schnell")) return "⚡ FLUX.1 Schnell";
+  if (lower.includes("turbo") || lower.includes("sonikoma")) return "⚡ Sonikoma Studio 2D";
+  if (lower.includes("flux.1") || lower.includes("schnell")) return "⚡ Sonikoma Studio 2D";
   if (lower.includes("flux-anime") || lower === "flux_anime") return "🎨 FLUX Anime";
   if (lower.includes("flux-realism")) return "📸 FLUX Real";
   if (lower.includes("flux-pro")) return "✨ FLUX Pro";
-  if (lower.includes("flux")) return "⚡ FLUX";
+  if (lower.includes("flux")) return "⚡ Sonikoma Studio 2D";
   if (lower.includes("sdxl") || lower.includes("stable-diffusion-xl")) return "🖼️ SDXL";
   if (lower.includes("stable-diffusion") || lower.includes("diffusers")) return "🖼️ Stable Diffusion";
-  if (lower.includes("turbo")) return "⚡ Turbo";
   if (lower.includes("dall-e")) return "🎨 DALL-E 3";
   if (lower.includes("midjourney")) return "🌌 Midjourney";
   if (lower.includes("gemini")) return "✨ Gemini Vision";
@@ -635,6 +636,8 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         setEditingSpeechText(chap.panels[0].speech_text || "");
         setEditingSpeaker(chap.panels[0].speech_bubbles?.[0]?.speaker_name || "Hero");
       }
+      console.log(`[Series Studio] Loaded AI Series "${proj.title}" (Format: ${fmt}, Sessions: ${proj.sessions?.length || 1})`);
+      console.log(`[Series Studio] Initialized Chapter 1 (${chap.panels?.length || 0} panels ready)`);
     } catch (err: any) {
       console.error("[AISeriesStudio] Load failure:", err);
       setLoadError(err.message || "Failed to load AI Series project.");
@@ -683,6 +686,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
         setEditingSpeechText(chap.panels[0].speech_text || "");
         setEditingSpeaker(chap.panels[0].speech_bubbles?.[0]?.speaker_name || "Hero");
       }
+      console.log(`[Series Studio] Switched to Chapter ${chapNum}: "${chap.title}" (${chap.panels?.length || 0} panels)`);
       addNotification(`Loaded Chapter ${chapNum}: "${chap.title}"`, "info");
     } catch (err: any) {
       console.error("[AISeriesStudio] Chapter load error:", err);
@@ -705,8 +709,15 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   const handleSynthesizeChapterVisuals = async (model?: string) => {
     if (!resolvedSeriesId || !project) return;
     const chosenModel = model || project.image_model || "flux-anime";
+    const taskKey = project.art_style === "manhwa" ? "manhwa_diffusion" : "image_diffusion";
+    const cascade = logAITaskCascade("Visual Diffusion", {
+      taskKey,
+      requestedModel: chosenModel,
+      details: `Chapter ${selectedChapterNum}`,
+    });
     try {
       setIsSynthesizingVisuals(true);
+      console.log(`[Series Studio] Synthesizing visuals for Chapter ${selectedChapterNum} (Model: ${chosenModel})...`);
       addNotification(`Synthesizing visuals with ${chosenModel}...`, "info");
       const updated = await aiSeriesApi.renderChapterImages(
         resolvedSeriesId,
@@ -733,6 +744,18 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           ...freshChap,
           panels: timestampedPanels,
         });
+        const activeTier =
+          chosenModel === cascade.emergency
+            ? "Tier 3 (Emergency)"
+            : chosenModel === cascade.fallback
+            ? "Tier 2 (Fallback)"
+            : "Tier 1 (Primary)";
+        logAITaskCompletion("Visual Diffusion", {
+          model: chosenModel,
+          tier_display: activeTier,
+          cascade,
+        });
+        console.log(`[Series Studio] Synthesized visuals for Chapter ${selectedChapterNum} (${freshChap.panels?.length || 0} panels ready).`);
         addNotification("Chapter panels synthesized successfully!", "success");
       }
     } catch (err: any) {
@@ -746,8 +769,14 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
   // ── Vocal Dubbing Synthesis Actions ───────────────────────────────────
   const handleSynthesizeAudio = async () => {
     if (!resolvedSeriesId) return;
+    const cascade = logAITaskCascade("Voiceover Synthesis", {
+      taskKey: "speech_synthesis",
+      requestedModel: "edge-tts-neural",
+      details: `Chapter ${selectedChapterNum}`,
+    });
     try {
       setIsSynthesizingAudio(true);
+      console.log(`[Series Studio] Synthesizing vocal dubbing for Chapter ${selectedChapterNum}...`);
       addNotification("Synthesizing Edge-TTS vocal audio for all character dialogue...", "info");
       const updated = await aiSeriesApi.synthesizeChapterAudio(
         resolvedSeriesId,
@@ -761,6 +790,12 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           selectedChapterNum
         );
         setCurrentChapter(freshChap);
+        logAITaskCompletion("Voiceover Synthesis", {
+          model: "edge-tts-neural",
+          tier_display: "Tier 1 (Primary)",
+          cascade,
+        });
+        console.log(`[Series Studio] Vocal dubbing completed for Chapter ${selectedChapterNum}.`);
         addNotification("Vocal dubbing synthesized successfully!", "success");
       }
     } catch (err: any) {
@@ -778,6 +813,12 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
     overrideModel?: string
   ) => {
     if (!resolvedSeriesId || !panels[idx]) return;
+    const chosenModel = overrideModel || project?.image_model || "flux-anime";
+    const taskKey = project?.art_style === "manhwa" ? "manhwa_diffusion" : "image_diffusion";
+    const cascade = logAITaskCascade(`Shot #${idx + 1} Visual Synthesis`, {
+      taskKey,
+      requestedModel: chosenModel,
+    });
     try {
       setSelectedPanelIdx(idx);
       setRegeneratingPanelIdx(idx);
@@ -785,6 +826,7 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
       const targetPanel = panels[idx];
       const panelId = targetPanel.panel_id || targetPanel.id || String(idx + 1);
       const promptToUse = (overridePrompt ?? editingPrompt ?? targetPanel.prompt)?.trim() || targetPanel.prompt;
+      console.log(`[Series Studio] Regenerating Shot #${idx + 1} (Model: ${overrideModel || project?.image_model || "auto"})...`);
       addNotification(`Generating Shot #${idx + 1}...`, "info");
       const updatedPanel = await aiSeriesApi.renderPanelImage(
         resolvedSeriesId,
@@ -813,6 +855,18 @@ export const AISeriesStudioPage: React.FC<AISeriesStudioPageProps> = ({
           panels: updatedPanels,
         });
         setEditingPrompt(promptToUse);
+        const activeTier =
+          chosenModel === cascade.emergency
+            ? "Tier 3 (Emergency)"
+            : chosenModel === cascade.fallback
+            ? "Tier 2 (Fallback)"
+            : "Tier 1 (Primary)";
+        logAITaskCompletion(`Shot #${idx + 1} Visual Synthesis`, {
+          model: chosenModel,
+          tier_display: activeTier,
+          cascade,
+        });
+        console.log(`[Series Studio] Shot #${idx + 1} regenerated successfully.`);
         addNotification(`Shot #${idx + 1} generated!`, "success");
       }
     } catch (err: any) {

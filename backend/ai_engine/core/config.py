@@ -9,36 +9,26 @@ Can run standalone in any project without external framework dependencies.
 import os
 from typing import Dict, Any, Optional
 
-# Attempt to load .env if python-dotenv is present
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class AIConfig:
     """Universal configuration container for AI providers & models."""
 
     # API Keys & Secrets
-    GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY")
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
     ANTHROPIC_API_KEY: Optional[str] = os.getenv("ANTHROPIC_API_KEY")
     DEEPSEEK_API_KEY: Optional[str] = os.getenv("DEEPSEEK_API_KEY")
     GROQ_API_KEY: Optional[str] = os.getenv("GROQ_API_KEY")
     ELEVENLABS_API_KEY: Optional[str] = os.getenv("ELEVENLABS_API_KEY")
-    HUGGINGFACE_API_KEY: Optional[str] = os.getenv("HUGGINGFACE_API_KEY") or os.getenv("HF_TOKEN")
+    HUGGINGFACE_API_KEY: Optional[str] = os.getenv("HUGGINGFACE_API_KEY")
 
     # Local Engine Binaries / Flags
     FFMPEG_PATH: str = os.getenv("FFMPEG_PATH", "ffmpeg")
     FFPROBE_PATH: str = os.getenv("FFPROBE_PATH", "ffprobe")
-
-    # Default Preferred Models per Modality
-    DEFAULT_TEXT_MODEL: str = os.getenv("AI_DEFAULT_TEXT_MODEL", "gemini-1.5-flash")
-    DEFAULT_IMAGE_MODEL: str = os.getenv("AI_DEFAULT_IMAGE_MODEL", "flux")
-    DEFAULT_VISION_MODEL: str = os.getenv("AI_DEFAULT_VISION_MODEL", "gemini-1.5-flash")
-    DEFAULT_TTS_MODEL: str = os.getenv("AI_DEFAULT_TTS_MODEL", "edge-tts")
-    DEFAULT_TRANSCRIBE_MODEL: str = os.getenv("AI_DEFAULT_TRANSCRIBE_MODEL", "whisper-1")
 
     @classmethod
     def get_configured_providers(cls) -> Dict[str, bool]:

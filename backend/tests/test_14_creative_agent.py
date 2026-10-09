@@ -35,23 +35,23 @@ def test_launch_creative_agent_endpoint(client, user_headers):
 
 
 def test_get_creative_agent_status_endpoint(client, user_headers):
-    """GET /api/v1/creative/agent/status/{run_id} - fetches real-time agent status."""
-    payload = {
-        "url": "https://example.com/webtoon/chapter/1",
-        "video_format": "landscape",
-        "review_mode": True,
-        "max_panels": 3,
-    }
-    launch_res = client.post("/api/v1/creative/agent/run", json=payload, headers=user_headers)
+    """GET /api/v1/creative/agent/status/{run_id} - fetches real-time agent run status and logs."""
+    launch_res = client.post(
+        "/api/v1/creative/agent/run",
+        json={"url": "https://example.com/test", "review_mode": True, "max_panels": 2},
+        headers=user_headers,
+    )
     assert launch_res.status_code == 200
     run_id = launch_res.json()["run_id"]
 
     status_res = client.get(f"/api/v1/creative/agent/status/{run_id}", headers=user_headers)
     assert status_res.status_code == 200
-    state = status_res.json()
-    assert state["run_id"] == run_id
-    assert "progress" in state
-    assert "current_action" in state
+    status_data = status_res.json()
+    assert status_data["run_id"] == run_id
+    assert "status" in status_data
+    assert "logs" in status_data
+    assert isinstance(status_data["logs"], list)
+    assert len(status_data["logs"]) >= 1
 
 
 def test_approve_creative_agent_endpoint(client, user_headers):

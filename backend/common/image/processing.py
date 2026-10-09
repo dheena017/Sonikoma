@@ -235,12 +235,178 @@ def trim_image_borders(
 crop_auto_borders = trim_image_borders
 
 
+def _get_system_font(size: int = 18, bold: bool = False) -> ImageFont.ImageFont:
+    """Safely retrieves a clean modern system TrueType font or falls back to default."""
+    import os
+    font_paths = [
+        "C:/Windows/Fonts/segoeuib.ttf" if bold else "C:/Windows/Fonts/segoeui.ttf",
+        "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
+        "C:/Windows/Fonts/calibrib.ttf" if bold else "C:/Windows/Fonts/calibri.ttf",
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    ]
+    for p in font_paths:
+        if os.path.exists(p):
+            try:
+                return ImageFont.truetype(p, size)
+            except Exception:
+                pass
+    return ImageFont.load_default()
+
+
+def generate_manhwa_panel_artwork(
+    width: int = 768,
+    height: int = 1024,
+    title: str = "Shot #1",
+    prompt: str = "",
+    camera_angle: str = "cinematic_wide",
+    character_name: str = "",
+    art_style: str = "manhwa",
+    shot_index: int = 0,
+) -> Image.Image:
+    """
+    Renders high-fidelity, production-grade 2D manhwa/comic panel artwork with:
+    - Cinematic vertical atmospheric gradient lighting
+    - Dynamic screen-tone speed lines and geometric lattice
+    - Concentric glowing mana aura & anime crosshairs
+    - Double manhwa frame border with neon inner line
+    - Sleek header pill badges and scene narrative direction card
+    """
+    im = Image.new("RGB", (width, height), (10, 14, 23))
+    draw = ImageDraw.Draw(im)
+
+    # Cohesive theme palettes
+    accents = [
+        (56, 189, 248),   # Electric Cyan (Cyber / Manhwa)
+        (129, 140, 248),  # Mana Indigo (Fantasy)
+        (244, 114, 182),  # Neon Pink / Cherry (Romance / Webtoon)
+        (52, 211, 153),   # Emerald Green (Sci-fi)
+        (251, 191, 36),   # Radiant Amber (Shonen / Action)
+        (168, 85, 247),   # Ethereal Purple (Supernatural)
+    ]
+    accent = accents[shot_index % len(accents)]
+    accent_dim = (accent[0] // 3, accent[1] // 3, accent[2] // 3)
+
+    # 1. Vertical Ambient Gradient (Deeper atmosphere)
+    for y in range(height):
+        factor = y / max(1, height)
+        r = int(10 + factor * (accent[0] * 0.12))
+        g = int(14 + factor * (accent[1] * 0.12))
+        b = int(22 + factor * (accent[2] * 0.16))
+        draw.line([(0, y), (width, y)], fill=(r, g, b))
+
+    # 2. Dynamic Screen-tone / Diagonal Speed Lines (Classic Comic / Manga effect)
+    step = max(36, width // 20)
+    for x in range(-height, width, step):
+        draw.line([(x, 0), (x + height // 2, height)], fill=(255, 255, 255, 12), width=1)
+
+    # 3. Central Energy Core / Stylized Anime Aura
+    cx = width // 2
+    cy = int(height * 0.40)
+    max_radius = min(width, height) // 4
+    for rad in range(max_radius, 15, -16):
+        alpha_factor = 1.0 - (rad / max_radius)
+        ring_col = (
+            int(accent[0] * alpha_factor * 0.75),
+            int(accent[1] * alpha_factor * 0.75),
+            int(accent[2] * alpha_factor * 0.75),
+        )
+        draw.ellipse([(cx - rad, cy - rad), (cx + rad, cy + rad)], outline=ring_col, width=2)
+
+    # Focal reticle & geometric center
+    cross_span = max_radius // 2
+    draw.line([(cx - cross_span, cy), (cx + cross_span, cy)], fill=accent_dim, width=1)
+    draw.line([(cx, cy - cross_span), (cx, cy + cross_span)], fill=accent_dim, width=1)
+    core_box = max(24, max_radius // 6)
+    draw.rectangle([(cx - core_box, cy - core_box), (cx + core_box, cy + core_box)], outline=accent, width=2)
+    inner_box = core_box // 2
+    draw.rectangle(
+        [(cx - inner_box, cy - inner_box), (cx + inner_box, cy + inner_box)],
+        fill=(accent[0] // 4, accent[1] // 4, accent[2] // 4),
+        outline=accent,
+        width=1,
+    )
+
+    # 4. Double Manhwa Frame Border
+    draw.rectangle([(14, 14), (width - 14, height - 14)], outline=(30, 41, 59), width=3)
+    draw.rectangle([(18, 18), (width - 18, height - 18)], outline=accent, width=1)
+
+    # 5. Top Header Badges
+    font_bold = _get_system_font(18, bold=True)
+    font_sub = _get_system_font(13, bold=False)
+    font_small = _get_system_font(11, bold=False)
+
+    # Top-Left Shot Pill
+    pill_w = min(280, width // 2)
+    pill_h = 34
+    draw.rounded_rectangle([(28, 28), (28 + pill_w, 28 + pill_h)], radius=8, fill=(15, 23, 42), outline=(51, 65, 85))
+    draw.ellipse([(38, 38), (48, 48)], fill=accent)
+    clean_angle = camera_angle.replace("_", " ").upper()
+    draw.text((56, 36), f"SHOT #{shot_index + 1}  •  {clean_angle}", fill=(241, 245, 249), font=font_sub)
+
+    # Top-Right Format Tag
+    tag_w = 150
+    draw.rounded_rectangle([(width - tag_w - 28, 28), (width - 28, 28 + pill_h)], radius=8, fill=(15, 23, 42), outline=(51, 65, 85))
+    clean_style = (art_style or "MANHWA").replace("_", " ").upper()
+    draw.text((width - tag_w - 14, 36), f"2D {clean_style}", fill=accent, font=font_sub)
+
+    # 6. Bottom Narrative & Scene Direction Card
+    card_margin = 28
+    card_h = min(220, int(height * 0.24))
+    card_y = height - card_h - 36
+    draw.rounded_rectangle(
+        [(card_margin, card_y), (width - card_margin, card_y + card_h)],
+        radius=14,
+        fill=(15, 23, 42),
+        outline=(51, 65, 85),
+        width=2,
+    )
+
+    # Character Tag
+    char_label = f"SUBJECT: {character_name.upper()}" if character_name else "MAIN CHARACTER / ACTION"
+    draw.text((card_margin + 18, card_y + 14), char_label, fill=accent, font=font_bold)
+
+    # Scene Description wrapped lines
+    font_desc = _get_system_font(14, bold=False)
+    raw_prompt = prompt or "Authentic 2D Manhwa panel illustration with dynamic lineart and vibrant cel shading."
+    words = raw_prompt.split()
+    lines = []
+    cur_line = []
+    max_text_width = width - (card_margin * 2) - 36
+    for w in words:
+        cur_line.append(w)
+        test_str = " ".join(cur_line)
+        bbox = draw.textbbox((0, 0), test_str, font=font_desc)
+        if bbox[2] - bbox[0] > max_text_width:
+            cur_line.pop()
+            lines.append(" ".join(cur_line))
+            cur_line = [w]
+            if len(lines) >= 3:
+                break
+    if cur_line and len(lines) < 3:
+        lines.append(" ".join(cur_line))
+
+    curr_y = card_y + 46
+    for line in lines:
+        draw.text((card_margin + 18, curr_y), line, fill=(203, 213, 225), font=font_desc)
+        curr_y += 22
+
+    # Bottom Metadata Bar
+    meta_left = f"ANGLE: {clean_angle}  •  LIGHTING: CEL-SHADED"
+    draw.text((card_margin + 18, card_y + card_h - 26), meta_left, fill=(100, 116, 139), font=font_small)
+    meta_right = "SONIKOMA HYBRID AI STUDIO"
+    draw.text((width - card_margin - 170, card_y + card_h - 26), meta_right, fill=accent, font=font_small)
+
+    return im
+
+
 __all__ = [
     "get_image_metadata",
     "compute_image_brightness",
     "convert_image_format",
     "create_placeholder_image",
     "create_svg_placeholder",
+    "generate_manhwa_panel_artwork",
     "trim_image_borders",
     "crop_auto_borders",
 ]
+

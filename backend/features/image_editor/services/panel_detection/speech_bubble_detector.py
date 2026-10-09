@@ -67,12 +67,12 @@ def get_yolo_speech_bubble_model():
         logger.warning(f"[YOLO Detector] Custom model fallback: {e}")
 
     # Priority 1: kitsumed YOLOv8m-seg
-    hf_token = os.getenv("HUGGINGFACE_API_KEY") or os.getenv("HF_TOKEN")
+    huggingface_api_key = os.getenv("HUGGINGFACE_API_KEY")
     try:
         model_path = hf_hub_download(
             repo_id="kitsumed/yolov8m_seg-speech-bubble",
             filename="model.pt",
-            token=hf_token
+            token=huggingface_api_key
         )
         _yolo_model = YOLO(model_path)
         return _yolo_model
@@ -84,7 +84,7 @@ def get_yolo_speech_bubble_model():
         model_path = hf_hub_download(
             repo_id="ogkalu/comic-speech-bubble-detector-yolov8m",
             filename="comic-speech-bubble-detector.pt",
-            token=hf_token
+            token=huggingface_api_key
         )
         _yolo_model = YOLO(model_path)
         logger.info("[Vision Engine] Bubble Detection model loaded successfully")

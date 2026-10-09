@@ -251,7 +251,7 @@ class AIOrchestrator:
         "batch_panel_analysis": "gemini-2.5-flash",
         "scraper_blueprint": "gemini-2.5-flash",
         "prompt_enhancement": "gemini-2.5-flash",
-        "image_diffusion": "FLUX.1-schnell",
+        "image_diffusion": "turbo",
         "speech_synthesis": "edge-tts-neural",
         "speech_to_text": "whisper-1",
         "translate": "gemini-2.5-flash",
@@ -386,6 +386,33 @@ class AIOrchestrator:
             return custom_entry
         return ModelRegistry.get_primary_model_for_capability(capability)
 
+    DEFAULT_CASCADE_BY_CAPABILITY = {
+        "storyboard_narrative": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "panel_analysis": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "batch_panel_analysis": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "scraper_blueprint": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "prompt_enhancement": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "image_diffusion": {"primary": "flux-anime", "fallback": "stable-diffusion", "tertiary": "turbo"},
+        "manhwa_diffusion": {"primary": "flux-anime", "fallback": "stable-diffusion", "tertiary": "turbo"},
+        "comic_diffusion": {"primary": "stable-diffusion", "fallback": "flux-anime", "tertiary": "turbo"},
+        "anime_video": {"primary": "tooncrafter", "fallback": "animatediff", "tertiary": "wan-2.1-t2v-14b"},
+        "speech_synthesis": {"primary": "edge-tts-neural", "fallback": "eleven_multilingual_v2", "tertiary": "edge-tts-neural"},
+        "tts": {"primary": "edge-tts-neural", "fallback": "eleven_multilingual_v2", "tertiary": "edge-tts-neural"},
+        "translate": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "character_persona": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "voice_cast": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "seo_optimization": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "sfx_audio": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "bgm_vibe": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "smart_crop": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "chat_completion": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "text": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "series_arc_director": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "series_arc_comic": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "series_arc_manhwa": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+        "series_arc_anime": {"primary": "gemini-2.5-flash", "fallback": "gemini-2.0-flash", "tertiary": "gemini-1.5-flash"},
+    }
+
     @classmethod
     def get_task_cascade(cls, capability: str) -> Dict[str, str]:
         """Returns the full 3-tier cascade mapping (primary, fallback, tertiary) for a task."""
@@ -402,9 +429,19 @@ class AIOrchestrator:
         elif isinstance(custom_entry, str):
             primary = custom_entry
 
+        cap_defaults = cls.DEFAULT_CASCADE_BY_CAPABILITY.get(capability, {
+            "primary": cls.DEFAULT_CAPABILITY_ROUTING.get(capability) or "gemini-2.5-flash",
+            "fallback": "gpt-4o-mini",
+            "tertiary": "deepseek-chat",
+        })
+
         if not primary:
-            primary = cls.DEFAULT_CAPABILITY_ROUTING.get(capability) or ModelRegistry.get_primary_model_for_capability(capability)
-        
+            primary = cap_defaults.get("primary") or cls.DEFAULT_CAPABILITY_ROUTING.get(capability) or ModelRegistry.get_primary_model_for_capability(capability)
+        if not fallback:
+            fallback = cap_defaults.get("fallback") or "gpt-4o-mini"
+        if not tertiary:
+            tertiary = cap_defaults.get("tertiary") or "deepseek-chat"
+
         return {
             "primary": primary or "gemini-2.5-flash",
             "fallback": fallback or "gpt-4o-mini",
@@ -435,22 +472,18 @@ class AIOrchestrator:
         candidates: List[Tuple[str, str]] = []
         seen = set()
 
-        custom_entry = cls._custom_capability_routing.get(capability, {})
-        custom_primary = (
-            custom_entry.get("primary") if isinstance(custom_entry, dict)
-            else (custom_entry if isinstance(custom_entry, str) else None)
-        )
+        cascade = cls.get_task_cascade(capability)
 
         # Safeguard: do not allow audio/websocket preview models as vision/text generation primary
         if requested_model and ("live-translate" in requested_model.lower() or "live-preview" in requested_model.lower()):
             requested_model = None
 
-        # The model configured in AI Smart Routing takes priority
-        primary = requested_model or custom_primary or cls.get_default_model_for_capability(capability)
-        fallback = (custom_entry.get("fallback") if isinstance(custom_entry, dict) else None)
-        tertiary = (custom_entry.get("tertiary") if isinstance(custom_entry, dict) else None)
+        # The model configured in AI Smart Routing takes priority: Tier 1 -> Tier 2 -> Tier 3
+        primary = requested_model or cascade.get("primary") or cls.get_default_model_for_capability(capability)
+        fallback = cascade.get("fallback")
+        tertiary = cascade.get("tertiary")
 
-        # Strictly only evaluate user-configured routing tiers (no hardcoded fallback injection)
+        # Ordered execution candidates: Tier 1 (Primary) -> Tier 2 (Fallback) -> Tier 3 (Emergency)
         ordered_models: List[Optional[str]] = [primary, fallback, tertiary]
 
         for m in ordered_models:
@@ -496,7 +529,7 @@ class AIOrchestrator:
     def is_provider_configured(cls, provider: str, user_keys: Optional[dict] = None) -> bool:
         """Verifies whether server-side or user-supplied credentials exist for provider."""
         p = provider.lower()
-        if p in ("edgetts", "stablediffusion", "whisper", "local", "pollinations", "video_kinetic", "voice_cloning", "enhancer"):
+        if p in ("edgetts", "edge_tts", "stablediffusion", "stable_diffusion", "whisper", "local", "pollinations", "video_kinetic", "video", "voice_cloning", "enhancer"):
             return True
         if user_keys and user_keys.get(p):
             return True
@@ -517,6 +550,8 @@ class AIOrchestrator:
             return bool(os.getenv("DEEPL_API_KEY"))
         elif p == "huggingface":
             return bool(os.getenv("HUGGINGFACE_API_KEY"))
+        elif p == "replicate":
+            return bool(os.getenv("REPLICATE_API_TOKEN"))
         return False
 
     @classmethod
@@ -664,6 +699,18 @@ class AIOrchestrator:
         # 2. Resolve ordered execution candidates (Tier 1 -> Tier 2 -> Tier 3)
         candidates = cls.resolve_execution_candidates(cap_clean, mode="manual" if model else "system", requested_model=model)
 
+        cascade_info = cls.get_task_cascade(cap_clean)
+        tier1_m = cascade_info.get("primary") or (candidates[0][1] if len(candidates) > 0 else "auto")
+        tier2_m = cascade_info.get("fallback") or (candidates[1][1] if len(candidates) > 1 else "auto")
+        tier3_m = cascade_info.get("tertiary") or (candidates[2][1] if len(candidates) > 2 else "auto")
+
+        logger.info(
+            f"[AI 3-Tier Cascade] Task: '{human_cap}' | "
+            f"Tier 1 (Primary): {tier1_m} | "
+            f"Tier 2 (Fallback): {tier2_m} | "
+            f"Tier 3 (Emergency): {tier3_m}"
+        )
+
         from ai_engine.skills.coordinator import execute_provider_call
 
         last_error: Optional[AIExecutionError] = None
@@ -671,30 +718,36 @@ class AIOrchestrator:
 
         for tier_idx, (provider, target_model) in enumerate(candidates, start=1):
             tier_label = f"Tier {tier_idx}" if tier_idx <= 3 else f"Resilient Tier {tier_idx}"
-            attempted_tiers.append(f"{tier_label}: {provider}/{target_model}")
+            tier_display = (
+                "Tier 1 (Primary)" if tier_idx == 1
+                else "Tier 2 (Fallback)" if tier_idx == 2
+                else "Tier 3 (Emergency)" if tier_idx == 3
+                else tier_label
+            )
+            attempted_tiers.append(f"{tier_display}: {provider}/{target_model}")
 
             # 3. Check rate-limit cooldown
             cooldown_until = _tier_cooldowns.get((provider, target_model), 0)
             if time.time() < cooldown_until:
-                logger.debug(f"[AI Core] Skipping {tier_label} ({provider}/{target_model}): rate limit cooldown active.")
+                logger.debug(f"[AI Core] Skipping {tier_display} ({provider}/{target_model}): rate limit cooldown active.")
                 continue
 
             # 4. Verify provider credentials for candidate
             if not cls.is_provider_configured(provider, user_keys):
-                logger.debug(f"[AI Core] Skipping {tier_label} ({provider}/{target_model}): provider not configured.")
+                logger.debug(f"[AI Core] Skipping {tier_display} ({provider}/{target_model}): provider not configured.")
                 continue
 
             # 4. Verify rate limits for candidate
             rate_ok, rate_msg = cls.get_rate_limiter().check_limit(provider, target_model, user_id)
             if not rate_ok:
                 logger.warning(
-                    f"[AI Core] {human_cap} {tier_label} ({target_model}) hit local rate limit ({rate_msg}). "
+                    f"[AI Core] {human_cap} {tier_display} ({target_model}) hit local rate limit ({rate_msg}). "
                     "Auto-switching to next tier..."
                 )
                 continue
 
-            logger.debug(
-                f"[AI Core] >>> Executing '{human_cap}' via {tier_label} -> Provider: {provider} | Model: {target_model}"
+            logger.info(
+                f"[AI Execution] Running {tier_display} -> {provider}/{target_model} for '{human_cap}'"
             )
 
             attempt_t0 = time.monotonic()
@@ -744,6 +797,12 @@ class AIOrchestrator:
                     "provider": provider,
                     "model": target_model,
                     "tier_used": tier_label,
+                    "tier_display": tier_display,
+                    "cascade": {
+                        "primary": tier1_m,
+                        "fallback": tier2_m,
+                        "emergency": tier3_m,
+                    },
                     "result": parsed,
                     "input_tokens": p_tokens,
                     "output_tokens": c_tokens,
@@ -771,9 +830,14 @@ class AIOrchestrator:
                     short_reason = classified.message[:45]
 
                 next_idx = tier_idx + 1
-                next_label = f"Tier {next_idx}" if next_idx <= len(candidates) else "next model"
+                next_label = (
+                    "Tier 2 (Fallback)" if next_idx == 2
+                    else "Tier 3 (Emergency)" if next_idx == 3
+                    else f"Tier {next_idx}" if next_idx <= len(candidates)
+                    else "failover queue"
+                )
                 logger.warning(
-                    f"[AI Core] {human_cap} {tier_label} ({target_model}) paused ({short_reason}). "
+                    f"[AI Failover] {tier_display} ({target_model}) paused ({short_reason}). "
                     f"Auto-switching to {next_label}..."
                 )
                 continue

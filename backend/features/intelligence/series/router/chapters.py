@@ -74,6 +74,7 @@ async def get_series_chapter(series_id: str, session_number: int, chapter_number
             chapter_number=chapter_number,
         )
 
+    logger.info(f"[Chapters] Loaded S{session_number}:C{chapter_number} for series '{series_id}' ({len(chapter.panels or [])} panels).")
     return _enrich_chapter_image_timestamps(series_id, chapter)
 
 
@@ -90,6 +91,7 @@ async def synthesize_chapter(
     image_model: Optional[str] = Query(None, description="Optional image model override (e.g. stable-diffusion, flux)"),
 ):
     """Trigger AI generation for a chapter's panels, speech bubbles, and kinetic video motion."""
+    logger.info(f"[Chapters] Synthesizing S{session_number}:C{chapter_number} for series '{series_id}' ({panel_count} panels, model: {image_model or 'auto'})...")
     try:
         updated_chapter = await series_orchestrator.generate_chapter(
             series_id=series_id,
@@ -98,6 +100,7 @@ async def synthesize_chapter(
             panel_count=panel_count,
             image_model=image_model,
         )
+        logger.info(f"[Chapters] Completed synthesis for S{session_number}:C{chapter_number} ({len(updated_chapter.panels or [])} panels ready).")
         return _enrich_chapter_image_timestamps(series_id, updated_chapter)
     except Exception as e:
         logger.exception(f"[Chapters] Failed to generate chapter S{session_number}:C{chapter_number}: {e}")

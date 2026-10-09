@@ -7,6 +7,16 @@ Sonikoma Webtoon-to-Video Compiler — FastAPI Computational Engine & API Server
 
 import os
 import sys
+import warnings
+
+# Prevent python from generating .pyc and __pycache__ churn during runtime
+os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+sys.dont_write_bytecode = True
+
+# Suppress known external library deprecation warnings
+warnings.filterwarnings("ignore", message=".*pkg_resources is deprecated.*")
+warnings.filterwarnings("ignore", category=UserWarning, module="imageio_ffmpeg")
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Ensure backend directory is on sys.path for top-level package resolution
 BACKEND_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -127,8 +137,24 @@ if __name__ == "__main__":
                 "level": "WARNING",
                 "propagate": False,
             },
+            "watchfiles": {
+                "handlers": ["default"],
+                "level": "WARNING",
+                "propagate": False,
+            },
+            "watchfiles.main": {
+                "handlers": ["default"],
+                "level": "WARNING",
+                "propagate": False,
+            },
         },
     }
+
+    code_dirs = [
+        os.path.join(BACKEND_DIR, d)
+        for d in ["app", "ai_engine", "features", "common", "openapi"]
+        if os.path.isdir(os.path.join(BACKEND_DIR, d))
+    ]
 
     run_args = {
         "app": "main:app",
@@ -138,6 +164,9 @@ if __name__ == "__main__":
         "log_config": custom_log_config,
         "use_colors": True,
         "reload": not IS_PRODUCTION,
+        "reload_dirs": code_dirs if code_dirs else [BACKEND_DIR],
+        "reload_includes": ["*.py"],
+        "reload_excludes": ["*.pyc", "*__pycache__*"],
     }
     if IS_PRODUCTION:
         run_args["workers"] = 1

@@ -34,9 +34,6 @@ export function PanelCardControls({
           type="button"
           aria-label="Add this panel to your video timeline"
           onClick={() => {
-            console.log(
-              `[PanelCardControls] Adding image #${idx + 1} to timeline`
-            );
             addPanelsToStoryboard([imgUrl]);
           }}
           className="w-full flex items-center justify-center gap-2 bg-[#3B82F6] hover:bg-[#2563EB] active:bg-blue-700 text-white text-[11px] h-9 rounded-xl font-mono font-bold tracking-wider transition-all duration-150 cursor-pointer border border-blue-400/40 shadow-[0_4px_16px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_22px_rgba(37,99,235,0.5)] active:scale-[0.98]"
@@ -64,9 +61,6 @@ export function PanelCardControls({
           }
           onClick={() => {
             if (isLast) return;
-            console.log(
-              `[PanelCardControls] Merging image #${idx + 1} with next`
-            );
             handleMergeWithNext(idx);
           }}
           disabled={isMerging || isLast}

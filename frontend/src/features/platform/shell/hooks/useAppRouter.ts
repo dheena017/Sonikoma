@@ -236,6 +236,7 @@ export function useAppRouter(props?: UseAppRouterProps) {
     const current = window.location.pathname + window.location.search;
     if (current === targetPath) return;
 
+    console.log(`[Navigation] Navigating to ${targetPath}`);
     window.history.pushState({}, "", targetPath);
     const newPath = window.location.pathname;
 

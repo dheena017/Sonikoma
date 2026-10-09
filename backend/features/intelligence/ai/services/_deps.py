@@ -75,9 +75,15 @@ async def run_md_skill(skill_name: str, model: Optional[str], api_key: Any = Non
         except Exception:
             parsed = {"raw_output": raw_text}
 
+        meta = getattr(skill, "last_execution_meta", {}) or {}
         return {
             "success":      True,
             "result":       parsed,
+            "model":        meta.get("model", model or "gemini-2.5-flash"),
+            "provider":     meta.get("provider", "gemini"),
+            "tier_used":    meta.get("tier_used", "Tier 1"),
+            "tier_display": meta.get("tier_display", "Tier 1 (Primary)"),
+            "cascade":      meta.get("cascade") or {},
             "inputTokens":  getattr(skill, "last_input_tokens",  0),
             "outputTokens": getattr(skill, "last_output_tokens", 0),
         }

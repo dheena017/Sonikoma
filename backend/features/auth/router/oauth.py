@@ -14,6 +14,7 @@ import logging
 import urllib.parse
 import requests
 from typing import Optional
+from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Request, Query
 from fastapi.responses import RedirectResponse
 
@@ -70,11 +71,7 @@ def _load_google_secrets() -> tuple[str, str | None]:
     project_root = os.path.abspath(os.path.join(base_dir, "..", "..", "..", "..", ".."))
     dotenv_file = os.path.join(project_root, ".env")
     if os.path.exists(dotenv_file):
-        try:
-            from dotenv import load_dotenv
-            load_dotenv(dotenv_file, override=True)
-        except Exception:
-            pass
+        load_dotenv(dotenv_file, override=True)
 
     env_client_id = os.getenv("GOOGLE_CLIENT_ID")
     env_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")

@@ -1,5 +1,6 @@
 import { apiRequest } from "@/shared/api/client/request";
 import { FetchClient, ApiResponse } from "@/shared/api/types";
+import { logAITaskCascade, logAITaskCompletion } from "@/shared/utils/aiTierLogger";
 
 export const SKILL_ENDPOINTS = {
   TRANSLATE: "/api/v1/ai/skills/translate",
@@ -23,14 +24,34 @@ export const runSkill = async (
   data: any,
   options?: RequestInit
 ): Promise<ApiResponse<any>> => {
-  return apiRequest(fetchWithInterceptor, endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-    ...options,
+  const start = performance.now();
+  const skillKey = endpoint.split("/").pop() || "ai_skill";
+  const cascade = logAITaskCascade(`Skill: ${skillKey}`, {
+    taskKey: skillKey,
+    requestedModel: data?.model,
   });
+  try {
+    const res = await apiRequest(fetchWithInterceptor, endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      ...options,
+    });
+    const elapsed = Math.round(performance.now() - start);
+    logAITaskCompletion(`Skill: ${skillKey}`, {
+      tier_display: (res as any)?.tier_display || "Tier 1 (Primary)",
+      tier_used: (res as any)?.tier_used,
+      model: (res as any)?.model || data?.model || cascade.primary,
+      latency_ms: elapsed,
+      cascade: (res as any)?.cascade || cascade,
+    });
+    return res;
+  } catch (err) {
+    console.error(`[AI Skill Error] ${endpoint}:`, err);
+    throw err;
+  }
 };
 
 const truncateText = (text: string, maxLength = 160) => {

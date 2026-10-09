@@ -18,6 +18,7 @@ import urllib.parse
 import aiohttp
 import requests
 from typing import Optional
+from dotenv import load_dotenv
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Request, Query, Path
 from fastapi.responses import RedirectResponse, JSONResponse
@@ -98,11 +99,7 @@ def _load_google_secrets() -> tuple[str, str]:
     project_root = os.path.abspath(os.path.join(base_dir, "..", "..", "..", "..", ".."))
     dotenv_file = os.path.join(project_root, ".env")
     if os.path.exists(dotenv_file):
-        try:
-            from dotenv import load_dotenv
-            load_dotenv(dotenv_file, override=True)
-        except Exception:
-            pass
+        load_dotenv(dotenv_file, override=True)
 
     env_client_id = os.getenv("YOUTUBE_CLIENT_ID") or os.getenv("GOOGLE_CLIENT_ID")
     env_client_secret = os.getenv("YOUTUBE_CLIENT_SECRET") or os.getenv("GOOGLE_CLIENT_SECRET")

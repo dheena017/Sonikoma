@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   Zap,
   ShieldCheck,
@@ -7,12 +8,11 @@ import {
   Search,
   Check,
   Sparkles,
-  DollarSign,
-  Gauge,
   Activity,
-  Cpu,
   X,
+  Filter,
 } from "lucide-react";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 export interface DynamicModelOption {
   id: string;
@@ -151,6 +151,30 @@ const PROVIDER_THEMES: Record<
     text: "#9ca3af",
     border: "rgba(75, 85, 99, 0.4)",
   },
+  groq: {
+    name: "GROQ CLOUD",
+    bg: "rgba(249, 115, 22, 0.15)",
+    text: "#fb923c",
+    border: "rgba(249, 115, 22, 0.35)",
+  },
+  whisper: {
+    name: "WHISPER AI",
+    bg: "rgba(16, 185, 129, 0.15)",
+    text: "#34d399",
+    border: "rgba(16, 185, 129, 0.35)",
+  },
+  flux: {
+    name: "FLUX / HF",
+    bg: "rgba(245, 158, 11, 0.15)",
+    text: "#fbbf24",
+    border: "rgba(245, 158, 11, 0.35)",
+  },
+  replicate: {
+    name: "REPLICATE",
+    bg: "rgba(168, 85, 247, 0.15)",
+    text: "#c084fc",
+    border: "rgba(168, 85, 247, 0.35)",
+  },
   pollinations: {
     name: "POLLINATIONS AI",
     bg: "rgba(168, 85, 247, 0.15)",
@@ -188,15 +212,13 @@ export const isProviderKeyConfiguredInVault = (providerKey: string = "") => {
     p === "pollinations" ||
     p === "video_kinetic" ||
     p === "voice_cloning" ||
-    p === "enhancer"
+    p === "enhancer" ||
+    p === "gemini" ||
+    p === "google" ||
+    p === "huggingface" ||
+    p === "flux"
   ) {
     return true;
-  }
-  if (p === "gemini" || p === "google") {
-    return Boolean(
-      localStorage.getItem("user_gemini_key") ||
-        localStorage.getItem("sonikoma_key_gemini")
-    );
   }
   if (p === "openai") {
     return Boolean(
@@ -341,35 +363,40 @@ export default function TierModelCard({
   const providerKey = hasModel
     ? selectedModel?.provider?.toLowerCase() || inferProvider(modelId)
     : "none";
-  const provTheme = PROVIDER_THEMES[providerKey] || {
-    name: "NO KEY / EMPTY",
-    bg: "rgba(245, 158, 11, 0.12)",
-    text: "#f59e0b",
-    border: "rgba(245, 158, 11, 0.35)",
+  const provTheme = (hasModel && PROVIDER_THEMES[providerKey]) || {
+    name: hasModel
+      ? providerKey !== "none"
+        ? providerKey.toUpperCase()
+        : "AI ENGINE"
+      : "NO MODEL",
+    bg: "rgba(99, 102, 241, 0.15)",
+    text: "#818cf8",
+    border: "rgba(99, 102, 241, 0.35)",
   };
   const isKeyConfigured = hasModel
     ? isProviderKeyConfiguredInVault(providerKey)
     : false;
 
-  // Close dropdown when clicked outside
+  // Handle ESC key and lock background scroll when side panel is open
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
         setIsOpen(false);
       }
     };
-    if (isOpen) {
-      document.addEventListener("mousedown", handleOutsideClick);
-    }
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [isOpen]);
 
   const [providerFilter, setProviderFilter] = useState<string>("all");
 
-  // Show all tier models when dropdown is opened
+  // Show all tier models when drawer is opened
   useEffect(() => {
     if (isOpen) {
       setProviderFilter("all");
@@ -386,6 +413,38 @@ export default function TierModelCard({
     return Array.from(set);
   }, [availableModels]);
 
+  // Provider options for codebase CyberSelect
+  const providerOptions = React.useMemo(() => {
+    const allOpt = {
+      value: "all",
+      label: "All Providers",
+      badge: `${availableModels.length}`,
+      icon: <Filter className="w-3 h-3 text-[#3B82F6]" />,
+    };
+
+    const provOpts = availableProviders.map((p) => {
+      const pTheme = PROVIDER_THEMES[p] || PROVIDER_THEMES.gemini;
+      const count = availableModels.filter(
+        (m) => (m.provider?.toLowerCase() || inferProvider(m.id)) === p
+      ).length;
+      const hasKey = isProviderKeyConfiguredInVault(p);
+      return {
+        value: p,
+        label: pTheme.name,
+        badge: `${count}`,
+        icon: (
+          <span
+            className="w-1.5 h-1.5 rounded-full shrink-0"
+            style={{ backgroundColor: hasKey ? "#10B981" : "#F59E0B" }}
+            title={hasKey ? "Key configured in vault" : "Key required"}
+          />
+        ),
+      };
+    });
+
+    return [allOpt, ...provOpts];
+  }, [availableModels, availableProviders]);
+
   const filteredModels = availableModels.filter((m) => {
     const p = m.provider?.toLowerCase() || inferProvider(m.id);
     const matchesProvider = providerFilter === "all" || p === providerFilter;
@@ -398,7 +457,7 @@ export default function TierModelCard({
     return matchesProvider && matchesSearch;
   });
 
-  // Format pricing string
+  // Format pricing string for dropdown items
   const getPricingLabel = (m?: any) => {
     if (!m) return "$0.00";
     if (m.price_per_image !== undefined && m.price_per_image > 0) {
@@ -412,37 +471,6 @@ export default function TierModelCard({
       return `$${Number(cost1m).toFixed(2)}/1M`;
     }
     return "Included / Free";
-  };
-
-  // Format context label
-  const getContextLabel = (m?: any) => {
-    if (!m) return "General";
-    if (typeof m.context_window === "number") {
-      if (m.context_window >= 1000000)
-        return `${(m.context_window / 1000000).toFixed(1)}M ctx`;
-      if (m.context_window >= 1000)
-        return `${Math.round(m.context_window / 1000)}K ctx`;
-      return `${m.context_window} ctx`;
-    }
-    return m.category || "General";
-  };
-
-  // Format speed label
-  const getSpeedLabel = (m?: any) => {
-    if (!m) return "Fast";
-    if (m.speed_rating) {
-      return m.speed_rating.split("(")[0].trim();
-    }
-    const idLower = (m.id || "").toLowerCase();
-    if (
-      idLower.includes("flash") ||
-      idLower.includes("mini") ||
-      idLower.includes("haiku") ||
-      idLower.includes("turbo")
-    ) {
-      return "Ultra Fast";
-    }
-    return "Standard";
   };
 
   return (
@@ -522,11 +550,6 @@ export default function TierModelCard({
                   {provTheme.name}
                 </span>
                 {selectedModel?.tags?.[0] && renderTagBadge(selectedModel.tags[0])}
-                {isModelFree(selectedModel) && (
-                  <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-sm shrink-0">
-                    100% FREE
-                  </span>
-                )}
                 {!isKeyConfigured && (
                   <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300">
                     KEY REQUIRED
@@ -560,303 +583,285 @@ export default function TierModelCard({
               : "No Model Selected (Click to choose)"}
           </div>
         </button>
-
-        {/* Telemetry & Live Specs Metric Pills */}
-        <div className="grid grid-cols-3 gap-1.5 py-0.5 text-[10px] font-mono">
-          {/* Speed */}
-          <div
-            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
-            title={
-              hasModel
-                ? selectedModel?.speed_rating || "Fast inference"
-                : "No active model"
-            }
-          >
-            <Gauge className="w-3 h-3 text-[#F59E0B] shrink-0" />
-            <span className="text-[#E5E5E5] truncate">
-              {hasModel ? getSpeedLabel(selectedModel) : "—"}
-            </span>
-          </div>
-
-          {/* Pricing */}
-          <div
-            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
-            title="Estimated Prompt / Token Cost"
-          >
-            <DollarSign className="w-3 h-3 text-[#10B981] shrink-0" />
-            <span className="text-[#E5E5E5] truncate">
-              {hasModel ? getPricingLabel(selectedModel) : "—"}
-            </span>
-          </div>
-
-          {/* Context Window */}
-          <div
-            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] truncate"
-            title="Maximum Token Context"
-          >
-            <Cpu className="w-3 h-3 text-[#3B82F6] shrink-0" />
-            <span className="text-[#E5E5E5] truncate">
-              {hasModel ? getContextLabel(selectedModel) : "—"}
-            </span>
-          </div>
-        </div>
       </div>
 
-      {/* ── INTERACTIVE DROPDOWN FLYOUT ── */}
-      {isOpen && (
-        <div
-          className="absolute z-50 top-full left-0 right-0 mt-2 rounded-2xl border shadow-2xl overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150"
-          style={{
-            backgroundColor: "#181818",
-            borderColor: `${cfg.color}55`,
-            boxShadow: `0 20px 40px rgba(0, 0, 0, 0.8), 0 0 15px ${cfg.color}25`,
-          }}
-        >
-          {/* Strict Modality Filter Notice */}
-          {requiredTag && (
-            <div className="flex items-center justify-between px-3.5 py-1.5 bg-purple-950/40 border-b border-purple-500/20 text-[10.5px] font-mono text-purple-300">
-              <span className="flex items-center gap-1.5 font-bold">
-                <Sparkles className="w-3 h-3 text-purple-400" />
-                Required Modality: {requiredTag}
-              </span>
-              <span className="text-[8.5px] text-purple-200/60 uppercase tracking-wider font-semibold">
-                Strict Zero-Leakage Filter
-              </span>
-            </div>
-          )}
-
-          {/* Enhanced Cyber Search Box */}
-          <div className="p-2.5 border-b border-white/10 bg-neutral-950/80">
+      {/* ── SLIDE-OVER SIDE PANEL VIA PORTAL ── */}
+      {isOpen &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] flex justify-end">
+            {/* Backdrop Overlay */}
             <div
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-neutral-900/90 border transition-all duration-200"
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-200 animate-in fade-in"
+              onClick={() => setIsOpen(false)}
+            />
+
+            {/* Slide-out Drawer Panel */}
+            <div
+              className="relative w-full sm:w-[500px] md:w-[560px] max-w-full h-full bg-[#121212] border-l border-white/10 shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200 text-white"
               style={{
-                borderColor: search ? cfg.color : "#2F2F2F",
-                boxShadow: search ? `0 0 12px ${cfg.color}22` : "none",
+                boxShadow: `-10px 0 50px rgba(0, 0, 0, 0.85), 0 0 30px ${cfg.color}15`,
               }}
             >
-              <Search
-                className="w-3.5 h-3.5 transition-colors shrink-0"
-                style={{ color: search ? cfg.color : "#737373" }}
-              />
-              <input
-                autoFocus
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search models by name, role, or ID..."
-                className="flex-1 bg-transparent text-xs text-white placeholder-neutral-500 outline-none border-none ring-0 focus:outline-none focus:ring-0 font-sans"
-              />
-              {search ? (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-                  title="Clear search"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <span className="text-[9px] font-mono text-neutral-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/5 select-none">
-                  ESC
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Provider Filter Tabs */}
-          <div
-            className="flex items-center gap-1.5 px-3 py-2 border-b overflow-x-auto no-scrollbar"
-            style={{
-              backgroundColor: "rgba(10, 10, 10, 0.7)",
-              borderColor: "#2F2F2F",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setProviderFilter("all")}
-              className={`px-2.5 py-1 rounded-lg text-[9.5px] font-mono font-bold uppercase transition-all cursor-pointer shrink-0 ${
-                providerFilter === "all"
-                  ? "bg-[#3B82F6] text-white"
-                  : "bg-white/5 text-neutral-400 hover:text-white"
-              }`}
-            >
-              All ({availableModels.length})
-            </button>
-            {availableProviders.map((p) => {
-              const pTheme = PROVIDER_THEMES[p] || PROVIDER_THEMES.gemini;
-              const count = availableModels.filter(
-                (m) => (m.provider?.toLowerCase() || inferProvider(m.id)) === p
-              ).length;
-              const isActive = providerFilter === p;
-              const hasKey = isProviderKeyConfiguredInVault(p);
-
-              return (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setProviderFilter(p)}
-                  className="px-2.5 py-1 rounded-lg text-[9.5px] font-mono font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-                  style={{
-                    backgroundColor: isActive
-                      ? pTheme.bg
-                      : "rgba(255, 255, 255, 0.04)",
-                    color: isActive ? pTheme.text : "#9ca3af",
-                    border: `1px solid ${
-                      isActive ? pTheme.border : "rgba(255, 255, 255, 0.06)"
-                    }`,
-                  }}
-                >
-                  <span>{pTheme.name}</span>
-                  <span className="opacity-60 text-[8.5px]">({count})</span>
-                  {hasKey ? (
-                    <span
-                      className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-                      title="Key Configured in Vault"
-                    />
-                  ) : (
-                    <span
-                      className="w-1.5 h-1.5 rounded-full bg-amber-400"
-                      title="API Key Required"
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* List of Models */}
-          <div
-            className="max-h-56 overflow-y-auto divide-y divide-white/5"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: `${cfg.color}44 transparent`,
-            }}
-          >
-            {/* Top Option: None / Empty Selection */}
-            <button
-              type="button"
-              onClick={() => {
-                onModelChange("");
-                setIsOpen(false);
-                setSearch("");
-              }}
-              className={`w-full flex items-center justify-between gap-3 px-3.5 py-2 text-left transition-all duration-100 cursor-pointer border-b border-white/5 ${
-                !hasModel
-                  ? "bg-amber-500/10 text-amber-400"
-                  : "text-neutral-400 hover:bg-white/5"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <X className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-xs font-mono font-bold">
-                  None / Keep Empty (No Model)
-                </span>
-              </div>
-              {!hasModel && (
-                <Check className="w-3.5 h-3.5 stroke-[3] text-amber-400" />
-              )}
-            </button>
-
-            {filteredModels.length === 0 ? (
-              <div className="px-4 py-6 text-center text-xs text-neutral-500">
-                No matching models found
-              </div>
-            ) : (
-              filteredModels.map((m) => {
-                const isSelected = m.id === modelId;
-                const mProvider =
-                  m.provider?.toLowerCase() || inferProvider(m.id);
-                const hasKey = isProviderKeyConfiguredInVault(mProvider);
-
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => {
-                      onModelChange(m.id);
-                      setIsOpen(false);
-                      setSearch("");
-                    }}
-                    className="w-full flex items-center justify-between gap-3 px-3.5 py-2.5 text-left transition-all duration-100 cursor-pointer"
-                    style={{
-                      backgroundColor: isSelected
-                        ? `${cfg.color}18`
-                        : "transparent",
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) {
-                        (e.currentTarget as HTMLElement).style.backgroundColor =
-                          "rgba(255, 255, 255, 0.04)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) {
-                        (e.currentTarget as HTMLElement).style.backgroundColor =
-                          "transparent";
-                      }
-                    }}
-                  >
-                    <div className="min-w-0 flex-1 space-y-0.5">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span
-                          className="text-xs font-bold truncate"
-                          style={{
-                            color: isSelected ? "#ffffff" : "#e5e7eb",
-                          }}
+              {/* ── UNIFIED DRAWER HEADER ── */}
+              <div
+                className="p-4 sm:p-5 border-b space-y-3.5 shrink-0"
+                style={{
+                  backgroundColor: cfg.bgAccent,
+                  borderColor: `${cfg.color}33`,
+                }}
+              >
+                {/* Top Row: Icon, Title, Modality Tag & Close Button */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className="flex items-center justify-center w-8 h-8 rounded-xl shrink-0"
+                      style={{ backgroundColor: cfg.badgeBg, color: cfg.color }}
+                    >
+                      <TierIcon className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3
+                          className="text-sm font-bold font-mono tracking-wider uppercase truncate"
+                          style={{ color: cfg.color }}
                         >
-                          {m.name}
-                        </span>
-                        {/* Canonical Modality Tag Badges */}
-                        {m.tags && m.tags.map((t: string) => renderTagBadge(t))}
-                        {/* 100% Free Indicator */}
-                        {isModelFree(m) && (
-                          <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-sm shrink-0">
-                            100% FREE
-                          </span>
-                        )}
-                        {!hasKey && (
-                          <span className="text-[8px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">
-                            Key Required
-                          </span>
-                        )}
-                        {hasKey && (
-                          <span className="text-[8px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shrink-0">
-                            Ready
+                          {cfg.title}
+                        </h3>
+                        {requiredTag && (
+                          <span className="flex items-center gap-1 text-[9.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/35 text-purple-300 shrink-0">
+                            <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+                            {requiredTag}
                           </span>
                         )}
                       </div>
+                      <p className="text-xs text-neutral-400 truncate mt-0.5">
+                        {cfg.subtitle} · {hasModel ? (selectedModel?.name || modelId) : "No Model Assigned"}
+                      </p>
+                    </div>
+                  </div>
 
-                      <div className="text-[10px] text-neutral-400 flex items-center gap-2 font-mono">
-                        <span>{m.category || m.provider_name}</span>
-                        <span>·</span>
-                        <span>{getPricingLabel(m)}</span>
-                        {m.speed_rating && (
-                          <>
-                            <span>·</span>
-                            <span>{m.speed_rating.split("(")[0].trim()}</span>
-                          </>
-                        )}
-                      </div>
+                  {/* Right side: Provider Filter Dropdown + Close Button */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Provider Dropdown (via codebase CyberSelect) */}
+                    <div className="w-40 sm:w-48 shrink-0">
+                      <CyberSelect
+                        value={providerFilter}
+                        onChange={(val) => setProviderFilter(val)}
+                        options={providerOptions}
+                        variant="blue"
+                        size="sm"
+                        ariaLabel="Filter models by provider"
+                      />
                     </div>
 
-                    {isSelected && (
-                      <span
-                        className="flex items-center justify-center w-5 h-5 rounded-full shrink-0"
+                    <button
+                      type="button"
+                      onClick={() => setIsOpen(false)}
+                      className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+                      title="Close side panel (Esc)"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Search Input */}
+                <div
+                  className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-neutral-900 border transition-all duration-200"
+                  style={{
+                    borderColor: search ? cfg.color : "#2F2F2F",
+                    boxShadow: search ? `0 0 14px ${cfg.color}22` : "none",
+                  }}
+                >
+                  <Search
+                    className="w-4 h-4 transition-colors shrink-0"
+                    style={{ color: search ? cfg.color : "#737373" }}
+                  />
+                  <input
+                    autoFocus
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search models by name, provider, role, or ID..."
+                    className="flex-1 bg-transparent text-xs text-white placeholder-neutral-500 outline-none border-none ring-0 focus:outline-none focus:ring-0 font-sans"
+                  />
+                  {search ? (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="p-1 rounded-md text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                      title="Clear search"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <span className="text-[10px] font-mono text-neutral-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/5 select-none">
+                      ESC
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Scrollable Model List */}
+              <div
+                className="flex-1 overflow-y-auto p-4 space-y-3"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: `${cfg.color}44 transparent`,
+                }}
+              >
+                {/* Option 1: None / Keep Empty */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onModelChange("");
+                    setIsOpen(false);
+                    setSearch("");
+                  }}
+                  className={`w-full flex items-center justify-between gap-3 p-3.5 rounded-xl text-left transition-all duration-150 cursor-pointer border ${
+                    !hasModel
+                      ? "bg-amber-500/10 border-amber-500/40 text-amber-300"
+                      : "bg-white/[0.02] border-white/5 text-neutral-400 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                      <X className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-xs font-mono font-bold text-amber-400">
+                        None / Keep Empty (No Model)
+                      </div>
+                      <div className="text-[10px] text-neutral-500">
+                        Disable this tier or leave slot unassigned
+                      </div>
+                    </div>
+                  </div>
+                  {!hasModel && (
+                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-500 text-black shrink-0">
+                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    </span>
+                  )}
+                </button>
+
+                {/* Filtered Models */}
+                {filteredModels.length === 0 ? (
+                  <div className="py-16 text-center text-neutral-500 text-xs">
+                    <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    No models matching "{search}"
+                  </div>
+                ) : (
+                  filteredModels.map((m) => {
+                    const isSelected = m.id === modelId;
+                    const mProvider =
+                      m.provider?.toLowerCase() || inferProvider(m.id);
+                    const hasKey = isProviderKeyConfiguredInVault(mProvider);
+                    const pTheme = PROVIDER_THEMES[mProvider] || PROVIDER_THEMES.gemini;
+
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          onModelChange(m.id);
+                          setIsOpen(false);
+                          setSearch("");
+                        }}
+                        className={`w-full flex items-start justify-between gap-3 p-3.5 rounded-xl text-left transition-all duration-150 cursor-pointer border ${
+                          isSelected
+                            ? "border-transparent"
+                            : "bg-white/[0.02] border-white/5 hover:bg-white/[0.06] hover:border-white/10"
+                        }`}
                         style={{
-                          backgroundColor: cfg.color,
-                          color: "#000000",
+                          backgroundColor: isSelected
+                            ? `${cfg.color}15`
+                            : undefined,
+                          borderColor: isSelected ? `${cfg.color}55` : undefined,
+                          boxShadow: isSelected
+                            ? `0 0 12px ${cfg.color}20`
+                            : undefined,
                         }}
                       >
-                        <Check className="w-3 h-3 stroke-[3]" />
-                      </span>
-                    )}
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
+                        <div className="min-w-0 flex-1 space-y-1.5">
+                          {/* Name + Provider + Tags */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span
+                              className="text-xs font-bold"
+                              style={{
+                                color: isSelected ? "#ffffff" : "#f3f4f6",
+                              }}
+                            >
+                              {m.name}
+                            </span>
+                            <span
+                              className="text-[8.5px] font-mono font-bold px-1.5 py-0.5 rounded border uppercase shrink-0"
+                              style={{
+                                backgroundColor: pTheme.bg,
+                                color: pTheme.text,
+                                borderColor: pTheme.border,
+                              }}
+                            >
+                              {pTheme.name}
+                            </span>
+                            {m.tags && m.tags.map((t: string) => renderTagBadge(t))}
+                            {!hasKey && (
+                              <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 text-amber-400 shrink-0">
+                                Key Required
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Category and details */}
+                          <div className="text-[10px] text-neutral-400 flex items-center gap-2 font-mono flex-wrap">
+                            <span className="text-neutral-300 font-medium">
+                              {m.category || m.provider_name}
+                            </span>
+                            {m.speed_rating && (
+                              <>
+                                <span>·</span>
+                                <span className="text-neutral-400">
+                                  {m.speed_rating.split("(")[0].trim()}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {isSelected && (
+                          <span
+                            className="flex items-center justify-center w-5 h-5 rounded-full shrink-0 shadow-md mt-0.5"
+                            style={{
+                              backgroundColor: cfg.color,
+                              color: "#000000",
+                            }}
+                          >
+                            <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Drawer Bottom Footer */}
+              <div className="px-5 py-3 border-t border-white/10 bg-[#161616] flex items-center justify-between text-xs text-neutral-400 shrink-0">
+                <div className="font-mono text-[11px]">
+                  Showing <span className="text-white font-bold">{filteredModels.length}</span> models
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium text-xs transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

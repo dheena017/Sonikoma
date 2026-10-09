@@ -409,7 +409,9 @@ export function useAutoAnalysis({
       }
 
       const baseId =
-        panels.length > 0 ? Math.max(...panels.map((p) => p.id)) + 1 : 1;
+        panels.length > 0
+          ? Math.max(...panels.map((p) => Number(p.id) || 0), 0) + 1
+          : 1;
 
       const episodeGroups: Array<{
         episodeLabel: string;
@@ -469,14 +471,8 @@ export function useAutoAnalysis({
         ...prev,
       ]);
       addNotification(
-        `Added ${imgUrls.length} panel(s) to timeline. Unsaved changes — click "Save Project" to save.`,
-        "warning"
-      );
-
-      // Developer console visibility
-      console.log(
-        `[GUI] Added ${imgUrls.length} frame(s) to timeline`,
-        newPanelsToAdd
+        `Added ${imgUrls.length} panel(s) to timeline. Click "Save Project" to persist changes.`,
+        "info"
       );
     },
     [panels, addNotification, setActivePreviewTab, setPanels, setConsoleLogs]

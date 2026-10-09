@@ -160,37 +160,79 @@ export function useCompileActions({
 
   const handleAnalyzePanel = async (
     panelId: number | string,
-    imageUrl: string
+    imageUrl: string,
+    panelIndex?: number
   ) => {
-    setAnalyzingPanelId(panelId);
+    const isValidId = (id: any) =>
+      id !== null &&
+      id !== undefined &&
+      id !== "" &&
+      id !== "undefined" &&
+      id !== "NaN" &&
+      !Number.isNaN(id);
+
+    const resolvedIndex =
+      typeof panelIndex === "number" && panelIndex >= 0
+        ? panelIndex
+        : panels.findIndex((p) =>
+            isValidId(panelId) ? String(p.id) === String(panelId) : false
+          );
+
+    const targetPanel =
+      resolvedIndex >= 0
+        ? panels[resolvedIndex]
+        : panels.find((p) => isValidId(panelId) && String(p.id) === String(panelId));
+
+    const targetId =
+      targetPanel?.id ?? (isValidId(panelId) ? panelId : (resolvedIndex >= 0 ? resolvedIndex + 1 : 1));
+    const targetUrl = imageUrl || targetPanel?.image_url || "";
+
+    const isTarget = (p: GeneratedPanel, i: number) => {
+      if (resolvedIndex >= 0) return i === resolvedIndex;
+      if (isValidId(targetId)) return String(p.id) === String(targetId);
+      return false;
+    };
+
+    setAnalyzingPanelId(targetId);
     setPanels((prev) =>
-      prev.map((p) =>
-        String(p.id) === String(panelId) ? { ...p, isAnalyzing: true } : p
+      prev.map((p, i) =>
+        isTarget(p, i) ? { ...p, isAnalyzing: true } : p
       )
     );
     const activeModel = selectedModel;
-    const originalPanel = panels.find((p) => String(p.id) === String(panelId));
-    const originalText = originalPanel ? originalPanel.speech_text : "";
-    const originalMotion = originalPanel ? originalPanel.motion_type : "";
+    const originalText = targetPanel ? targetPanel.speech_text : "";
+    const originalMotion = targetPanel ? targetPanel.motion_type : "";
+
+    let primaryModel = activeModel || "gemini-2.5-flash";
+    let fallbackModel = "gpt-4o-mini";
+    let emergencyModel = "claude-3-5-sonnet-20241022";
+    try {
+      const stored = localStorage.getItem("sonikoma_ai_routing_custom");
+      if (stored) {
+        const routes = JSON.parse(stored);
+        const match = routes.find((r: any) => r.task === "panel_analysis");
+        if (match) {
+          primaryModel = match.primary_model || primaryModel;
+          fallbackModel = match.fallback_model || fallbackModel;
+          emergencyModel = match.tertiary_model || emergencyModel;
+        }
+      }
+    } catch {}
 
     console.log(
-      "[Timeline] Starting Smart Scanner analysis for panel",
-      panelId
+      `[AI 3-Tier Cascade] Task: "Panel Analysis" | Tier 1 (Primary): ${primaryModel} | Tier 2 (Fallback): ${fallbackModel} | Tier 3 (Emergency): ${emergencyModel}`
     );
-    console.log(`  - Model used: ${activeModel}`);
-    console.log(`  - Sent Image: ${imageUrl.substring(0, 60)}...`);
-    console.log(`  - Sent Original Dialogue: "${originalText}"`);
     console.log(
-      `  - Sent Original Motion: "${originalPanel?.motion_type || ""}"`
+      `[Smart Scanner] Analyzing Panel #${targetId} using Tier 1 (Primary: ${primaryModel})...`
     );
 
     if (addNotification) {
-      addNotification(`Starting AI Scanner for Panel #${panelId}...`, "info");
+      addNotification(`Starting AI Scanner for Panel #${targetId}...`, "info");
     }
 
     if (setConsoleLogs) {
       setConsoleLogs((prev) => [
-        `[Smart Auto-Analysis] Initiated analysis on Panel #${panelId} (Model: ${
+        `[Smart Auto-Analysis] Initiated analysis on Panel #${targetId} (Model: ${
           activeModel || "gemini-2.5-flash"
         })`,
         `[Smart Auto-Analysis]   - Sent Dialogue: "${originalText || "None"}"`,
@@ -200,20 +242,16 @@ export function useCompileActions({
 
     try {
       abortControllerRef.current = new AbortController();
-      console.log("[API] Analyzing image for panel", panelId);
 
       const currentMemory =
         useProjectStore.getState().activeProjectData?.story_memory;
-      const panelIndex = panels.findIndex(
-        (p) => String(p.id) === String(panelId)
-      );
       let precedingContext = "";
-      if (panelIndex > 0) {
-        const prevPanel = panels[panelIndex - 1];
-        const prevSpeech = prevPanel.speech_text
+      if (resolvedIndex > 0) {
+        const prevPanel = panels[resolvedIndex - 1];
+        const prevSpeech = prevPanel?.speech_text
           ? `Previous speech: "${prevPanel.speech_text}"`
           : "";
-        const prevNarrative = prevPanel.narrative
+        const prevNarrative = prevPanel?.narrative
           ? `Previous scene recap: "${prevPanel.narrative}"`
           : "";
         precedingContext = [prevSpeech, prevNarrative]
@@ -224,7 +262,7 @@ export function useCompileActions({
       const data = await api.analyzeSingleImage(
         activeFetch,
         {
-          url: imageUrl,
+          url: targetUrl,
           model: activeModel,
           narrationStyle,
           voice: voiceActor,
@@ -260,27 +298,27 @@ export function useCompileActions({
         const speech =
           analysis.speech_text !== undefined
             ? analysis.speech_text
-            : originalPanel?.speech_text;
+            : targetPanel?.speech_text;
         const sfx =
-          analysis.sfx !== undefined ? analysis.sfx : originalPanel?.sfx;
+          analysis.sfx !== undefined ? analysis.sfx : targetPanel?.sfx;
         const visual =
           analysis.visual_description !== undefined
             ? analysis.visual_description
-            : originalPanel?.visual_description;
+            : targetPanel?.visual_description;
         const narrative =
           data.narrative ||
           data.narrativeText ||
           analysis.narrative ||
           analysis.narrativeText ||
-          originalPanel?.narrative;
+          targetPanel?.narrative;
         const narrativeAudioUrl =
           data.narrative_audio_url ||
           analysis.narrative_audio_url ||
-          originalPanel?.narrative_audio_url;
+          targetPanel?.narrative_audio_url;
 
         setPanels((prev) =>
-          prev.map((p) =>
-            String(p.id) === String(panelId)
+          prev.map((p, i) =>
+            isTarget(p, i)
               ? {
                   ...p,
                   speech_text: speech,
@@ -302,13 +340,14 @@ export function useCompileActions({
           )
         );
 
+        const tierDisp = (data as any).tier_display || (data as any).tier_used || "Tier 1 (Primary)";
         console.log(
-          `[Timeline] Smart Scanner completed for panel #${panelId} (${usedModel})`
+          `[AI Execution Completed] Panel #${targetId} Analysis finished successfully via ${tierDisp} (${usedModel})${latMs}`
         );
 
         if (setConsoleLogs) {
           setConsoleLogs((prev) => [
-            `[Smart Auto-Analysis] [SUCCESS] Panel #${panelId} analyzed by ${usedModel}${latMs}!`,
+            `[Smart Auto-Analysis] [SUCCESS] Panel #${targetId} analyzed via ${tierDisp} (${usedModel})${latMs}!`,
             `[Smart Auto-Analysis]   - Dialogue: "${speech}"`,
             `[Smart Auto-Analysis]   - Motion: "${aiMotion}" | Duration: ${aiDuration}s | SFX: "${sfx}"`,
             ...prev,
@@ -317,7 +356,7 @@ export function useCompileActions({
 
         if (addNotification) {
           addNotification(
-            `Smart Scanner analysis completed for Panel #${panelId}!`,
+            `Smart Scanner analysis completed for Panel #${targetId}!`,
             "success"
           );
           audioFeedback?.playSuccess();
@@ -338,7 +377,7 @@ export function useCompileActions({
       console.error("[Timeline] Panel analysis failed:", err);
       if (setConsoleLogs) {
         setConsoleLogs((prev) => [
-          `[Smart Auto-Analysis] [ERROR] Analysis failed for Panel #${panelId}: ${
+          `[Smart Auto-Analysis] [ERROR] Analysis failed for Panel #${targetId}: ${
             err.message || "Unknown error"
           }`,
           ...prev,
@@ -346,7 +385,7 @@ export function useCompileActions({
       }
       if (addNotification) {
         addNotification(
-          `Smart Scanner analysis failed for Panel #${panelId}: ${
+          `Smart Scanner analysis failed for Panel #${targetId}: ${
             err.message || "Please try again."
           }`,
           "error"
@@ -355,8 +394,8 @@ export function useCompileActions({
     } finally {
       setAnalyzingPanelId(null);
       setPanels((prev) =>
-        prev.map((p) =>
-          String(p.id) === String(panelId) ? { ...p, isAnalyzing: false } : p
+        prev.map((p, i) =>
+          isTarget(p, i) ? { ...p, isAnalyzing: false } : p
         )
       );
     }

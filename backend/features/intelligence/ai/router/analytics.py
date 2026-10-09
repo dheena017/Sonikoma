@@ -1065,11 +1065,7 @@ def _get_model_routing_payload() -> dict:
 
     dynamic_routing = {}
     for cap in capabilities:
-        dynamic_routing[cap] = {
-            "primary": "",
-            "fallback": "",
-            "tertiary": "",
-        }
+        dynamic_routing[cap] = AIOrchestrator.get_task_cascade(cap)
 
     # Merge custom user/admin overrides
     merged = {**dynamic_routing, **AIOrchestrator._custom_capability_routing}
@@ -1140,21 +1136,32 @@ async def _execute_simulate_model_routing(payload: dict) -> dict:
                 return m
         return {"id": model_id, "name": model_id, "provider": "google", "context_window": "200K"}
 
+    logger.info(
+        f"[AI 3-Tier Cascade] Task: '{task}' | "
+        f"Tier 1 (Primary): {primary_model} | "
+        f"Tier 2 (Fallback): {fallback_model} | "
+        f"Tier 3 (Emergency): {tertiary_model}"
+    )
+
     if is_primary_failed and is_fallback_failed:
         resolved = find_model_meta(tertiary_model)
-        tier_used = "Tier 3 Emergency"
+        tier_used = "Tier 3 (Emergency)"
         status = "FAILOVER_CASCADE_TIER3"
         message = f"Simulated failover: Tier 1 ({primary_model}) & Tier 2 ({fallback_model}) bypassed; dispatched via Tier 3 ({tertiary_model})."
     elif is_primary_failed:
         resolved = find_model_meta(fallback_model)
-        tier_used = "Tier 2 Fallback"
+        tier_used = "Tier 2 (Fallback)"
         status = "FAILOVER_ENGAGED"
         message = f"Simulated failover: Primary engine ({primary_model}) rate-limit simulated; smoothly routed to Tier 2 ({fallback_model})."
     else:
         resolved = find_model_meta(primary_model)
-        tier_used = "Tier 1 Primary"
+        tier_used = "Tier 1 (Primary)"
         status = "SUCCESS"
         message = f"Pipeline successfully routed to {resolved.get('name', primary_model)} with active failover backup."
+
+    logger.info(
+        f"[AI Execution] Running {tier_used} -> {resolved.get('provider', 'google')}/{resolved.get('id', primary_model)} for '{task}'"
+    )
 
     # Perform real live network ping to the provider's official gateway to measure authentic latency
     provider_gateways = {
@@ -1185,6 +1192,12 @@ async def _execute_simulate_model_routing(payload: dict) -> dict:
         "task": task,
         "status": status,
         "tier_used": tier_used,
+        "tier_display": tier_used,
+        "cascade": {
+            "primary": primary_model,
+            "fallback": fallback_model,
+            "emergency": tertiary_model,
+        },
         "resolved_model": resolved.get("id", primary_model),
         "model_name": resolved.get("name", primary_model),
         "provider": resolved.get("provider", "google"),

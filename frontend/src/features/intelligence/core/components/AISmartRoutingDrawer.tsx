@@ -19,6 +19,8 @@ import {
   Key,
 } from "lucide-react";
 import { SonikomaLogo } from "@/shared/ui/branding";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
+import PipelineTelemetryModal from "./PipelineTelemetryModal";
 import {
   useAIModelStore,
   AIModelInfo,
@@ -169,6 +171,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<string>("All Pipelines");
   const [sortBy, setSortBy] = useState<string>("default");
+  const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem("sonikoma_routing_favorites");
@@ -276,6 +279,44 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
     "SEO & Social",
   ];
 
+  const categoryOptions = useMemo(
+    () => [
+      {
+        value: "All Pipelines",
+        label: `All Pipelines (${PIPELINE_TASKS.length})`,
+      },
+      {
+        value: "★ Favorites",
+        label: `★ Favorites (${favoriteIds.length})`,
+      },
+      {
+        value: "Creative",
+        label: `Creative (${PIPELINE_TASKS.filter((t) => t.category === "Creative").length})`,
+      },
+      {
+        value: "Image",
+        label: `Image (${PIPELINE_TASKS.filter((t) => t.category === "Image").length})`,
+      },
+      {
+        value: "Video",
+        label: `Video (${PIPELINE_TASKS.filter((t) => t.category === "Video").length})`,
+      },
+      {
+        value: "Vision & OCR",
+        label: `Vision & OCR (${PIPELINE_TASKS.filter((t) => t.category === "Vision & OCR").length})`,
+      },
+      {
+        value: "Audio & Voice",
+        label: `Audio & Voice (${PIPELINE_TASKS.filter((t) => t.category === "Audio & Voice").length})`,
+      },
+      {
+        value: "SEO & Social",
+        label: `SEO & Social (${PIPELINE_TASKS.filter((t) => t.category === "SEO & Social").length})`,
+      },
+    ],
+    [favoriteIds.length]
+  );
+
   const filteredTasks = useMemo(() => {
     let list = PIPELINE_TASKS.filter((t) => {
       if (selectedFilter === "★ Favorites") {
@@ -360,59 +401,91 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
 
             {/* Right Side Drawer Container */}
             <div className="relative w-full sm:w-[500px] lg:w-[540px] h-full bg-[#141414] border-l border-[#2F2F2F] shadow-2xl flex flex-col z-10 text-left overflow-hidden animate-in slide-in-from-right duration-300">
-              {/* 1. Header Bar */}
-              <div className="p-4 sm:p-5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between gap-3 shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center flex-shrink-0">
-                    <SonikomaLogo iconOnly size="md" />
+              {/* 1. UNIFIED SINGLE HEADER BAR */}
+              <div className="p-4 sm:p-5 border-b border-[#2F2F2F] bg-[#181818] shrink-0 space-y-3 relative z-30">
+                {/* Header Top: Logo + Title + Active Pipelines Badge + Actions */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center justify-center flex-shrink-0">
+                      <SonikomaLogo iconOnly size="md" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-base font-bold text-white tracking-tight font-sans truncate">
+                        AI Smart Routing
+                      </h3>
+                      <p className="text-xs text-neutral-400 font-sans mt-0.5 truncate">
+                        Global pipeline routing &amp; model cascades
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-base font-bold text-white tracking-tight font-sans">
-                      AI Smart Routing
-                    </h3>
-                    <p className="text-xs text-neutral-400 font-sans mt-0.5">
-                      Global pipeline routing &amp; model cascades
-                    </p>
+
+                  {/* Actions: Routing Matrix + CONFIGURE + Close */}
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <a
+                      href="/ai-core?tab=routing"
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#222222] hover:bg-[#2A2A2A] border border-[#2F2F2F] hover:border-neutral-600 text-xs font-semibold text-neutral-200 hover:text-white transition-all cursor-pointer shadow-sm hidden sm:flex"
+                      title="Open full Routing Matrix page"
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-[#3B82F6]" />
+                      <span>Matrix</span>
+                    </a>
+
+                    <a
+                      href="/ai-core?tab=routing"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-[#3B82F6]/30 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-sm"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-white text-white" />
+                      <span>CONFIGURE</span>
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsOpen(false)}
+                      className="p-1.5 rounded-xl text-neutral-400 hover:text-white hover:bg-[#262626] transition-colors cursor-pointer"
+                      title="Close Panel (Esc)"
+                      aria-label="Close drawer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <a
-                    href="/ai-core?tab=routing"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-xs font-semibold text-neutral-200 hover:text-white transition-all cursor-pointer"
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5 text-[#3B82F6]" />
-                    <span>Routing Matrix</span>
-                  </a>
+                {/* Merged Category Dropdown & Search Bar in One Line */}
+                <div className="flex items-center gap-2 pt-1 w-full">
+                  {/* Category Dropdown (via codebase CyberSelect) */}
+                  <div className="w-44 sm:w-52 shrink-0">
+                    <CyberSelect
+                      value={selectedFilter}
+                      onChange={(val) => setSelectedFilter(val)}
+                      options={categoryOptions}
+                      variant="blue"
+                      size="md"
+                      ariaLabel="Filter pipelines by category"
+                    />
+                  </div>
 
-                  <a
-                    href="/ai-core?tab=routing"
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#2A2A2A] hover:bg-[#333333] border border-[#2F2F2F] hover:border-neutral-700 text-white text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
-                  >
-                    <Zap className="w-3.5 h-3.5 text-[#3B82F6] group-hover:text-white" />
-                    <span>CONFIGURE</span>
-                  </a>
-
-                  <button
-                    type="button"
-                    onClick={() => setIsOpen(false)}
-                    className="p-2 rounded-xl text-neutral-400 hover:text-white hover:bg-[#262626] transition-colors cursor-pointer ml-1"
-                    title="Close Panel (Esc)"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  {/* Search Input */}
+                  <div className="h-10 flex-1 min-w-0 flex items-center gap-2 px-3 rounded-xl border border-[#2A2A2A] bg-[#121212] focus-within:border-[#3B82F6] hover:border-neutral-700 transition-colors shadow-sm">
+                    <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Search pipelines, models, or tasks..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="bg-transparent text-xs text-white placeholder:text-neutral-500 outline-none w-full font-sans"
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        className="text-neutral-400 hover:text-white p-0.5 rounded cursor-pointer"
+                        title="Clear search"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              {/* 2. Subheader Status Strip */}
-              <div className="px-5 py-3 border-b border-[#2F2F2F] bg-[#121212] flex items-center justify-between gap-2 shrink-0">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{PIPELINE_TASKS.length} ACTIVE PIPELINES</span>
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full bg-[#1E1E1E] border border-[#2F2F2F] text-[10px] font-mono font-bold text-neutral-400">
-                  Synchronized
-                </span>
               </div>
 
               {/* 3. Hero Feature / Missing Key Card */}
@@ -459,53 +532,7 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
                 )}
               </div>
 
-              {/* 4. Search & Sort Controls */}
-              <div className="p-4 sm:p-5 pb-3 space-y-3 bg-[#181818] border-b border-[#2F2F2F] shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
-                    <input
-                      type="text"
-                      placeholder="Search pipelines, models, or tasks..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full rounded-xl border border-[#2F2F2F] bg-[#121212] py-2 pl-10 pr-4 text-xs text-white placeholder:text-neutral-500 focus:border-neutral-600 focus:outline-none transition-all font-sans"
-                    />
-                  </div>
-
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="rounded-xl border border-[#2F2F2F] bg-[#121212] px-3 py-2 text-xs text-neutral-300 focus:border-neutral-600 focus:outline-none transition-all cursor-pointer font-sans"
-                  >
-                    <option value="default">Default Order</option>
-                    <option value="alphabetical">Alphabetical</option>
-                  </select>
-                </div>
-
-                {/* Filter Tabs */}
-                <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pt-1">
-                  {categories.map((cat) => {
-                    const isSelected = selectedFilter === cat;
-                    return (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => setSelectedFilter(cat)}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-[#3B82F6] text-white border border-[#60A5FA]/40 font-bold"
-                            : "text-neutral-400 bg-[#121212] border border-[#2F2F2F] hover:text-white hover:border-neutral-700 hover:bg-[#2A2A2A]"
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 5. Scrollable Pipeline Task Cards List */}
+              {/* 2. Scrollable Pipeline Task Cards List */}
               <div className="p-4 sm:p-5 flex-1 overflow-y-auto space-y-3 bg-[#141414]">
                 {filteredTasks.length === 0 ? (
                   <div className="p-8 text-center rounded-2xl border border-[#2F2F2F] bg-[#181818] text-neutral-400 text-xs font-mono">
@@ -643,6 +670,15 @@ export const AISmartRoutingDrawer: React.FC<AISmartRoutingDrawerProps> = ({
           </div>,
           document.body
         )}
+
+      {/* Cascade Architecture & System Telemetry Details Modal */}
+      <PipelineTelemetryModal
+        isOpen={showTelemetryModal}
+        onClose={() => setShowTelemetryModal(false)}
+        routesCount={PIPELINE_TASKS.length}
+        totalRoutes={11}
+        engineCount={allModels.length || 14}
+      />
     </div>
   );
 };

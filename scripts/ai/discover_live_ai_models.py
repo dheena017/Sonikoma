@@ -59,6 +59,7 @@ import argparse
 from typing import List, Dict, Any, Optional, Tuple
 
 import httpx
+from dotenv import load_dotenv
 
 # Ensure UTF-8 output across all consoles
 try:
@@ -121,26 +122,9 @@ def load_env_vars():
         os.path.join(os.getcwd(), ".env"),
     ]
 
-    try:
-        from dotenv import load_dotenv
-        for f in candidate_files:
-            if os.path.exists(f):
-                load_dotenv(f, override=False)
-    except ImportError:
-        for f in candidate_files:
-            if os.path.exists(f):
-                try:
-                    with open(f, "r", encoding="utf-8") as env_f:
-                        for line in env_f:
-                            line = line.strip()
-                            if line and not line.startswith("#") and "=" in line:
-                                k, v = line.split("=", 1)
-                                k = k.strip()
-                                v = v.strip().strip("'\"")
-                                if k and k not in os.environ:
-                                    os.environ[k] = v
-                except Exception:
-                    pass
+    for env_file in candidate_files:
+        if os.path.exists(env_file):
+            load_dotenv(env_file, override=False)
 
 load_env_vars()
 
@@ -1084,8 +1068,8 @@ def run_interactive_mode(details_view: bool = False):
     usage_map = get_live_usage_map()
 
     detected_keys = {}
-    if os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"):
-        detected_keys["gemini"] = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if os.getenv("GEMINI_API_KEY"):
+        detected_keys["gemini"] = os.getenv("GEMINI_API_KEY")
     if os.getenv("OPENAI_API_KEY"):
         detected_keys["openai"] = os.getenv("OPENAI_API_KEY")
     if os.getenv("ANTHROPIC_API_KEY"):
@@ -1319,8 +1303,8 @@ def main():
     results = {}
 
     if args.all:
-        if os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"):
-            probe_and_display_provider("gemini", os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"), results, usage_map=usage_map, details=args.details, filter_query=args.filter)
+        if os.getenv("GEMINI_API_KEY"):
+            probe_and_display_provider("gemini", os.getenv("GEMINI_API_KEY"), results, usage_map=usage_map, details=args.details, filter_query=args.filter)
         if os.getenv("OPENAI_API_KEY"):
             probe_and_display_provider("openai", os.getenv("OPENAI_API_KEY"), results, usage_map=usage_map, details=args.details, filter_query=args.filter)
         if os.getenv("ANTHROPIC_API_KEY"):

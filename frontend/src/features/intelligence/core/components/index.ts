@@ -6,16 +6,19 @@ export { default as HeaderCreditsPopover } from "./HeaderCreditsPopover";
 export type { HeaderCreditsPopoverProps } from "./HeaderCreditsPopover";
 export {
   default as AIModelSelector,
-  AIModelSelector as NamedAIModelSelector,
-} from "./AIModelSelector";
-export {
   default as AISmartRoutingDrawer,
+  AISmartRoutingDrawer as NamedAIModelSelector,
   AISmartRoutingDrawer as NamedAISmartRoutingDrawer,
 } from "./AISmartRoutingDrawer";
-export type { AISmartRoutingDrawerProps } from "./AISmartRoutingDrawer";
+export type {
+  AISmartRoutingDrawerProps,
+  AISmartRoutingDrawerProps as AIModelSelectorProps,
+} from "./AISmartRoutingDrawer";
 export { default as TaskRouteConfigureView } from "./TaskRouteConfigureView";
 export * from "./TaskRouteConfigureView";
-export { default as AIModelCard } from "./AIModelCard";
-export type { AIModelCardData } from "./AIModelCard";
 export { default as TierModelCard } from "./TierModelCard";
 export type { DynamicModelOption, TierType } from "./TierModelCard";
+export { default as CascadeSimulatorModal } from "./CascadeSimulatorModal";
+export type { CascadeSimulatorModalProps, SimulationResult } from "./CascadeSimulatorModal";
+export { default as PipelineTelemetryModal } from "./PipelineTelemetryModal";
+export type { PipelineTelemetryModalProps } from "./PipelineTelemetryModal";

@@ -110,7 +110,12 @@ async def translate_speech_bubbles(
                 capability="translate",
                 prompt=prompt,
             )
-            if res.get("status") == "success" and res.get("content"):
+            parsed_res = res.get("result")
+            if isinstance(parsed_res, dict) and "raw_output" in parsed_res:
+                translated_text = str(parsed_res["raw_output"]).strip().strip('"').strip("'")
+            elif isinstance(parsed_res, str):
+                translated_text = parsed_res.strip().strip('"').strip("'")
+            elif res.get("content"):
                 translated_text = str(res["content"]).strip().strip('"').strip("'")
             elif res.get("text"):
                 translated_text = str(res["text"]).strip().strip('"').strip("'")
@@ -137,4 +142,7 @@ async def translate_speech_bubbles(
         "status": "success",
         "target_language": req.target_language,
         "translated_bubbles": translated_bubbles,
+        "tier_used": res.get("tier_used") if 'res' in locals() else "Tier 1",
+        "tier_display": res.get("tier_display") if 'res' in locals() else "Tier 1 (Primary)",
+        "cascade": res.get("cascade") if 'res' in locals() else {},
     }

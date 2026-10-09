@@ -116,16 +116,9 @@ export function useAppNotifications(volume = 80, isMuted = false) {
         }
       }
 
-      // Structured human-readable developer console output
-      const prefix = "[Sonikoma]";
+      // Only log critical errors to the browser console
       if (type === "error") {
-        console.error(`${prefix} [ERROR] ${cleanMsg}`);
-      } else if (type === "warning") {
-        console.warn(`${prefix} [WARN] ${cleanMsg}`);
-      } else if (type === "success") {
-        console.info(`${prefix} [SUCCESS] ${cleanMsg}`);
-      } else {
-        console.info(`${prefix} [INFO] ${cleanMsg}`);
+        console.error(`[Sonikoma] [ERROR] ${cleanMsg}`);
       }
 
       const id = Date.now() + Math.floor(Math.random() * 1000);

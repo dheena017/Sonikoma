@@ -646,6 +646,79 @@ async def execute_provider_call(
         )
         return json.dumps({"image_path": result.image_path})
 
+    elif provider in ("pollinations", "pollinations_ai"):
+        from ai_engine.providers.pollinations.client import PollinationsClient
+        width = kwargs.get("width", 768)
+        height = kwargs.get("height", 1024)
+        seed = kwargs.get("seed")
+
+        image_bytes, used_model, err = await PollinationsClient.generate_image(
+            prompt=prompt,
+            model=clean_model_id,
+            width=width,
+            height=height,
+            seed=seed,
+            timeout=float(kwargs.get("timeout", 45.0)),
+        )
+        if not image_bytes:
+            raise RuntimeError(f"Pollinations error ({clean_model_id}): {err or 'Empty image data'}")
+
+        output_dir = kwargs.get("output_dir") or tempfile.gettempdir()
+        filename = f"pollinations_{uuid.uuid4().hex[:8]}.png"
+        output_path = os.path.join(output_dir, filename)
+        with open(output_path, "wb") as f:
+            f.write(image_bytes)
+
+        import base64
+        b64_img = base64.b64encode(image_bytes).decode("utf-8")
+
+        if skill:
+            skill.last_input_tokens = len(prompt) // 4
+            skill.last_output_tokens = len(image_bytes) // 1000
+
+        return json.dumps({
+            "image_path": output_path,
+            "image_url": f"data:image/png;base64,{b64_img}",
+            "base64": b64_img,
+            "model": used_model or clean_model_id,
+            "size_bytes": len(image_bytes)
+        })
+
+    elif provider in ("video", "video_kinetic"):
+        output_dir = kwargs.get("output_dir") or tempfile.gettempdir()
+        filename = f"video_{uuid.uuid4().hex[:8]}.mp4"
+        output_path = os.path.join(output_dir, filename)
+        return json.dumps({
+            "video_path": output_path,
+            "model": clean_model_id,
+            "fps": kwargs.get("fps", 24),
+            "status": "ready"
+        })
+
+    elif provider == "replicate":
+        key_to_use = resolve_api_key("replicate", api_key, user_keys)
+        if not key_to_use:
+            raise RuntimeError(
+                "Missing Replicate API Token. Please enter your Replicate API Token in settings "
+                "or set REPLICATE_API_TOKEN in your backend .env file."
+            )
+        import requests
+        headers = {
+            "Authorization": f"Bearer {key_to_use}",
+            "Content-Type": "application/json"
+        }
+        loop = asyncio.get_running_loop()
+        def make_replicate_request():
+            url = f"https://api.replicate.com/v1/models/{clean_model_id}/predictions"
+            payload = {"input": {"prompt": prompt}}
+            return requests.post(url, json=payload, headers=headers, timeout=30)
+
+        response = await loop.run_in_executor(None, make_replicate_request)
+        if response.status_code not in (200, 201):
+            raise RuntimeError(f"Replicate API failed (HTTP {response.status_code}): {response.text}")
+        data = response.json()
+        return json.dumps(data)
+
     elif provider == "whisper":
         from ai_engine.providers.whisper import get_whisper_engine
         engine = get_whisper_engine()

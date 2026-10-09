@@ -7,6 +7,7 @@ import { AgentTerminalLogs } from "../components/AgentTerminalLogs";
 import { AgentPanelsPreview } from "../components/AgentPanelsPreview";
 import { AgentYouTubeSuccessCard } from "../components/AgentYouTubeSuccessCard";
 import { AgentHistoryModal } from "../components/AgentHistoryModal";
+import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
 
 interface CreativeAgentPageProps {
   fetchWithInterceptor?: any;
@@ -19,6 +20,7 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
   addNotification,
 }) => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
 
   const {
     url,
@@ -44,6 +46,14 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
 
   const isCompleted = activeRun?.status === "completed";
   const isReviewAwaiting = activeRun?.status === "awaiting_review";
+
+  const handlePromptReset = () => {
+    if (activeRun && activeRun.status !== "completed") {
+      setShowResetConfirmModal(true);
+    } else {
+      handleReset();
+    }
+  };
 
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto py-4 sm:py-6 animate-fade-in text-left text-[#E5E5E5]">
@@ -84,7 +94,7 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
               </div>
               <button
                 type="button"
-                onClick={handleReset}
+                onClick={handlePromptReset}
                 className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#262626] hover:bg-[#333] border border-[#3F3F3F] text-gray-200 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
                 title="Discard this run and launch a fresh episode"
               >
@@ -97,7 +107,7 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
               progress={activeRun.progress}
               currentAction={activeRun.current_action}
               onApprove={handleApprove}
-              onReset={handleReset}
+              onReset={handlePromptReset}
               isReviewAwaiting={isReviewAwaiting}
             />
 
@@ -142,6 +152,21 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
         history={history}
         onSelectRun={selectHistoryRun}
       />
+
+      {/* ── Delete / Discard Confirmation Modal ── */}
+      {showResetConfirmModal && (
+        <DeleteConfirmModal
+          title="Discard Active Run?"
+          message="Are you sure you want to discard this in-progress autonomous agent run and start a new URL? Any unfinished progress will be reset."
+          confirmText="Discard & Reset"
+          cancelText="Keep Running"
+          onConfirm={() => {
+            handleReset();
+            setShowResetConfirmModal(false);
+          }}
+          onCancel={() => setShowResetConfirmModal(false)}
+        />
+      )}
     </div>
   );
 };

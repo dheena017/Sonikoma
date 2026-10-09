@@ -80,6 +80,7 @@ export function useProjectsData(): UseProjectsDataState {
 
       const list = await inFlightProjectsPromise;
       setProjects(list);
+      console.log(`[Projects Page] Loaded ${list.length} studio projects.`);
     } catch (err: any) {
       console.error("Failed to fetch projects", err);
       const errMsg =

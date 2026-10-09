@@ -82,13 +82,50 @@ function formatMessage(level: string, filename: string, args: any[]): any[] {
   }
 }
 
+// Files and patterns to suppress from console noise
+const SUPPRESSED_FILENAMES = new Set([
+  "request.ts",
+]);
+
+const SUPPRESSED_PATTERNS = [
+  /options (undefined|\{)/i,
+  /method (GET|POST|PUT|DELETE|PATCH)/i,
+  /existingHeaders/i,
+  /\[API Interceptor\]/i,
+  /\[PanelCardControls\]/i,
+  /\[GUI\] Added \d+ frame/i,
+  /\[AI Endpoint\] (POST|success|output|input|id|url|Request|response)/i,
+  /React DevTools/i,
+  /\[Intervention\] Images loaded lazily/i,
+  /Download the React DevTools/i,
+];
+
+function shouldSuppress(filename: string, args: any[]): boolean {
+  if (SUPPRESSED_FILENAMES.has(filename)) return true;
+  try {
+    const str = args
+      .map((a) =>
+        typeof a === "object" && a !== null ? JSON.stringify(a) : String(a)
+      )
+      .join(" ");
+    for (const pat of SUPPRESSED_PATTERNS) {
+      if (pat.test(str)) return true;
+    }
+  } catch {
+    // If JSON stringify fails on circular ref, skip suppression
+  }
+  return false;
+}
+
 console.log = (...args: any[]) => {
   const filename = getCallerFile();
+  if (shouldSuppress(filename, args)) return;
   originalLog(...formatMessage("INFO", filename, args));
 };
 
 console.warn = (...args: any[]) => {
   const filename = getCallerFile();
+  if (shouldSuppress(filename, args)) return;
   originalWarn(...formatMessage("WARN", filename, args));
 };
 
@@ -99,5 +136,6 @@ console.error = (...args: any[]) => {
 
 console.debug = (...args: any[]) => {
   const filename = getCallerFile();
+  if (shouldSuppress(filename, args)) return;
   originalDebug(...formatMessage("DEBUG", filename, args));
 };

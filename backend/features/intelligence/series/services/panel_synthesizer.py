@@ -8,9 +8,12 @@ and dynamically coordinates with the 'generate_chapter' AI skill.
 
 from __future__ import annotations
 
+import os
 import logging
 from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
+
+from common.image import generate_manhwa_panel_artwork
 
 from features.intelligence.series.schemas import (
     AISeriesPanel,
@@ -163,11 +166,26 @@ class PanelSynthesizer:
                 series_id, base_prompt, character_names=[clean_hero] if clean_hero else None
             )
 
-            # High quality Pollinations URL directly via series_image_service
-            seed = (session_number * 10000) + (chapter_number * 333) + (p_idx * 47)
-            image_url = series_image_service.build_pollinations_url(
-                prompt=enhanced_prompt, width=w, height=h, seed=seed, model=actual_image_model
-            )
+            # High quality guaranteed local panel image synthesis
+            s_dir = series_image_service._get_series_images_dir(series_id)
+            panel_filename = f"{panel_id}.png"
+            panel_disk_path = os.path.join(s_dir, panel_filename)
+            try:
+                artwork = generate_manhwa_panel_artwork(
+                    width=w,
+                    height=h,
+                    title=f"Shot #{p_idx}",
+                    prompt=enhanced_prompt,
+                    camera_angle=camera or "cinematic_wide",
+                    character_name=clean_hero,
+                    art_style=art_style_key,
+                    shot_index=p_idx - 1,
+                )
+                artwork.save(panel_disk_path, format="PNG")
+                image_url = f"/media/series_images/{series_id}/{panel_filename}"
+            except Exception as e:
+                logger.warning(f"[PanelSynthesizer] Local panel artwork generation warning: {e}")
+                image_url = f"/media/series_images/{series_id}/{panel_filename}"
 
             # Interactive Vector Speech Bubbles & Cinematic Subtitles
             bubbles: List[InteractiveSpeechBubble] = []

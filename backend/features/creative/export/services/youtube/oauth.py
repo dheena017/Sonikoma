@@ -11,6 +11,7 @@ import logging
 import asyncio
 import tempfile
 from typing import Optional, Any
+from dotenv import load_dotenv
 
 from app.core.exceptions import ServiceException
 from features.creative.repositories import get_youtube_credentials
@@ -201,11 +202,7 @@ async def get_authenticated_service(user_id: Optional[str] = None, allow_interac
                 # Reload .env dynamically so credentials take effect without restarting
                 dotenv_file = os.path.join(PROJECT_ROOT, ".env")
                 if os.path.exists(dotenv_file):
-                    try:
-                        from dotenv import load_dotenv
-                        load_dotenv(dotenv_file, override=True)
-                    except Exception:
-                        pass
+                    load_dotenv(dotenv_file, override=True)
 
                 # Check environment variables directly from .env
                 google_client_id = os.getenv("YOUTUBE_CLIENT_ID") or os.getenv("GOOGLE_CLIENT_ID")

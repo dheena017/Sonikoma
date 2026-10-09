@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   Zap,
   ShieldCheck,
@@ -7,6 +7,7 @@ import {
   Save,
   Search,
   Filter,
+  ChevronDown,
   RefreshCw,
   CheckCircle2,
   Play,
@@ -23,11 +24,15 @@ import {
   DollarSign,
   Gauge,
   ExternalLink,
+  Info,
 } from "lucide-react";
 import TierModelCard, {
   DynamicModelOption,
   isProviderKeyConfiguredInVault,
 } from "../components/TierModelCard";
+import CascadeSimulatorModal from "../components/CascadeSimulatorModal";
+import PipelineTelemetryModal from "../components/PipelineTelemetryModal";
+import CyberSelect from "@/shared/ui/common/CyberSelect";
 
 interface AIRoutingPageProps {
   addNotification?: (msg: string, type?: string) => void;
@@ -68,7 +73,7 @@ interface CapabilityDefinition {
   default_tertiary: string;
 }
 
-interface CapabilityRoute extends CapabilityDefinition {
+export interface CapabilityRoute extends CapabilityDefinition {
   primary_model: string;
   fallback_model: string;
   tertiary_model: string;
@@ -85,8 +90,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "text_reasoning",
     required_tag: "Text-to-Text",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "claude-3-5-sonnet-20241022",
-    default_tertiary: "gpt-4o",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
   {
     task: "manhwa_diffusion",
@@ -98,7 +103,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "image_diffusion",
     required_tag: "Text-to-Image",
     default_primary: "flux-anime",
-    default_fallback: "flux",
+    default_fallback: "stable-diffusion",
     default_tertiary: "turbo",
   },
   {
@@ -112,7 +117,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_tag: "Text-to-Image",
     default_primary: "stable-diffusion",
     default_fallback: "flux-anime",
-    default_tertiary: "flux",
+    default_tertiary: "turbo",
   },
   {
     task: "anime_video",
@@ -137,8 +142,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "vision_multimodal",
     required_tag: "Image-to-Text",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "gemini-3.5-flash-lite",
-    default_tertiary: "gpt-4o",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
   {
     task: "scraper_blueprint",
@@ -150,8 +155,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "vision_multimodal",
     required_tag: "Image-to-Text",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "gpt-4o-mini",
-    default_tertiary: "deepseek-chat",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
   {
     task: "prompt_enhancement",
@@ -163,8 +168,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "text_reasoning",
     required_tag: "Text-to-Text",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "gpt-4o-mini",
-    default_tertiary: "claude-3-5-haiku-20241022",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
   {
     task: "image_diffusion",
@@ -176,8 +181,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "image_diffusion",
     required_tag: "Text-to-Image",
     default_primary: "flux-anime",
-    default_fallback: "flux",
-    default_tertiary: "stable-diffusion",
+    default_fallback: "stable-diffusion",
+    default_tertiary: "turbo",
   },
   {
     task: "speech_synthesis",
@@ -190,7 +195,7 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_tag: "Text-to-Speech",
     default_primary: "edge-tts-neural",
     default_fallback: "eleven_multilingual_v2",
-    default_tertiary: "tts-1-hd",
+    default_tertiary: "edge-tts-neural",
   },
   {
     task: "translate",
@@ -202,8 +207,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "translation",
     required_tag: "Translation",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "deepl-pro",
-    default_tertiary: "gpt-4o-mini",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
   {
     task: "character_persona",
@@ -214,9 +219,9 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
       "Extracts character identities, personality traits, and recommends matching voice actors from audio samples.",
     required_type: "text_reasoning",
     required_tag: "Text-to-Text",
-    default_primary: "claude-3-5-sonnet-20241022",
-    default_fallback: "gpt-4o",
-    default_tertiary: "gemini-2.5-flash",
+    default_primary: "gemini-2.5-flash",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
   {
     task: "seo_optimization",
@@ -227,9 +232,9 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
       "Generates high-CTR YouTube titles, timestamps, video descriptions, tags, and hashtag recommendations.",
     required_type: "text_reasoning",
     required_tag: "Text-to-Text",
-    default_primary: "gpt-4o-mini",
-    default_fallback: "gemini-2.5-flash",
-    default_tertiary: "deepseek-chat",
+    default_primary: "gemini-2.5-flash",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
   {
     task: "sfx_audio",
@@ -241,8 +246,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "text_reasoning",
     required_tag: "Text-to-Text",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "gpt-4o-mini",
-    default_tertiary: "claude-3-5-haiku-20241022",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
   {
     task: "smart_crop",
@@ -254,8 +259,8 @@ const CAPABILITY_DEFINITIONS: CapabilityDefinition[] = [
     required_type: "vision_multimodal",
     required_tag: "Image-to-Text",
     default_primary: "gemini-2.5-flash",
-    default_fallback: "gemini-3.5-flash-lite",
-    default_tertiary: "gpt-4o",
+    default_fallback: "gemini-2.0-flash",
+    default_tertiary: "gemini-1.5-flash",
   },
 ];
 
@@ -391,93 +396,62 @@ const PROVIDER_COLOR_MAP: Record<string, { bg: string; text: string; border: str
   whisper: { bg: "rgba(16, 185, 129, 0.15)", text: "#34d399", border: "rgba(16, 185, 129, 0.35)" },
 };
 
+export const getModelDisplayDetails = (
+  modelId: string = "",
+  catalog: DynamicModelOption[] = []
+) => {
+  if (!modelId || !modelId.trim()) {
+    return {
+      name: "No Model Assigned",
+      id: "",
+      provider: "none",
+      providerName: "Unconfigured",
+      isConfigured: false,
+      color: {
+        bg: "rgba(255, 255, 255, 0.05)",
+        text: "#9CA3AF",
+        border: "rgba(255, 255, 255, 0.1)",
+      },
+      speedRating: "—",
+    };
+  }
+
+  const found = catalog.find((m) => m.id === modelId);
+  const provInfo = inferModelProviderInfo(modelId);
+  const providerKey = (found?.provider || provInfo.provider).toLowerCase();
+  const providerName = found?.provider_name || provInfo.provider_name;
+  const color =
+    PROVIDER_COLOR_MAP[providerKey] || PROVIDER_COLOR_MAP.gemini;
+  const isConfigured = isProviderKeyConfiguredInVault(providerKey);
+
+  // Formatted human-friendly name if not in catalog
+  let name = found?.name;
+  if (!name) {
+    name = modelId
+      .replace(/[-_]/g, " ")
+      .split(" ")
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  }
+
+  return {
+    name,
+    id: modelId,
+    provider: providerKey,
+    providerName,
+    isConfigured,
+    color,
+    speedRating: found?.speed_rating || "Ultra Fast",
+  };
+};
+
 export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [routes, setRoutes] = useState<CapabilityRoute[]>([]);
   const [originalRoutes, setOriginalRoutes] = useState<CapabilityRoute[]>([]);
   const [availableModels, setAvailableModels] = useState<DynamicModelOption[]>(
     []
   );
-  const [activeViewTab, setActiveViewTab] = useState<"matrix" | "routing">(() => {
-    if (typeof window !== "undefined" && window.location.pathname.includes("/models")) {
-      return "matrix";
-    }
-    return "matrix";
-  });
-  const [selectedProviderFilter, setSelectedProviderFilter] = useState<string>("All");
-  const [selectedCapabilityFilter, setSelectedCapabilityFilter] = useState<string>("All");
-  const [modelSearchQuery, setModelSearchQuery] = useState<string>("");
-  const [copiedModelId, setCopiedModelId] = useState<string | null>(null);
-
-  const handleCopyModelId = (id: string) => {
-    try {
-      navigator.clipboard?.writeText(id);
-      setCopiedModelId(id);
-      setTimeout(() => setCopiedModelId(null), 1800);
-      addNotification?.(`Copied model ID "${id}" to clipboard`, "info");
-    } catch {}
-  };
-
-  const handleSelectAsActiveModel = (modelId: string) => {
-    localStorage.setItem("ai_comic_model", modelId);
-    window.dispatchEvent(
-      new CustomEvent("ai-model-changed", {
-        detail: { model: modelId },
-      })
-    );
-    addNotification?.(`Set "${modelId}" as active primary studio model!`, "success");
-  };
-
-  const providerList = useMemo(() => {
-    const counts: Record<string, number> = { All: availableModels.length };
-    availableModels.forEach((m) => {
-      const p = m.provider_name || m.provider;
-      counts[p] = (counts[p] || 0) + 1;
-    });
-    return Object.entries(counts).map(([name, count]) => ({ name, count }));
-  }, [availableModels]);
-
-  const capabilityOptions = [
-    { id: "All", label: "All Capabilities" },
-    { id: "vision", label: "Vision & OCR" },
-    { id: "image_generation", label: "Diffusion & Artwork" },
-    { id: "text", label: "Scripting & Reasoning" },
-    { id: "tts", label: "Speech & Audio" },
-    { id: "video_generation", label: "Kinetic Video & Sakuga" },
-    { id: "upscaling", label: "4K Super-Resolution" },
-    { id: "translation", label: "Translation" },
-  ];
-
-  const filteredCatalogModels = useMemo(() => {
-    return availableModels.filter((m) => {
-      const pName = m.provider_name || m.provider;
-      const matchesProvider =
-        selectedProviderFilter === "All" || pName === selectedProviderFilter;
-      const caps = m.capabilities || [];
-      const matchesCap =
-        selectedCapabilityFilter === "All" ||
-        caps.includes(selectedCapabilityFilter) ||
-        (selectedCapabilityFilter === "tts" &&
-          (caps.includes("audio") || caps.includes("voice_cloning"))) ||
-        (selectedCapabilityFilter === "image_generation" &&
-          (caps.includes("diffusion") ||
-            (m.category || "").toLowerCase().includes("diffusion")));
-      const q = modelSearchQuery.toLowerCase().trim();
-      const matchesQuery =
-        !q ||
-        m.name.toLowerCase().includes(q) ||
-        m.id.toLowerCase().includes(q) ||
-        (m.provider_name || "").toLowerCase().includes(q) ||
-        (m.category || "").toLowerCase().includes(q) ||
-        (m.recommended_for || []).some((r: string) => r.toLowerCase().includes(q));
-      return matchesProvider && matchesCap && matchesQuery;
-    });
-  }, [
-    availableModels,
-    selectedProviderFilter,
-    selectedCapabilityFilter,
-    modelSearchQuery,
-  ]);
-
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -487,27 +461,11 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [keyUpdateTick, setKeyUpdateTick] = useState(0);
 
   const hasUserKey = useMemo(() => {
-    return Boolean(
-      localStorage.getItem("user_gemini_key") ||
-        localStorage.getItem("sonikoma_key_gemini") ||
-        localStorage.getItem("user_openai_key") ||
-        localStorage.getItem("sonikoma_key_openai") ||
-        localStorage.getItem("user_anthropic_key") ||
-        localStorage.getItem("sonikoma_key_anthropic") ||
-        localStorage.getItem("user_groq_key") ||
-        localStorage.getItem("sonikoma_key_groq") ||
-        localStorage.getItem("user_deepseek_key") ||
-        localStorage.getItem("sonikoma_key_deepseek") ||
-        localStorage.getItem("user_elevenlabs_key") ||
-        localStorage.getItem("sonikoma_key_elevenlabs") ||
-        localStorage.getItem("user_deepl_key") ||
-        localStorage.getItem("sonikoma_key_deepl") ||
-        localStorage.getItem("user_huggingface_key") ||
-        localStorage.getItem("sonikoma_key_huggingface")
-    );
+    // Server environment has built-in keys (Gemini, HuggingFace, Edge-TTS, Whisper, Pollinations)
+    return true;
   }, [keyUpdateTick]);
 
-  // Helper to check if a specific model's provider is configured with an API key in website
+  // Helper to check if a specific model's provider is configured with an API key
   const isModelConfiguredInWebsite = (modelId: string = "") => {
     if (!modelId) return false;
     const info = inferModelProviderInfo(modelId);
@@ -534,15 +492,9 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
         r.task === task
           ? {
               ...r,
-              primary_model: isModelConfiguredInWebsite(def.default_primary)
-                ? def.default_primary
-                : "",
-              fallback_model: isModelConfiguredInWebsite(def.default_fallback)
-                ? def.default_fallback
-                : "",
-              tertiary_model: isModelConfiguredInWebsite(def.default_tertiary)
-                ? def.default_tertiary
-                : "",
+              primary_model: def.default_primary,
+              fallback_model: def.default_fallback,
+              tertiary_model: def.default_tertiary,
             }
           : r
       )
@@ -557,6 +509,22 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
   const [simTask, setSimTask] = useState<CapabilityRoute | null>(null);
   const [simRunning, setSimRunning] = useState<boolean>(false);
   const [simResult, setSimResult] = useState<any>(null);
+
+  // Telemetry Details Modal State
+  const [showTelemetryModal, setShowTelemetryModal] = useState<boolean>(false);
+
+  // Close open modals on Escape key
+  useEffect(() => {
+    if (!simModalOpen && !showTelemetryModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSimModalOpen(false);
+        setShowTelemetryModal(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [simModalOpen, showTelemetryModal]);
 
   // Return all compatible models from the full catalog for this specific task
   // Return strictly compatible models matching the route's canonical Modality Tag
@@ -725,15 +693,9 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
             const p2Candidate = serverRoute?.fallback || def.default_fallback;
             const p3Candidate = serverRoute?.tertiary || def.default_tertiary;
 
-            const p1 = isModelConfiguredInWebsite(p1Candidate)
-              ? p1Candidate
-              : "";
-            const p2 = isModelConfiguredInWebsite(p2Candidate)
-              ? p2Candidate
-              : "";
-            const p3 = isModelConfiguredInWebsite(p3Candidate)
-              ? p3Candidate
-              : "";
+            const p1 = p1Candidate || def.default_primary;
+            const p2 = p2Candidate || def.default_fallback;
+            const p3 = p3Candidate || def.default_tertiary;
 
             return {
               ...def,
@@ -746,6 +708,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
 
         setRoutes(initialRoutes);
         setOriginalRoutes(initialRoutes);
+        console.log(`[AI Routing] Loaded ${initialRoutes.length} capability cascades with 3-tier failovers.`);
       } catch (err) {
         console.error("Failed to load AI model routing data:", err);
       } finally {
@@ -762,6 +725,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     field: "primary_model" | "fallback_model" | "tertiary_model",
     val: string
   ) => {
+    console.log(`[AI Routing] Route updated for "${task}": ${field} -> ${val}`);
     setRoutes((prev) =>
       prev.map((r) => (r.task === task ? { ...r, [field]: val } : r))
     );
@@ -819,6 +783,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
       });
       if (res.ok) {
         setOriginalRoutes(routes);
+        console.log(`[AI Routing] Saved ${routes.length} capability cascades to platform settings.`);
         addNotification?.(
           "All AI model routing cascades saved and synchronized successfully!",
           "success"
@@ -963,6 +928,32 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     "Kinetic Video",
   ];
 
+  // Category select options for codebase CyberSelect
+  const categoryOptions = useMemo(() => {
+    return categories.map((cat) => {
+      const count =
+        cat === "All"
+          ? routes.length
+          : routes.filter((r) => r.category === cat).length;
+      const catCfg = CATEGORY_COLORS[cat];
+      const dotColor = cat === "All" ? "#3B82F6" : catCfg?.dot || "#3B82F6";
+      return {
+        value: cat,
+        label: cat === "All" ? "All Categories" : cat,
+        badge: `${count}`,
+        icon:
+          cat === "All" ? (
+            <Filter className="w-3.5 h-3.5 text-[#3B82F6]" />
+          ) : (
+            <span
+              className="w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: dotColor }}
+            />
+          ),
+      };
+    });
+  }, [routes, categories]);
+
   // Filter routes based on Category and Search
   const filteredRoutes = routes.filter((r) => {
     const matchesCategory =
@@ -990,44 +981,36 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
     <div className="flex-1 w-full max-w-7xl mx-auto py-5 sm:py-7 animate-in fade-in duration-200 text-left text-[#E5E5E5]">
       {/* ── MAIN COVER WRAPPER CARD ── */}
       <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden">
-        {/* ── 1. HERO HEADER & TELEMETRY BANNER ──────────────────────────────── */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#2F2F2F] relative z-10">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
-                {activeViewTab === "matrix" ? (
-                  <>
-                    AI Model{" "}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#60A5FA]">
-                      Matrix & Catalog
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    AI Smart Model{" "}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#3B82F6]">
-                      Routing
-                    </span>
-                  </>
-                )}
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/15 border border-[#3B82F6]/30 text-[10px] font-mono font-bold text-[#3B82F6] flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
-                {activeViewTab === "matrix"
-                  ? `${availableModels.length} ENGINES TRACKED`
-                  : `${CAPABILITY_DEFINITIONS.length} ACTIVE PIPELINES`}
-              </span>
+        {/* ── UNIFIED SINGLE HERO HEADER ────────────────────────────────────── */}
+        <div className="space-y-6 pb-6 border-b border-[#2F2F2F] relative z-40">
+          {/* 1. Header Top: Title & Action CTAs */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-2xl sm:text-3xl font-black text-[#E5E5E5] tracking-tight">
+                  AI Smart Model{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3B82F6] to-[#60A5FA]">
+                    Routing
+                  </span>
+                </h1>
+              </div>
+              <p className="text-neutral-400 text-xs sm:text-sm max-w-3xl leading-relaxed">
+                Configure specialized 3-tier cascade engines (Primary, High-Speed Fallback, and Emergency Failover) across all comic generation pipelines.
+              </p>
             </div>
-            <p className="text-neutral-400 text-xs sm:text-sm max-w-3xl leading-relaxed">
-              {activeViewTab === "matrix"
-                ? "Unified index of all foundation, diffusion, voice cloning, and kinetic video AI engines with live specs, pricing, and capabilities."
-                : "Configure specialized 3-tier cascade engines (Primary, High-Speed Fallback, and Emergency Failover) across all comic generation pipelines."}
-            </p>
-          </div>
 
-          {/* Action CTAs: Reset Defaults + Save */}
-          {activeViewTab === "routing" && (
-            <div className="flex items-center gap-3 shrink-0">
+            {/* Action CTAs: Details + Reset Defaults + Save */}
+            <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowTelemetryModal(true)}
+                className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-semibold font-mono text-[#E5E5E5] bg-[#1E1E1E] border border-[#2F2F2F] hover:bg-[#2A2A2A] hover:border-neutral-600 transition-all cursor-pointer shadow-sm"
+                title="View multi-tier cascade health and live telemetry metrics"
+              >
+                <Info className="w-3.5 h-3.5 text-[#3B82F6]" />
+                <span className="hidden sm:inline">Details</span>
+              </button>
+
               <button
                 type="button"
                 onClick={handleResetDefaults}
@@ -1070,554 +1053,80 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                 )}
               </button>
             </div>
-          )}
-        </div>
-
-        {/* ── TOP VIEW MODE SWITCHER TABS ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-2 rounded-2xl bg-[#121212] border border-[#2F2F2F]">
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-white/5">
-            <button
-              type="button"
-              onClick={() => setActiveViewTab("matrix")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                activeViewTab === "matrix"
-                  ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-900/40"
-                  : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
-              }`}
-            >
-              <Cpu className="w-3.5 h-3.5" />
-              <span>All Models Matrix</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">
-                {availableModels.length}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveViewTab("routing")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                activeViewTab === "routing"
-                  ? "bg-[#3B82F6] text-white shadow-lg shadow-blue-900/40"
-                  : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
-              }`}
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              <span>3-Tier Pipeline Cascades</span>
-              <span className="px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-bold">
-                {routes.length}
-              </span>
-            </button>
           </div>
 
-          <div className="text-xs font-mono text-neutral-400 flex items-center gap-2 px-2">
-            <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
-            <span>
-              {activeViewTab === "matrix"
-                ? `Showing ${filteredCatalogModels.length} of ${availableModels.length} AI Engines`
-                : `${routes.length} Active Comic Pipelines Configured`}
-            </span>
+          {/* 2. Header Controls: Merged Category Dropdown & Search Bar in One Line */}
+          <div className="flex items-center gap-2.5 pt-3 border-t border-[#2F2F2F]/60 w-full relative z-30">
+            {/* Category Dropdown (via codebase CyberSelect) */}
+            <div className="w-48 sm:w-60 shrink-0">
+              <CyberSelect
+                value={selectedCategory}
+                onChange={(val) => setSelectedCategory(val)}
+                options={categoryOptions}
+                variant="blue"
+                size="md"
+                ariaLabel="Filter pipelines by category"
+              />
+            </div>
+
+            {/* Search input */}
+            <div className="h-10 flex-1 min-w-0 flex items-center gap-2 px-3.5 rounded-xl border border-[#2A2A2A] bg-[#141414] focus-within:border-[#3B82F6] hover:border-neutral-700 transition-colors shadow-sm">
+              <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search pipelines by task, tag, or assigned model..."
+                className="bg-transparent text-xs text-[#E5E5E5] placeholder-[#6B7280] outline-none w-full font-sans"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="text-[10px] text-[#9CA3AF] hover:text-white p-0.5 rounded cursor-pointer transition-colors"
+                  title="Clear search"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {activeViewTab === "matrix" ? (
-          <div className="space-y-6 animate-in fade-in duration-150">
-            {/* KPI Metrics Grid for Models */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-              <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-                <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-                    Total Tracked Models
-                  </span>
-                  <Cpu className="w-4 h-4 text-[#3B82F6]" />
+        <div className="space-y-6">
+          {/* ── 1.1 MISSING API KEYS WARNING BANNER ────────────────────────────── */}
+          {!hasUserKey && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in shadow-lg">
+              <div className="flex items-start gap-3.5">
+                <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+                  <AlertCircle className="w-5 h-5" />
                 </div>
-                <div className="text-xl font-bold text-[#E5E5E5] font-mono">
-                  {availableModels.length} Engines
-                </div>
-                <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-                  Multimodal, diffusion, audio & video
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-                <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-                    Connected Providers
-                  </span>
-                  <Activity className="w-4 h-4 text-[#10B981]" />
-                </div>
-                <div className="text-xl font-bold text-[#10B981] font-mono">
-                  {Math.max(1, providerList.length - 1)} Ecosystems
-                </div>
-                <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-                  Google, OpenAI, Claude, Pollinations...
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-                <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-                    Diffusion & Media
-                  </span>
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                </div>
-                <div className="text-xl font-bold text-purple-300 font-mono">
-                  {availableModels.filter(m => (m.category || "").toLowerCase().includes("diffusion") || (m.capabilities || []).includes("image_generation")).length} Models
-                </div>
-                <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-                  SDXL, Flux, Anime, Inpainting
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-                <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-                  <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-                    Voice & Kinetic
-                  </span>
-                  <Zap className="w-4 h-4 text-amber-400" />
-                </div>
-                <div className="text-xl font-bold text-amber-300 font-mono">
-                  {availableModels.filter(m => (m.capabilities || []).some((c: string) => ["tts", "voice_cloning", "video_generation"].includes(c))).length} Engines
-                </div>
-                <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-                  GPT-SoVITS, ToonCrafter, Wan2.1
-                </div>
-              </div>
-            </div>
-
-            {/* Filter Bar: Providers + Capabilities + Search */}
-            <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] space-y-3.5 shadow-md">
-              {/* Provider Pills */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400">
-                  Filter By Provider:
-                </span>
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 flex-wrap [scrollbar-width:none]">
-                  {providerList.map((p) => {
-                    const isActive = selectedProviderFilter === p.name;
-                    return (
-                      <button
-                        key={p.name}
-                        type="button"
-                        onClick={() => setSelectedProviderFilter(p.name)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
-                          isActive
-                            ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#60A5FA] shadow-sm"
-                            : "bg-[#121212] border-[#2F2F2F] text-neutral-400 hover:text-white hover:border-neutral-600"
-                        }`}
-                      >
-                        <span>{p.name}</span>
-                        <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-white/10">
-                          {p.count}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Capability & Search Row */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1 border-t border-white/5">
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 flex-wrap">
-                  {capabilityOptions.map((c) => {
-                    const isActive = selectedCapabilityFilter === c.id;
-                    return (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setSelectedCapabilityFilter(c.id)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-sans font-semibold transition-all cursor-pointer border ${
-                          isActive
-                            ? "bg-white/15 border-white/30 text-white"
-                            : "bg-transparent border-transparent text-neutral-400 hover:text-white hover:bg-white/5"
-                        }`}
-                      >
-                        {c.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Search */}
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#2F2F2F] bg-[#121212] w-full md:w-72 focus-within:border-[#3B82F6] transition-colors">
-                  <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
-                  <input
-                    type="text"
-                    value={modelSearchQuery}
-                    onChange={(e) => setModelSearchQuery(e.target.value)}
-                    placeholder="Search all models..."
-                    className="bg-transparent text-xs text-[#E5E5E5] placeholder-[#6B7280] outline-none w-full font-sans"
-                  />
-                  {modelSearchQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setModelSearchQuery("")}
-                      className="text-[10px] text-[#9CA3AF] hover:text-white"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Models Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {filteredCatalogModels.map((m) => {
-                const info = inferModelProviderInfo(m.id);
-                const theme = PROVIDER_COLOR_MAP[info.provider] || {
-                  bg: "rgba(59, 130, 246, 0.15)",
-                  text: "#60a5fa",
-                  border: "rgba(59, 130, 246, 0.35)",
-                };
-                const isCopied = copiedModelId === m.id;
-                const isFreeTier =
-                  m.cost_per_1m_prompt === 0 &&
-                  m.cost_per_1m_completion === 0 &&
-                  (m.price_per_image === 0 || m.price_per_image === undefined);
-
-                return (
-                  <div
-                    key={m.id}
-                    className="rounded-2xl border border-[#2F2F2F] bg-[#141414] p-4 flex flex-col justify-between hover:border-neutral-600 transition-all duration-200 shadow-md group relative overflow-hidden"
-                  >
-                    <div className="space-y-3">
-                      {/* Top Row: Provider & Status */}
-                      <div className="flex items-center justify-between gap-2">
-                        <span
-                          className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border flex items-center gap-1.5"
-                          style={{
-                            backgroundColor: theme.bg,
-                            borderColor: theme.border,
-                            color: theme.text,
-                          }}
-                        >
-                          <span
-                            className="w-1.5 h-1.5 rounded-full"
-                            style={{ backgroundColor: theme.text }}
-                          />
-                          {m.provider_name || info.provider_name}
-                        </span>
-
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold">
-                          {isFreeTier ? "BUILT-IN / FREE" : "ONLINE API"}
-                        </span>
-                      </div>
-
-                      {/* Model Name & ID */}
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-bold text-white group-hover:text-[#60A5FA] transition-colors leading-snug">
-                          {m.name}
-                        </h3>
-                        <div className="flex items-center gap-1.5">
-                          <code className="text-[10px] font-mono text-neutral-400 bg-black/40 px-2 py-0.5 rounded border border-white/5 truncate max-w-[200px]">
-                            {m.id}
-                          </code>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyModelId(m.id)}
-                            className="p-1 rounded hover:bg-white/10 text-neutral-500 hover:text-white transition-colors cursor-pointer"
-                            title="Copy Model ID"
-                          >
-                            {isCopied ? (
-                              <Check className="w-3 h-3 text-emerald-400" />
-                            ) : (
-                              <Copy className="w-3 h-3" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Specs Row: Speed, Context, Price */}
-                      <div className="grid grid-cols-3 gap-2 py-2 px-2.5 rounded-xl bg-[#0E0F16] border border-white/5 text-[11px] font-mono">
-                        <div>
-                          <span className="text-[9px] text-neutral-500 block uppercase">
-                            Speed
-                          </span>
-                          <span className="font-semibold text-neutral-200 truncate block">
-                            {m.speed_rating || "Fast"}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] text-neutral-500 block uppercase">
-                            Context
-                          </span>
-                          <span className="font-semibold text-neutral-200 truncate block">
-                            {typeof m.context_window === "number"
-                              ? `${Math.round(m.context_window / 1000)}k`
-                              : m.context_window || "128k"}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-[9px] text-neutral-500 block uppercase">
-                            Pricing
-                          </span>
-                          <span className="font-semibold text-emerald-400 truncate block">
-                            {isFreeTier
-                              ? "$0 / Free"
-                              : m.price_per_image
-                              ? `$${m.price_per_image}/img`
-                              : `$${m.cost_per_1m_prompt || 0}/1M`}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Capabilities Tags */}
-                      {m.capabilities && m.capabilities.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {m.capabilities.map((c: string) => (
-                            <span
-                              key={c}
-                              className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-white/[0.04] border border-white/10 text-neutral-400"
-                            >
-                              {c.replace(/_/g, " ")}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Recommended For */}
-                      {m.recommended_for && m.recommended_for.length > 0 && (
-                        <div className="space-y-1 pt-1">
-                          <span className="text-[9px] font-mono text-neutral-500 uppercase tracking-wider block">
-                            Best Suited For:
-                          </span>
-                          <ul className="text-[10px] text-neutral-300 font-sans space-y-0.5 list-disc list-inside">
-                            {m.recommended_for.slice(0, 2).map((rec: string, rIdx: number) => (
-                              <li key={rIdx} className="truncate">
-                                {rec}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Card Footer: Set As Active Studio Model */}
-                    <div className="pt-3 mt-3 border-t border-white/5 flex items-center justify-between gap-2">
-                      <span className="text-[10px] text-neutral-500 font-mono capitalize">
-                        {m.category || "General"}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectAsActiveModel(m.id)}
-                        className="px-2.5 py-1 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/30 text-blue-300 hover:text-white text-[10px] font-mono font-bold flex items-center gap-1 transition-all cursor-pointer active:scale-95"
-                      >
-                        <Zap className="w-3 h-3" />
-                        <span>Select Engine</span>
-                      </button>
-                    </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-white font-sans">
+                      No API Keys Configured in Website
+                    </h3>
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300 uppercase">
+                      Setup Required
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-
-            {filteredCatalogModels.length === 0 && (
-              <div className="p-12 text-center rounded-2xl bg-[#141414] border border-[#2F2F2F] space-y-3">
-                <Cpu className="w-8 h-8 text-neutral-600 mx-auto" />
-                <h3 className="text-sm font-bold text-white">No Models Found</h3>
-                <p className="text-xs text-neutral-400 max-w-sm mx-auto font-sans">
-                  No models matched your search criteria. Try selecting "All Providers" or resetting your filter.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedProviderFilter("All");
-                    setSelectedCapabilityFilter("All");
-                    setModelSearchQuery("");
-                  }}
-                  className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-mono font-semibold"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* ── 1.1 MISSING API KEYS WARNING BANNER ────────────────────────────── */}
-        {!hasUserKey && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in shadow-lg">
-            <div className="flex items-start gap-3.5">
-              <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
-                <AlertCircle className="w-5 h-5" />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-white font-sans">
-                    No API Keys Configured in Website
-                  </h3>
-                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/20 border border-amber-500/30 text-amber-300 uppercase">
-                    Setup Required
-                  </span>
+                  <p className="text-xs text-neutral-300 leading-relaxed max-w-3xl">
+                    You need to enter your API key in the website (AI Vault) to
+                    activate and select AI models. All default AI models remain
+                    empty until an API key is entered in your browser vault.
+                  </p>
                 </div>
-                <p className="text-xs text-neutral-300 leading-relaxed max-w-3xl">
-                  You need to enter your API key in the website (AI Vault) to
-                  activate and select AI models. All default AI models remain
-                  empty until an API key is entered in your browser vault.
-                </p>
               </div>
-            </div>
 
-            <a
-              href="/ai-core/api-keys"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer self-start sm:self-center active:scale-95"
-            >
-              <Key className="w-3.5 h-3.5" />
-              <span>Enter API Key in AI Vault</span>
-            </a>
-          </div>
-        )}
-
-        {/* ── 2. TELEMETRY KPI METRICS GRID ──────────────────────────────────── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {/* KPI 1: Active Pipelines */}
-          <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-            <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-                Routed Pipelines
-              </span>
-              <Cpu className="w-4 h-4 text-[#3B82F6]" />
-            </div>
-            <div className="text-xl font-bold text-[#E5E5E5] font-mono">
-              {routes.length} / 11
-            </div>
-            <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-              Full comic workflow coverage
-            </div>
-          </div>
-
-          {/* KPI 2: 3-Tier Redundancy */}
-          <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-            <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-                Cascade Redundancy
-              </span>
-              <ShieldCheck className="w-4 h-4 text-[#10B981]" />
-            </div>
-            <div className="text-xl font-bold text-[#10B981] font-mono">
-              100% 3-Tier
-            </div>
-            <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-              Auto-failover enabled on rate limit
-            </div>
-          </div>
-
-          {/* KPI 3: Available Models */}
-          <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-            <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-                Model Catalog
-              </span>
-              <Sparkles className="w-4 h-4 text-[#3B82F6]" />
-            </div>
-            <div className="text-xl font-bold text-[#E5E5E5] font-mono">
-              {new Set(
-                routes.flatMap((r) => [
-                  r.primary_model,
-                  r.fallback_model,
-                  r.tertiary_model,
-                ])
-              ).size || 12}{" "}
-              Tier Engines
-            </div>
-            <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-              Active across 3-tier routing pipelines
-            </div>
-          </div>
-
-          {/* KPI 4: Orchestrator State */}
-          <div className="p-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] shadow-sm">
-            <div className="flex items-center justify-between text-[#9CA3AF] mb-1">
-              <span className="text-[11px] font-mono uppercase tracking-wider font-bold">
-                Orchestrator Sync
-              </span>
-              <Activity className="w-4 h-4 text-[#3B82F6]" />
-            </div>
-            <div className="text-xl font-bold text-[#3B82F6] font-mono flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
-              SYNCHRONIZED
-            </div>
-            <div className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">
-              Live Central AI Core binding
-            </div>
-          </div>
-        </div>
-
-        {/* ── 3. SEARCH & CATEGORY FILTER BAR ────────────────────────────────── */}
-        <div className="p-3.5 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-md">
-          {/* Category Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 flex-wrap">
-            {categories.map((cat) => {
-              const isActive = selectedCategory === cat;
-              const catCfg = CATEGORY_COLORS[cat];
-              const activeColor =
-                cat === "All" ? "#3B82F6" : catCfg?.dot || "#3B82F6";
-
-              const count =
-                cat === "All"
-                  ? routes.length
-                  : routes.filter((r) => r.category === cat).length;
-
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer font-sans"
-                  style={{
-                    borderWidth: 1,
-                    borderStyle: "solid",
-                    borderColor: isActive ? activeColor : "#2F2F2F",
-                    backgroundColor: isActive ? `${activeColor}20` : "#121212",
-                    color: isActive ? "#ffffff" : "#9CA3AF",
-                  }}
-                >
-                  {cat !== "All" && (
-                    <span
-                      className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{
-                        backgroundColor: isActive ? activeColor : "#6B7280",
-                      }}
-                    />
-                  )}
-                  <span>{cat}</span>
-                  <span
-                    className="px-1.5 py-0.2 rounded-full text-[9px] font-mono"
-                    style={{
-                      backgroundColor: isActive
-                        ? `${activeColor}33`
-                        : "rgba(255, 255, 255, 0.06)",
-                      color: isActive ? "#ffffff" : "#6b7280",
-                    }}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Search input */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#2F2F2F] bg-[#121212] w-full md:w-64 focus-within:border-[#3B82F6] transition-colors">
-            <Search className="w-3.5 h-3.5 text-[#6B7280] shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search pipelines..."
-              className="bg-transparent text-xs text-[#E5E5E5] placeholder-[#6B7280] outline-none w-full font-sans"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="text-[10px] text-[#9CA3AF] hover:text-white"
+              <a
+                href="/ai-core/api-keys"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-md shrink-0 cursor-pointer self-start sm:self-center active:scale-95"
               >
-                <X className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-        </div>
+                <Key className="w-3.5 h-3.5" />
+                <span>Enter API Key in AI Vault</span>
+              </a>
+            </div>
+          )}
 
         {/* ── 4. PIPELINE TASK CARDS WITH 3-TIER CASCADE FLOW ───────────────── */}
         <div className="space-y-4">
@@ -1671,7 +1180,7 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
                   {/* Header Action Badges: 3 Tier count, slug, and Simulator Button */}
                   <div className="flex items-center gap-2 shrink-0 self-end sm:self-start">
                     <span className="text-[10px] font-mono px-2.5 py-1 rounded-lg border border-[#2F2F2F] bg-[#121212] text-[#9CA3AF]">
-                      {tierModels.length} Tier Engines
+                      {tierModels.length} Engines
                     </span>
 
                     <button
@@ -1726,119 +1235,34 @@ export default function AIRoutingPage({ addNotification }: AIRoutingPageProps) {
           })}
         </div>
       </div>
-    )}
 
         {/* ── 5. CASCADE DRY-RUN SIMULATOR MODAL ─────────────────────────────── */}
-        {simModalOpen && simTask && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-150">
-            <div className="w-full max-w-lg rounded-3xl border border-[#2F2F2F] bg-[#181818] p-6 space-y-5 shadow-2xl relative">
-              {/* Modal Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{simTask.emoji}</span>
-                    <h3 className="text-base font-bold text-[#E5E5E5]">
-                      Cascade Simulator: {simTask.name}
-                    </h3>
-                  </div>
-                  <p className="text-xs text-[#9CA3AF] font-sans">
-                    Simulate a dispatch request through the 3-tier cascade and
-                    inspect model resolution.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSimModalOpen(false)}
-                  className="btn-secondary p-1.5 rounded-xl text-[#9CA3AF] hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        <CascadeSimulatorModal
+          isOpen={simModalOpen}
+          onClose={() => setSimModalOpen(false)}
+          task={simTask}
+          availableModels={availableModels}
+          simRunning={simRunning}
+          simResult={simResult}
+          onExecuteSimulation={handleExecuteSimulation}
+        />
 
-              {/* Cascade Flow Blueprint */}
-              <div className="p-3.5 rounded-2xl border border-[#2F2F2F] bg-[#121212] space-y-2 text-xs font-mono">
-                <div className="text-[10px] text-[#9CA3AF] uppercase tracking-wider font-bold">
-                  Configured Execution Path:
-                </div>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-[#3B82F6]">
-                    <Zap className="w-3.5 h-3.5 shrink-0" />
-                    <span className="font-bold">Tier 1 (Primary):</span>
-                    <span className="text-[#E5E5E5] truncate">
-                      {simTask.primary_model}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-emerald-300">
-                    <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                    <span className="font-bold">Tier 2 (Fallback):</span>
-                    <span className="text-white truncate">
-                      {simTask.fallback_model}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-amber-300">
-                    <Layers className="w-3.5 h-3.5 shrink-0" />
-                    <span className="font-bold">Tier 3 (Emergency):</span>
-                    <span className="text-white truncate">
-                      {simTask.tertiary_model}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Simulation Result */}
-              {simResult && (
-                <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 space-y-2 animate-in fade-in duration-150">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      {simResult.status}
-                    </span>
-                    <span className="text-neutral-400">
-                      Latency: {simResult.latency}
-                    </span>
-                  </div>
-                  <div className="text-xs text-neutral-200">
-                    Routed cleanly to{" "}
-                    <strong className="text-white font-bold">
-                      {simResult.resolvedModel}
-                    </strong>{" "}
-                    via {simResult.targetTier}.
-                  </div>
-                </div>
-              )}
-
-              {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setSimModalOpen(false)}
-                  className="btn-secondary px-4 py-2 rounded-xl text-xs font-semibold"
-                >
-                  Close
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleExecuteSimulation}
-                  disabled={simRunning}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#3B82F6] hover:bg-[#2563EB] shadow-md border border-[#3B82F6]/30 cursor-pointer disabled:opacity-50 transition-all active:scale-95"
-                >
-                  {simRunning ? (
-                    <>
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                      <span>Resolving Cascade…</span>
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-3.5 h-3.5 fill-white" />
-                      <span>Execute Dry Run</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* ── TELEMETRY & SYSTEM DETAILS MODAL ───────────────────────── */}
+        <PipelineTelemetryModal
+          isOpen={showTelemetryModal}
+          onClose={() => setShowTelemetryModal(false)}
+          routesCount={routes.length}
+          totalRoutes={11}
+          engineCount={
+            new Set(
+              routes.flatMap((r) => [
+                r.primary_model,
+                r.fallback_model,
+                r.tertiary_model,
+              ])
+            ).size || 12
+          }
+        />
       </div>
     </div>
   );

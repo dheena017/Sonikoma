@@ -19,6 +19,7 @@ from .processing import (
     convert_image_format,
     create_placeholder_image,
     create_svg_placeholder,
+    generate_manhwa_panel_artwork,
     trim_image_borders,
     crop_auto_borders,
 )
@@ -35,6 +36,7 @@ __all__ = [
     "convert_image_format",
     "create_placeholder_image",
     "create_svg_placeholder",
+    "generate_manhwa_panel_artwork",
     "trim_image_borders",
     "crop_auto_borders",
 ]

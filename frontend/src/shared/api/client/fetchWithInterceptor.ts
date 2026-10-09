@@ -44,13 +44,17 @@ export function createFetchWithInterceptor({
         ? input.toString()
         : (input as any)?.url || "";
     const isQuiet =
-      inputStr.includes("/auth/credits") ||
+      inputStr.includes("/system/logs") ||
+      inputStr.includes("/system-logs") ||
       inputStr.includes("/metrics") ||
       inputStr.includes("/health") ||
-      inputStr.includes("system-logs");
+      inputStr.includes("/status") ||
+      inputStr.includes("/credits");
 
+    const startTime = Date.now();
     if (!isQuiet) {
-      console.log(`[API Interceptor] Fetching: ${inputStr}`);
+      const method = (init?.method || "GET").toUpperCase();
+      console.log(`[API] ${method} ${inputStr}`);
     }
 
     return new Promise<Response>((resolve, reject) => {
@@ -301,9 +305,8 @@ export function createFetchWithInterceptor({
           }
 
           if (!isQuiet) {
-            console.log(
-              `[API Interceptor] Response OK: ${inputStr} (${response.status})`
-            );
+            const duration = Date.now() - startTime;
+            console.log(`[API] ${response.status} ${inputStr} (${duration}ms)`);
           }
           resolve(response);
         } catch (error: any) {

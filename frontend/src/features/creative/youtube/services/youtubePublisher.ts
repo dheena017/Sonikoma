@@ -1,4 +1,5 @@
 import { GeneratedPanel } from "@/shared/types";
+import { logAITaskCascade, logAITaskCompletion } from "@/shared/utils/aiTierLogger";
 
 interface PublishJsonParams {
   videoUrl: string;
@@ -194,6 +195,11 @@ export async function generateSeoMetadata(
           .slice(0, 1000)
       : "A customized webtoon compilation video review.";
 
+  const cascade = logAITaskCascade("YouTube SEO & Metadata", {
+    taskKey: "seo_optimization",
+    requestedModel: localStorage.getItem("ai_comic_model") || undefined,
+  });
+
   const res = await fetch("/api/v1/ai/skills/seo", {
     method: "POST",
     headers: {
@@ -212,6 +218,11 @@ export async function generateSeoMetadata(
   if (!res.ok || !data.success) {
     throw new Error(data.detail || "Failed to generate metadata");
   }
+  logAITaskCompletion("YouTube SEO & Metadata", {
+    model: data.model || cascade.primary,
+    tier_display: data.tier_display || "Tier 1 (Primary)",
+    cascade: data.cascade || cascade,
+  });
   return data.result;
 }
 

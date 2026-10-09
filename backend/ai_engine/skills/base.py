@@ -142,6 +142,9 @@ class BaseAISkill:
         self.last_execution_meta = {
             "provider": res.get("provider"),
             "model": res.get("model") or model or getattr(self, "default_model", None) or "gemini-2.5-flash",
+            "tier_used": res.get("tier_used"),
+            "tier_display": res.get("tier_display"),
+            "cascade": res.get("cascade"),
             "latency_ms": res.get("latency_ms", elapsed_ms),
             "success": res.get("success", False),
         }

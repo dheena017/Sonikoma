@@ -372,7 +372,7 @@ async def facade_list_models(provider: str, api_key: Optional[str]) -> Dict[str,
             })
         return {"success": True, "provider": "huggingface", "total": len(result_list), "models": result_list}
 
-    elif provider in ("groq", "deepseek", "elevenlabs", "deepl", "edgetts", "stablediffusion", "whisper"):
+    elif provider in ("groq", "deepseek", "elevenlabs", "deepl", "edgetts", "stablediffusion", "whisper", "pollinations", "replicate", "video"):
         catalog = ModelRegistry.get_catalog_for_providers([provider])
         result_list = []
         for m in catalog:
@@ -655,6 +655,9 @@ async def facade_analyze_image(
         "story_memory": memory_tracker.to_dict(),
         "source": meta.get("provider", "gemini"),
         "model": model_used,
+        "tier_used": meta.get("tier_used", "Tier 1"),
+        "tier_display": meta.get("tier_display", "Tier 1 (Primary)"),
+        "cascade": meta.get("cascade") or {},
         "latencyMs": meta.get("latency_ms", elapsed),
         "latency_ms": meta.get("latency_ms", elapsed),
         "inputTokens": getattr(skill, "last_input_tokens", 0),
@@ -917,6 +920,9 @@ async def facade_analyze_batch(
             "story_memory": memory_tracker.to_dict(),
             "source": meta.get("provider", "gemini"),
             "model": model_used,
+            "tier_used": meta.get("tier_used", "Tier 1"),
+            "tier_display": meta.get("tier_display", "Tier 1 (Primary)"),
+            "cascade": meta.get("cascade") or {},
             "latencyMs": elapsed,
             "latency_ms": elapsed,
         })
@@ -926,6 +932,9 @@ async def facade_analyze_batch(
         "results": results,
         "story_memory": memory_tracker.to_dict(),
         "model": model_used,
+        "tier_used": meta.get("tier_used", "Tier 1"),
+        "tier_display": meta.get("tier_display", "Tier 1 (Primary)"),
+        "cascade": meta.get("cascade") or {},
         "overall_scene_summary": overall_scene_summary
     }
 
@@ -1218,12 +1227,17 @@ async def facade_smart_crop(
     )
     # Crop all AI-detected panels server-side before returning
     await asyncio.to_thread(_crop_panels_server_side, img_buffer, sorted_final_panels, url)
+    meta = getattr(skill, "last_execution_meta", {}) or {}
     return {
         "success": True,
         "total_panels": len(sorted_final_panels),
         "imageWidth": w_img,
         "imageHeight": h_img,
         "panels": sorted_final_panels,
+        "model": successful_model,
+        "tier_used": meta.get("tier_used", "Tier 1"),
+        "tier_display": meta.get("tier_display", "Tier 1 (Primary)"),
+        "cascade": meta.get("cascade") or {},
         "isTallStrip": is_tall_strip,
     }
 
@@ -1300,8 +1314,14 @@ async def facade_analyze_narrative_sequence(
 
             return {"narrative": text, "narrative_audio_url": audio_url}
 
-    results = await asyncio.gather(*[process_narrative_audio(i, t) for i, t in enumerate(narrative_texts)])
-    return {"success": True, "results": list(results)}
+    return {
+        "success": True,
+        "results": list(results),
+        "tier_used": res.get("tier_used"),
+        "tier_display": res.get("tier_display"),
+        "cascade": res.get("cascade"),
+        "model": res.get("model"),
+    }
 
 
 async def facade_enhance_prompt(
