@@ -750,7 +750,7 @@ async def youtube_oauth_callback(
     refresh_token = token_data.get("refresh_token")
 
     if not access_token:
-        logger.error(f"[YouTube OAuth] Token exchange: no access_token returned in response")
+        logger.error(f"[YouTube OAuth] Token exchange: no access_token returned in response. Response from Google: {token_data}")
         return RedirectResponse(f"{yt_page_url}?yt_error=no_access_token")
 
     google_account_email = None
