@@ -82,8 +82,19 @@ class PollinationsClient:
                         c_type = resp.headers.get("content-type", "")
                         if "text" not in c_type and "json" not in c_type:
                             return resp.content, candidate, None
-                    elif resp.status_code == 402:
-                        last_error = f"Model '{candidate}': 402 Payment Required"
+                    elif resp.status_code in (402, 500):
+                        if width is not None or height is not None:
+                            # Pollinations free tier serves default dimensions without 402/500
+                            fallback_url = cls.build_url(prompt, width=None, height=None, seed=seed, model=candidate)
+                            try:
+                                r_fb = await client.get(fallback_url)
+                                if r_fb.status_code == 200 and len(r_fb.content) > 1000:
+                                    c_type = r_fb.headers.get("content-type", "")
+                                    if "text" not in c_type and "json" not in c_type:
+                                        return r_fb.content, candidate, None
+                            except Exception:
+                                pass
+                        last_error = f"Model '{candidate}': {resp.status_code} error"
                         logger.warning(f"[PollinationsClient] {last_error}. Bypassing...")
                         continue
                     elif resp.status_code == 429:

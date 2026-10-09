@@ -37,6 +37,15 @@ logger = logging.getLogger("sonikoma.creative.thumbnails.generator")
 TARGET_W = 1280
 TARGET_H = 720
 
+ASPECT_RATIO_DIMENSIONS = {
+    "16:9": (1280, 720),
+    "9:16": (720, 1280),
+    "1:1": (1024, 1024),
+    "4:5": (864, 1080),
+    "4:3": (1024, 768),
+    "21:9": (1680, 720),
+}
+
 
 def _cover_crop(img: Image.Image, target_w: int = TARGET_W, target_h: int = TARGET_H) -> Image.Image:
     """Resizes and center-crops an image to fill target dimensions perfectly."""
@@ -73,15 +82,15 @@ def _format_clean_error(candidate: str, exc: Exception) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 async def _synthesize_pollinations(
-    prompt: str, model_id: str
+    prompt: str, model_id: str, width: int = TARGET_W, height: int = TARGET_H
 ) -> Tuple[Optional[Image.Image], Optional[str], Optional[str]]:
     """Synthesizes real diffusion artwork via Pollinations AI."""
     try:
         from ai_engine.providers.pollinations import PollinationsClient
         img_bytes, used_model, err = await PollinationsClient.generate_image(
             prompt=prompt,
-            width=TARGET_W,
-            height=TARGET_H,
+            width=None,
+            height=None,
             model=model_id,
         )
         if img_bytes and len(img_bytes) > 1000:
@@ -93,7 +102,7 @@ async def _synthesize_pollinations(
 
 
 async def _synthesize_huggingface(
-    prompt: str, model_id: str
+    prompt: str, model_id: str, width: int = TARGET_W, height: int = TARGET_H
 ) -> Tuple[Optional[Image.Image], Optional[str], Optional[str]]:
     """Synthesizes real diffusion artwork via Hugging Face Inference API."""
     try:
@@ -101,8 +110,8 @@ async def _synthesize_huggingface(
         hf_bytes = await HuggingFaceClient.generate_image(
             prompt=prompt,
             model=model_id,
-            width=TARGET_W,
-            height=TARGET_H,
+            width=width,
+            height=height,
             raise_on_error=True,
         )
         if hf_bytes and len(hf_bytes) > 1000:
@@ -114,15 +123,17 @@ async def _synthesize_huggingface(
 
 
 async def _synthesize_openai(
-    prompt: str, model_id: str
+    prompt: str, model_id: str, width: int = TARGET_W, height: int = TARGET_H
 ) -> Tuple[Optional[Image.Image], Optional[str], Optional[str]]:
     """Synthesizes real diffusion artwork via OpenAI DALL-E."""
     try:
         from ai_engine.providers.openai.client import OpenAIClient
+        # Select best compatible size for DALL-E 3
+        dalle_size = "1024x1024" if width == height else ("1024x1792" if height > width else "1792x1024")
         dalle_bytes = await OpenAIClient.generate_image(
             prompt=prompt,
             model=model_id,
-            size="1792x1024",
+            size=dalle_size,
         )
         if dalle_bytes and len(dalle_bytes) > 1000:
             img = Image.open(io.BytesIO(dalle_bytes)).convert("RGBA")
@@ -133,7 +144,7 @@ async def _synthesize_openai(
 
 
 async def _synthesize_gemini(
-    prompt: str, model_id: str
+    prompt: str, model_id: str, width: int = TARGET_W, height: int = TARGET_H
 ) -> Tuple[Optional[Image.Image], Optional[str], Optional[str]]:
     """Synthesizes real diffusion artwork via Google Gemini."""
     try:
@@ -166,16 +177,18 @@ REAL_AI_SYNTHESIZERS = {
 
 async def _generate_image_from_prompt(
     prompt: str,
+    target_w: int = TARGET_W,
+    target_h: int = TARGET_H,
 ) -> Tuple[Image.Image, dict]:
     """
-    Synthesizes a 1280x720 image from the user's prompt directly using real AI models
+    Synthesizes an image from the user's prompt directly using real AI models
     resolved dynamically from the central AI Smart Routing cascade (/api/v1/ai/routing).
     Zero if/else model branching — model identification is driven by ModelRegistry.
     """
     clean_prompt = prompt.strip().replace("\n", " ")
 
     # 1. Resolve candidates from central AI Smart Routing
-    AIOrchestrator.load_custom_routing(force=True)
+    AIOrchestrator.load_custom_routing()
     cascade = AIOrchestrator.get_task_cascade("thumbnail_generation")
     tier_labels = ["Tier 1: Primary", "Tier 2: Fallback", "Tier 3: Tertiary"]
     candidates = [
@@ -201,7 +214,7 @@ async def _generate_image_from_prompt(
             logger.warning(f"[AI Smart Routing] No synthesizer registered for provider '{provider}' ({candidate})")
             continue
 
-        img, used_model, err = await synthesizer(clean_prompt, model_id)
+        img, used_model, err = await synthesizer(clean_prompt, model_id, width=target_w, height=target_h)
         if img:
             resolved_name = used_model or model_id
             prov_label = provider.capitalize() if provider != "pollinations" else "Pollinations AI"
@@ -218,7 +231,7 @@ async def _generate_image_from_prompt(
                 "cascade_path": " -> ".join(attempts + [f"{tier_label}: {resolved_name}"]),
                 "routing_message": status_msg,
             }
-            return _cover_crop(img, TARGET_W, TARGET_H), meta
+            return _cover_crop(img, target_w, target_h), meta
 
         last_error = err or f"Error generating with {provider}/{model_id}"
         attempts.append(f"{tier_label} [{model_id}]: Failed")
@@ -232,7 +245,7 @@ async def _generate_image_from_prompt(
         synth = REAL_AI_SYNTHESIZERS.get(prov)
         if not synth:
             continue
-        img, used_model, err = await synth(clean_prompt, m_id)
+        img, used_model, err = await synth(clean_prompt, m_id, width=target_w, height=target_h)
         if img:
             resolved_name = used_model or m_id
             rec_meta = {
@@ -242,7 +255,7 @@ async def _generate_image_from_prompt(
                 "cascade_path": " -> ".join(attempts + [f"Emergency Free Recovery: {resolved_name}"]),
                 "routing_message": f"Configured tiers failed. Auto-recovered via real AI {prov.capitalize()} model: {resolved_name}",
             }
-            return _cover_crop(img, TARGET_W, TARGET_H), rec_meta
+            return _cover_crop(img, target_w, target_h), rec_meta
 
     # 4. If all real AI models failed, raise real HTTP error
     error_msg = last_error or "Image synthesis failed across configured real AI diffusion models."
@@ -255,9 +268,12 @@ async def generate_thumbnail_package(
 ) -> List[GeneratedThumbnailItem]:
     """
     Generates high-CTR YouTube thumbnails directly from the user's prompt (default 1 image).
+    Supports dynamic aspect ratio ('16:9', '9:16', '1:1', '4:5', '4:3', '21:9').
     Synthesizes real images using AI diffusion models with comprehensive cascade telemetry.
     """
     count = request.count if (request.count is not None and request.count > 0) else 1
+    aspect_ratio = (request.aspect_ratio or "16:9").strip()
+    target_w, target_h = ASPECT_RATIO_DIMENSIONS.get(aspect_ratio, (TARGET_W, TARGET_H))
 
     # 1. Expand prompt into distinct visual angles
     if not concepts:
@@ -269,11 +285,12 @@ async def generate_thumbnail_package(
             count=count,
             hook_override=request.hook_text_override,
             style=request.style,
+            aspect_ratio=aspect_ratio,
         )
 
     # 2. Concurrently generate real AI images for all variants from prompt
     tasks = [
-        _generate_image_from_prompt(c.visual_prompt)
+        _generate_image_from_prompt(c.visual_prompt, target_w, target_h)
         for c in concepts[:count]
     ]
     generated_results = await asyncio.gather(*tasks)
@@ -292,10 +309,10 @@ async def generate_thumbnail_package(
         if isinstance(ai_res, tuple):
             canvas, meta = ai_res
         else:
-            canvas = _cover_crop(ai_res, TARGET_W, TARGET_H)
+            canvas = _cover_crop(ai_res, target_w, target_h)
             meta = {}
 
-        # Save high-res JPEG (1280x720) to cache
+        # Save high-res JPEG to cache
         buf = io.BytesIO()
         rgb_canvas = canvas.convert("RGB")
         rgb_canvas.save(buf, format="JPEG", quality=93)
@@ -314,8 +331,9 @@ async def generate_thumbnail_package(
                 title=f"{request.series_title or 'Webtoon'} - {concept.archetype_label}",
                 prompt_used=concept.visual_prompt,
                 palette=concept.palette,
-                width=TARGET_W,
-                height=TARGET_H,
+                width=target_w,
+                height=target_h,
+                aspect_ratio=aspect_ratio,
                 created_at=timestamp,
                 tier_used=meta.get("tier_used", "Tier 1: Primary"),
                 model_used=meta.get("model_used", "flux-anime"),

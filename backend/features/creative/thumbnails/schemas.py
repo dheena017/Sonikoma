@@ -56,6 +56,10 @@ class ThumbnailGenerateRequest(BaseModel):
         default=None,
         description="Visual style direction"
     )
+    aspect_ratio: Optional[str] = Field(
+        default="16:9",
+        description="Aspect ratio for thumbnail: '16:9', '9:16', '1:1', '4:5', '4:3', '21:9'"
+    )
 
 
 class GeneratedThumbnailItem(BaseModel):
@@ -70,6 +74,7 @@ class GeneratedThumbnailItem(BaseModel):
     palette: List[str]
     width: int = 1280
     height: int = 720
+    aspect_ratio: Optional[str] = "16:9"
     created_at: float
     tier_used: Optional[str] = "Tier 1: Primary"
     model_used: Optional[str] = "flux-anime"
@@ -86,6 +91,7 @@ class ThumbnailGenerateResponse(BaseModel):
     series_title: str
     thumbnails: List[GeneratedThumbnailItem]
     execution_time_ms: float
+    aspect_ratio: Optional[str] = "16:9"
     tier_used: Optional[str] = "Tier 1: Primary"
     model_used: Optional[str] = "flux-anime"
     provider_used: Optional[str] = "Pollinations AI"

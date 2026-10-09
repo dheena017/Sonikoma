@@ -72,7 +72,14 @@ class AIHub:
             max_tokens=max_tokens,
         )
         if isinstance(res, dict):
-            return res.get("text", res.get("result", str(res)))
+            val = res.get("text")
+            if val is None:
+                val = res.get("result")
+            if isinstance(val, dict):
+                if "raw_output" in val and isinstance(val["raw_output"], str):
+                    return val["raw_output"]
+                return json.dumps(val)
+            return str(val) if val is not None else ""
         return str(res)
 
     # ── Image Generation ─────────────────────────────────────────────────────

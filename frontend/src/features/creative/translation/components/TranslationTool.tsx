@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Sparkles,
   Check,
-  AlertTriangle,
   Layers3,
   Copy,
   CheckCircle2,
@@ -11,8 +10,6 @@ import {
   Film,
   Globe2,
   SlidersHorizontal,
-  ShieldCheck,
-  ArrowRight,
   TrendingUp,
 } from "lucide-react";
 import { GeneratedPanel } from "@/shared/types";
@@ -32,15 +29,6 @@ interface TranslationToolProps {
 
 export type PanelTranslationToolProps = TranslationToolProps;
 
-const POPULAR_LANGUAGES = [
-  { code: "Japanese", label: "Japanese", flag: "🇯🇵" },
-  { code: "Spanish", label: "Spanish", flag: "🇪🇸" },
-  { code: "Korean", label: "Korean", flag: "🇰🇷" },
-  { code: "French", label: "French", flag: "🇫🇷" },
-  { code: "German", label: "German", flag: "🇩🇪" },
-  { code: "Tamil", label: "Tamil", flag: "🇮🇳" },
-  { code: "Chinese", label: "Chinese", flag: "🇨🇳" },
-];
 
 const TONE_PRESETS = [
   { id: "natural", label: "Natural Conversational", hint: "Everyday authentic dialogue" },
@@ -64,19 +52,11 @@ export function TranslationTool({
   const [translating, setTranslating] = useState(false);
   const [batchTranslating, setBatchTranslating] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
-  const [scrubbing, setScrubbing] = useState(false);
   const [copiedTarget, setCopiedTarget] = useState(false);
 
   // Editable translation state
   const [targetDraft, setTargetDraft] = useState<string>("");
   const [appliedRecently, setAppliedRecently] = useState(false);
-
-  const [scrubResult, setScrubResult] = useState<{
-    contains_violation: boolean;
-    violation_type: string;
-    sanitized_text: string;
-    explanation: string;
-  } | null>(null);
 
   // Derive source text based on active scope
   const sourceText = targetScope === "dialogue"
@@ -86,7 +66,6 @@ export function TranslationTool({
   // Update targetDraft when panel changes or targetScope toggles
   useEffect(() => {
     setTargetDraft("");
-    setScrubResult(null);
     setAppliedRecently(false);
   }, [panel?.id, targetScope]);
 
@@ -101,22 +80,19 @@ export function TranslationTool({
 
     setTranslating(true);
     try {
-      const toneHint = TONE_PRESETS.find((t) => t.id === selectedTone)?.label || "Natural";
-      const payloadText = selectedTone !== "natural"
-        ? `[Tone: ${toneHint}] ${sourceText}`
-        : sourceText;
-
       const json = await api.runTranslateSkill(fetchWithAuth, {
-        text: payloadText,
+        text: sourceText,
         target_lang: lang,
+        tone: selectedTone,
         model: localStorage.getItem("ai_comic_model") || undefined,
       });
 
-      if (json.success && json.result) {
-        setTargetDraft(json.result.translated_text || "");
+      const translated = json.result?.translated_text || json.translated_text || "";
+      if (json.success && translated) {
+        setTargetDraft(translated);
         addNotification?.(`Translated to ${lang} successfully!`, "success");
       } else {
-        addNotification?.("Translation service did not return text.", "error");
+        addNotification?.(json.error || "Translation service did not return text.", "error");
       }
     } catch (e: any) {
       console.error("Translation error:", e);
@@ -167,15 +143,17 @@ export function TranslationTool({
           const json = await api.runTranslateSkill(fetchWithAuth, {
             text: itemSource,
             target_lang: lang,
+            tone: selectedTone,
             model: localStorage.getItem("ai_comic_model") || undefined,
           });
 
-          if (json.success && json.result?.translated_text) {
+          const translated = json.result?.translated_text || json.translated_text || "";
+          if (json.success && translated) {
             successCount++;
             if (targetScope === "dialogue") {
-              updatedPanels.push({ ...item, speech_text: json.result.translated_text });
+              updatedPanels.push({ ...item, speech_text: translated });
             } else {
-              updatedPanels.push({ ...item, visual_description: json.result.translated_text });
+              updatedPanels.push({ ...item, visual_description: translated });
             }
           } else {
             updatedPanels.push(item);
@@ -212,34 +190,7 @@ export function TranslationTool({
     }
   };
 
-  const handleScrub = async () => {
-    const textToCheck = targetDraft.trim() || sourceText.trim();
-    if (!textToCheck) {
-      addNotification?.("No text to scan for safety compliance.", "error");
-      return;
-    }
 
-    setScrubbing(true);
-    try {
-      const json = await api.runCopyrightScrubSkill(fetchWithAuth, {
-        text: textToCheck,
-        model: localStorage.getItem("ai_comic_model") || undefined,
-      });
-      if (json.success && json.result) {
-        setScrubResult(json.result);
-        if (json.result.contains_violation) {
-          addNotification?.("Compliance check flagged potential policy violations.", "warning");
-        } else {
-          addNotification?.("Script conforms fully to content & copyright guidelines!", "success");
-        }
-      }
-    } catch (e: any) {
-      console.error("Compliance scrub error:", e);
-      addNotification?.("Failed to run compliance scanner.", "error");
-    } finally {
-      setScrubbing(false);
-    }
-  };
 
   const handleCopyTarget = () => {
     if (!targetDraft) return;
@@ -262,9 +213,8 @@ export function TranslationTool({
     <div className="h-full flex flex-col justify-between space-y-4">
       {/* ── TOP SECTION: CONTROLS & LANGUAGE SELECTION ── */}
       <div className="space-y-3">
-        {/* ROW 1: SCOPE SWITCHER & TONE PRESETS */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-neutral-950/80 rounded-xl border border-neutral-850">
-          {/* SCOPE TABS */}
+        {/* ROW 1: SCOPE SWITCHER */}
+        <div className="flex items-center justify-between p-2.5 bg-neutral-950/80 rounded-xl border border-neutral-850">
           <div className="flex items-center gap-1.5 p-1 bg-neutral-900 rounded-lg border border-neutral-800">
             <button
               onClick={() => setTargetScope("dialogue")}
@@ -290,85 +240,71 @@ export function TranslationTool({
             </button>
           </div>
 
-          {/* TONE PILLS */}
-          <div className="flex items-center gap-1.5 overflow-x-auto py-0.5">
-            <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-wider font-semibold mr-1 flex items-center gap-1">
-              <SlidersHorizontal className="w-3 h-3 text-[#60A5FA]" /> Tone:
-            </span>
-            {TONE_PRESETS.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setSelectedTone(t.id)}
-                title={t.hint}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-mono transition-all cursor-pointer border ${
-                  selectedTone === t.id
-                    ? "bg-[#3B82F6]/20 border-[#3B82F6] text-[#60A5FA] font-bold"
-                    : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-neutral-200 hover:border-neutral-700"
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
+          <span className="text-[10px] font-mono text-neutral-400 hidden sm:inline">
+            Active: {targetScope === "dialogue" ? "Character Speech Bubbles" : "Scene Description"}
+          </span>
         </div>
 
-        {/* ROW 2: TARGET LANGUAGE BAR */}
-        <div className="p-3.5 bg-neutral-950/80 rounded-xl border border-neutral-850 space-y-2.5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 font-bold flex items-center gap-1.5">
-              <Globe2 className="w-3.5 h-3.5 text-[#3B82F6]" /> Target Language
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono text-neutral-400">
-                <strong className="text-white">{lang}</strong>
+        {/* ROW 2: TARGET LANGUAGE & TONE DROPDOWNS (SIDE-BY-SIDE) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {/* TARGET LANGUAGE */}
+          <div className="p-3 bg-neutral-950/80 rounded-xl border border-neutral-850 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 font-bold flex items-center gap-1.5">
+                <Globe2 className="w-3.5 h-3.5 text-[#3B82F6]" /> Target Language
+              </span>
+              <span className="text-[10px] font-mono text-[#60A5FA] bg-[#3B82F6]/10 border border-[#3B82F6]/30 px-2 py-0.5 rounded-full font-semibold">
+                Selected: {lang}
               </span>
             </div>
+
+            <CyberSelect
+              value={lang}
+              onChange={setLang}
+              size="md"
+              searchable
+              options={[
+                { value: "Spanish", label: "Spanish (Español)", description: "Neutral Spanish" },
+                { value: "Japanese", label: "Japanese (日本語)", description: "Authentic manga style" },
+                { value: "Korean", label: "Korean (한국어)", description: "Authentic webtoon style" },
+                { value: "Chinese", label: "Chinese (简体中文)", description: "Manhua localization" },
+                { value: "French", label: "French (Français)", description: "Standard French" },
+                { value: "German", label: "German (Deutsch)", description: "Standard German" },
+                { value: "Tamil", label: "Tamil (தமிழ்)", description: "Direct native localization" },
+                { value: "Hindi", label: "Hindi (हिन्दी)", description: "Devanagari localization" },
+                { value: "Portuguese", label: "Portuguese (Português)", description: "BR/PT localization" },
+                { value: "Italian", label: "Italian (Italiano)", description: "Standard Italian" },
+                { value: "Russian", label: "Russian (Русский)", description: "Standard Russian" },
+                { value: "Arabic", label: "Arabic (العربية)", description: "Modern standard Arabic" },
+                { value: "Indonesian", label: "Indonesian (Bahasa)", description: "Standard Indonesian" },
+                { value: "Vietnamese", label: "Vietnamese (Tiếng Việt)", description: "Standard Vietnamese" },
+                { value: "Thai", label: "Thai (ไทย)", description: "Standard Thai" },
+                { value: "English", label: "English", description: "Standard English" },
+              ]}
+            />
           </div>
 
-          {/* QUICK LANGUAGE CHIPS */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            {POPULAR_LANGUAGES.map((item) => (
-              <button
-                key={item.code}
-                onClick={() => setLang(item.code)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer border ${
-                  lang === item.code
-                    ? "bg-[#3B82F6]/25 border-[#3B82F6] text-white font-bold shadow-sm"
-                    : "bg-neutral-900/90 border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700"
-                }`}
-              >
-                <span>{item.flag}</span>
-                <span>{item.label}</span>
-              </button>
-            ))}
-
-            {/* CYBERSELECT FOR COMPLETE LANGUAGE LIST */}
-            <div className="w-48 ml-auto">
-              <CyberSelect
-                value={lang}
-                onChange={setLang}
-                size="sm"
-                searchable
-                options={[
-                  { value: "Spanish", label: "Spanish (Español)", description: "Neutral Spanish" },
-                  { value: "Japanese", label: "Japanese (日本語)", description: "Authentic manga style" },
-                  { value: "Korean", label: "Korean (한국어)", description: "Authentic webtoon style" },
-                  { value: "Chinese", label: "Chinese (简体中文)", description: "Manhua localization" },
-                  { value: "French", label: "French (Français)", description: "Standard French" },
-                  { value: "German", label: "German (Deutsch)", description: "Standard German" },
-                  { value: "Tamil", label: "Tamil (தமிழ்)", description: "Direct native localization" },
-                  { value: "Hindi", label: "Hindi (हिन्दी)", description: "Devanagari localization" },
-                  { value: "Portuguese", label: "Portuguese (Português)", description: "BR/PT localization" },
-                  { value: "Italian", label: "Italian (Italiano)", description: "Standard Italian" },
-                  { value: "Russian", label: "Russian (Русский)", description: "Standard Russian" },
-                  { value: "Arabic", label: "Arabic (العربية)", description: "Modern standard Arabic" },
-                  { value: "Indonesian", label: "Indonesian (Bahasa)", description: "Standard Indonesian" },
-                  { value: "Vietnamese", label: "Vietnamese (Tiếng Việt)", description: "Standard Vietnamese" },
-                  { value: "Thai", label: "Thai (ไทย)", description: "Standard Thai" },
-                  { value: "English", label: "English", description: "Standard English" },
-                ]}
-              />
+          {/* TRANSLATION TONE DROPDOWN */}
+          <div className="p-3 bg-neutral-950/80 rounded-xl border border-neutral-850 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 font-bold flex items-center gap-1.5">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#3B82F6]" /> Translation Tone
+              </span>
+              <span className="text-[10px] font-mono text-[#60A5FA] bg-[#3B82F6]/10 border border-[#3B82F6]/30 px-2 py-0.5 rounded-full font-semibold">
+                {TONE_PRESETS.find(t => t.id === selectedTone)?.label || selectedTone}
+              </span>
             </div>
+
+            <CyberSelect
+              value={selectedTone}
+              onChange={setSelectedTone}
+              size="md"
+              options={TONE_PRESETS.map((t) => ({
+                value: t.id,
+                label: t.label,
+                description: t.hint,
+              }))}
+            />
           </div>
         </div>
       </div>
@@ -378,9 +314,14 @@ export function TranslationTool({
         {/* SOURCE SCRIPT CARD */}
         <div className="flex flex-col rounded-xl border border-neutral-800 bg-neutral-950/90 p-3.5 space-y-2">
           <div className="flex items-center justify-between pb-2 border-b border-neutral-850">
-            <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 font-bold flex items-center gap-1.5">
-              Source {targetScope === "dialogue" ? "Speech" : "Narrative"}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-400 font-bold flex items-center gap-1.5">
+                Source {targetScope === "dialogue" ? "Speech" : "Narrative"}
+              </span>
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-neutral-800 text-neutral-400">
+                Editable
+              </span>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-[9px] font-mono text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
                 {sourceWordCount} words · {sourceCharCount} chars
@@ -388,33 +329,57 @@ export function TranslationTool({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto max-h-[170px] pr-1">
-            {sourceText ? (
-              <p className="text-xs text-neutral-200 leading-relaxed font-sans select-text whitespace-pre-wrap">
-                {sourceText}
-              </p>
-            ) : (
-              <div className="h-full flex items-center justify-center text-xs text-neutral-400 italic">
-                No {targetScope === "dialogue" ? "dialogue speech" : "narrative description"} registered for this panel frame.
-              </div>
-            )}
+          <div className="flex-1 flex flex-col min-h-[110px]">
+            <textarea
+              value={sourceText}
+              onChange={(e) => {
+                if (targetScope === "dialogue") {
+                  onUpdateDialogue(e.target.value);
+                } else if (onUpdateNarrative) {
+                  onUpdateNarrative(e.target.value);
+                }
+              }}
+              placeholder={
+                targetScope === "dialogue"
+                  ? "Enter original comic dialogue to translate..."
+                  : "Enter original scene visual narrative to translate..."
+              }
+              className="w-full flex-1 bg-transparent text-xs text-neutral-100 placeholder:text-neutral-500 resize-none focus:outline-none font-sans leading-relaxed min-h-[100px]"
+            />
           </div>
 
           <div className="pt-2 border-t border-neutral-850/60 flex items-center justify-between text-[10px] font-mono text-neutral-400">
-            <span>Source: English / Original</span>
-            <button
-              onClick={() => {
-                if (sourceText) {
-                  navigator.clipboard.writeText(sourceText);
-                  addNotification?.("Copied source text!", "success");
-                }
-              }}
-              disabled={!sourceText}
-              className="text-neutral-400 hover:text-white flex items-center gap-1 cursor-pointer disabled:opacity-40"
-              title="Copy source text"
-            >
-              <Copy className="w-3 h-3" /> Copy
-            </button>
+            <span>Source: Original Script</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (sourceText) {
+                    navigator.clipboard.writeText(sourceText);
+                    addNotification?.("Copied source text!", "success");
+                  }
+                }}
+                disabled={!sourceText}
+                className="text-neutral-400 hover:text-white flex items-center gap-1 cursor-pointer disabled:opacity-40"
+                title="Copy source text"
+              >
+                <Copy className="w-3 h-3" /> Copy
+              </button>
+              {sourceText && (
+                <button
+                  onClick={() => {
+                    if (targetScope === "dialogue") {
+                      onUpdateDialogue("");
+                    } else if (onUpdateNarrative) {
+                      onUpdateNarrative("");
+                    }
+                  }}
+                  className="text-neutral-400 hover:text-neutral-300 flex items-center gap-1 cursor-pointer"
+                  title="Clear source text"
+                >
+                  <RotateCcw className="w-3 h-3" /> Clear
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -575,86 +540,6 @@ export function TranslationTool({
         </div>
       </div>
 
-      {/* ── BOTTOM SECTION: COMPLIANCE & SAFETY STUDIO ── */}
-      <div className="p-3.5 bg-neutral-950/70 rounded-xl border border-neutral-850 space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span className="text-[11px] font-mono uppercase tracking-wider text-neutral-300 font-bold">
-              Content & Copyright Compliance
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleScrub}
-              disabled={scrubbing || (!targetDraft && !sourceText)}
-              className="px-3 py-1 bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40"
-            >
-              {scrubbing ? (
-                <>
-                  <Sparkles className="w-3 h-3 animate-pulse text-[#3B82F6]" />
-                  Scanning Script...
-                </>
-              ) : (
-                <>✦ Run Safety & Trademark Check</>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {scrubResult ? (
-          <div className="p-3 bg-neutral-900/90 rounded-lg border border-neutral-800 space-y-2 animate-fade-in text-xs font-sans">
-            <div className="flex items-center justify-between">
-              {scrubResult.contains_violation ? (
-                <span className="text-[11px] font-mono font-bold text-rose-400 flex items-center gap-1.5">
-                  <AlertTriangle className="h-4 w-4" /> Policy Flag: {scrubResult.violation_type}
-                </span>
-              ) : (
-                <span className="text-[11px] font-mono font-bold text-emerald-400 flex items-center gap-1.5">
-                  <CheckCircle2 className="h-4 w-4" /> Safe for Webtoon / Tapas Publication
-                </span>
-              )}
-            </div>
-
-            <p className="text-neutral-400 text-xs leading-relaxed">
-              {scrubResult.explanation}
-            </p>
-
-            {scrubResult.contains_violation && scrubResult.sanitized_text && (
-              <div className="pt-2 border-t border-neutral-800 flex items-center justify-between gap-3">
-                <div className="space-y-0.5">
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-neutral-400 block font-bold">
-                    Sanitized Clean Script:
-                  </span>
-                  <p className="text-xs text-neutral-200 font-mono">
-                    "{scrubResult.sanitized_text}"
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setTargetDraft(scrubResult.sanitized_text);
-                    if (targetScope === "dialogue") {
-                      onUpdateDialogue(scrubResult.sanitized_text);
-                    } else if (onUpdateNarrative) {
-                      onUpdateNarrative(scrubResult.sanitized_text);
-                    }
-                    setScrubResult(null);
-                    addNotification?.("Replaced with sanitized clean script!", "success");
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[10px] font-bold shrink-0 cursor-pointer shadow-sm"
-                >
-                  ✓ Apply Clean Script
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <p className="text-[10px] font-mono text-neutral-400 leading-normal">
-            Verifies dialogue against trademark infringements, copyright terms, and content publishing standards before syndication.
-          </p>
-        )}
-      </div>
     </div>
   );
 }

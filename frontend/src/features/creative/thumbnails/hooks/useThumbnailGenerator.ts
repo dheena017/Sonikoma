@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   ThumbnailCount,
   GeneratedThumbnailItem,
@@ -10,14 +10,15 @@ import { generateThumbnails } from "../services/thumbnailApi";
 export function useThumbnailGenerator(
   fetchWithInterceptor: any,
   activePanels: any[] = [],
-  initialTitle: string = "Solo Leveling Episode Climax",
+  initialTitle: string = "",
   addNotification?: any
 ) {
   const [prompt, setPrompt] = useState("");
   const [count, setCount] = useState<ThumbnailCount>(1);
-  const [seriesTitle, setSeriesTitle] = useState(initialTitle);
+  const [seriesTitle, setSeriesTitle] = useState("");
   const [genre, setGenre] = useState("Action Fantasy");
   const [style, setStyle] = useState<string>("anime_manhwa");
+  const [aspectRatio, setAspectRatio] = useState<string>("16:9");
 
   const [thumbnails, setThumbnails] = useState<GeneratedThumbnailItem[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -40,10 +41,11 @@ export function useThumbnailGenerator(
       const request: ThumbnailGenerateRequest = {
         prompt: prompt.trim() || undefined,
         count: 1,
-        series_title: seriesTitle.trim() || "Webtoon Climax",
+        series_title: seriesTitle.trim() || undefined,
         genre,
         panels: mappedPanels,
         style,
+        aspect_ratio: aspectRatio,
       };
 
       const res = await generateThumbnails(fetchWithInterceptor, request);
@@ -57,7 +59,7 @@ export function useThumbnailGenerator(
       const detailedMsg =
         res.routing_message ||
         topItem?.routing_message ||
-        `✨ Generated 16:9 thumbnail via ${tierUsed}: ${modelUsed} (${providerUsed})${seconds}`;
+        `✨ Generated ${aspectRatio} thumbnail via ${tierUsed}: ${modelUsed} (${providerUsed})${seconds}`;
 
       addNotification?.(detailedMsg, "success");
     } catch (err: any) {
@@ -71,6 +73,7 @@ export function useThumbnailGenerator(
     seriesTitle,
     genre,
     style,
+    aspectRatio,
     activePanels,
     fetchWithInterceptor,
     addNotification,
@@ -83,7 +86,7 @@ export function useThumbnailGenerator(
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    addNotification?.("Downloaded thumbnail in HD 1280x720!", "success");
+    addNotification?.(`Downloaded thumbnail (${item.width || 1280}x${item.height || 720})!`, "success");
   }, [addNotification]);
 
   return {
@@ -97,6 +100,8 @@ export function useThumbnailGenerator(
     setGenre,
     style,
     setStyle,
+    aspectRatio,
+    setAspectRatio,
     thumbnails,
     isGenerating,
     previewItem,

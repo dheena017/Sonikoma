@@ -1,5 +1,7 @@
 export type ThumbnailCount = 1 | 3 | 6;
 
+export type ThumbnailAspectRatio = "16:9" | "9:16" | "1:1" | "4:5" | "4:3" | "21:9";
+
 export type ThumbnailStylePreset =
   | "anime_manhwa"
   | "dark_monarch"
@@ -26,6 +28,7 @@ export interface ThumbnailGenerateRequest {
   panels?: ThumbnailPanelInput[];
   video_url?: string;
   style?: ThumbnailStylePreset;
+  aspect_ratio?: ThumbnailAspectRatio | string;
 }
 
 export interface GeneratedThumbnailItem {
@@ -39,6 +42,7 @@ export interface GeneratedThumbnailItem {
   palette: string[];
   width: number;
   height: number;
+  aspect_ratio?: string;
   created_at: number;
   tier_used?: string;
   model_used?: string;
@@ -54,6 +58,7 @@ export interface ThumbnailGenerateResponse {
   series_title: string;
   thumbnails: GeneratedThumbnailItem[];
   execution_time_ms: number;
+  aspect_ratio?: string;
   tier_used?: string;
   model_used?: string;
   provider_used?: string;

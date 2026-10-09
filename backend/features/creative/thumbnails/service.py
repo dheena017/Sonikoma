@@ -49,6 +49,7 @@ class CreativeThumbnailService:
             series_title=request.series_title or "Webtoon Climax",
             thumbnails=thumbnails,
             execution_time_ms=elapsed_ms,
+            aspect_ratio=getattr(top_item, "aspect_ratio", request.aspect_ratio or "16:9"),
             tier_used=tier_used,
             model_used=model_used,
             provider_used=provider_used,

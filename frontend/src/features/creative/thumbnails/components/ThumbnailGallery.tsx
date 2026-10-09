@@ -58,7 +58,11 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
           >
             {/* Thumbnail Image Container */}
             <div
-              className="relative aspect-video bg-[#121212] overflow-hidden cursor-pointer"
+              className="relative bg-[#121212] overflow-hidden cursor-pointer w-full"
+              style={{
+                aspectRatio: item.width && item.height ? `${item.width} / ${item.height}` : "16 / 9",
+                maxHeight: "680px",
+              }}
               onClick={() => onPreview(item)}
             >
               <img
@@ -69,7 +73,7 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
 
               {/* Overlay Badges */}
               <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-[#121212]/90 backdrop-blur-md text-[10px] font-mono font-bold text-[#E5E5E5] uppercase border border-[#2F2F2F]">
-                {thumbnails.length === 1 ? "16:9 Master" : `Option #${index + 1}`}
+                {thumbnails.length === 1 ? `${item.aspect_ratio || "16:9"} Master` : `Option #${index + 1}`}
               </div>
 
               <div className="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-[#3B82F6] text-white backdrop-blur-md text-[10px] font-mono font-bold uppercase shadow-md">
@@ -138,6 +142,9 @@ export const ThumbnailGallery: React.FC<ThumbnailGalleryProps> = ({
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-[#10B981]/15 border border-[#10B981]/30 text-[#6ee7b7] text-[10px] font-mono font-semibold">
                     {item.model_used || "flux-anime"}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-md bg-[#F59E0B]/15 border border-[#F59E0B]/30 text-[#fcd34d] text-[10px] font-mono font-semibold">
+                    {item.aspect_ratio || "16:9"} ({item.width}×{item.height})
                   </span>
                   {item.provider_used && (
                     <span className="px-2 py-0.5 rounded-md bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 text-[#c4b5fd] text-[10px] font-mono">

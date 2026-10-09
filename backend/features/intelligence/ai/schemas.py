@@ -237,6 +237,7 @@ class TranslationRequest(BaseModel):
     """Translates text content into target languages."""
     text: str
     target_lang: str
+    tone: Optional[str] = "natural"
     model: Optional[str] = None
     project_id: Optional[str] = None
     job_id: Optional[str] = None

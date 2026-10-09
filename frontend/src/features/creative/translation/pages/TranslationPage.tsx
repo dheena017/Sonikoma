@@ -9,6 +9,7 @@ import {
   Maximize2,
   X,
   Image,
+  Plus,
 } from "lucide-react";
 import { GeneratedPanel } from "@/shared/types";
 import { cleanDialogueDisplay } from "@/shared/utils";
@@ -79,33 +80,26 @@ export const TranslationPage = React.memo(
       }
     }, [safePanels.length]);
 
-    const handleLoadDemoPanels = () => {
+    const handleCreatePanel = () => {
       if (typeof setPanels === "function") {
-        setPanels([
-          {
-            id: 1,
-            prompt: "Mystic runes glowing across the ancient temple chamber",
-            duration: 0,
-            speech_text: "The awakening of the ancient realm begins now.",
-            visual_description: "Mystic runes glow across the temple chamber.",
-            image_url: "",
-            sfx: "Magic Hum",
-            motion_type: "",
-          },
-          {
-            id: 2,
-            prompt: "Warriors raising shields against approaching shadows",
-            duration: 0,
-            speech_text: "We must protect the artifact at all costs!",
-            visual_description:
-              "Warriors raise their shields as shadowy beasts approach.",
-            image_url: "",
-            sfx: "Shield Clang",
-            motion_type: "pan_left",
-          },
-        ]);
+        const nextId =
+          safePanels.length > 0
+            ? Math.max(...safePanels.map((p) => p.id || 0)) + 1
+            : 1;
+        const newPanel: GeneratedPanel = {
+          id: nextId,
+          prompt: "",
+          duration: 0,
+          speech_text: "",
+          visual_description: "",
+          image_url: "",
+          sfx: "",
+          motion_type: "",
+        };
+        setPanels((prev) => [...(prev || []), newPanel]);
+        setSelectedIdx(safePanels.length);
         addNotification?.(
-          "Loaded demo panels for Translation Studio!",
+          `Created new Frame #${safePanels.length + 1} for translation!`,
           "success"
         );
       }
@@ -182,91 +176,138 @@ export const TranslationPage = React.memo(
                   <span>Open Dashboard Projects</span>
                 </button>
                 <button
-                  onClick={handleLoadDemoPanels}
+                  onClick={handleCreatePanel}
                   className="btn-secondary flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold font-mono"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
-                  <span>Load Interactive Demo Panels</span>
+                  <Plus className="w-3.5 h-3.5 text-[#3B82F6]" />
+                  <span>Create First Panel Frame</span>
                 </button>
               </div>
             </div>
           ) : (
             <>
               {/* TOP SECTION: HORIZONTAL PANEL CAROUSEL RIBBON */}
-              <div className="relative flex items-center gap-4 bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-3 shadow-md">
-                <button
-                  onClick={() => scrollFilmstrip("left")}
-                  className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-xl transition-all shrink-0 cursor-pointer mr-3 shadow-md"
-                  title="Scroll left"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
+              <div className="bg-[#1A1A1A] border border-[#2F2F2F] rounded-2xl p-4 shadow-md space-y-2">
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
+                      <Image className="w-3.5 h-3.5 text-[#3B82F6]" />
+                      Storyboard Timeline ({safePanels.length} Frames)
+                    </span>
+                    <span className="text-[10px] font-mono text-[#60A5FA] bg-[#3B82F6]/10 border border-[#3B82F6]/30 px-2 py-0.5 rounded-full">
+                      Active: Frame #{selectedIdx + 1}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleCreatePanel}
+                      className="px-2.5 py-1 text-xs font-mono font-semibold text-[#60A5FA] bg-[#3B82F6]/10 border border-[#3B82F6]/30 hover:bg-[#3B82F6]/20 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
+                      title="Add new storyboard frame"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Frame</span>
+                    </button>
+                    {safePanels.length > 4 && (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => scrollFilmstrip("left")}
+                          className="p-1.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
+                          title="Scroll left"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => scrollFilmstrip("right")}
+                          className="p-1.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
+                          title="Scroll right"
+                        >
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 <div
                   ref={filmstripRef}
-                  className="flex items-center gap-3.5 overflow-x-auto py-1.5 scrollbar-none flex-1 scroll-smooth px-1"
+                  className="flex items-center gap-3 overflow-x-auto py-1 scrollbar-thin scrollbar-thumb-neutral-800 scroll-smooth px-1"
                 >
                   {safePanels.map((p, idx) => {
                     const isSel = idx === selectedIdx;
+                    const speech = cleanDialogueDisplay(p?.speech_text).speech;
                     return (
                       <button
                         key={p?.id || idx}
                         onClick={() => setSelectedIdx(idx)}
-                        className={`relative flex-shrink-0 w-20 h-16 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/60 flex items-center justify-center ${
+                        className={`relative flex-shrink-0 w-28 sm:w-32 rounded-xl overflow-hidden border transition-all cursor-pointer group bg-black/80 flex flex-col p-1.5 ${
                           isSel
-                            ? "border-2 border-[#3B82F6]  scale-105 bg-[#3B82F6]/10"
-                            : "border-neutral-850 opacity-60 hover:opacity-100 hover:border-neutral-700"
+                            ? "border-2 border-[#3B82F6] bg-[#3B82F6]/10 shadow-lg shadow-[#3B82F6]/25 ring-2 ring-[#3B82F6]/30 scale-[1.02]"
+                            : "border-neutral-800 opacity-70 hover:opacity-100 hover:border-neutral-600 hover:scale-[1.01]"
                         }`}
                       >
-                        {p?.image_url ? (
-                          <img
-                            src={p.image_url}
-                            alt={`Frame ${idx + 1}`}
-                            className="w-full h-full object-contain"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-neutral-950 flex items-center justify-center text-[10px] text-neutral-600 font-mono">
-                            Panel #{idx + 1}
-                          </div>
-                        )}
-                        <div className="absolute bottom-1 right-1 bg-black/85 px-1.5 py-0.5 rounded text-[8px] font-mono font-bold text-neutral-300 border border-neutral-800">
-                          #{idx + 1}
+                        {/* Frame Header */}
+                        <div className="flex items-center justify-between pb-1 px-0.5 text-[10px] font-mono">
+                          <span className={isSel ? "text-[#60A5FA] font-bold" : "text-neutral-400"}>
+                            Frame #{idx + 1}
+                          </span>
+                          {isSel && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6] animate-pulse" />
+                          )}
+                        </div>
+
+                        {/* Thumbnail Image (Vertical Comic Ratio 3:4) */}
+                        <div className="w-full aspect-[3/4] rounded-lg overflow-hidden bg-neutral-950 border border-neutral-900 flex items-center justify-center relative">
+                          {p?.image_url ? (
+                            <img
+                              src={p.image_url}
+                              alt={`Frame ${idx + 1}`}
+                              className="w-full h-full object-contain p-0.5 group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-neutral-950 flex flex-col items-center justify-center text-[10px] text-neutral-600 font-mono gap-1">
+                              <Image className="w-4 h-4 opacity-40" />
+                              <span>#{idx + 1}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Dialogue Preview Snippet */}
+                        <div className="pt-1.5 px-0.5 text-[9px] font-mono text-neutral-400 truncate text-left w-full">
+                          {speech ? `"${speech}"` : <span className="italic opacity-50">No dialogue</span>}
                         </div>
                       </button>
                     );
                   })}
                 </div>
-
-                <button
-                  onClick={() => scrollFilmstrip("right")}
-                  className="p-2.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-xl transition-all shrink-0 cursor-pointer ml-3 shadow-md"
-                  title="Scroll right"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
               </div>
 
-              {/* TWO-COLUMN STUDIO WORKSPACE GRID (4 : 8) */}
+              {/* TWO-COLUMN STUDIO WORKSPACE GRID (5 : 7) */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-                {/* COLUMN 1 (LEFT - 4 COLS / 33% WIDTH): ACTIVE PANEL DETAILS */}
-                <div className="lg:col-span-4 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 space-y-4 shadow-xl flex flex-col justify-between h-full">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest font-bold">
-                      FRAME PREVIEW
-                    </span>
+                {/* COLUMN 1 (LEFT - 5 COLS / 42% WIDTH): ACTIVE PANEL DETAILS & LARGE PREVIEW */}
+                <div className="lg:col-span-5 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-5 space-y-4 shadow-xl flex flex-col justify-between h-full min-h-[620px]">
+                  {/* Preview Header */}
+                  <div className="flex items-center justify-between border-b border-neutral-800/80 pb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-[#60A5FA] uppercase tracking-widest font-bold bg-[#3B82F6]/15 border border-[#3B82F6]/30 px-2.5 py-1 rounded-lg">
+                        FRAME #{selectedIdx + 1} OF {safePanels.length}
+                      </span>
+                    </div>
                     {activePanel?.image_url && (
                       <button
                         type="button"
                         onClick={() => setPreviewPanel(activePanel)}
-                        className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 border border-transparent hover:border-neutral-700 transition-all cursor-pointer"
+                        className="px-2.5 py-1 rounded-lg text-xs font-mono text-neutral-300 hover:text-white bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
                         title="Full-screen preview (Esc to close)"
                       >
-                        <Maximize2 className="w-3.5 h-3.5" />
+                        <Maximize2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                        <span>Expand</span>
                       </button>
                     )}
                   </div>
+
+                  {/* Main Comic Panel Image Canvas */}
                   <div
-                    className="h-56 sm:h-64 rounded-xl overflow-hidden border border-neutral-800 bg-neutral-950 flex items-center justify-center p-2 relative shadow-inner group cursor-pointer"
+                    className="flex-1 min-h-[380px] sm:min-h-[440px] max-h-[540px] rounded-xl overflow-hidden border border-neutral-800 bg-[#0C0C0C] flex items-center justify-center p-3 relative shadow-inner group cursor-pointer"
                     onClick={() => activePanel?.image_url && setPreviewPanel(activePanel)}
                   >
                     {activePanel?.image_url ? (
@@ -274,75 +315,74 @@ export const TranslationPage = React.memo(
                         <img
                           src={activePanel.image_url}
                           alt={`Panel #${selectedIdx + 1}`}
-                          className="max-h-full max-w-full object-contain rounded group-hover:scale-[1.03] transition-transform duration-300"
+                          className="max-h-full max-w-full object-contain rounded-lg group-hover:scale-[1.02] transition-transform duration-300 shadow-2xl"
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <div className="p-2.5 rounded-xl bg-black/70 border border-white/20">
-                            <Maximize2 className="w-5 h-5 text-white" />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
+                          <div className="p-3 rounded-xl bg-black/80 border border-white/20 text-white flex items-center gap-2 text-xs font-mono font-bold shadow-xl">
+                            <Maximize2 className="w-4 h-4 text-[#3B82F6]" />
+                            <span>Click to Zoom</span>
                           </div>
                         </div>
                       </>
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-neutral-600">
-                        <Image className="w-8 h-8" />
-                        <span className="text-[10px] font-mono">
-                          No image rendered
-                        </span>
+                        <Image className="w-10 h-10 opacity-40" />
+                        <span className="text-xs font-mono">No image rendered for this frame</span>
                       </div>
                     )}
-                    <div className="absolute top-2 left-2 bg-black/80 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold text-[#60A5FA] border border-[#3B82F6]/20 shadow-md">
-                      PANEL #{selectedIdx + 1}
-                    </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
-                      SPEECH & DIALOGUE
-                    </span>
-                    <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
-                      {cleanDialogueDisplay(activePanel?.speech_text).speech ? (
-                        <div className="space-y-1.5">
-                          {cleanDialogueDisplay(activePanel?.speech_text)
-                            .tone && (
-                            <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
-                              Tone:{" "}
-                              {
-                                cleanDialogueDisplay(activePanel?.speech_text)
-                                  .tone
-                              }
-                            </span>
-                          )}
-                          <p>
-                            {
-                              cleanDialogueDisplay(activePanel?.speech_text)
-                                .speech
-                            }
-                          </p>
-                        </div>
-                      ) : (
-                        <span className="text-neutral-600 italic">
-                          No speech text recorded for this panel.
+                  {/* Frame Navigation Buttons */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      disabled={selectedIdx <= 0}
+                      onClick={() => setSelectedIdx((prev) => Math.max(0, prev - 1))}
+                      className="py-2 px-3 rounded-xl bg-neutral-950 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed text-xs font-mono font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Prev Frame</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={selectedIdx >= safePanels.length - 1}
+                      onClick={() => setSelectedIdx((prev) => Math.min(safePanels.length - 1, prev + 1))}
+                      className="py-2 px-3 rounded-xl bg-neutral-950 border border-neutral-800 hover:border-neutral-700 text-neutral-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed text-xs font-mono font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <span>Next Frame</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Collated Script Overview for Active Panel */}
+                  <div className="p-3 bg-neutral-950 border border-neutral-850 rounded-xl space-y-2 text-xs font-sans">
+                    <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase text-neutral-400">
+                      <span>Panel Dialogue & Narrative</span>
+                      {cleanDialogueDisplay(activePanel?.speech_text).tone && (
+                        <span className="px-2 py-0.5 rounded text-[9px] bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/30">
+                          {cleanDialogueDisplay(activePanel?.speech_text).tone}
                         </span>
                       )}
                     </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-mono text-neutral-400 uppercase tracking-widest block font-bold">
-                      NARRATIVE TEXT
-                    </span>
-                    <div className="p-3.5 bg-neutral-950 border border-neutral-850 rounded-xl text-xs text-neutral-200 font-sans leading-relaxed min-h-[70px]">
-                      {activePanel?.visual_description || (
-                        <span className="text-neutral-600 italic">
-                          No narrative text recorded for this panel.
-                        </span>
-                      )}
-                    </div>
+                    {cleanDialogueDisplay(activePanel?.speech_text).speech ? (
+                      <p className="text-neutral-200 line-clamp-2 leading-relaxed">
+                        <strong className="text-white font-mono text-[11px] mr-1.5">Dialogue:</strong>
+                        "{cleanDialogueDisplay(activePanel?.speech_text).speech}"
+                      </p>
+                    ) : (
+                      <p className="text-neutral-500 italic text-[11px]">No dialogue recorded for this panel.</p>
+                    )}
+                    {activePanel?.visual_description && (
+                      <p className="text-neutral-400 line-clamp-2 leading-relaxed text-[11px] border-t border-neutral-900 pt-1.5">
+                        <strong className="text-neutral-300 font-mono mr-1.5">Scene:</strong>
+                        {activePanel.visual_description}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {/* COLUMN 2 (RIGHT - 8 COLS / 67% WIDTH): TRANSLATION WORKFLOW CANVAS */}
-                <div className="lg:col-span-8 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-6 shadow-xl flex flex-col h-full min-h-[580px]">
+                {/* COLUMN 2 (RIGHT - 7 COLS / 58% WIDTH): TRANSLATION WORKFLOW CANVAS */}
+                <div className="lg:col-span-7 rounded-2xl border border-neutral-850 bg-neutral-900/60 p-6 shadow-xl flex flex-col h-full min-h-[620px]">
                   <div className="flex items-center justify-between gap-3 border-b border-neutral-850 pb-3 mb-4">
                     <div>
                       <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-400 font-bold">

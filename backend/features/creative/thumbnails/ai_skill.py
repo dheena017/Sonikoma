@@ -30,7 +30,7 @@ class DynamicThumbnailConcept:
 
 
 STYLE_PROMPT_MODIFIERS = {
-    "anime_manhwa": "vibrant anime manhwa key visual, sharp lineart, glowing highlights, Solo Leveling aesthetic, high contrast dramatic lighting",
+    "anime_manhwa": "vibrant anime manhwa key visual, sharp lineart, glowing highlights, dynamic cel shading, high contrast dramatic lighting",
     "dark_monarch": "dark monarch sovereign aura, obsidian shadows, glowing purple and blue arcane energy, intense grimdark contrast",
     "shonen_battle": "epic shonen battle climax, blazing golden aura, dynamic action debris, explosive impact sparks",
     "cyber_neon": "cyberpunk neon awakening, cyan and magenta neon glow, futuristic cyber runes, dark tech background",
@@ -75,34 +75,40 @@ class ThumbnailAISkill:
         count: int = 1,
         hook_override: Optional[str] = None,
         style: Optional[str] = None,
+        aspect_ratio: str = "16:9",
     ) -> List[DynamicThumbnailConcept]:
         """
-        Synthesizes thumbnail concepts directly from the user's prompt and visual style.
+        Synthesizes thumbnail concepts directly from the user's prompt, visual style, and aspect ratio.
         Zero hardcoded templates, zero if-else condition branches.
         """
-        title = series_title.strip() or "Webtoon"
-        genre_str = genre.strip() or "Action Fantasy"
+        title = series_title.strip() if series_title else ""
+        genre_str = genre.strip() if genre else ""
+        ratio_str = aspect_ratio.strip() or "16:9"
 
         style_mod = STYLE_PROMPT_MODIFIERS.get(style or "", "")
+        ratio_tag = f"{ratio_str} aspect ratio"
 
-        # Directly use what the user entered in the prompt enriched by the selected style
+        # Directly use what the user entered in the prompt enriched by the selected style & aspect ratio
         if user_prompt.strip():
             if style_mod:
-                base_prompt = f"{user_prompt.strip()}, {style_mod}, 16:9 ratio, high detail masterpiece"
+                base_prompt = f"{user_prompt.strip()}, {style_mod}, {ratio_tag}, high detail masterpiece"
             else:
-                base_prompt = f"{user_prompt.strip()}, 16:9 ratio, high detail masterpiece"
+                base_prompt = f"{user_prompt.strip()}, {ratio_tag}, high detail masterpiece"
         else:
             style_desc = style_mod or "2D anime illustration, vibrant manhwa key visual"
-            base_prompt = f"{style_desc}, {title} {genre_str} climax scene, dynamic heroic pose, glowing aura, cinematic lighting, 8k resolution, anime masterpiece"
+            context_bits = [b for b in [title, genre_str] if b]
+            context_prefix = f"{' '.join(context_bits)} " if context_bits else ""
+            base_prompt = f"{style_desc}, {context_prefix}climax scene, {ratio_tag}, dynamic heroic pose, glowing aura, cinematic lighting, 8k resolution, anime masterpiece"
 
         concepts: List[DynamicThumbnailConcept] = []
         for i in range(max(1, count)):
             index = i + 1
             if count == 1:
-                hook = hook_override or title.upper()
-                label = "Master 16:9 Climax"
+                hook = hook_override or (title.upper() if title else "EPIC CLIMAX")
+                label = f"Master {ratio_str} Climax"
             else:
-                hook = hook_override or f"{title.upper()} #{index}"
+                prefix = title.upper() if title else "CONCEPT"
+                hook = hook_override or f"{prefix} #{index}"
                 label = f"Concept #{index}"
 
             concepts.append(

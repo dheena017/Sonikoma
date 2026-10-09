@@ -312,6 +312,7 @@ class AIOrchestrator:
 
     # Custom user/admin override routing
     _custom_capability_routing: Dict[str, Dict[str, Any]] = {}
+    _routing_log_emitted: bool = False
 
     @classmethod
     def load_custom_routing(cls, force: bool = False):
@@ -327,11 +328,14 @@ class AIOrchestrator:
                     data = json.loads(row['value'])
                     if isinstance(data, dict):
                         cls._custom_capability_routing = data
-                        logger.debug(f"[AI Engine] Loaded {len(data)} custom routing configurations from database.")
+                        if not cls._routing_log_emitted:
+                            logger.debug(f"[AI Engine] Loaded {len(data)} custom routing configurations from database.")
+                            cls._routing_log_emitted = True
             finally:
                 conn.close()
         except Exception as e:
-            logger.debug(f"[AI Engine] Could not load custom routing from database: {e}")
+            if not cls._routing_log_emitted:
+                logger.debug(f"[AI Engine] Could not load custom routing from database: {e}")
 
     @classmethod
     def get_rate_limiter(cls) -> RateLimiter:
@@ -422,7 +426,8 @@ class AIOrchestrator:
     @classmethod
     def get_task_cascade(cls, capability: str) -> Dict[str, str]:
         """Returns the full 3-tier cascade mapping (primary, fallback, tertiary) for a task."""
-        cls.load_custom_routing(force=True)
+        if not cls._custom_capability_routing:
+            cls.load_custom_routing()
         custom_entry = cls._custom_capability_routing.get(capability, {})
         primary = None
         fallback = None
@@ -693,6 +698,7 @@ class AIOrchestrator:
         start_time = time.monotonic()
         cap_clean = capability.lower().strip()
         human_cap = CAPABILITY_HUMAN_NAMES.get(cap_clean, cap_clean.replace("_", " ").title())
+        model = model or kwargs.get("requested_model")
 
         # 1. Quota Pre-check
         quota_ok, credit_amount, quota_err = cls.check_and_reserve_quota(user_id, cap_clean)

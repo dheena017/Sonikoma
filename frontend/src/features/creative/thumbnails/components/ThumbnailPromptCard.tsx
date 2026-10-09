@@ -3,6 +3,7 @@ import {
   Sparkles,
   Wand2,
   Film,
+  Maximize2,
 } from "lucide-react";
 import CyberSelect from "@/shared/ui/common/CyberSelect";
 
@@ -15,6 +16,8 @@ interface ThumbnailPromptCardProps {
   setGenre: (g: string) => void;
   style?: string;
   setStyle?: (s: string) => void;
+  aspectRatio?: string;
+  setAspectRatio?: (r: string) => void;
   onGenerate: () => void;
   isGenerating: boolean;
 }
@@ -27,6 +30,14 @@ interface StyleOption {
   category: "Featured" | "Digital & Modern" | "Illustration & Comic" | "Traditional" | "Fine Art";
 }
 
+interface AspectRatioOption {
+  id: string;
+  label: string;
+  desc: string;
+  icon: string;
+  category: string;
+}
+
 const CATEGORIES = [
   "All",
   "Featured",
@@ -36,9 +47,18 @@ const CATEGORIES = [
   "Fine Art",
 ] as const;
 
+const ASPECT_RATIO_OPTIONS: AspectRatioOption[] = [
+  { id: "16:9", label: "16:9 Landscape (YouTube Standard)", desc: "1280×720 • Standard Video Thumbnails", icon: "📺", category: "Standard" },
+  { id: "9:16", label: "9:16 Vertical (Shorts & Reels)", desc: "720×1280 • YouTube Shorts, TikTok & Stories", icon: "📱", category: "Mobile" },
+  { id: "1:1", label: "1:1 Square (Community & Feed)", desc: "1024×1024 • Instagram & Community Posts", icon: "⏹️", category: "Social" },
+  { id: "4:5", label: "4:5 Portrait (Feed & Covers)", desc: "864×1080 • Social Feed & Comic Covers", icon: "🖼️", category: "Social" },
+  { id: "4:3", label: "4:3 Classic (Standard)", desc: "1024×768 • Classic Retro Displays", icon: "🖥️", category: "Standard" },
+  { id: "21:9", label: "21:9 Ultrawide (Cinematic Banner)", desc: "1680×720 • Panoramic Channel Headers", icon: "🎬", category: "Cinematic" },
+];
+
 const STYLE_OPTIONS: StyleOption[] = [
   // ── Featured & Manga Styles ───────────────────────────────────────────────
-  { id: "anime_manhwa", label: "Solo Leveling Manhwa", icon: "🎨", desc: "Vibrant anime manhwa, sharp lineart, glowing highlights", category: "Featured" },
+  { id: "anime_manhwa", label: "Anime / Webtoon Action", icon: "🎨", desc: "Vibrant anime manhwa, sharp lineart, glowing highlights", category: "Featured" },
   { id: "dark_monarch", label: "Dark Monarch Aura", icon: "🌑", desc: "Obsidian shadows, purple/blue arcane flames, high contrast", category: "Featured" },
   { id: "shonen_battle", label: "Epic Shonen Climax", icon: "🔥", desc: "Golden aura, dynamic battle debris, explosive power", category: "Featured" },
   { id: "cyber_neon", label: "Cyber Neon Awakening", icon: "⚡", desc: "Cyan & magenta neon glow, futuristic energy runes", category: "Featured" },
@@ -85,6 +105,8 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
   setGenre = () => { },
   style = "anime_manhwa",
   setStyle = () => { },
+  aspectRatio = "16:9",
+  setAspectRatio = () => { },
   onGenerate = () => { },
   isGenerating = false,
 }) => {
@@ -99,42 +121,77 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
     }));
   }, []);
 
+  const aspectRatioSelectOptions = useMemo(() => {
+    return ASPECT_RATIO_OPTIONS.map((opt) => ({
+      value: opt.id,
+      label: opt.label,
+      description: opt.desc,
+      group: opt.category,
+      icon: <span className="text-base shrink-0">{opt.icon}</span>,
+      badge: opt.id,
+    }));
+  }, []);
+
   return (
     <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 sm:p-7 shadow-md space-y-6">
-      {/* ── Top Controls: Series / Chapter Title ─────────────────────────── */}
-      <div className="space-y-1.5">
-        <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
-          <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
-          Series / Chapter Title
-        </label>
-        <input
-          type="text"
-          value={seriesTitle}
-          onChange={(e) => setSeriesTitle(e.target.value)}
-          placeholder="e.g. Solo Leveling Chapter 1 Climax"
-          className="w-full px-4 py-3 bg-[#121212] border border-[#2F2F2F] rounded-xl text-sm text-[#E5E5E5] placeholder-[#6B7280] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 transition-all font-sans"
-        />
-      </div>
+      {/* ── Top Controls: Series Title & Dropdowns in Unified Grid ─────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        {/* 1. Series / Chapter Title */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
+            <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
+            Series / Chapter Title
+          </label>
+          <input
+            type="text"
+            value={seriesTitle}
+            onChange={(e) => setSeriesTitle(e.target.value)}
+            placeholder="Enter series or video title (optional)..."
+            className="w-full h-11 px-4 py-2.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-sm text-[#E5E5E5] placeholder-[#6B7280] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 transition-all font-sans"
+          />
+        </div>
 
-      {/* ── Art & Visual Style Selector (CyberSelect Dropdown) ─────────────── */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
+        {/* 2. Visual Art Style Dropdown */}
+        <div className="space-y-1.5">
           <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
             Visual Art Style ({STYLE_OPTIONS.length} Styles)
           </label>
+          <CyberSelect
+            value={style}
+            onChange={(newVal) => setStyle?.(newVal)}
+            options={styleSelectOptions}
+            variant="blue"
+            size="md"
+            searchable={true}
+            placeholder="Select Visual Art Style..."
+          />
         </div>
 
-        <CyberSelect
-          value={style}
-          onChange={(newVal) => setStyle?.(newVal)}
-          options={styleSelectOptions}
-          variant="blue"
-          size="lg"
-          searchable={true}
-          placeholder="Select Visual Art Style..."
-        />
+        {/* 3. Aspect Ratio Dropdown */}
+        <div className="space-y-1.5 md:col-span-2 lg:col-span-1">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#9CA3AF] flex items-center gap-1.5">
+              <Maximize2 className="w-3.5 h-3.5 text-[#3B82F6]" />
+              Aspect Ratio ({ASPECT_RATIO_OPTIONS.length} Formats)
+            </label>
+            <span className="text-[10px] font-mono text-[#60A5FA] font-semibold hidden sm:inline">
+              {ASPECT_RATIO_OPTIONS.find((o) => o.id === aspectRatio)?.desc.split("•")[0]?.trim()}
+            </span>
+          </div>
+          <CyberSelect
+            value={aspectRatio}
+            onChange={(newVal) => setAspectRatio?.(newVal)}
+            options={aspectRatioSelectOptions}
+            variant="blue"
+            size="md"
+            searchable={false}
+            placeholder="Select Aspect Ratio..."
+          />
+        </div>
       </div>
+
+
 
       {/* ── AI Prompt Textarea & Quick Preset Suggestions ─────────────────── */}
       <div className="space-y-2">
@@ -158,11 +215,9 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
           rows={3}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe your desired thumbnail composition: e.g. The True Queen monarch awakening, glowing royal crown, majestic radiant aura, commanding low-angle pose, stormy battle sky..."
+          placeholder="Describe your desired thumbnail composition: e.g. Epic hero awakening, blazing golden aura, dynamic battle debris, commanding low-angle pose, stormy electric sky..."
           className="w-full p-4 bg-[#121212] border border-[#2F2F2F] rounded-xl text-sm text-[#E5E5E5] placeholder-[#6B7280] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/30 transition-all font-sans resize-none"
         />
-
-
       </div>
 
       {/* ── GENERATE BUTTON ────────────────────────────────────────────────── */}
@@ -176,12 +231,12 @@ export const ThumbnailPromptCard: React.FC<ThumbnailPromptCardProps> = ({
           {isGenerating ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Synthesizing AI Thumbnails (1280x720 HD)...</span>
+              <span>Synthesizing AI Thumbnail ({aspectRatio})...</span>
             </>
           ) : (
             <>
               <Sparkles className="w-4 h-4 text-white" />
-              <span>Generate High-CTR YouTube Thumbnails</span>
+              <span>Generate High-CTR {aspectRatio === "16:9" ? "YouTube" : aspectRatio} Thumbnail</span>
             </>
           )}
         </button>

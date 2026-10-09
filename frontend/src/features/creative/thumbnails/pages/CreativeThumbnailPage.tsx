@@ -28,7 +28,7 @@ export const CreativeThumbnailPage: React.FC<CreativeThumbnailPageProps> = ({
   const seriesTitle =
     activeProjectData?.project?.title ||
     activeProjectData?.project?.series_title ||
-    "Solo Leveling Episode Climax";
+    "";
 
   const {
     prompt,
@@ -39,6 +39,8 @@ export const CreativeThumbnailPage: React.FC<CreativeThumbnailPageProps> = ({
     setGenre,
     style,
     setStyle,
+    aspectRatio,
+    setAspectRatio,
     thumbnails,
     isGenerating,
     previewItem,
@@ -48,7 +50,7 @@ export const CreativeThumbnailPage: React.FC<CreativeThumbnailPageProps> = ({
   } = useThumbnailGenerator(
     fetchWithInterceptor,
     activePanels,
-    seriesTitle,
+    "",
     addNotification
   );
 
@@ -79,6 +81,8 @@ export const CreativeThumbnailPage: React.FC<CreativeThumbnailPageProps> = ({
           setGenre={setGenre}
           style={style}
           setStyle={setStyle}
+          aspectRatio={aspectRatio}
+          setAspectRatio={setAspectRatio}
           onGenerate={handleGenerate}
           isGenerating={isGenerating}
         />

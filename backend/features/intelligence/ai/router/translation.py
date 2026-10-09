@@ -30,16 +30,24 @@ async def translate_script(
     try:
         from features.creative.translation.service import translation_service
         from features.creative.translation.schemas import TranslationRequest as CreativeTransReq
-        res = await translation_service.translate(CreativeTransReq(text=body.text, target_lang=body.target_lang, model=body.model))
+        res = await translation_service.translate(
+            CreativeTransReq(
+                text=body.text,
+                target_lang=body.target_lang,
+                tone=getattr(body, "tone", "natural"),
+                model=body.model,
+            )
+        )
         return {
             "success": True,
             "translated_text": res.result.translated_text,
             "accuracy_rating": res.result.accuracy_rating,
             "result": res.result.model_dump(),
         }
-    except Exception:
+    except Exception as err:
+        logger.warning(f"[Translate Route] Primary translation attempt failed: {err}")
         return await run_md_skill(
             "translation", body.model, api_key=user_api_key,
-            text=body.text, target_lang=body.target_lang,
+            text=body.text, target_lang=body.target_lang, tone=getattr(body, "tone", "natural"),
         )
 

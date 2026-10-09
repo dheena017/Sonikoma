@@ -50,39 +50,34 @@ def _clean_json_text(text: str) -> str:
 class CreativeTranslationService:
     """Service handling autonomous comic and webtoon dialogue localization."""
 
-    async def _call_llm(self, prompt: str, system_instruction: Optional[str] = None) -> Optional[str]:
-        """Calls Gemini API across fallback models, then falls back to AIHub."""
-        if ai_initialized and genai_client:
-            models_to_try = [GEMINI_MODEL_PRIMARY]
-            for model_name in models_to_try:
-                async def _invoke():
-                    full_p = f"{system_instruction}\n\n{prompt}" if system_instruction else prompt
-                    if hasattr(genai_client, "models") and hasattr(genai_client.models, "generate_content"):
-                        resp = genai_client.models.generate_content(
-                            model=model_name,
-                            contents=full_p,
-                        )
-                        return getattr(resp, "text", str(resp))
-                    elif hasattr(genai_client, "GenerativeModel"):
-                        model = genai_client.GenerativeModel(model_name)
-                        resp = model.generate_content(full_p)
-                        return getattr(resp, "text", str(resp))
-                    return None
-
-                try:
-                    result = await call_gemini_with_retry(_invoke)
-                    if result and len(str(result).strip()) > 1:
-                        return str(result)
-                except Exception as e:
-                    logger.debug(f"[TranslationService] Gemini {model_name} attempt notice: {e}")
-                    continue
-
+    async def _call_llm(self, prompt: str, system_instruction: Optional[str] = None, model: Optional[str] = None) -> Optional[str]:
+        """Calls AIHub with automatic multi-tier cascade and resilient rate-limit failover."""
+        chosen_model = model or "gemini-3.5-flash-lite"
         try:
-            hub_result = await AIHub().chat(prompt=prompt, system_instruction=system_instruction)
-            if hub_result and len(hub_result.strip()) > 1:
-                return hub_result
+            hub_result = await AIHub().chat(
+                prompt=prompt,
+                system_instruction=system_instruction,
+                model=chosen_model,
+            )
+            if isinstance(hub_result, dict):
+                return json.dumps(hub_result)
+            elif hub_result is not None and len(str(hub_result).strip()) > 1:
+                return str(hub_result)
         except Exception as hub_err:
             logger.debug(f"[TranslationService] AIHub chat attempt notice: {hub_err}")
+
+        # Emergency direct fallback if AIHub was unavailable and Gemini has quota
+        if ai_initialized and genai_client:
+            try:
+                full_p = f"{system_instruction}\n\n{prompt}" if system_instruction else prompt
+                if hasattr(genai_client, "models") and hasattr(genai_client.models, "generate_content"):
+                    resp = genai_client.models.generate_content(
+                        model=GEMINI_MODEL_PRIMARY,
+                        contents=full_p,
+                    )
+                    return getattr(resp, "text", str(resp))
+            except Exception:
+                pass
 
         return None
 
@@ -102,6 +97,13 @@ class CreativeTranslationService:
 
         target_lang = req.target_lang or "Spanish"
         tone = req.tone or "natural"
+
+        # Clean any prepended tone tags from text to avoid prompt pollution
+        match_tone = re.match(r"^\[Tone:\s*([^\]]+)\]\s*(.*)", text, re.IGNORECASE)
+        if match_tone:
+            if not req.tone or req.tone == "natural":
+                tone = match_tone.group(1).strip()
+            text = match_tone.group(2).strip()
 
         prompt = f"""You are an elite multilingual comic & webtoon localization master.
 Translate the following dialogue / narrative text into {target_lang}.
@@ -124,23 +126,48 @@ Return STRICT JSON:
 """
 
         system_inst = "You are an expert anime, manga, and manhwa localization director."
-        translated_text = text
-        accuracy = 0.95
+        translated_text = ""
+        accuracy = 0.98
 
         try:
-            raw_ai = await self._call_llm(prompt=prompt, system_instruction=system_inst)
+            raw_ai = await self._call_llm(prompt=prompt, system_instruction=system_inst, model=req.model)
             if raw_ai:
                 cleaned = _clean_json_text(raw_ai)
                 try:
                     parsed = json.loads(cleaned)
-                    if isinstance(parsed, dict) and "translated_text" in parsed:
-                        translated_text = parsed["translated_text"]
-                        accuracy = float(parsed.get("accuracy_rating", 0.98))
+                    if isinstance(parsed, dict):
+                        if "translated_text" in parsed and parsed["translated_text"]:
+                            translated_text = str(parsed["translated_text"]).strip()
+                            accuracy = float(parsed.get("accuracy_rating", 0.98))
+                        elif "raw_output" in parsed and parsed["raw_output"]:
+                            translated_text = str(parsed["raw_output"]).strip()
                 except Exception:
                     # If LLM returned raw translated text without json wrapper
                     translated_text = cleaned.strip('"\'')
         except Exception as err:
-            logger.warning(f"[TranslationService] Translation notice: {err}")
+            logger.warning(f"[TranslationService] First-pass translation notice: {err}")
+
+        # If strict JSON pass did not return translated text, perform direct concise localization pass
+        if not translated_text or translated_text.strip().lower() == text.strip().lower():
+            direct_prompt = (
+                f"You are a professional comic translator. Translate this comic line directly into {target_lang} "
+                f"using a {tone} tone. Output ONLY the localized translation without commentary or quotes:\n{text}"
+            )
+            try:
+                raw_direct = await self._call_llm(prompt=direct_prompt, model=req.model)
+                if raw_direct and str(raw_direct).strip():
+                    cleaned_direct = str(raw_direct).strip().strip('"\'')
+                    if cleaned_direct and cleaned_direct.lower() != text.strip().lower():
+                        translated_text = cleaned_direct
+                        accuracy = 0.95
+            except Exception as direct_err:
+                logger.warning(f"[TranslationService] Direct translation fallback notice: {direct_err}")
+
+        if not translated_text:
+            raise RuntimeError(
+                f"AI translation engine was unable to synthesize localized text for '{text}' into {target_lang}. "
+                "Please verify active model status and provider configuration in AI Routing."
+            )
 
         return TranslationResponse(
             success=True,
