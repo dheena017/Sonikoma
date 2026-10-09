@@ -327,20 +327,23 @@ const YouTubePage = React.memo(
         {/* ── YOUTUBE RED TOP LOADING BAR ─────────────────────────────────── */}
         <YouTubeTopProgressBar isLoading={isNavigating || isPublishing} />
 
-        {/* ── TOP APP NAVIGATION BAR ─────────────────────────────────────── */}
-        <YouTubeAppNavBar
-          activeTab={activeTab}
-          onTabChange={(tab) => handleTabChange(tab as AppTab)}
-          channelTitle={navChannel?.title || "Connect YouTube"}
-          channelHandle={navChannel?.custom_url || ""}
-          channelThumbnail={navChannel?.thumbnail}
-          isConnected={!!navChannel?.authenticated}
-          onOpenChannelModal={() => setIsChannelModalOpen(true)}
-          onPublish={handleQuickPublish}
-        />
-
         {/* ── MAIN TAB CANVAS CONTAINER (KEEP-ALIVE SPA PERSISTENCE) ──────── */}
-        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl min-h-[600px]">
+        <div className="rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl min-h-[600px] space-y-6">
+          {/* ── TOP APP NAVIGATION BAR (Always present on all pages) ─────── */}
+          <div className="w-full px-4 sm:px-6 py-3 bg-[#0c0c12]/95 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-lg">
+            <YouTubeAppNavBar
+              activeTab={activeTab}
+              onTabChange={(tab) => handleTabChange(tab as AppTab)}
+              channelTitle={navChannel?.title || "Connect YouTube"}
+              channelHandle={navChannel?.custom_url || ""}
+              channelThumbnail={navChannel?.thumbnail}
+              isConnected={!!navChannel?.authenticated}
+              onOpenChannelModal={() => setIsChannelModalOpen(true)}
+              onPublish={handleQuickPublish}
+              isEmbedded
+            />
+          </div>
+
           {/* 1. TAB: HOME / OVERVIEW */}
           {visitedTabs.has("home") && (
             <div

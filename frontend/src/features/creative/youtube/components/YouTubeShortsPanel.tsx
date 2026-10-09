@@ -127,73 +127,7 @@ export default function YouTubeShortsPanel({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* ── 1. HEADER BANNER & SHORTS TELEMETRY ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-gradient-to-r from-red-950/40 via-[#2A2A2A] to-neutral-950 p-6 rounded-3xl border border-red-900/30 shadow-2xl">
-        <div className="flex items-center gap-4">
-          <div className="p-3.5 bg-gradient-to-br from-red-600 to-rose-700 rounded-2xl shadow-xl shadow-red-600/30 shrink-0">
-            <Zap className="w-6 h-6 text-white fill-white" />
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-lg sm:text-xl font-black text-white font-sans tracking-tight">
-                YouTube Shorts Hub
-              </h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-300 text-[10px] font-mono font-bold uppercase">
-                Vertical 9:16
-              </span>
-            </div>
-            <p className="text-xs text-neutral-400 font-mono">
-              Continuous fullscreen reel player, performance analytics, and
-              vertical story discovery
-            </p>
-          </div>
-        </div>
-
-        {/* Action Controls & Metrics */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-3 px-4 py-2 bg-neutral-950/80 border border-neutral-800 rounded-2xl text-xs font-mono">
-            <span className="flex items-center gap-1.5 text-sky-400 font-bold">
-              <Eye className="w-3.5 h-3.5" />
-              {totalShortsViews.toLocaleString()} views
-            </span>
-            <span className="text-neutral-700">|</span>
-            <span className="flex items-center gap-1.5 text-emerald-400 font-bold">
-              <ThumbsUp className="w-3.5 h-3.5" />
-              {totalShortsLikes.toLocaleString()} likes
-            </span>
-          </div>
-
-          {onNavigateStudio && (
-            <button
-              onClick={onNavigateStudio}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-bold font-mono shadow-md shadow-red-600/30 transition-all cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create Short</span>
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              fetchShorts();
-            }}
-            disabled={isLoading}
-            className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm"
-            title="Refresh Shorts"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${
-                isLoading ? "animate-spin text-red-400" : ""
-              }`}
-            />
-          </button>
-        </div>
-      </div>
-
-      {/* ── 2. CONTROLS, SEARCH & FILTER TABS ── */}
+      {/* ── CONTROLS, SEARCH & FILTER TABS ── */}
       <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Search */}
@@ -216,44 +150,65 @@ export default function YouTubeShortsPanel({
             )}
           </div>
 
-          {/* Quick Sort Filter Pills */}
-          <div className="flex items-center gap-1.5 p-1 bg-neutral-950 border border-neutral-800 rounded-xl">
-            {[
-              { id: "newest", label: "Newest", icon: Sparkles },
-              { id: "popular", label: "🔥 Top Watched", icon: Flame },
-              { id: "likes", label: "❤️ Most Liked", icon: ThumbsUp },
-            ].map((f) => {
-              const isSel = sortBy === f.id;
-              const Icon = f.icon;
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => setSortBy(f.id as any)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-                    isSel
-                      ? "bg-red-600 text-white shadow-sm"
-                      : "text-neutral-400 hover:text-neutral-200"
-                  }`}
-                >
-                  <Icon className="w-3 h-3" />
-                  <span>{f.label}</span>
-                </button>
-              );
-            })}
+          <div className="flex items-center gap-2">
+            {/* Quick Sort Filter Pills */}
+            <div className="flex items-center gap-1.5 p-1 bg-neutral-950 border border-neutral-800 rounded-xl">
+              {[
+                { id: "newest", label: "Newest", icon: Sparkles },
+                { id: "popular", label: "🔥 Top Watched", icon: Flame },
+                { id: "likes", label: "❤️ Most Liked", icon: ThumbsUp },
+              ].map((f) => {
+                const isSel = sortBy === f.id;
+                const Icon = f.icon;
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => setSortBy(f.id as any)}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                      isSel
+                        ? "bg-red-600 text-white shadow-sm"
+                        : "text-neutral-400 hover:text-neutral-200"
+                    }`}
+                  >
+                    <Icon className="w-3 h-3" />
+                    <span>{f.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Refresh */}
+            <button
+              onClick={fetchShorts}
+              disabled={isLoading}
+              className="p-2 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer shadow-sm active:scale-95 shrink-0"
+              title="Refresh Shorts"
+            >
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${
+                  isLoading ? "animate-spin text-red-400" : ""
+                }`}
+              />
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 pt-2 border-t border-neutral-800/60">
-          <span>
-            Displaying{" "}
-            <strong className="text-white">{sortedShorts.length}</strong>{" "}
-            vertical shorts
-          </span>
+        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 pt-2 border-t border-neutral-800/60 flex-wrap gap-2">
+          <div className="flex items-center gap-2.5">
+            <span>
+              Displaying <strong className="text-white">{sortedShorts.length}</strong> vertical shorts
+            </span>
+            <span className="text-neutral-700">•</span>
+            <span className="text-sky-400 font-bold">{totalShortsViews.toLocaleString()} views</span>
+            <span className="text-neutral-700">•</span>
+            <span className="text-emerald-400 font-bold">{totalShortsLikes.toLocaleString()} likes</span>
+          </div>
           <span className="text-[10px] text-neutral-500">
             Click any card to start full Reels Player
           </span>
         </div>
       </div>
+
 
       {/* ── 3. 9:16 VERTICAL SHORTS CARDS GRID ── */}
       {isLoading ? (

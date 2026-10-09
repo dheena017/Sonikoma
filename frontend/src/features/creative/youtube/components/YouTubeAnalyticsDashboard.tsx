@@ -307,17 +307,25 @@ export default function YouTubeAnalyticsDashboard({
 
   return (
     <div className="space-y-5">
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 font-bold">
-            Channel Intelligence
-          </p>
-          <h2 className="text-base font-black text-white mt-0.5 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-red-400" />
-            Analytics Dashboard
-          </h2>
+      {/* ── Tab Bar & Actions ── */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-1 p-1 bg-neutral-900/80 border border-neutral-800/80 rounded-2xl w-fit">
+          {TABS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id as typeof activeTab)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-bold font-mono transition-all cursor-pointer ${
+                activeTab === id
+                  ? "bg-red-600 text-white shadow-lg shadow-red-600/30"
+                  : "text-neutral-400 hover:text-neutral-200"
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          ))}
         </div>
+
         <button
           type="button"
           onClick={(e) => {
@@ -335,23 +343,6 @@ export default function YouTubeAnalyticsDashboard({
         </button>
       </div>
 
-      {/* ── Tab Bar ── */}
-      <div className="flex items-center gap-1 p-1 bg-neutral-900/80 border border-neutral-800/80 rounded-2xl w-fit">
-        {TABS.map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => setActiveTab(id as typeof activeTab)}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-bold font-mono transition-all cursor-pointer ${
-              activeTab === id
-                ? "bg-red-600 text-white shadow-lg shadow-red-600/30"
-                : "text-neutral-400 hover:text-neutral-200"
-            }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {label}
-          </button>
-        ))}
-      </div>
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 gap-3">

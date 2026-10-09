@@ -178,15 +178,17 @@ export default function YouTubeChannelHome({
     <div className="space-y-8 animate-fade-in">
       {/* ── 1. CHANNEL HERO BANNER & PROFILE CARD ── */}
       <div className="relative w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-neutral-950">
+
+
         {/* Banner Area */}
-        <div className="relative w-full h-44 sm:h-56 md:h-64 overflow-hidden bg-neutral-950">
+        <div className="relative w-full h-52 sm:h-64 md:h-76 lg:h-80 overflow-hidden bg-neutral-950">
           {channel?.banner_url && !bannerError ? (
             <img
               src={channel.banner_url}
               alt="Channel Banner"
               referrerPolicy="no-referrer"
               onError={() => setBannerError(true)}
-              className="w-full h-full object-cover object-center"
+              className="w-full h-full object-cover object-[center_top]"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-r from-red-950/70 via-neutral-900 to-neutral-950 relative flex items-center justify-center">

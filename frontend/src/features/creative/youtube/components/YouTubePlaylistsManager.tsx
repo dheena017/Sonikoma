@@ -433,75 +433,18 @@ export default function YouTubePlaylistsManager({
   // ── GALLERY VIEW (Default) ──
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* ── 1. HEADER BANNER & METRICS ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-gradient-to-r from-[#2A2A2A] via-neutral-900 to-neutral-950 p-6 rounded-3xl border border-[#2F2F2F] shadow-2xl">
-        <div className="flex items-center gap-4">
-          <div className="p-3.5 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl shadow-sm shrink-0">
-            <ListVideo className="w-6 h-6 text-white" />
-          </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-lg sm:text-xl font-black text-white font-sans tracking-tight">
-                Playlists &amp; Series Hub
-              </h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#3B82F6]/20 border border-[#3B82F6]/40 text-[#60A5FA] text-[10px] font-mono font-bold">
-                {playlists.length} Playlists
-              </span>
-            </div>
-            <p className="text-xs text-neutral-400 font-mono">
-              Curate, organize, and publish binge-worthy episode playlists on
-              YouTube
-            </p>
-          </div>
-        </div>
-
-        {/* Actions & Stats */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="px-4 py-2 bg-neutral-950/80 border border-neutral-800 rounded-2xl text-xs font-mono text-[#60A5FA] font-bold">
-            <span className="text-white">{totalVideosInPlaylists}</span> total
-            curated videos
-          </div>
-
-          <button
-            onClick={() => setCurrentView("create")}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-bold font-mono shadow-lg shadow-sm transition-all cursor-pointer"
-          >
-            <FolderPlus className="w-4 h-4" />
-            <span>Create New Playlist</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              fetchPlaylists();
-            }}
-            disabled={isLoading}
-            className="p-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm"
-            title="Refresh Playlists"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${
-                isLoading ? "animate-spin text-[#3B82F6]" : ""
-              }`}
-            />
-          </button>
-        </div>
-      </div>
-
-      {/* ── 2. SEARCH & FILTER TOOLBAR ── */}
-      <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      {/* ── SEARCH, FILTER & PLAYLIST ACTION TOOLBAR ── */}
+      <div className="bg-[#121218]/90 border border-white/[0.08] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl backdrop-blur-md">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           {/* Search */}
-          <div className="md:col-span-6 relative">
+          <div className="flex-1 relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search playlists by title or description..."
-              className="w-full bg-neutral-950 border border-neutral-800 focus:border-neutral-600 focus:ring-1 focus:ring-neutral-700 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder:text-neutral-500 font-sans focus:outline-none transition-all"
+              className="w-full bg-neutral-950/80 border border-white/[0.08] focus:border-blue-500/50 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder:text-neutral-500 font-sans focus:outline-none transition-all"
             />
             {search && (
               <button
@@ -514,7 +457,7 @@ export default function YouTubePlaylistsManager({
           </div>
 
           {/* Privacy Filter */}
-          <div className="md:col-span-3">
+          <div className="w-full md:w-44 shrink-0">
             <CyberSelect
               value={privacyFilter}
               onChange={setPrivacyFilter}
@@ -528,7 +471,7 @@ export default function YouTubePlaylistsManager({
           </div>
 
           {/* Sort By */}
-          <div className="md:col-span-3">
+          <div className="w-full md:w-44 shrink-0">
             <CyberSelect
               value={sortBy}
               onChange={(val: any) => setSortBy(val)}
@@ -539,27 +482,60 @@ export default function YouTubePlaylistsManager({
               ]}
             />
           </div>
+
+          {/* Create New Playlist Button */}
+          <button
+            onClick={() => setCurrentView("create")}
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold font-mono shadow-md shadow-blue-600/25 transition-all cursor-pointer active:scale-95 shrink-0 whitespace-nowrap"
+          >
+            <FolderPlus className="w-3.5 h-3.5 text-white" />
+            <span>New Playlist</span>
+          </button>
+
+          {/* Refresh Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              fetchPlaylists();
+            }}
+            disabled={isLoading}
+            className="p-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-white/[0.08] text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
+            title="Refresh Playlists"
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${
+                isLoading ? "animate-spin text-[#3B82F6]" : ""
+              }`}
+            />
+          </button>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-500 pt-2 border-t border-neutral-800/60">
-          <span>
-            Showing{" "}
-            <strong className="text-white">{filteredPlaylists.length}</strong>{" "}
-            of <strong>{playlists.length}</strong> playlists
-          </span>
+        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 pt-2 border-t border-white/[0.06]">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span>
+              Showing <strong className="text-white">{filteredPlaylists.length}</strong> of <strong>{playlists.length}</strong> playlists
+            </span>
+            <span className="text-neutral-700">•</span>
+            <span className="text-[#60A5FA]">
+              <strong>{totalVideosInPlaylists}</strong> total curated videos
+            </span>
+          </div>
           {(search || privacyFilter !== "all") && (
             <button
               onClick={() => {
                 setSearch("");
                 setPrivacyFilter("all");
               }}
-              className="text-[#3B82F6] hover:text-[#93C5FD] underline cursor-pointer"
+              className="text-xs text-blue-400 hover:underline cursor-pointer"
             >
-              Clear filters
+              Reset Filters
             </button>
           )}
         </div>
       </div>
+
 
       {/* ── 3. PLAYLISTS CARDS GRID ── */}
       {isLoading ? (
