@@ -5,6 +5,7 @@ User active login sessions and audit logs.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
+import sqlite3
 from typing import List, Dict, Any
 
 from database.engine import get_db_connection
@@ -108,6 +109,8 @@ def write_audit_log(user_id: str, event: str, ip: str, status: str) -> None:
             VALUES (?, ?, ?, ?)
         """, (user_id, event, ip, status))
         conn.commit()
+    except sqlite3.IntegrityError:
+        pass
     finally:
         conn.close()
 
