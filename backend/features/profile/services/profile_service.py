@@ -20,7 +20,6 @@ from features.auth.repositories import (
     get_user_sessions,
     terminate_user_session,
     get_user_invoices,
-    seed_default_invoices_if_empty,
     write_audit_log,
     get_audit_logs,
 )
@@ -34,8 +33,6 @@ logger = logging.getLogger("sonikoma.features.profile.services.profile")
 
 def get_user_profile(user_id: str, current_user: dict) -> Dict[str, Any]:
     """Fetch and assemble the complete authenticated user profile payload."""
-    seed_default_invoices_if_empty(user_id)
-
     try:
         portfolio_links = json.loads(current_user.get("portfolio_links") or "[]")
     except Exception:
@@ -197,7 +194,6 @@ def get_user_audit_logs(
 
 def get_user_invoices_service(user_id: str, limit: int = 20, offset: int = 0) -> Dict[str, Any]:
     """Fetch billing invoices history."""
-    seed_default_invoices_if_empty(user_id)
     invoices = get_user_invoices(user_id)
     total = len(invoices)
     return {"success": True, "total": total, "invoices": invoices[offset:offset + limit]}

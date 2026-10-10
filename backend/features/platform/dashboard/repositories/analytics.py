@@ -104,24 +104,6 @@ def get_global_analytics() -> dict:
 
         # Revenue MRR, Active Subscriptions & Churn
         has_invoices = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='user_invoices'").fetchone() is not None
-        if has_invoices:
-            invoices_count = conn.execute("SELECT COUNT(*) FROM user_invoices").fetchone()[0]
-            if invoices_count == 0:
-                users_list = conn.execute("SELECT id FROM users").fetchall()
-                for u in users_list:
-                    user_id = u['id']
-                    suffix = user_id.split('_')[-1] if '_' in user_id else user_id
-                    invoices = [
-                        (f"INV-2026-004-{suffix}", 19.00, "paid", "2026-06-15 14:30:00"),
-                        (f"INV-2026-003-{suffix}", 19.00, "paid", "2026-05-15 10:15:00"),
-                        (f"INV-2026-002-{suffix}", 19.00, "paid", "2026-04-15 11:20:00")
-                    ]
-                    for inv_id, amt, stat, dt in invoices:
-                        conn.execute("""
-                            INSERT INTO user_invoices (invoice_id, user_id, amount, status, created_at)
-                            VALUES (?, ?, ?, ?, ?)
-                        """, (inv_id, user_id, amt, stat, dt))
-                conn.commit()
 
         mrr = 0.0
         active_subscriptions = 0

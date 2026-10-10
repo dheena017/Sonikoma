@@ -96,6 +96,7 @@ async def compile_video_from_panels(
     raw_title = first_panel.get("series_title") or first_panel.get("series_slug") or "series"
     clean_series = slugify(raw_title, separator="-") or "series"
     clean_series = clean_series.replace("_", "-").strip("-")
+    series_slug = clean_series
     ep_num = first_panel.get("episode_num") or first_panel.get("chapter_num") or "1"
     try:
         ep_formatted = f"{int(ep_num):02d}"
