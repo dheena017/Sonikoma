@@ -18,10 +18,12 @@ from pydantic import BaseModel, EmailStr, Field
 # ─────────────────────────────────────────────────────────────────────────────
 
 class UserRegister(BaseModel):
-    """Registration payload (email, password, optional full name)."""
+    """Registration payload (email, password, optional full name, creator role, newsletter)."""
     email: EmailStr
     password: str
     full_name: Optional[str] = None
+    creator_role: Optional[str] = "creator"
+    subscribe_newsletter: Optional[bool] = True
 
 
 class UserLogin(BaseModel):

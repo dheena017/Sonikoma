@@ -25,6 +25,8 @@ async def register_endpoint(user_data: UserRegister, request: Request = None):
             email=user_data.email,
             password=user_data.password,
             full_name=user_data.full_name,
+            creator_role=user_data.creator_role,
+            subscribe_newsletter=user_data.subscribe_newsletter,
             ip_addr=ip_addr,
         )
     except ValueError as ve:

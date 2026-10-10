@@ -190,6 +190,8 @@ class AuthService:
         email: str,
         password: str,
         full_name: Optional[str] = None,
+        creator_role: Optional[str] = None,
+        subscribe_newsletter: Optional[bool] = None,
         ip_addr: str = "127.0.0.1",
     ) -> Dict[str, Any]:
         """Registers a new creator user account."""
@@ -205,6 +207,8 @@ class AuthService:
             "email": email,
             "hashed_password": hashed_password,
             "full_name": full_name,
+            "creator_role": creator_role or "creator",
+            "subscribe_newsletter": subscribe_newsletter if subscribe_newsletter is not None else True,
             "avatar_url": "https://lh3.googleusercontent.com/a/default-user",
         }
 
@@ -218,6 +222,7 @@ class AuthService:
             "user_id": user_id,
             "email": email,
             "full_name": full_name,
+            "creator_role": new_user["creator_role"],
             "avatar_url": new_user["avatar_url"],
         }
         return {"access_token": access_token, "token_type": "bearer", "user": user_info}
