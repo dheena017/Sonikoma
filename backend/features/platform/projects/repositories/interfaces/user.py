@@ -67,11 +67,6 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    def seed_default_invoices_if_empty(self, user_id: str) -> None:
-        """Utility to prepopulate sample transaction history if empty."""
-        pass
-
-    @abstractmethod
     def get_user_api_keys(self, user_id: str) -> List[Dict[str, Any]]:
         """Lists all active developer API keys registered to a user."""
         pass

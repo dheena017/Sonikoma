@@ -20,12 +20,6 @@ def get_user_invoices(user_id: str) -> List[Dict[str, Any]]:
     finally:
         conn.close()
 
-
-def seed_default_invoices_if_empty(user_id: str) -> None:
-    """No-op: Invoices should only be created from real user purchases/transactions."""
-    pass
-
-
 def create_user_invoice(user_id: str, amount: float, status: str) -> Dict[str, Any]:
     conn = get_db_connection()
     try:
