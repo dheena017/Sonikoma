@@ -12,12 +12,12 @@ import logging
 from typing import Any, Dict, List, Optional, cast
 
 from database.engine import get_db_connection
-from database.session import uuid_hex
-from database.transaction import (
+from database.utils import (
+    ensure_user_exists,
     generate_unique_slug,
     unwrap_proxy_url,
+    uuid_hex,
 )
-from database.health import ensure_user_exists
 
 logger = logging.getLogger("sonikoma.repositories.project.project")
 

@@ -16,7 +16,7 @@ from typing import Tuple
 from app.core.cache import stitched_cache, edit_history
 import features.image_editor.services.utils.image_utils as img_utils
 
-from database.transaction import unwrap_proxy_url
+from database.utils import unwrap_proxy_url
 
 logger = logging.getLogger("sonikoma.services.image.stitch_cache")
 

@@ -1,58 +1,46 @@
 """
 backend/database/__init__.py
 ─────────────────────────────────────────────────────────────────────────────
-Database infrastructure package providing database initialization, connection
-factories, schema migrations, and transaction utilities.
+Unified database infrastructure package providing:
+- Configuration and engine connection factories
+- Startup orchestration and idempotent schema migrations
+- High-level utilities: UUID/datetime helpers, slugs, transactions, proxy unwrapping
+- Supabase cloud storage integration
 ─────────────────────────────────────────────────────────────────────────────
 """
 
-try:
-    from . import config
-    from .engine import get_db_connection
-    from .bootstrap import init_db
-    from .health import ensure_user_exists
-    from .transaction import (
-        managed_transaction,
-        create_slug,
-        generate_unique_slug,
-        generate_missing_slugs,
-        unwrap_proxy_url,
-    )
-    from .session import uuid_hex, datetime_now_date
-    from . import migrator
-    from . import supabase
-    from .supabase import get_supabase_client, upload_to_supabase_bucket
-except ImportError:
-    import database.config as config
-    from database.engine import get_db_connection
-    from database.bootstrap import init_db
-    from database.health import ensure_user_exists
-    from database.transaction import (
-        managed_transaction,
-        create_slug,
-        generate_unique_slug,
-        generate_missing_slugs,
-        unwrap_proxy_url,
-    )
-    from database.session import uuid_hex, datetime_now_date
-    import database.migrator as migrator
-    import database.supabase as supabase
-    from database.supabase import get_supabase_client, upload_to_supabase_bucket
+from database import config, migrator, supabase
+from database.bootstrap import init_db, is_database_initialized
+from database.engine import get_db_connection
+from database.supabase import get_supabase_client, upload_to_supabase_bucket
+from database.utils import (
+    create_slug,
+    datetime_now_date,
+    datetime_now_iso,
+    ensure_user_exists,
+    generate_missing_slugs,
+    generate_unique_slug,
+    managed_transaction,
+    unwrap_proxy_url,
+    uuid_hex,
+)
 
 __all__ = [
     "config",
-    "get_db_connection",
-    "init_db",
-    "ensure_user_exists",
-    "managed_transaction",
-    "create_slug",
-    "generate_unique_slug",
-    "generate_missing_slugs",
-    "unwrap_proxy_url",
-    "uuid_hex",
-    "datetime_now_date",
     "migrator",
     "supabase",
+    "get_db_connection",
+    "init_db",
+    "is_database_initialized",
     "get_supabase_client",
     "upload_to_supabase_bucket",
+    "create_slug",
+    "datetime_now_date",
+    "datetime_now_iso",
+    "ensure_user_exists",
+    "generate_missing_slugs",
+    "generate_unique_slug",
+    "managed_transaction",
+    "unwrap_proxy_url",
+    "uuid_hex",
 ]

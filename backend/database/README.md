@@ -1,30 +1,26 @@
 # Database Infrastructure (`backend/database/`)
 
 ## 1. Overview & Architecture
-The `database/` package provides Sonikoma's unified database abstraction layer, supporting **dual-engine execution**:
-- **SQLite**: Local development and embedded tests (`app.db` or `sonikoma.db`).
-- **PostgreSQL / Supabase**: Production deployments with connection pooling, pgvector, and automated backups when `DATABASE_URL` is set.
+The `database/` package provides Sonikoma's unified database abstraction layer, operating on **SQLite (WAL Mode)** with thread-safe connection pooling, automated schema validation, and cloud bucket storage integration:
 
 ```text
 backend/database/
-├── __init__.py                # Consolidated package exports
-├── bootstrap.py               # Initial schema initialization and startup guards
-├── config.py                  # Database path, timeout, and connection configuration
-├── engine.py                  # Core connection factory and engine pooling (get_db_connection)
-├── health.py                  # DB connection health and default user assertion
-├── migrator.py                # Versioned incremental migration runner
-├── schema.sql                 # Unified canonical DDL schema (SQLite & PostgreSQL)
-├── session.py                 # UUID generation and timestamp helpers
-├── supabase.py                # Supabase client and storage bucket upload integration
-├── transaction.py             # managed_transaction context manager & slug utilities
-└── README.md                  # Primary database architecture documentation
+├── __init__.py         # Package root with unified public exports
+├── bootstrap.py        # Thread-safe database startup orchestration & mutex guards
+├── config.py           # Path constants, environment variables, and credit thresholds
+├── engine.py           # Low-level SQLite connection factory with WAL mode & PRAGMAs
+├── migrator.py         # Canonical schema applicator, safe incremental column alters, and dead table pruning
+├── schema.sql          # Canonical 30-table DDL schema with domain grouping and indexed date sorting
+├── utils.py            # Unified utilities: UUID/datetime generation, slugs, transactions, proxy unwrapping
+├── supabase.py         # Supabase client and storage bucket upload integration
+└── README.md           # Database architecture documentation
 ```
 
 ---
 
 ## 2. Entity-Relationship & Domain Table Mapping
 
-All application state is partitioned logically across Sonikoma's feature domains:
+All application state is partitioned logically across Sonikoma's 8 canonical domain sections in `schema.sql`:
 
 ```mermaid
 erDiagram
@@ -54,7 +50,7 @@ erDiagram
 
 ---
 
-## 3. Connection Lifecycle & Transaction Management
+## 3. Connection Lifecycle & Utilities
 
 ### Connection Factory (`engine.py`)
 Repositories and services obtain managed connections via `get_db_connection`:
@@ -70,19 +66,19 @@ finally:
     conn.close()
 ```
 
-### Managed Transactions (`transaction.py`)
+### Managed Transactions (`utils.py`)
 Atomic operations wrapped with `managed_transaction` guarantee automatic commit on success and rollback on exceptions:
 ```python
-from app.database import managed_transaction
+from database import managed_transaction
 
-with managed_transaction(conn) as cursor:
-    cursor.execute("INSERT INTO series (id, title) VALUES (?, ?)", (series_id, title))
-    cursor.execute("INSERT INTO chapters (id, series_id) VALUES (?, ?)", (chapter_id, series_id))
+with managed_transaction(conn) as active_conn:
+    active_conn.execute("INSERT INTO series (id, title) VALUES (?, ?)", (series_id, title))
+    active_conn.execute("INSERT INTO chapters (id, series_id) VALUES (?, ?)", (chapter_id, series_id))
     # Automatically committed at block exit, or rolled back on error
 ```
 
 ---
 
 ## 4. Migrations & Schema Evolution (`migrator.py`)
-- **Canonical Schema**: `schema.sql` defines the desired state for all tables, indexes, and views across both SQLite and PostgreSQL.
-- **Migration Runner**: On app startup in `lifespan.py`, `migrator.init_sqlite()` / `migrator.init_postgres()` checks the database and executes incremental upgrade blocks idempotently.
+- **Canonical Schema**: `schema.sql` defines the desired state for all 30 tables, foreign key constraints, and performance indexes using `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS`.
+- **Migration Runner**: On app startup in `bootstrap.init_db()`, `migrator.init_sqlite()` verifies the canonical schema, runs safe non-destructive column additions for older SQLite databases, drops obsolete dead tables, and backfills missing slugs.

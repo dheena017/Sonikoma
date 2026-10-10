@@ -10,7 +10,7 @@ import logging
 from typing import Any, Dict, Optional, Protocol, cast
 
 from app.core.config import NODE_ENV
-from database.transaction import unwrap_proxy_url
+from database.utils import unwrap_proxy_url
 
 logger = logging.getLogger("sonikoma.services.project")
 

@@ -8,7 +8,7 @@ Storyboard panel data operations.
 from typing import List, Dict, Any, Optional
 
 from database.engine import get_db_connection
-from database.transaction import unwrap_proxy_url
+from database.utils import unwrap_proxy_url
 from features.platform.projects.services.asset_service import cleanup_cached_url
 
 

@@ -8,10 +8,7 @@ Shared utilities and formatters used across project sub-modules.
 from typing import List, Any
 from urllib.parse import quote
 
-try:
-    from database.transaction import unwrap_proxy_url
-except ImportError:
-    from database.transaction import unwrap_proxy_url
+from database.utils import unwrap_proxy_url
 
 
 def wrap_proxy_url(url_str: str) -> str:

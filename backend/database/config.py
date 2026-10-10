@@ -1,58 +1,47 @@
 """
-infrastructure/database/config.py
+backend/database/config.py
 ─────────────────────────────────────────────────────────────────────────────
-Database path constants and environment configuration.
+Database path constants, application thresholds, and configuration settings.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
 import os
 
-# ── Directory & file paths ────────────────────────────────────────────────
+# ── Directory & File Paths ─────────────────────────────────────────────────
 
 DB_DIR = os.path.abspath(os.path.dirname(__file__))
-_BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+_BACKEND_ROOT = os.path.abspath(os.path.join(DB_DIR, ".."))
 DATA_DIR = os.path.join(_BACKEND_ROOT, "data")
 
 DB_PATH = os.path.join(DATA_DIR, "webtoon_local.db")
 SCHEMA_PATH = os.path.join(DB_DIR, "schema.sql")
 SCHEMA_PG_PATH = SCHEMA_PATH
 
-# ── Environment flags ─────────────────────────────────────────────────────
+# ── Environment & Engine Configuration ────────────────────────────────────
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 NODE_ENV = os.environ.get("NODE_ENV", "development").lower()
 
-if NODE_ENV == "production":
-    if not DATABASE_URL:
-        raise RuntimeError(
-            "Configuration Error: DATABASE_URL must be defined in production. "
-            "Set DATABASE_URL to your Supabase Postgres connection string."
-        )
-    if not (DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://")):
-        raise RuntimeError(
-            "Configuration Error: DATABASE_URL in production must be a PostgreSQL connection string. "
-            "Use a Supabase/Postgres URL such as postgresql://... or postgres://..."
-        )
+# Local SQLite is the primary database engine
+is_postgres: bool = False
 
-is_postgres: bool = bool(
-    NODE_ENV == "production"
-    and DATABASE_URL
-    and (
-        DATABASE_URL.startswith("postgresql://")
-        or DATABASE_URL.startswith("postgres://")
-    )
-)
-
-# ── Application constants ─────────────────────────────────────────────────
+# ── Application Thresholds ────────────────────────────────────────────────
 
 LOW_BALANCE_THRESHOLD: int = 20
 
-# ── Optional client helper re-export ──────────────────────────────────────
-try:
-    from .supabase import get_supabase_client
-except ImportError:
-    try:
-        from database.supabase import get_supabase_client
-    except ImportError:
-        get_supabase_client = None  # type: ignore[assignment]
+# ── Storage & Cloud Client Helpers ────────────────────────────────────────
+
+from database.supabase import get_supabase_client
+
+__all__ = [
+    "DB_DIR",
+    "DATA_DIR",
+    "DB_PATH",
+    "SCHEMA_PATH",
+    "SCHEMA_PG_PATH",
+    "DATABASE_URL",
+    "NODE_ENV",
+    "is_postgres",
+    "LOW_BALANCE_THRESHOLD",
+    "get_supabase_client",
+]

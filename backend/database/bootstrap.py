@@ -1,7 +1,7 @@
 """
-backend/app/database/bootstrap.py
+backend/database/bootstrap.py
 ─────────────────────────────────────────────────────────────────────────────
-Database initialization orchestrator and startup guards.
+Database initialization orchestrator and thread-safe startup guards.
 ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -9,19 +9,12 @@ import os
 import logging
 import threading
 
-try:
-    from . import config
-    from .engine import _create_db_connection
-    from . import migrator
-except ImportError:
-    import database.config as config
-    from database.engine import _create_db_connection
-    import database.migrator as migrator
-
+from database import config, migrator
+from database.engine import _create_db_connection
 
 logger = logging.getLogger("sonikoma.database.bootstrap")
 
-# ── Initialisation state ──────────────────────────────────────────────────
+# ── Concurrency & Initialization Guards ────────────────────────────────────
 
 _db_initialized: bool = False
 _db_init_lock = threading.Lock()
@@ -31,50 +24,54 @@ _system_log_persist_in_progress: bool = False
 
 
 def _should_skip_system_log_persistence() -> bool:
-    return _db_init_in_progress or (
-        not _db_init_complete.is_set() and not _db_initialized
-    )
+    """Guard against logging to system_logs before tables are created."""
+    return _db_init_in_progress or not _db_initialized
+
+
+def is_database_initialized() -> bool:
+    """Check if database initialization has completed."""
+    return _db_initialized
 
 
 def init_db() -> None:
-    """Idempotent schema bootstrap. Thread-safe; safe to call from multiple
-    workers simultaneously."""
+    """
+    Idempotent, thread-safe database bootstrap.
+    Safe to call concurrently from multiple workers during application startup.
+    """
     global _db_initialized, _db_init_in_progress
 
+    # Fast-path check without acquiring lock
     if _db_initialized:
         return
 
     with _db_init_lock:
+        # Double-check inside mutex
         if _db_initialized:
             return
-        if _db_init_in_progress:
-            wait_for_init = True
-        else:
-            _db_init_in_progress = True
-            _db_init_complete.clear()
-            wait_for_init = False
 
-    if wait_for_init:
-        _db_init_complete.wait(timeout=60)
-        return
+        _db_init_in_progress = True
+        _db_init_complete.clear()
 
-    try:
-        os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
-        os.makedirs(config.DB_DIR, exist_ok=True)
-        conn = _create_db_connection()
-        migrator.init_sqlite(conn)
-        logger.info(f"[Database] SQLite database ready at {config.DB_PATH} [OK]")
-    except Exception as e:
-        logger.error(f"[Database] Error during database initialization: {e}")
-        with _db_init_lock:
+        try:
+            # Ensure local SQLite directory exists
+            os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
+            os.makedirs(config.DB_DIR, exist_ok=True)
+
+            conn = _create_db_connection()
+            migrator.init_sqlite(conn)
+            _db_initialized = True
+            logger.info(f"[Database] SQLite database ready at {config.DB_PATH} [OK]")
+
+        except Exception as e:
+            logger.error(f"[Database] Error during database initialization: {e}")
+            if os.getenv("RENDER") or os.getenv("NODE_ENV") == "production":
+                logger.warning(
+                    "[Database] Non-fatal database initialization warning in production environment; "
+                    "server will continue booting to open HTTP port."
+                )
+                return
+            raise
+
+        finally:
             _db_init_in_progress = False
             _db_init_complete.set()
-        if os.getenv("RENDER") or os.getenv("NODE_ENV") == "production":
-            logger.warning("[Database] Non-fatal database initialization warning in production environment; server will continue booting to open HTTP port.")
-            return
-        raise
-
-    with _db_init_lock:
-        _db_initialized = True
-        _db_init_in_progress = False
-        _db_init_complete.set()
