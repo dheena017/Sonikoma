@@ -401,56 +401,58 @@ export default function SeriesDetailsPage({
   }
 
   return (
-    <div className="w-full min-w-0 flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-6 sm:py-8 max-w-7xl mx-auto text-left">
-      <section className="w-full space-y-7 text-left" aria-label="Series details">
-        {/* Top Back Nav & Quick Toolbar */}
-        <div className="flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
-            <button
-              type="button"
-              onClick={() => navigateTo("/projects")}
-              className="flex min-h-9 items-center gap-1.5 rounded-lg border border-white/10 px-3 text-neutral-400 transition-colors hover:bg-white/5 hover:text-white group"
-            >
-              <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
-              <span>Projects</span>
-            </button>
-            <span className="text-neutral-600 font-bold">&rsaquo;</span>
-            <span className="max-w-[min(60vw,28rem)] truncate rounded-md px-1.5 py-1 font-semibold text-[#D4D4D8]">
-              {series.title}
-            </span>
-          </div>
+    <div className="w-full min-w-0 flex-1 flex flex-col items-center justify-start py-4 sm:py-6 lg:py-8 animate-fade-in relative z-10 text-left">
+      {/* ── MAIN COVER WRAPPER CARD MATCHING DASHBOARD & PROJECTS ── */}
+      <div className="w-full max-w-7xl mx-auto rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+        <section className="w-full space-y-7 text-left" aria-label="Series details">
+          {/* Top Back Nav & Quick Toolbar */}
+          <div className="flex flex-col gap-3 border-b border-[#2F2F2F] pb-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
+              <button
+                type="button"
+                onClick={() => navigateTo("/projects")}
+                className="flex min-h-9 items-center gap-1.5 rounded-xl border border-[#2F2F2F] bg-[#141414] px-3 text-neutral-400 transition-colors hover:bg-[#252525] hover:text-white group"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+                <span>Projects</span>
+              </button>
+              <span className="text-neutral-600 font-bold">&rsaquo;</span>
+              <span className="max-w-[min(60vw,28rem)] truncate rounded-md px-1.5 py-1 font-semibold text-[#D4D4D8]">
+                {series.title}
+              </span>
+            </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsFavorite(!isFavorite)}
-              aria-pressed={isFavorite}
-              className={`flex min-h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors cursor-pointer ${
-                isFavorite
-                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
-                  : "bg-neutral-900/80 border-white/10 text-neutral-400 hover:text-white hover:bg-neutral-850"
-              }`}
-            >
-              <Star
-                className={`w-3.5 h-3.5 ${
-                  isFavorite ? "fill-amber-400 text-amber-400" : ""
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsFavorite(!isFavorite)}
+                aria-pressed={isFavorite}
+                className={`flex min-h-9 items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition-colors cursor-pointer ${
+                  isFavorite
+                    ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+                    : "bg-[#141414] border-[#2F2F2F] text-neutral-400 hover:text-white hover:bg-[#252525]"
                 }`}
-              />
-              <span>{isFavorite ? "Favorited" : "Favorite"}</span>
-            </button>
+              >
+                <Star
+                  className={`w-3.5 h-3.5 ${
+                    isFavorite ? "fill-amber-400 text-amber-400" : ""
+                  }`}
+                />
+                <span>{isFavorite ? "Favorited" : "Favorite"}</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setIsEditModalOpen(true)}
-              className="flex min-h-9 items-center gap-1.5 rounded-lg border border-white/10 px-3 text-xs font-semibold text-neutral-300 transition-colors hover:bg-white/5 hover:text-white"
-            >
-              <Edit3 className="w-3.5 h-3.5 text-[#3B82F6]" />
-              <span>Edit Info</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(true)}
+                className="flex min-h-9 items-center gap-1.5 rounded-xl border border-[#2F2F2F] bg-[#141414] px-3 text-xs font-semibold text-neutral-300 transition-colors hover:bg-[#252525] hover:text-white"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-[#3B82F6]" />
+                <span>Edit Info</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="relative overflow-hidden rounded-lg border border-white/10 bg-[#151515] p-4 sm:p-6 lg:p-7">
+          <div className="relative overflow-hidden rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-5 sm:p-6 lg:p-7 shadow-md">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-6">
             {/* Cover Poster */}
             <div className="relative aspect-[2/3] w-32 shrink-0 overflow-hidden rounded-md border border-white/10 bg-neutral-950 sm:w-40">
@@ -502,10 +504,10 @@ export default function SeriesDetailsPage({
                   : "recently"}
               </p>
 
-              <div className="grid grid-cols-1 gap-2 border-t border-white/10 pt-4 sm:grid-cols-2 xl:flex xl:flex-wrap">
+              <div className="grid grid-cols-1 gap-2 border-t border-[#2F2F2F] pt-4 sm:grid-cols-2 xl:flex xl:flex-wrap">
                 <button
                   onClick={handleNewChapter}
-                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-emerald-300/30 bg-emerald-300 px-4 text-sm font-semibold text-[#101510] transition-colors hover:bg-emerald-200 xl:justify-start"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-emerald-400/40 bg-emerald-400 px-4 text-sm font-bold text-black transition-colors hover:bg-emerald-300 xl:justify-start cursor-pointer"
                 >
                   <Plus className="h-4 w-4" />
                   <span>New chapter</span>
@@ -513,7 +515,7 @@ export default function SeriesDetailsPage({
 
                 <button
                   onClick={() => setIsPublishModalOpen(true)}
-                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/5 hover:text-white xl:justify-start"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#2F2F2F] bg-[#141414] px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-[#252525] hover:text-white xl:justify-start cursor-pointer"
                 >
                   <Film className="h-4 w-4 text-[#3B82F6]" />
                   <span>Export series</span>
@@ -521,7 +523,7 @@ export default function SeriesDetailsPage({
 
                 <button
                   onClick={() => setIsReaderModalOpen(true)}
-                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/5 hover:text-white xl:justify-start"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#2F2F2F] bg-[#141414] px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-[#252525] hover:text-white xl:justify-start cursor-pointer"
                 >
                   <BookOpen className="h-4 w-4 text-emerald-400" />
                   <span>Read Series</span>
@@ -529,7 +531,7 @@ export default function SeriesDetailsPage({
 
                 <button
                   onClick={() => navigateTo("/creative-suite")}
-                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/10 px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-white/5 hover:text-white xl:justify-start"
+                  className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#2F2F2F] bg-[#141414] px-4 text-sm font-medium text-neutral-200 transition-colors hover:bg-[#252525] hover:text-white xl:justify-start cursor-pointer"
                 >
                   <Volume2 className="h-4 w-4 text-amber-400" />
                   <span>Audio Studio</span>
@@ -539,58 +541,58 @@ export default function SeriesDetailsPage({
           </div>
         </div>
 
-        {/* 2. Deep Series Analytics Dashboard */}
-        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#171717] p-4">
-            <div className="shrink-0 rounded-lg border border-sky-400/20 bg-sky-400/10 p-2.5 text-sky-300">
+        {/* 2. Deep Series Analytics Dashboard Matching Master Cards */}
+        <div className="mb-8 grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="flex items-center gap-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-4 sm:p-5 shadow-sm">
+            <div className="shrink-0 rounded-xl border border-white/5 bg-sky-500/10 p-2.5 text-sky-400">
               <Layers className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-black text-[#E5E5E5]">
                 {series.chapterCount}
               </div>
-              <div className="text-xs text-neutral-400">
+              <div className="text-xs text-[#9CA3AF] mt-0.5">
                 Chapters · {readyChaptersCount} ready · {draftChaptersCount} draft
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#171717] p-4">
-            <div className="shrink-0 rounded-lg border border-amber-400/20 bg-amber-400/10 p-2.5 text-amber-300">
+          <div className="flex items-center gap-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-4 sm:p-5 shadow-sm">
+            <div className="shrink-0 rounded-xl border border-white/5 bg-amber-500/10 p-2.5 text-amber-400">
               <Zap className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-black text-[#E5E5E5]">
                 {totalPanels.toLocaleString()}
               </div>
-              <div className="text-xs text-neutral-400">
+              <div className="text-xs text-[#9CA3AF] mt-0.5">
                 Panels extracted
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#171717] p-4">
-            <div className="shrink-0 rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-2.5 text-emerald-300">
+          <div className="flex items-center gap-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-4 sm:p-5 shadow-sm">
+            <div className="shrink-0 rounded-xl border border-white/5 bg-emerald-500/10 p-2.5 text-emerald-400">
               <Clock className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-black text-[#E5E5E5]">
                 ~{estimatedRuntimeMinutes}m
               </div>
-              <div className="text-xs text-neutral-400">
+              <div className="text-xs text-[#9CA3AF] mt-0.5">
                 Estimated video runtime
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 rounded-lg border border-white/10 bg-[#171717] p-4">
-            <div className="shrink-0 rounded-lg border border-indigo-400/20 bg-indigo-400/10 p-2.5 text-indigo-300">
+          <div className="flex items-center gap-4 rounded-2xl border border-[#2F2F2F] bg-[#1E1E1E] p-4 sm:p-5 shadow-sm">
+            <div className="shrink-0 rounded-xl border border-white/5 bg-indigo-500/10 p-2.5 text-indigo-400">
               <CheckCircle2 className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs text-neutral-400">Ready rate</span>
-                <span className="text-xs font-semibold text-indigo-300">
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-xs text-[#9CA3AF]">Ready rate</span>
+                <span className="text-xs font-bold text-indigo-400">
                   {Math.round(
                     (readyChaptersCount / Math.max(1, series.chapterCount)) *
                       100
@@ -599,7 +601,7 @@ export default function SeriesDetailsPage({
                 </span>
               </div>
               <div
-                className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800"
+                className="h-1.5 w-full overflow-hidden rounded-full bg-[#121212] border border-[#2F2F2F]"
                 role="progressbar"
                 aria-label="Ready chapter rate"
                 aria-valuemin={0}
@@ -610,7 +612,7 @@ export default function SeriesDetailsPage({
                 )}
               >
                 <div
-                  className="h-full rounded-full bg-indigo-300"
+                  className="h-full rounded-full bg-[#3B82F6] transition-all duration-500"
                   style={{
                     width: `${Math.round(
                       (readyChaptersCount / Math.max(1, series.chapterCount)) *
@@ -624,12 +626,12 @@ export default function SeriesDetailsPage({
         </div>
 
         {/* 4. Filter, Search & View Mode Controls Bar */}
-        <div className="mb-5 flex flex-col gap-4 border-b border-white/10 pb-5 xl:flex-row xl:items-center xl:justify-between">
+        <div className="mb-5 flex flex-col gap-4 border-b border-[#2F2F2F] pb-5 xl:flex-row xl:items-center xl:justify-between">
           {/* Title + Chapter Counter */}
           <div className="flex min-w-0 items-center gap-3">
-            <h2 className="flex min-w-0 flex-wrap items-center gap-2 text-xl font-semibold text-white sm:text-2xl">
+            <h2 className="flex min-w-0 flex-wrap items-center gap-2.5 text-xl font-black text-white sm:text-2xl">
               Chapters
-              <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs font-medium leading-none text-neutral-300">
+              <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-[#2F2F2F] bg-[#141414] px-2.5 py-0.5 text-xs font-mono font-bold leading-none text-[#9CA3AF]">
                 {filteredChapters.length} of {series.chapterCount}
               </span>
             </h2>
@@ -646,21 +648,21 @@ export default function SeriesDetailsPage({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search chapters"
-                className="h-11 w-full rounded-lg border border-white/10 bg-[#141414] py-2 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-500 focus:border-sky-300/50 focus:ring-2 focus:ring-sky-300/10"
+                className="h-11 w-full rounded-xl border border-[#2F2F2F] bg-[#141414] py-2 pl-9 pr-3 text-sm text-white outline-none transition-colors placeholder:text-neutral-500 focus:border-[#3B82F6]/60"
               />
             </div>
 
             {/* Status Filters */}
-            <div className="col-span-2 grid h-11 grid-cols-3 items-center rounded-lg border border-white/10 bg-[#141414] p-1 text-xs sm:col-span-1 sm:flex">
+            <div className="col-span-2 grid h-11 grid-cols-3 items-center rounded-xl border border-[#2F2F2F] bg-[#141414] p-1 text-xs sm:col-span-1 sm:flex">
               {(["all", "draft", "ready"] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   aria-pressed={statusFilter === status}
-                  className={`h-full rounded-md px-2 text-xs capitalize transition-colors cursor-pointer sm:px-3 ${
+                  className={`h-full rounded-lg px-2 text-xs capitalize transition-colors cursor-pointer sm:px-3 ${
                     statusFilter === status
-                      ? "bg-white/10 font-medium text-white"
-                      : "text-neutral-400 hover:text-white"
+                      ? "bg-[#252525] font-bold text-white border border-[#2F2F2F]"
+                      : "text-[#9CA3AF] hover:text-white"
                   }`}
                 >
                   {status}
@@ -673,13 +675,13 @@ export default function SeriesDetailsPage({
               <button
                 type="button"
                 onClick={() => setIsSortOpen((prev) => !prev)}
-                className={`flex h-11 min-w-0 items-center justify-between gap-2 rounded-lg border bg-[#141414] px-3 text-xs transition-colors cursor-pointer select-none sm:flex-none ${
+                className={`flex h-11 min-w-0 items-center justify-between gap-2 rounded-xl border bg-[#141414] px-3 text-xs transition-colors cursor-pointer select-none sm:flex-none ${
                   isSortOpen
-                    ? "border-sky-300/50 text-white ring-2 ring-sky-300/10"
-                    : "border-white/10 text-neutral-300 hover:border-white/20"
+                    ? "border-[#3B82F6]/60 text-white"
+                    : "border-[#2F2F2F] text-neutral-300 hover:border-neutral-500"
                 }`}
               >
-                  <span className="hidden text-neutral-500 sm:inline">Sort:</span>
+                <span className="hidden text-neutral-500 sm:inline">Sort:</span>
                 <span className="font-semibold text-white">
                   {sortBy === "newest"
                     ? "Newest First"
@@ -691,13 +693,13 @@ export default function SeriesDetailsPage({
                 </span>
                 <ChevronDown
                   className={`w-3.5 h-3.5 text-neutral-400 transition-transform duration-200 ${
-                    isSortOpen ? "rotate-180 text-[#60A5FA]" : ""
+                    isSortOpen ? "rotate-180 text-[#3B82F6]" : ""
                   }`}
                 />
               </button>
 
               {isSortOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-44 rounded-lg border border-white/10 bg-[#171717] py-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 z-50 mt-2 w-44 rounded-xl border border-[#2F2F2F] bg-[#1E1E1E] py-1.5 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-1">
                     {[
                       { id: "newest", label: "Newest First" },
@@ -714,10 +716,10 @@ export default function SeriesDetailsPage({
                             setSortBy(opt.id as any);
                             setIsSortOpen(false);
                           }}
-                          className={`my-0.5 flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-xs transition-colors cursor-pointer ${
+                          className={`my-0.5 flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition-colors cursor-pointer ${
                             isSelected
-                              ? "bg-white/10 font-medium text-white"
-                              : "text-neutral-300 hover:bg-white/[0.07] hover:text-white"
+                              ? "bg-[#252525] font-bold text-white"
+                              : "text-neutral-300 hover:bg-[#252525] hover:text-white"
                           }`}
                         >
                           <span>{opt.label}</span>
@@ -733,14 +735,14 @@ export default function SeriesDetailsPage({
             </div>
 
             {/* View Switcher */}
-            <div className="flex h-11 items-center justify-center rounded-lg border border-white/10 bg-[#141414] p-1">
+            <div className="flex h-11 items-center justify-center rounded-xl border border-[#2F2F2F] bg-[#141414] p-1">
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
                 aria-label="Grid view"
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors cursor-pointer ${
+                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer ${
                   viewMode === "grid"
-                    ? "bg-white/10 text-white"
+                    ? "bg-[#252525] text-white"
                     : "text-neutral-500 hover:text-white"
                 }`}
                 title="Grid view"
@@ -751,9 +753,9 @@ export default function SeriesDetailsPage({
                 type="button"
                 onClick={() => setViewMode("list")}
                 aria-label="List view"
-                className={`flex h-8 w-8 items-center justify-center rounded-md transition-colors cursor-pointer ${
+                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer ${
                   viewMode === "list"
-                    ? "bg-white/10 text-white"
+                    ? "bg-[#252525] text-white"
                     : "text-neutral-500 hover:text-white"
                 }`}
                 title="List view"
@@ -942,6 +944,7 @@ export default function SeriesDetailsPage({
           chapters={series.chapters}
         />
       </section>
+      </div>
     </div>
   );
 }

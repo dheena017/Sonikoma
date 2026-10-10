@@ -5,7 +5,6 @@ import ProjectsPageHeader from "@/features/platform/projects/components/Projects
 import ProjectsFilters from "@/features/platform/projects/components/ProjectsFilters";
 import ProjectsStats from "@/features/platform/projects/components/ProjectsStats";
 import ProjectsPageResultView from "@/features/platform/projects/components/ProjectsPageResultView";
-import ProjectsQuickLauncher from "@/features/platform/projects/components/ProjectsQuickLauncher";
 import AISeriesGridCard from "@/features/intelligence/series/components/AISeriesGridCard";
 import { ProjectCardSkeleton } from "@/shared/ui/loading";
 import { aiSeriesApi, type AISeriesProject } from "@/features/intelligence/series/api/aiSeries";
@@ -317,14 +316,6 @@ export default function ProjectsPageView({
               }}
             />
           )}
-        </div>
-
-        {/* Studio Creation Suite (6 Interactive Modules Launchpad) - Placed at the bottom */}
-        <div className="relative z-10 pt-4 border-t border-[#2F2F2F]/60">
-          <ProjectsQuickLauncher
-            onOpenScraper={() => navigateTo("/scraper")}
-            onOpenAiStudio={() => navigateTo("/ai-series")}
-          />
         </div>
       </div>
     </div>
