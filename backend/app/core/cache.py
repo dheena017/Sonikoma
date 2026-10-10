@@ -406,9 +406,61 @@ def purge_all_expired() -> None:
         logger.info(f"[Cache] ♻️  Purged {total} expired entries (merged:{m} edits:{e} zips:{z} proxy:{p})")
 
 
+def enforce_disk_quota(max_bytes: int = 2 * 1024 * 1024 * 1024) -> int:
+    """
+    Enforces a strict disk quota (default 2.0 GB) on PERSISTENT_CACHE_DIR.
+    If usage exceeds max_bytes, prunes oldest files by access/modification time
+    until usage drops below 80% of max_bytes (1.6 GB).
+    Returns number of pruned files.
+    """
+    if not os.path.exists(PERSISTENT_CACHE_DIR):
+        return 0
+
+    files_with_stats = []
+    total_size = 0
+    for dirpath, _, filenames in os.walk(PERSISTENT_CACHE_DIR):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            if not os.path.islink(fp):
+                try:
+                    st = os.stat(fp)
+                    total_size += st.st_size
+                    files_with_stats.append((fp, st.st_size, st.st_atime or st.st_mtime))
+                except OSError:
+                    pass
+
+    if total_size <= max_bytes:
+        return 0
+
+    files_with_stats.sort(key=lambda x: x[2])
+    target_size = int(max_bytes * 0.8)
+    pruned_count = 0
+
+    for fp, sz, _ in files_with_stats:
+        if total_size <= target_size:
+            break
+        try:
+            os.remove(fp)
+            total_size -= sz
+            pruned_count += 1
+        except OSError:
+            pass
+
+    if pruned_count > 0:
+        logger.info(f"[Cache] 🧹 Enforced 2GB disk quota: pruned {pruned_count} oldest files, current size {total_size / (1024*1024):.1f} MB")
+    return pruned_count
+
+
 def clear_all_caches() -> None:
     stitched_cache.clear()
     edit_history.clear()
     zip_cache.clear()
     proxy_cache.clear()
     logger.info("[Cache] Cleared all memory and disk caches.")
+
+
+# ── Canonical Proper Naming Aliases ──────────────────────────────────────────
+stitched_strips_cache = stitched_cache
+panel_edits_cache = edit_history
+image_proxy_ram_cache = proxy_cache
+export_archives_ram_cache = zip_cache

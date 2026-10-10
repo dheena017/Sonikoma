@@ -59,17 +59,11 @@ def init_db() -> None:
         return
 
     try:
-        if config.is_postgres:
-            logger.info("[Database] Connecting to PostgreSQL (Supabase)...")
-            conn = _create_db_connection()
-            migrator.init_postgres(conn)
-            logger.info("[Database] PostgreSQL ready [OK]")
-        else:
-            os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
-            os.makedirs(config.DB_DIR, exist_ok=True)
-            conn = _create_db_connection()
-            migrator.init_sqlite(conn)
-            logger.info(f"[Database] SQLite database ready at {config.DB_PATH} [OK]")
+        os.makedirs(os.path.dirname(config.DB_PATH), exist_ok=True)
+        os.makedirs(config.DB_DIR, exist_ok=True)
+        conn = _create_db_connection()
+        migrator.init_sqlite(conn)
+        logger.info(f"[Database] SQLite database ready at {config.DB_PATH} [OK]")
     except Exception as e:
         logger.error(f"[Database] Error during database initialization: {e}")
         with _db_init_lock:

@@ -80,13 +80,29 @@ def create_series(series_id: str, user_id: str, title: str, author: str, cover_i
         conn.close()
 
 
-def get_series_for_user(user_id: str) -> List[Dict[str, Any]]:
+def get_series_for_user(
+    user_id: str,
+    sort_by: str = "created_at",
+    order: str = "DESC",
+) -> List[Dict[str, Any]]:
     """
-    Queries and returns all Series publishing metadata linked to a specific user.
+    Queries and returns all Series publishing metadata linked to a specific user,
+    with flexible date/title sorting (created_at, updated_at, title).
     """
+    valid_sorts = {
+        "created_at": "created_at",
+        "updated_at": "updated_at",
+        "title": "title",
+    }
+    sort_col = valid_sorts.get(str(sort_by).lower(), "created_at")
+    sort_dir = "ASC" if str(order).upper() == "ASC" else "DESC"
+
     conn = get_db_connection()
     try:
-        rows = conn.execute("SELECT * FROM series WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
+        rows = conn.execute(
+            f"SELECT * FROM series WHERE user_id = ? ORDER BY {sort_col} {sort_dir}",
+            (user_id,),
+        ).fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()
@@ -107,13 +123,30 @@ def add_chapter_to_series(chapter_id: str, series_id: str, episode_number: str, 
         conn.close()
 
 
-def get_chapters_for_series(series_id: str) -> List[Dict[str, Any]]:
+def get_chapters_for_series(
+    series_id: str,
+    sort_by: str = "created_at",
+    order: str = "ASC",
+) -> List[Dict[str, Any]]:
     """
     Retrieves all Chapters publishing metadata nested under a specific Series parent ID.
+    Defaults to chronological ASC order (Episode 1 -> Episode 2).
     """
+    valid_sorts = {
+        "created_at": "created_at",
+        "updated_at": "updated_at",
+        "episode_number": "episode_number",
+        "chapter_number": "episode_number",
+    }
+    sort_col = valid_sorts.get(str(sort_by).lower(), "created_at")
+    sort_dir = "DESC" if str(order).upper() == "DESC" else "ASC"
+
     conn = get_db_connection()
     try:
-        rows = conn.execute("SELECT * FROM chapters WHERE series_id = ? ORDER BY created_at ASC", (series_id,)).fetchall()
+        rows = conn.execute(
+            f"SELECT * FROM chapters WHERE series_id = ? ORDER BY {sort_col} {sort_dir}",
+            (series_id,),
+        ).fetchall()
         results = []
         for r in rows:
             d = dict(r)

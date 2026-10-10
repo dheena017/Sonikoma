@@ -45,13 +45,12 @@ erDiagram
 | :--- | :--- | :--- |
 | **`auth` & `profile`** | `users`, `user_sessions`, `user_audit_logs`, `user_api_keys`, `user_invoices`, `credit_transactions` | Creator identities, sessions, security audit events, developer API credentials, billing ledger |
 | **`platform/projects`** | `series`, `chapters`, `panels` | Top-level comics/manga, episode workspaces, panel crops, dialogue, and styling |
-| **`platform/scraper`** | `scrape_sessions`, `scraper_rules`, `chapter_cache`, `series_chapters_cache`, `scraper_l1_cache`, `scraper_l5_cache` | Scraped image URLs, site rate-limit rules, discovery caches |
+| **`platform/scraper`** | `scrape_sessions`, `series_chapters_cache`, `scraper_rules`, `scraper_l1_cache`, `scraper_l5_cache` | Scraped image URLs, site rate-limit rules, discovery caches |
 | **`platform/jobs`** | `jobs` | Async background tasks, progress percentages, execution status |
 | **`platform/terminal`**| `system_logs`, `token_usage_logs` | Server logging stream, runtime debug traces, LLM cost accounting |
 | **`admin`** | `platform_settings`, `system_announcements`, `content_moderation_logs` | Global app toggles, banner announcements, safety moderation |
-| **`creative`** | `youtube_profiles`, `youtube_publications`, `youtube_credentials`, `youtube_oauth_tokens` | YouTube channel profiles, OAuth2 credentials, published upload history |
-| **`intelligence`** | `ai_token_usage_ledger`, `ai_usage_ledger` | Detailed AI model execution logs and analytics ledger |
-| **`image_editor`** | `edit_history` | Image filter history and panel transformations |
+| **`creative`** | `user_youtube_channels`, `youtube_oauth_tokens`, `youtube_profiles`, `youtube_publications`, `youtube_credentials` | YouTube channel profiles, OAuth2 credentials, published upload history |
+| **`intelligence`** | `ai_series_projects`, `series_continuity_memory`, `series_feedback_events`, `ai_token_usage_ledger` | AI project states, continuity lore memory, RLHF feedback, and model performance analytics |
 
 ---
 

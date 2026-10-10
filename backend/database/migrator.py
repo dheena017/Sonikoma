@@ -18,376 +18,7 @@ except ImportError:
 
 logger = logging.getLogger("sonikoma.database.migrator")
 
-
-def seed_default_settings(conn) -> None:
-    """Seeds default platform settings if the platform_settings table is empty."""
-    try:
-        cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM platform_settings")
-        row = cursor.fetchone()
-        count = row[0] if row is not None else 0
-        if count == 0:
-            logger.info("[Database] Seeding default platform settings...")
-            defaults = [
-                ("maintenance_mode", "false"),
-                ("disable_signups", "false"),
-                ("global_banner", ""),
-                ("enable_beta", "false"),
-                ("max_upload_size_mb", "50"),
-                ("max_scenes_per_project", "100"),
-                ("default_starting_credits", "200"),
-                ("smtp_host", "smtp.mailgun.org"),
-                ("smtp_port", "587"),
-                ("smtp_user", ""),
-                ("enforce_2fa", "false"),
-                ("strict_ip_binding", "false"),
-                ("session_timeout_min", "120"),
-                ("webhook_url", "https://api.sonikoma.com/webhooks"),
-                ("log_retention_days", "7"),
-                ("log_max_entries", "5000"),
-            ]
-            cursor.executemany(
-                "INSERT INTO platform_settings (key, value) VALUES (?, ?)", defaults
-            )
-            conn.commit()
-            logger.info("[Database] Seeding default platform settings completed.")
-    except Exception as e:
-        logger.error(f"[Database] Failed to seed default platform settings: {e}")
-
-
-# ── PostgreSQL initialisation ─────────────────────────────────────────────
-
-
-def init_postgres(conn) -> None:
-    """Apply the Postgres schema and incremental table migrations."""
-    try:
-        row = conn.execute(
-            "SELECT EXISTS ("
-            "  SELECT FROM information_schema.tables"
-            "  WHERE table_schema = 'public' AND table_name = 'users'"
-            ") as exists"
-        ).fetchone()
-        if not row or not row.get("exists"):
-            logger.info("[Database] Initializing PostgreSQL schema...")
-            if os.path.exists(config.SCHEMA_PATH):
-                with open(config.SCHEMA_PATH, "r", encoding="utf-8") as f:
-                    schema = f.read()
-                conn.executescript(schema)
-                conn.commit()
-                logger.info("[Database] Schema applied successfully.")
-            else:
-                logger.warning("[Database] schema.sql not found.")
-        else:
-            logger.info("[Database] Relational database schema is already initialized.")
-
-        # YouTube tables
-        row_yt = conn.execute(
-            "SELECT EXISTS ("
-            "  SELECT FROM information_schema.tables"
-            "  WHERE table_schema = 'public' AND table_name = 'youtube_profiles'"
-            ") as exists"
-        ).fetchone()
-        if not row_yt or not row_yt.get("exists"):
-            logger.info("[Database] Initializing PostgreSQL YouTube schema...")
-            conn.executescript("""
-            CREATE TABLE IF NOT EXISTS youtube_profiles (
-              id                  SERIAL PRIMARY KEY,
-              user_id             TEXT    NOT NULL,
-              name                TEXT    NOT NULL,
-              title_template      TEXT    NOT NULL,
-              description_template TEXT   NOT NULL,
-              tags                TEXT    NOT NULL,
-              category_id         TEXT    NOT NULL DEFAULT '1',
-              privacy_status      TEXT    NOT NULL DEFAULT 'unlisted',
-              is_short            INTEGER NOT NULL DEFAULT 0,
-              made_for_kids       TEXT    NOT NULL DEFAULT 'no',
-              paid_promotion      INTEGER NOT NULL DEFAULT 0,
-              license             TEXT    NOT NULL DEFAULT 'youtube',
-              video_language      TEXT    NOT NULL DEFAULT 'en',
-              channel_link        TEXT,
-              discord_link        TEXT,
-              patreon_link        TEXT,
-              created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-              UNIQUE(user_id, name)
-            );
-            CREATE TABLE IF NOT EXISTS youtube_publications (
-              id                  SERIAL PRIMARY KEY,
-              user_id             TEXT    NOT NULL,
-              chapter_id          TEXT,
-              youtube_url         TEXT    NOT NULL,
-              title               TEXT    NOT NULL,
-              privacy_status      TEXT    NOT NULL DEFAULT 'unlisted',
-              published_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-              FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE SET NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_youtube_profiles_user ON youtube_profiles(user_id);
-            CREATE INDEX IF NOT EXISTS idx_youtube_publications_user ON youtube_publications(user_id);
-            """)
-            conn.commit()
-            logger.info("[Database] PostgreSQL YouTube schema applied successfully.")
-
-        # YouTube credentials
-        row_creds = conn.execute(
-            "SELECT EXISTS ("
-            "  SELECT FROM information_schema.tables"
-            "  WHERE table_schema = 'public' AND table_name = 'youtube_credentials'"
-            ") as exists"
-        ).fetchone()
-        if not row_creds or not row_creds.get("exists"):
-            logger.info("[Database] Initializing PostgreSQL YouTube credentials schema...")
-            conn.executescript("""
-            CREATE TABLE IF NOT EXISTS youtube_credentials (
-              user_id             TEXT    PRIMARY KEY,
-              client_id           TEXT    NOT NULL,
-              client_secret       TEXT    NOT NULL,
-              project_id          TEXT    NOT NULL,
-              updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            );
-            """)
-            conn.commit()
-
-        # credit_transactions
-        row_tx = conn.execute(
-            "SELECT EXISTS ("
-            "  SELECT FROM information_schema.tables"
-            "  WHERE table_schema = 'public' AND table_name = 'credit_transactions'"
-            ") as exists"
-        ).fetchone()
-        if not row_tx or not row_tx.get("exists"):
-            logger.info("[Database] Initializing PostgreSQL credit_transactions schema...")
-            conn.executescript("""
-            CREATE TABLE IF NOT EXISTS credit_transactions (
-              id              TEXT PRIMARY KEY,
-              user_id         TEXT NOT NULL,
-              amount          INTEGER NOT NULL,
-              feature_name    TEXT NOT NULL,
-              created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            );
-            CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id);
-            """)
-            conn.commit()
-
-        # credit_balance column on users
-        row_col = conn.execute(
-            "SELECT EXISTS ("
-            "  SELECT FROM information_schema.columns"
-            "  WHERE table_schema = 'public'"
-            "    AND table_name = 'users'"
-            "    AND column_name = 'credit_balance'"
-            ") as exists"
-        ).fetchone()
-        if not row_col or not row_col.get("exists"):
-            logger.info(
-                "[Database] Migration: adding 'credit_balance' column to 'users' table..."
-            )
-            conn.execute(
-                "ALTER TABLE users ADD COLUMN credit_balance INTEGER NOT NULL DEFAULT 840"
-            )
-            conn.commit()
-
-        # Columns used by OAuth and project token accounting.
-        for table_name, column_name, column_definition in (
-            ("users", "google_access_token", "TEXT"),
-            ("chapters", "total_tokens_used", "INTEGER NOT NULL DEFAULT 0"),
-        ):
-            try:
-                row_column = conn.execute(
-                    "SELECT EXISTS ("
-                    "  SELECT FROM information_schema.columns"
-                    "  WHERE table_schema = 'public'"
-                    "    AND table_name = ?"
-                    "    AND column_name = ?"
-                    ") as exists",
-                    (table_name, column_name),
-                ).fetchone()
-                if not row_column or not row_column.get("exists"):
-                    logger.info(
-                        "[Database] Migration: adding '%s' column to '%s' table...",
-                        column_name,
-                        table_name,
-                    )
-                    conn.execute(
-                        f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}"
-                    )
-                    conn.commit()
-            except Exception:
-                pass
-
-        # YouTube OAuth and channel tables for existing PostgreSQL databases.
-        try:
-            conn.executescript("""
-            CREATE TABLE IF NOT EXISTS youtube_oauth_tokens (
-              user_id                    TEXT PRIMARY KEY,
-              access_token               TEXT NOT NULL,
-              refresh_token              TEXT,
-              token_uri                  TEXT NOT NULL DEFAULT 'https://oauth2.googleapis.com/token',
-              client_id                  TEXT,
-              client_secret              TEXT,
-              scopes                     TEXT,
-              google_email               TEXT,
-              selected_channel_id        TEXT,
-              selected_channel_title     TEXT,
-              selected_channel_thumbnail TEXT,
-              selected_channel_handle    TEXT,
-              updated_at                 TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            );
-            CREATE TABLE IF NOT EXISTS user_youtube_channels (
-              channel_id       TEXT NOT NULL,
-              user_id          TEXT NOT NULL,
-              title            TEXT NOT NULL,
-              description      TEXT,
-              custom_url       TEXT,
-              thumbnail        TEXT,
-              subscriber_count TEXT,
-              view_count       TEXT,
-              video_count      TEXT,
-              channel_type     TEXT DEFAULT 'personal',
-              is_selected      INTEGER NOT NULL DEFAULT 0,
-              created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-              updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-              PRIMARY KEY (user_id, channel_id),
-              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            );
-            CREATE TABLE IF NOT EXISTS user_unlinked_youtube_channels (
-              user_id     TEXT NOT NULL,
-              channel_id  TEXT NOT NULL,
-              unlinked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-              PRIMARY KEY (user_id, channel_id),
-              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-            );
-            CREATE INDEX IF NOT EXISTS idx_user_yt_channels_user
-              ON user_youtube_channels(user_id);
-            """)
-            conn.commit()
-        except Exception as exc:
-            logger.warning("[Database] PostgreSQL YouTube account migration failed: %s", exc)
-
-        # narrative column on panels
-        try:
-            row_panel_col = conn.execute(
-                "SELECT EXISTS ("
-                "  SELECT FROM information_schema.columns"
-                "  WHERE table_schema = 'public'"
-                "    AND table_name = 'panels'"
-                "    AND column_name = 'narrative'"
-                ") as exists"
-            ).fetchone()
-            if not row_panel_col or not row_panel_col.get("exists"):
-                logger.info("[Database] Migration: adding 'narrative' column to 'panels' table...")
-                conn.execute("ALTER TABLE panels ADD COLUMN narrative TEXT")
-                conn.commit()
-        except Exception:
-            pass
-
-        # job_id column on chapters
-        try:
-            row_chap_job = conn.execute(
-                "SELECT EXISTS ("
-                "  SELECT FROM information_schema.columns"
-                "  WHERE table_schema = 'public'"
-                "    AND table_name = 'chapters'"
-                "    AND column_name = 'job_id'"
-                ") as exists"
-            ).fetchone()
-            if not row_chap_job or not row_chap_job.get("exists"):
-                logger.info("[Database] Migration: adding 'job_id' column to 'chapters' table...")
-                conn.execute("ALTER TABLE chapters ADD COLUMN job_id TEXT")
-                conn.commit()
-        except Exception:
-            pass
-
-        # job_id column on token_usage_logs
-        try:
-            row_log_job = conn.execute(
-                "SELECT EXISTS ("
-                "  SELECT FROM information_schema.columns"
-                "  WHERE table_schema = 'public'"
-                "    AND table_name = 'token_usage_logs'"
-                "    AND column_name = 'job_id'"
-                ") as exists"
-            ).fetchone()
-            if not row_log_job or not row_log_job.get("exists"):
-                logger.info("[Database] Migration: adding 'job_id' column to 'token_usage_logs' table...")
-                conn.execute("ALTER TABLE token_usage_logs ADD COLUMN job_id TEXT")
-                conn.commit()
-        except Exception:
-            pass
-
-        # project_type lifecycle column on chapters ('temp' | 'permanent')
-        try:
-            row_pt = conn.execute(
-                "SELECT EXISTS ("
-                "  SELECT FROM information_schema.columns"
-                "  WHERE table_schema = 'public'"
-                "    AND table_name = 'chapters'"
-                "    AND column_name = 'project_type'"
-                ") as exists"
-            ).fetchone()
-            if not row_pt or not row_pt.get("exists"):
-                logger.info("[Database] Migration: adding 'project_type' column to 'chapters' table...")
-                conn.execute(
-                    "ALTER TABLE chapters ADD COLUMN project_type TEXT NOT NULL DEFAULT 'permanent'"
-                )
-                conn.commit()
-        except Exception:
-            pass
-
-        # AI Series tables for PostgreSQL
-        try:
-            conn.executescript("""
-            CREATE TABLE IF NOT EXISTS ai_series_projects (
-              series_id   TEXT PRIMARY KEY,
-              title       TEXT NOT NULL,
-              format_type TEXT NOT NULL,
-              art_style   TEXT NOT NULL,
-              status      TEXT NOT NULL,
-              created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-              updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-              data_json   TEXT NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS idx_ai_series_updated
-              ON ai_series_projects(updated_at DESC);
-            CREATE TABLE IF NOT EXISTS creator_style_profiles (
-              creator_id TEXT PRIMARY KEY,
-              data_json  TEXT NOT NULL,
-              updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-            CREATE TABLE IF NOT EXISTS franchise_continuity (
-              series_id  TEXT PRIMARY KEY,
-              data_json  TEXT NOT NULL,
-              updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-            CREATE TABLE IF NOT EXISTS generation_feedback (
-              feedback_id    TEXT PRIMARY KEY,
-              series_id      TEXT NOT NULL,
-              chapter_id     TEXT,
-              panel_id       TEXT,
-              event_type     TEXT NOT NULL,
-              original_value TEXT,
-              adjusted_value TEXT,
-              rating         INTEGER,
-              creator_notes  TEXT,
-              timestamp      TIMESTAMPTZ NOT NULL DEFAULT NOW()
-            );
-            CREATE INDEX IF NOT EXISTS idx_generation_feedback_series
-              ON generation_feedback(series_id);
-            """)
-            conn.commit()
-        except Exception as exc:
-            logger.warning("[Database] PostgreSQL AI Series migration failed: %s", exc)
-
-    except Exception as e:
-        logger.error(f"[Database] Error checking PostgreSQL schema: {e}")
-    finally:
-        conn.close()
-
-
-# ── SQLite initialisation ─────────────────────────────────────────────────
+# ── SQLite initialisation & incremental migration runner ──────────────────
 
 
 def init_sqlite(conn) -> None:
@@ -395,31 +26,12 @@ def init_sqlite(conn) -> None:
     try:
         cursor = conn.cursor()
 
-        # ── Detect old flat schema and drop if necessary ──────────────────
+        # ── Apply base schema if users table is missing ───────────────────
         cursor.execute(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='users'"
         )
         users_table_exists = cursor.fetchone() is not None
 
-        if users_table_exists:
-            cursor.execute("PRAGMA table_info(users)")
-            columns = [col[1] for col in cursor.fetchall()]
-            if "username" not in columns:
-                logger.info(
-                    "[Database] Old schema detected (missing 'username'). "
-                    "Dropping old tables for clean relational upgrade..."
-                )
-                tables = [
-                    "panels", "projects", "user_sessions", "user_audit_logs",
-                    "user_invoices", "user_api_keys", "users", "series",
-                    "chapters", "scrape_sessions", "edit_history",
-                ]
-                for table in tables:
-                    cursor.execute(f"DROP TABLE IF EXISTS {table}")
-                conn.commit()
-                users_table_exists = False
-
-        # ── Apply base schema if tables are missing ───────────────────────
         if not users_table_exists:
             schema_file = config.SCHEMA_PATH if os.path.exists(config.SCHEMA_PATH) else "/app/schema_backup.sql"
             if not os.path.exists(schema_file):
@@ -427,15 +39,13 @@ def init_sqlite(conn) -> None:
                     os.path.dirname(__file__), "schema.sql"
                 )
             if os.path.exists(schema_file):
-                logger.info(f"[Database] Re-initializing schema from {schema_file}...")
+                logger.info(f"[Database] Initializing relational schema from {schema_file}...")
                 with open(schema_file, "r", encoding="utf-8") as f:
                     schema = f.read()
                 conn.executescript(schema)
                 logger.info("[Database] Relational schema applied successfully.")
             else:
                 logger.warning("[Database] schema.sql not found — skipping schema apply.")
-        else:
-            pass
 
         # ── Column migrations ─────────────────────────────────────────────
         _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN synopsis TEXT",
@@ -495,12 +105,35 @@ def init_sqlite(conn) -> None:
                         "ALTER TABLE chapters ADD COLUMN project_type TEXT NOT NULL DEFAULT 'permanent'",
                         "added 'project_type' to 'chapters'")
 
-        # ── Slug indexes & Moderation indexes ─────────────────────────────
+        # ── Slug indexes & Date performance indexes ─────────────────────────────
         try:
             cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_series_slug ON series(slug)")
             cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_chapters_slug ON chapters(slug)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_series_is_flagged ON series(is_flagged)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_series_status ON series(status)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_series_created_at ON series(created_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_series_updated_at ON series(updated_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_chapters_created_at ON chapters(created_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_chapters_updated_at ON chapters(updated_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_completed_at ON jobs(completed_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_youtube_pubs_published_at ON youtube_publications(published_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_scrape_sessions_scraped_at ON scrape_sessions(scraped_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_series_ch_cache_url ON series_chapters_cache(series_url)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_ai_token_ledger_created_at ON ai_token_usage_ledger(created_at)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_ai_token_ledger_user ON ai_token_usage_ledger(user_id)")
+
+            # Prune dead/redundant empty tables
+            for dead_tbl in [
+                "franchise_continuity",
+                "generation_feedback",
+                "creator_style_profiles",
+                "user_unlinked_youtube_channels",
+                "edit_history",
+            ]:
+                cursor.execute(f"DROP TABLE IF EXISTS {dead_tbl}")
+
             conn.commit()
         except Exception:
             pass
@@ -684,9 +317,6 @@ def init_sqlite(conn) -> None:
             "CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at)"
         )
 
-        # ── Default platform settings seeding ─────────────────────────────
-        seed_default_settings(conn)
-
         # ── credit_balance column on users ────────────────────────────────
         _run_safe_alter(
             cursor, conn,
@@ -744,15 +374,6 @@ def init_sqlite(conn) -> None:
           is_selected         INTEGER DEFAULT 0,
           created_at          TEXT NOT NULL DEFAULT (datetime('now')),
           updated_at          TEXT NOT NULL DEFAULT (datetime('now')),
-          PRIMARY KEY (user_id, channel_id),
-          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-        """)
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS user_unlinked_youtube_channels (
-          user_id             TEXT NOT NULL,
-          channel_id          TEXT NOT NULL,
-          unlinked_at         TEXT NOT NULL DEFAULT (datetime('now')),
           PRIMARY KEY (user_id, channel_id),
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
@@ -816,41 +437,6 @@ def init_sqlite(conn) -> None:
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_ai_series_updated ON ai_series_projects(updated_at DESC)"
         )
-
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS creator_style_profiles (
-          creator_id TEXT PRIMARY KEY,
-          data_json  TEXT NOT NULL,
-          updated_at TEXT NOT NULL
-        )
-        """)
-
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS franchise_continuity (
-          series_id  TEXT PRIMARY KEY,
-          data_json  TEXT NOT NULL,
-          updated_at TEXT NOT NULL
-        )
-        """)
-
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS generation_feedback (
-          feedback_id    TEXT PRIMARY KEY,
-          series_id      TEXT NOT NULL,
-          chapter_id     TEXT,
-          panel_id       TEXT,
-          event_type     TEXT NOT NULL,
-          original_value TEXT,
-          adjusted_value TEXT,
-          rating         INTEGER,
-          creator_notes  TEXT,
-          timestamp      TEXT NOT NULL
-        )
-        """)
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_generation_feedback_series ON generation_feedback(series_id)"
-        )
-
         conn.commit()
         logger.info("[Database] Database schema verification and migrations completed successfully.")
 
