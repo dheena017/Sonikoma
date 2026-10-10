@@ -168,6 +168,8 @@ class ProjectService:
                 orig_url = project_source_url or img_url
 
             payload = {
+                "id": self._get_panel_field(panel, "id", None),
+                "panel_index": self._get_panel_field(panel, "panel_index", None),
                 "image_url": img_url,
                 "speech_text": self._get_panel_field(panel, "speech_text", ""),
                 "sfx": self._get_panel_field(panel, "sfx", ""),
@@ -185,6 +187,10 @@ class ProjectService:
                 "bubble_dilation": self._get_panel_field(panel, "bubble_dilation", None),
                 "inpaint_radius": self._get_panel_field(panel, "inpaint_radius", None),
                 "detection_style": self._get_panel_field(panel, "detection_style", None),
+                "audio_url": self._get_panel_field(panel, "audio_url", None),
+                "smart_crop": self._get_panel_field(panel, "smart_crop", False),
+                "crop_padding": self._get_panel_field(panel, "crop_padding", None),
+                "is_sanitized": self._get_panel_field(panel, "is_sanitized", False),
                 "original_url": orig_url,
             }
             db_panels.append(payload)
@@ -195,7 +201,8 @@ class ProjectService:
         if audit_logger and request_client:
             audit_logger(current_user_id, "Saved Storyboard Panels", request_client, "Success")
 
-        return {"success": True, "saved": len(panels)}
+        saved_panels = self.repo.get_panels(project_id)
+        return {"success": True, "saved": len(panels), "panels": saved_panels}
 
     def increment_project_tokens(self, project_id: str, tokens: int, current_user_id: str) -> Dict[str, Any]:
         project = self.repo.get_project(project_id)
@@ -326,6 +333,8 @@ class ProjectService:
                     orig_url = project_source_url or img_url
 
                 payload = {
+                    "id": self._get_panel_field(panel, "id", None),
+                    "panel_index": self._get_panel_field(panel, "panel_index", None),
                     "image_url": img_url,
                     "speech_text": self._get_panel_field(panel, "speech_text", ""),
                     "sfx": self._get_panel_field(panel, "sfx", ""),
@@ -343,6 +352,10 @@ class ProjectService:
                     "bubble_dilation": self._get_panel_field(panel, "bubble_dilation", None),
                     "inpaint_radius": self._get_panel_field(panel, "inpaint_radius", None),
                     "detection_style": self._get_panel_field(panel, "detection_style", None),
+                    "audio_url": self._get_panel_field(panel, "audio_url", None),
+                    "smart_crop": self._get_panel_field(panel, "smart_crop", False),
+                    "crop_padding": self._get_panel_field(panel, "crop_padding", None),
+                    "is_sanitized": self._get_panel_field(panel, "is_sanitized", False),
                     "original_url": orig_url,
                 }
                 db_panels.append(payload)

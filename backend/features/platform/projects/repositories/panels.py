@@ -65,45 +65,105 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                 if not orig_url:
                     orig_url = ch_orig_url or img_url
 
-                conn.execute("""
-                    INSERT INTO panels (
-                        chapter_id, panel_index, image_url, original_url, speech_text, sfx,
-                        duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
-                        grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
-                        inpaint_radius, detection_style
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    project_id,
-                    i,
-                    img_url,
-                    orig_url,
-                    speech_text,
-                    p.get('sfx') or "",
-                    p.get('duration'),
-                    p.get('motion_type') or "",
-                    visual_description or None,
-                    p.get('narrative') or None,
-                    p.get('brightness'),
-                    p.get('contrast'),
-                    p.get('saturation'),
-                    1 if p.get('grayscale') else 0,
-                    p.get('filter_preset'),
-                    p.get('bubble_method'),
-                    p.get('bubble_sensitivity'),
-                    p.get('bubble_dilation'),
-                    p.get('inpaint_radius'),
-                    p.get('detection_style')
-                ))
+                panel_idx = p.get('panel_index')
+                if panel_idx is None:
+                    panel_idx = i
+
+                raw_id = p.get('id')
+                panel_id = None
+                try:
+                    if raw_id is not None:
+                        panel_id = int(raw_id)
+                except (ValueError, TypeError):
+                    panel_id = None
+
+                if panel_id is not None and panel_id > 0:
+                    conn.execute("""
+                        INSERT OR REPLACE INTO panels (
+                            id, chapter_id, panel_index, image_url, original_url, speech_text, sfx,
+                            duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
+                            grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
+                            inpaint_radius, detection_style, audio_url, smart_crop, crop_padding, is_sanitized
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        panel_id,
+                        project_id,
+                        panel_idx,
+                        img_url,
+                        orig_url,
+                        speech_text,
+                        p.get('sfx') or "",
+                        p.get('duration'),
+                        p.get('motion_type') or "",
+                        visual_description or None,
+                        p.get('narrative') or None,
+                        p.get('brightness'),
+                        p.get('contrast'),
+                        p.get('saturation'),
+                        1 if p.get('grayscale') else 0,
+                        p.get('filter_preset'),
+                        p.get('bubble_method'),
+                        p.get('bubble_sensitivity'),
+                        p.get('bubble_dilation'),
+                        p.get('inpaint_radius'),
+                        p.get('detection_style'),
+                        p.get('audio_url'),
+                        1 if p.get('smart_crop') else 0,
+                        p.get('crop_padding'),
+                        1 if p.get('is_sanitized') else 0
+                    ))
+                else:
+                    conn.execute("""
+                        INSERT INTO panels (
+                            chapter_id, panel_index, image_url, original_url, speech_text, sfx,
+                            duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
+                            grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
+                            inpaint_radius, detection_style, audio_url, smart_crop, crop_padding, is_sanitized
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        project_id,
+                        panel_idx,
+                        img_url,
+                        orig_url,
+                        speech_text,
+                        p.get('sfx') or "",
+                        p.get('duration'),
+                        p.get('motion_type') or "",
+                        visual_description or None,
+                        p.get('narrative') or None,
+                        p.get('brightness'),
+                        p.get('contrast'),
+                        p.get('saturation'),
+                        1 if p.get('grayscale') else 0,
+                        p.get('filter_preset'),
+                        p.get('bubble_method'),
+                        p.get('bubble_sensitivity'),
+                        p.get('bubble_dilation'),
+                        p.get('inpaint_radius'),
+                        p.get('detection_style'),
+                        p.get('audio_url'),
+                        1 if p.get('smart_crop') else 0,
+                        p.get('crop_padding'),
+                        1 if p.get('is_sanitized') else 0
+                    ))
     finally:
         conn.close()
 
 
 def get_panels(project_id: str) -> List[Dict[str, Any]]:
-    """Get all panels for a project, ordered by panel_index."""
+    """Get all panels for a project, ordered by panel_index and id."""
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT * FROM panels WHERE chapter_id = ? ORDER BY panel_index ASC', (project_id,)).fetchall()
-        return [dict(r) for r in rows]
+        rows = conn.execute('SELECT * FROM panels WHERE chapter_id = ? ORDER BY panel_index ASC, id ASC', (project_id,)).fetchall()
+        result = []
+        for idx, r in enumerate(rows):
+            d = dict(r)
+            if d.get("id") is None:
+                d["id"] = idx + 1
+            if d.get("panel_index") is None:
+                d["panel_index"] = idx
+            result.append(d)
+        return result
     finally:
         conn.close()
 

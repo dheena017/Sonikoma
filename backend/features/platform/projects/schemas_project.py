@@ -31,6 +31,8 @@ class ProjectCreateRequest(BaseModel):
 
 class PanelSaveItem(BaseModel):
     """Represents an individual storyboard panel (dialogue, motion, narrative, speech text, filters)."""
+    id: Optional[Any] = Field(None, description="Primary key id of the panel")
+    panel_index: Optional[int] = Field(None, description="Sequential index of the panel")
     image_url: Optional[str] = Field("")
     original_image_url: Optional[str] = Field(None, alias="original_url")
     speech_text: Optional[str] = Field("")
@@ -49,6 +51,10 @@ class PanelSaveItem(BaseModel):
     bubble_dilation: Optional[float] = Field(None)
     inpaint_radius: Optional[int] = Field(None)
     detection_style: Optional[str] = Field(None)
+    audio_url: Optional[str] = Field(None)
+    smart_crop: Optional[bool] = Field(False)
+    crop_padding: Optional[int] = Field(None)
+    is_sanitized: Optional[bool] = Field(False)
 
     class Config:
         populate_by_name = True

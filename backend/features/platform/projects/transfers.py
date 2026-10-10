@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/projects/transfers.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Project Transfers, Series Relationships, and Token Analytics routes:
@@ -85,6 +85,13 @@ async def get_project_transfer(project_id: str = Path(..., description="Project 
     data = _TEMPORARY_PROJECT_TRANSFERS.get(project_id)
     if not data:
         return {"success": False, "detail": "Transfer not found or expired"}
+    if isinstance(data.get("panels"), list):
+        for idx, p in enumerate(data["panels"]):
+            if isinstance(p, dict):
+                if p.get("id") is None:
+                    p["id"] = idx + 1
+                if p.get("panel_index") is None:
+                    p["panel_index"] = idx
     return {"success": True, **data}
 
 

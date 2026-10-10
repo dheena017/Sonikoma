@@ -247,7 +247,9 @@ class PanelBoundingBox(BaseModel):
 class CroppedSliceItem(BaseModel):
     """Enriched metadata for a sliced panel asset."""
     index: int = Field(..., description="0-indexed order of the slice in reading sequence")
+    panel_index: Optional[int] = Field(default=None, description="Sequential 0-based panel index")
     panel_id: Optional[str] = Field(default=None, description="Source panel identifier")
+    id: Optional[Any] = Field(default=None, description="Panel identifier")
     url: str = Field(..., description="Public media URL of the cropped slice")
     original_url: Optional[str] = Field(default=None, description="Source uncropped strip image URL")
     x: int = Field(default=0, description="Source X coordinate in parent image")
@@ -259,6 +261,16 @@ class CroppedSliceItem(BaseModel):
     aspect_ratio: float = Field(default=1.0, description="Slice aspect ratio (width / height)")
     gutter_after_px: int = Field(default=0, description="Whitespace gap distance in pixels to next panel")
     file_size_bytes: int = Field(default=0, description="Size of generated image file in bytes")
+
+    @model_validator(mode="before")
+    @classmethod
+    def sync_indices(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if data.get("panel_index") is None and data.get("index") is not None:
+                data["panel_index"] = data["index"]
+            if data.get("id") is None:
+                data["id"] = data.get("panel_id") or ((data.get("index") or 0) + 1)
+        return data
 
 
 class LongPanelsCropRequest(BaseModel):
@@ -303,6 +315,8 @@ class SmallPanelsCropResponse(BaseModel):
     """Response payload returned from small-panels margin cropping."""
     success: bool
     crop_type: str = "small_panels"
+    id: Optional[Any] = Field(default=1, description="Unique panel ID")
+    panel_index: Optional[int] = Field(default=0, description="Sequential 0-based panel index")
     url: str = Field(..., description="Public media URL of the cropped output")
     original_url: Optional[str] = Field(default=None, description="Original uncropped source URL")
     width: int = Field(..., description="Output width in pixels")

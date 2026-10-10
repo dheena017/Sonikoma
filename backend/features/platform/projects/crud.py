@@ -144,7 +144,11 @@ async def get_public_project_endpoint(project_id: str = Path(..., description="P
             project["cover_image"] = wrap_proxy_url(project["first_panel_image"])
         panels = get_panels(project["project_id"])
         project_url = project.get("url") or project.get("original_url")
-        for p in panels:
+        for idx, p in enumerate(panels):
+            if p.get("id") is None:
+                p["id"] = idx + 1
+            if p.get("panel_index") is None:
+                p["panel_index"] = idx
             if p.get("image_url"):
                 p["image_url"] = wrap_proxy_url(p["image_url"])
             if not p.get("original_url"):
@@ -302,7 +306,11 @@ async def get_single_project_endpoint(
             project["cover_image"] = wrap_proxy_url(project["first_panel_image"])
         panels = get_panels(project_id)
         project_url = project.get("url") or project.get("original_url")
-        for p in panels:
+        for idx, p in enumerate(panels):
+            if p.get("id") is None:
+                p["id"] = idx + 1
+            if p.get("panel_index") is None:
+                p["panel_index"] = idx
             if p.get("image_url"):
                 p["image_url"] = wrap_proxy_url(p["image_url"])
             if not p.get("original_url"):
