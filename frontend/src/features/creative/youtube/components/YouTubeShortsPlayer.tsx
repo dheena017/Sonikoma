@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   ChevronUp,
@@ -8,8 +9,6 @@ import {
   Share2,
   ExternalLink,
   Zap,
-  Volume2,
-  VolumeX,
   Check,
 } from "lucide-react";
 import type { YouTubeVideoItem } from "./YouTubeChannelHome";
@@ -31,7 +30,6 @@ export default function YouTubeShortsPlayer({
   const currentShort = shorts[currentIndex];
   const [showComments, setShowComments] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
 
   const hasNext = currentIndex < shorts.length - 1;
   const hasPrev = currentIndex > 0;
@@ -50,15 +48,22 @@ export default function YouTubeShortsPlayer({
     }
   }, [hasPrev, currentIndex, onNavigateIndex]);
 
-  // Keyboard navigation (Arrow keys & Escape)
+  // Body scroll lock & Keyboard navigation (Arrow keys & Escape)
   useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowDown" || e.key === "j") handleNext();
       else if (e.key === "ArrowUp" || e.key === "k") handlePrev();
       else if (e.key === "Escape") onClose();
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [handleNext, handlePrev, onClose]);
 
   const handleCopyLink = () => {
@@ -74,20 +79,30 @@ export default function YouTubeShortsPlayer({
 
   if (!currentShort) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 animate-fade-in">
+  const originParam =
+    typeof window !== "undefined"
+      ? encodeURIComponent(window.location.origin)
+      : "";
+
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${currentShort.id}?autoplay=1&loop=1&playlist=${currentShort.id}&modestbranding=1&rel=0&controls=1&enablejsapi=1&origin=${originParam}`;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 animate-fade-in"
+      data-modal="true"
+    >
       {/* Top Bar with Title & Close */}
       <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-20 pointer-events-none">
-        <div className="flex items-center gap-2 bg-neutral-900/90 border border-neutral-800 px-3.5 py-1.5 rounded-full pointer-events-auto shadow-lg">
-          <Zap className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" />
-          <span className="text-xs font-black text-white font-mono uppercase tracking-wider">
-            Shorts Reel ({currentIndex + 1}/{shorts.length})
+        <div className="flex items-center gap-2 bg-[#141414]/95 border border-[#2F2F2F] px-4 py-2 rounded-full pointer-events-auto shadow-xl">
+          <Zap className="w-4 h-4 text-red-500 fill-red-500" />
+          <span className="text-xs font-bold text-[#E5E5E5] font-sans">
+            Shorts ({currentIndex + 1} of {shorts.length})
           </span>
         </div>
 
         <button
           onClick={onClose}
-          className="p-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 hover:text-white rounded-full transition-all cursor-pointer pointer-events-auto shadow-lg"
+          className="p-2.5 bg-[#141414]/95 hover:bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] rounded-full transition-all cursor-pointer pointer-events-auto shadow-xl"
           aria-label="Close reel player"
         >
           <X className="w-5 h-5" />
@@ -97,12 +112,13 @@ export default function YouTubeShortsPlayer({
       {/* Main Reel Container */}
       <div className="relative flex items-center justify-center gap-4 sm:gap-6 max-h-[92vh] w-full max-w-4xl">
         {/* 9:16 Vertical Video Frame */}
-        <div className="relative w-full max-w-[360px] sm:max-w-[390px] aspect-[9/16] bg-neutral-950 rounded-3xl overflow-hidden border border-neutral-800 shadow-2xl shadow-red-950/30 flex items-center justify-center">
+        <div className="relative w-full max-w-[360px] sm:max-w-[390px] aspect-[9/16] bg-black rounded-3xl overflow-hidden border border-[#2F2F2F] shadow-2xl flex items-center justify-center">
           <iframe
             key={currentShort.id}
-            src={`https://www.youtube.com/embed/${currentShort.id}?autoplay=1&loop=1&playlist=${currentShort.id}&modestbranding=1&rel=0&controls=1`}
+            src={embedUrl}
             title={currentShort.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover border-0"
+            referrerPolicy="strict-origin-when-cross-origin"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
@@ -110,11 +126,11 @@ export default function YouTubeShortsPlayer({
           {/* Video Info Overlay at bottom */}
           <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none space-y-1.5 z-10">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-red-600/90 text-white text-[9px] font-mono font-bold uppercase tracking-wider">
+              <span className="px-2 py-0.5 rounded-md bg-red-600/90 text-white text-[9px] font-sans font-bold uppercase tracking-wider">
                 #Shorts
               </span>
-              <span className="text-[10px] text-neutral-300 font-mono">
-                {currentShort.view_count} views
+              <span className="text-[10px] text-[#9CA3AF] font-sans">
+                {currentShort.view_count || "0"} views
               </span>
             </div>
             <h3 className="text-xs sm:text-sm font-bold text-white font-sans line-clamp-2 drop-shadow-md leading-snug">
@@ -129,7 +145,7 @@ export default function YouTubeShortsPlayer({
           <button
             onClick={handlePrev}
             disabled={!hasPrev}
-            className="p-3 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed border border-neutral-800 text-white rounded-full transition-all cursor-pointer shadow-lg hover:scale-110 active:scale-95"
+            className="p-3 bg-[#141414] hover:bg-[#1E1E1E] disabled:opacity-30 disabled:cursor-not-allowed border border-[#2F2F2F] text-[#E5E5E5] rounded-full transition-all cursor-pointer shadow-lg active:scale-95"
             title="Previous Short (Up Arrow)"
           >
             <ChevronUp className="w-5 h-5" />
@@ -137,10 +153,10 @@ export default function YouTubeShortsPlayer({
 
           {/* Likes */}
           <div className="flex flex-col items-center gap-1">
-            <div className="p-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 rounded-full text-white shadow-lg transition-all">
-              <ThumbsUp className="w-5 h-5 text-emerald-400" />
+            <div className="p-3 bg-[#141414] border border-[#2F2F2F] rounded-full text-[#34D399] shadow-lg">
+              <ThumbsUp className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-mono font-bold text-neutral-300">
+            <span className="text-[10px] font-sans font-medium text-[#9CA3AF]">
               {currentShort.like_count || "0"}
             </span>
           </div>
@@ -149,16 +165,16 @@ export default function YouTubeShortsPlayer({
           <div className="flex flex-col items-center gap-1">
             <button
               onClick={() => setShowComments(!showComments)}
-              className={`p-3 border rounded-full text-white shadow-lg transition-all cursor-pointer hover:scale-110 ${
+              className={`p-3 border rounded-full shadow-lg transition-all cursor-pointer ${
                 showComments
-                  ? "bg-[#2A2A2A] border-[#3B82F6] text-white"
-                  : "bg-neutral-900/90 hover:bg-neutral-800 border-neutral-800"
+                  ? "bg-[#3B82F6]/20 border-[#3B82F6]/60 text-[#60A5FA]"
+                  : "bg-[#141414] hover:bg-[#1E1E1E] border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5]"
               }`}
               title="View Comments"
             >
-              <MessageSquare className="w-5 h-5 text-[#60A5FA]" />
+              <MessageSquare className="w-5 h-5" />
             </button>
-            <span className="text-[10px] font-mono font-bold text-neutral-300">
+            <span className="text-[10px] font-sans font-medium text-[#9CA3AF]">
               {currentShort.comment_count || "0"}
             </span>
           </div>
@@ -167,17 +183,17 @@ export default function YouTubeShortsPlayer({
           <div className="flex flex-col items-center gap-1">
             <button
               onClick={handleCopyLink}
-              className="p-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-white rounded-full shadow-lg transition-all cursor-pointer hover:scale-110"
+              className="p-3 bg-[#141414] hover:bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] rounded-full shadow-lg transition-all cursor-pointer"
               title="Copy Short Link"
             >
               {copied ? (
                 <Check className="w-5 h-5 text-emerald-400" />
               ) : (
-                <Share2 className="w-5 h-5 text-sky-400" />
+                <Share2 className="w-5 h-5" />
               )}
             </button>
-            <span className="text-[10px] font-mono text-neutral-400">
-              {copied ? "Copied!" : "Share"}
+            <span className="text-[10px] font-sans text-[#9CA3AF]">
+              {copied ? "Copied" : "Share"}
             </span>
           </div>
 
@@ -189,8 +205,8 @@ export default function YouTubeShortsPlayer({
             }
             target="_blank"
             rel="noreferrer"
-            className="p-3 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-full shadow-lg transition-all"
-            title="Open in YouTube App"
+            className="p-3 bg-[#141414] hover:bg-[#1E1E1E] border border-[#2F2F2F] text-[#9CA3AF] hover:text-red-400 rounded-full shadow-lg transition-all"
+            title="Open on YouTube"
           >
             <ExternalLink className="w-4 h-4" />
           </a>
@@ -199,7 +215,7 @@ export default function YouTubeShortsPlayer({
           <button
             onClick={handleNext}
             disabled={!hasNext}
-            className="p-3 bg-neutral-900/90 hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed border border-neutral-800 text-white rounded-full transition-all cursor-pointer shadow-lg hover:scale-110 active:scale-95"
+            className="p-3 bg-[#141414] hover:bg-[#1E1E1E] disabled:opacity-30 disabled:cursor-not-allowed border border-[#2F2F2F] text-[#E5E5E5] rounded-full transition-all cursor-pointer shadow-lg active:scale-95"
             title="Next Short (Down Arrow)"
           >
             <ChevronDown className="w-5 h-5" />
@@ -209,15 +225,15 @@ export default function YouTubeShortsPlayer({
 
       {/* Floating Comments Drawer Modal when toggled */}
       {showComments && (
-        <div className="fixed inset-y-0 right-0 w-full sm:w-[380px] z-30 bg-neutral-950/95 border-l border-neutral-800 p-5 overflow-y-auto shadow-2xl flex flex-col animate-fade-in">
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-3 mb-3">
-            <h4 className="text-xs font-black font-mono uppercase text-white flex items-center gap-2">
+        <div className="fixed inset-y-0 right-0 w-full sm:w-[380px] z-30 bg-[#121212]/95 backdrop-blur-2xl border-l border-[#2F2F2F] p-5 overflow-y-auto shadow-2xl flex flex-col animate-fade-in">
+          <div className="flex items-center justify-between border-b border-[#2F2F2F] pb-3 mb-3">
+            <h4 className="text-xs font-bold font-sans text-[#E5E5E5] flex items-center gap-2">
               <MessageSquare className="w-4 h-4 text-[#3B82F6]" />
-              Short Comments ({currentShort.comment_count})
+              Comments ({currentShort.comment_count || 0})
             </h4>
             <button
               onClick={() => setShowComments(false)}
-              className="p-1 text-neutral-500 hover:text-white cursor-pointer"
+              className="p-1 text-[#9CA3AF] hover:text-[#E5E5E5] cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -230,6 +246,7 @@ export default function YouTubeShortsPlayer({
           </div>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }
