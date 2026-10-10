@@ -78,28 +78,30 @@ def register_routers(app: FastAPI):
     # Include main API router
     app.include_router(api_router)
 
-    # Serve generated videos (public static mount)
-    videos_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media"))
-    os.makedirs(videos_path, exist_ok=True)
-    app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
-
     # Serve persistent creator media assets under canonical data/media
     media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media"))
-    series_images_dir = os.path.join(media_dir, "series_images")
-    series_audio_dir = os.path.join(media_dir, "series_audio")
-    media_panels_dir = os.path.join(media_dir, "panels")
     media_videos_dir = os.path.join(media_dir, "videos")
+    media_panels_dir = os.path.join(media_dir, "panels")
     media_audio_dir = os.path.join(media_dir, "audio")
     media_exports_dir = os.path.join(media_dir, "exports")
+    series_images_dir = os.path.join(media_dir, "series_images")
+    series_audio_dir = os.path.join(media_dir, "series_audio")
+    series_videos_dir = os.path.join(media_dir, "series_videos")
 
-    for d in [media_dir, series_images_dir, series_audio_dir, media_panels_dir, media_videos_dir, media_audio_dir, media_exports_dir]:
+    for d in [media_dir, media_videos_dir, media_panels_dir, media_audio_dir, media_exports_dir, series_images_dir, series_audio_dir, series_videos_dir]:
         os.makedirs(d, exist_ok=True)
 
+    # Public static mounts for videos
+    app.mount("/videos", StaticFiles(directory=media_videos_dir), name="videos")
+    app.mount("/media/videos", StaticFiles(directory=media_videos_dir), name="media_videos")
+
+    # Granular media mounts
+    app.mount("/media/panels", StaticFiles(directory=media_panels_dir), name="media_panels")
+    app.mount("/media/audio", StaticFiles(directory=media_audio_dir), name="media_audio")
+    app.mount("/media/exports", StaticFiles(directory=media_exports_dir), name="media_exports")
     app.mount("/media/series_images", NoCacheStaticFiles(directory=series_images_dir), name="series_images")
     app.mount("/media/series_audio", NoCacheStaticFiles(directory=series_audio_dir), name="series_audio")
-    app.mount("/media/panels", StaticFiles(directory=media_panels_dir), name="media_panels")
-    app.mount("/media/videos", StaticFiles(directory=media_videos_dir), name="media_videos")
-    app.mount("/media/audio", StaticFiles(directory=media_audio_dir), name="media_audio")
+    app.mount("/media/series_videos", StaticFiles(directory=series_videos_dir), name="series_videos")
     app.mount("/media", StaticFiles(directory=media_dir), name="media")
 
     # Serve locally saved training data
