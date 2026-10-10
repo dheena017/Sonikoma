@@ -18,7 +18,7 @@ const CreatorGuideSection: React.FC<CreatorGuideSectionProps> = ({
   setActiveGuideTab,
 }) => {
   return (
-    <div className="w-full rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl space-y-6">
+    <div className="w-full rounded-2xl border border-[#2F2F2F] bg-[#141414]/90 p-6 sm:p-7 shadow-md space-y-6">
       <div className="flex items-center gap-3">
         <div className="h-8 w-8 rounded-xl bg-[#121212] flex items-center justify-center border border-[#2F2F2F] text-[#3B82F6] shadow-inner">
           <BookOpen className="h-4 w-4" />

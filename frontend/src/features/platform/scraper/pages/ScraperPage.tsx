@@ -608,9 +608,10 @@ const ScraperPageInner = (props: ScraperPageProps) => {
     <section
       id="main_workspace"
       aria-label="Scraper workspace"
-      className="flex-1 w-full min-w-0 max-w-7xl mx-auto py-6 sm:py-8 flex flex-col gap-8 items-center justify-start text-[#E5E5E5] animate-fade-in"
+      className="w-full min-w-0 flex-1 flex flex-col items-center justify-start py-4 sm:py-6 lg:py-8 animate-fade-in relative z-10 text-left text-[#E5E5E5]"
     >
-      <div className="w-full space-y-8 text-left">
+      {/* ── MAIN COVER WRAPPER CARD MATCHING PROJECTS & DASHBOARD ── */}
+      <div className="w-full max-w-7xl mx-auto rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
         {matchingProject && (
           <WorkspaceResumeCard
             matchingProject={matchingProject as any}

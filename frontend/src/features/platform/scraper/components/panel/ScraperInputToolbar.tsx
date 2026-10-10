@@ -332,7 +332,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                 <span className="text-[11px] font-bold text-[#E5E5E5] uppercase tracking-wider font-mono">
                   Recent &amp; Bookmarked Episodes
                 </span>
-                <span className="px-2.5 py-0.5 text-[9px] font-bold bg-[#0e2238] text-[#38bdf8] rounded-full border border-[#1d4ed8]/35 shadow-[0_0_8px_rgba(37,99,235,0.25)] font-mono">
+                <span className="px-2.5 py-0.5 text-[9px] font-bold bg-[#0e2238] text-[#38bdf8] rounded-full border border-[#1d4ed8]/35 font-mono shadow-sm">
                   {suggestions.length}
                 </span>
               </div>
@@ -361,7 +361,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                     className="w-full px-4 py-3 hover:bg-[#13151f] border-b border-[#141620] last:border-b-0 flex items-center justify-between gap-3 transition-all cursor-pointer group bg-[#0c0e14]"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#13151f] border border-[#1e2230] group-hover:bg-[#181d2a] group-hover:border-[#2563eb]/50 group-hover:shadow-[0_0_14px_rgba(37,99,235,0.4)] transition-all duration-200 flex-shrink-0 shadow-sm">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#13151f] border border-[#1e2230] group-hover:bg-[#181d2a] group-hover:border-[#2563eb]/50 transition-all duration-200 flex-shrink-0 shadow-sm">
                         <Book className="w-4 h-4 text-[#38bdf8] group-hover:text-white transition-all duration-200 transform group-hover:scale-110" />
                       </div>
                       <div className="flex-grow min-w-0">
@@ -395,7 +395,7 @@ export const ScraperInputToolbar: React.FC<ScraperInputToolbarProps> = ({
                             setMenuAnchor({ rect, series });
                           }
                         }}
-                        className="w-7 h-7 rounded-lg bg-[#13151f] hover:bg-[#181d2a] hover:border-neutral-600 text-[#9CA3AF] hover:text-white border border-[#1e2230] flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm hover:shadow-[0_0_10px_rgba(37,99,235,0.3)]"
+                        className="w-7 h-7 rounded-lg bg-[#13151f] hover:bg-[#181d2a] hover:border-neutral-600 text-[#9CA3AF] hover:text-white border border-[#1e2230] flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
                         title="Options"
                       >
                         <MoreVertical className="w-3.5 h-3.5" />

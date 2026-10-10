@@ -147,7 +147,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
               onClick={() => setActiveTab("normal")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "normal"
-                  ? "bg-[#3B82F6] text-white shadow-[0_0_12px_rgba(59,130,246,0.35)]"
+                  ? "bg-[#3B82F6] text-white shadow-sm"
                   : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
             >
@@ -171,7 +171,7 @@ const RecentProjectsSection: React.FC<RecentProjectsSectionProps> = ({
               onClick={() => setActiveTab("ai")}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "ai"
-                  ? "bg-[#3B82F6] text-white shadow-[0_0_12px_rgba(59,130,246,0.35)]"
+                  ? "bg-[#3B82F6] text-white shadow-sm"
                   : "text-neutral-400 hover:text-white hover:bg-neutral-800/60"
               }`}
             >
