@@ -31,9 +31,14 @@ const CreativeSuiteMiniSidebarInner: React.FC<
           path: "/creative-suite",
           requiresPanels: false,
         },
+      ],
+    },
+    {
+      name: "Agent",
+      items: [
         {
           id: "agent",
-          label: "1-Click AI Agent",
+          label: "Autonomous Webtoon Agent",
           icon: Bot,
           path: "/creative-suite/agent",
           requiresPanels: false,

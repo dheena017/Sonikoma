@@ -118,7 +118,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
   const tools = [
     {
       id: "agent",
-      label: "1-Click AI Agent",
+      label: "Autonomous Webtoon Agent",
       desc: "Zero-touch URL to YouTube pipeline: scrapes, crops panels, narrates & publishes video.",
       icon: Bot,
       path: "/creative-suite/agent",

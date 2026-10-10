@@ -160,9 +160,14 @@ const CreativeSuiteSidebar: React.FC<CreativeSuiteSidebarProps> = ({
           path: "/creative-suite",
           requiresPanels: false,
         },
+      ],
+    },
+    {
+      name: "Autonomous Agent",
+      items: [
         {
           id: "agent",
-          label: "1-Click AI Agent",
+          label: "Autonomous Webtoon Agent",
           icon: Bot,
           path: "/creative-suite/agent",
           requiresPanels: false,
