@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/app/api/v1/projects/crud.py
 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Core Project CRUD routes:
@@ -143,9 +143,14 @@ async def get_public_project_endpoint(project_id: str = Path(..., description="P
         elif project.get("first_panel_image"):
             project["cover_image"] = wrap_proxy_url(project["first_panel_image"])
         panels = get_panels(project["project_id"])
+        project_url = project.get("url") or project.get("original_url")
         for p in panels:
             if p.get("image_url"):
                 p["image_url"] = wrap_proxy_url(p["image_url"])
+            if not p.get("original_url"):
+                p["original_url"] = project_url or p.get("image_url")
+            elif p.get("original_url"):
+                p["original_url"] = wrap_proxy_url(p["original_url"])
         scraped_images = []
         if project.get("scraped_images") and isinstance(project["scraped_images"], list):
             scraped_images = [wrap_proxy_url(img) for img in project["scraped_images"] if img]
@@ -296,9 +301,14 @@ async def get_single_project_endpoint(
         elif project.get("first_panel_image"):
             project["cover_image"] = wrap_proxy_url(project["first_panel_image"])
         panels = get_panels(project_id)
+        project_url = project.get("url") or project.get("original_url")
         for p in panels:
             if p.get("image_url"):
                 p["image_url"] = wrap_proxy_url(p["image_url"])
+            if not p.get("original_url"):
+                p["original_url"] = project_url or p.get("image_url")
+            elif p.get("original_url"):
+                p["original_url"] = wrap_proxy_url(p["original_url"])
         scraped_images = []
         if project.get("scraped_images") and isinstance(project["scraped_images"], list):
             scraped_images = [wrap_proxy_url(img) for img in project["scraped_images"] if img]

@@ -183,8 +183,10 @@ def _encode_slice_worker(args: Tuple) -> Optional[CroppedSliceItem]:
         gutter_after,
         output_format,
         quality,
-        bg_mode
+        bg_mode,
+        *rest
     ) = args
+    source_url = rest[0] if rest else None
 
     try:
         x = int(box_dict.get("x") or 0)
@@ -240,10 +242,18 @@ def _encode_slice_worker(args: Tuple) -> Optional[CroppedSliceItem]:
         cache_id = f"slice_{unique_filename}"
         stitched_cache.set(cache_id, {"data": slice_bytes, "content_type": content_type})
 
+        if source_url:
+            try:
+                from features.platform.projects.repositories.panels import save_edit_history
+                save_edit_history(media_url, source_url, "slice")
+            except Exception:
+                pass
+
         return CroppedSliceItem(
             index=order_idx,
             panel_id=panel_id,
             url=media_url,
+            original_url=source_url,
             cache_id=cache_id,
             x=x,
             y=y,
@@ -320,7 +330,8 @@ async def crop_long_panels_batch(request: LongPanelsCropRequest) -> LongPanelsCr
                 gutter_after,
                 request.output_format,
                 request.quality,
-                request.background_mode
+                request.background_mode,
+                request.url,
             ))
 
     # 4. Parallel WebP encoding via ThreadPoolExecutor

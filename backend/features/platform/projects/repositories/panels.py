@@ -40,9 +40,30 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
     conn = get_db_connection()
     try:
         with conn:
+            ch_row = conn.execute('SELECT original_url FROM chapters WHERE id = ? LIMIT 1', (project_id,)).fetchone()
+            ch_orig_url = ch_row['original_url'] if ch_row and ch_row['original_url'] else None
+
             for i, p in enumerate(panels):
                 speech_text = (p.get('speech_text') or "")[:1000]
                 visual_description = (p.get('visual_description') or "")[:2000]
+
+                img_url = unwrap_proxy_url(p.get('image_url') or "")
+                raw_orig = (
+                    p.get('original_url')
+                    or p.get('original_image_url')
+                    or p.get('source_url')
+                    or p.get('originalUrl')
+                )
+                orig_url = unwrap_proxy_url(raw_orig) if raw_orig else None
+                if not orig_url and img_url:
+                    row_edit = conn.execute(
+                        'SELECT original_url FROM edit_history WHERE edited_url = ? LIMIT 1',
+                        (img_url,)
+                    ).fetchone()
+                    if row_edit and row_edit['original_url']:
+                        orig_url = row_edit['original_url']
+                if not orig_url:
+                    orig_url = ch_orig_url or img_url
 
                 conn.execute("""
                     INSERT INTO panels (
@@ -54,8 +75,8 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                 """, (
                     project_id,
                     i,
-                    unwrap_proxy_url(p.get('image_url') or ""),
-                    unwrap_proxy_url(p.get('original_image_url') or p.get('original_url', None)),
+                    img_url,
+                    orig_url,
                     speech_text,
                     p.get('sfx') or "",
                     p.get('duration'),

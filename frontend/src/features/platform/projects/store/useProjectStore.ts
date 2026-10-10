@@ -1318,7 +1318,16 @@ export const useProjectStore = create<ProjectStoreState>()(
                 synopsis: activeProjectData.project.synopsis,
                 cover_image: activeProjectData.project.cover_image,
                 status: activeProjectData.project.status || "ready",
-                panels: activeProjectData.panels,
+                panels: activeProjectData.panels?.map((p: any) => ({
+                  ...p,
+                  original_url:
+                    p.original_url ||
+                    p.original_image_url ||
+                    p.originalUrl ||
+                    activeProjectData.project.url ||
+                    activeProjectData.project.original_url ||
+                    p.image_url,
+                })),
                 panels_count: panelsCount,
                 imported_assets_count: importedCount,
                 scraped_images: scrapedImgs,

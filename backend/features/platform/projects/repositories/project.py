@@ -222,7 +222,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
     try:
         if user_id:
             rows = conn.execute("""
-                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, c.original_url AS original_url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
@@ -234,7 +234,7 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
             """, (user_id,)).fetchall()
         else:
             rows = conn.execute("""
-                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, c.original_url AS original_url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
@@ -253,7 +253,7 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+            SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, c.original_url AS original_url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                    c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                    s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
@@ -279,7 +279,7 @@ def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
 
         for s in slugs_to_check:
             row = conn.execute("""
-                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
+                SELECT c.id AS project_id, c.id AS chapter_id, c.job_id, c.original_url AS url, c.original_url AS original_url, s.title, s.genre, s.author, s.cover_image, s.synopsis,
                        c.episode_number AS episode, c.status, c.panels_count, c.video_url,
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
@@ -450,6 +450,9 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     if row_dict['image_url']: old_urls.add(row_dict['image_url'])
                     if row_dict['audio_url']: old_urls.add(row_dict['audio_url'])
 
+                ch_row = conn.execute('SELECT original_url FROM chapters WHERE id = ? LIMIT 1', (project_id,)).fetchone()
+                ch_orig_url = ch_row['original_url'] if ch_row and ch_row['original_url'] else None
+
                 # Delete existing panels for this chapter
                 conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
 
@@ -457,6 +460,24 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                 for i, p in enumerate(panels):
                     speech_text = (p.get('speech_text') or "")[:1000]
                     visual_description = (p.get('visual_description') or "")[:2000]
+
+                    img_url = unwrap_proxy_url(p.get('image_url') or "")
+                    raw_orig = (
+                        p.get('original_url')
+                        or p.get('original_image_url')
+                        or p.get('source_url')
+                        or p.get('originalUrl')
+                    )
+                    orig_url = unwrap_proxy_url(raw_orig) if raw_orig else None
+                    if not orig_url and img_url:
+                        row_edit = conn.execute(
+                            'SELECT original_url FROM edit_history WHERE edited_url = ? LIMIT 1',
+                            (img_url,)
+                        ).fetchone()
+                        if row_edit and row_edit['original_url']:
+                            orig_url = row_edit['original_url']
+                    if not orig_url:
+                        orig_url = ch_orig_url or img_url
 
                     conn.execute("""
                         INSERT INTO panels (
@@ -468,8 +489,8 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     """, (
                         project_id,
                         i,
-                        unwrap_proxy_url(p.get('image_url') or ""),
-                        unwrap_proxy_url(p.get('original_image_url') or p.get('original_url', None)),
+                        img_url,
+                        orig_url,
                         speech_text,
                         p.get('sfx') or "",
                         p.get('duration'),

@@ -144,10 +144,31 @@ class ProjectService:
         if project.get("user_id") and project.get("user_id") not in (current_user_id, "system_default"):
             raise PermissionError("Access denied.")
 
+        project_source_url = unwrap_proxy_url(project.get("original_url") or project.get("url") or "")
+
         db_panels = []
         for panel in panels:
+            raw_orig = (
+                self._get_panel_field(panel, "original_url")
+                or self._get_panel_field(panel, "original_image_url")
+                or self._get_panel_field(panel, "originalUrl")
+                or self._get_panel_field(panel, "source_url")
+            )
+            orig_url = unwrap_proxy_url(raw_orig) if raw_orig else None
+            img_url = unwrap_proxy_url(self._get_panel_field(panel, "image_url", ""))
+
+            if not orig_url and img_url:
+                try:
+                    from features.platform.projects.repositories.panels import get_panel_original_url
+                    orig_url = get_panel_original_url(img_url)
+                except Exception:
+                    pass
+
+            if not orig_url:
+                orig_url = project_source_url or img_url
+
             payload = {
-                "image_url": unwrap_proxy_url(self._get_panel_field(panel, "image_url", "")),
+                "image_url": img_url,
                 "speech_text": self._get_panel_field(panel, "speech_text", ""),
                 "sfx": self._get_panel_field(panel, "sfx", ""),
                 "duration": self._get_panel_field(panel, "duration", None),
@@ -164,7 +185,7 @@ class ProjectService:
                 "bubble_dilation": self._get_panel_field(panel, "bubble_dilation", None),
                 "inpaint_radius": self._get_panel_field(panel, "inpaint_radius", None),
                 "detection_style": self._get_panel_field(panel, "detection_style", None),
-                "original_url": unwrap_proxy_url(self._get_panel_field(panel, "original_image_url", None)),
+                "original_url": orig_url,
             }
             db_panels.append(payload)
 
@@ -276,10 +297,36 @@ class ProjectService:
 
         db_panels = None
         if body.panels is not None:
+            project_source_url = unwrap_proxy_url(
+                updates.get("original_url")
+                or updates.get("url")
+                or (project.get("original_url") if project else None)
+                or (project.get("url") if project else None)
+                or ""
+            )
             db_panels = []
             for panel in body.panels:
+                raw_orig = (
+                    self._get_panel_field(panel, "original_url")
+                    or self._get_panel_field(panel, "original_image_url")
+                    or self._get_panel_field(panel, "originalUrl")
+                    or self._get_panel_field(panel, "source_url")
+                )
+                orig_url = unwrap_proxy_url(raw_orig) if raw_orig else None
+                img_url = unwrap_proxy_url(self._get_panel_field(panel, "image_url", ""))
+
+                if not orig_url and img_url:
+                    try:
+                        from features.platform.projects.repositories.panels import get_panel_original_url
+                        orig_url = get_panel_original_url(img_url)
+                    except Exception:
+                        pass
+
+                if not orig_url:
+                    orig_url = project_source_url or img_url
+
                 payload = {
-                    "image_url": unwrap_proxy_url(self._get_panel_field(panel, "image_url", "")),
+                    "image_url": img_url,
                     "speech_text": self._get_panel_field(panel, "speech_text", ""),
                     "sfx": self._get_panel_field(panel, "sfx", ""),
                     "duration": self._get_panel_field(panel, "duration", None),
@@ -296,7 +343,7 @@ class ProjectService:
                     "bubble_dilation": self._get_panel_field(panel, "bubble_dilation", None),
                     "inpaint_radius": self._get_panel_field(panel, "inpaint_radius", None),
                     "detection_style": self._get_panel_field(panel, "detection_style", None),
-                    "original_url": unwrap_proxy_url(self._get_panel_field(panel, "original_image_url", None)),
+                    "original_url": orig_url,
                 }
                 db_panels.append(payload)
 

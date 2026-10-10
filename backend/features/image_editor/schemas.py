@@ -249,6 +249,7 @@ class CroppedSliceItem(BaseModel):
     index: int = Field(..., description="0-indexed order of the slice in reading sequence")
     panel_id: Optional[str] = Field(default=None, description="Source panel identifier")
     url: str = Field(..., description="Public media URL of the cropped slice")
+    original_url: Optional[str] = Field(default=None, description="Source uncropped strip image URL")
     x: int = Field(default=0, description="Source X coordinate in parent image")
     y: int = Field(default=0, description="Source Y coordinate in parent image")
     width: int = Field(..., description="Output slice width in pixels")
@@ -303,6 +304,7 @@ class SmallPanelsCropResponse(BaseModel):
     success: bool
     crop_type: str = "small_panels"
     url: str = Field(..., description="Public media URL of the cropped output")
+    original_url: Optional[str] = Field(default=None, description="Original uncropped source URL")
     width: int = Field(..., description="Output width in pixels")
     height: int = Field(..., description="Output height in pixels")
     aspect_ratio: str = Field(default="free", description="Applied aspect ratio")

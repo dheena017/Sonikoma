@@ -216,6 +216,13 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
     media_url = f"/media/panels/{unique_filename}"
     stitched_cache.set(f"single_{unique_filename}", {"data": output_bytes, "content_type": content_type})
 
+    if request.url:
+        try:
+            from features.platform.projects.repositories.panels import save_edit_history
+            save_edit_history(media_url, request.url, "crop")
+        except Exception:
+            pass
+
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)
     logger.info(f"[SinglePanelsCrop] Cropped image to {final_w}x{final_h}px in {elapsed_ms}ms")
 
@@ -223,6 +230,7 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
         success=True,
         crop_type="small_panels",
         url=media_url,
+        original_url=request.url,
         width=final_w,
         height=final_h,
         aspect_ratio=request.aspect_ratio or "free",
