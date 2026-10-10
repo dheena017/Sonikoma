@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { useCreativeAgent } from "../hooks/useCreativeAgent";
-import { AgentHeroBanner } from "../components/AgentHeroBanner";
-import { AgentInputCard } from "../components/AgentInputCard";
-import { AgentProgressTracker } from "../components/AgentProgressTracker";
-import { AgentTerminalLogs } from "../components/AgentTerminalLogs";
-import { AgentPanelsPreview } from "../components/AgentPanelsPreview";
-import { AgentYouTubeSuccessCard } from "../components/AgentYouTubeSuccessCard";
-import { AgentHistoryModal } from "../components/AgentHistoryModal";
-import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
+import {
+  AgentHeroBanner,
+  AgentInputCard,
+  AgentProgressTracker,
+  AgentTerminalLogs,
+  AgentPanelsPreview,
+  AgentYouTubeSuccessCard,
+  AgentHistoryModal,
+  AgentActiveRunsBar,
+  AgentBackgroundActionModal,
+} from "../components";
+import { Sparkles, Trash2, Smartphone, Monitor } from "lucide-react";
 
 interface CreativeAgentPageProps {
   fetchWithInterceptor?: any;
@@ -20,7 +24,7 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
   addNotification,
 }) => {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false);
+  const [showBackgroundModal, setShowBackgroundModal] = useState(false);
 
   const {
     url,
@@ -35,21 +39,29 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
     setPrivacyStatus,
     reviewMode,
     setReviewMode,
+    maxPanels,
+    setMaxPanels,
+    titleOverride,
+    setTitleOverride,
     activeRun,
+    isCreatingNew,
     isLoading,
     history,
     handleLaunch,
     handleApprove,
     handleReset,
+    sendToBackgroundAndStartNew,
+    startNewAgent,
+    switchToRun,
     selectHistoryRun,
   } = useCreativeAgent(fetchWithInterceptor, addNotification);
 
   const isCompleted = activeRun?.status === "completed";
   const isReviewAwaiting = activeRun?.status === "awaiting_review";
 
-  const handlePromptReset = () => {
+  const handlePromptDiscard = () => {
     if (activeRun && activeRun.status !== "completed") {
-      setShowResetConfirmModal(true);
+      setShowBackgroundModal(true);
     } else {
       handleReset();
     }
@@ -65,41 +77,85 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
           historyCount={history.length}
         />
 
+        {/* ── Multi-Agent Background Switcher Bar ── */}
+        {history.length > 0 && (
+          <AgentActiveRunsBar
+            runs={history}
+            activeRunId={activeRun?.run_id}
+            isCreatingNew={isCreatingNew || !activeRun}
+            onSelectRun={switchToRun}
+            onStartNew={startNewAgent}
+          />
+        )}
+
         {/* ── Completed YouTube Success Card ── */}
-        {isCompleted && (
+        {!isCreatingNew && isCompleted && activeRun && (
           <AgentYouTubeSuccessCard
             youtubeUrl={activeRun.youtube_url}
             videoUrl={activeRun.video_url}
             metadata={activeRun.youtube_metadata}
             scrapedTitle={activeRun.scraped_title}
-            onReset={handleReset}
+            videoFormat={activeRun.video_format || videoFormat}
+            onReset={startNewAgent}
           />
         )}
 
         {/* ── Active Execution Tracker & Live Stream ── */}
-        {activeRun && !isCompleted && (
+        {!isCreatingNew && activeRun && !isCompleted && (
           <div className="space-y-6">
-            {/* Top Action Bar with Start New Run Button */}
+            {/* Top Action Bar with Multi-Agent Controls */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-[#1A1A1A] border border-[#2F2F2F] rounded-2xl px-5 py-3 shadow-inner">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse" />
                 <span className="text-xs font-semibold text-white">
-                  Active Run: <span className="font-mono text-blue-400">{activeRun.run_id}</span>
+                  Active Agent:{" "}
+                  <span className="font-mono text-blue-400">{activeRun.run_id}</span>
                 </span>
+                {activeRun.scraped_title && (
+                  <span className="text-xs text-gray-300 font-medium truncate max-w-[200px] sm:max-w-[320px]">
+                    "{activeRun.scraped_title}"
+                  </span>
+                )}
+                {/* Format Badge */}
+                {activeRun.video_format === "shorts" ? (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1">
+                    <Smartphone className="w-3 h-3 text-purple-400" />
+                    Shorts 9:16
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                    <Monitor className="w-3 h-3 text-blue-400" />
+                    16:9 Landscape
+                  </span>
+                )}
                 {activeRun.panels && activeRun.panels.length > 0 && (
                   <span className="text-xs text-[#9CA3AF] px-2.5 py-0.5 rounded-full bg-[#262626] font-mono border border-[#333]">
                     {activeRun.panels.length} Panels Loaded
                   </span>
                 )}
               </div>
-              <button
-                type="button"
-                onClick={handlePromptReset}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#262626] hover:bg-[#333] border border-[#3F3F3F] text-gray-200 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95"
-                title="Discard this run and launch a fresh episode"
-              >
-                Start New Run / Launch Another URL
-              </button>
+
+              {/* Action Buttons: Background & New vs Discard */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={sendToBackgroundAndStartNew}
+                  className="px-4 py-2 rounded-xl text-xs font-bold font-mono text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/20 border border-blue-400/40 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  title="Let this agent run in the background and configure another video"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-blue-200" />
+                  <span>Run in Background &amp; Create New</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePromptDiscard}
+                  className="px-3 py-2 rounded-xl text-xs font-semibold bg-[#262626] hover:bg-[#333] border border-[#3F3F3F] text-gray-300 hover:text-white transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
+                  title="Discard or clear this agent run"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-neutral-400" />
+                  <span>Discard</span>
+                </button>
+              </div>
             </div>
 
             <AgentProgressTracker
@@ -107,7 +163,7 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
               progress={activeRun.progress}
               currentAction={activeRun.current_action}
               onApprove={handleApprove}
-              onReset={handlePromptReset}
+              onReset={handlePromptDiscard}
               isReviewAwaiting={isReviewAwaiting}
             />
 
@@ -124,8 +180,8 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
           </div>
         )}
 
-        {/* ── Input Launch Form ── */}
-        {(!activeRun || isCompleted) && (
+        {/* ── Input Launch Form: Shown when starting new or no active run selected ── */}
+        {(isCreatingNew || !activeRun) && (
           <AgentInputCard
             url={url}
             setUrl={setUrl}
@@ -139,6 +195,10 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
             setPrivacyStatus={setPrivacyStatus}
             reviewMode={reviewMode}
             setReviewMode={setReviewMode}
+            maxPanels={maxPanels}
+            setMaxPanels={setMaxPanels}
+            titleOverride={titleOverride}
+            setTitleOverride={setTitleOverride}
             onLaunch={handleLaunch}
             isLoading={isLoading}
           />
@@ -153,18 +213,20 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
         onSelectRun={selectHistoryRun}
       />
 
-      {/* ── Delete / Discard Confirmation Modal ── */}
-      {showResetConfirmModal && (
-        <DeleteConfirmModal
-          title="Discard Active Run?"
-          message="Are you sure you want to discard this in-progress autonomous agent run and start a new URL? Any unfinished progress will be reset."
-          confirmText="Discard & Reset"
-          cancelText="Keep Running"
-          onConfirm={() => {
-            handleReset();
-            setShowResetConfirmModal(false);
+      {/* ── Multi-Agent Background Transition / Discard Modal ── */}
+      {showBackgroundModal && activeRun && (
+        <AgentBackgroundActionModal
+          runId={activeRun.run_id}
+          scrapedTitle={activeRun.scraped_title}
+          onRunInBackgroundAndStartNew={() => {
+            sendToBackgroundAndStartNew();
+            setShowBackgroundModal(false);
           }}
-          onCancel={() => setShowResetConfirmModal(false)}
+          onDiscard={() => {
+            handleReset();
+            setShowBackgroundModal(false);
+          }}
+          onCancel={() => setShowBackgroundModal(false)}
         />
       )}
     </div>

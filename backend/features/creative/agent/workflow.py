@@ -143,6 +143,51 @@ class AutonomousAgentWorkflow:
             updated_at=now,
         )
 
+        self._is_paused = asyncio.Event()
+        self._is_paused.set()
+        self._is_stopped = False
+        self._previous_status: Optional[str] = None
+        self._task: Optional[asyncio.Task] = None
+
+    def pause(self) -> AgentRunResponse:
+        """Pauses the running autonomous workflow."""
+        if self.state.status in ("completed", "failed", "stopped"):
+            return self.state
+        if self.state.status != "paused":
+            self._previous_status = self.state.status
+            self.state.status = "paused"
+            self._is_paused.clear()
+            self.log("pause", "Agent execution paused by user.", level="warning")
+        return self.state
+
+    def resume(self) -> AgentRunResponse:
+        """Resumes a paused autonomous workflow."""
+        if self.state.status == "paused":
+            self.state.status = self._previous_status or "rendering_video"
+            self._is_paused.set()
+            self.log("resume", "Agent execution resumed by user.", level="info")
+        return self.state
+
+    def stop(self) -> AgentRunResponse:
+        """Stops and cancels the running autonomous workflow."""
+        if self.state.status in ("completed", "failed"):
+            return self.state
+        self._is_stopped = True
+        self.state.status = "stopped"
+        self._is_paused.set()  # Unblock if paused
+        if self._task and not self._task.done():
+            self._task.cancel()
+        self.log("stop", "Agent execution stopped and cancelled by user.", level="error")
+        return self.state
+
+    async def _check_pause_and_stop(self):
+        """Checks if stopped or paused before/between stages."""
+        if self._is_stopped:
+            raise asyncio.CancelledError("Agent execution was stopped by user.")
+        await self._is_paused.wait()
+        if self._is_stopped:
+            raise asyncio.CancelledError("Agent execution was stopped by user.")
+
     def log(self, stage: str, message: str, level: Literal["error", "info", "success", "warning"] = "info", progress: Optional[int] = None):
         """Appends a timestamped log entry and updates real-time status."""
         now = time.time()
@@ -534,11 +579,18 @@ class AutonomousAgentWorkflow:
                 voice=self.request.voice,
             )
         except Exception as render_err:
-            logger.warning(f"[Agent Render] Video compiler notice: {render_err}. Using generated stream reference.")
-            video_filename = f"agent_compiled_{self.run_id[:8]}.mp4"
+            logger.error(f"[Agent Render] Video compilation failed: {render_err}", exc_info=True)
+            self.state.status = "failed"
+            self.state.error = f"Video compilation failed: {render_err}"
+            self.log(
+                "video_render",
+                f"[Render Video: POST /api/v1/video/render] Video compilation failed: {render_err}",
+                level="error",
+            )
+            raise render_err
 
         self.state.video_filename = video_filename
-        self.state.video_url = f"/api/v1/video/stream/{video_filename}"
+        self.state.video_url = f"/videos/{video_filename}"
         self.log(
             "video_render",
             f"[Render Video: POST /api/v1/video/render] Video rendered successfully: {video_filename}",

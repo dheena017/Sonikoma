@@ -17,7 +17,7 @@ import httpx
 from PIL import Image
 from typing import List, Dict, Any, Optional
 
-from moviepy.editor import AudioFileClip, concatenate_videoclips
+from moviepy.editor import AudioFileClip, CompositeAudioClip, concatenate_videoclips
 from common.media import resolve_image_to_buffer
 from common.video import ensure_even_dimensions, resolve_resolution
 from common.utils.formatting import slugify
@@ -274,10 +274,20 @@ async def compile_video_from_panels(
                     if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
                         has_audio = True
                         audio_files_to_cleanup.append(audio_path)
-                        duration = max(actual_duration, 1.0)
+                        # Query MoviePy directly for its perceived audio duration
+                        try:
+                            test_af = AudioFileClip(audio_path)
+                            if test_af.duration and test_af.duration > 0:
+                                duration = max(float(test_af.duration), 1.0)
+                            else:
+                                duration = max(actual_duration, 1.0)
+                            test_af.close()
+                        except Exception:
+                            duration = max(actual_duration, 1.0)
+
                         logger.info(
                             f"[Video Compiler] Panel {idx + 1}/{total_panels} (ID: {panel_id}, Image: {img_name}): "
-                            f"Successfully synthesized audio ({actual_duration:.1f}s)."
+                            f"Successfully synthesized audio ({duration:.1f}s)."
                         )
                         try:
                             with open(audio_path, "rb") as af:
@@ -327,12 +337,15 @@ async def compile_video_from_panels(
                 if has_audio:
                     try:
                         audio_clip = AudioFileClip(audio_path)
-                        a_dur = audio_clip.duration or duration
+                        a_dur = float(audio_clip.duration or duration)
                         if a_dur < duration:
-                            audio_clip = audio_clip.set_duration(duration)
+                            # Safely pad with silence up to duration so MoviePy reader never throws out-of-range IOError
+                            safe_audio = CompositeAudioClip([audio_clip.set_start(0)]).set_duration(duration)
+                        elif a_dur > duration:
+                            safe_audio = audio_clip.subclip(0, duration).set_duration(duration)
                         else:
-                            audio_clip = audio_clip.subclip(0, min(a_dur, duration)).set_duration(duration)
-                        composite_clip = composite_clip.set_audio(audio_clip)
+                            safe_audio = audio_clip.set_duration(duration)
+                        composite_clip = composite_clip.set_audio(safe_audio)
                     except Exception as a_err:
                         logger.warning(f"[Video Compiler] Panel {panel_id}: Audio attach warning: {a_err}")
 
@@ -400,14 +413,16 @@ async def compile_video_from_panels(
         logger.info("[Video Compiler] Cleaning up temporary working files...")
         for clip in clips:
             try:
+                if getattr(clip, "audio", None):
+                    clip.audio.close()
                 clip.close()
-            except:
+            except Exception:
                 pass
         for af in audio_files_to_cleanup:
             try:
                 if os.path.exists(af):
                     os.remove(af)
-            except:
+            except Exception:
                 pass
 
     return output_filename

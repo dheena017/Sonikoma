@@ -89,7 +89,9 @@ class AgentRunResponse(BaseModel):
         "rendering_video",
         "publishing_youtube",
         "completed",
-        "failed"
+        "failed",
+        "paused",
+        "stopped"
     ]
     progress: int = Field(0, ge=0, le=100)
     current_action: str = ""

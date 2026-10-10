@@ -125,7 +125,7 @@ async def stream_video_endpoint(video_filename: str):
     ]
     for p in candidate_paths:
         if os.path.exists(p) and os.path.isfile(p):
-            return FileResponse(p, media_type="video/mp4", filename=video_filename)
+            return FileResponse(p, media_type="video/mp4", filename=video_filename, content_disposition_type="inline")
 
     raise HTTPException(status_code=404, detail=f"Video file '{video_filename}' not found.")
 

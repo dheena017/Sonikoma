@@ -10,6 +10,9 @@ import {
   Tag,
   Clock,
   RotateCcw,
+  AlertCircle,
+  Smartphone,
+  Monitor,
 } from "lucide-react";
 import { AgentYouTubeMetadata } from "../types";
 
@@ -18,6 +21,7 @@ interface AgentYouTubeSuccessCardProps {
   videoUrl?: string;
   metadata?: AgentYouTubeMetadata;
   scrapedTitle?: string;
+  videoFormat?: string;
   onReset: () => void;
 }
 
@@ -26,9 +30,12 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
   videoUrl,
   metadata,
   scrapedTitle,
+  videoFormat = "shorts",
   onReset,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const isShort = videoFormat === "shorts" || metadata?.is_short === true;
 
   const handleCopy = async () => {
     if (!youtubeUrl) return;
@@ -50,9 +57,13 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
             <Youtube className="w-6 h-6 fill-current" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-[#10B981]/20 text-[#10B981] border border-[#10B981]/30">
                 {youtubeUrl ? "Live & Published" : "Render Complete"}
+              </span>
+              <span className="text-[10px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full bg-[#3B82F6]/20 text-[#3B82F6] border border-[#3B82F6]/30 flex items-center gap-1">
+                {isShort ? <Smartphone className="w-3 h-3" /> : <Monitor className="w-3 h-3" />}
+                {isShort ? "Shorts (9:16)" : "16:9 Video"}
               </span>
               <span className="text-[10px] font-mono uppercase font-bold text-[#9CA3AF]">
                 1-Click Agent Complete
@@ -156,24 +167,62 @@ export const AgentYouTubeSuccessCard: React.FC<AgentYouTubeSuccessCardProps> = (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Video Player Preview (if videoUrl is present) */}
         {videoUrl && (
-          <div className="lg:col-span-5 space-y-2">
-            <span className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
-              <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
-              Compiled Video Preview
-            </span>
-            <div className="relative rounded-xl overflow-hidden border border-[#2F2F2F] bg-black aspect-[9/16] sm:aspect-video lg:aspect-[9/16] flex items-center justify-center max-h-[460px] mx-auto">
-              <video
-                src={videoUrl}
-                controls
-                className="w-full h-full object-contain"
-                playsInline
-              />
+          <div className={isShort ? "lg:col-span-5 space-y-2" : "lg:col-span-6 space-y-2"}>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
+                <Film className="w-3.5 h-3.5 text-[#3B82F6]" />
+                Compiled Video Preview
+              </span>
+              <span className="text-[10px] font-mono font-bold text-[#3B82F6] px-2 py-0.5 bg-[#3B82F6]/10 rounded border border-[#3B82F6]/20 flex items-center gap-1">
+                {isShort ? <Smartphone className="w-3 h-3" /> : <Monitor className="w-3 h-3" />}
+                {isShort ? "9:16 Shorts" : "16:9 Video"}
+              </span>
+            </div>
+            <div
+              className={`relative rounded-xl overflow-hidden border border-[#2F2F2F] bg-black flex items-center justify-center max-h-[460px] mx-auto ${
+                isShort
+                  ? "aspect-[9/16] w-full max-w-[270px]"
+                  : "aspect-video w-full"
+              }`}
+            >
+              {videoError ? (
+                <div className="flex flex-col items-center justify-center p-6 text-center space-y-3">
+                  <div className="p-3 rounded-full bg-red-500/10 border border-red-500/20 text-red-400">
+                    <AlertCircle className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-gray-200">Video Preview Unavailable</p>
+                    <p className="text-[11px] text-[#9CA3AF] max-w-[200px]">
+                      The compiled video file was not found or failed to load.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVideoError(false);
+                      const v = document.querySelector("video");
+                      if (v) v.load();
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-[#262626] hover:bg-[#333] border border-[#3F3F3F] text-[11px] text-gray-300 hover:text-white transition-colors cursor-pointer"
+                  >
+                    Retry Loading
+                  </button>
+                </div>
+              ) : (
+                <video
+                  src={videoUrl}
+                  controls
+                  className="w-full h-full object-contain"
+                  playsInline
+                  onError={() => setVideoError(true)}
+                />
+              )}
             </div>
           </div>
         )}
 
         {/* Right: AI-Generated YouTube Headers */}
-        <div className={videoUrl ? "lg:col-span-7 space-y-4" : "lg:col-span-12 space-y-4"}>
+        <div className={videoUrl ? (isShort ? "lg:col-span-7 space-y-4" : "lg:col-span-6 space-y-4") : "lg:col-span-12 space-y-4"}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />

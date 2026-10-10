@@ -5,3 +5,5 @@ export { AgentTerminalLogs } from "./AgentTerminalLogs";
 export { AgentPanelsPreview } from "./AgentPanelsPreview";
 export { AgentYouTubeSuccessCard } from "./AgentYouTubeSuccessCard";
 export { AgentHistoryModal } from "./AgentHistoryModal";
+export { AgentActiveRunsBar } from "./AgentActiveRunsBar";
+export { AgentBackgroundActionModal } from "./AgentBackgroundActionModal";
