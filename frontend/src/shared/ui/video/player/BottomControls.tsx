@@ -122,73 +122,88 @@ export const VideoPreviewBottomControls: React.FC<
         {/* FLOATING PRECISE SEEKING POPUP CONTAINER */}
         {hoverProgress.isHovering && (
           <div
-            className="absolute bottom-6 flex flex-col items-center z-45 transition-all duration-75 pointer-events-none w-[150px]"
+            className="absolute bottom-6 flex flex-col items-center z-45 transition-all duration-75 pointer-events-none w-48"
             style={{
-              left: `clamp(0px, calc(${
-                hoverProgress.percent * 100
-              }% - 75px), calc(100% - 150px))`,
+              left: `${Math.max(10, Math.min(90, hoverProgress.percent * 100))}%`,
+              transform: "translateX(-50%)",
             }}
           >
-            <div className="bg-neutral-900 border border-neutral-800/80 rounded-2xl p-1.5 shadow-2xl backdrop-blur-md flex flex-col gap-1 w-full overflow-hidden">
+            <div className="bg-neutral-900/95 border border-neutral-700/80 rounded-2xl p-2 shadow-2xl backdrop-blur-md flex flex-col gap-1.5 w-full overflow-hidden">
               <div className="relative aspect-video rounded-xl overflow-hidden bg-black border border-neutral-950 flex items-center justify-center">
                 {activePanelForHover ? (
                   activePanelForHover.layers ? (
-                    <>
-                      <img
-                        src={activePanelForHover.layers.background_url}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        alt="Seeking Thumbnail BG"
-                      />
-                      <img
-                        src={activePanelForHover.layers.character_url}
-                        className="absolute inset-0 w-full h-full object-contain z-10"
-                        alt="Seeking Thumbnail Char"
-                      />
-                    </>
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      {activePanelForHover.layers.background_url && (
+                        <img
+                          src={activePanelForHover.layers.background_url}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          alt="Seeking Thumbnail BG"
+                        />
+                      )}
+                      {activePanelForHover.layers.character_url && (
+                        <img
+                          src={activePanelForHover.layers.character_url}
+                          className="absolute inset-0 w-full h-full object-contain z-10"
+                          alt="Seeking Thumbnail Char"
+                        />
+                      )}
+                      {activePanelForHover.layers.text_url && (
+                        <img
+                          src={activePanelForHover.layers.text_url}
+                          className="absolute inset-0 w-full h-full object-contain z-20"
+                          alt="Seeking Thumbnail Text"
+                        />
+                      )}
+                    </div>
                   ) : (
                     <img
-                      src={activePanelForHover.image_url}
+                      src={
+                        activePanelForHover.image_url ||
+                        (activePanelForHover as any).imageUrl ||
+                        (activePanelForHover as any).img_url ||
+                        (activePanelForHover as any).panel_url ||
+                        (activePanelForHover as any).url ||
+                        ""
+                      }
                       className="w-full h-full object-cover"
                       alt="Seeking Panel"
                     />
                   )
                 ) : (
                   <div className="flex flex-col items-center justify-center w-full h-full">
-                    <div className="h-5 w-5 rounded bg-[#3B82F6]/10 flex items-center justify-center">
-                      <Sliders className="h-3 w-3 text-[#3B82F6]" />
+                    <div className="h-6 w-6 rounded-lg bg-[#3B82F6]/10 flex items-center justify-center">
+                      <Sliders className="h-3.5 w-3.5 text-[#3B82F6]" />
                     </div>
                   </div>
                 )}
+
+                {/* Floating timestamp badge directly on preview image */}
+                <div className="absolute bottom-1.5 left-1.5 z-30 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-sm border border-white/10 text-[10px] font-mono font-bold text-white shadow">
+                  {formatTime(hoverProgress.time)}
+                </div>
               </div>
 
               <div className="px-1 py-0.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black font-mono text-[#3B82F6] tabular-nums">
-                    {formatTime(hoverProgress.time)}
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-[10px] font-mono text-[#3B82F6] font-semibold tabular-nums">
+                    {formatTime(hoverProgress.time)} / {formatTime(totalDuration)}
                   </span>
                   {getActiveChapter?.(hoverProgress.time)?.title && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-neutral-950/60 rounded border border-neutral-800 text-neutral-400 uppercase">
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 bg-neutral-950/80 rounded border border-neutral-800 text-neutral-300 uppercase truncate max-w-[80px]">
                       {getActiveChapter(hoverProgress.time)!.title}
                     </span>
                   )}
                 </div>
                 {activePanelForHover?.speech_text && (
-                  <p className="text-[8px] text-neutral-500 truncate leading-normal font-sans mt-0.5">
+                  <p className="text-[9px] text-neutral-300 italic truncate leading-snug font-sans mt-1">
                     "{activePanelForHover.speech_text}"
                   </p>
                 )}
               </div>
             </div>
-            <div
-              className="w-2.5 h-2.5 bg-neutral-900 border-r border-b border-neutral-800/80 -mt-1 shadow-md relative z-10"
-              style={{
-                transform: `translateX(clamp(-63px, calc(${
-                  hoverProgress.percent * 100
-                }% - clamp(75px, ${
-                  hoverProgress.percent * 100
-                }%, calc(100% - 75px))), 63px)) rotate(45deg)`,
-              }}
-            />
+
+            {/* DIRECTLY CENTERED POINTER ARROW */}
+            <div className="w-2.5 h-2.5 bg-neutral-900 border-r border-b border-neutral-700/80 -mt-1.5 rotate-45 shadow-md relative z-10" />
           </div>
         )}
 
@@ -213,23 +228,47 @@ export const VideoPreviewBottomControls: React.FC<
             );
           })}
 
+          {/* HOVER PREVIEW TRACK EXTENSION */}
+          {hoverProgress.isHovering && (
+            <div
+              className="absolute top-0 left-0 h-full bg-white/20 rounded-full z-[5] pointer-events-none transition-all duration-75"
+              style={{
+                width: `${Math.max(0, Math.min(100, hoverProgress.percent * 100))}%`,
+              }}
+            />
+          )}
+
+          {/* ACTIVE PLAYBACK PROGRESS FILL */}
           <div
             className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#3B82F6] to-[#2563EB] rounded-full z-10"
             style={{
               width: `${
-                totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0
+                totalDuration > 0
+                  ? Math.max(0, Math.min(100, (currentTime / totalDuration) * 100))
+                  : 0
               }%`,
             }}
           />
 
+          {/* HOVER PREVIEW SEEK CIRCLE */}
+          {hoverProgress.isHovering && (
+            <div
+              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full aspect-square bg-white/90 border border-[#3B82F6] shadow-sm pointer-events-none z-25 transition-transform duration-75"
+              style={{
+                left: `${Math.max(0, Math.min(100, hoverProgress.percent * 100))}%`,
+              }}
+            />
+          )}
+
+          {/* CURRENT PLAYHEAD CIRCLE */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 h-0 w-0 bg-white rounded-full opacity-0 group-hover/scrub:opacity-100 group-hover/scrub:h-3.5 group-hover/scrub:w-3.5 pointer-events-none transition-all duration-200 z-30"
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full aspect-square bg-white border-2 border-[#3B82F6] shadow-[0_0_10px_rgba(59,130,246,0.7)] group-hover/scrub:scale-125 pointer-events-none transition-transform duration-150 z-30"
             style={{
-              left: `calc(${
-                totalDuration > 0 ? (currentTime / totalDuration) * 100 : 0
-              }% - 7px)`,
-              boxShadow:
-                "0 0 0 2px rgba(59,130,246,0.4), 0 0 16px rgba(59,130,246,0.8)",
+              left: `${
+                totalDuration > 0
+                  ? Math.max(0, Math.min(100, (currentTime / totalDuration) * 100))
+                  : 0
+              }%`,
             }}
           />
         </div>
