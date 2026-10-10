@@ -32,6 +32,13 @@ import {
   BubblesAfter,
   TranslationBefore,
   TranslationAfter,
+  CinematicRenderDemo,
+  MetricsBanner,
+  FeatureGrid,
+  VoiceStudioShowcase,
+  MotionShowcase,
+  ComparisonSection,
+  TestimonialsSection,
 } from "@/features/landing/components";
 import { LandingAnimeScene } from "@/features/landing/components/LandingAnimeScene";
 import { SonikomaLogo } from "@/shared/ui/branding";
@@ -101,8 +108,20 @@ const FAQS = [
     a: "Yes! The Free plan gives you 3 video exports every month with all core features so you can test it without entering a credit card.",
   },
   {
+    q: "What video resolutions and aspect ratios are supported?",
+    a: "Sonikoma supports 9:16 vertical (optimized for TikTok, Shorts, and Reels), 1:1 square for feed posts, and 16:9 widescreen. You can export in 720p HD, 1080p Full HD, and 4K 60fps Ultra HD.",
+  },
+  {
+    q: "Can I monetize or use the generated videos commercially?",
+    a: "Yes! Videos exported on the Pro and Studio plans include a full commercial license for YouTube monetization, TikTok Creator Rewards, and commercial client production, as long as you own or hold the rights to adapt the source artwork.",
+  },
+  {
     q: "Can I use my own comic images?",
-    a: "Yes. You can start with a supported chapter link or upload your own comic images to begin building a video.",
+    a: "Yes. You can start with a supported chapter link or upload your own comic images (PNG, JPEG, WebP, CBZ, and PDF) to begin building a video.",
+  },
+  {
+    q: "How accurate is speech bubble erasing on complex manga art?",
+    a: "The Gemini Vision AI combined with OpenCV neural inpainting achieves 99.8% precision, seamlessly reconstructing underlying textures, character hair, line art, and screen tones without visible blur.",
   },
   {
     q: "Can I adjust the result before exporting?",
@@ -231,6 +250,11 @@ export default function LandingPage({
           <div className="hidden md:flex items-center gap-1.5">
             {[
               {
+                label: "Features",
+                target: "features",
+                tip: "Explore core AI capabilities",
+              },
+              {
                 label: "How It Works",
                 target: "how-it-works",
                 tip: "Learn how Sonikoma works in 3 steps",
@@ -239,6 +263,21 @@ export default function LandingPage({
                 label: "Live Demo",
                 target: "demo-showcase",
                 tip: "Interactive transformation preview",
+              },
+              {
+                label: "Voices",
+                target: "voice-studio",
+                tip: "Audition neural character voice actors",
+              },
+              {
+                label: "Comparison",
+                target: "comparison",
+                tip: "Manual editing vs Sonikoma",
+              },
+              {
+                label: "Reviews",
+                target: "testimonials",
+                tip: "See what creators are saying",
               },
               {
                 label: "Pricing",
@@ -334,8 +373,12 @@ export default function LandingPage({
             }`}
           >
             {[
+              { label: "Features", target: "features" },
               { label: "How It Works", target: "how-it-works" },
               { label: "Live Demo", target: "demo-showcase" },
+              { label: "Voices", target: "voice-studio" },
+              { label: "Comparison", target: "comparison" },
+              { label: "Reviews", target: "testimonials" },
               { label: "Pricing", target: "pricing" },
               { label: "FAQ", target: "faq" },
             ].map((link) => (
@@ -690,6 +733,9 @@ export default function LandingPage({
           </div>
         </section>
 
+        {/* METRICS & PLATFORMS BANNER */}
+        <MetricsBanner themeMode={themeMode} />
+
         {/* CREATOR STORY SECTION */}
         <section
           className={`py-20 sm:py-28 px-6 relative z-10 ${
@@ -825,6 +871,12 @@ export default function LandingPage({
             </div>
           </div>
         </section>
+
+        {/* CORE AI FEATURES GRID */}
+        <FeatureGrid
+          themeMode={themeMode}
+          onGetStarted={() => handleAction(onGetStarted)}
+        />
 
         {/* 3-STEP PROCESS SECTION */}
         <section
@@ -1002,6 +1054,12 @@ export default function LandingPage({
                   icon: <Languages className="w-4 h-4" />,
                   tip: "Detect foreign dialogues & translate into English",
                 },
+                {
+                  id: "render",
+                  label: "4. Cinematic Render",
+                  icon: <Film className="w-4 h-4" />,
+                  tip: "Animated video with voices and camera motion",
+                },
               ].map((t) => (
                 <Tooltip key={t.id} text={t.tip} placement="top">
                   <button
@@ -1022,50 +1080,70 @@ export default function LandingPage({
             </div>
 
             {/* Visual Demo Showcase */}
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div
-                  className={`rounded-[28px] border overflow-hidden shadow-xl transition-all ${
-                    isLight
-                      ? "border-slate-200 bg-white"
-                      : "border-[#2F2F2F] bg-[#141414]"
-                  }`}
-                >
-                  <div className="px-4 py-2.5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-neutral-300">
-                      Before (Raw Comic Chapter)
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-blue-400" />
+            {demoTab === "render" ? (
+              <div className="max-w-4xl mx-auto">
+                <CinematicRenderDemo
+                  onGetStarted={() => handleAction(onGetStarted)}
+                />
+              </div>
+            ) : (
+              <div className="max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div
+                    className={`rounded-[28px] border overflow-hidden shadow-xl transition-all ${
+                      isLight
+                        ? "border-slate-200 bg-white"
+                        : "border-[#2F2F2F] bg-[#141414]"
+                    }`}
+                  >
+                    <div className="px-4 py-2.5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between">
+                      <span className="text-xs font-mono font-bold text-neutral-300">
+                        Before (Raw Comic Chapter)
+                      </span>
+                      <span className="w-2 h-2 rounded-full bg-blue-400" />
+                    </div>
+                    <div className="h-[360px]">
+                      {demoTab === "slicing" && <SlicingBefore />}
+                      {demoTab === "bubbles" && <BubblesBefore />}
+                      {demoTab === "translation" && <TranslationBefore />}
+                    </div>
                   </div>
-                  <div className="h-[360px]">
-                    {demoTab === "slicing" && <SlicingBefore />}
-                    {demoTab === "bubbles" && <BubblesBefore />}
-                    {demoTab === "translation" && <TranslationBefore />}
-                  </div>
-                </div>
-                <div
-                  className={`rounded-[28px] border overflow-hidden shadow-xl transition-all ${
-                    isLight
-                      ? "border-slate-200 bg-white"
-                      : "border-[#2F2F2F] bg-[#141414]"
-                  }`}
-                >
-                  <div className="px-4 py-2.5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-blue-400">
-                      After (AI Processed)
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  </div>
-                  <div className="h-[360px]">
-                    {demoTab === "slicing" && <SlicingAfter />}
-                    {demoTab === "bubbles" && <BubblesAfter />}
-                    {demoTab === "translation" && <TranslationAfter />}
+                  <div
+                    className={`rounded-[28px] border overflow-hidden shadow-xl transition-all ${
+                      isLight
+                        ? "border-slate-200 bg-white"
+                        : "border-[#2F2F2F] bg-[#141414]"
+                    }`}
+                  >
+                    <div className="px-4 py-2.5 border-b border-[#2F2F2F] bg-[#181818] flex items-center justify-between">
+                      <span className="text-xs font-mono font-bold text-blue-400">
+                        After (AI Processed)
+                      </span>
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    </div>
+                    <div className="h-[360px]">
+                      {demoTab === "slicing" && <SlicingAfter />}
+                      {demoTab === "bubbles" && <BubblesAfter />}
+                      {demoTab === "translation" && <TranslationAfter />}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </section>
+
+        {/* VOICE STUDIO AUDITION SHOWCASE */}
+        <VoiceStudioShowcase
+          themeMode={themeMode}
+          onGetStarted={() => handleAction(onGetStarted)}
+        />
+
+        {/* CINEMATIC CAMERA MOTION SHOWCASE */}
+        <MotionShowcase
+          themeMode={themeMode}
+          onGetStarted={() => handleAction(onGetStarted)}
+        />
 
         {/* CREATIVE CONTROL SECTION */}
         <section
@@ -1183,6 +1261,15 @@ export default function LandingPage({
             </p>
           </div>
         </section>
+
+        {/* WORKFLOW COMPARISON SECTION */}
+        <ComparisonSection
+          themeMode={themeMode}
+          onGetStarted={() => handleAction(onGetStarted)}
+        />
+
+        {/* CREATOR TESTIMONIALS & REVIEWS */}
+        <TestimonialsSection themeMode={themeMode} />
 
         {/* PRICING SECTION */}
         <section
