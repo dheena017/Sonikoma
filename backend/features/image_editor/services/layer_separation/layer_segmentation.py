@@ -17,9 +17,8 @@ from PIL import Image
 logger = logging.getLogger("sonikoma.services.image.layer_separation.layer_segmentation")
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower().strip()
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-PROJECT_ROOT = BASE_DIR  # BASE_DIR is already backend/; data/ lives at backend/data/
-LOCAL_MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, "data", "local_media"))
+from database.config import DATA_DIR, LOCAL_MEDIA_DIR, _BACKEND_ROOT as PROJECT_ROOT
+LOCAL_MEDIA_ROOT = LOCAL_MEDIA_DIR
 LOCAL_MEDIA_URL_PREFIX = "/media"
 
 from features.image_editor.services.ocr.ocr_engine import extract_full_ocr_data

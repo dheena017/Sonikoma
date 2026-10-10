@@ -94,8 +94,8 @@ def get_yolo_speech_bubble_model():
 
     # Priority 3: Generic YOLOv8n-seg
     try:
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        project_model_path = os.path.join(base_dir, "data", "models", "yolov8n-seg.pt")
+        from database.config import DATA_DIR, _BACKEND_ROOT as base_dir
+        project_model_path = os.path.join(DATA_DIR, "models", "yolov8n-seg.pt")
         if os.path.exists(project_model_path):
             _yolo_model = YOLO(project_model_path)
         else:
@@ -370,8 +370,8 @@ def get_yolo_character_segmentation_model():
 
     try:
         from ultralytics import YOLO
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        model_candidate = os.path.join(base_dir, "data", "models", "yolov8n-seg.pt")
+        from database.config import DATA_DIR, _BACKEND_ROOT as base_dir
+        model_candidate = os.path.join(DATA_DIR, "models", "yolov8n-seg.pt")
         local_path = model_candidate if os.path.exists(model_candidate) else os.path.join(base_dir, "yolov8n-seg.pt")
         if os.path.exists(local_path):
             _yolo_char_model = YOLO(local_path)

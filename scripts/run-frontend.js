@@ -73,7 +73,7 @@ function resolvePythonPath() {
       : path.resolve(__dirname, "../.venv/bin/python");
   if (fs.existsSync(venvPython)) {
     try {
-      execSync(`"${venvPython}" --version`, { stdio: "ignore" });
+      execSync(`"${venvPython}" -c "import _ctypes"`, { stdio: "ignore" });
       return venvPython;
     } catch {
       // venv is blocked or unusable (e.g. Windows Application Control policy)

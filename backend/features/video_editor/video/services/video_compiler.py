@@ -83,10 +83,10 @@ async def compile_video_from_panels(
         except Exception as p_err:
             logger.debug(f"[Video Compiler] Project DB lookup note: {p_err}")
 
-    backend_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    data_dir = os.path.join(backend_root, "data")
-    temp_dir = os.path.join(data_dir, "temp")
-    media_dir = os.path.join(data_dir, "media")
+    from database import config as db_cfg
+    data_dir = db_cfg.DATA_DIR
+    temp_dir = db_cfg.TEMP_DIR
+    media_dir = db_cfg.MEDIA_DIR
 
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(temp_dir, exist_ok=True)
