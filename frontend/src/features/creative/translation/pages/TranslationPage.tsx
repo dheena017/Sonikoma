@@ -9,7 +9,6 @@ import {
   Maximize2,
   X,
   Image,
-  Plus,
 } from "lucide-react";
 import { GeneratedPanel } from "@/shared/types";
 import { cleanDialogueDisplay } from "@/shared/utils";
@@ -80,30 +79,6 @@ export const TranslationPage = React.memo(
       }
     }, [safePanels.length]);
 
-    const handleCreatePanel = () => {
-      if (typeof setPanels === "function") {
-        const nextId =
-          safePanels.length > 0
-            ? Math.max(...safePanels.map((p) => p.id || 0)) + 1
-            : 1;
-        const newPanel: GeneratedPanel = {
-          id: nextId,
-          prompt: "",
-          duration: 0,
-          speech_text: "",
-          visual_description: "",
-          image_url: "",
-          sfx: "",
-          motion_type: "",
-        };
-        setPanels((prev) => [...(prev || []), newPanel]);
-        setSelectedIdx(safePanels.length);
-        addNotification?.(
-          `Created new Frame #${safePanels.length + 1} for translation!`,
-          "success"
-        );
-      }
-    };
 
     const activePanel = safePanels[selectedIdx] || ({} as GeneratedPanel);
 
@@ -175,13 +150,6 @@ export const TranslationPage = React.memo(
                 >
                   <span>Open Dashboard Projects</span>
                 </button>
-                <button
-                  onClick={handleCreatePanel}
-                  className="btn-secondary flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold font-mono"
-                >
-                  <Plus className="w-3.5 h-3.5 text-[#3B82F6]" />
-                  <span>Create First Panel Frame</span>
-                </button>
               </div>
             </div>
           ) : (
@@ -198,34 +166,24 @@ export const TranslationPage = React.memo(
                       Active: Frame #{selectedIdx + 1}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handleCreatePanel}
-                      className="px-2.5 py-1 text-xs font-mono font-semibold text-[#60A5FA] bg-[#3B82F6]/10 border border-[#3B82F6]/30 hover:bg-[#3B82F6]/20 rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
-                      title="Add new storyboard frame"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Frame</span>
-                    </button>
-                    {safePanels.length > 4 && (
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => scrollFilmstrip("left")}
-                          className="p-1.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
-                          title="Scroll left"
-                        >
-                          <ChevronLeft className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => scrollFilmstrip("right")}
-                          className="p-1.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
-                          title="Scroll right"
-                        >
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  {safePanels.length > 4 && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => scrollFilmstrip("left")}
+                        className="p-1.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
+                        title="Scroll left"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => scrollFilmstrip("right")}
+                        className="p-1.5 text-neutral-400 hover:text-white bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-lg transition-all cursor-pointer"
+                        title="Scroll right"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div
