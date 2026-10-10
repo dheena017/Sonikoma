@@ -12,7 +12,7 @@ The `scraper` sub-domain extracts chapters, metadata, and high-resolution vertic
 - `router.py`: Handles scraping jobs, URL resolution, and image streaming through anti-blocking reverse proxies.
 - `app.services.scraper.adapters`: Site-specific parsing adapters (Webtoons, Bato, MangaDex, Madara, Generic).
 - `app.repositories.chapter_cache`: Caches discovered chapter lists in `chapter_cache` to reduce upstream rate-limiting.
-- `app.repositories.scraper`: Persists scrape sessions and site-specific throttling rules in `scrape_sessions` and `scraper_rules`.
+- `app.repositories.scraper`: Persists scrape sessions in `scrape_sessions`.
 
 ---
 

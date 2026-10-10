@@ -44,10 +44,3 @@ def test_admin_token_usage(client, admin_headers):
     data = response.json()
     assert isinstance(data, (list, dict))
 
-
-def test_admin_scraper_rules(client, admin_headers):
-    """GET /api/v1/admin/scrapers/rules - returns domain scraping rules."""
-    response = client.get("/api/v1/admin/scrapers/rules", headers=admin_headers)
-    assert response.status_code == 200
-    data = response.json()
-    assert isinstance(data, (list, dict))

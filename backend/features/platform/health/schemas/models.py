@@ -110,7 +110,6 @@ class DatabaseTableCounts(BaseModel):
     credit_transactions: int = 0
     platform_settings: int = 0
     content_moderation_logs: int = 0
-    scraper_rules: int = 0
 
 
 class DatabaseHealthStatus(BaseModel):

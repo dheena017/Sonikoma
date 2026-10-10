@@ -36,17 +36,19 @@ erDiagram
     scrape_sessions ||--o{ chapters : produces
 ```
 
-### Table Breakdown by Domain:
-| Feature Domain | Tables | Responsibilities |
-| :--- | :--- | :--- |
-| **`auth` & `profile`** | `users`, `user_sessions`, `user_audit_logs`, `user_api_keys`, `user_invoices`, `credit_transactions` | Creator identities, sessions, security audit events, developer API credentials, billing ledger |
-| **`platform/projects`** | `series`, `chapters`, `panels` | Top-level comics/manga, episode workspaces, panel crops, dialogue, and styling |
-| **`platform/scraper`** | `scrape_sessions`, `series_chapters_cache`, `scraper_rules`, `scraper_l1_cache`, `scraper_l5_cache` | Scraped image URLs, site rate-limit rules, discovery caches |
-| **`platform/jobs`** | `jobs` | Async background tasks, progress percentages, execution status |
-| **`platform/terminal`**| `system_logs`, `token_usage_logs` | Server logging stream, runtime debug traces, LLM cost accounting |
-| **`admin`** | `platform_settings`, `system_announcements`, `content_moderation_logs` | Global app toggles, banner announcements, safety moderation |
-| **`creative`** | `user_youtube_channels`, `youtube_oauth_tokens`, `youtube_profiles`, `youtube_publications`, `youtube_credentials` | YouTube channel profiles, OAuth2 credentials, published upload history |
-| **`intelligence`** | `ai_series_projects`, `series_continuity_memory`, `series_feedback_events`, `ai_token_usage_ledger` | AI project states, continuity lore memory, RLHF feedback, and model performance analytics |
+### Table Breakdown by 10 Core Application Domains:
+| # | Feature Domain | Sub-Domain | Database Tables | Responsibilities |
+| :---: | :--- | :--- | :--- | :--- |
+| **1** | **`admin/`** | `settings`, `notifications`, `moderation` | `platform_settings`, `system_announcements`, `content_moderation_logs` | Global toggles, banner announcements, safety moderation |
+| **2** | **`landing/`** | `showcase`, `pricing` | *(Stateless / public queries)* | Public landing page metrics (reads series/user aggregates) |
+| **3** | **`auth/`** | `identity`, `session`, `security` | `users`, `user_sessions`, `user_audit_logs` | Credential auth, login sessions, security event audits |
+| **4** | **`workspace/`** | `shell`, `storyboard` | `chapters`, `panels` | Storyboard scene breakdowns, voiceover scripts, panel queues |
+| **5** | **`image-editor/`** | `canvas`, `auto-crop`, `history` | `panels`, `edit_history` | Panel detection, crop coordinates, bubble params, edit cache history |
+| **6** | **`video-editor/`** | `timeline`, `render` | `chapters`, `panels` | Video render status, frame timings, motion transitions, audio sync |
+| **7** | **`creative/`** | `youtube`, `agent` | `user_youtube_channels`, `youtube_oauth_tokens`, `youtube_profiles`, `youtube_publications`, `youtube_credentials`, `creator_style_profiles` | YouTube publishing, OAuth2 credentials, creator style preferences |
+| **8** | **`platform/`** | `projects`, `scraper`, `jobs`, `terminal` | `series`, `chapters`, `scrape_sessions`, `series_chapters_cache`, `jobs`, `system_logs` | Series/chapter lifecycle, web scraping, async jobs, debug logs |
+| **9** | **`profile/`** | `account`, `api-keys`, `billing` | `users`, `user_api_keys`, `user_invoices`, `credit_transactions` | Creator bio, developer API keys, billing invoices, credit wallet |
+| **10** | **`intelligence/`** | `series-studio`, `lore`, `routing` | `ai_series_projects`, `series_continuity_memory`, `series_feedback_events`, `ai_token_usage_ledger`, `token_usage_logs` | AI project state, lore memory, RLHF feedback, token usage ledger |
 
 ---
 

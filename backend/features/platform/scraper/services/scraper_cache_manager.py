@@ -19,13 +19,7 @@ from typing import List, Dict, Any, Optional, Set, Tuple
 from .scraper_models import ImageItem, ChapterResult
 from .scraper_constants import SCRAPER_VERSION
 
-try:
-    from database.engine import get_db_connection
-except ImportError:
-    try:
-        from database.engine import get_db_connection
-    except ImportError:
-        get_db_connection = None
+
 
 try:
     from features.platform.scraper.repositories import save_scrape_session, get_latest_scrape_session
@@ -37,47 +31,14 @@ logger = logging.getLogger("sonikoma.services.scraper.cache")
 
 
 class ScraperCacheManager:
-    """Manages multi-tier L1-L5 caching and idempotency verification with SQLite persistence."""
+    """Manages multi-tier L1-L5 caching and idempotency verification in-memory."""
 
-    _initialized = False
     _L1_HTML_TTL: float = 900.0   # 15 minutes
     _L5_RESULT_TTL: float = 3600.0  # 1 hour
 
-    # In-memory fast fallbacks
+    # In-memory fast stores
     _mem_l1: Dict[str, Tuple[str, float]] = {}
     _mem_l5: Dict[str, Tuple[Dict[str, Any], float]] = {}
-
-    @classmethod
-    def _ensure_tables(cls):
-        if cls._initialized or not get_db_connection:
-            return
-        try:
-            with get_db_connection() as conn:
-                conn.execute("""
-                CREATE TABLE IF NOT EXISTS scraper_l1_cache (
-                    cache_key   TEXT PRIMARY KEY,
-                    url         TEXT NOT NULL,
-                    html        TEXT NOT NULL,
-                    expires_at  REAL NOT NULL,
-                    created_at  TEXT DEFAULT (datetime('now'))
-                )
-                """)
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_scraper_l1_exp ON scraper_l1_cache(expires_at)")
-
-                conn.execute("""
-                CREATE TABLE IF NOT EXISTS scraper_l5_cache (
-                    idempotency_key TEXT PRIMARY KEY,
-                    canonical_url   TEXT NOT NULL,
-                    result_json     TEXT NOT NULL,
-                    expires_at      REAL NOT NULL,
-                    created_at      TEXT DEFAULT (datetime('now'))
-                )
-                """)
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_scraper_l5_exp ON scraper_l5_cache(expires_at)")
-                conn.commit()
-                cls._initialized = True
-        except Exception as e:
-            pass
 
     @classmethod
     def generate_fingerprint(cls, url: str) -> str:
@@ -89,27 +50,12 @@ class ScraperCacheManager:
         raw = f"{canonical_url.strip().lower()}|{project_id or 'default'}|v{SCRAPER_VERSION}"
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
-    # ── L1: HTML Request Cache ───────────────────────────────────────────────
+    # ── L1: HTML Request Cache (In-Memory) ───────────────────────────────────
     @classmethod
     def get_l1_html(cls, url: str) -> Optional[str]:
         k = hashlib.md5(url.strip().lower().encode("utf-8")).hexdigest()
         now = time.time()
 
-        # Try DB
-        if get_db_connection:
-            cls._ensure_tables()
-            try:
-                with get_db_connection() as conn:
-                    row = conn.execute(
-                        "SELECT html FROM scraper_l1_cache WHERE cache_key = ? AND expires_at > ?",
-                        (k, now)
-                    ).fetchone()
-                    if row and row["html"]:
-                        return row["html"]
-            except Exception:
-                pass
-
-        # Memory fallback
         if k in cls._mem_l1:
             html, exp = cls._mem_l1[k]
             if exp > now:
@@ -124,27 +70,9 @@ class ScraperCacheManager:
             return
         k = hashlib.md5(url.strip().lower().encode("utf-8")).hexdigest()
         expires = time.time() + cls._L1_HTML_TTL
-
-        # Memory store
         cls._mem_l1[k] = (html, expires)
 
-        # SQLite store
-        if get_db_connection:
-            cls._ensure_tables()
-            try:
-                with get_db_connection() as conn:
-                    conn.execute("""
-                    INSERT INTO scraper_l1_cache (cache_key, url, html, expires_at)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT(cache_key) DO UPDATE SET
-                        html = excluded.html,
-                        expires_at = excluded.expires_at
-                    """, (k, url, html, expires))
-                    conn.commit()
-            except Exception:
-                pass
-
-    # ── L5: Result & Idempotency Cache ───────────────────────────────────────
+    # ── L5: Result & Idempotency Cache (In-Memory) ───────────────────────────
     @classmethod
     def get_cached_chapter_result(cls, canonical_url: str, bypass_cache: bool = False) -> Optional[ChapterResult]:
         if bypass_cache:
@@ -152,23 +80,6 @@ class ScraperCacheManager:
         k = cls.build_idempotency_key(canonical_url)
         now = time.time()
 
-        # Try SQLite
-        if get_db_connection:
-            cls._ensure_tables()
-            try:
-                with get_db_connection() as conn:
-                    row = conn.execute(
-                        "SELECT result_json FROM scraper_l5_cache WHERE idempotency_key = ? AND expires_at > ?",
-                        (k, now)
-                    ).fetchone()
-                    if row and row["result_json"]:
-                        res_dict = json.loads(row["result_json"])
-                        logger.info(f"[ScraperCacheManager] L5 Idempotency Cache HIT (SQLite) for {canonical_url}")
-                        return ChapterResult(**res_dict)
-            except Exception as e:
-                pass
-
-        # Memory fallback
         if k in cls._mem_l5:
             res_dict, exp = cls._mem_l5[k]
             if exp > now:
@@ -187,26 +98,7 @@ class ScraperCacheManager:
             return
         k = cls.build_idempotency_key(canonical_url)
         expires = time.time() + cls._L5_RESULT_TTL
-        res_json = json.dumps(result.model_dump())
-
-        # Memory store
         cls._mem_l5[k] = (result.model_dump(), expires)
-
-        # SQLite store
-        if get_db_connection:
-            cls._ensure_tables()
-            try:
-                with get_db_connection() as conn:
-                    conn.execute("""
-                    INSERT INTO scraper_l5_cache (idempotency_key, canonical_url, result_json, expires_at)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT(idempotency_key) DO UPDATE SET
-                        result_json = excluded.result_json,
-                        expires_at = excluded.expires_at
-                    """, (k, canonical_url, res_json, expires))
-                    conn.commit()
-            except Exception as e:
-                pass
 
     # ── Session & Incremental Discovery ──────────────────────────────────────
     @classmethod
@@ -255,20 +147,11 @@ class ScraperCacheManager:
     # ── In-Memory Fast Cache Clearing & Session Operations ──────────────────
     @classmethod
     def clear(cls) -> Dict[str, Any]:
-        """Flushes in-memory RAM caches (_mem_l1, _mem_l5) and SQLite persistent cache tables."""
+        """Flushes in-memory RAM caches (_mem_l1, _mem_l5)."""
         l1_count = len(cls._mem_l1)
         l5_count = len(cls._mem_l5)
         cls._mem_l1.clear()
         cls._mem_l5.clear()
-
-        if get_db_connection:
-            try:
-                with get_db_connection() as conn:
-                    conn.execute("DELETE FROM scraper_l1_cache")
-                    conn.execute("DELETE FROM scraper_l5_cache")
-                    conn.commit()
-            except Exception:
-                pass
 
         return {
             "success": True,

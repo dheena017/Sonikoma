@@ -368,7 +368,6 @@ def get_comprehensive_backend_status(
         counts.credit_transactions = _get_count("credit_transactions")
         counts.platform_settings = _get_count("platform_settings")
         counts.content_moderation_logs = _get_count("content_moderation_logs")
-        counts.scraper_rules = _get_count("scraper_rules")
 
         # SQLite Pragmas
         db_journal_mode = None

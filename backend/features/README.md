@@ -12,28 +12,16 @@ Each feature domain is a self-contained module encapsulating its own:
 
 ```text
 backend/app/features/
-├── auth/                 # Authentication, JWT sessions, OAuth, and user models
-├── admin/                # Platform administration, analytics, and telemetry
-├── creative/             # Creative suite tools, YouTube publishing, export bundles
-├── image_editor/         # Panel canvas, auto-cropping, OCR, bubble-guided text extraction
-├── intelligence/         # AI core, series generation, prompt engineering, continuity memory
-├── landing/              # Public showcase endpoints, stats, tiers, and demo reels
-├── platform/             # Core platform hub (shell, dashboard, projects, scraper, jobs...)
-│   ├── shell/            # Platform navigation schemas, layout state, and theme preferences
-│   ├── dashboard/        # Hardware telemetry, project overviews, quick metrics, analytics
-│   ├── projects/         # Project lifecycle (CRUD), chapter structures, asset references
-│   ├── scraper/          # Webtoon & manga scraping engine, chapter downloads, search
-│   ├── shortcuts/        # Keyboard shortcut registry and custom user keybindings
-│   ├── terminal/         # Sandboxed web developer terminal, diagnostic commands, logs
-│   ├── notifications/    # User notification feed, unread tracking, system alerts
-│   └── jobs/             # Background task execution polling, cancellation, stage tracking
-├── profile/              # User profile, avatars, API key management
-├── video_editor/         # Timeline rendering, TTS synthesis, subtitle alignment, mixing
-└── workspace/            # Studio editor engine, storyboard, asset trays
-    ├── shell/            # Canvas viewport, zoom ratios, tool modes, and session context
-    ├── storyboard/       # AI scene breakdown, voiceover scripts, audio cues, frame timings
-    ├── viewer/           # Webtoon continuous vertical reader, manga reader, scroll progress
-    └── imported_assets/  # Project media gallery, multipart asset upload, disk indexing
+├── admin/                # 1. Platform administration, settings, telemetry, and moderation
+├── landing/              # 2. Public showcase endpoints, stats, tiers, and demo reels
+├── auth/                 # 3. Authentication, JWT sessions, OAuth, and user credentials
+├── workspace/            # 4. Studio editor engine, storyboard, viewer, asset trays
+├── image_editor/         # 5. Panel canvas, auto-cropping, OCR, enhancements, and stitching
+├── video_editor/         # 6. Timeline rendering, multi-voice TTS synthesis, cuts, mixing
+├── creative/             # 7. Creative suite tools, AI agent, translation, YouTube publishing
+├── platform/             # 8. Core platform hub (dashboard, projects, scraper, jobs, terminal)
+├── profile/              # 9. User profile, account preferences, developer API keys, billing
+└── intelligence/         # 10. AI core, series studio, lore continuity memory, multi-model routing
 ```
 
 ---
@@ -48,20 +36,20 @@ Cross-domain calls are orchestrated through public service functions rather than
 
 ---
 
-## 3. Parity Mapping Matrix
+## 3. Parity Mapping Matrix (1 to 10)
 
-| Backend Domain | Frontend Counterpart (`frontend/src/features/`) | Sub-Domains / Responsibilities |
-| :--- | :--- | :--- |
-| **`auth/`** | `auth/` | Registration, login, JWT issuance, OAuth verification |
-| **`admin/`** | `admin/` | System configuration, AI usage telemetry, superuser console |
-| **`creative/`** | `creative/` | Video export pipelines, YouTube publishing, export archives |
-| **`image_editor/`** | `image-editor/` | Panel detection, smart slicing, OCR text, transformations |
-| **`intelligence/`** | `intelligence/` | Multimodal AI vision, character consistency, series bibles |
-| **`landing/`** | `landing/` | Public demo reels, platform metrics, subscription tiers |
-| **`platform/`** | `platform/` | **8 Sub-domains**: `shell`, `dashboard`, `projects`, `scraper`, `shortcuts`, `terminal`, `notifications`, `jobs` |
-| **`profile/`** | `profile/` | Account settings, API keys, avatar uploads, theme state |
-| **`video_editor/`** | `video-editor/` | Timeline rendering, multi-voice TTS, audio mixing, subtitles |
-| **`workspace/`** | `workspace/` | **4 Sub-domains**: `shell`, `storyboard`, `viewer`, `imported_assets` |
+| # | Backend Domain | Frontend Counterpart (`frontend/src/features/`) | Sub-Domains | What Lives Here |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | **`admin/`** | `admin/` | `dashboard`, `users`, `content`, `usage`, `finance`, `scrapers`, `jobs`, `settings` | Admin dashboard, admin pages, superuser controls, telemetry |
+| **2** | **`landing/`** | `landing/` | `hero`, `demo`, `features`, `pricing`, `faq` | Public landing page, demo reels, pricing tiers, marketing |
+| **3** | **`auth/`** | `auth/` | `login`, `register`, `forgot-password`, `oauth`, `session` | Login, Register, Reset Password, OAuth, JWT sessions |
+| **4** | **`workspace/`** | `workspace/` | `shell`, `imported-assets`, `storyboard`, `viewer`, `preview-video` | Studio shell, imported-assets, storyboard, vertical viewer, preview |
+| **5** | **`image_editor/`** | `image-editor/` | `canvas`, `drawing`, `layers`, `auto-crop`, `splitter`, `enhancements`, `merge` | Canvas, drawing, layers, auto-crop, splitter, enhancements, merge |
+| **6** | **`video_editor/`** | `video-editor/` | `timeline`, `audio`, `cuts`, `render`, `playback` | Video timeline, audio, cuts, FFmpeg render, playback |
+| **7** | **`creative/`** | `creative/` | `suite`, `agent`, `optimizer`, `panel-gen`, `voice`, `thumbnails`, `translation`, `youtube` | Suite hub, agent, optimizer, panel-gen, voice, YouTube publishing |
+| **8** | **`platform/`** | `platform/` | `dashboard`, `projects`, `notifications`, `terminal`, `shortcuts`, `scraper`, `jobs`, `shell` | Dashboard, Projects, Notifications, Terminal, Shortcuts, Scraper, Jobs |
+| **9** | **`profile/`** | `profile/` | `profile`, `account`, `settings`, `api-keys`, `billing` | User profile, account settings, developer API keys, billing |
+| **10** | **`intelligence/`** | `intelligence/` | `core`, `series-studio`, `routing`, `models`, `playground`, `keys`, `wallet` | AI core, series studio, routing, models, playground, keys, wallet |
 
 ---
 

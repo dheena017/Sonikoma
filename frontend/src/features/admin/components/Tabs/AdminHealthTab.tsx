@@ -328,11 +328,6 @@ export function AdminHealthTab({ fetchWithInterceptor }: any) {
                 count: counts.content_moderation_logs,
                 color: "text-fuchsia-400",
               },
-              {
-                label: "Scraper Rules",
-                count: counts.scraper_rules,
-                color: "text-orange-400",
-              },
             ].map((item) => (
               <div
                 key={item.label}

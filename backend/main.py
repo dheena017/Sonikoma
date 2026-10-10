@@ -58,6 +58,10 @@ if __name__ == "__main__":
                 "()": ColoredFormatter,
                 "use_colors": True,
             },
+            "access": {
+                "()": ColoredFormatter,
+                "use_colors": True,
+            },
             "file": {
                 "format": "%(asctime)s [%(levelname)-7s] [%(name)s] %(message)s",
                 "datefmt": "%Y-%m-%d %H:%M:%S",

@@ -78,13 +78,6 @@ def init_sqlite(conn: sqlite3.Connection) -> None:
         except Exception:
             pass
 
-        # Scraper rules
-        _run_safe_alter(cursor, conn, "ALTER TABLE scraper_rules ADD COLUMN engine_strategy TEXT DEFAULT 'auto'", "added engine_strategy to scraper_rules")
-        _run_safe_alter(cursor, conn, "ALTER TABLE scraper_rules ADD COLUMN timeout_sec INTEGER DEFAULT 30", "added timeout_sec to scraper_rules")
-        _run_safe_alter(cursor, conn, "ALTER TABLE scraper_rules ADD COLUMN max_concurrency INTEGER DEFAULT 2", "added max_concurrency to scraper_rules")
-        _run_safe_alter(cursor, conn, "ALTER TABLE scraper_rules ADD COLUMN retry_attempts INTEGER DEFAULT 2", "added retry_attempts to scraper_rules")
-        _run_safe_alter(cursor, conn, "ALTER TABLE scraper_rules ADD COLUMN notes TEXT DEFAULT ''", "added notes to scraper_rules")
-
         # Token usage logs
         _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN user_id TEXT", "added user_id to token_usage_logs")
         _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN chapter_id TEXT", "added chapter_id to token_usage_logs")
@@ -104,9 +97,7 @@ def init_sqlite(conn: sqlite3.Connection) -> None:
         for dead_table in [
             "franchise_continuity",
             "generation_feedback",
-            "creator_style_profiles",
             "user_unlinked_youtube_channels",
-            "edit_history",
         ]:
             try:
                 cursor.execute(f"DROP TABLE IF EXISTS {dead_table}")

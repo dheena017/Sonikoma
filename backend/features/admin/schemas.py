@@ -64,25 +64,7 @@ class AdminUpdateProject(BaseModel):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. Telemetry & Scraper Rules Schemas
-# ─────────────────────────────────────────────────────────────────────────────
-
-class ScraperRulePayload(BaseModel):
-    """Domain scraping rule, rate-limiting, and blocklist configuration."""
-    domain: str
-    is_blocked: bool = False
-    rate_limit_per_min: int = 30
-    proxy_required: bool = False
-    engine_strategy: Optional[str] = "auto"
-    timeout_sec: Optional[int] = 30
-    max_concurrency: Optional[int] = 2
-    retry_attempts: Optional[int] = 2
-    notes: Optional[str] = ""
-    custom_headers: Optional[str] = "{}"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# 5. Standard Responses
+# 4. Standard Responses
 # ─────────────────────────────────────────────────────────────────────────────
 
 class AdminStandardResponse(BaseModel):

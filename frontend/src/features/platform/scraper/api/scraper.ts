@@ -830,24 +830,3 @@ export const clearScraperCache = async (
   });
 };
 
-export const saveDomainRule = async (
-  fetchWithInterceptor: FetchClient,
-  payload: {
-    domain: string;
-    is_blocked?: boolean;
-    rate_limit_per_min?: number;
-    proxy_required?: boolean;
-    engine_strategy?: string;
-    timeout_sec?: number;
-    max_concurrency?: number;
-    retry_attempts?: number;
-    notes?: string;
-    custom_headers?: string;
-  }
-): Promise<{ success: boolean; message: string }> => {
-  return apiRequest(fetchWithInterceptor, "/api/v1/auth/admin/scrapers/rules", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-};

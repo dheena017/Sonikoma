@@ -38,7 +38,6 @@ import {
   listAdminDomains,
   updateDomainStatus,
   deleteAdminDomain,
-  saveDomainRule,
   checkDomainBlocked,
   separateComicUrl,
   listAdapters,
@@ -152,26 +151,13 @@ const DomainRuleModal = ({
 
     setSubmitting(true);
     try {
-      await saveDomainRule(fetchWithInterceptor, {
-        domain: cleaned,
-        is_blocked: status === "blocked",
-        rate_limit_per_min: Number(rateLimit) || 30,
-        proxy_required: proxyRequired,
-        engine_strategy: engineStrategy,
-        timeout_sec: Number(timeoutSec) || 30,
-        max_concurrency: Number(maxConcurrency) || 2,
-        retry_attempts: Number(retryAttempts) || 2,
-        notes: notes.trim(),
-        custom_headers: customHeaders.trim() || "{}",
-      });
-
-      // Also ensure status is reflected via scraper admin API
       await updateDomainStatus(fetchWithInterceptor, cleaned, {
         status: status,
+        notes: notes.trim(),
       });
 
       addNotification(
-        `Domain rule for '${cleaned}' ${
+        `Domain '${cleaned}' ${
           isEditing ? "updated" : "created"
         } successfully.`,
         "success"
@@ -637,17 +623,6 @@ export function AdminScrapersTab({
     const nextStatus = d.status === "approved" ? "blocked" : "approved";
     setActionLoading(d.domain);
     try {
-      await saveDomainRule(fetchWithInterceptor, {
-        domain: d.domain,
-        is_blocked: nextStatus === "blocked",
-        rate_limit_per_min: d.rate_limit_per_min || 30,
-        proxy_required: Boolean(d.proxy_required),
-        engine_strategy: d.engine_strategy || "auto",
-        timeout_sec: d.timeout_sec || 30,
-        max_concurrency: d.max_concurrency || 2,
-        retry_attempts: d.retry_attempts || 2,
-        notes: d.notes || "",
-      });
       await updateDomainStatus(fetchWithInterceptor, d.domain, {
         status: nextStatus,
       });
