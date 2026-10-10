@@ -269,15 +269,15 @@ function PanelCard({
           viewLayout === "grid" ? "320px 460px" : "300px 460px",
       }}
       className={[
-        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-colors duration-150 text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-neutral-700 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-neutral-950",
+        "group relative rounded-2xl overflow-hidden border p-3.5 space-y-3 transition-colors duration-150 text-center cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-neutral-700 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-950 bg-[#1E1E1E]",
         viewLayout === "grid"
           ? "w-full min-w-0"
           : "w-[85vw] max-w-[340px] sm:w-[300px] shrink-0 snap-center",
         isProcessing
-          ? "border-purple-500/60 bg-neutral-900/90 shadow-md ring-1 ring-purple-500/30"
+          ? "border-purple-500/60 bg-[#1E1E1E] shadow-md ring-1 ring-purple-500/30"
           : isSelected
-          ? "border-blue-500/80 bg-neutral-900/90 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/30"
-          : "border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60",
+          ? "border-[#3B82F6] bg-[#222222] shadow-md ring-1 ring-[#3B82F6]/30"
+          : "border-[#2F2F2F] hover:border-neutral-600 hover:bg-[#232323]",
         className || "",
       ].join(" ")}
     >

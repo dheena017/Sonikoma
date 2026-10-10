@@ -218,10 +218,10 @@ export const HorizontalScrollContainer: React.FC<{
   };
 
   return (
-    <div className="w-full max-w-full min-w-0 relative isolate flex items-center justify-center group/hscroll overflow-hidden rounded-2xl">
+    <div className="w-full max-w-full min-w-0 relative isolate flex items-center justify-center group/hscroll overflow-hidden rounded-2xl border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-2.5 sm:p-3.5 shadow-xl text-left">
       {/* Left Edge Gradient Mask */}
       <div
-        className={`absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-[#0c0d16] via-[#0c0d16]/80 to-transparent pointer-events-none z-30 transition-opacity duration-300 ${
+        className={`absolute left-0 inset-y-0 w-16 bg-gradient-to-r from-[#141414] via-[#141414]/80 to-transparent pointer-events-none z-30 transition-opacity duration-300 ${
           canScrollLeft ? "opacity-100" : "opacity-0"
         }`}
       />
@@ -236,9 +236,9 @@ export const HorizontalScrollContainer: React.FC<{
         aria-label="Scroll Left"
         title="Scroll Left"
         disabled={!canScrollLeft}
-        className={`flex absolute left-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-neutral-700 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
+        className={`flex absolute left-3 top-1/2 -translate-y-1/2 z-40 w-10 h-10 rounded-full bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] hover:border-neutral-600 text-neutral-300 hover:text-white shadow-xl items-center justify-center transition-all duration-200 cursor-pointer ${
           canScrollLeft
-            ? "opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            ? "opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 pointer-events-auto"
             : "opacity-0 scale-75 pointer-events-none"
         }`}
       >
@@ -250,14 +250,14 @@ export const HorizontalScrollContainer: React.FC<{
         ref={scrollRef}
         onMouseDown={handleMouseDown}
         onClickCapture={handleClickCapture}
-        className={`w-full min-w-0 flex items-center gap-3 sm:gap-4 overflow-x-auto pb-3 pt-3.5 custom-purple-scrollbar select-none overscroll-x-contain touch-pan-x snap-x snap-mandatory sm:snap-none [transform:translateZ(0)] px-3 sm:px-2 ${className}`}
+        className={`w-full min-w-0 flex items-center gap-3 sm:gap-4 overflow-x-auto pb-2.5 pt-2.5 custom-purple-scrollbar select-none overscroll-x-contain touch-pan-x snap-x snap-mandatory sm:snap-none [transform:translateZ(0)] px-2.5 sm:px-2 ${className}`}
       >
         {children}
       </div>
 
       {/* Right Edge Gradient Mask */}
       <div
-        className={`absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-[#0c0d16] via-[#0c0d16]/80 to-transparent pointer-events-none z-30 transition-opacity duration-300 ${
+        className={`absolute right-0 inset-y-0 w-16 bg-gradient-to-l from-[#141414] via-[#141414]/80 to-transparent pointer-events-none z-30 transition-opacity duration-300 ${
           canScrollRight ? "opacity-100" : "opacity-0"
         }`}
       />
@@ -272,9 +272,9 @@ export const HorizontalScrollContainer: React.FC<{
         aria-label="Scroll Right"
         title="Scroll Right"
         disabled={!canScrollRight}
-        className={`flex absolute right-3 top-1/2 -translate-y-1/2 z-40 w-11 h-11 rounded-full bg-neutral-950/90 hover:bg-blue-600 border border-neutral-700/80 hover:border-neutral-700 text-blue-400 hover:text-white shadow-[0_8px_30px_rgba(0,0,0,0.9)] items-center justify-center transition-all duration-300 backdrop-blur-xl ${
+        className={`flex absolute right-3 top-1/2 -translate-y-1/2 z-40 w-10 h-10 rounded-full bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] hover:border-neutral-600 text-neutral-300 hover:text-white shadow-xl items-center justify-center transition-all duration-200 cursor-pointer ${
           canScrollRight
-            ? "opacity-90 hover:opacity-100 hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+            ? "opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 pointer-events-auto"
             : "opacity-0 scale-75 pointer-events-none"
         }`}
       >
@@ -899,7 +899,7 @@ const ImportedAssetsDeck = React.memo(
       <>
         <div
           id="scraped_strips_deck"
-          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full min-h-[190px] flex-1 flex flex-col overflow-hidden"
+          className="w-full min-w-0 min-h-[190px] rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-6 lg:p-7 space-y-3 shadow-2xl flex-1 flex flex-col overflow-hidden relative text-left"
         >
           <ImportedAssetsHeader
             scrapedImagesLength={scrapedImages.length}

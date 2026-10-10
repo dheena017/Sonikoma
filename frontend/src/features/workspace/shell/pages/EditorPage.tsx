@@ -522,14 +522,14 @@ const EditorPage: React.FC<EditorPageProps> = ({
               activeTab === "audio-settings" ||
               activeTab === "autocrop-settings"
               ? "px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6 w-full max-w-5xl mx-auto"
-              : `border-t border-white/5 px-3 sm:px-5 lg:px-6 py-3 sm:py-4 flex flex-col gap-3.5 sm:gap-4 w-full max-w-[1720px] mx-auto flex-1 min-h-0 ${isFocusMode ? "hidden" : "flex flex-col flex-1"
+              : `border-t border-[#2F2F2F] px-3 sm:px-5 lg:px-6 py-4 flex flex-col gap-6 sm:gap-7 w-full max-w-[1720px] mx-auto flex-1 min-h-0 ${isFocusMode ? "hidden" : "flex flex-col flex-1"
               }`
             }`}
         >
           {activeTab === "video-settings" || activeTab === "settings" ? (
-            <div className="w-full space-y-6 rounded-3xl border border-neutral-800/80 bg-[#050508]/95 backdrop-blur-3xl shadow-2xl p-6 sm:p-8">
+            <div className="w-full space-y-6 rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] shadow-2xl p-6 sm:p-8">
               {/* Settings Header */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+              <div className="flex items-center justify-between border-b border-[#2F2F2F] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-[#3B82F6]/10 text-[#3B82F6] rounded-xl border border-[#3B82F6]/20">
                     <Sliders className="h-5 w-5" />
@@ -643,9 +643,9 @@ const EditorPage: React.FC<EditorPageProps> = ({
               </div>
             </div>
           ) : activeTab === "audio-settings" ? (
-            <div className="w-full space-y-6 rounded-3xl border border-neutral-800/80 bg-[#050508]/95 backdrop-blur-3xl shadow-2xl p-6 sm:p-8">
+            <div className="w-full space-y-6 rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] shadow-2xl p-6 sm:p-8">
               {/* Settings Header */}
-              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+              <div className="flex items-center justify-between border-b border-[#2F2F2F] pb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 bg-[#3B82F6]/10 text-[#3B82F6] rounded-xl border border-[#3B82F6]/20">
                     <Mic className="h-5 w-5" />
@@ -705,7 +705,7 @@ const EditorPage: React.FC<EditorPageProps> = ({
           ) : activeTab === "autocrop-settings" ? (
             <div className="w-full space-y-6">
               <React.Suspense fallback={null}>
-                <div className="rounded-3xl border border-neutral-800/80 overflow-hidden bg-[#050508] shadow-2xl">
+                <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] shadow-2xl overflow-hidden p-6 sm:p-8">
                   <AutoCropSettingsModal
                     isPage={true}
                     onClose={handleCloseSettings}
@@ -824,23 +824,22 @@ const EditorPage: React.FC<EditorPageProps> = ({
                           .getState()
                           .setPlayerSettings({ isPlayerOpen: true });
                       }}
-                      className="w-full h-13 px-5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-neutral-900/90 to-indigo-950/30 hover:from-blue-950/60 hover:to-indigo-950/50 border border-blue-500/30 hover:border-blue-500/50 text-blue-300 hover:text-white transition-all flex items-center justify-between cursor-pointer group shadow-[0_8px_25px_rgba(0,0,0,0.5)]"
+                      className="w-full h-14 px-5 rounded-2xl bg-[#1E1E1E] hover:bg-[#252525] border border-[#2F2F2F] hover:border-[#3B82F6]/50 text-[#E5E5E5] transition-all flex items-center justify-between cursor-pointer group shadow-md"
                     >
                       <div className="flex items-center gap-3.5">
-                        <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-md shadow-blue-500/25 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                          <Tv className="h-4 w-4" />
+                        <div className="h-9 w-9 rounded-xl bg-[#3B82F6]/15 border border-[#3B82F6]/30 flex items-center justify-center text-[#3B82F6] group-hover:scale-105 transition-transform">
+                          <Tv className="h-4.5 w-4.5" />
                         </div>
                         <div className="text-left">
                           <span className="text-xs font-bold font-mono tracking-wider uppercase block text-white">
                             Video Preview Viewport
                           </span>
                           <span className="text-[10px] text-neutral-400 font-mono">
-                            Click to expand video preview player & visual canvas
-                            monitor
+                            Click to expand video preview player & visual canvas monitor
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] border border-blue-400/40 text-xs font-mono text-white transition-colors shadow-md shadow-blue-500/25">
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-mono text-white transition-colors">
                         <Eye className="h-3.5 w-3.5" />
                         <span>Expand Preview</span>
                       </div>

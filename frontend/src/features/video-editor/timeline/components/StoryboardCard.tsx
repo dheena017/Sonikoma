@@ -938,12 +938,12 @@ const StoryboardCard = ({
         isMenuOpen ? "z-50" : "z-0"
       } ${
         isThisPanelAnalyzing
-          ? "border-purple-500/70 bg-neutral-900 ring-1 ring-purple-500/30 shadow-lg shadow-purple-500/10"
+          ? "border-purple-500/70 bg-[#1E1E1E] ring-1 ring-purple-500/30 shadow-md"
           : currentPanelIndex === idx
-          ? "border-blue-500/80 bg-neutral-900/90 shadow-lg shadow-blue-500/10 ring-1 ring-blue-500/30"
+          ? "border-[#3B82F6] bg-[#222222] shadow-md ring-1 ring-[#3B82F6]/40"
           : isSelected
-          ? "border-blue-500/40 bg-blue-950/20 shadow-md ring-1 ring-blue-500/20"
-          : "border-neutral-800 bg-neutral-950 hover:border-neutral-700"
+          ? "border-[#3B82F6]/60 bg-[#1E1E1E] shadow-sm ring-1 ring-[#3B82F6]/20"
+          : "border-[#2F2F2F] bg-[#1E1E1E] hover:border-neutral-600 hover:bg-[#232323]"
       }`}
     >
       {/* Image Thumbnail */}

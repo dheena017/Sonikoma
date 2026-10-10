@@ -68,7 +68,7 @@ export const QuickVideoPreview: React.FC<QuickVideoPreviewProps> = ({
   const finalSave = onSave || handleSave;
 
   return (
-    <div className="w-full flex-1 h-full min-h-0 bg-[#0c0d16]/70 backdrop-blur-2xl rounded-3xl border border-[#3B82F6]/30 p-4 sm:p-5 lg:p-6 shadow-[0_10px_40px_rgba(0,0,0,0.6),0_0_30px_rgba(59,130,246,0.08)] flex flex-col gap-4">
+    <div className="w-full flex-1 h-full min-h-0 rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-6 lg:p-7 shadow-2xl flex flex-col gap-4 relative overflow-hidden text-left">
       <QuickVideoPreviewHeader
         monitorTab={monitorTab}
         setMonitorTab={setMonitorTab}
@@ -90,7 +90,7 @@ export const QuickVideoPreview: React.FC<QuickVideoPreviewProps> = ({
         advancedSettingsProps={advancedSettingsProps}
       />
 
-      <div className="w-full flex-1 min-h-[260px] max-h-[600px] lg:max-h-[500px] aspect-video mx-auto rounded-2xl overflow-hidden border border-[#3B82F6]/20 bg-black/80 shadow-2xl relative flex items-center justify-center my-auto">
+      <div className="w-full flex-1 min-h-[260px] max-h-[600px] lg:max-h-[500px] aspect-video mx-auto rounded-2xl overflow-hidden border border-[#2F2F2F] bg-black/90 shadow-xl relative flex items-center justify-center my-auto">
         <PlaybackMonitor
           panels={panels}
           videoUrl={videoUrl}

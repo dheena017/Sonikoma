@@ -1124,7 +1124,7 @@ const StoryboardTimeline = React.memo(
       return (
         <div
           id="panels_timeline_section"
-          className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full min-h-[190px] flex flex-col"
+          className="w-full min-w-0 min-h-[190px] rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-6 lg:p-7 space-y-3 shadow-2xl flex flex-col relative overflow-hidden text-left"
         >
           <StoryboardHeader
             panelsLength={0}
@@ -1154,7 +1154,7 @@ const StoryboardTimeline = React.memo(
     return (
       <div
         id="panels_timeline_section"
-        className="bg-[#0c0d16]/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-3 sm:p-4 lg:p-4 space-y-2.5 transition-all pb-3 relative shadow-[0_10px_40px_rgba(0,0,0,0.6)] min-w-0 w-full min-h-[190px] flex flex-col"
+        className="w-full min-w-0 min-h-[190px] rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-6 lg:p-7 space-y-3 transition-all pb-4 relative shadow-2xl flex flex-col overflow-hidden text-left"
       >
         <StoryboardAnalysisBanner
           isAnalyzingAll={isAnalyzingAll}
