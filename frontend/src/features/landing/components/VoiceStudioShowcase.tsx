@@ -21,6 +21,7 @@ interface VoiceCharacter {
   name: string;
   archetype: string;
   avatar: string;
+  image: string;
   badge: string;
   badgeColor: string;
   voiceModel: string;
@@ -35,8 +36,9 @@ const CHARACTERS: VoiceCharacter[] = [
   {
     id: "protagonist",
     name: "Sung Jin",
-    archetype: "Shadow Monarch / Hero",
-    avatar: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&auto=format&fit=crop&q=80",
+    archetype: "Shadow Hunter / Climax",
+    avatar: "/demo-action-hero.jpg",
+    image: "/demo-action-cleaned.jpg",
     badge: "Deep & Resonant",
     badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     voiceModel: "en-US-ChristopherNeural (Heroic)",
@@ -49,8 +51,9 @@ const CHARACTERS: VoiceCharacter[] = [
   {
     id: "mage",
     name: "Archmage Lyra",
-    archetype: "High Sorceress / Ally",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+    archetype: "Imperial Sorceress",
+    avatar: "/voice-lyra.jpg",
+    image: "/voice-lyra.jpg",
     badge: "Melodic & Elegant",
     badgeColor: "bg-purple-500/10 text-purple-400 border-purple-500/20",
     voiceModel: "en-US-JennyNeural (Expressive)",
@@ -62,14 +65,15 @@ const CHARACTERS: VoiceCharacter[] = [
   },
   {
     id: "narrator",
-    name: "The Chronicler",
-    archetype: "Cinematic Narrator",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+    name: "The Shadow Monarch",
+    archetype: "Dark Sovereign / Ruler",
+    avatar: "/demo-monarch.jpg",
+    image: "/demo-monarch.jpg",
     badge: "Epic Cinematic",
     badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
     voiceModel: "en-US-GuyNeural (Cinematic)",
-    sampleQuote: "In the twenty-fourth hour of the eclipse, the stone monolith groaned. The era of hunters had reached its twilight.",
-    context: "Prologue / Lore Exposition",
+    sampleQuote: "In the twenty-fourth hour of the eclipse, the stone monolith groaned. All arise before the king.",
+    context: "Prologue / Throne Room",
     pitch: "-2 Semitones (Warm)",
     pace: "1.00x Steady",
     emotion: "Solemn & Dramatic",
@@ -77,13 +81,14 @@ const CHARACTERS: VoiceCharacter[] = [
   {
     id: "rogue",
     name: "Ren - Shadow Blade",
-    archetype: "Speedster / Rival",
-    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80",
+    archetype: "Cyberpunk Ninja",
+    avatar: "/demo-cyberpunk.jpg",
+    image: "/demo-cyberpunk-cleaned.jpg",
     badge: "Fast & Edgy",
     badgeColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
     voiceModel: "en-US-BrianNeural (Youthful)",
-    sampleQuote: "You really thought you could land a strike on someone twice as fast as thunder? Cute attempt.",
-    context: "Duel Scene • Chapter 15",
+    sampleQuote: "The city waits... only death is certain. You really thought you could land a strike on lightning?",
+    context: "Rooftop Duel • Chapter 15",
     pitch: "Default",
     pace: "1.20x Rapid",
     emotion: "Sarcastic & Energetic",
@@ -196,7 +201,7 @@ export function VoiceStudioShowcase({
                     <img
                       src={char.avatar}
                       alt={char.name}
-                      className="w-10 h-10 rounded-xl object-cover border border-white/10 shadow-xs"
+                      className="w-11 h-11 rounded-xl object-cover border border-white/20 shadow-sm shrink-0"
                     />
                     <div className="min-w-0">
                       <h4
@@ -230,10 +235,30 @@ export function VoiceStudioShowcase({
                 : "bg-[#161822] border-white/10"
             }`}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+              {/* CHARACTER COMIC ARTWORK PREVIEW */}
+              <div className="lg:col-span-3 flex justify-center">
+                <div className="relative w-44 h-60 rounded-2xl overflow-hidden border-2 border-blue-400/60 shadow-xl group">
+                  <img
+                    src={selectedChar.image}
+                    alt={selectedChar.name}
+                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                  <div className="absolute bottom-2 inset-x-2 text-center">
+                    <span className="text-white text-xs font-black block truncate">
+                      {selectedChar.name}
+                    </span>
+                    <span className="text-[10px] text-blue-300 font-mono">
+                      {selectedChar.archetype}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* SCRIPT QUOTE & PLAYBACK CONTROLLER */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="lg:col-span-5 space-y-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
                     <span
@@ -246,7 +271,7 @@ export function VoiceStudioShowcase({
                   </div>
 
                   <span
-                    className={`text-[11px] px-2.5 py-1 rounded-full font-semibold ${
+                    className={`text-[11px] px-2.5 py-0.5 rounded-full font-semibold ${
                       isLight
                         ? "bg-slate-200 text-slate-700"
                         : "bg-white/10 text-neutral-300"
@@ -258,35 +283,35 @@ export function VoiceStudioShowcase({
 
                 {/* Speech Bubble / Quote Box */}
                 <div
-                  className={`p-5 sm:p-6 rounded-2xl border relative ${
+                  className={`p-4 sm:p-5 rounded-2xl border relative ${
                     isLight
                       ? "bg-white border-slate-200 text-slate-900 shadow-sm"
                       : "bg-[#0f1016] border-white/10 text-neutral-100"
                   }`}
                 >
-                  <p className="text-base sm:text-lg font-semibold italic leading-relaxed">
+                  <p className="text-sm sm:text-base font-semibold italic leading-relaxed">
                     "{selectedChar.sampleQuote}"
                   </p>
                 </div>
 
                 {/* Audio Waveform Equalizer & Play Button */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3.5">
                   <button
                     onClick={handleTogglePlay}
-                    className="w-14 h-14 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25 active:scale-95 transition-all cursor-pointer"
+                    className="w-12 h-12 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-500/25 active:scale-95 transition-all cursor-pointer"
                     aria-label={isPlaying ? "Pause voice preview" : "Play voice preview"}
                   >
                     {isPlaying ? (
-                      <Pause className="w-6 h-6 fill-white" />
+                      <Pause className="w-5 h-5 fill-white" />
                     ) : (
-                      <Play className="w-6 h-6 fill-white ml-0.5" />
+                      <Play className="w-5 h-5 fill-white ml-0.5" />
                     )}
                   </button>
 
-                  <div className="flex-1 space-y-2">
+                  <div className="flex-1 space-y-1.5">
                     <div className="flex items-center justify-between text-xs font-mono font-bold">
                       <span className={isLight ? "text-slate-700" : "text-neutral-300"}>
-                        {isPlaying ? "Auditioning Neural Audio..." : "Click Play to Preview"}
+                        {isPlaying ? "Auditioning Neural Audio..." : "Click Play to Audition"}
                       </span>
                       <span className="text-blue-400">
                         {isPlaying ? `${Math.round(playbackProgress)}%` : "00:04"}
@@ -294,10 +319,10 @@ export function VoiceStudioShowcase({
                     </div>
 
                     {/* Equalizer Bars Simulation */}
-                    <div className="flex items-end gap-1 h-8 px-2 py-1 bg-black/10 dark:bg-black/30 rounded-lg">
-                      {Array.from({ length: 32 }).map((_, i) => {
+                    <div className="flex items-end gap-1 h-7 px-2 py-1 bg-black/10 dark:bg-black/30 rounded-lg">
+                      {Array.from({ length: 24 }).map((_, i) => {
                         const randomHeight = isPlaying
-                          ? Math.sin(i * 0.4 + playbackProgress * 0.2) * 12 + 16
+                          ? Math.sin(i * 0.4 + playbackProgress * 0.2) * 10 + 14
                           : 4;
                         return (
                           <div
@@ -322,7 +347,7 @@ export function VoiceStudioShowcase({
 
               {/* VOICE PARAMETERS CONTROL PANEL */}
               <div
-                className={`p-5 rounded-2xl border space-y-4 ${
+                className={`lg:col-span-4 p-5 rounded-2xl border space-y-4 ${
                   isLight
                     ? "bg-white border-slate-200"
                     : "bg-[#0f1016] border-white/10"
@@ -335,14 +360,14 @@ export function VoiceStudioShowcase({
                       isLight ? "text-slate-800" : "text-white"
                     }`}
                   >
-                    Studio Modulation
+                    Voice Modulation
                   </span>
                 </div>
 
                 <div className="space-y-3 text-xs">
                   <div>
                     <div className="flex justify-between text-neutral-400 mb-1">
-                      <span>Emotion Preset:</span>
+                      <span>Emotion Tone:</span>
                       <span className="font-bold text-blue-400">
                         {selectedChar.emotion}
                       </span>

@@ -1,42 +1,44 @@
 import React from "react";
-import { Languages, Check } from "lucide-react";
+import { Languages, Check, Volume2 } from "lucide-react";
 
 export function TranslationAfter() {
   return (
-    <div className="w-full h-full flex items-center justify-center p-6 bg-[#0d0e15] relative overflow-hidden">
-      <div className="w-72 h-72 rounded-2xl bg-gradient-to-br from-rose-950 via-slate-900 to-[#2A2A2A] border-2 border-[#60A5FA] p-4 flex flex-col justify-between relative overflow-hidden shadow-2xl shadow-black/50">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.35),transparent_60%)]" />
+    <div className="w-full h-full flex flex-col items-center justify-center p-3 sm:p-4 bg-[#0d0e15] relative overflow-hidden">
+      <div className="relative w-full max-w-[280px] h-[320px] rounded-2xl overflow-hidden border-2 border-blue-400 shadow-2xl shadow-blue-500/20 group">
+        {/* Real Inpainted Cyberpunk Art */}
+        <img
+          src="/demo-cyberpunk-cleaned.jpg"
+          alt="Translated and dubbed Cyberpunk comic panel"
+          className="w-full h-full object-cover object-center"
+        />
 
-        <div className="relative z-10 flex items-center justify-between">
-          <span className="text-[10px] font-mono font-bold text-[#3B82F6] bg-black/50 px-2 py-0.5 rounded border border-[#3B82F6]/30 flex items-center gap-1">
-            <Languages className="w-3 h-3" />
-            TRANSLATED (EN)
-          </span>
-          <span className="px-2 py-0.5 rounded bg-[#2A2A2A] text-white text-[9px] font-mono font-extrabold flex items-center gap-1">
-            <Check className="w-2.5 h-2.5" />
-            Auto Typeset
-          </span>
+        {/* Ambient Dark Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+
+        {/* Translated Language Badge */}
+        <div className="absolute top-3 left-3 bg-blue-950/80 border border-blue-400/50 backdrop-blur-md px-2.5 py-1 rounded-xl text-blue-300 text-[10px] font-mono font-bold flex items-center gap-1.5 shadow-lg">
+          <Languages className="w-3 h-3 text-blue-400" />
+          <span>Translated & Dubbed (EN)</span>
         </div>
 
-        {/* Character Visual */}
-        <div className="absolute bottom-4 left-6 z-10 flex flex-col items-center">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-rose-600 to-blue-500 flex items-center justify-center text-2xl shadow-lg border border-white/20">
-            🥷
-          </div>
-          <span className="text-[10px] font-black text-white uppercase tracking-wider mt-1.5">
-            Cha Hae-In
-          </span>
+        {/* Audio Dub Status */}
+        <div className="absolute top-3 right-3 bg-emerald-950/80 border border-emerald-400/50 backdrop-blur-md px-2 py-1 rounded-xl text-emerald-300 text-[9px] font-mono font-bold flex items-center gap-1 shadow-lg">
+          <Volume2 className="w-3 h-3 text-emerald-400 animate-pulse" />
+          <span>TTS Ready</span>
         </div>
 
-        {/* Translated English Speech Bubble */}
-        <div className="absolute top-8 right-5 z-20 bg-white text-slate-950 p-3.5 rounded-2xl rounded-tr-none shadow-2xl max-w-[160px] border-2 border-[#2F2F2F] animate-fade-in">
-          <p className="text-xs font-black leading-snug text-center text-[#3B82F6]">
-            "I will definitely protect this world!"
+        {/* Dynamic English Subtitle Overlay */}
+        <div className="absolute bottom-3 inset-x-3 p-3 rounded-xl bg-black/85 backdrop-blur-md border border-white/20 text-center space-y-0.5 z-10 shadow-2xl">
+          <p className="text-white text-xs font-black tracking-wide leading-tight">
+            "The city waits... only death is certain."
           </p>
-          <span className="text-[9px] text-[#3B82F6] font-bold block text-center mt-0.5 font-mono">
-            ★ English Dub Ready
-          </span>
-          <div className="absolute -right-2 top-0 w-3.5 h-3.5 bg-white border-r-2 border-t-2 border-[#2F2F2F] rotate-45 pointer-events-none" />
+          <div className="flex items-center justify-between text-[9px] font-mono font-bold pt-1 border-t border-white/10 text-neutral-300">
+            <span className="text-blue-400 flex items-center gap-1">
+              <Check className="w-2.5 h-2.5 text-blue-400" />
+              Synced Subtitles
+            </span>
+            <span className="text-emerald-400">BrianNeural Voice</span>
+          </div>
         </div>
       </div>
     </div>

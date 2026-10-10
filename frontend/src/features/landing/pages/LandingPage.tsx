@@ -39,6 +39,7 @@ import {
   MotionShowcase,
   ComparisonSection,
   TestimonialsSection,
+  GenreGallery,
 } from "@/features/landing/components";
 import { LandingAnimeScene } from "@/features/landing/components/LandingAnimeScene";
 import { SonikomaLogo } from "@/shared/ui/branding";
@@ -57,6 +58,7 @@ const SAMPLE_URLS = [
     url: "https://mangadex.org/title/solo-leveling-chapter-1",
     tag: "Manhwa / Action",
     icon: "⚡",
+    thumbnail: "/demo-action-hero.jpg",
     platform: "MangaDex",
     glowColor:
       "hover:border-neutral-700 hover:shadow-blue-500/20 active:border-blue-400",
@@ -66,6 +68,7 @@ const SAMPLE_URLS = [
     url: "https://www.webtoons.com/en/romance/lore-olympus/episode-1",
     tag: "Romance / Drama",
     icon: "🌸",
+    thumbnail: "/demo-romance.jpg",
     platform: "Webtoon",
     glowColor:
       "hover:border-pink-500 hover:shadow-pink-500/20 active:border-pink-400",
@@ -75,18 +78,20 @@ const SAMPLE_URLS = [
     url: "https://www.webtoons.com/en/action/omniscient-reader/episode-1",
     tag: "Action / Fantasy",
     icon: "🗡️",
+    thumbnail: "/demo-monarch.jpg",
     platform: "Webtoon",
     glowColor:
       "hover:border-emerald-500 hover:shadow-emerald-500/20 active:border-emerald-400",
   },
   {
-    name: "Tower of God",
-    url: "https://www.webtoons.com/en/fantasy/tower-of-god/episode-1",
-    tag: "Adventure",
-    icon: "🏰",
+    name: "Cyberpunk Blade",
+    url: "https://www.webtoons.com/en/action/cyberpunk-blade/episode-1",
+    tag: "Sci-Fi / Action",
+    icon: "🏙️",
+    thumbnail: "/demo-cyberpunk.jpg",
     platform: "Webtoon",
     glowColor:
-      "hover:border-amber-500 hover:shadow-amber-500/20 active:border-amber-400",
+      "hover:border-cyan-500 hover:shadow-cyan-500/20 active:border-cyan-400",
   },
 ];
 
@@ -270,6 +275,11 @@ export default function LandingPage({
                 tip: "Audition neural character voice actors",
               },
               {
+                label: "Gallery",
+                target: "genre-gallery",
+                tip: "Explore comic genres & art showcase",
+              },
+              {
                 label: "Comparison",
                 target: "comparison",
                 tip: "Manual editing vs Sonikoma",
@@ -377,6 +387,7 @@ export default function LandingPage({
               { label: "How It Works", target: "how-it-works" },
               { label: "Live Demo", target: "demo-showcase" },
               { label: "Voices", target: "voice-studio" },
+              { label: "Gallery", target: "genre-gallery" },
               { label: "Comparison", target: "comparison" },
               { label: "Reviews", target: "testimonials" },
               { label: "Pricing", target: "pricing" },
@@ -1141,6 +1152,12 @@ export default function LandingPage({
 
         {/* CINEMATIC CAMERA MOTION SHOWCASE */}
         <MotionShowcase
+          themeMode={themeMode}
+          onGetStarted={() => handleAction(onGetStarted)}
+        />
+
+        {/* COMIC GENRES & ART GALLERY */}
+        <GenreGallery
           themeMode={themeMode}
           onGetStarted={() => handleAction(onGetStarted)}
         />

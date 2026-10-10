@@ -16,7 +16,7 @@ export function TestimonialsSection({
       author: "Alex Rivera",
       handle: "@MangaMotion_Official",
       role: "TikTok Comic Creator (480K followers)",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+      avatar: "/testimonial-alex.jpg",
       rating: 5,
       stats: "+320K TikTok Followers in 60 Days",
       quote:
@@ -26,7 +26,7 @@ export function TestimonialsSection({
       author: "Hana Takahashi",
       handle: "@TakahashiWebtoons",
       role: "Indie Manhwa Author & Illustrator",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80",
+      avatar: "/testimonial-hana.jpg",
       rating: 5,
       stats: "1.4M Views on Debut Reel",
       quote:
@@ -36,7 +36,7 @@ export function TestimonialsSection({
       author: "Marcus Vance",
       handle: "@TheManhwaRecap",
       role: "YouTube Shorts Creator (1.1M Subs)",
-      avatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+      avatar: "/testimonial-marcus.jpg",
       rating: 5,
       stats: "Saved 18 Hours / Week",
       quote:
@@ -46,7 +46,7 @@ export function TestimonialsSection({
       author: "Sarah Lin",
       handle: "@KWebtoonDaily",
       role: "Manhwa Translator & Streamer",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+      avatar: "/testimonial-sarah.jpg",
       rating: 5,
       stats: "99.8% Subtitle Accuracy",
       quote:

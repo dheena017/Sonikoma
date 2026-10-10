@@ -11,3 +11,4 @@ export * from "./VoiceStudioShowcase";
 export * from "./MotionShowcase";
 export * from "./ComparisonSection";
 export * from "./TestimonialsSection";
+export * from "./GenreGallery";
