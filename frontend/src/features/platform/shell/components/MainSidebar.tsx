@@ -26,7 +26,10 @@ import {
 } from "lucide-react";
 
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
-import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
+import {
+  getHumanEditorPath,
+  getImageEditorPath,
+} from "@/shared/utils/workspaceNavigation";
 import { GeneratedPanel } from "@/shared/types";
 import { Notification } from "@/features/platform/notifications";
 import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
@@ -335,7 +338,15 @@ const SidebarInner = ({
           icon: Image,
           active: isImageEditorPath,
           path: "/image-editor",
-          onClick: () => navigateTo("/image-editor"),
+          onClick: () =>
+            navigateTo(
+              getImageEditorPath({
+                seriesSlug,
+                chapterSlug,
+                projectId,
+                idx: editingImageIdx ?? 0,
+              })
+            ),
           enabled: true,
         },
         {

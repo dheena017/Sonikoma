@@ -1,5 +1,8 @@
 import React from "react";
-import { resolveWorkspaceReturnPath } from "@/shared/utils/workspaceNavigation";
+import {
+  resolveWorkspaceReturnPath,
+  getImageEditorPath,
+} from "@/shared/utils/workspaceNavigation";
 import {
   Layout,
   Scissors,
@@ -255,8 +258,12 @@ const EditorSidebar = ({
                             window.dispatchEvent(new Event("popstate"));
                           }
                         } else if (item.id === "image-editor") {
-                          const target = `/image-editor?idx=${editingImageIdx ?? 0
-                            }`;
+                          const target = getImageEditorPath({
+                            seriesSlug,
+                            chapterSlug,
+                            projectId,
+                            idx: editingImageIdx ?? 0,
+                          });
                           if (navigateTo) {
                             navigateTo(target);
                           } else {

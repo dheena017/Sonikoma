@@ -14,6 +14,8 @@ import { StoryboardCameraView } from "./components/StoryboardCameraView";
 import { StoryboardAudioView } from "./components/StoryboardAudioView";
 import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
 import { GeneratedPanel } from "@/shared/types";
+import { getImageEditorPath } from "@/shared/utils/workspaceNavigation";
+import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
 
 export interface StoryboardWorkspaceProps {
   onTriggerFeedback?: (msg: string) => void;
@@ -200,6 +202,26 @@ export const StoryboardWorkspace: React.FC<StoryboardWorkspaceProps> = ({
     (idx: number) => {
       if (appLogic?.setEditingImageIdx) {
         appLogic.setEditingImageIdx(idx);
+      }
+      useImageEditorStore.setState({ editingImageIdx: idx });
+
+      const store = useProjectStore.getState();
+      const proj = store.activeProjectData?.project;
+      const targetPath = getImageEditorPath({
+        seriesSlug: proj?.series_slug,
+        chapterSlug: proj?.chapter_slug,
+        seriesTitle: proj?.title,
+        chapterNumber: proj?.episode,
+        projectId: store.activeProjectId,
+        idx,
+      });
+
+      if ((window as any).navigateTo) {
+        (window as any).navigateTo(targetPath);
+      } else {
+        window.history.pushState({}, "", targetPath);
+        window.dispatchEvent(new Event("popstate"));
+        window.dispatchEvent(new Event("locationchange"));
       }
       onTriggerFeedback?.(`Opened Panel #${idx + 1} in Editor`);
     },

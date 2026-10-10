@@ -171,3 +171,97 @@ export function resolveWorkspaceReturnPath(
     storage,
   });
 }
+
+export function getImageEditorPath(options: {
+  seriesSlug?: string | null;
+  chapterSlug?: string | null;
+  seriesTitle?: string | null;
+  chapterNumber?: string | number | null;
+  projectId?: string | null;
+  jobId?: string | null;
+  idx?: number;
+} = {}): string {
+  const {
+    seriesSlug,
+    chapterSlug,
+    seriesTitle,
+    chapterNumber,
+    projectId,
+    jobId,
+  } = options;
+
+  let activeSeries = seriesSlug || (seriesTitle ? slugify(seriesTitle) : null);
+  let activeChapter =
+    chapterSlug || (chapterNumber ? `chapter-${chapterNumber}` : null);
+  let activeProjectId = projectId;
+
+  let activeIdx = options.idx;
+
+  if (typeof window !== "undefined") {
+    const urlMatch = window.location.pathname.match(
+      /\/series\/([^/]+)\/chapters\/([^/]+)/
+    );
+    if (!activeSeries && urlMatch?.[1]) activeSeries = urlMatch[1];
+    if (!activeChapter && urlMatch?.[2]) activeChapter = urlMatch[2];
+
+    if (!activeSeries) {
+      activeSeries = localStorage.getItem("active_series_slug") || null;
+    }
+    if (!activeChapter) {
+      activeChapter = localStorage.getItem("active_chapter_slug") || null;
+    }
+
+    const searchParams = new URLSearchParams(window.location.search);
+    if (!activeProjectId) {
+      activeProjectId =
+        searchParams.get("project_id") ||
+        searchParams.get("projectId") ||
+        searchParams.get("id") ||
+        localStorage.getItem("active_project_id") ||
+        null;
+    }
+
+    if (activeIdx === undefined || activeIdx === null) {
+      const idxFromUrl = searchParams.get("idx");
+      if (idxFromUrl !== null && !isNaN(Number(idxFromUrl))) {
+        activeIdx = Number(idxFromUrl);
+      } else {
+        activeIdx = 0;
+      }
+    }
+  }
+
+  if (activeIdx === undefined || activeIdx === null) {
+    activeIdx = 0;
+  }
+
+  const queryParams = new URLSearchParams();
+  if (activeProjectId) {
+    queryParams.set("project_id", activeProjectId);
+  }
+  if (jobId) {
+    queryParams.set("job_id", jobId);
+  }
+  queryParams.set("idx", String(activeIdx));
+
+  const queryString = `?${queryParams.toString()}`;
+
+  if (
+    activeSeries &&
+    activeChapter &&
+    activeSeries !== "null" &&
+    activeChapter !== "null"
+  ) {
+    const cleanChapter =
+      activeChapter.startsWith("chapter-") || activeChapter.startsWith("ch-")
+        ? activeChapter
+        : `chapter-${activeChapter}`;
+    return `/scraper/editor/series/${activeSeries}/chapters/${cleanChapter}/image-editor${queryString}`;
+  }
+
+  if (activeProjectId) {
+    return `/scraper/editor/image-editor${queryString}`;
+  }
+
+  return `/image-editor?idx=${activeIdx}`;
+}

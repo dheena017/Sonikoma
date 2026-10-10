@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useCropEditorStore } from "@/features/image-editor/canvas/hooks/useImageEditorState";
+import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
 import { useImageEditor } from "@/features/image-editor/canvas/hooks/useImageEditor";
 import { useAppLogic } from "@/features/platform/scraper/hooks/useChapterIngestion";
 import { ImageEditorHeader } from "@/features/image-editor/canvas/components/ImageEditorHeader";
@@ -60,11 +61,32 @@ const ImageEditorPage = React.memo(
       };
     }, [sidebarOpen]);
 
-    // Auto-select the first image if the user opens the editor but hasn't picked one yet
+    // Synchronize editingImageIdx from URL parameter (?idx=) on load and URL change
     useEffect(() => {
-      if (editingImageIdx === null && appLogic.scrapedImages?.length > 0) {
-        setEditingImageIdx(0);
-      }
+      const syncIdxFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        const idxVal = params.get("idx");
+        if (idxVal !== null) {
+          const parsed = parseInt(idxVal, 10);
+          if (!isNaN(parsed) && parsed >= 0) {
+            if (editingImageIdx !== parsed) {
+              setEditingImageIdx(parsed);
+              useImageEditorStore.setState({ editingImageIdx: parsed });
+            }
+          }
+        } else if (editingImageIdx === null && appLogic.scrapedImages?.length > 0) {
+          setEditingImageIdx(0);
+          useImageEditorStore.setState({ editingImageIdx: 0 });
+        }
+      };
+
+      syncIdxFromUrl();
+      window.addEventListener("popstate", syncIdxFromUrl);
+      window.addEventListener("locationchange", syncIdxFromUrl);
+      return () => {
+        window.removeEventListener("popstate", syncIdxFromUrl);
+        window.removeEventListener("locationchange", syncIdxFromUrl);
+      };
     }, [editingImageIdx, appLogic.scrapedImages, setEditingImageIdx]);
 
     // Fallback sync: If scrapedImages is empty but panels exist, populate scrapedImages from panels

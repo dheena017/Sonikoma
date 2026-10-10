@@ -9,6 +9,8 @@ import { ImportedAssetsCard } from "./components/ImportedAssetsCard";
 import { ImportedAssetsAiToolbar } from "./components/ImportedAssetsAiToolbar";
 import { ImportedAssetsUploadZone } from "./components/ImportedAssetsUploadZone";
 import DeleteConfirmModal from "@/shared/ui/modal/DeleteConfirmModal";
+import { getImageEditorPath } from "@/shared/utils/workspaceNavigation";
+import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
 
 export interface ImportedAssetsWorkspaceProps {
   onTriggerFeedback?: (msg: string) => void;
@@ -220,6 +222,26 @@ export const ImportedAssetsWorkspace: React.FC<
       e.stopPropagation();
       if (appLogic?.setEditingImageIdx) {
         appLogic.setEditingImageIdx(idx);
+      }
+      useImageEditorStore.setState({ editingImageIdx: idx });
+
+      const store = useProjectStore.getState();
+      const proj = store.activeProjectData?.project;
+      const targetPath = getImageEditorPath({
+        seriesSlug: proj?.series_slug,
+        chapterSlug: proj?.chapter_slug,
+        seriesTitle: proj?.title,
+        chapterNumber: proj?.episode,
+        projectId: store.activeProjectId,
+        idx,
+      });
+
+      if ((window as any).navigateTo) {
+        (window as any).navigateTo(targetPath);
+      } else {
+        window.history.pushState({}, "", targetPath);
+        window.dispatchEvent(new Event("popstate"));
+        window.dispatchEvent(new Event("locationchange"));
       }
       onTriggerFeedback?.(`Opened Frame #${idx + 1} in Editor`);
     },

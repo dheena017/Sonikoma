@@ -22,7 +22,10 @@ import {
   ExternalLink,
 } from "lucide-react";
 import TooltipPortal from "@/shared/ui/common/TooltipPortal";
-import { getHumanEditorPath } from "@/shared/utils/workspaceNavigation";
+import {
+  getHumanEditorPath,
+  getImageEditorPath,
+} from "@/shared/utils/workspaceNavigation";
 
 interface MiniSidebarProps {
   currentPath: string;
@@ -155,7 +158,14 @@ const MiniSidebarInner: React.FC<MiniSidebarProps> = ({
           icon: Image,
           active: isImageEditorPath,
           path: "/image-editor",
-          onClick: () => navigateTo("/image-editor"),
+          onClick: () =>
+            navigateTo(
+              getImageEditorPath({
+                seriesSlug,
+                chapterSlug,
+                projectId,
+              })
+            ),
         },
         {
           label: "Video Editor",

@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { Trash2, X, Edit2 } from "lucide-react";
 import { NotificationType } from "@/features/platform/notifications";
 import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
+import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import { getImageEditorPath } from "@/shared/utils/workspaceNavigation";
 import { Tooltip } from "@/shared/ui/common/TooltipPortal";
 
 interface PanelCardActionsProps {
@@ -27,7 +29,7 @@ export function PanelCardActions({
 }: PanelCardActionsProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Safely open the editor without URL bugs
+  // Safely open the editor with proper project-scoped route
   const handleEditClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
 
@@ -37,10 +39,24 @@ export function PanelCardActions({
       activeTool: "adjust",
     });
 
-    // 2. Tell the main layout to switch to the Image Editor tab
-    window.dispatchEvent(
-      new CustomEvent("SWITCH_TAB", { detail: "image-editor" })
-    );
+    const store = useProjectStore.getState();
+    const proj = store.activeProjectData?.project;
+    const targetPath = getImageEditorPath({
+      seriesSlug: proj?.series_slug,
+      chapterSlug: proj?.chapter_slug,
+      seriesTitle: proj?.title,
+      chapterNumber: proj?.episode,
+      projectId: store.activeProjectId,
+      idx,
+    });
+
+    if ((window as any).navigateTo) {
+      (window as any).navigateTo(targetPath);
+    } else {
+      window.history.pushState({}, "", targetPath);
+      window.dispatchEvent(new Event("popstate"));
+      window.dispatchEvent(new Event("locationchange"));
+    }
   };
 
   const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>) => {

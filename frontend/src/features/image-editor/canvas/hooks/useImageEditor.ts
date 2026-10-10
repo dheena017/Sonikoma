@@ -499,22 +499,21 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
     addNotification("Crop bounds reset", "info");
   };
 
+  const updateUrlForImageIndex = (nextIdx: number) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("idx", String(nextIdx));
+    const target = `${window.location.pathname}?${params.toString()}`;
+    window.history.pushState({}, "", target);
+    window.dispatchEvent(new Event("popstate"));
+    window.dispatchEvent(new Event("locationchange"));
+  };
+
   const handlePrevImage = () => {
     if (editingImageIdx === null || editingImageIdx <= 0) return;
     const nextIdx = editingImageIdx - 1;
     setEditingImageIdx(nextIdx);
-    const isProjectScoped = window.location.pathname.includes(
-      "/scraper/editor/series/"
-    );
-    let target = "";
-    if (isProjectScoped) {
-      target = `${window.location.pathname}?idx=${nextIdx}`;
-    } else {
-      const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
-      target = `/editor/${activeTabVal}?idx=${nextIdx}`;
-    }
-    window.history.pushState({}, "", target);
-    window.dispatchEvent(new Event("popstate"));
+    useImageEditorStore.setState({ editingImageIdx: nextIdx });
+    updateUrlForImageIndex(nextIdx);
   };
 
   const handleNextImage = () => {
@@ -522,18 +521,8 @@ export function useImageEditor({ appLogic }: UseCropEditorProps) {
       return;
     const nextIdx = editingImageIdx + 1;
     setEditingImageIdx(nextIdx);
-    const isProjectScoped = window.location.pathname.includes(
-      "/scraper/editor/series/"
-    );
-    let target = "";
-    if (isProjectScoped) {
-      target = `${window.location.pathname}?idx=${nextIdx}`;
-    } else {
-      const activeTabVal = window.location.pathname.split("/")[2] || "adjust";
-      target = `/editor/${activeTabVal}?idx=${nextIdx}`;
-    }
-    window.history.pushState({}, "", target);
-    window.dispatchEvent(new Event("popstate"));
+    useImageEditorStore.setState({ editingImageIdx: nextIdx });
+    updateUrlForImageIndex(nextIdx);
   };
 
   const handleApplyEqualSplits = (count: number) => {

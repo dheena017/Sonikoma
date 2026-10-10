@@ -1187,10 +1187,11 @@ export default function AppRouter(props: AppRouterProps) {
 
     // Cleanly normalize series / chapters to /scraper/editor/series/.../chapters/..., preserving query params
     if (
-      currentPath.startsWith("/scraper/series/") ||
-      (currentPath.startsWith("/scraper/editor") &&
-        seriesSlugState &&
-        chapterSlugState)
+      (currentPath.startsWith("/scraper/series/") ||
+        (currentPath.startsWith("/scraper/editor") &&
+          seriesSlugState &&
+          chapterSlugState)) &&
+      !currentPath.includes("/image-editor")
     ) {
       const search = window.location.search;
       const params = new URLSearchParams(search);

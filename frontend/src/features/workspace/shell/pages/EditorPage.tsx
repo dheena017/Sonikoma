@@ -8,6 +8,7 @@ import { getUserCredits } from "@/features/auth/api/auth";
 import { Tv, Eye, Sliders, Save, X, Mic } from "lucide-react";
 import { useImageEditorStore } from "@/features/workspace/shell/hooks/useEditorState";
 import { useProjectStore } from "@/features/platform/projects/store/useProjectStore";
+import { getImageEditorPath } from "@/shared/utils/workspaceNavigation";
 
 
 const AudioSettingsPage = React.lazy(
@@ -351,7 +352,13 @@ const EditorPage: React.FC<EditorPageProps> = ({
           useImageEditorStore.getState().editingImageIdx ??
           appLogic.editingImageIdx ??
           0;
-        navigateTo(`/image-editor?idx=${idx}`);
+        navigateTo(
+          getImageEditorPath({
+            seriesSlug,
+            chapterSlug,
+            idx,
+          })
+        );
       } else if (detail === "video-editor") {
         navigateTo("/video-editor");
       } else {
