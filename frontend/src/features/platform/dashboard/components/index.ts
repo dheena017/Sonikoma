@@ -1,1 +1,15 @@
-export {};
+export { default as DashboardHeader } from "./DashboardHeader";
+export { default as DashboardStats } from "./DashboardStats";
+export { default as DashboardQuickIngest } from "./DashboardQuickIngest";
+export { default as DashboardQuickLinks } from "./DashboardQuickLinks";
+export { default as DashboardVoiceAudition } from "./DashboardVoiceAudition";
+export { default as DashboardMotionPresets } from "./DashboardMotionPresets";
+export { default as DashboardAIPipeline } from "./DashboardAIPipeline";
+export { default as DashboardStarterTemplates } from "./DashboardStarterTemplates";
+export { default as DashboardSystemHealth } from "./DashboardSystemHealth";
+export { default as DashboardOnboardingGuide } from "./DashboardOnboardingGuide";
+export { default as DashboardKeyboardCheatsheet } from "./DashboardKeyboardCheatsheet";
+export { default as DashboardProjectSection } from "./DashboardProjectSection";
+export { default as DashboardActivityFeed } from "./DashboardActivityFeed";
+export { default as DashboardAISeriesSection } from "./DashboardAISeriesSection";
+export { default as DashboardSidebar } from "./DashboardSidebar";

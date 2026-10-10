@@ -5,6 +5,7 @@ import ProjectsPageHeader from "@/features/platform/projects/components/Projects
 import ProjectsFilters from "@/features/platform/projects/components/ProjectsFilters";
 import ProjectsStats from "@/features/platform/projects/components/ProjectsStats";
 import ProjectsPageResultView from "@/features/platform/projects/components/ProjectsPageResultView";
+import ProjectsQuickLauncher from "@/features/platform/projects/components/ProjectsQuickLauncher";
 import AISeriesGridCard from "@/features/intelligence/series/components/AISeriesGridCard";
 import { ProjectCardSkeleton } from "@/shared/ui/loading";
 import { aiSeriesApi, type AISeriesProject } from "@/features/intelligence/series/api/aiSeries";
@@ -34,6 +35,9 @@ export interface ProjectsPageViewProps {
     totalPanels: number;
   };
   uniqueGenres: string[];
+  isDemoActive?: boolean;
+  loadDemoProjects?: () => void;
+  clearDemoProjects?: () => void;
   setSearchQuery: (value: string) => void;
   setStatusFilter: (value: string) => void;
   setGenreFilter: (value: string) => void;
@@ -74,6 +78,9 @@ export default function ProjectsPageView({
   renamingProjectId,
   stats,
   uniqueGenres,
+  isDemoActive,
+  loadDemoProjects,
+  clearDemoProjects,
   setSearchQuery,
   setStatusFilter,
   setGenreFilter,
@@ -179,22 +186,47 @@ export default function ProjectsPageView({
 
   const hasContent = projectsLength > 0 || aiSeriesList.length > 0;
 
-  return (
-    <div className="w-full min-w-0 flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-6 sm:py-8 max-w-7xl mx-auto">
-      <section className="w-full space-y-7 text-left" aria-label="Projects and series">
-        <ProjectsPageHeader onNewSeries={handleNewSeries} stats={stats} />
+  const navigateTo = (path: string) => {
+    const nav = (window as any).navigateTo;
+    if (typeof nav === "function") nav(path);
+    else window.location.href = path;
+  };
 
-        {!loading && hasContent && (
-          <ProjectsStats
+  return (
+    <div className="w-full min-w-0 flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-4 sm:py-6 max-w-7xl mx-auto">
+      {/* ── MAIN COVER WRAPPER CARD MATCHING IMAGE 1 ── */}
+      <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+        {/* 1. Header with Search and CTAs Matching Image 1 */}
+        <div className="relative z-10">
+          <ProjectsPageHeader
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onNewSeries={handleNewSeries}
             stats={stats}
-            statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
-            showTabs={true}
-            aiSeriesCount={aiSeriesList.length}
+            onOpenScraper={() => navigateTo("/scraper")}
+            onOpenAiStudio={() => navigateTo("/ai-series")}
+            onLoadDemo={loadDemoProjects}
+            isDemoActive={isDemoActive}
           />
+        </div>
+
+        {/* 2. Top Metric Statistics Cards Matching Image 1 */}
+        {!loading && (
+          <div className="relative z-10">
+            <ProjectsStats
+              stats={stats}
+              statusFilter={statusFilter}
+              onStatusChange={setStatusFilter}
+              showTabs={true}
+              aiSeriesCount={aiSeriesList.length}
+            />
+          </div>
         )}
 
-        {!loading && hasContent && (
+
+
+        {/* Filters and Controls Bar (Rendered when content exists or in AI tab or searching) */}
+        {!loading && (hasContent || isDemoActive || isAiTab || Boolean(searchQuery)) && (
           <ProjectsFilters
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -205,6 +237,9 @@ export default function ProjectsPageView({
             onSortChange={setSortBy}
             viewMode={viewMode}
             onViewModeChange={setViewMode}
+            isDemoActive={isDemoActive}
+            onClearDemo={clearDemoProjects}
+            totalCount={isAiTab ? filteredAiSeries.length : filteredSeries.length}
           />
         )}
 
@@ -215,28 +250,22 @@ export default function ProjectsPageView({
                 <ProjectCardSkeleton count={6} />
               </div>
             ) : filteredAiSeries.length === 0 ? (
-              <div className="border border-white/5 bg-[#0b0b0e]/50 rounded-3xl p-12 text-center flex flex-col items-center justify-center max-w-2xl mx-auto mt-6">
-                <div className="w-16 h-16 rounded-3xl bg-neutral-900 border border-white/5 flex items-center justify-center text-amber-400 mb-4">
-                  <Sparkles className="w-8 h-8" />
+              <div className="border border-white/10 bg-[#141416] rounded-2xl p-10 text-center flex flex-col items-center justify-center max-w-xl mx-auto mt-6">
+                <div className="w-14 h-14 rounded-2xl bg-neutral-900 border border-white/10 flex items-center justify-center text-purple-400 mb-4">
+                  <Sparkles className="w-7 h-7" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">
                   No AI series found
                 </h3>
-                <p className="text-sm text-neutral-400 max-w-sm mb-6 font-mono">
+                <p className="text-sm text-neutral-400 max-w-sm mb-6">
                   {searchQuery
                     ? `No AI series match "${searchQuery}".`
                     : "You haven't created any AI generated series yet. Construct your first series in the studio!"}
                 </p>
                 <button
-                  onClick={() => {
-                    const nav = (window as any).navigateTo;
-                    if (typeof nav === "function") {
-                      nav("/scraper");
-                    } else {
-                      window.location.href = "/scraper";
-                    }
-                  }}
-                  className="px-6 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl font-bold text-sm transition-all cursor-pointer shadow-lg shadow-blue-500/25 inline-flex items-center gap-2"
+                  type="button"
+                  onClick={() => navigateTo("/ai-series")}
+                  className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-2"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   <span>Construct AI Series</span>
@@ -278,10 +307,26 @@ export default function ProjectsPageView({
               onSaveRename={saveProjectName}
               clearSelection={clearSelection}
               onBulkDelete={handleBulkDelete}
+              onLoadDemo={loadDemoProjects}
+              onOpenScraper={() => navigateTo("/scraper")}
+              onOpenAiStudio={() => navigateTo("/ai-series")}
+              onClearFilters={() => {
+                setSearchQuery("");
+                setGenreFilter("All");
+                setStatusFilter("All");
+              }}
             />
           )}
         </div>
-      </section>
+
+        {/* Studio Creation Suite (6 Interactive Modules Launchpad) - Placed at the bottom */}
+        <div className="relative z-10 pt-4 border-t border-[#2F2F2F]/60">
+          <ProjectsQuickLauncher
+            onOpenScraper={() => navigateTo("/scraper")}
+            onOpenAiStudio={() => navigateTo("/ai-series")}
+          />
+        </div>
+      </div>
     </div>
   );
 }

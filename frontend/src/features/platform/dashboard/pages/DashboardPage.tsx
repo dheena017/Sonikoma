@@ -1,7 +1,15 @@
 import React from "react";
 import DashboardHeader from "@/features/platform/dashboard/components/DashboardHeader";
 import DashboardStats from "@/features/platform/dashboard/components/DashboardStats";
+import DashboardQuickIngest from "@/features/platform/dashboard/components/DashboardQuickIngest";
 import DashboardQuickLinks from "@/features/platform/dashboard/components/DashboardQuickLinks";
+import DashboardVoiceAudition from "@/features/platform/dashboard/components/DashboardVoiceAudition";
+import DashboardMotionPresets from "@/features/platform/dashboard/components/DashboardMotionPresets";
+import DashboardAIPipeline from "@/features/platform/dashboard/components/DashboardAIPipeline";
+import DashboardStarterTemplates from "@/features/platform/dashboard/components/DashboardStarterTemplates";
+import DashboardSystemHealth from "@/features/platform/dashboard/components/DashboardSystemHealth";
+import DashboardOnboardingGuide from "@/features/platform/dashboard/components/DashboardOnboardingGuide";
+import DashboardKeyboardCheatsheet from "@/features/platform/dashboard/components/DashboardKeyboardCheatsheet";
 import DashboardProjectSection from "@/features/platform/dashboard/components/DashboardProjectSection";
 import DashboardActivityFeed from "@/features/platform/dashboard/components/DashboardActivityFeed";
 import useDashboardPage from "@/features/platform/dashboard/hooks/useDashboardPage";
@@ -17,9 +25,11 @@ export default function DashboardPage() {
     projects,
     loading,
     error,
+    latency,
     analytics,
     searchQuery,
     setSearchQuery,
+    onboardingTasks,
     openMenuId,
     renamingProjectId,
     filteredProjects,
@@ -87,6 +97,7 @@ export default function DashboardPage() {
     <div className="w-full flex-1 flex flex-col text-[#E5E5E5] animate-fade-in relative z-10 py-4 sm:py-6 max-w-7xl mx-auto">
       {/* ── MAIN COVER WRAPPER CARD ── */}
       <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-4 sm:p-8 lg:p-9 shadow-2xl space-y-8 relative overflow-hidden text-left">
+        {/* 1. Header with Search and CTAs */}
         <div className="relative z-10">
           <DashboardHeader
             themeMode={themeMode}
@@ -96,6 +107,7 @@ export default function DashboardPage() {
           />
         </div>
 
+        {/* 2. Top Metric Statistics Cards */}
         <div className="relative z-10">
           <DashboardStats
             projectsCount={projects.length}
@@ -106,18 +118,8 @@ export default function DashboardPage() {
           />
         </div>
 
+        {/* 3. Recent Series Workspace (Normal Projects & AI Series tabs) */}
         <div className="relative z-10">
-          <DashboardQuickLinks
-            onGoToWorkspace={handleNewSeries}
-            onGoToAudioLab={() =>
-              (window as any).navigateTo?.("/creative-suite")
-            }
-            onGoToCharacters={() => (window as any).navigateTo?.("/characters")}
-          />
-        </div>
-
-        {/* ── MAIN CONTENT WORKSPACE (PROJECTS & RECENT PRODUCTION FEED) ── */}
-        <div className="space-y-10 relative z-10">
           <DashboardProjectSection
             themeMode={themeMode}
             loading={loading}
@@ -137,8 +139,65 @@ export default function DashboardPage() {
             onToggleMenu={toggleMenu}
             onSaveRename={saveProjectName}
           />
+        </div>
 
+        {/* 4. Direct Chapter & Strip URL Ingestion Bar */}
+        <div className="relative z-10">
+          <DashboardQuickIngest />
+        </div>
+
+        {/* 5. Interactive Getting Started / Onboarding Checklist */}
+        <div className="relative z-10">
+          <DashboardOnboardingGuide
+            tasks={onboardingTasks}
+            onNewSeries={handleNewSeries}
+          />
+        </div>
+
+        {/* 6. Studio Creation Suite (6 Interactive Modules Launchpad) */}
+        <div className="relative z-10">
+          <DashboardQuickLinks
+            onGoToWorkspace={handleNewSeries}
+            onGoToAudioLab={() =>
+              (window as any).navigateTo?.("/creative-suite")
+            }
+            onGoToCharacters={() => (window as any).navigateTo?.("/characters")}
+          />
+        </div>
+
+        {/* 7. Neural Voice Actor Audition Studio Preview */}
+        <div className="relative z-10">
+          <DashboardVoiceAudition />
+        </div>
+
+        {/* 8. 2.5D Cinematic Camera Motion Presets */}
+        <div className="relative z-10">
+          <DashboardMotionPresets />
+        </div>
+
+        {/* 9. AI Manga-to-Video Engine Architectural Pipeline */}
+        <div className="relative z-10">
+          <DashboardAIPipeline />
+        </div>
+
+        {/* 10. Starter Manga Packs & Demos */}
+        <div className="relative z-10">
+          <DashboardStarterTemplates />
+        </div>
+
+        {/* 11. System Telemetry, Engine Health & Resource Quotas */}
+        <div className="relative z-10">
+          <DashboardSystemHealth latency={latency} analytics={analytics} />
+        </div>
+
+        {/* 12. Real-time Activity Timeline & Production Events */}
+        <div className="relative z-10">
           <DashboardActivityFeed analytics={analytics} />
+        </div>
+
+        {/* 13. Studio Keyboard Shortcuts & Cheatsheet */}
+        <div className="relative z-10">
+          <DashboardKeyboardCheatsheet />
         </div>
       </div>
 

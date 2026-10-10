@@ -46,6 +46,9 @@ export interface ProjectsPageState {
     completedProjects: number;
     totalPanels: number;
   };
+  isDemoActive: boolean;
+  loadDemoProjects: () => void;
+  clearDemoProjects: () => void;
   uniqueGenres: string[];
   filteredProjects: Project[];
   filteredSeries: any[]; // Using any to avoid circular deps if needed, or import Series
@@ -174,6 +177,9 @@ export default function useProjectsPage(): ProjectsPageState {
     handleCopyLink,
     handleDeleteSingle,
     handleBulkDelete,
+    isDemoActive: dataState.isDemoActive,
+    loadDemoProjects: dataState.loadDemoProjects,
+    clearDemoProjects: dataState.clearDemoProjects,
     stats: computedState.stats,
     uniqueGenres: computedState.uniqueGenres,
     filteredProjects: computedState.filteredProjects,

@@ -19,6 +19,9 @@ interface ProjectsFiltersProps {
   onSortChange: (value: string) => void;
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
+  isDemoActive?: boolean;
+  onClearDemo?: () => void;
+  totalCount?: number;
 }
 
 const SORT_OPTIONS = [
@@ -38,6 +41,9 @@ export default function ProjectsFilters({
   onSortChange,
   viewMode,
   onViewModeChange,
+  isDemoActive,
+  onClearDemo,
+  totalCount,
 }: ProjectsFiltersProps) {
   const [isGenreOpen, setIsGenreOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -67,17 +73,37 @@ export default function ProjectsFilters({
       <div className="relative min-w-0 flex-1 sm:min-w-[240px]">
         <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#71717A]" />
         <input
-          type="search"
+          type="text"
           aria-label="Search projects by title, series, or author"
-          placeholder="Search projects"
+          placeholder="Search projects by title, series, or author..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="h-11 w-full rounded-lg border border-white/10 bg-[#141414] py-2 pl-10 pr-4 text-sm text-white outline-none transition-colors placeholder:text-[#71717A] hover:border-white/20 focus:border-sky-300/50 focus:ring-2 focus:ring-sky-300/10"
+          className="h-11 w-full rounded-lg border border-white/10 bg-[#141414] py-2 pl-10 pr-9 text-sm text-white outline-none transition-colors placeholder:text-[#71717A] hover:border-white/20 focus:border-white/30"
         />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => onSearchChange("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors cursor-pointer text-xs"
+            title="Clear search"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {/* Filters and Controls */}
       <div className="flex min-w-0 flex-wrap items-center gap-2">
+        {isDemoActive && onClearDemo && (
+          <button
+            type="button"
+            onClick={onClearDemo}
+            className="h-11 px-3 text-xs font-mono font-medium rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition-colors cursor-pointer flex items-center gap-1.5"
+            title="Remove sample demo projects"
+          >
+            <span>Reset Demo Data</span>
+          </button>
+        )}
         {/* Custom Genre Dropdown */}
         <div className="relative" ref={genreRef}>
           <button

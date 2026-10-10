@@ -430,7 +430,7 @@ export default function SeriesCard({
               e.stopPropagation();
               onOpenSeries(series);
             }}
-            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-blue-400/40 bg-[#3B82F6] hover:bg-[#2563EB] text-xs font-bold text-white transition-all cursor-pointer shadow-md shadow-blue-500/25 active:scale-95 shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 h-8 px-3.5 rounded-xl border border-blue-400/30 bg-[#2563EB] hover:bg-[#1D4ED8] text-xs font-bold text-white transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
           >
             <span>Explore</span>
             <ArrowRight className="w-3 h-3 text-white" />

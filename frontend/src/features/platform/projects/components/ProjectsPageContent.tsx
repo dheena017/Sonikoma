@@ -55,6 +55,9 @@ export default function ProjectsPageContent() {
       toggleSelectAll={page.toggleSelectAll}
       clearSelection={page.clearSelection}
       saveProjectName={page.saveProjectName}
+      isDemoActive={page.isDemoActive}
+      loadDemoProjects={page.loadDemoProjects}
+      clearDemoProjects={page.clearDemoProjects}
     />
   );
 }
