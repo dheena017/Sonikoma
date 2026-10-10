@@ -1,24 +1,5 @@
-import React from "react";
-import { Twitter, Youtube } from "lucide-react";
 import { useThemeMode } from "@/shared/hooks/useThemeMode";
 import { SonikomaLogo } from "@/shared/ui/branding";
-
-function FooterSocial({ icon }: { icon: React.ReactElement<any> }) {
-  const { themeMode } = useThemeMode();
-  const isLight = themeMode === "light";
-  return (
-    <a
-      href="#"
-      className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer border ${
-        isLight
-          ? "bg-slate-100 border-slate-200 text-slate-700 hover:text-blue-600 hover:border-neutral-700 hover:bg-blue-50"
-          : "bg-[#181818] border-[#2F2F2F] text-neutral-400 hover:text-white hover:border-neutral-500 hover:bg-[#222]"
-      }`}
-    >
-      {React.cloneElement(icon, { size: 16 })}
-    </a>
-  );
-}
 
 export function LandingFooter() {
   const { themeMode } = useThemeMode();
@@ -40,10 +21,13 @@ export function LandingFooter() {
             Turn your favorite webtoon chapters and comics into voiced, animated
             vertical videos.
           </p>
-          <div className="flex items-center gap-2.5 pt-2">
-            <FooterSocial icon={<Twitter />} />
-            <FooterSocial icon={<Youtube />} />
-          </div>
+          <p
+            className={`pt-2 text-xs font-semibold tracking-wide transition-colors ${
+              isLight ? "text-blue-700" : "text-blue-300"
+            }`}
+          >
+            Made for the stories worth sharing.
+          </p>
         </div>
 
         <div>
@@ -117,38 +101,38 @@ export function LandingFooter() {
           <ul className="space-y-2.5 text-sm">
             <li>
               <a
-                href="#"
+                href="#how-it-works"
                 className={`transition-colors duration-200 cursor-pointer ${
                   isLight
                     ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
-                Documentation
+                Getting started
               </a>
             </li>
             <li>
               <a
-                href="#"
+                href="#demo-showcase"
                 className={`transition-colors duration-200 cursor-pointer ${
                   isLight
                     ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
-                API Reference
+                Explore the workflow
               </a>
             </li>
             <li>
               <a
-                href="#"
+                href="#faq"
                 className={`transition-colors duration-200 cursor-pointer ${
                   isLight
                     ? "text-slate-700 hover:text-blue-600 font-medium"
                     : "text-neutral-400 hover:text-white font-medium"
                 }`}
               >
-                Community Discord
+                Help & FAQs
               </a>
             </li>
           </ul>

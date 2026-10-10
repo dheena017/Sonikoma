@@ -394,7 +394,7 @@ export default function LandingPage({
                 isLight ? "text-slate-950" : "text-white"
               }`}
             >
-              Turn Any Comic Into <br />
+              Bring Your Favorite Comics to Life <br />
               <span
                 className={`text-transparent bg-clip-text bg-gradient-to-r ${
                   isLight
@@ -402,7 +402,7 @@ export default function LandingPage({
                     : "from-blue-400 via-indigo-400 to-cyan-300"
                 }`}
               >
-                Voiced Vertical Videos
+                One Panel at a Time
               </span>
             </h1>
 
@@ -412,9 +412,9 @@ export default function LandingPage({
                 isLight ? "text-slate-600" : "text-neutral-300"
               }`}
             >
-              Paste any chapter link or drop images. Sonikoma auto-cuts panels,
-              removes speech bubbles, generates dynamic AI voice acting, and
-              renders viral TikTok & Shorts in seconds.
+              Turn a chapter link or your own comic images into a vertical
+              video with panel-by-panel editing, character voices, and
+              cinematic motion—all in one creative workspace.
             </p>
 
             {/* HERO COMPONENT: ADVANCED OMNIBAR CARD */}
@@ -660,7 +660,7 @@ export default function LandingPage({
                   }`}
                 >
                   <Zap className="w-4 h-4 text-amber-500" />
-                  <span>Ready in ~15 seconds</span>
+                  <span>Creator-controlled from start to finish</span>
                 </span>
 
                 <span
@@ -671,9 +671,145 @@ export default function LandingPage({
                   }`}
                 >
                   <Film className="w-4 h-4 text-blue-400" />
-                  <span>TikTok & Shorts ready</span>
+                  <span>Made for TikTok, Shorts & Reels</span>
                 </span>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CREATOR STORY SECTION */}
+        <section
+          className={`py-20 sm:py-28 px-6 relative z-10 ${
+            isLight ? "bg-white" : "bg-[#0a0b0e]"
+          }`}
+        >
+          <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div
+              className={`relative min-h-[340px] sm:min-h-[440px] rounded-[32px] overflow-hidden border shadow-2xl ${
+                isLight
+                  ? "border-slate-200 shadow-slate-300/40"
+                  : "border-white/10 shadow-black/40"
+              }`}
+            >
+              <img
+                src="/landing-anime-hero.png"
+                alt="A creator brings a comic scene to life in a digital studio"
+                loading="lazy"
+                className="absolute inset-0 w-full h-full object-cover object-[72%_35%]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#080a12] via-[#080a12]/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-300">
+                      Your next story starts here
+                    </span>
+                    <p className="mt-1 text-xl sm:text-2xl font-black text-white">
+                      From page to playback.
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-black/40 px-3 py-2 text-xs font-semibold text-white backdrop-blur-md">
+                    <Volume2 className="h-4 w-4 text-blue-300" />
+                    Panels with a voice
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-7">
+              <div className="space-y-4">
+                <span
+                  className={`text-xs font-bold uppercase tracking-[0.18em] ${
+                    isLight ? "text-blue-700" : "text-blue-400"
+                  }`}
+                >
+                  More than a video maker
+                </span>
+                <h2
+                  className={`text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight ${
+                    isLight ? "text-slate-950" : "text-white"
+                  }`}
+                >
+                  Give every panel{" "}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-cyan-400">
+                    a little more life.
+                  </span>
+                </h2>
+                <p
+                  className={`text-base leading-relaxed max-w-xl ${
+                    isLight ? "text-slate-600" : "text-neutral-400"
+                  }`}
+                >
+                  Shape the rhythm of your story. Refine panels, bring dialogue
+                  to life with character voices, and prepare a vertical cut
+                  that feels made to be watched.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  {
+                    icon: <Scissors className="h-5 w-5" />,
+                    title: "A cleaner view of every scene",
+                    description:
+                      "Separate long comic pages into focused, easy-to-follow panels.",
+                  },
+                  {
+                    icon: <Volume2 className="h-5 w-5" />,
+                    title: "Dialogue with its own voice",
+                    description:
+                      "Build a distinct listening experience with character voices and narration.",
+                  },
+                  {
+                    icon: <Film className="h-5 w-5" />,
+                    title: "A format made for the feed",
+                    description:
+                      "Bring your sequence together as a vertical video for short-form platforms.",
+                  },
+                ].map((feature) => (
+                  <div key={feature.title} className="flex items-start gap-4">
+                    <span
+                      className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${
+                        isLight
+                          ? "border-blue-100 bg-blue-50 text-blue-700"
+                          : "border-blue-400/20 bg-blue-400/10 text-blue-300"
+                      }`}
+                    >
+                      {feature.icon}
+                    </span>
+                    <div>
+                      <h3
+                        className={`font-bold ${
+                          isLight ? "text-slate-900" : "text-white"
+                        }`}
+                      >
+                        {feature.title}
+                      </h3>
+                      <p
+                        className={`mt-1 text-sm leading-relaxed ${
+                          isLight ? "text-slate-600" : "text-neutral-400"
+                        }`}
+                      >
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  document
+                    .getElementById("demo-showcase")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="inline-flex items-center gap-2 rounded-xl border border-blue-500/30 px-4 py-2.5 text-sm font-bold text-blue-500 transition-colors hover:border-blue-500 hover:bg-blue-500/5"
+              >
+                Explore the workflow
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
           </div>
         </section>
@@ -701,15 +837,15 @@ export default function LandingPage({
                   isLight ? "text-slate-950" : "text-white"
                 }`}
               >
-                How It Works
+                From chapter to finished story
               </h2>
               <p
                 className={`max-w-xl mx-auto text-sm leading-relaxed font-medium ${
                   isLight ? "text-slate-700" : "text-neutral-400"
                 }`}
               >
-                No video editing skills needed. Everything is automated from
-                chapter link to finished video.
+                Start with a chapter or your own images, then shape each step
+                into a video that is ready to share.
               </p>
             </div>
 
@@ -821,14 +957,15 @@ export default function LandingPage({
                   isLight ? "text-slate-950" : "text-white"
                 }`}
               >
-                See Before & After
+                See your story take shape
               </h2>
               <p
                 className={`max-w-xl mx-auto text-sm font-medium ${
                   isLight ? "text-slate-700" : "text-neutral-400"
                 }`}
               >
-                Click each stage to see how raw comic panels are transformed.
+                Explore how panel selection, dialogue cleanup, and translation
+                can fit into one connected workflow.
               </p>
             </div>
 
@@ -1105,6 +1242,8 @@ export default function LandingPage({
                   >
                     <button
                       onClick={() => toggleFaq(index)}
+                      aria-expanded={isOpen}
+                      aria-controls={`faq-answer-${index}`}
                       className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer"
                     >
                       <span
@@ -1122,6 +1261,7 @@ export default function LandingPage({
                     </button>
                     {isOpen && (
                       <div
+                        id={`faq-answer-${index}`}
                         className={`px-5 pb-5 pt-0 text-sm leading-relaxed border-t font-normal transition-colors ${
                           isLight
                             ? "border-slate-100 text-slate-700"
