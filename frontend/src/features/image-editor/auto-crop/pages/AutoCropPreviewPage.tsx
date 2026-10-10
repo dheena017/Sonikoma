@@ -1105,6 +1105,13 @@ export default function AutoCropPreviewPage({
         const p = previews[i];
         if (!p.sourceUrl) continue;
 
+        // Use the already-cropped panelUrls from the preview phase.
+        // Only fall back to a fresh crop if panelUrls is empty but we have box coords.
+        if (p.panelUrls && p.panelUrls.length > 0) {
+          confirmedMap[p.sourceUrl] = p.panelUrls;
+          continue;
+        }
+
         if (p.boxes && p.boxes.length > 0) {
           try {
             const cropped = await api.cropLongPanels(fetcher, {
@@ -1120,15 +1127,10 @@ export default function AutoCropPreviewPage({
                 .sort((a, b) => a.index - b.index)
                 .map((s) => s.url);
               confirmedMap[p.sourceUrl] = urls;
-              continue;
             }
           } catch (e) {
-            console.warn("Fallback to cached panelUrls for", p.sourceUrl, e);
+            console.warn("Could not re-crop panels for", p.sourceUrl, e);
           }
-        }
-
-        if (p.panelUrls && p.panelUrls.length > 0) {
-          confirmedMap[p.sourceUrl] = p.panelUrls;
         }
       }
       onConfirm(confirmedMap);
