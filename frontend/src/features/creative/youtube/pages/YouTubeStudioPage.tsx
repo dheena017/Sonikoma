@@ -3,7 +3,6 @@ import { Youtube, Check } from "lucide-react";
 import type { GeneratedPanel } from "@/shared/types";
 import YouTubeOfficialLogo from "../components/YouTubeOfficialLogo";
 import PublishMonitor from "../components/PublishMonitor";
-import YouTubeChannelHeader from "../components/YouTubeChannelHeader";
 import StudioDetailsTab from "../components/studio/StudioDetailsTab";
 import StudioElementsTab from "../components/studio/StudioElementsTab";
 import StudioChecksTab from "../components/studio/StudioChecksTab";
@@ -278,16 +277,6 @@ export default function YouTubeStudioPage({
 
   return (
     <div className="space-y-6 animate-fade-in">
-
-
-      {/* ── 2. CHANNEL INTEGRATION BANNER CARD ── */}
-      <YouTubeChannelHeader
-        key={headerRefreshKey}
-        seoScore={seoScore}
-        isPublishing={isPublishing}
-        onOpenChannelModal={() => setIsChannelModalOpen(true)}
-        addNotification={addNotification}
-      />
 
       {/* ── 2. OFFICIAL YOUTUBE STUDIO HORIZONTAL STEPPER BAR ── */}
       <div className="w-full bg-neutral-950/80 border border-neutral-800/80 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-xl">

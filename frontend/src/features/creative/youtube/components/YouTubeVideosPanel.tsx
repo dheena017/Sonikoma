@@ -190,132 +190,160 @@ export default function YouTubeVideosPanel({
 
 
       {/* ── 2. SEARCH, FILTER & TOOLBAR ── */}
-      <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-3.5 sm:p-4 space-y-3.5 shadow-xl backdrop-blur-md">
+        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
           {/* Search Bar */}
-          <div className="md:col-span-5 relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+          <div className="relative flex-1 min-w-[200px] max-w-full xl:max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9CA3AF] pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by video title, keywords, tags..."
-              className="w-full bg-neutral-950 border border-neutral-800 focus:border-red-500/70 focus:ring-1 focus:ring-red-500/20 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder:text-neutral-500 font-sans focus:outline-none transition-all"
+              className="w-full bg-[#1E1E1E] hover:bg-[#242424] focus:bg-[#2A2A2A] border border-[#2F2F2F] focus:border-red-500/60 focus:ring-2 focus:ring-red-500/20 rounded-xl pl-10 pr-9 py-2 text-xs text-[#E5E5E5] placeholder:text-[#6B7280] font-sans focus:outline-none transition-all shadow-inner"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors cursor-pointer p-0.5 rounded-md"
+                title="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Format Filter Pills */}
-          <div className="md:col-span-3 flex items-center gap-1 p-1 bg-neutral-950 border border-neutral-800 rounded-xl">
-            {[
-              { id: "all", label: "All Formats", icon: Film },
-              { id: "videos", label: "HD Videos", icon: Video },
-              { id: "shorts", label: "Shorts", icon: Zap },
-            ].map((f) => {
-              const isSel = formatFilter === f.id;
-              const Icon = f.icon;
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => setFormatFilter(f.id as any)}
-                  className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer ${
-                    isSel
-                      ? "bg-red-600 text-white shadow-sm"
-                      : "text-neutral-400 hover:text-neutral-200"
-                  }`}
-                >
-                  <Icon className="w-3 h-3" />
-                  <span>{f.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          {/* Filter Controls */}
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap shrink-0">
+            {/* Format Segmented Filter Pills */}
+            <div className="flex items-center gap-1 p-1 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl shrink-0">
+              {[
+                { id: "all", label: "All Formats", icon: Film },
+                { id: "videos", label: "HD Videos", icon: Video },
+                { id: "shorts", label: "Shorts", icon: Zap },
+              ].map((f) => {
+                const isSel = formatFilter === f.id;
+                const Icon = f.icon;
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => setFormatFilter(f.id as any)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold font-sans transition-all cursor-pointer whitespace-nowrap select-none ${
+                      isSel
+                        ? "bg-red-600 text-white shadow-sm border border-red-500/50"
+                        : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-white/[0.04] border border-transparent"
+                    }`}
+                  >
+                    <Icon
+                      className={`w-3.5 h-3.5 ${
+                        isSel ? "text-white" : "text-[#9CA3AF]"
+                      }`}
+                    />
+                    <span>{f.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Privacy & Sort Dropdowns */}
-          <div className="md:col-span-3 flex items-center gap-2">
-            <CyberSelect
-              value={privacyFilter}
-              onChange={setPrivacyFilter}
-              size="sm"
-              className="w-1/2"
-              options={[
-                { value: "all", label: "All Privacy" },
-                { value: "public", label: "Public" },
-                { value: "unlisted", label: "Unlisted" },
-                { value: "private", label: "Private" },
-              ]}
-            />
-
-            <CyberSelect
-              value={sortBy}
-              onChange={(val: any) => setSortBy(val)}
-              size="sm"
-              className="w-1/2"
-              options={[
-                { value: "newest", label: "Newest First" },
-                { value: "oldest", label: "Oldest First" },
-                { value: "views", label: "Most Views" },
-                { value: "likes", label: "Most Likes" },
-                { value: "comments", label: "Most Comments" },
-              ]}
-            />
-          </div>
-
-          {/* View Mode Toggle & Refresh */}
-          <div className="md:col-span-1 flex items-center justify-end gap-1.5">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                viewMode === "grid"
-                  ? "bg-red-600/20 border-red-500 text-red-400"
-                  : "bg-neutral-950 border-neutral-800 text-neutral-500 hover:text-neutral-300"
-              }`}
-              title="Grid View"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                viewMode === "list"
-                  ? "bg-red-600/20 border-red-500 text-red-400"
-                  : "bg-neutral-950 border-neutral-800 text-neutral-500 hover:text-neutral-300"
-              }`}
-              title="List View"
-            >
-              <List className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={fetchVideos}
-              disabled={isLoading}
-              className="p-2 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer shadow-sm active:scale-95"
-              title="Refresh Videos"
-            >
-              <RefreshCw
-                className={`w-3.5 h-3.5 ${isLoading ? "animate-spin text-red-400" : ""}`}
+            {/* Privacy & Sort Dropdowns */}
+            <div className="flex items-center gap-2 shrink-0">
+              <CyberSelect
+                value={privacyFilter}
+                onChange={setPrivacyFilter}
+                size="sm"
+                className="w-[125px]"
+                options={[
+                  { value: "all", label: "All Privacy" },
+                  { value: "public", label: "Public" },
+                  { value: "unlisted", label: "Unlisted" },
+                  { value: "private", label: "Private" },
+                ]}
               />
-            </button>
+
+              <CyberSelect
+                value={sortBy}
+                onChange={(val: any) => setSortBy(val)}
+                size="sm"
+                className="w-[135px]"
+                options={[
+                  { value: "newest", label: "Newest First" },
+                  { value: "oldest", label: "Oldest First" },
+                  { value: "views", label: "Most Views" },
+                  { value: "likes", label: "Most Likes" },
+                  { value: "comments", label: "Most Comments" },
+                ]}
+              />
+            </div>
+
+            {/* View Mode Toggle & Refresh */}
+            <div className="flex items-center gap-1.5 shrink-0 ml-auto sm:ml-0">
+              <div className="flex items-center gap-0.5 p-1 bg-[#1E1E1E] border border-[#2F2F2F] rounded-xl shrink-0">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewMode === "grid"
+                      ? "bg-[#2A2A2A] text-white shadow-xs"
+                      : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-white/[0.04]"
+                  }`}
+                  title="Grid View"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                    viewMode === "list"
+                      ? "bg-[#2A2A2A] text-white shadow-xs"
+                      : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-white/[0.04]"
+                  }`}
+                  title="List View"
+                >
+                  <List className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <button
+                onClick={fetchVideos}
+                disabled={isLoading}
+                className="p-2 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
+                title="Refresh Videos"
+              >
+                <RefreshCw
+                  className={`w-3.5 h-3.5 ${
+                    isLoading ? "animate-spin text-red-400" : ""
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Status Bar with telemetry */}
-        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 pt-2 border-t border-neutral-800/60 flex-wrap gap-2">
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <span>
-              Showing <strong className="text-white">{filteredAndSorted.length}</strong> of <strong>{videos.length}</strong> videos
+        <div className="flex items-center justify-between text-xs font-sans text-[#9CA3AF] pt-2.5 border-t border-[#2F2F2F] flex-wrap gap-2">
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+            <span className="text-[#9CA3AF]">
+              Showing{" "}
+              <strong className="text-[#E5E5E5] font-semibold">
+                {filteredAndSorted.length}
+              </strong>{" "}
+              of{" "}
+              <strong className="text-[#9CA3AF] font-medium">
+                {videos.length}
+              </strong>{" "}
+              videos
             </span>
-            <span className="text-neutral-700">•</span>
-            <span className="text-sky-400 font-bold">{totalViews.toLocaleString()} views</span>
-            <span className="text-neutral-700">•</span>
-            <span className="text-emerald-400 font-bold">{totalLikes.toLocaleString()} likes</span>
+            <span className="text-[#6B7280]">•</span>
+            <span className="inline-flex items-center gap-1 text-[#60A5FA] font-medium">
+              <Eye className="w-3.5 h-3.5 text-[#3B82F6]" />
+              <strong className="text-[#E5E5E5]">{totalViews.toLocaleString()}</strong> views
+            </span>
+            <span className="text-[#6B7280]">•</span>
+            <span className="inline-flex items-center gap-1 text-[#34D399] font-medium">
+              <ThumbsUp className="w-3.5 h-3.5 text-[#10B981]" />
+              <strong className="text-[#E5E5E5]">{totalLikes.toLocaleString()}</strong> likes
+            </span>
           </div>
+
           {(search || privacyFilter !== "all" || formatFilter !== "all") && (
             <button
               onClick={() => {
@@ -323,9 +351,10 @@ export default function YouTubeVideosPanel({
                 setPrivacyFilter("all");
                 setFormatFilter("all");
               }}
-              className="text-red-400 hover:text-red-300 underline cursor-pointer"
+              className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors flex items-center gap-1 cursor-pointer"
             >
-              Clear all filters
+              <X className="w-3.5 h-3.5" />
+              <span>Clear filters</span>
             </button>
           )}
         </div>
@@ -335,17 +364,17 @@ export default function YouTubeVideosPanel({
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
-          <p className="text-xs text-neutral-400 font-mono">
+          <p className="text-xs text-[#9CA3AF] font-sans">
             Loading channel videos catalog…
           </p>
         </div>
       ) : filteredAndSorted.length === 0 ? (
-        <div className="p-16 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
-          <Video className="w-12 h-12 text-neutral-600 mx-auto" />
-          <h3 className="text-sm font-bold text-white">
+        <div className="p-16 text-center border border-[#2F2F2F] rounded-2xl bg-[#141414] space-y-3">
+          <Video className="w-12 h-12 text-[#6B7280] mx-auto" />
+          <h3 className="text-sm font-bold text-[#E5E5E5] font-sans">
             No matching videos found
           </h3>
-          <p className="text-xs text-neutral-500 font-mono max-w-sm mx-auto">
+          <p className="text-xs text-[#9CA3AF] font-sans max-w-sm mx-auto">
             Try adjusting your search terms or filters above to find published
             videos.
           </p>
@@ -358,7 +387,7 @@ export default function YouTubeVideosPanel({
             return (
               <div
                 key={vid.id}
-                className="group bg-neutral-900/70 border border-neutral-800/80 rounded-2xl overflow-hidden hover:border-red-500/40 hover:shadow-2xl transition-all duration-300 flex flex-col backdrop-blur-sm"
+                className="group bg-[#141414] hover:bg-[#1A1A1A] border border-[#2F2F2F] hover:border-red-500/40 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 flex flex-col"
               >
                 {/* Thumbnail Preview Area */}
                 <div
@@ -380,7 +409,7 @@ export default function YouTubeVideosPanel({
                   />
 
                   {/* Format Pill */}
-                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-black/80 backdrop-blur-sm text-[9px] font-mono font-bold text-white border border-white/10 flex items-center gap-1">
+                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded-lg bg-[#0A0A0A]/80 backdrop-blur-sm text-[10px] font-sans font-medium text-[#E5E5E5] border border-[#2F2F2F] flex items-center gap-1">
                     {isShort ? (
                       <>
                         <Zap className="w-2.5 h-2.5 text-red-400 fill-red-400" />
@@ -388,7 +417,7 @@ export default function YouTubeVideosPanel({
                       </>
                     ) : (
                       <>
-                        <Film className="w-2.5 h-2.5 text-sky-400" />
+                        <Film className="w-2.5 h-2.5 text-[#60A5FA]" />
                         <span>HD Video</span>
                       </>
                     )}
@@ -396,12 +425,12 @@ export default function YouTubeVideosPanel({
 
                   {/* Privacy Badge */}
                   <div
-                    className={`absolute top-2 right-2 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold uppercase backdrop-blur-sm border ${
+                    className={`absolute top-2 right-2 px-2 py-0.5 rounded-lg text-[10px] font-sans font-medium uppercase backdrop-blur-sm border ${
                       vid.privacy_status === "public"
                         ? "bg-emerald-950/80 text-emerald-300 border-emerald-800/60"
                         : vid.privacy_status === "unlisted"
                         ? "bg-amber-950/80 text-amber-300 border-amber-800/60"
-                        : "bg-neutral-950/80 text-neutral-400 border-neutral-700/60"
+                        : "bg-[#1E1E1E]/80 text-[#9CA3AF] border-[#2F2F2F]"
                     }`}
                   >
                     {vid.privacy_status}
@@ -416,50 +445,50 @@ export default function YouTubeVideosPanel({
                 </div>
 
                 {/* Content & Metadata */}
-                <div className="p-4 flex flex-col gap-2 flex-1 justify-between">
+                <div className="p-4 flex flex-col gap-2.5 flex-1 justify-between">
                   <div className="space-y-1">
                     <h4
-                      className="text-xs font-bold text-neutral-100 line-clamp-2 font-sans cursor-pointer hover:text-red-300 transition-colors leading-snug"
+                      className="text-xs font-semibold text-[#E5E5E5] line-clamp-2 font-sans cursor-pointer hover:text-red-400 transition-colors leading-snug"
                       onClick={() => onWatchVideo(vid.id, vid)}
                     >
                       {vid.title}
                     </h4>
-                    <p className="text-[10px] text-neutral-500 font-mono">
+                    <p className="text-[11px] text-[#9CA3AF] font-sans">
                       {formatDate(vid.published_at)}
                     </p>
                   </div>
 
                   {/* Telemetry Footer */}
-                  <div className="space-y-2.5 pt-3 border-t border-neutral-800/60">
-                    <div className="flex items-center justify-between text-[10.5px] font-mono text-neutral-400">
-                      <span className="flex items-center gap-1 font-bold text-sky-400">
-                        <Eye className="w-3 h-3" /> {vid.view_count}
+                  <div className="space-y-2.5 pt-2.5 border-t border-[#2F2F2F]">
+                    <div className="flex items-center justify-between text-xs font-sans text-[#9CA3AF]">
+                      <span className="flex items-center gap-1 font-medium text-[#60A5FA]">
+                        <Eye className="w-3.5 h-3.5 text-[#3B82F6]" /> {vid.view_count}
                       </span>
-                      <span className="flex items-center gap-1 font-bold text-emerald-400">
-                        <ThumbsUp className="w-3 h-3" /> {vid.like_count}
+                      <span className="flex items-center gap-1 font-medium text-[#34D399]">
+                        <ThumbsUp className="w-3.5 h-3.5 text-[#10B981]" /> {vid.like_count}
                       </span>
                       <button
                         onClick={() => onViewComments(vid.id)}
-                        className="flex items-center gap-1 hover:text-[#93C5FD] transition-colors cursor-pointer"
+                        className="flex items-center gap-1 text-[#9CA3AF] hover:text-[#60A5FA] transition-colors cursor-pointer"
                         title="View Comments"
                       >
-                        <MessageSquare className="w-3 h-3 text-[#3B82F6]" />{" "}
+                        <MessageSquare className="w-3.5 h-3.5 text-[#3B82F6]" />{" "}
                         {vid.comment_count}
                       </button>
                     </div>
 
                     {/* Action Bar */}
-                    <div className="flex items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center justify-between gap-2 pt-0.5">
                       <button
                         onClick={() => onWatchVideo(vid.id, vid)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-neutral-950 hover:bg-red-950/40 border border-neutral-800 hover:border-red-500/50 rounded-xl text-[10px] font-mono font-bold text-neutral-300 hover:text-red-300 transition-all cursor-pointer"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-medium font-sans transition-all cursor-pointer shadow-sm active:scale-95"
                       >
                         <Play className="w-3 h-3 fill-current" />
-                        <span>Theater</span>
+                        <span>Watch</span>
                       </button>
                       <button
                         onClick={(e) => handleCopy(vid.youtube_url, vid.id, e)}
-                        className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                        className="p-1.5 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors cursor-pointer"
                         title="Copy YouTube Link"
                       >
                         {copiedId === vid.id ? (
@@ -472,7 +501,7 @@ export default function YouTubeVideosPanel({
                         href={vid.youtube_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                        className="p-1.5 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors"
                         title="Open on YouTube"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -486,18 +515,18 @@ export default function YouTubeVideosPanel({
         </div>
       ) : (
         /* ── LIST VIEW ── */
-        <div className="bg-neutral-900/80 border border-neutral-800/80 rounded-3xl overflow-hidden shadow-xl">
-          <div className="divide-y divide-neutral-800/60">
+        <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl overflow-hidden shadow-xl">
+          <div className="divide-y divide-[#2F2F2F]">
             {filteredAndSorted.map((vid) => (
               <div
                 key={vid.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-neutral-950/40 transition-colors group"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-[#1A1A1A] transition-colors group"
               >
                 <div
                   className="flex items-center gap-3.5 min-w-0 flex-1 cursor-pointer"
                   onClick={() => onWatchVideo(vid.id, vid)}
                 >
-                  <div className="relative w-28 sm:w-36 aspect-video bg-black rounded-xl overflow-hidden shrink-0 border border-neutral-800">
+                  <div className="relative w-28 sm:w-36 aspect-video bg-black rounded-xl overflow-hidden shrink-0 border border-[#2F2F2F]">
                     <img
                       src={vid.thumbnail}
                       alt={vid.title}
@@ -510,11 +539,11 @@ export default function YouTubeVideosPanel({
 
                   <div className="space-y-1 min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-xs sm:text-sm font-bold text-white truncate font-sans group-hover:text-red-300 transition-colors">
+                      <h4 className="text-xs sm:text-sm font-semibold text-[#E5E5E5] truncate font-sans group-hover:text-red-400 transition-colors">
                         {vid.title}
                       </h4>
                       <span
-                        className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase border ${
+                        className={`px-2 py-0.5 rounded text-[10px] font-sans font-medium uppercase border ${
                           vid.privacy_status === "public"
                             ? "text-emerald-400 border-emerald-900/40 bg-emerald-950/40"
                             : "text-amber-400 border-amber-900/40 bg-amber-950/40"
@@ -523,24 +552,24 @@ export default function YouTubeVideosPanel({
                         {vid.privacy_status}
                       </span>
                     </div>
-                    <p className="text-[10px] text-neutral-500 font-mono">
+                    <p className="text-[11px] text-[#9CA3AF] font-sans">
                       Published {formatDate(vid.published_at)}
                     </p>
                   </div>
                 </div>
 
                 {/* Stats & Actions */}
-                <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 text-xs font-mono text-neutral-400">
+                <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 text-xs font-sans text-[#9CA3AF]">
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 text-sky-400 font-bold">
-                      <Eye className="w-3.5 h-3.5" /> {vid.view_count}
+                    <span className="flex items-center gap-1 text-[#60A5FA] font-medium">
+                      <Eye className="w-3.5 h-3.5 text-[#3B82F6]" /> {vid.view_count}
                     </span>
-                    <span className="flex items-center gap-1 text-emerald-400 font-bold">
-                      <ThumbsUp className="w-3.5 h-3.5" /> {vid.like_count}
+                    <span className="flex items-center gap-1 text-[#34D399] font-medium">
+                      <ThumbsUp className="w-3.5 h-3.5 text-[#10B981]" /> {vid.like_count}
                     </span>
                     <button
                       onClick={() => onViewComments(vid.id)}
-                      className="flex items-center gap-1 hover:text-[#93C5FD] transition-colors cursor-pointer"
+                      className="flex items-center gap-1 text-[#9CA3AF] hover:text-[#60A5FA] transition-colors cursor-pointer"
                     >
                       <MessageSquare className="w-3.5 h-3.5 text-[#3B82F6]" />{" "}
                       {vid.comment_count}
@@ -550,13 +579,13 @@ export default function YouTubeVideosPanel({
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => onWatchVideo(vid.id, vid)}
-                      className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-300 rounded-xl text-xs font-bold font-mono transition-colors cursor-pointer"
+                      className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-medium font-sans transition-colors cursor-pointer shadow-sm active:scale-95"
                     >
                       Watch
                     </button>
                     <button
                       onClick={(e) => handleCopy(vid.youtube_url, vid.id, e)}
-                      className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                      className="p-1.5 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors cursor-pointer"
                       title="Copy Link"
                     >
                       {copiedId === vid.id ? (
@@ -569,7 +598,7 @@ export default function YouTubeVideosPanel({
                       href={vid.youtube_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                      className="p-1.5 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors"
                       title="Open on YouTube"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />

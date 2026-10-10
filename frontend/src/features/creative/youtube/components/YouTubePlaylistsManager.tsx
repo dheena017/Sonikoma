@@ -434,22 +434,22 @@ export default function YouTubePlaylistsManager({
   return (
     <div className="space-y-6 animate-fade-in">
       {/* ── SEARCH, FILTER & PLAYLIST ACTION TOOLBAR ── */}
-      <div className="bg-[#121218]/90 border border-white/[0.08] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl backdrop-blur-md">
+      <div className="bg-[#141414] border border-[#2F2F2F] rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xl">
         <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B7280]" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search playlists by title or description..."
-              className="w-full bg-neutral-950/80 border border-white/[0.08] focus:border-blue-500/50 rounded-xl pl-9 pr-8 py-2.5 text-xs text-white placeholder:text-neutral-500 font-sans focus:outline-none transition-all"
+              className="w-full bg-[#1E1E1E] border border-[#2F2F2F] focus:border-[#3B82F6]/70 rounded-xl pl-9 pr-8 py-2.5 text-xs text-[#E5E5E5] placeholder:text-[#6B7280] font-sans focus:outline-none transition-all"
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#E5E5E5]"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -486,7 +486,7 @@ export default function YouTubePlaylistsManager({
           {/* Create New Playlist Button */}
           <button
             onClick={() => setCurrentView("create")}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold font-mono shadow-md shadow-blue-600/25 transition-all cursor-pointer active:scale-95 shrink-0 whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-semibold font-sans shadow-sm transition-all cursor-pointer active:scale-95 shrink-0 whitespace-nowrap"
           >
             <FolderPlus className="w-3.5 h-3.5 text-white" />
             <span>New Playlist</span>
@@ -501,7 +501,7 @@ export default function YouTubePlaylistsManager({
               fetchPlaylists();
             }}
             disabled={isLoading}
-            className="p-2.5 bg-neutral-900/90 hover:bg-neutral-800 border border-white/[0.08] text-neutral-400 hover:text-white rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
+            className="p-2.5 bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 shrink-0"
             title="Refresh Playlists"
           >
             <RefreshCw
@@ -512,12 +512,12 @@ export default function YouTubePlaylistsManager({
           </button>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] font-mono text-neutral-400 pt-2 border-t border-white/[0.06]">
+        <div className="flex items-center justify-between text-xs font-sans text-[#9CA3AF] pt-2 border-t border-[#2F2F2F]">
           <div className="flex items-center gap-2.5 flex-wrap">
             <span>
-              Showing <strong className="text-white">{filteredPlaylists.length}</strong> of <strong>{playlists.length}</strong> playlists
+              Showing <strong className="text-[#E5E5E5]">{filteredPlaylists.length}</strong> of <strong>{playlists.length}</strong> playlists
             </span>
-            <span className="text-neutral-700">•</span>
+            <span className="text-[#4B5563]">•</span>
             <span className="text-[#60A5FA]">
               <strong>{totalVideosInPlaylists}</strong> total curated videos
             </span>
@@ -528,7 +528,7 @@ export default function YouTubePlaylistsManager({
                 setSearch("");
                 setPrivacyFilter("all");
               }}
-              className="text-xs text-blue-400 hover:underline cursor-pointer"
+              className="text-xs text-[#60A5FA] hover:underline cursor-pointer"
             >
               Reset Filters
             </button>
@@ -541,21 +541,20 @@ export default function YouTubePlaylistsManager({
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-24 gap-3">
           <Loader2 className="w-8 h-8 text-[#3B82F6] animate-spin" />
-          <p className="text-xs text-neutral-400 font-mono">
+          <p className="text-xs text-[#9CA3AF] font-sans">
             Loading playlists from YouTube…
           </p>
         </div>
       ) : filteredPlaylists.length === 0 ? (
-        <div className="p-16 text-center border border-neutral-800/80 rounded-3xl bg-neutral-950/40 space-y-3">
-          <ListVideo className="w-12 h-12 text-neutral-600 mx-auto" />
-          <h3 className="text-sm font-bold text-white">No playlists found</h3>
-          <p className="text-xs text-neutral-500 font-mono max-w-sm mx-auto">
-            Organize your episodes into bingeable playlists to increase channel
-            watch time and SEO rankings.
+        <div className="p-16 text-center border border-[#2F2F2F] rounded-2xl bg-[#141414] space-y-3">
+          <ListVideo className="w-10 h-10 text-[#6B7280] mx-auto" />
+          <h3 className="text-sm font-semibold text-[#E5E5E5] font-sans">No playlists found</h3>
+          <p className="text-xs text-[#9CA3AF] font-sans max-w-sm mx-auto">
+            Playlists created on your YouTube channel will appear here.
           </p>
           <button
             onClick={() => setCurrentView("create")}
-            className="px-5 py-2.5 bg-[#2A2A2A] hover:bg-[#333333] text-white rounded-xl text-xs font-mono font-bold shadow-lg shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
+            className="px-4 py-2 bg-[#3B82F6] hover:bg-[#2563EB] text-white rounded-xl text-xs font-semibold font-sans shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
           >
             <FolderPlus className="w-4 h-4" />
             <span>Create First Playlist</span>
@@ -567,10 +566,10 @@ export default function YouTubePlaylistsManager({
             <div
               key={pl.id}
               onClick={() => handleOpenPlaylist(pl)}
-              className="group bg-neutral-900/70 border border-neutral-800/80 rounded-3xl overflow-hidden hover:border-neutral-700 hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col backdrop-blur-sm"
+              className="group bg-[#141414] hover:bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[#3B82F6]/40 rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer flex flex-col"
             >
               {/* Cover Preview Area */}
-              <div className="relative aspect-video bg-neutral-950 overflow-hidden flex items-center justify-center">
+              <div className="relative aspect-video bg-black overflow-hidden flex items-center justify-center">
                 {pl.thumbnail ? (
                   <img
                     src={pl.thumbnail}
@@ -578,28 +577,28 @@ export default function YouTubePlaylistsManager({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <ListVideo className="w-12 h-12 text-[#3B82F6]/40" />
+                  <ListVideo className="w-10 h-10 text-[#6B7280]" />
                 )}
 
                 {/* Video Count Sidebar Overlay */}
-                <div className="absolute inset-y-0 right-0 w-24 bg-black/85 backdrop-blur-md border-l border-white/10 flex flex-col items-center justify-center gap-1 text-white">
-                  <Layers className="w-4 h-4 text-[#3B82F6]" />
-                  <span className="text-xs font-black font-mono">
-                    {pl.item_count ?? "?"}
+                <div className="absolute inset-y-0 right-0 w-24 bg-black/85 backdrop-blur-md border-l border-[#2F2F2F] flex flex-col items-center justify-center gap-1 text-[#E5E5E5]">
+                  <Layers className="w-4 h-4 text-[#60A5FA]" />
+                  <span className="text-xs font-bold font-sans">
+                    {pl.item_count ?? 0}
                   </span>
-                  <span className="text-[8px] font-mono uppercase tracking-wider text-neutral-400">
+                  <span className="text-[9px] font-sans uppercase tracking-wider text-[#9CA3AF]">
                     Videos
                   </span>
                 </div>
 
                 {/* Privacy Badge */}
                 <div
-                  className={`absolute top-2 left-2 px-2 py-0.5 rounded-lg text-[9px] font-mono font-bold uppercase backdrop-blur-sm border ${
+                  className={`absolute top-2 left-2 px-2 py-0.5 rounded-lg text-[10px] font-sans font-semibold uppercase backdrop-blur-sm border ${
                     pl.privacy === "public"
                       ? "bg-emerald-950/80 text-emerald-300 border-emerald-800/60"
                       : pl.privacy === "unlisted"
                       ? "bg-amber-950/80 text-amber-300 border-amber-800/60"
-                      : "bg-neutral-950/80 text-neutral-400 border-neutral-700/60"
+                      : "bg-[#1E1E1E]/80 text-[#9CA3AF] border-[#2F2F2F]"
                   }`}
                 >
                   {pl.privacy || "public"}
@@ -607,8 +606,8 @@ export default function YouTubePlaylistsManager({
 
                 {/* Hover Play Button */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                  <div className="p-3 bg-[#2A2A2A] rounded-2xl shadow-xl transform group-hover:scale-110 transition-transform">
-                    <Play className="w-5 h-5 fill-white text-white ml-0.5" />
+                  <div className="p-3 bg-[#3B82F6] rounded-2xl shadow-xl transform group-hover:scale-110 transition-transform">
+                    <Play className="w-4 h-4 fill-white text-white ml-0.5" />
                   </div>
                 </div>
               </div>
@@ -616,19 +615,19 @@ export default function YouTubePlaylistsManager({
               {/* Details & Actions */}
               <div className="p-4 flex flex-col gap-2 flex-1 justify-between">
                 <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-white line-clamp-1 font-sans group-hover:text-[#93C5FD] transition-colors">
+                  <h4 className="text-xs font-semibold text-[#E5E5E5] line-clamp-1 font-sans group-hover:text-[#60A5FA] transition-colors">
                     {pl.title}
                   </h4>
                   {pl.description && (
-                    <p className="text-[10px] text-neutral-400 line-clamp-2 font-mono leading-relaxed">
+                    <p className="text-[11px] text-[#9CA3AF] line-clamp-2 font-sans leading-relaxed">
                       {pl.description}
                     </p>
                   )}
                 </div>
 
                 {/* Actions Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-neutral-800/60 mt-auto">
-                  <span className="text-[10px] font-mono text-[#3B82F6] font-bold flex items-center gap-1">
+                <div className="flex items-center justify-between pt-3 border-t border-[#2F2F2F] mt-auto">
+                  <span className="text-xs font-sans text-[#60A5FA] font-medium flex items-center gap-1">
                     <span>View Tracklist</span>
                     <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                   </span>
@@ -642,7 +641,7 @@ export default function YouTubePlaylistsManager({
                           e
                         )
                       }
-                      className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                      className="p-1.5 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors cursor-pointer"
                       title="Copy Playlist URL"
                     >
                       {copiedId === pl.id ? (
@@ -656,7 +655,7 @@ export default function YouTubePlaylistsManager({
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="p-1.5 rounded-xl bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white transition-colors"
+                      className="p-1.5 rounded-xl bg-[#1E1E1E] hover:bg-[#2A2A2A] border border-[#2F2F2F] text-[#9CA3AF] hover:text-[#E5E5E5] transition-colors"
                       title="Open on YouTube"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />

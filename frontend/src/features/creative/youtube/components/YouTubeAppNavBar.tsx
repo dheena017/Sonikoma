@@ -48,31 +48,29 @@ export default function YouTubeAppNavBar({
   isEmbedded = false,
 }: YouTubeAppNavBarProps) {
   return (
-    <header className="relative w-full shrink-0">
+    <div className="relative w-full shrink-0">
       <div className="w-full flex items-center justify-between gap-2 sm:gap-3 lg:gap-4">
         {/* ── LEFT: BRAND & CHANNEL SELECTOR ── */}
-        <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           {/* Brand */}
           <div className="flex items-center gap-2.5 group cursor-default select-none">
-            <div className="p-1.5 px-2 bg-[#121218] group-hover:bg-[#1a1a24] rounded-xl flex items-center justify-center border border-white/[0.08] group-hover:border-red-500/30 transition-all shadow-sm shrink-0">
+            <div className="p-1.5 px-2 bg-[#121212] group-hover:bg-[#1E1E1E] rounded-xl flex items-center justify-center border border-[#2F2F2F] group-hover:border-red-500/30 transition-all shadow-sm shrink-0">
               <YouTubeOfficialLogo className="w-6 h-4.5 drop-shadow-[0_0_8px_rgba(255,0,0,0.35)]" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black tracking-tight text-white font-sans">
+                <span className="text-xs font-black tracking-tight text-[#E5E5E5] font-sans">
                   SONIKOMA
                 </span>
-                <span className="px-1.5 py-0.5 rounded bg-red-500/15 border border-red-500/30 text-[8.5px] font-black font-mono text-red-400 tracking-wider">
+                <span className="px-1.5 py-0.5 rounded bg-red-500/15 border border-red-500/30 text-[8.5px] font-bold font-sans text-red-400 tracking-wider">
                   STUDIO
                 </span>
               </div>
-              <span className="text-[9.5px] text-neutral-400 font-mono hidden sm:inline">
+              <span className="text-[10px] text-[#9CA3AF] font-sans hidden sm:inline leading-tight">
                 YouTube Creator Suite
               </span>
             </div>
           </div>
-
-          <div className="h-5 w-px bg-white/10 hidden sm:block shrink-0" />
 
           {/* Connected Channel Pill */}
           <Tooltip
@@ -85,7 +83,7 @@ export default function YouTubeAppNavBar({
           >
             <button
               onClick={onOpenChannelModal}
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer group shadow-sm shrink-0"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-[#141414] hover:bg-[#1E1E1E] border border-[#2F2F2F] hover:border-red-500/40 transition-all duration-200 cursor-pointer group shadow-sm shrink-0"
               aria-label="Switch Channel"
             >
               <div className="relative shrink-0">
@@ -98,16 +96,16 @@ export default function YouTubeAppNavBar({
                       (e.currentTarget as HTMLImageElement).style.display =
                         "none";
                     }}
-                    className="w-6 h-6 rounded-full object-cover border border-neutral-700 group-hover:border-red-500/50 transition-colors shadow-sm"
+                    className="w-6 h-6 rounded-full object-cover border border-[#2F2F2F] group-hover:border-red-500/50 transition-colors shadow-sm"
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 via-rose-600 to-red-700 flex items-center justify-center font-bold text-white text-[9px] font-sans uppercase shadow-sm">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-600 via-rose-600 to-red-700 flex items-center justify-center font-bold text-white text-[9.5px] font-sans uppercase shadow-sm">
                     {channelTitle ? channelTitle.charAt(0) : "Y"}
                   </div>
                 )}
                 {/* Live connection dot */}
                 <span
-                  className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-neutral-950 ${
+                  className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ring-2 ring-[#0A0A0A] ${
                     isConnected
                       ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.85)]"
                       : "bg-amber-400"
@@ -116,10 +114,10 @@ export default function YouTubeAppNavBar({
               </div>
 
               <div className="text-left min-w-0 max-w-[120px] sm:max-w-[160px] md:max-w-[210px]">
-                <div className="text-xs font-bold text-white leading-tight truncate group-hover:text-red-300 transition-colors">
+                <div className="text-xs font-semibold text-[#E5E5E5] leading-tight truncate group-hover:text-red-300 transition-colors">
                   {isConnected ? channelTitle : "Connect Channel"}
                 </div>
-                <div className="text-[9.5px] text-neutral-400 font-mono leading-tight truncate flex items-center gap-1">
+                <div className="text-[10px] text-[#9CA3AF] font-sans leading-tight truncate flex items-center gap-1">
                   <span>
                     {channelHandle ||
                       (isConnected ? "Connected" : "Click to connect")}
@@ -127,14 +125,14 @@ export default function YouTubeAppNavBar({
                 </div>
               </div>
 
-              <ChevronDown className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-200 transition-transform group-hover:translate-y-0.5 shrink-0" />
+              <ChevronDown className="w-3.5 h-3.5 text-[#9CA3AF] group-hover:text-[#E5E5E5] transition-transform duration-200 group-hover:translate-y-0.5 shrink-0" />
             </button>
           </Tooltip>
         </div>
 
         {/* ── CENTER: NAVIGATION TABS ── */}
-        <nav className="flex items-center shrink min-w-0">
-          <div className="flex items-center gap-0.5 sm:gap-1 p-1 bg-black/50 border border-white/[0.08] rounded-xl shadow-inner backdrop-blur-md">
+        <nav className="flex items-center min-w-0 overflow-x-auto no-scrollbar py-0.5">
+          <div className="flex items-center gap-1 p-1 bg-[#121212] border border-[#2F2F2F] rounded-xl shadow-inner shrink-0">
             {TABS.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -142,15 +140,15 @@ export default function YouTubeAppNavBar({
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
-                  className={`relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all duration-200 cursor-pointer select-none whitespace-nowrap ${
+                  className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium font-sans transition-all duration-200 cursor-pointer select-none whitespace-nowrap ${
                     isActive
-                      ? "bg-gradient-to-r from-red-600 via-red-500 to-rose-600 text-white shadow-[0_0_16px_rgba(239,68,68,0.45)] border border-red-400/40"
-                      : "text-neutral-400 hover:text-white hover:bg-white/[0.06] border border-transparent"
+                      ? "bg-red-600 text-white font-semibold shadow-sm border border-red-500/50"
+                      : "text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#1E1E1E] border border-transparent"
                   }`}
                 >
                   <Icon
                     className={`w-3.5 h-3.5 transition-transform ${
-                      isActive ? "scale-110 text-white" : "text-neutral-400"
+                      isActive ? "scale-105 text-white" : "text-[#9CA3AF]"
                     }`}
                   />
                   <span>{tab.label}</span>
@@ -171,7 +169,7 @@ export default function YouTubeAppNavBar({
           >
             <button
               onClick={onPublish}
-              className="group relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 bg-gradient-to-r from-red-600 via-rose-600 to-red-600 hover:from-red-500 hover:to-rose-500 text-white text-xs font-black font-mono rounded-xl shadow-[0_0_18px_rgba(239,68,68,0.35)] hover:shadow-[0_0_24px_rgba(239,68,68,0.55)] border border-red-400/40 transition-all duration-300 cursor-pointer active:scale-95 overflow-hidden shrink-0 whitespace-nowrap"
+              className="group relative flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold font-sans rounded-xl shadow-md shadow-red-950/40 hover:shadow-red-900/60 border border-red-500/50 transition-all duration-300 cursor-pointer active:scale-95 overflow-hidden shrink-0 whitespace-nowrap"
               aria-label="Publish Video"
             >
               {/* Shimmer reflection */}
@@ -182,6 +180,6 @@ export default function YouTubeAppNavBar({
           </Tooltip>
         </div>
       </div>
-    </header>
+    </div>
   );
 }

@@ -328,7 +328,7 @@ const YouTubePage = React.memo(
         <YouTubeTopProgressBar isLoading={isNavigating || isPublishing} />
 
         {/* ── MAIN TAB CANVAS CONTAINER (KEEP-ALIVE SPA PERSISTENCE) ──────── */}
-        <div className="rounded-[28px] border border-white/[0.08] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl min-h-[600px] space-y-6">
+        <div className="rounded-[28px] border border-[#2F2F2F] bg-gradient-to-b from-[#181818] via-[#141414] to-[#0E0E0E] p-6 sm:p-8 shadow-2xl min-h-[600px] space-y-6">
           {/* ── TOP APP NAVIGATION BAR (Always present on all pages) ─────── */}
           <div className="w-full">
             <YouTubeAppNavBar
