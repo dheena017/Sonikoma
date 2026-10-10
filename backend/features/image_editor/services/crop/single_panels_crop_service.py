@@ -14,6 +14,7 @@ import os
 import io
 import time
 import uuid
+import datetime
 import logging
 from typing import Optional, Dict, Any, Tuple
 
@@ -205,11 +206,21 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
     img.save(out_io, format=target_fmt, **save_opts)
     output_bytes = out_io.getvalue()
 
-    # Save to /media/
-    unique_filename = f"single_crop_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}.{ext}"
+    # Save to /media/ with clean, human-readable, unique name
+    date_str = datetime.datetime.now().strftime("%Y%m%d")
+    unique_filename = f"panel-crop-{date_str}-{uuid.uuid4().hex[:8]}.{ext}"
     file_path = os.path.join(MEDIA_DIR, unique_filename)
     with open(file_path, "wb") as f:
         f.write(output_bytes)
+
+    # Also save to canonical media/panels/ if directory exists
+    panels_dir = os.path.join(PROJECT_ROOT, "data", "media", "panels")
+    if os.path.exists(panels_dir):
+        try:
+            with open(os.path.join(panels_dir, unique_filename), "wb") as f:
+                f.write(output_bytes)
+        except Exception:
+            pass
 
     media_url = f"/media/{unique_filename}"
     stitched_cache.set(f"single_{unique_filename}", {"data": output_bytes, "content_type": content_type})

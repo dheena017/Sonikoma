@@ -54,13 +54,16 @@ def delete_series(series_id: str) -> None:
         # Clean up compiled video files
         for c in chaps:
             if c['video_url']:
-                video_path = os.path.abspath(os.path.join(_PROJECT_ROOT, 'data', 'media', c['video_url'].split('/')[-1]))
-                if os.path.exists(video_path):
-                    try:
-                        logger.info(f"[Database] Deleting series compiled video file from disk: {video_path}")
-                        os.remove(video_path)
-                    except Exception as e:
-                        logger.error(f"[Database] Failed to delete video file {video_path}: {e}")
+                vid_filename = c['video_url'].split('/')[-1]
+                for vid_sub in [os.path.join('media', 'videos'), 'media']:
+                    video_path = os.path.abspath(os.path.join(_PROJECT_ROOT, 'data', vid_sub, vid_filename))
+                    if os.path.exists(video_path):
+                        try:
+                            logger.info(f"[Database] Deleting series compiled video file from disk: {video_path}")
+                            os.remove(video_path)
+                            break
+                        except Exception as e:
+                            logger.error(f"[Database] Failed to delete video file {video_path}: {e}")
     finally:
         conn.close()
 

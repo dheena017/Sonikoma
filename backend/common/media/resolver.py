@@ -184,23 +184,35 @@ async def resolve_url_to_buffer(
     if "/media/" in working_url or working_url.startswith("media/"):
         clean_name = working_url.split("/media/")[-1] if "/media/" in working_url else working_url.split("media/")[-1]
         clean_name = clean_name.split("?")[0]
-        for candidate_dir in ["local_media", "media", "temp"]:
-            cand_path = os.path.join(_project_root, "data", candidate_dir, clean_name)
+        for candidate_sub in [
+            os.path.join("media", "panels"),
+            os.path.join("media", "videos"),
+            os.path.join("media", "audio"),
+            os.path.join("cache", "stitched"),
+            os.path.join("cache", "edits"),
+            os.path.join("cache", "audio"),
+            "local_media",
+            "media",
+            "image_cache",
+            "temp",
+        ]:
+            cand_path = os.path.join(_project_root, "data", candidate_sub, clean_name)
             if os.path.exists(cand_path) and os.path.isfile(cand_path):
                 with open(cand_path, 'rb') as f:
                     buf = f.read()
                 ext = os.path.splitext(clean_name)[1].lower()
-                mime = "image/webp" if ext == ".webp" else ("image/png" if ext == ".png" else "image/jpeg")
+                mime = "image/webp" if ext == ".webp" else ("image/png" if ext == ".png" else ("video/mp4" if ext == ".mp4" else "image/jpeg"))
                 return {"data": buf, "content_type": mime, "contentType": mime}
 
     if "/videos/" in working_url or working_url.startswith("videos/"):
         clean_name = working_url.split("/videos/")[-1] if "/videos/" in working_url else working_url.split("videos/")[-1]
         clean_name = clean_name.split("?")[0]
-        cand_path = os.path.join(_project_root, "data", "media", clean_name)
-        if os.path.exists(cand_path) and os.path.isfile(cand_path):
-            with open(cand_path, 'rb') as f:
-                buf = f.read()
-            return {"data": buf, "content_type": "video/mp4", "contentType": "video/mp4"}
+        for vid_dir in [os.path.join("media", "videos"), "media"]:
+            cand_path = os.path.join(_project_root, "data", vid_dir, clean_name)
+            if os.path.exists(cand_path) and os.path.isfile(cand_path):
+                with open(cand_path, 'rb') as f:
+                    buf = f.read()
+                return {"data": buf, "content_type": "video/mp4", "contentType": "video/mp4"}
 
     # 5. Normalize internal hostnames to relative paths
     if re.match(r'^https?://', working_url, re.IGNORECASE):

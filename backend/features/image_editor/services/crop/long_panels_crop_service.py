@@ -14,6 +14,7 @@ import os
 import io
 import time
 import uuid
+import datetime
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from typing import List, Optional, Tuple
@@ -228,11 +229,21 @@ def _encode_slice_worker(args: Tuple) -> Optional[CroppedSliceItem]:
         cropped_img.save(out_io, format=target_fmt, **save_opts)
         slice_bytes = out_io.getvalue()
 
-        # Save locally to /media/
-        unique_filename = f"slice_{int(time.time()*1000)}_{order_idx}_{uuid.uuid4().hex[:6]}.{ext}"
+        # Save locally with clean, human-readable, unique name
+        date_str = datetime.datetime.now().strftime("%Y%m%d")
+        unique_filename = f"strip-slice-{date_str}-idx{order_idx:03d}-{uuid.uuid4().hex[:6]}.{ext}"
         file_path = os.path.join(MEDIA_DIR, unique_filename)
         with open(file_path, "wb") as f:
             f.write(slice_bytes)
+
+        # Also save to canonical media/panels/ if directory exists
+        panels_dir = os.path.join(PROJECT_ROOT, "data", "media", "panels")
+        if os.path.exists(panels_dir):
+            try:
+                with open(os.path.join(panels_dir, unique_filename), "wb") as f:
+                    f.write(slice_bytes)
+            except Exception:
+                pass
 
         media_url = f"/media/{unique_filename}"
         cache_id = f"slice_{unique_filename}"

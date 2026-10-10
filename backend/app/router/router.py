@@ -92,7 +92,18 @@ def register_routers(app: FastAPI):
     app.mount("/media/series_images", NoCacheStaticFiles(directory=series_images_dir), name="series_images")
     app.mount("/media/series_audio", NoCacheStaticFiles(directory=series_audio_dir), name="series_audio")
 
-    # Serve locally generated panel layer WebPs
+    # Serve persistent creator media assets (panels, videos, audio)
+    media_panels_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media", "panels"))
+    media_videos_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media", "videos"))
+    media_audio_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media", "audio"))
+    os.makedirs(media_panels_dir, exist_ok=True)
+    os.makedirs(media_videos_dir, exist_ok=True)
+    os.makedirs(media_audio_dir, exist_ok=True)
+    app.mount("/media/panels", StaticFiles(directory=media_panels_dir), name="media_panels")
+    app.mount("/media/videos", StaticFiles(directory=media_videos_dir), name="media_videos")
+    app.mount("/media/audio", StaticFiles(directory=media_audio_dir), name="media_audio")
+
+    # Serve locally generated panel layer WebPs (legacy fallback)
     local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "local_media"))
     os.makedirs(local_media_dir, exist_ok=True)
     app.mount("/media", StaticFiles(directory=local_media_dir), name="media")

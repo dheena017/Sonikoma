@@ -157,7 +157,7 @@ def _print_startup_banner():
         if getattr(db_config, "NODE_ENV", "") == "production":
             db_status = "Supabase/PostgreSQL"
         else:
-            db_status = f"SQLite ({getattr(db_config, 'DB_PATH', 'data/sonikoma.db')})"
+            db_status = f"SQLite ({getattr(db_config, 'DB_PATH', 'data/webtoon_local.db')})"
     except Exception:
         db_status = "SQLite"
 

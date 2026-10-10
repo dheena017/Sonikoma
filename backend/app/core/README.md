@@ -22,7 +22,7 @@ The `app.core` package provides foundational cross-cutting capabilities for the 
 | `NODE_ENV` | `str` | `development` | Deployment mode (`development`, `staging`, `production`). |
 | `BACKEND_PORT` | `int` | `8000` | Port for the Uvicorn ASGI HTTP listener. |
 | `SECRET_KEY` | `str` | `sonikoma-insecure-secret-key` | HMAC secret for signing JWT auth tokens. |
-| `DATABASE_URL` | `str` | `sqlite:///data/sonikoma.db` | Connection string for SQLite or Postgres/Supabase. |
+| `DATABASE_URL` | `str` | `sqlite:///data/webtoon_local.db` | Connection string for SQLite or Postgres/Supabase. |
 | `STORAGE_DIR` | `str` | `data/storage` | Root filesystem directory for projects, chapters, and media assets. |
 | `GEMINI_API_KEY` | `str` | `None` | Google Gemini API key for multimodal vision and AI scripting. |
 

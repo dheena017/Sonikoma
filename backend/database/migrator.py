@@ -111,7 +111,10 @@ def init_sqlite(conn: sqlite3.Connection) -> None:
             except Exception:
                 pass
 
-        # ── 4. Backfill missing slugs ──
+        # ── 4. Normalize legacy date formats to standard ISO 8601 UTC ──
+        _normalize_legacy_dates(cursor, conn)
+
+        # ── 5. Backfill missing slugs ──
         generate_missing_slugs(conn)
 
         conn.commit()
@@ -129,3 +132,39 @@ def _run_safe_alter(cursor: sqlite3.Cursor, conn: sqlite3.Connection, sql: str, 
         conn.commit()
     except Exception:
         pass  # Column already exists or table structure is up to date
+
+
+def _normalize_legacy_dates(cursor: sqlite3.Cursor, conn: sqlite3.Connection) -> None:
+    """Normalize non-standard date strings across tables to standard ISO 8601 UTC."""
+    date_columns_map = {
+        "series": ["created_at", "updated_at", "flagged_at"],
+        "chapters": ["created_at", "updated_at"],
+        "panels": ["created_at"],
+        "credit_transactions": ["created_at"],
+        "user_audit_logs": ["created_at"],
+        "user_invoices": ["created_at"],
+        "platform_settings": ["updated_at"],
+        "user_youtube_channels": ["created_at", "updated_at"],
+        "youtube_oauth_tokens": ["updated_at"],
+        "users": ["created_at", "updated_at", "last_login_at"],
+        "scrape_sessions": ["scraped_at"],
+        "token_usage_logs": ["created_at"],
+    }
+    for tbl, cols in date_columns_map.items():
+        try:
+            existing_cols = [c[1] for c in cursor.execute(f'PRAGMA table_info("{tbl}")').fetchall()]
+            for col in cols:
+                if col in existing_cols:
+                    cursor.execute(
+                        f'UPDATE "{tbl}" SET "{col}" = strftime(\'%Y-%m-%dT%H:%M:%SZ\', "{col}") WHERE "{col}" IS NOT NULL AND "{col}" LIKE \'% %\''
+                    )
+        except Exception:
+            pass
+    try:
+        cursor.execute(
+            "UPDATE series_chapters_cache SET updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', datetime(updated_at, 'unixepoch')) WHERE updated_at IS NOT NULL AND updated_at NOT LIKE '%-%'"
+        )
+    except Exception:
+        pass
+    conn.commit()
+

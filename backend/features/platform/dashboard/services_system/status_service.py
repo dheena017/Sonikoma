@@ -407,14 +407,17 @@ def get_comprehensive_backend_status(
     except Exception:
         pass
 
+    from database import config as db_cfg
     dirs_to_inspect = {
-        "media": os.path.join(root_path, "data", "media"),
-        "local_media": os.path.join(root_path, "data", "local_media"),
-        "scraped_cache": os.path.join(root_path, "data", "image_cache"),
-        "chapter_cache": os.path.join(root_path, "data", "chapter_cache"),
-        "temp_workspace": os.path.join(root_path, "data", "temp"),
-        "exports": os.path.join(root_path, "data", "storage"),
-        "database": DB_PATH if os.path.exists(DB_PATH) else os.path.join(root_path, "data", "sonikoma.db"),
+        "media": db_cfg.MEDIA_DIR,
+        "media_videos": db_cfg.MEDIA_VIDEOS_DIR,
+        "media_panels": db_cfg.MEDIA_PANELS_DIR,
+        "cache": db_cfg.CACHE_DIR,
+        "scraped_cache": db_cfg.IMAGE_CACHE_DIR,
+        "temp_workspace": db_cfg.TEMP_DIR,
+        "exports": db_cfg.STORAGE_DIR,
+        "backups": db_cfg.BACKUPS_DIR,
+        "database": db_cfg.DB_PATH,
     }
 
     yolo_candidate = os.path.join(root_path, "data", "models", "yolov8n-seg.pt")

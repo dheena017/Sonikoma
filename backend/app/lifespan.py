@@ -81,6 +81,26 @@ async def lifespan(app: FastAPI):
             logger.warning(f"[System] Log pruning failed during startup: {e}")
 
         try:
+            from database import config as db_cfg
+            if os.path.exists(db_cfg.TEMP_DIR):
+                now_ts = time.time()
+                cleaned_temp = 0
+                for f in os.listdir(db_cfg.TEMP_DIR):
+                    if f.startswith('.'):
+                        continue
+                    fp = os.path.join(db_cfg.TEMP_DIR, f)
+                    if os.path.isfile(fp) and (now_ts - os.path.getmtime(fp) > 86400):
+                        try:
+                            os.remove(fp)
+                            cleaned_temp += 1
+                        except Exception:
+                            pass
+                if cleaned_temp > 0:
+                    logger.info(f"[Startup] Purged {cleaned_temp} stale temporary files (>24h old).")
+        except Exception as e:
+            logger.debug(f"[Startup] Temp directory sweep note: {e}")
+
+        try:
             from ai_engine.skills import registry
             registry.load_skills()
         except Exception as e:

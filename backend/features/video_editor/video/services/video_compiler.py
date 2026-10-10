@@ -94,10 +94,15 @@ async def compile_video_from_panels(
 
     first_panel = panels[0] if panels else {}
     raw_title = first_panel.get("series_title") or first_panel.get("series_slug") or "series"
-    series_slug = slugify(raw_title, separator="_") or "series"
+    clean_series = slugify(raw_title, separator="-") or "series"
+    clean_series = clean_series.replace("_", "-").strip("-")
     ep_num = first_panel.get("episode_num") or first_panel.get("chapter_num") or "1"
+    try:
+        ep_formatted = f"{int(ep_num):02d}"
+    except (ValueError, TypeError):
+        ep_formatted = str(ep_num)
 
-    output_filename = f"{series_slug}_ep{ep_num}_compiled_{uuid.uuid4().hex[:8]}.mp4"
+    output_filename = f"{clean_series}-ep{ep_formatted}-video-render-{uuid.uuid4().hex[:8]}.mp4"
     output_path = os.path.join(output_dir, output_filename)
 
     clips = []
