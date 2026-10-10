@@ -83,30 +83,24 @@ def register_routers(app: FastAPI):
     os.makedirs(videos_path, exist_ok=True)
     app.mount("/videos", StaticFiles(directory=videos_path), name="videos")
 
-    # Serve AI series generated panel images & voice dubbing audio (with anti-caching headers)
-    backend_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "local_media"))
-    series_images_dir = os.path.join(backend_media_dir, "series_images")
-    series_audio_dir = os.path.join(backend_media_dir, "series_audio")
-    os.makedirs(series_images_dir, exist_ok=True)
-    os.makedirs(series_audio_dir, exist_ok=True)
+    # Serve persistent creator media assets under canonical data/media
+    media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media"))
+    series_images_dir = os.path.join(media_dir, "series_images")
+    series_audio_dir = os.path.join(media_dir, "series_audio")
+    media_panels_dir = os.path.join(media_dir, "panels")
+    media_videos_dir = os.path.join(media_dir, "videos")
+    media_audio_dir = os.path.join(media_dir, "audio")
+    media_exports_dir = os.path.join(media_dir, "exports")
+
+    for d in [media_dir, series_images_dir, series_audio_dir, media_panels_dir, media_videos_dir, media_audio_dir, media_exports_dir]:
+        os.makedirs(d, exist_ok=True)
+
     app.mount("/media/series_images", NoCacheStaticFiles(directory=series_images_dir), name="series_images")
     app.mount("/media/series_audio", NoCacheStaticFiles(directory=series_audio_dir), name="series_audio")
-
-    # Serve persistent creator media assets (panels, videos, audio)
-    media_panels_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media", "panels"))
-    media_videos_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media", "videos"))
-    media_audio_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "media", "audio"))
-    os.makedirs(media_panels_dir, exist_ok=True)
-    os.makedirs(media_videos_dir, exist_ok=True)
-    os.makedirs(media_audio_dir, exist_ok=True)
     app.mount("/media/panels", StaticFiles(directory=media_panels_dir), name="media_panels")
     app.mount("/media/videos", StaticFiles(directory=media_videos_dir), name="media_videos")
     app.mount("/media/audio", StaticFiles(directory=media_audio_dir), name="media_audio")
-
-    # Serve locally generated panel layer WebPs (legacy fallback)
-    local_media_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "local_media"))
-    os.makedirs(local_media_dir, exist_ok=True)
-    app.mount("/media", StaticFiles(directory=local_media_dir), name="media")
+    app.mount("/media", StaticFiles(directory=media_dir), name="media")
 
     # Serve locally saved training data
     training_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "data", "training_data"))

@@ -26,7 +26,11 @@ MEDIA_DIR = os.path.join(DATA_DIR, "media")
 MEDIA_VIDEOS_DIR = os.path.join(MEDIA_DIR, "videos")
 MEDIA_PANELS_DIR = os.path.join(MEDIA_DIR, "panels")
 MEDIA_AUDIO_DIR = os.path.join(MEDIA_DIR, "audio")
-LOCAL_MEDIA_DIR = os.path.join(DATA_DIR, "local_media")  # Backward-compatible alias
+MEDIA_EXPORTS_DIR = os.path.join(MEDIA_DIR, "exports")
+MEDIA_SERIES_IMAGES_DIR = os.path.join(MEDIA_DIR, "series_images")
+MEDIA_SERIES_AUDIO_DIR = os.path.join(MEDIA_DIR, "series_audio")
+MEDIA_SERIES_VIDEOS_DIR = os.path.join(MEDIA_DIR, "series_videos")
+LOCAL_MEDIA_DIR = MEDIA_DIR  # Canonical alias pointing directly to MEDIA_DIR
 
 # ── Tier 3: High-Performance Ephemeral Caches ─────────────────────────────
 
@@ -70,6 +74,10 @@ __all__ = [
     "MEDIA_VIDEOS_DIR",
     "MEDIA_PANELS_DIR",
     "MEDIA_AUDIO_DIR",
+    "MEDIA_EXPORTS_DIR",
+    "MEDIA_SERIES_IMAGES_DIR",
+    "MEDIA_SERIES_AUDIO_DIR",
+    "MEDIA_SERIES_VIDEOS_DIR",
     "LOCAL_MEDIA_DIR",
     "CACHE_DIR",
     "CACHE_STITCHED_DIR",

@@ -55,6 +55,8 @@ def init_sqlite(conn: sqlite3.Connection) -> None:
 
         # Panels
         _run_safe_alter(cursor, conn, "ALTER TABLE panels ADD COLUMN narrative TEXT", "added narrative to panels")
+        _run_safe_alter(cursor, conn, "ALTER TABLE panels ADD COLUMN visual_description TEXT", "added visual_description to panels")
+        _run_safe_alter(cursor, conn, "ALTER TABLE panels ADD COLUMN grayscale INTEGER DEFAULT 0", "added grayscale to panels")
 
         # Users
         _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN is_locked INTEGER NOT NULL DEFAULT 0", "added is_locked to users")

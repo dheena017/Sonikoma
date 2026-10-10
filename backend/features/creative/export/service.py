@@ -75,8 +75,8 @@ class ExportService:
             else:
                 filename = video_url.split("/")[-1].split("?")[0] if video_url else ""
                 candidate_paths = [
+                    os.path.join(PROJECT_ROOT, "data", "media", "videos", filename),
                     os.path.join(PROJECT_ROOT, "data", "media", filename),
-                    os.path.join(PROJECT_ROOT, "data", "local_media", filename),
                 ]
                 for cp in candidate_paths:
                     if os.path.exists(cp) and os.path.isfile(cp):
@@ -105,7 +105,8 @@ class ExportService:
                 else:
                     t_filename = thumbnail_url.split("/")[-1].split("?")[0]
                     t_candidates = [
-                        os.path.join(PROJECT_ROOT, "data", "local_media", t_filename),
+                        os.path.join(PROJECT_ROOT, "data", "media", "panels", t_filename),
+                        os.path.join(PROJECT_ROOT, "data", "media", t_filename),
                         os.path.join(PROJECT_ROOT, "data", "cache", t_filename),
                     ]
                     for tp in t_candidates:

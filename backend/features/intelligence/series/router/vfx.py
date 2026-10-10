@@ -3,7 +3,7 @@
 High-level generative anime motion synthesis (24fps MP4):
 - True physical anime motion: orbital 3D pans, whip pans, heroic low angle rises, and sakuga dash
 - Real MP4 video encoding using ImageIO / FFMPEG (libx264)
-- Local disk persistence under data/local_media/series_videos/{series_id}/
+- Local disk persistence under data/media/series_videos/{series_id}/
 - Live video streaming endpoint at /preview-video/{panel_id}.mp4
 """
 
@@ -29,9 +29,8 @@ logger = logging.getLogger("sonikoma.series.router.vfx")
 
 router = APIRouter(tags=["AI Series - Visual FX & Motion"])
 
-VIDEO_STORAGE_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media", "series_videos")
-)
+from database.config import MEDIA_SERIES_VIDEOS_DIR, MEDIA_SERIES_IMAGES_DIR
+VIDEO_STORAGE_DIR = MEDIA_SERIES_VIDEOS_DIR
 os.makedirs(VIDEO_STORAGE_DIR, exist_ok=True)
 
 
@@ -53,10 +52,8 @@ def _get_series_video_dir(series_id: str) -> str:
 
 async def _load_panel_source_image(panel: AISeriesPanel, series_id: str) -> Image.Image:
     """Resolve and load panel image from local disk cache, remote URL, or create high-contrast canvas."""
-    # 1. Check local media directory
-    img_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media", "series_images", series_id)
-    )
+    # 1. Check media series_images directory
+    img_dir = os.path.join(MEDIA_SERIES_IMAGES_DIR, series_id)
     p_id = panel.panel_id or panel.id or "panel"
     local_path = os.path.join(img_dir, f"{p_id}.png")
     if os.path.exists(local_path):

@@ -134,10 +134,12 @@ CREATE TABLE IF NOT EXISTS panels (
   sfx                TEXT    NOT NULL DEFAULT '',       -- Onomatopoeia / sound effect text
   duration           REAL,                              -- Timeline display duration in seconds
   motion_type        TEXT,                              -- "Ken Burns", "Pan Up", "Static"
+  visual_description TEXT,                              -- Frame visual description / artwork generation prompt
   narrative          TEXT,                              -- Scene visual summary & context (unified narrative)
   brightness         REAL,
   contrast           REAL,
   saturation         REAL,
+  grayscale          INTEGER DEFAULT 0,                 -- Grayscale filter toggle (0 or 1)
   filter_preset      TEXT,                              -- "grayscale", "warm", "vintage", "dramatic"
   bubble_method      TEXT,                              -- Detection algorithm: "opencv", "yolo", "manual"
   detection_style    TEXT,                              -- Detection filter: "all", "white_only", "text_only"

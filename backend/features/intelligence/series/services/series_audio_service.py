@@ -2,7 +2,7 @@
 
 Performs high-quality vocal dubbing using Microsoft Edge-TTS with multi-character
 voice profiles, natural sentence cadence optimization, pitch/rate controls,
-and local disk persistence under data/local_media/series_audio/.
+and local disk persistence under data/media/series_audio/.
 """
 
 import os
@@ -20,11 +20,9 @@ logger = logging.getLogger("sonikoma.services.series.audio")
 class SeriesAudioService:
     def __init__(self):
         # Base audio storage directory mounted at /media
-        base_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media", "series_audio")
-        )
-        os.makedirs(base_dir, exist_ok=True)
-        self.audio_dir = base_dir
+        from database.config import MEDIA_SERIES_AUDIO_DIR
+        os.makedirs(MEDIA_SERIES_AUDIO_DIR, exist_ok=True)
+        self.audio_dir = MEDIA_SERIES_AUDIO_DIR
 
     def _get_series_audio_dir(self, series_id: str) -> str:
         s_dir = os.path.join(self.audio_dir, series_id)

@@ -62,12 +62,12 @@ The transformation of a static comic series into a high-fidelity widescreen cine
 
 To facilitate zero-configuration local execution and robust state persistence, all system-wide data assets are globally routed to reside under a unified, single-source-of-truth **`data/`** directory in the repository root:
 
-- **`data/webtoon_local.db`:** The primary SQLite relational database.
-- **`data/image_cache/`:** Long-term caching for scraped panel strips.
-- **`data/media/`:** Rendered output MP4 movies and soft subtitle packages.
-- **`data/local_media/`:** Local isolated character layers, panel segmentation crops, and fine-tuned weight artifacts.
-- **`data/temp/`:** Temporary compilation chunks and processing files globally managed in Python via a custom `tempfile.tempdir` override.
-- **`data/scraped_html/`:** Scraper diagnostics and raw HTML caches.
+- **`data/webtoon_local.db`:** The primary SQLite relational database (ISO 8601 UTC dates).
+- **`data/media/`:** Persistent creator assets (`videos/`, `panels/`, `audio/`, `series_images/`, `exports/`).
+- **`data/cache/`:** High-performance ephemeral caches (`stitched/`, `edits/`, `audio/`).
+- **`data/backups/`:** Automatic SQLite database snapshots and schema restore points.
+- **`data/temp/`:** Temporary compilation chunks and processing files (auto-purged after 24h).
+- **`data/training_data/`:** Fine-tuned YOLO weight artifacts and vision datasets.
 
 ---
 

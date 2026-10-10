@@ -33,9 +33,9 @@ from app.core.cache import stitched_cache
 
 logger = logging.getLogger("sonikoma.services.crop.long_panels")
 
-# Local media storage directory (backend/data/local_media)
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-MEDIA_DIR = os.path.join(PROJECT_ROOT, "data", "local_media")
+# Persistent media storage directory (backend/data/media/panels)
+from database.config import MEDIA_PANELS_DIR
+MEDIA_DIR = MEDIA_PANELS_DIR
 os.makedirs(MEDIA_DIR, exist_ok=True)
 
 
@@ -229,23 +229,14 @@ def _encode_slice_worker(args: Tuple) -> Optional[CroppedSliceItem]:
         cropped_img.save(out_io, format=target_fmt, **save_opts)
         slice_bytes = out_io.getvalue()
 
-        # Save locally with clean, human-readable, unique name
+        # Save to canonical media/panels/ with clean, human-readable, unique name
         date_str = datetime.datetime.now().strftime("%Y%m%d")
         unique_filename = f"strip-slice-{date_str}-idx{order_idx:03d}-{uuid.uuid4().hex[:6]}.{ext}"
-        file_path = os.path.join(MEDIA_DIR, unique_filename)
+        file_path = os.path.join(MEDIA_PANELS_DIR, unique_filename)
         with open(file_path, "wb") as f:
             f.write(slice_bytes)
 
-        # Also save to canonical media/panels/ if directory exists
-        panels_dir = os.path.join(PROJECT_ROOT, "data", "media", "panels")
-        if os.path.exists(panels_dir):
-            try:
-                with open(os.path.join(panels_dir, unique_filename), "wb") as f:
-                    f.write(slice_bytes)
-            except Exception:
-                pass
-
-        media_url = f"/media/{unique_filename}"
+        media_url = f"/media/panels/{unique_filename}"
         cache_id = f"slice_{unique_filename}"
         stitched_cache.set(cache_id, {"data": slice_bytes, "content_type": content_type})
 

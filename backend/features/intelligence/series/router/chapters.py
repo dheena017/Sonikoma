@@ -27,9 +27,8 @@ def _enrich_chapter_image_timestamps(series_id: str, chapter: ChapterSession) ->
     """Ensure every panel's image_url includes the latest file modification timestamp (?v=mtime) from disk."""
     if not chapter or not chapter.panels:
         return chapter
-    backend_media_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media", "series_images", series_id)
-    )
+    from database.config import MEDIA_SERIES_IMAGES_DIR
+    backend_media_dir = os.path.join(MEDIA_SERIES_IMAGES_DIR, series_id)
     for p in chapter.panels:
         if p.image_url and "/media/series_images/" in p.image_url:
             clean_url = p.image_url.split("?")[0]

@@ -26,11 +26,9 @@ logger = logging.getLogger("sonikoma.services.series.image")
 class SeriesImageService:
     def __init__(self):
         # Base image storage directory mounted at /media
-        base_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media", "series_images")
-        )
-        os.makedirs(base_dir, exist_ok=True)
-        self.images_dir = base_dir
+        from database.config import MEDIA_SERIES_IMAGES_DIR
+        os.makedirs(MEDIA_SERIES_IMAGES_DIR, exist_ok=True)
+        self.images_dir = MEDIA_SERIES_IMAGES_DIR
 
     def _get_series_images_dir(self, series_id: str) -> str:
         s_dir = os.path.join(self.images_dir, series_id)
@@ -116,22 +114,22 @@ class SeriesImageService:
         s_dir = self._get_series_images_dir(series_id)
         filename = f"{actual_panel_id}.png"
         filepath = os.path.join(s_dir, filename)
-        local_media_url = f"/media/series_images/{series_id}/{filename}"
+        media_url = f"/media/series_images/{series_id}/{filename}"
 
-        final_url = local_media_url
+        final_url = media_url
 
         # Fast path: already cached locally on disk
         if not force_regenerate and os.path.exists(filepath) and os.path.getsize(filepath) > 1024:
             if panel and hasattr(panel, "image_url"):
-                panel.image_url = local_media_url
+                panel.image_url = media_url
             if panel_id is not None or prompt is not None:
                 return {
                     "status": "success",
-                    "image_url": local_media_url,
+                    "image_url": media_url,
                     "panel_id": actual_panel_id,
                     "prompt": actual_prompt,
                 }
-            return local_media_url
+            return media_url
 
         # Attempt remote generation with fast timeout
         saved = False
@@ -164,18 +162,18 @@ class SeriesImageService:
                 logger.error(f"[SeriesImageService] Fallback panel synthesis failed: {e}")
 
         if panel and hasattr(panel, "image_url"):
-            panel.image_url = local_media_url
+            panel.image_url = media_url
 
         # Return dict if requested via single panel endpoint
         if panel_id is not None or prompt is not None or force_regenerate:
             return {
                 "status": "success",
-                "image_url": local_media_url,
+                "image_url": media_url,
                 "panel_id": actual_panel_id,
                 "prompt": actual_prompt,
             }
 
-        return local_media_url
+        return media_url
 
     async def render_chapter_panels_batch(
         self,

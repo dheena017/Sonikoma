@@ -27,9 +27,8 @@ logger = logging.getLogger("sonikoma.series.router.export")
 
 router = APIRouter(tags=["AI Series - Export Master"])
 
-EXPORTS_STORAGE_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media", "exports")
-)
+from database.config import MEDIA_EXPORTS_DIR, MEDIA_SERIES_IMAGES_DIR
+EXPORTS_STORAGE_DIR = MEDIA_EXPORTS_DIR
 os.makedirs(EXPORTS_STORAGE_DIR, exist_ok=True)
 
 
@@ -44,9 +43,7 @@ class ExportRequest(BaseModel):
 
 async def _fetch_panel_pil_image(panel: AISeriesPanel, series_id: str) -> Image.Image:
     """Load panel image from disk cache or remote URL into RGB PIL Image."""
-    img_dir = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media", "series_images", series_id)
-    )
+    img_dir = os.path.join(MEDIA_SERIES_IMAGES_DIR, series_id)
     p_id = panel.panel_id or panel.id or "panel"
     local_path = os.path.join(img_dir, f"{p_id}.png")
     if os.path.exists(local_path):

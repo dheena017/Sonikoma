@@ -121,7 +121,7 @@ async def stream_video_endpoint(video_filename: str):
     """Streams a rendered MP4 video file by filename."""
     candidate_paths = [
         os.path.join(_VIDEO_OUTPUT_DIR, video_filename),
-        os.path.join(os.path.abspath(os.path.join(_VIDEO_OUTPUT_DIR, "..", "local_media")), video_filename),
+        os.path.join(os.path.abspath(os.path.join(_VIDEO_OUTPUT_DIR, "videos")), video_filename),
     ]
     for p in candidate_paths:
         if os.path.exists(p) and os.path.isfile(p):

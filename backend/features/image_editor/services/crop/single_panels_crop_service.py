@@ -27,9 +27,9 @@ from app.core.cache import stitched_cache
 
 logger = logging.getLogger("sonikoma.services.crop.single_panels")
 
-# Local media storage directory (backend/data/local_media)
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-MEDIA_DIR = os.path.join(PROJECT_ROOT, "data", "local_media")
+# Persistent media storage directory (backend/data/media/panels)
+from database.config import MEDIA_PANELS_DIR
+MEDIA_DIR = MEDIA_PANELS_DIR
 os.makedirs(MEDIA_DIR, exist_ok=True)
 
 
@@ -206,23 +206,14 @@ async def crop_single_panels_margins(request: SinglePanelsCropRequest) -> Single
     img.save(out_io, format=target_fmt, **save_opts)
     output_bytes = out_io.getvalue()
 
-    # Save to /media/ with clean, human-readable, unique name
+    # Save to canonical media/panels/ with clean, human-readable, unique name
     date_str = datetime.datetime.now().strftime("%Y%m%d")
     unique_filename = f"panel-crop-{date_str}-{uuid.uuid4().hex[:8]}.{ext}"
-    file_path = os.path.join(MEDIA_DIR, unique_filename)
+    file_path = os.path.join(MEDIA_PANELS_DIR, unique_filename)
     with open(file_path, "wb") as f:
         f.write(output_bytes)
 
-    # Also save to canonical media/panels/ if directory exists
-    panels_dir = os.path.join(PROJECT_ROOT, "data", "media", "panels")
-    if os.path.exists(panels_dir):
-        try:
-            with open(os.path.join(panels_dir, unique_filename), "wb") as f:
-                f.write(output_bytes)
-        except Exception:
-            pass
-
-    media_url = f"/media/{unique_filename}"
+    media_url = f"/media/panels/{unique_filename}"
     stitched_cache.set(f"single_{unique_filename}", {"data": output_bytes, "content_type": content_type})
 
     elapsed_ms = int((time.perf_counter() - start_time) * 1000)

@@ -223,10 +223,15 @@ async def proxy_image_stream_endpoint(
 
     # Local /media/ or /videos/ fallback resolution
     if fetch_url.startswith("/media/") or fetch_url.startswith("media/") or "/media/slice_" in fetch_url or "/media/single_" in fetch_url:
-        media_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "data", "local_media"))
+        from database.config import MEDIA_DIR
         clean_name = fetch_url.split("/media/")[-1] if "/media/" in fetch_url else fetch_url.split("media/")[-1]
-        local_path = os.path.join(media_root, clean_name)
-        if os.path.exists(local_path):
+        clean_name = clean_name.split("?")[0]
+        local_path = os.path.join(MEDIA_DIR, clean_name)
+        if not os.path.exists(local_path):
+            cand = os.path.join(MEDIA_DIR, "panels", clean_name)
+            if os.path.exists(cand):
+                local_path = cand
+        if os.path.exists(local_path) and os.path.isfile(local_path):
             with open(local_path, "rb") as f:
                 content = f.read()
             ext = os.path.splitext(clean_name)[1].lower()

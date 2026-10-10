@@ -3,7 +3,7 @@ scripts/reset_to_defaults.py
 ─────────────────────────────────────────────────────────────────────────────
 Safely resets all project data:
 1. Creates a timestamped backup of the database in data/backups/.
-2. Cleans temporary and generated media files (local_media, temp, media, image_cache).
+2. Cleans temporary and generated cache/media files (cache, temp, media, image_cache).
 3. Clears all operational tables in SQLite database.
 4. Re-initializes clean schema and runs migrations.
 5. Seeds the complete set of default platform settings, default series,
@@ -31,12 +31,12 @@ BACKUP_DIR = os.path.join(DATA_DIR, "backups")
 
 CACHE_AND_MEDIA_DIRS = [
     os.path.join(DATA_DIR, "temp"),
-    os.path.join(DATA_DIR, "local_media"),
+    os.path.join(DATA_DIR, "cache"),
     os.path.join(DATA_DIR, "media"),
     os.path.join(DATA_DIR, "image_cache"),
     os.path.join(DATA_DIR, "training_data"),
     os.path.join(PROJECT_ROOT, "data", "temp"),
-    os.path.join(PROJECT_ROOT, "data", "local_media"),
+    os.path.join(PROJECT_ROOT, "data", "cache"),
     os.path.join(PROJECT_ROOT, "data", "media"),
     os.path.join(PROJECT_ROOT, "data", "image_cache"),
 ]
