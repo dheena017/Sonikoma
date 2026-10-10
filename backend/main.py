@@ -41,6 +41,10 @@ if __name__ == "__main__":
 
     log_level_name = os.getenv("LOG_LEVEL", "info" if IS_PRODUCTION else "debug").lower()
 
+    log_dir = os.path.join(BACKEND_DIR, "data", "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    log_file_path = os.path.join(log_dir, "sonikoma.log")
+
     custom_log_config = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -54,9 +58,9 @@ if __name__ == "__main__":
                 "()": ColoredFormatter,
                 "use_colors": True,
             },
-            "access": {
-                "()": ColoredFormatter,
-                "use_colors": True,
+            "file": {
+                "format": "%(asctime)s [%(levelname)-7s] [%(name)s] %(message)s",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
             },
         },
         "handlers": {
@@ -66,29 +70,38 @@ if __name__ == "__main__":
                 "stream": "ext://sys.stdout",
                 "filters": ["endpoint_filter"],
             },
+            "file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "formatter": "file",
+                "filename": log_file_path,
+                "maxBytes": 10 * 1024 * 1024,
+                "backupCount": 5,
+                "encoding": "utf-8",
+                "filters": ["endpoint_filter"],
+            },
         },
         "root": {
-            "handlers": ["default"],
+            "handlers": ["default", "file"],
             "level": log_level_name.upper(),
         },
         "loggers": {
             "sonikoma": {
-                "handlers": ["default"],
+                "handlers": ["default", "file"],
                 "level": log_level_name.upper(),
                 "propagate": False,
             },
             "uvicorn": {
-                "handlers": ["default"],
+                "handlers": ["default", "file"],
                 "level": log_level_name.upper(),
                 "propagate": False,
             },
             "uvicorn.error": {
-                "handlers": ["default"],
+                "handlers": ["default", "file"],
                 "level": log_level_name.upper(),
                 "propagate": False,
             },
             "uvicorn.access": {
-                "handlers": ["default"],
+                "handlers": ["default", "file"],
                 "level": log_level_name.upper(),
                 "propagate": False,
             },

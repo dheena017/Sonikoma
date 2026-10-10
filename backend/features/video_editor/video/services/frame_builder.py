@@ -15,6 +15,10 @@ from proglog import ProgressBarLogger
 
 logger = logging.getLogger("sonikoma.video_editor.video.services.frame_builder")
 
+_PROJECT_ROOT = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..")
+)
+
 from database.config import MEDIA_VIDEOS_DIR
 
 _VIDEO_OUTPUT_DIR = MEDIA_VIDEOS_DIR

@@ -227,6 +227,12 @@ def setup_logging():
         file_handler.setLevel(logging.DEBUG)
         file_handler.addFilter(filter_pipeline)
         root_logger.addHandler(file_handler)
+
+        # Attach file_handler to non-propagating loggers (sonikoma, uvicorn) to avoid duplicate lines
+        for target_name in ("sonikoma", "uvicorn", "uvicorn.error", "uvicorn.access"):
+            t_log = logging.getLogger(target_name)
+            if not t_log.propagate and not any(isinstance(h, RotatingFileHandler) for h in t_log.handlers):
+                t_log.addHandler(file_handler)
     except Exception as e:
         # Fallback gracefully if file logging cannot be initialized (e.g. read-only volume)
         sys.stderr.write(f"[LoggingSetup] Warning: Could not initialize rotating file handler: {e}\n")
