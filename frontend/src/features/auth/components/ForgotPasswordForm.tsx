@@ -283,6 +283,40 @@ export default function ForgotPasswordPage({
               )}
             </div>
 
+            {/* Protected Comic Studio Drafts Card */}
+            <div className="p-3.5 rounded-2xl bg-[#14151a] border border-white/10 flex items-center justify-between gap-3 shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="flex -space-x-2 shrink-0">
+                  <img
+                    src="/demo-action-cleaned.jpg"
+                    alt="Comic Draft 1"
+                    className="w-9 h-9 rounded-full object-cover border-2 border-[#14151a] shadow-sm"
+                  />
+                  <img
+                    src="/demo-romance.jpg"
+                    alt="Comic Draft 2"
+                    className="w-9 h-9 rounded-full object-cover border-2 border-[#14151a] shadow-sm"
+                  />
+                  <img
+                    src="/demo-monarch.jpg"
+                    alt="Comic Draft 3"
+                    className="w-9 h-9 rounded-full object-cover border-2 border-[#14151a] shadow-sm"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white">
+                    Your Comic Drafts are Safe
+                  </p>
+                  <p className="text-[10px] text-neutral-400">
+                    Restoring access recovers all saved storyboards & video exports
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-500/20 shrink-0">
+                Encrypted
+              </span>
+            </div>
+
             {/* Back to Login Link */}
             <p className="text-center text-sm text-neutral-400 font-medium">
               Remember your password?{" "}

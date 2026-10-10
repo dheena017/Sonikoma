@@ -98,7 +98,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
               {/* Visual Demo Card */}
               <div className="my-4 w-full rounded-2xl border border-[#2F2F2F] bg-[#141414]/95 backdrop-blur-2xl p-4 shadow-2xl relative overflow-hidden">
                 {idx === 0 && (
-                  /* Slide 0: AI Panel Slicing */
+                  /* Slide 0: AI Panel Slicing with Real Comic Images */
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-semibold text-neutral-300 border-b border-[#2F2F2F] pb-2">
                       <span className="flex items-center gap-1.5 text-blue-400 font-bold">
@@ -110,34 +110,46 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                       </span>
                     </div>
                     <div className="grid grid-cols-3 gap-2.5">
-                      <div className="bg-[#181818] border border-blue-500/30 rounded-xl p-2.5 text-center space-y-1">
-                        <div className="h-16 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl text-blue-400">
-                          ⚡️
+                      <div className="bg-[#181818] border border-blue-500/30 rounded-xl p-2 text-center space-y-1 group">
+                        <div className="h-20 rounded-lg overflow-hidden border border-blue-500/20 relative">
+                          <img
+                            src="/demo-action-cleaned.jpg"
+                            alt="Panel 1"
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          />
                         </div>
                         <span className="text-xs font-bold text-white block truncate">
-                          Panel 1
+                          Hunter Raid
                         </span>
                         <span className="text-[10px] text-blue-400 block font-medium">
                           Auto-Cropped
                         </span>
                       </div>
-                      <div className="bg-[#181818] border border-blue-500/30 rounded-xl p-2.5 text-center space-y-1">
-                        <div className="h-16 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-xl text-blue-400">
-                          ⚔️
+                      <div className="bg-[#181818] border border-blue-500/30 rounded-xl p-2 text-center space-y-1 group">
+                        <div className="h-20 rounded-lg overflow-hidden border border-blue-500/20 relative">
+                          <img
+                            src="/demo-romance.jpg"
+                            alt="Panel 2"
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          />
                         </div>
                         <span className="text-xs font-bold text-white block truncate">
-                          Panel 2
+                          Royal Palace
                         </span>
                         <span className="text-[10px] text-blue-400 block font-medium">
                           Auto-Cropped
                         </span>
                       </div>
-                      <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-2.5 text-center space-y-1">
-                        <div className="h-16 rounded-lg bg-indigo-500/10 border border-[#2F2F2F] flex items-center justify-center text-xl text-indigo-400">
-                          💥
+                      <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-2 text-center space-y-1 group">
+                        <div className="h-20 rounded-lg overflow-hidden border border-[#2F2F2F] relative">
+                          <img
+                            src="/demo-cyberpunk.jpg"
+                            alt="Panel 3"
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          />
                         </div>
                         <span className="text-xs font-bold text-white block truncate">
-                          Panel 3
+                          Cyber City
                         </span>
                         <span className="text-[10px] text-indigo-400 block font-medium">
                           Auto-Cropped
@@ -148,7 +160,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                 )}
 
                 {idx === 1 && (
-                  /* Slide 1: Camera Motions */
+                  /* Slide 1: Camera Motions with Real Comic Art */
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-semibold text-neutral-300 border-b border-[#2F2F2F] pb-2">
                       <span className="flex items-center gap-1.5 text-blue-400 font-bold">
@@ -159,21 +171,27 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                         60 FPS Video
                       </span>
                     </div>
-                    <div className="h-24 rounded-xl bg-[#181818] border border-[#2F2F2F] p-3.5 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md">
+                    <div className="relative h-24 rounded-xl overflow-hidden border border-[#2F2F2F] p-3.5 flex items-center justify-between group">
+                      <img
+                        src="/demo-monarch.jpg"
+                        alt="Motion artwork"
+                        className="absolute inset-0 w-full h-full object-cover opacity-50 scale-105 group-hover:scale-110 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/25" />
+                      <div className="relative z-10 flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shrink-0">
                           <Play className="w-4 h-4 fill-white ml-0.5" />
                         </div>
                         <div>
                           <p className="text-xs font-bold text-white">
                             Smooth Camera Pan & Zoom
                           </p>
-                          <p className="text-[10px] text-neutral-400">
-                            Automatic motion animation
+                          <p className="text-[10px] text-neutral-300">
+                            Automatic Ken Burns motion curves
                           </p>
                         </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-lg bg-[#0E0E0E] text-blue-400 text-[10px] font-bold border border-[#2F2F2F]">
+                      <span className="relative z-10 px-2.5 py-1 rounded-lg bg-black/80 text-blue-400 text-[10px] font-bold border border-white/20 backdrop-blur-md">
                         1080p / 4K
                       </span>
                     </div>
@@ -181,7 +199,7 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                 )}
 
                 {idx === 2 && (
-                  /* Slide 2: Voice Narration */
+                  /* Slide 2: Voice Narration with Real Character Art */
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-semibold text-neutral-300 border-b border-[#2F2F2F] pb-2">
                       <span className="flex items-center gap-1.5 text-blue-400 font-bold">
@@ -193,32 +211,44 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5">
-                      <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-bold text-white">
-                            Main Character Voice
+                      <div className="relative overflow-hidden rounded-xl border border-blue-500/30 p-2.5 flex items-center justify-between bg-black/40">
+                        <img
+                          src="/demo-action-hero.jpg"
+                          alt="Protagonist"
+                          className="absolute inset-0 w-full h-full object-cover opacity-35"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30" />
+                        <div className="relative z-10">
+                          <p className="text-xs font-bold text-white truncate max-w-[90px]">
+                            Hero Voice Dub
                           </p>
-                          <p className="text-[10px] text-neutral-400">
-                            Dramatic • English
+                          <p className="text-[10px] text-neutral-300 font-mono">
+                            ChristopherNeural
                           </p>
                         </div>
-                        <div className="flex items-end gap-1 h-5">
+                        <div className="relative z-10 flex items-end gap-1 h-5 shrink-0">
                           <span className="w-1 bg-blue-400 h-3 rounded-full animate-pulse" />
-                          <span className="w-1 bg-indigo-400 h-5 rounded-full animate-pulse" />
+                          <span className="w-1 bg-cyan-400 h-5 rounded-full animate-pulse" />
                           <span className="w-1 bg-blue-400 h-2 rounded-full animate-pulse" />
                         </div>
                       </div>
-                      <div className="bg-[#181818] border border-[#2F2F2F] rounded-xl p-3 flex items-center justify-between">
-                        <div>
-                          <p className="text-xs font-bold text-white">
-                            Background Soundtracks
+                      <div className="relative overflow-hidden rounded-xl border border-purple-500/30 p-2.5 flex items-center justify-between bg-black/40">
+                        <img
+                          src="/demo-romance.jpg"
+                          alt="Sorceress"
+                          className="absolute inset-0 w-full h-full object-cover opacity-35"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30" />
+                        <div className="relative z-10">
+                          <p className="text-xs font-bold text-white truncate max-w-[90px]">
+                            Melodic Sorceress
                           </p>
-                          <p className="text-[10px] text-neutral-400">
-                            Action & Mystery
+                          <p className="text-[10px] text-neutral-300 font-mono">
+                            JennyNeural
                           </p>
                         </div>
-                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                          Auto-Synced
+                        <span className="relative z-10 text-[10px] font-bold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/30 shrink-0">
+                          Synced
                         </span>
                       </div>
                     </div>
@@ -226,28 +256,39 @@ export default function AuthShowcase({}: AuthShowcaseProps) {
                 )}
 
                 {idx === 3 && (
-                  /* Slide 3: Video Export */
+                  /* Slide 3: Video Export with Real Vertical Video Artwork */
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs font-semibold text-neutral-300 border-b border-[#2F2F2F] pb-2">
                       <span className="flex items-center gap-1.5 text-blue-400 font-bold">
                         <Cpu className="w-4 h-4 text-blue-400" />
                         Ready to Post
                       </span>
-                      <span className="text-[10px] text-blue-400 font-bold px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
-                        Vertical MP4
+                      <span className="text-[10px] text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                        Vertical 9:16 MP4
                       </span>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-neutral-300 font-bold">
-                          Video Generation
+                    <div className="relative h-24 rounded-xl overflow-hidden border border-emerald-500/30 p-3 flex items-center justify-between bg-black">
+                      <img
+                        src="/demo-cyberpunk-cleaned.jpg"
+                        alt="Export video"
+                        className="absolute inset-0 w-full h-full object-cover opacity-45"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20" />
+                      <div className="relative z-10 space-y-1 max-w-[180px]">
+                        <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/30">
+                          Export Ready • 60 FPS
                         </span>
-                        <span className="text-blue-400 font-bold">
+                        <p className="text-xs font-bold text-white leading-tight">
+                          TikTok & Shorts Formatted
+                        </p>
+                      </div>
+                      <div className="relative z-10 flex flex-col items-end gap-1 shrink-0">
+                        <span className="text-xs font-mono font-bold text-emerald-400 bg-black/80 px-2 py-0.5 rounded-lg border border-emerald-500/30">
                           100% Ready
                         </span>
-                      </div>
-                      <div className="h-2 w-full bg-[#0E0E0E] rounded-full overflow-hidden border border-[#2F2F2F]">
-                        <div className="h-full bg-blue-600 w-full rounded-full" />
+                        <span className="text-[9px] text-neutral-400 font-mono">
+                          00:30 MP4
+                        </span>
                       </div>
                     </div>
                   </div>
