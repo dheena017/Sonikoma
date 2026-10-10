@@ -3,15 +3,10 @@ import DashboardHeader from "@/features/platform/dashboard/components/DashboardH
 import DashboardStats from "@/features/platform/dashboard/components/DashboardStats";
 import DashboardQuickIngest from "@/features/platform/dashboard/components/DashboardQuickIngest";
 import DashboardQuickLinks from "@/features/platform/dashboard/components/DashboardQuickLinks";
-import DashboardVoiceAudition from "@/features/platform/dashboard/components/DashboardVoiceAudition";
-import DashboardMotionPresets from "@/features/platform/dashboard/components/DashboardMotionPresets";
-import DashboardAIPipeline from "@/features/platform/dashboard/components/DashboardAIPipeline";
 import DashboardStarterTemplates from "@/features/platform/dashboard/components/DashboardStarterTemplates";
 import DashboardSystemHealth from "@/features/platform/dashboard/components/DashboardSystemHealth";
 import DashboardOnboardingGuide from "@/features/platform/dashboard/components/DashboardOnboardingGuide";
-import DashboardKeyboardCheatsheet from "@/features/platform/dashboard/components/DashboardKeyboardCheatsheet";
 import DashboardProjectSection from "@/features/platform/dashboard/components/DashboardProjectSection";
-import DashboardActivityFeed from "@/features/platform/dashboard/components/DashboardActivityFeed";
 import useDashboardPage from "@/features/platform/dashboard/hooks/useDashboardPage";
 import {
   WelcomeUserModal,
@@ -146,15 +141,17 @@ export default function DashboardPage() {
           <DashboardQuickIngest />
         </div>
 
-        {/* 5. Interactive Getting Started / Onboarding Checklist */}
-        <div className="relative z-10">
-          <DashboardOnboardingGuide
-            tasks={onboardingTasks}
-            onNewSeries={handleNewSeries}
-          />
-        </div>
+        {/* 5. Getting Started Checklist (Only for new creators with no active projects) */}
+        {!loading && projects.length === 0 && (
+          <div className="relative z-10">
+            <DashboardOnboardingGuide
+              tasks={onboardingTasks}
+              onNewSeries={handleNewSeries}
+            />
+          </div>
+        )}
 
-        {/* 6. Studio Creation Suite (6 Interactive Modules Launchpad) */}
+        {/* 6. Studio Creation Suite (6 Interactive Workspaces Launchpad) */}
         <div className="relative z-10">
           <DashboardQuickLinks
             onGoToWorkspace={handleNewSeries}
@@ -165,39 +162,14 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* 7. Neural Voice Actor Audition Studio Preview */}
-        <div className="relative z-10">
-          <DashboardVoiceAudition />
-        </div>
-
-        {/* 8. 2.5D Cinematic Camera Motion Presets */}
-        <div className="relative z-10">
-          <DashboardMotionPresets />
-        </div>
-
-        {/* 9. AI Manga-to-Video Engine Architectural Pipeline */}
-        <div className="relative z-10">
-          <DashboardAIPipeline />
-        </div>
-
-        {/* 10. Starter Manga Packs & Demos */}
+        {/* 7. Starter Manga Packs & Demos */}
         <div className="relative z-10">
           <DashboardStarterTemplates />
         </div>
 
-        {/* 11. System Telemetry, Engine Health & Resource Quotas */}
+        {/* 8. System Telemetry, Engine Health & Resource Quotas */}
         <div className="relative z-10">
           <DashboardSystemHealth latency={latency} analytics={analytics} />
-        </div>
-
-        {/* 12. Real-time Activity Timeline & Production Events */}
-        <div className="relative z-10">
-          <DashboardActivityFeed analytics={analytics} />
-        </div>
-
-        {/* 13. Studio Keyboard Shortcuts & Cheatsheet */}
-        <div className="relative z-10">
-          <DashboardKeyboardCheatsheet />
         </div>
       </div>
 
