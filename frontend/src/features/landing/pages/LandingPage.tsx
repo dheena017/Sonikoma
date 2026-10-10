@@ -1388,18 +1388,17 @@ export default function LandingPage({
                         <ChevronDown className="w-4 h-4 text-neutral-400 shrink-0" />
                       )}
                     </button>
-                    {isOpen && (
-                      <div
-                        id={`faq-answer-${index}`}
-                        className={`px-5 pb-5 pt-0 text-sm leading-relaxed border-t font-normal transition-colors ${
-                          isLight
-                            ? "border-slate-100 text-slate-700"
-                            : "border-[#2F2F2F] text-neutral-300"
-                        }`}
-                      >
-                        {faq.a}
-                      </div>
-                    )}
+                    <div
+                      id={`faq-answer-${index}`}
+                      hidden={!isOpen}
+                      className={`px-5 pb-5 pt-0 text-sm leading-relaxed border-t font-normal transition-colors ${
+                        isLight
+                          ? "border-slate-100 text-slate-700"
+                          : "border-[#2F2F2F] text-neutral-300"
+                      }`}
+                    >
+                      {faq.a}
+                    </div>
                   </div>
                 );
               })}
