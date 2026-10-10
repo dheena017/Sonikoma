@@ -24,7 +24,7 @@ export function AdminUsageTab({ fetchWithInterceptor, analytics }: any) {
       const [resLogs, resKeys] = await Promise.all([
         fetchWithInterceptor("/api/v1/auth/admin/usage/tokens?limit=50"),
         fetchWithInterceptor(
-          "/api/v1/auth/admin/db/query?table=user_api_keys&limit=50"
+          "/api/v1/auth/admin/db/query?table=profile_api_keys&limit=50"
         ),
       ]);
 

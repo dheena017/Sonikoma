@@ -21,7 +21,7 @@ def get_series_by_slug(series_slug: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT * FROM series WHERE slug = ?
+            SELECT * FROM platform_series WHERE slug = ?
         """, (series_slug,)).fetchone()
         return dict(row) if row else None
     finally:
@@ -34,17 +34,17 @@ def delete_series(series_id: str) -> None:
     try:
         rows = conn.execute("""
             SELECT image_url, audio_url
-            FROM panels
-            WHERE chapter_id IN (SELECT id FROM chapters WHERE series_id = ?)
+            FROM image_panels
+            WHERE chapter_id IN (SELECT id FROM workspace_chapters WHERE series_id = ?)
         """, (series_id,)).fetchall()
         panel_urls = []
         for r in rows:
             if r['image_url']: panel_urls.append(r['image_url'])
             if r['audio_url']: panel_urls.append(r['audio_url'])
 
-        chaps = conn.execute('SELECT video_url FROM chapters WHERE series_id = ?', (series_id,)).fetchall()
+        chaps = conn.execute('SELECT video_url FROM workspace_chapters WHERE series_id = ?', (series_id,)).fetchall()
 
-        conn.execute('DELETE FROM series WHERE id = ?', (series_id,))
+        conn.execute('DELETE FROM platform_series WHERE id = ?', (series_id,))
         conn.commit()
 
         # Clean up cached panel files
@@ -75,7 +75,7 @@ def create_series(series_id: str, user_id: str, title: str, author: str, cover_i
     conn = get_db_connection()
     try:
         conn.execute("""
-            INSERT INTO series (id, user_id, title, author, cover_image, genre)
+            INSERT INTO platform_series (id, user_id, title, author, cover_image, genre)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (series_id, user_id, title, author, cover_image, genre))
         conn.commit()
@@ -103,7 +103,7 @@ def get_series_for_user(
     conn = get_db_connection()
     try:
         rows = conn.execute(
-            f"SELECT * FROM series WHERE user_id = ? ORDER BY {sort_col} {sort_dir}",
+            f"SELECT * FROM platform_series WHERE user_id = ? ORDER BY {sort_col} {sort_dir}",
             (user_id,),
         ).fetchall()
         return [dict(r) for r in rows]
@@ -118,7 +118,7 @@ def add_chapter_to_series(chapter_id: str, series_id: str, episode_number: str, 
     conn = get_db_connection()
     try:
         conn.execute("""
-            INSERT INTO chapters (id, series_id, episode_number, original_url, panels_count, video_url)
+            INSERT INTO workspace_chapters (id, series_id, episode_number, original_url, panels_count, video_url)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (chapter_id, series_id, episode_number, original_url, panels_count, video_url))
         conn.commit()
@@ -147,7 +147,7 @@ def get_chapters_for_series(
     conn = get_db_connection()
     try:
         rows = conn.execute(
-            f"SELECT * FROM chapters WHERE series_id = ? ORDER BY {sort_col} {sort_dir}",
+            f"SELECT * FROM workspace_chapters WHERE series_id = ? ORDER BY {sort_col} {sort_dir}",
             (series_id,),
         ).fetchall()
         results = []
@@ -164,7 +164,7 @@ def get_chapters_for_series(
 def delete_series_admin(series_id: str):
     conn = get_db_connection()
     try:
-        conn.execute('DELETE FROM series WHERE id = ?', (series_id,))
+        conn.execute('DELETE FROM platform_series WHERE id = ?', (series_id,))
         conn.commit()
     finally:
         conn.close()
@@ -180,7 +180,7 @@ def update_series_admin(series_id: str, updates: dict):
             params.append(v)
         params.append(series_id)
 
-        query = f"UPDATE series SET {', '.join(set_parts)} WHERE id = ?"
+        query = f"UPDATE platform_series SET {', '.join(set_parts)} WHERE id = ?"
         conn.execute(query, params)
         conn.commit()
     finally:

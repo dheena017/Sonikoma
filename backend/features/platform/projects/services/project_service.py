@@ -418,9 +418,9 @@ class ProjectService:
     def get_series_details(self, series_id_or_slug: str, current_user_id: str) -> Optional[Dict[str, Any]]:
         from database.engine import get_db_connection
         conn = get_db_connection()
-        row = conn.execute("SELECT * FROM series WHERE id = ?", (series_id_or_slug,)).fetchone()
+        row = conn.execute("SELECT * FROM platform_series WHERE id = ?", (series_id_or_slug,)).fetchone()
         if not row:
-            row = conn.execute("SELECT * FROM series WHERE slug = ?", (series_id_or_slug,)).fetchone()
+            row = conn.execute("SELECT * FROM platform_series WHERE slug = ?", (series_id_or_slug,)).fetchone()
         conn.close()
 
         if not row:

@@ -18,7 +18,7 @@ def save_youtube_profile(user_id: str, profile: Dict[str, Any]) -> Dict[str, Any
     conn = get_db_connection()
     try:
         cursor = conn.execute("""
-            INSERT INTO youtube_profiles (
+            INSERT INTO creative_youtube_profiles (
                 user_id, name, title_template, description_template, tags,
                 category_id, privacy_status, is_short, made_for_kids,
                 paid_promotion, license, video_language, channel_link,
@@ -67,7 +67,7 @@ def save_youtube_profile(user_id: str, profile: Dict[str, Any]) -> Dict[str, Any
 def get_youtube_profiles(user_id: str) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
-        rows = conn.execute("SELECT * FROM youtube_profiles WHERE user_id = ? ORDER BY name ASC", (user_id,)).fetchall()
+        rows = conn.execute("SELECT * FROM creative_youtube_profiles WHERE user_id = ? ORDER BY name ASC", (user_id,)).fetchall()
         result = []
         for r in rows:
             d = dict(r)
@@ -86,7 +86,7 @@ def get_youtube_profiles(user_id: str) -> List[Dict[str, Any]]:
 def delete_youtube_profile(user_id: str, name: str) -> bool:
     conn = get_db_connection()
     try:
-        cursor = conn.execute("DELETE FROM youtube_profiles WHERE user_id = ? AND name = ?", (user_id, name))
+        cursor = conn.execute("DELETE FROM creative_youtube_profiles WHERE user_id = ? AND name = ?", (user_id, name))
         conn.commit()
         return cursor.rowcount > 0
     finally:
@@ -97,7 +97,7 @@ def log_youtube_publication(user_id: str, chapter_id: Optional[str], youtube_url
     conn = get_db_connection()
     try:
         cursor = conn.execute("""
-            INSERT INTO youtube_publications (user_id, chapter_id, youtube_url, title, privacy_status)
+            INSERT INTO creative_youtube_publications (user_id, chapter_id, youtube_url, title, privacy_status)
             VALUES (?, ?, ?, ?, ?)
             RETURNING *
         """, (user_id, chapter_id, youtube_url, title, privacy_status))
@@ -111,7 +111,7 @@ def log_youtube_publication(user_id: str, chapter_id: Optional[str], youtube_url
 def get_youtube_publications(user_id: str) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
-        rows = conn.execute("SELECT * FROM youtube_publications WHERE user_id = ? ORDER BY published_at DESC", (user_id,)).fetchall()
+        rows = conn.execute("SELECT * FROM creative_youtube_publications WHERE user_id = ? ORDER BY published_at DESC", (user_id,)).fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()
@@ -121,7 +121,7 @@ def save_youtube_credentials(user_id: str, client_id: str, client_secret: str, p
     conn = get_db_connection()
     try:
         cursor = conn.execute("""
-            INSERT INTO youtube_credentials (user_id, client_id, client_secret, project_id, updated_at)
+            INSERT INTO creative_youtube_credentials (user_id, client_id, client_secret, project_id, updated_at)
             VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(user_id) DO UPDATE SET
                 client_id=excluded.client_id,
@@ -140,7 +140,7 @@ def save_youtube_credentials(user_id: str, client_id: str, client_secret: str, p
 def get_youtube_credentials(user_id: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
-        row = conn.execute("SELECT * FROM youtube_credentials WHERE user_id = ?", (user_id,)).fetchone()
+        row = conn.execute("SELECT * FROM creative_youtube_credentials WHERE user_id = ?", (user_id,)).fetchone()
         return dict(row) if row else None
     finally:
         conn.close()
@@ -149,7 +149,7 @@ def get_youtube_credentials(user_id: str) -> Optional[Dict[str, Any]]:
 def delete_youtube_credentials(user_id: str) -> bool:
     conn = get_db_connection()
     try:
-        cursor = conn.execute("DELETE FROM youtube_credentials WHERE user_id = ?", (user_id,))
+        cursor = conn.execute("DELETE FROM creative_youtube_credentials WHERE user_id = ?", (user_id,))
         conn.commit()
         return cursor.rowcount > 0
     finally:
@@ -174,12 +174,12 @@ def save_youtube_oauth_tokens(
     conn = get_db_connection()
     try:
         try:
-            conn.execute("ALTER TABLE youtube_oauth_tokens ADD COLUMN google_email TEXT")
+            conn.execute("ALTER TABLE creative_youtube_tokens ADD COLUMN google_email TEXT")
         except Exception:
             pass
 
         conn.execute("""
-            INSERT INTO youtube_oauth_tokens (user_id, access_token, refresh_token, client_id, client_secret, scopes, google_email, updated_at)
+            INSERT INTO creative_youtube_tokens (user_id, access_token, refresh_token, client_id, client_secret, scopes, google_email, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
             ON CONFLICT(user_id) DO UPDATE SET
                 access_token=excluded.access_token,
@@ -199,7 +199,7 @@ def get_youtube_oauth_tokens(user_id: str) -> Optional[Dict[str, Any]]:
     """Return the stored YouTube OAuth tokens for a user, or None if not connected."""
     conn = get_db_connection()
     try:
-        row = conn.execute("SELECT * FROM youtube_oauth_tokens WHERE user_id = ?", (user_id,)).fetchone()
+        row = conn.execute("SELECT * FROM creative_youtube_tokens WHERE user_id = ?", (user_id,)).fetchone()
         return dict(row) if row else None
     finally:
         conn.close()
@@ -216,7 +216,7 @@ def save_selected_youtube_channel(
     conn = get_db_connection()
     try:
         conn.execute("""
-            UPDATE youtube_oauth_tokens
+            UPDATE creative_youtube_tokens
             SET selected_channel_id=?, selected_channel_title=?,
                 selected_channel_thumbnail=?, selected_channel_handle=?,
                 updated_at=datetime('now')
@@ -226,7 +226,7 @@ def save_selected_youtube_channel(
         # Also mark this channel as selected in user_youtube_channels
         try:
             conn.execute("""
-                UPDATE user_youtube_channels
+                UPDATE creative_youtube_channels
                 SET is_selected = CASE WHEN channel_id = ? THEN 1 ELSE 0 END,
                     updated_at = datetime('now')
                 WHERE user_id = ?
@@ -247,7 +247,7 @@ def get_selected_youtube_channel(user_id: str) -> Optional[Dict[str, Any]]:
                    selected_channel_title AS title,
                    selected_channel_thumbnail AS thumbnail,
                    selected_channel_handle AS custom_url
-            FROM youtube_oauth_tokens
+            FROM creative_youtube_tokens
             WHERE user_id=? AND selected_channel_id IS NOT NULL
         """, (user_id,)).fetchone()
         return dict(row) if row else None
@@ -275,14 +275,14 @@ def save_user_youtube_channel(user_id: str, ch: Dict[str, Any]) -> None:
         # Clear from unlinked list if user is explicitly re-adding or linking this channel
         try:
             conn.execute(
-                "DELETE FROM user_unlinked_youtube_channels WHERE user_id = ? AND channel_id = ?",
+                "DELETE FROM creative_youtube_unlinked_channels WHERE user_id = ? AND channel_id = ?",
                 (user_id, channel_id),
             )
         except Exception:
             pass
 
         conn.execute("""
-            INSERT INTO user_youtube_channels (
+            INSERT INTO creative_youtube_channels (
                 channel_id, user_id, title, description, custom_url,
                 thumbnail, subscriber_count, view_count, video_count,
                 channel_type, is_selected, updated_at
@@ -313,7 +313,7 @@ def get_user_unlinked_channel_ids(user_id: str) -> set[str]:
     conn = get_db_connection()
     try:
         rows = conn.execute(
-            "SELECT channel_id FROM user_unlinked_youtube_channels WHERE user_id = ?",
+            "SELECT channel_id FROM creative_youtube_unlinked_channels WHERE user_id = ?",
             (user_id,),
         ).fetchall()
         return {r[0] for r in rows if r[0]}
@@ -339,7 +339,7 @@ def get_user_youtube_channels(user_id: str) -> List[Dict[str, Any]]:
                    video_count,
                    channel_type AS type,
                    is_selected
-            FROM user_youtube_channels
+            FROM creative_youtube_channels
             WHERE user_id = ?
             ORDER BY is_selected DESC, updated_at DESC
         """, (user_id,)).fetchall()
@@ -354,16 +354,16 @@ def delete_user_youtube_channel(user_id: str, channel_id: str) -> bool:
     """Remove a saved YouTube channel from a user's channel list."""
     conn = get_db_connection()
     try:
-        # 1. Delete from user_youtube_channels
+        # 1. Delete from the user's saved YouTube channels
         cur = conn.execute(
-            "DELETE FROM user_youtube_channels WHERE user_id = ? AND channel_id = ?",
+            "DELETE FROM creative_youtube_channels WHERE user_id = ? AND channel_id = ?",
             (user_id, channel_id),
         )
 
         # 2. Record in unlinked channels so auto-discovery doesn't resurrect it
         try:
             conn.execute(
-                "INSERT OR IGNORE INTO user_unlinked_youtube_channels (user_id, channel_id, unlinked_at) VALUES (?, ?, datetime('now'))",
+                "INSERT OR IGNORE INTO creative_youtube_unlinked_channels (user_id, channel_id, unlinked_at) VALUES (?, ?, datetime('now'))",
                 (user_id, channel_id),
             )
         except Exception:
@@ -371,26 +371,26 @@ def delete_user_youtube_channel(user_id: str, channel_id: str) -> bool:
 
         # 3. If the deleted channel was currently active, switch to next remaining channel
         remaining = conn.execute(
-            "SELECT * FROM user_youtube_channels WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1",
+            "SELECT * FROM creative_youtube_channels WHERE user_id = ? ORDER BY updated_at DESC LIMIT 1",
             (user_id,),
         ).fetchone()
 
         if remaining:
             rem = dict(remaining)
             conn.execute("""
-                UPDATE youtube_oauth_tokens
+                UPDATE creative_youtube_tokens
                 SET selected_channel_id = ?, selected_channel_title = ?,
                     selected_channel_thumbnail = ?, selected_channel_handle = ?,
                     updated_at = datetime('now')
                 WHERE user_id = ?
             """, (rem["channel_id"], rem["title"], rem["thumbnail"], rem["custom_url"], user_id))
             conn.execute(
-                "UPDATE user_youtube_channels SET is_selected = 1 WHERE user_id = ? AND channel_id = ?",
+                "UPDATE creative_youtube_channels SET is_selected = 1 WHERE user_id = ? AND channel_id = ?",
                 (user_id, rem["channel_id"]),
             )
         else:
             conn.execute("""
-                UPDATE youtube_oauth_tokens
+                UPDATE creative_youtube_tokens
                 SET selected_channel_id = NULL, selected_channel_title = NULL,
                     selected_channel_thumbnail = NULL, selected_channel_handle = NULL,
                     updated_at = datetime('now')

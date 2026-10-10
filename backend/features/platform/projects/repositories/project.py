@@ -85,12 +85,12 @@ def insert_project(data: Dict[str, Any]) -> None:
         synopsis = data.get('synopsis')
 
         # First, check if a Series matching this title and user already exists.
-        row = conn.execute("SELECT id FROM series WHERE user_id = ? AND title = ? LIMIT 1", (user_id, title)).fetchone()
+        row = conn.execute("SELECT id FROM platform_series WHERE user_id = ? AND title = ? LIMIT 1", (user_id, title)).fetchone()
         if row:
             series_id = row['id']
             if data.get('author') or data.get('genre') or data.get('cover_image') or data.get('synopsis'):
                 conn.execute("""
-                    UPDATE series
+                    UPDATE platform_series
                     SET author = COALESCE(?, author),
                         genre = COALESCE(?, genre),
                         cover_image = COALESCE(?, cover_image),
@@ -99,9 +99,9 @@ def insert_project(data: Dict[str, Any]) -> None:
                 """, (data.get('author'), data.get('genre'), data.get('cover_image'), data.get('synopsis'), series_id))
         else:
             series_id = f"ser_{uuid_hex()}"
-            series_slug = generate_unique_slug(title, 'series', conn)
+            series_slug = generate_unique_slug(title, 'platform_series', conn)
             conn.execute("""
-                INSERT INTO series (id, user_id, title, slug, author, cover_image, genre, synopsis)
+                INSERT INTO platform_series (id, user_id, title, slug, author, cover_image, genre, synopsis)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (series_id, user_id, title, series_slug, author, cover_image, genre, synopsis))
 
@@ -117,7 +117,7 @@ def insert_project(data: Dict[str, Any]) -> None:
         audio_settings_val = data.get('audio_settings')
         audio_settings_json = json.dumps(audio_settings_val) if isinstance(audio_settings_val, dict) else (audio_settings_val if isinstance(audio_settings_val, str) else None)
 
-        row_ch = conn.execute("SELECT id, total_tokens_used, audio_settings, original_url FROM chapters WHERE id = ? LIMIT 1", (chapter_id,)).fetchone()
+        row_ch = conn.execute("SELECT id, total_tokens_used, audio_settings, original_url FROM workspace_chapters WHERE id = ? LIMIT 1", (chapter_id,)).fetchone()
         if row_ch:
             tokens_to_add = data.get('total_tokens_used', 0)
             new_token_total = (row_ch['total_tokens_used'] or 0) + tokens_to_add if tokens_to_add else row_ch['total_tokens_used']
@@ -125,15 +125,15 @@ def insert_project(data: Dict[str, Any]) -> None:
             final_original_url = original_url or row_ch['original_url']
 
             conn.execute("""
-                UPDATE chapters
+                UPDATE workspace_chapters
                 SET episode_number = ?, original_url = ?, status = ?, panels_count = ?, video_url = ?, total_tokens_used = ?, job_id = COALESCE(?, job_id), project_type = COALESCE(?, project_type), audio_settings = ?
                 WHERE id = ?
             """, (episode_number, final_original_url, status, panels_count, video_url, new_token_total, chapter_job_id, project_type, final_audio_settings, chapter_id))
         else:
-            chapter_slug = generate_unique_slug(f"{title} {episode_number}", 'chapters', conn)
+            chapter_slug = generate_unique_slug(f"{title} {episode_number}", 'workspace_chapters', conn)
             initial_tokens = data.get('total_tokens_used', 0)
             conn.execute("""
-                INSERT INTO chapters (id, series_id, job_id, episode_number, slug, original_url, status, panels_count, video_url, total_tokens_used, project_type, audio_settings)
+                INSERT INTO workspace_chapters (id, series_id, job_id, episode_number, slug, original_url, status, panels_count, video_url, total_tokens_used, project_type, audio_settings)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (chapter_id, series_id, chapter_job_id, episode_number, chapter_slug, original_url, status, panels_count, video_url, initial_tokens, project_type, audio_settings_json))
         conn.commit()
@@ -147,7 +147,7 @@ def _enrich_project_item(item: Dict[str, Any], conn: Any) -> Dict[str, Any]:
     # 1. Check panels table count
     panels_count = item.get("panels_count") or 0
     try:
-        cnt_row = conn.execute("SELECT COUNT(*) FROM panels WHERE chapter_id = ?", (item["project_id"],)).fetchone()
+        cnt_row = conn.execute("SELECT COUNT(*) FROM image_panels WHERE chapter_id = ?", (item["project_id"],)).fetchone()
         if cnt_row and cnt_row[0] > 0:
             panels_count = cnt_row[0]
     except Exception:
@@ -171,7 +171,7 @@ def _enrich_project_item(item: Dict[str, Any], conn: Any) -> Dict[str, Any]:
     if not imported_count and target_url:
         try:
             sess_row = conn.execute(
-                "SELECT panel_count, image_urls FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
+                "SELECT panel_count, image_urls FROM platform_scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
                 (target_url,)
             ).fetchone()
             if sess_row:
@@ -195,7 +195,7 @@ def _enrich_project_item(item: Dict[str, Any], conn: Any) -> Dict[str, Any]:
             search_term = title if len(title) >= 3 else (slug if len(slug) >= 3 else "")
             if search_term:
                 sess_row = conn.execute(
-                    "SELECT panel_count, image_urls FROM scrape_sessions WHERE url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
+                    "SELECT panel_count, image_urls FROM platform_scrape_sessions WHERE url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
                     (f"%{search_term}%",)
                 ).fetchone()
                 if sess_row:
@@ -227,8 +227,8 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
                        c.project_type
-                FROM chapters c
-                JOIN series s ON c.series_id = s.id
+                FROM workspace_chapters c
+                JOIN platform_series s ON c.series_id = s.id
                 WHERE s.user_id = ?
                 ORDER BY c.created_at DESC
             """, (user_id,)).fetchall()
@@ -239,8 +239,8 @@ def get_all_projects(user_id: Optional[str] = None) -> List[Dict[str, Any]]:
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
                        c.project_type
-                FROM chapters c
-                JOIN series s ON c.series_id = s.id
+                FROM workspace_chapters c
+                JOIN platform_series s ON c.series_id = s.id
                 ORDER BY c.created_at DESC
             """).fetchall()
         return [_enrich_project_item(cast(Dict[str, Any], dict(r)), conn) for r in rows]
@@ -258,8 +258,8 @@ def get_project(project_id: str) -> Optional[Dict[str, Any]]:
                    c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                    s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
                    c.project_type
-            FROM chapters c
-            JOIN series s ON c.series_id = s.id
+            FROM workspace_chapters c
+            JOIN platform_series s ON c.series_id = s.id
             WHERE c.id = ?
         """, (project_id,)).fetchone()
         return _enrich_project_item(dict(row), conn) if row else None
@@ -284,8 +284,8 @@ def get_project_by_slug(chapter_slug: str) -> Optional[Dict[str, Any]]:
                        c.created_at, c.updated_at, s.user_id, s.id AS series_id,
                        s.slug AS series_slug, c.slug AS chapter_slug, c.audio_settings,
                        c.project_type
-                FROM chapters c
-                JOIN series s ON c.series_id = s.id
+                FROM workspace_chapters c
+                JOIN platform_series s ON c.series_id = s.id
                 WHERE c.slug = ?
             """, (s,)).fetchone()
             if row:
@@ -308,7 +308,7 @@ def update_project(project_id: str, updates: Dict[str, Any]) -> None:
         if set_parts:
             set_parts.append("updated_at = datetime('now')")
             params.append(project_id)
-            query = f"UPDATE chapters SET {', '.join(set_parts)} WHERE id = ?"
+            query = f"UPDATE workspace_chapters SET {', '.join(set_parts)} WHERE id = ?"
             conn.execute(query, tuple(params))
             conn.commit()
     finally:
@@ -320,7 +320,7 @@ def increment_project_tokens(project_id: str, tokens: int) -> None:
     conn = get_db_connection()
     try:
         conn.execute("""
-            UPDATE chapters
+            UPDATE workspace_chapters
             SET total_tokens_used = total_tokens_used + ?,
                 updated_at = datetime('now')
             WHERE id = ?
@@ -338,8 +338,8 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             # 1. Fetch series_id and title for this project/chapter
             row = conn.execute("""
                 SELECT c.series_id, s.title, c.episode_number
-                FROM chapters c
-                JOIN series s ON c.series_id = s.id
+                FROM workspace_chapters c
+                JOIN platform_series s ON c.series_id = s.id
                 WHERE c.id = ?
                 LIMIT 1
             """, (project_id,)).fetchone()
@@ -349,13 +349,13 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             current_title = row['title']
             current_episode = row['episode_number']
 
-            # 2. Update chapters table fields
+            # 2. Update chapter fields
             chapter_set_parts = []
             chapter_params = []
             if 'episode' in updates:
                 chapter_set_parts.append("episode_number = ?")
                 chapter_params.append(updates['episode'])
-                new_slug = generate_unique_slug(f"{updates.get('title', current_title)} {updates['episode']}", 'chapters', conn)
+                new_slug = generate_unique_slug(f"{updates.get('title', current_title)} {updates['episode']}", 'workspace_chapters', conn)
                 chapter_set_parts.append("slug = ?")
                 chapter_params.append(new_slug)
 
@@ -377,7 +377,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                 chapter_set_parts.append("job_id = ?")
                 chapter_params.append(updates['job_id'])
             if any(k in updates for k in ('audio_settings', 'video_settings', 'autocrop_settings', 'scraped_images')):
-                cur_row = conn.execute("SELECT audio_settings FROM chapters WHERE id = ?", (project_id,)).fetchone()
+                cur_row = conn.execute("SELECT audio_settings FROM workspace_chapters WHERE id = ?", (project_id,)).fetchone()
                 existing_raw = cur_row['audio_settings'] if cur_row else None
                 
                 settings_dict = {}
@@ -417,10 +417,10 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
             if chapter_set_parts:
                 chapter_set_parts.append("updated_at = datetime('now')")
                 chapter_params.append(project_id)
-                query = f"UPDATE chapters SET {', '.join(chapter_set_parts)} WHERE id = ?"
+                query = f"UPDATE workspace_chapters SET {', '.join(chapter_set_parts)} WHERE id = ?"
                 conn.execute(query, tuple(chapter_params))
 
-            # 3. Update series table fields
+            # 3. Update series fields
             series_set_parts = []
             series_params = []
             for key in ('title', 'author', 'cover_image', 'genre', 'synopsis'):
@@ -432,29 +432,29 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     series_params.append(val)
 
                     if key == 'title':
-                        new_series_slug = generate_unique_slug(updates['title'], 'series', conn)
+                        new_series_slug = generate_unique_slug(updates['title'], 'platform_series', conn)
                         series_set_parts.append("slug = ?")
                         series_params.append(new_series_slug)
 
             if series_set_parts:
                 series_params.append(series_id)
-                query = f"UPDATE series SET {', '.join(series_set_parts)} WHERE id = ?"
+                query = f"UPDATE platform_series SET {', '.join(series_set_parts)} WHERE id = ?"
                 conn.execute(query, tuple(series_params))
 
             # 4. Update panels if provided
             if panels is not None:
-                rows = conn.execute('SELECT image_url, audio_url FROM panels WHERE chapter_id = ?', (project_id,)).fetchall()
+                rows = conn.execute('SELECT image_url, audio_url FROM image_panels WHERE chapter_id = ?', (project_id,)).fetchall()
                 old_urls = set()
                 for r in rows:
                     row_dict = cast(Dict[str, Any], dict(r))
                     if row_dict['image_url']: old_urls.add(row_dict['image_url'])
                     if row_dict['audio_url']: old_urls.add(row_dict['audio_url'])
 
-                ch_row = conn.execute('SELECT original_url FROM chapters WHERE id = ? LIMIT 1', (project_id,)).fetchone()
+                ch_row = conn.execute('SELECT original_url FROM workspace_chapters WHERE id = ? LIMIT 1', (project_id,)).fetchone()
                 ch_orig_url = ch_row['original_url'] if ch_row and ch_row['original_url'] else None
 
                 # Delete existing panels for this chapter
-                conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
+                conn.execute('DELETE FROM image_panels WHERE chapter_id = ?', (project_id,))
 
                 # Insert the new ones
                 for i, p in enumerate(panels):
@@ -471,7 +471,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                     orig_url = unwrap_proxy_url(raw_orig) if raw_orig else None
                     if not orig_url and img_url:
                         row_edit = conn.execute(
-                            'SELECT original_url FROM edit_history WHERE edited_url = ? LIMIT 1',
+                            'SELECT original_url FROM image_edit_history WHERE edited_url = ? LIMIT 1',
                             (img_url,)
                         ).fetchone()
                         if row_edit and row_edit['original_url']:
@@ -493,7 +493,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
 
                     if panel_id is not None and panel_id > 0:
                         conn.execute("""
-                            INSERT OR REPLACE INTO panels (
+                            INSERT OR REPLACE INTO image_panels (
                                 id, chapter_id, panel_index, image_url, original_url, speech_text, sfx,
                                 duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
                                 grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
@@ -528,7 +528,7 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
                         ))
                     else:
                         conn.execute("""
-                            INSERT INTO panels (
+                            INSERT INTO image_panels (
                                 chapter_id, panel_index, image_url, original_url, speech_text, sfx,
                                 duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
                                 grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
@@ -563,9 +563,9 @@ def update_project_full(project_id: str, updates: Dict[str, Any], panels: Option
 
                 # Sync panel count
                 if len(panels) > 0:
-                    conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (len(panels), project_id))
+                    conn.execute("UPDATE workspace_chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (len(panels), project_id))
                 elif 'panels_count' in updates and updates['panels_count'] is not None and updates['panels_count'] > 0:
-                    conn.execute("UPDATE chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (updates['panels_count'], project_id))
+                    conn.execute("UPDATE workspace_chapters SET panels_count = ?, updated_at = datetime('now') WHERE id = ?", (updates['panels_count'], project_id))
 
                 # Find which old URLs are not in the new list, and clean them up
                 new_urls = set()
@@ -584,16 +584,16 @@ def delete_project(project_id: str) -> None:
     """Delete a project and all its panels (via SQL CASCADE), removing associated files from cache."""
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT image_url, audio_url FROM panels WHERE chapter_id = ?', (project_id,)).fetchall()
+        rows = conn.execute('SELECT image_url, audio_url FROM image_panels WHERE chapter_id = ?', (project_id,)).fetchall()
         panel_urls = []
         for r in rows:
             row_dict = cast(Dict[str, Any], dict(r))
             if row_dict['image_url']: panel_urls.append(row_dict['image_url'])
             if row_dict['audio_url']: panel_urls.append(row_dict['audio_url'])
 
-        chap = conn.execute('SELECT video_url FROM chapters WHERE id = ?', (project_id,)).fetchone()
+        chap = conn.execute('SELECT video_url FROM workspace_chapters WHERE id = ?', (project_id,)).fetchone()
 
-        conn.execute('DELETE FROM chapters WHERE id = ?', (project_id,))
+        conn.execute('DELETE FROM workspace_chapters WHERE id = ?', (project_id,))
         conn.commit()
 
         # Clean up cached panel files
@@ -612,9 +612,9 @@ def get_all_projects_admin() -> list[dict]:
     try:
         rows = conn.execute('''
             SELECT s.*, u.email as user_email,
-                   (SELECT COUNT(*) FROM chapters c WHERE c.series_id = s.id) as chapters_count
-            FROM series s
-            LEFT JOIN users u ON s.user_id = u.id
+                     (SELECT COUNT(*) FROM workspace_chapters c WHERE c.series_id = s.id) as chapters_count
+                 FROM platform_series s
+                 LEFT JOIN auth_users u ON s.user_id = u.id
             ORDER BY s.created_at DESC
             LIMIT 500
         ''').fetchall()

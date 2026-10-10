@@ -835,7 +835,7 @@ async def disconnect_youtube(
     try:
         conn = get_db_connection()
         try:
-            conn.execute("DELETE FROM youtube_oauth_tokens WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM creative_youtube_tokens WHERE user_id = ?", (user_id,))
             conn.commit()
         finally:
             conn.close()

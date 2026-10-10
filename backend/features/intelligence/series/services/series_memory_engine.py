@@ -58,7 +58,7 @@ class SeriesMemoryEngine:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                CREATE TABLE IF NOT EXISTS series_continuity_memory (
+                CREATE TABLE IF NOT EXISTS intelligence_continuity_memory (
                     series_id TEXT PRIMARY KEY,
                     active_characters TEXT,
                     world_rules TEXT,
@@ -66,12 +66,14 @@ class SeriesMemoryEngine:
                     unresolved_threads TEXT,
                     resolved_threads TEXT,
                     canonical_locations TEXT,
-                    last_synced_at TEXT
+                    total_chapters_generated INTEGER DEFAULT 0,
+                    last_synced_at TEXT,
+                    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
                 )
                 """
             )
             # Ensure new columns exist if table was previously created with legacy schema
-            cursor.execute("PRAGMA table_info(series_continuity_memory)")
+            cursor.execute("PRAGMA table_info(intelligence_continuity_memory)")
             existing_cols = {row["name"] for row in cursor.fetchall()}
             for col in [
                 "active_characters", "world_rules", "lore_revelations",
@@ -79,30 +81,31 @@ class SeriesMemoryEngine:
             ]:
                 if col not in existing_cols:
                     try:
-                        cursor.execute(f"ALTER TABLE series_continuity_memory ADD COLUMN {col} TEXT")
+                        cursor.execute(f"ALTER TABLE intelligence_continuity_memory ADD COLUMN {col} TEXT")
                     except Exception:
                         pass
 
             cursor.execute(
                 """
-                CREATE TABLE IF NOT EXISTS creator_style_profiles (
+                CREATE TABLE IF NOT EXISTS creative_style_profiles (
                     creator_id TEXT PRIMARY KEY,
-                    preferred_art_styles TEXT,
+                    preferred_art_styles TEXT DEFAULT '[]',
                     pacing_bias TEXT DEFAULT 'balanced',
                     dialogue_density_bias TEXT DEFAULT 'medium',
-                    favorite_genres TEXT,
-                    negative_prompt_additions TEXT,
-                    created_at TEXT,
-                    updated_at TEXT
+                    favorite_genres TEXT DEFAULT '[]',
+                    negative_prompt_additions TEXT DEFAULT '',
+                    created_at TEXT DEFAULT (datetime('now')),
+                    updated_at TEXT DEFAULT (datetime('now'))
                 )
                 """
             )
             cursor.execute(
                 """
-                CREATE TABLE IF NOT EXISTS series_feedback_events (
-                    id TEXT PRIMARY KEY,
+                CREATE TABLE IF NOT EXISTS intelligence_feedback_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    feedback_id TEXT UNIQUE,
                     series_id TEXT,
-                    chapter_number INTEGER,
+                    chapter_number TEXT,
                     panel_index INTEGER,
                     feedback_type TEXT,
                     user_comment TEXT,
@@ -118,7 +121,7 @@ class SeriesMemoryEngine:
         row = None
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM series_continuity_memory WHERE series_id = ?", (series_id,))
+            cursor.execute("SELECT * FROM intelligence_continuity_memory WHERE series_id = ?", (series_id,))
             row = cursor.fetchone()
 
         if not row:
@@ -159,7 +162,7 @@ class SeriesMemoryEngine:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO series_continuity_memory (
+                INSERT INTO intelligence_continuity_memory (
                     series_id, active_characters, world_rules, lore_revelations,
                     unresolved_threads, resolved_threads, canonical_locations, last_synced_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -267,8 +270,8 @@ class SeriesMemoryEngine:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO series_feedback_events (
-                    id, series_id, chapter_number, panel_index,
+                INSERT INTO intelligence_feedback_events (
+                    feedback_id, series_id, chapter_number, panel_index,
                     feedback_type, user_comment, applied_fix, created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -290,7 +293,7 @@ class SeriesMemoryEngine:
         row = None
         with self._get_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM creator_style_profiles WHERE creator_id = ?", (creator_id,))
+            cursor.execute("SELECT * FROM creative_style_profiles WHERE creator_id = ?", (creator_id,))
             row = cursor.fetchone()
 
         if not row:
@@ -316,7 +319,7 @@ class SeriesMemoryEngine:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO creator_style_profiles (
+                INSERT INTO creative_style_profiles (
                     creator_id, preferred_art_styles, pacing_bias, dialogue_density_bias,
                     favorite_genres, negative_prompt_additions, created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -361,7 +364,7 @@ class SeriesMemoryEngine:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT feedback_type, COUNT(*) as cnt FROM series_feedback_events WHERE series_id = ? GROUP BY feedback_type",
+                "SELECT feedback_type, COUNT(*) as cnt FROM intelligence_feedback_events WHERE series_id = ? GROUP BY feedback_type",
                 (series_id,),
             )
             feedback_counts = {r["feedback_type"]: r["cnt"] for r in cursor.fetchall()}

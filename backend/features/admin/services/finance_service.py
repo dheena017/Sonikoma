@@ -30,8 +30,8 @@ class AdminFinanceService:
         try:
             query = """
                 SELECT ct.*, u.email as user_email, u.username as creator_username
-                FROM credit_transactions ct
-                LEFT JOIN users u ON ct.user_id = u.id
+                FROM profile_credit_transactions ct
+                LEFT JOIN auth_users u ON ct.user_id = u.id
                 WHERE 1=1
             """
             params = []
@@ -57,7 +57,7 @@ class AdminFinanceService:
                     SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END) as total_added,
                     SUM(CASE WHEN amount < 0 THEN ABS(amount) ELSE 0 END) as total_deducted,
                     COUNT(*) as total_count
-                FROM credit_transactions
+                FROM profile_credit_transactions
             """).fetchone()
 
             stats = {
@@ -80,8 +80,8 @@ class AdminFinanceService:
         try:
             query = """
                 SELECT inv.*, u.email as user_email, u.full_name as user_full_name
-                FROM user_invoices inv
-                LEFT JOIN users u ON inv.user_id = u.id
+                FROM profile_invoices inv
+                LEFT JOIN auth_users u ON inv.user_id = u.id
                 WHERE 1=1
             """
             params = []
@@ -100,7 +100,7 @@ class AdminFinanceService:
                     SUM(CASE WHEN LOWER(status) = 'paid' THEN amount ELSE 0 END) as total_revenue,
                     COUNT(CASE WHEN LOWER(status) = 'paid' THEN 1 END) as paid_count,
                     COUNT(CASE WHEN LOWER(status) = 'pending' THEN 1 END) as pending_count
-                FROM user_invoices
+                FROM profile_invoices
             """).fetchone()
 
             summary = {

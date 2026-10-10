@@ -16,7 +16,7 @@ def get_user_by_email(email: str) -> Optional[Dict[str, Any]]:
     """
     conn = get_db_connection()
     try:
-        row = conn.execute('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', (email.strip(),)).fetchone()
+        row = conn.execute('SELECT * FROM auth_users WHERE LOWER(email) = LOWER(?)', (email.strip(),)).fetchone()
         if row:
             res = dict(row)
             # Map database 'password_hash' to expected 'hashed_password' for auth route compatibility
@@ -34,7 +34,7 @@ def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
     """
     conn = get_db_connection()
     try:
-        row = conn.execute('SELECT * FROM users WHERE LOWER(username) = LOWER(?)', (username.strip(),)).fetchone()
+        row = conn.execute('SELECT * FROM auth_users WHERE LOWER(username) = LOWER(?)', (username.strip(),)).fetchone()
         if row:
             res = dict(row)
             res['hashed_password'] = res.get('password_hash')
@@ -51,7 +51,7 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
     """
     conn = get_db_connection()
     try:
-        row = conn.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+        row = conn.execute('SELECT * FROM auth_users WHERE id = ?', (user_id,)).fetchone()
         if row:
             res = dict(row)
             # Map fields for routing handlers compatibility
@@ -69,7 +69,7 @@ def get_all_users() -> List[Dict[str, Any]]:
     """
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT id, username, email, full_name, avatar_url, creator_role, credits, credit_balance, is_locked, is_banned, created_at FROM users ORDER BY created_at DESC').fetchall()
+        rows = conn.execute('SELECT id, username, email, full_name, avatar_url, creator_role, credits, credit_balance, is_locked, is_banned, created_at FROM auth_users ORDER BY created_at DESC').fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()

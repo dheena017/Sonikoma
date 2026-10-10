@@ -16,6 +16,48 @@ from database.utils import generate_missing_slugs
 
 logger = logging.getLogger("sonikoma.database.migrator")
 
+LEGACY_TABLE_MIGRATIONS = (
+    ("users", "auth_users"),
+    ("user_sessions", "auth_sessions"),
+    ("user_audit_logs", "auth_audit_logs"),
+    ("platform_settings", "admin_settings"),
+    ("system_announcements", "admin_announcements"),
+    ("content_moderation_logs", "admin_moderation_logs"),
+    ("series", "platform_series"),
+    ("chapters", "workspace_chapters"),
+    ("panels", "image_panels"),
+    ("edit_history", "image_edit_history"),
+    ("user_youtube_channels", "creative_youtube_channels"),
+    ("user_unlinked_youtube_channels", "creative_youtube_unlinked_channels"),
+    ("youtube_oauth_tokens", "creative_youtube_tokens"),
+    ("youtube_profiles", "creative_youtube_profiles"),
+    ("youtube_publications", "creative_youtube_publications"),
+    ("youtube_credentials", "creative_youtube_credentials"),
+    ("creator_style_profiles", "creative_style_profiles"),
+    ("jobs", "platform_jobs"),
+    ("scrape_sessions", "platform_scrape_sessions"),
+    ("series_chapters_cache", "platform_series_cache"),
+    ("series_episodes_cache", "platform_series_cache"),
+    ("system_logs", "platform_system_logs"),
+    ("user_api_keys", "profile_api_keys"),
+    ("user_invoices", "profile_invoices"),
+    ("credit_transactions", "profile_credit_transactions"),
+    ("ai_series_projects", "intelligence_projects"),
+    ("series_continuity_memory", "intelligence_continuity_memory"),
+    ("franchise_continuity", "intelligence_continuity_memory"),
+    ("series_feedback_events", "intelligence_feedback_events"),
+    ("generation_feedback", "intelligence_feedback_events"),
+    ("token_usage_logs", "intelligence_token_usage"),
+    ("ai_token_usage_ledger", "intelligence_ledger"),
+)
+
+LEGACY_COLUMN_MAPPINGS = {
+    ("user_api_keys", "profile_api_keys"): {"id": None},
+    ("series_feedback_events", "intelligence_feedback_events"): {"id": "feedback_id"},
+    ("generation_feedback", "intelligence_feedback_events"): {"id": "feedback_id"},
+    ("ai_token_usage_ledger", "intelligence_ledger"): {"id": "request_id"},
+}
+
 
 def init_sqlite(conn: sqlite3.Connection) -> None:
     """Apply the canonical SQLite schema and incremental column migrations."""
@@ -35,74 +77,17 @@ def init_sqlite(conn: sqlite3.Connection) -> None:
         else:
             logger.warning(f"[Database] Schema file {schema_file} not found; skipping schema apply.")
 
-        # ── 2. Safe incremental column migrations (for pre-existing databases) ──
-        # Series
-        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN synopsis TEXT", "added synopsis to series")
-        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN slug TEXT", "added slug to series")
-        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN status TEXT NOT NULL DEFAULT 'ready'", "added status to series")
-        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN is_flagged INTEGER NOT NULL DEFAULT 0", "added is_flagged to series")
-        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN flag_reason TEXT", "added flag_reason to series")
-        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN flagged_by TEXT", "added flagged_by to series")
-        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN flagged_at TEXT", "added flagged_at to series")
-        _run_safe_alter(cursor, conn, "ALTER TABLE series ADD COLUMN updated_at TEXT", "added updated_at to series")
+        # ── 2. Add columns introduced after earlier canonical schema versions ──
+        _run_safe_alter(cursor, conn, "ALTER TABLE platform_system_logs ADD COLUMN timestamp TEXT", "added timestamp to platform_system_logs")
+        _run_safe_alter(cursor, conn, "ALTER TABLE platform_system_logs ADD COLUMN correlation_id TEXT", "added correlation_id to platform_system_logs")
+        _run_safe_alter(cursor, conn, "ALTER TABLE platform_system_logs ADD COLUMN user_id TEXT", "added user_id to platform_system_logs")
+        _run_safe_alter(cursor, conn, "ALTER TABLE platform_system_logs ADD COLUMN snapshot TEXT", "added snapshot to platform_system_logs")
+        _run_safe_alter(cursor, conn, "ALTER TABLE creative_youtube_tokens ADD COLUMN google_email TEXT", "added google_email to creative_youtube_tokens")
+        _run_safe_alter(cursor, conn, "ALTER TABLE intelligence_feedback_events ADD COLUMN feedback_id TEXT", "added feedback_id to intelligence_feedback_events")
+        _run_safe_alter(cursor, conn, "ALTER TABLE intelligence_ledger ADD COLUMN request_id TEXT", "added request_id to intelligence_ledger")
 
-        # Chapters
-        _run_safe_alter(cursor, conn, "ALTER TABLE chapters ADD COLUMN slug TEXT", "added slug to chapters")
-        _run_safe_alter(cursor, conn, "ALTER TABLE chapters ADD COLUMN job_id TEXT", "added job_id to chapters")
-        _run_safe_alter(cursor, conn, "ALTER TABLE chapters ADD COLUMN total_tokens_used INTEGER NOT NULL DEFAULT 0", "added total_tokens_used to chapters")
-        _run_safe_alter(cursor, conn, "ALTER TABLE chapters ADD COLUMN audio_settings TEXT", "added audio_settings to chapters")
-        _run_safe_alter(cursor, conn, "ALTER TABLE chapters ADD COLUMN project_type TEXT NOT NULL DEFAULT 'permanent'", "added project_type to chapters")
-
-        # Panels
-        _run_safe_alter(cursor, conn, "ALTER TABLE panels ADD COLUMN narrative TEXT", "added narrative to panels")
-        _run_safe_alter(cursor, conn, "ALTER TABLE panels ADD COLUMN visual_description TEXT", "added visual_description to panels")
-        _run_safe_alter(cursor, conn, "ALTER TABLE panels ADD COLUMN grayscale INTEGER DEFAULT 0", "added grayscale to panels")
-
-        # Users
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN is_locked INTEGER NOT NULL DEFAULT 0", "added is_locked to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN is_banned INTEGER NOT NULL DEFAULT 0", "added is_banned to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN ban_reason TEXT", "added ban_reason to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN last_login_at TEXT", "added last_login_at to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN last_login_ip TEXT", "added last_login_ip to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN location TEXT NOT NULL DEFAULT ''", "added location to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN website TEXT NOT NULL DEFAULT ''", "added website to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN timezone TEXT NOT NULL DEFAULT 'UTC'", "added timezone to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN credit_balance INTEGER NOT NULL DEFAULT 840", "added credit_balance to users")
-        _run_safe_alter(cursor, conn, "ALTER TABLE users ADD COLUMN google_access_token TEXT", "added google_access_token to users")
-
-        # Synchronize credit balance
-        try:
-            cursor.execute(
-                "UPDATE users SET credit_balance = credits WHERE credit_balance = 840 AND credits != 840"
-            )
-        except Exception:
-            pass
-
-        # Token usage logs
-        _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN user_id TEXT", "added user_id to token_usage_logs")
-        _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN chapter_id TEXT", "added chapter_id to token_usage_logs")
-        _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN job_id TEXT", "added job_id to token_usage_logs")
-        _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN model_name TEXT", "added model_name to token_usage_logs")
-        _run_safe_alter(cursor, conn, "ALTER TABLE token_usage_logs ADD COLUMN provider TEXT", "added provider to token_usage_logs")
-
-        # System logs
-        _run_safe_alter(cursor, conn, "ALTER TABLE system_logs ADD COLUMN correlation_id TEXT", "added correlation_id to system_logs")
-        _run_safe_alter(cursor, conn, "ALTER TABLE system_logs ADD COLUMN user_id TEXT", "added user_id to system_logs")
-        _run_safe_alter(cursor, conn, "ALTER TABLE system_logs ADD COLUMN snapshot TEXT", "added snapshot to system_logs")
-
-        # YouTube OAuth tokens
-        _run_safe_alter(cursor, conn, "ALTER TABLE youtube_oauth_tokens ADD COLUMN google_email TEXT", "added google_email to youtube_oauth_tokens")
-
-        # ── 3. Prune dead legacy tables ──
-        for dead_table in [
-            "franchise_continuity",
-            "generation_feedback",
-            "user_unlinked_youtube_channels",
-        ]:
-            try:
-                cursor.execute(f"DROP TABLE IF EXISTS {dead_table}")
-            except Exception:
-                pass
+        # ── 3. Copy legacy tables without deleting their source data ──
+        _migrate_legacy_tables(cursor, conn)
 
         # ── 4. Normalize legacy date formats to standard ISO 8601 UTC ──
         _normalize_legacy_dates(cursor, conn)
@@ -114,8 +99,68 @@ def init_sqlite(conn: sqlite3.Connection) -> None:
         logger.info("[Database] Database schema verification and migrations completed successfully.")
 
     except sqlite3.Error as e:
+        conn.rollback()
         logger.error(f"[Database] Error checking or applying schema: {e}")
         raise
+
+
+def _migrate_legacy_tables(cursor: sqlite3.Cursor, conn: sqlite3.Connection) -> None:
+    """Copy legacy table rows into canonical tables, keeping sources for rollback."""
+    table_names = {
+        row[0]
+        for row in cursor.execute("SELECT name FROM sqlite_master WHERE type = 'table'").fetchall()
+    }
+    for source, target in LEGACY_TABLE_MIGRATIONS:
+        if source not in table_names or target not in table_names:
+            continue
+
+        source_columns = {
+            row[1]
+            for row in cursor.execute(f'PRAGMA table_info("{source}")').fetchall()
+        }
+        target_info = {
+            row[1]: row
+            for row in cursor.execute(f'PRAGMA table_info("{target}")').fetchall()
+        }
+        target_columns = set(target_info)
+        explicit_mappings = LEGACY_COLUMN_MAPPINGS.get((source, target), {})
+        column_pairs = []
+        consumed_source_columns = set()
+        consumed_target_columns = set()
+
+        for source_column, target_column in explicit_mappings.items():
+            consumed_source_columns.add(source_column)
+            if target_column and source_column in source_columns and target_column in target_columns:
+                column_pairs.append((source_column, target_column))
+                consumed_target_columns.add(target_column)
+
+        for column in sorted(source_columns & target_columns):
+            if column not in consumed_source_columns and column not in consumed_target_columns:
+                column_pairs.append((column, column))
+
+        if not column_pairs:
+            logger.warning("[Database] No shared columns to migrate from %s to %s.", source, target)
+            continue
+
+        target_sql_columns = ", ".join(f'"{target_column}"' for _, target_column in column_pairs)
+        source_sql_columns = ", ".join(
+            f'COALESCE("{source_column}", {target_info[target_column][4]})'
+            if target_info[target_column][3] and target_info[target_column][4] is not None
+            else f'"{source_column}"'
+            for source_column, target_column in column_pairs
+        )
+        cursor.execute(
+            f'INSERT OR IGNORE INTO "{target}" ({target_sql_columns}) '
+            f'SELECT {source_sql_columns} FROM "{source}"'
+        )
+        if cursor.rowcount:
+            logger.info(
+                "[Database] Copied %s rows from legacy table %s to %s.",
+                cursor.rowcount,
+                source,
+                target,
+            )
+    conn.commit()
 
 
 def _run_safe_alter(cursor: sqlite3.Cursor, conn: sqlite3.Connection, sql: str, description: str) -> None:
@@ -130,18 +175,18 @@ def _run_safe_alter(cursor: sqlite3.Cursor, conn: sqlite3.Connection, sql: str, 
 def _normalize_legacy_dates(cursor: sqlite3.Cursor, conn: sqlite3.Connection) -> None:
     """Normalize non-standard date strings across tables to standard ISO 8601 UTC."""
     date_columns_map = {
-        "series": ["created_at", "updated_at", "flagged_at"],
-        "chapters": ["created_at", "updated_at"],
-        "panels": ["created_at"],
-        "credit_transactions": ["created_at"],
-        "user_audit_logs": ["created_at"],
-        "user_invoices": ["created_at"],
-        "platform_settings": ["updated_at"],
-        "user_youtube_channels": ["created_at", "updated_at"],
-        "youtube_oauth_tokens": ["updated_at"],
-        "users": ["created_at", "updated_at", "last_login_at"],
-        "scrape_sessions": ["scraped_at"],
-        "token_usage_logs": ["created_at"],
+        "platform_series": ["created_at", "updated_at", "flagged_at"],
+        "workspace_chapters": ["created_at", "updated_at"],
+        "image_panels": ["created_at"],
+        "profile_credit_transactions": ["created_at"],
+        "auth_audit_logs": ["created_at"],
+        "profile_invoices": ["created_at"],
+        "admin_settings": ["updated_at"],
+        "creative_youtube_channels": ["created_at", "updated_at"],
+        "creative_youtube_tokens": ["updated_at"],
+        "auth_users": ["created_at", "updated_at", "last_login_at"],
+        "platform_scrape_sessions": ["scraped_at"],
+        "intelligence_token_usage": ["created_at"],
     }
     for tbl, cols in date_columns_map.items():
         try:
@@ -155,7 +200,8 @@ def _normalize_legacy_dates(cursor: sqlite3.Cursor, conn: sqlite3.Connection) ->
             pass
     try:
         cursor.execute(
-            "UPDATE series_chapters_cache SET updated_at = strftime('%Y-%m-%dT%H:%M:%SZ', datetime(updated_at, 'unixepoch')) WHERE updated_at IS NOT NULL AND updated_at NOT LIKE '%-%'"
+            "UPDATE platform_series_cache SET updated_at = CAST(strftime('%s', updated_at) AS REAL) "
+            "WHERE updated_at IS NOT NULL AND CAST(updated_at AS REAL) = 0 AND strftime('%s', updated_at) IS NOT NULL"
         )
     except Exception:
         pass

@@ -16,11 +16,11 @@ from database.engine import get_db_connection
 logger = logging.getLogger("sonikoma.repositories.scraper_repository")
 
 def _ensure_tables():
-    """Ensure scrape_sessions and edit_history tables exist and have required columns."""
+    """Ensure canonical scrape-session and edit-history tables exist."""
     try:
         with get_db_connection() as conn:
             conn.execute("""
-            CREATE TABLE IF NOT EXISTS scrape_sessions (
+            CREATE TABLE IF NOT EXISTS platform_scrape_sessions (
               id          INTEGER PRIMARY KEY AUTOINCREMENT,
               url         TEXT,
               image_urls  TEXT,
@@ -28,19 +28,19 @@ def _ensure_tables():
               scraped_at  TEXT
             )
             """)
-            cols = [r["name"] for r in conn.execute("PRAGMA table_info(scrape_sessions)").fetchall()]
+            cols = [r["name"] for r in conn.execute("PRAGMA table_info(platform_scrape_sessions)").fetchall()]
             if "url" not in cols:
-                conn.execute("ALTER TABLE scrape_sessions ADD COLUMN url TEXT")
+                conn.execute("ALTER TABLE platform_scrape_sessions ADD COLUMN url TEXT")
             if "image_urls" not in cols:
-                conn.execute("ALTER TABLE scrape_sessions ADD COLUMN image_urls TEXT")
+                conn.execute("ALTER TABLE platform_scrape_sessions ADD COLUMN image_urls TEXT")
             if "panel_count" not in cols:
-                conn.execute("ALTER TABLE scrape_sessions ADD COLUMN panel_count INTEGER DEFAULT 0")
+                conn.execute("ALTER TABLE platform_scrape_sessions ADD COLUMN panel_count INTEGER DEFAULT 0")
             if "scraped_at" not in cols:
-                conn.execute("ALTER TABLE scrape_sessions ADD COLUMN scraped_at TEXT")
+                conn.execute("ALTER TABLE platform_scrape_sessions ADD COLUMN scraped_at TEXT")
 
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_scrape_url ON scrape_sessions(url)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_platform_scrape_sessions_url ON platform_scrape_sessions(url)")
             conn.execute("""
-            CREATE TABLE IF NOT EXISTS edit_history (
+            CREATE TABLE IF NOT EXISTS image_edit_history (
               id           INTEGER PRIMARY KEY AUTOINCREMENT,
               edited_url   TEXT    NOT NULL UNIQUE,
               original_url TEXT    NOT NULL,
@@ -60,7 +60,7 @@ def save_scrape_session(url: str, image_urls: List[str]) -> None:
     conn = get_db_connection()
     try:
         conn.execute("""
-            INSERT INTO scrape_sessions (url, image_urls, panel_count)
+            INSERT INTO platform_scrape_sessions (url, image_urls, panel_count)
             VALUES (?, ?, ?)
         """, (url, json.dumps(image_urls), len(image_urls)))
         conn.commit()
@@ -73,7 +73,7 @@ def get_latest_scrape_session(url: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT * FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1
+            SELECT * FROM platform_scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1
         """, (url,)).fetchone()
         if row:
             res = dict(row)
@@ -89,7 +89,7 @@ def save_edit_history(edited_url: str, original_url: str, edit_type: str = 'edit
     conn = get_db_connection()
     try:
         conn.execute("""
-            INSERT OR REPLACE INTO edit_history (edited_url, original_url, edit_type)
+            INSERT OR REPLACE INTO image_edit_history (edited_url, original_url, edit_type)
             VALUES (?, ?, ?)
         """, (edited_url, original_url, edit_type))
         conn.commit()
@@ -101,7 +101,7 @@ def delete_scrape_session(url: str) -> None:
     """Delete scrape session for a URL."""
     conn = get_db_connection()
     try:
-        conn.execute("DELETE FROM scrape_sessions WHERE url = ?", (url,))
+        conn.execute("DELETE FROM platform_scrape_sessions WHERE url = ?", (url,))
         conn.commit()
     finally:
         conn.close()

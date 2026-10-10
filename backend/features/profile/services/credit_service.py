@@ -38,7 +38,7 @@ def get_available_credits(user_id: str) -> int:
         return 10000
     conn = get_db_connection()
     try:
-        row = conn.execute("SELECT credits, credit_balance FROM users WHERE id = ?", (user_id,)).fetchone()
+        row = conn.execute("SELECT credits, credit_balance FROM auth_users WHERE id = ?", (user_id,)).fetchone()
         if row is None:
             return 840
         bal = row["credit_balance"] if row["credit_balance"] is not None else row["credits"]
@@ -61,7 +61,7 @@ def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> i
             except Exception:
                 pass
 
-        query = "SELECT credits, credit_balance, creator_role FROM users WHERE id = ?"
+        query = "SELECT credits, credit_balance, creator_role FROM auth_users WHERE id = ?"
         if _is_postgres:
             query += " FOR UPDATE"
 
@@ -83,15 +83,15 @@ def record_credit_transaction(user_id: str, amount: int, feature_name: str) -> i
 
         try:
             conn.execute(
-                "UPDATE users SET credits = ?, credit_balance = ?, updated_at = datetime('now') WHERE id = ?",
+                "UPDATE auth_users SET credits = ?, credit_balance = ?, updated_at = datetime('now') WHERE id = ?",
                 (new_balance, new_balance, user_id),
             )
         except Exception:
-            conn.execute("UPDATE users SET credits = ?, updated_at = datetime('now') WHERE id = ?", (new_balance, user_id))
+            conn.execute("UPDATE auth_users SET credits = ?, updated_at = datetime('now') WHERE id = ?", (new_balance, user_id))
 
         tx_id = str(uuid.uuid4())
         conn.execute(
-            "INSERT INTO credit_transactions (id, user_id, amount, feature_name) VALUES (?, ?, ?, ?)",
+            "INSERT INTO profile_credit_transactions (id, user_id, amount, feature_name) VALUES (?, ?, ?, ?)",
             (tx_id, user_id, amount, feature_name),
         )
         conn.commit()
@@ -121,7 +121,7 @@ def get_credit_transactions(user_id: str, limit: int = 100) -> List[Dict[str, An
     conn = get_db_connection()
     try:
         rows = conn.execute(
-            "SELECT * FROM credit_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
+            "SELECT * FROM profile_credit_transactions WHERE user_id = ? ORDER BY created_at DESC LIMIT ?",
             (user_id, limit),
         ).fetchall()
         txs = [dict(r) for r in rows]

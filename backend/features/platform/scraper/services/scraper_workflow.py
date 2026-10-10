@@ -38,13 +38,13 @@ logger = logging.getLogger("sonikoma.services.scraper.workflow")
 # ═════════════════════════════════════════════════════════════════════════════
 
 def _ensure_chapters_table():
-    """Initializes the series_chapters_cache SQLite table if not already present."""
+    """Initializes the canonical series cache if not already present."""
     if not get_db_connection:
         return
     try:
         with get_db_connection() as conn:
             conn.execute("""
-            CREATE TABLE IF NOT EXISTS series_chapters_cache (
+            CREATE TABLE IF NOT EXISTS platform_series_cache (
                 series_url      TEXT PRIMARY KEY,
                 title           TEXT,
                 data_json       TEXT NOT NULL,
@@ -53,7 +53,7 @@ def _ensure_chapters_table():
                 created_at      TEXT DEFAULT (datetime('now'))
             )
             """)
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_series_ch_url ON series_chapters_cache(series_url)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_platform_series_cache_url ON platform_series_cache(series_url)")
             conn.commit()
     except Exception as e:
         pass
@@ -74,7 +74,7 @@ def _get_cached_chapters(series_url: str, ttl_seconds: float = 3600.0) -> Option
         with get_db_connection() as conn:
             # 1. Exact URL match
             row = conn.execute(
-                "SELECT data_json, updated_at FROM series_chapters_cache WHERE LOWER(series_url) = ?",
+                "SELECT data_json, updated_at FROM platform_series_cache WHERE LOWER(series_url) = ?",
                 (clean_url,)
             ).fetchone()
             if row and row["data_json"] and (now - row["updated_at"] < ttl_seconds):
@@ -88,7 +88,7 @@ def _get_cached_chapters(series_url: str, ttl_seconds: float = 3600.0) -> Option
                 clean_title_pattern = f"%{clean_url.replace('-', ' ')}%"
                 fuzzy_row = conn.execute(
                     """
-                    SELECT data_json, updated_at FROM series_chapters_cache 
+                    SELECT data_json, updated_at FROM platform_series_cache 
                     WHERE LOWER(series_url) LIKE ? OR LOWER(title) LIKE ?
                     ORDER BY updated_at DESC LIMIT 1
                     """,
@@ -99,18 +99,6 @@ def _get_cached_chapters(series_url: str, ttl_seconds: float = 3600.0) -> Option
                     data["from_cache"] = True
                     return data
 
-            # Fallback to legacy episodes cache if present
-            try:
-                legacy_row = conn.execute(
-                    "SELECT data_json, updated_at FROM series_episodes_cache WHERE LOWER(series_url) = ?",
-                    (clean_url,)
-                ).fetchone()
-                if legacy_row and legacy_row["data_json"] and (now - legacy_row["updated_at"] < ttl_seconds):
-                    data = json.loads(legacy_row["data_json"])
-                    data["from_cache"] = True
-                    return data
-            except Exception:
-                pass
     except Exception as e:
         pass
     return None
@@ -133,7 +121,7 @@ def _save_cached_chapters(series_url: str, title: str, result_dict: Dict[str, An
         now = time.time()
         with get_db_connection() as conn:
             conn.execute("""
-            INSERT INTO series_chapters_cache (series_url, title, data_json, total_chapters, updated_at)
+            INSERT INTO platform_series_cache (series_url, title, data_json, total_chapters, updated_at)
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(series_url) DO UPDATE SET
                 title           = excluded.title,

@@ -16,26 +16,26 @@ def create_user_session(user_id: str, session_id: str, browser: str, ip: str, lo
     try:
         # Check if there is an existing session for the same user, browser, and IP
         existing = conn.execute("""
-            SELECT session_id FROM user_sessions
+            SELECT session_id FROM auth_sessions
             WHERE user_id = ? AND browser = ? AND ip = ?
             LIMIT 1
         """, (user_id, browser, ip)).fetchone()
 
         if existing:
             conn.execute("""
-                UPDATE user_sessions
+                UPDATE auth_sessions
                 SET session_id = ?, active = 1, created_at = datetime('now')
                 WHERE user_id = ? AND browser = ? AND ip = ?
             """, (session_id, user_id, browser, ip))
         else:
             conn.execute("""
-                INSERT INTO user_sessions (session_id, user_id, browser, ip, location, active)
+                INSERT INTO auth_sessions (session_id, user_id, browser, ip, location, active)
                 VALUES (?, ?, ?, ?, ?, 1)
             """, (session_id, user_id, browser, ip, location))
 
         # Prune active sessions if they exceed 5
         rows = conn.execute("""
-            SELECT session_id FROM user_sessions
+            SELECT session_id FROM auth_sessions
             WHERE user_id = ? AND active = 1
             ORDER BY created_at DESC
         """, (user_id,)).fetchall()
@@ -43,7 +43,7 @@ def create_user_session(user_id: str, session_id: str, browser: str, ip: str, lo
         if len(active_sids) > 5:
             to_remove = active_sids[5:]
             for sid in to_remove:
-                conn.execute("DELETE FROM user_sessions WHERE user_id = ? AND session_id = ?", (user_id, sid))
+                conn.execute("DELETE FROM auth_sessions WHERE user_id = ? AND session_id = ?", (user_id, sid))
 
         conn.commit()
     finally:
@@ -55,7 +55,7 @@ def get_user_sessions(user_id: str) -> List[Dict[str, Any]]:
     try:
         # Automatically deduplicate and prune sessions for same browser & IP keeping the most recent one
         rows = conn.execute("""
-            SELECT id, browser, ip, created_at FROM user_sessions
+            SELECT id, browser, ip, created_at FROM auth_sessions
             WHERE user_id = ?
             ORDER BY created_at DESC
         """, (user_id,)).fetchall()
@@ -70,12 +70,12 @@ def get_user_sessions(user_id: str) -> List[Dict[str, Any]]:
                 seen.add(key)
 
         if to_delete:
-            conn.execute(f"DELETE FROM user_sessions WHERE id IN ({','.join(map(str, to_delete))})")
+            conn.execute(f"DELETE FROM auth_sessions WHERE id IN ({','.join(map(str, to_delete))})")
             conn.commit()
 
         # Enforce maximum 5 active sessions
         active_rows = conn.execute("""
-            SELECT session_id FROM user_sessions
+            SELECT session_id FROM auth_sessions
             WHERE user_id = ? AND active = 1
             ORDER BY created_at DESC
         """, (user_id,)).fetchall()
@@ -83,10 +83,10 @@ def get_user_sessions(user_id: str) -> List[Dict[str, Any]]:
         if len(active_sids) > 5:
             excess = active_sids[5:]
             for sid in excess:
-                conn.execute("DELETE FROM user_sessions WHERE user_id = ? AND session_id = ?", (user_id, sid))
+                conn.execute("DELETE FROM auth_sessions WHERE user_id = ? AND session_id = ?", (user_id, sid))
             conn.commit()
 
-        rows = conn.execute("SELECT * FROM user_sessions WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
+        rows = conn.execute("SELECT * FROM auth_sessions WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()
@@ -95,7 +95,7 @@ def get_user_sessions(user_id: str) -> List[Dict[str, Any]]:
 def terminate_user_session(user_id: str, session_id: str) -> None:
     conn = get_db_connection()
     try:
-        conn.execute("DELETE FROM user_sessions WHERE user_id = ? AND session_id = ?", (user_id, session_id))
+        conn.execute("DELETE FROM auth_sessions WHERE user_id = ? AND session_id = ?", (user_id, session_id))
         conn.commit()
     finally:
         conn.close()
@@ -105,7 +105,7 @@ def write_audit_log(user_id: str, event: str, ip: str, status: str) -> None:
     conn = get_db_connection()
     try:
         conn.execute("""
-            INSERT INTO user_audit_logs (user_id, event, ip, status)
+            INSERT INTO auth_audit_logs (user_id, event, ip, status)
             VALUES (?, ?, ?, ?)
         """, (user_id, event, ip, status))
         conn.commit()
@@ -122,14 +122,14 @@ def get_audit_logs(user_id: str, query: str = "", limit: int = 10, offset: int =
 
         # Get count
         count_row = conn.execute("""
-            SELECT COUNT(*) as c FROM user_audit_logs
+            SELECT COUNT(*) as c FROM auth_audit_logs
             WHERE user_id = ? AND (event LIKE ? OR ip LIKE ?)
         """, (user_id, search_pattern, search_pattern)).fetchone()
         total = count_row['c'] if count_row else 0
 
         # Get logs
         rows = conn.execute("""
-            SELECT * FROM user_audit_logs
+            SELECT * FROM auth_audit_logs
             WHERE user_id = ? AND (event LIKE ? OR ip LIKE ?)
             ORDER BY created_at DESC LIMIT ? OFFSET ?
         """, (user_id, search_pattern, search_pattern, limit, offset)).fetchall()

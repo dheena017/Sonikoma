@@ -17,7 +17,7 @@ def save_edit_history(edited_url: str, original_url: str, edit_type: str = 'edit
     conn = get_db_connection()
     try:
         conn.execute("""
-            INSERT OR REPLACE INTO edit_history (edited_url, original_url, edit_type)
+            INSERT OR REPLACE INTO image_edit_history (edited_url, original_url, edit_type)
             VALUES (?, ?, ?)
         """, (edited_url, original_url, edit_type))
         conn.commit()
@@ -29,7 +29,7 @@ def get_edit_history(edited_url: str) -> Optional[Dict[str, Any]]:
     """Retrieve the stored edit history for a given edited URL."""
     conn = get_db_connection()
     try:
-        row = conn.execute('SELECT * FROM edit_history WHERE edited_url = ?', (edited_url,)).fetchone()
+        row = conn.execute('SELECT * FROM image_edit_history WHERE edited_url = ?', (edited_url,)).fetchone()
         return dict(row) if row else None
     finally:
         conn.close()
@@ -40,7 +40,7 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
     conn = get_db_connection()
     try:
         with conn:
-            ch_row = conn.execute('SELECT original_url FROM chapters WHERE id = ? LIMIT 1', (project_id,)).fetchone()
+            ch_row = conn.execute('SELECT original_url FROM workspace_chapters WHERE id = ? LIMIT 1', (project_id,)).fetchone()
             ch_orig_url = ch_row['original_url'] if ch_row and ch_row['original_url'] else None
 
             for i, p in enumerate(panels):
@@ -57,7 +57,7 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                 orig_url = unwrap_proxy_url(raw_orig) if raw_orig else None
                 if not orig_url and img_url:
                     row_edit = conn.execute(
-                        'SELECT original_url FROM edit_history WHERE edited_url = ? LIMIT 1',
+                        'SELECT original_url FROM image_edit_history WHERE edited_url = ? LIMIT 1',
                         (img_url,)
                     ).fetchone()
                     if row_edit and row_edit['original_url']:
@@ -79,7 +79,7 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
 
                 if panel_id is not None and panel_id > 0:
                     conn.execute("""
-                        INSERT OR REPLACE INTO panels (
+                        INSERT OR REPLACE INTO image_panels (
                             id, chapter_id, panel_index, image_url, original_url, speech_text, sfx,
                             duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
                             grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
@@ -114,7 +114,7 @@ def insert_panels(project_id: str, panels: List[Dict[str, Any]]) -> None:
                     ))
                 else:
                     conn.execute("""
-                        INSERT INTO panels (
+                        INSERT INTO image_panels (
                             chapter_id, panel_index, image_url, original_url, speech_text, sfx,
                             duration, motion_type, visual_description, narrative, brightness, contrast, saturation,
                             grayscale, filter_preset, bubble_method, bubble_sensitivity, bubble_dilation,
@@ -154,7 +154,7 @@ def get_panels(project_id: str) -> List[Dict[str, Any]]:
     """Get all panels for a project, ordered by panel_index and id."""
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT * FROM panels WHERE chapter_id = ? ORDER BY panel_index ASC, id ASC', (project_id,)).fetchall()
+        rows = conn.execute('SELECT * FROM image_panels WHERE chapter_id = ? ORDER BY panel_index ASC, id ASC', (project_id,)).fetchall()
         result = []
         for idx, r in enumerate(rows):
             d = dict(r)
@@ -172,8 +172,8 @@ def delete_panels(project_id: str) -> None:
     """Delete all panels belonging to a project, removing associated files."""
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT image_url, audio_url FROM panels WHERE chapter_id = ?', (project_id,)).fetchall()
-        conn.execute('DELETE FROM panels WHERE chapter_id = ?', (project_id,))
+        rows = conn.execute('SELECT image_url, audio_url FROM image_panels WHERE chapter_id = ?', (project_id,)).fetchall()
+        conn.execute('DELETE FROM image_panels WHERE chapter_id = ?', (project_id,))
         conn.commit()
         for r in rows:
             cleanup_cached_url(r['image_url'])
@@ -190,7 +190,7 @@ def get_panel_original_url(image_url: str) -> Optional[str]:
     conn = get_db_connection()
     try:
         row = conn.execute(
-            'SELECT original_url FROM panels WHERE image_url = ? AND original_url IS NOT NULL LIMIT 1',
+            'SELECT original_url FROM image_panels WHERE image_url = ? AND original_url IS NOT NULL LIMIT 1',
             (image_url,)
         ).fetchone()
         if row and row['original_url']:

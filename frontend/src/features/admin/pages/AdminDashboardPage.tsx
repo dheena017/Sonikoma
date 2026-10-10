@@ -148,7 +148,7 @@ const AdminDashboardPage = React.memo(
     const verifyDatabase = async () => {
       try {
         const res = await fetchWithInterceptor(
-          "/api/v1/auth/admin/db/query?table=platform_settings&limit=1"
+          "/api/v1/auth/admin/db/query?table=admin_settings&limit=1"
         );
         if (res.ok) {
           setDbStatus("Healthy");

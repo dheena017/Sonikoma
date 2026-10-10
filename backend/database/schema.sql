@@ -1,36 +1,21 @@
 -- =============================================================================
--- SONIKOMA AI STUDIO — CANONICAL DATABASE SCHEMA (schema.sql)
+-- SONIKOMA AI STUDIO — FINAL POLISHED DATABASE SCHEMA
 -- =============================================================================
--- Dual-Engine Compatible: SQLite (Local Development) & PostgreSQL (Production)
--- Structured into Sonikoma's 10 Core Application Domains:
---   1. admin/          - Platform governance, settings, moderation, and announcements
---   2. landing/        - Public landing page, demo showcases, and marketing tiers
---   3. auth/           - Authentication, credentials, sessions, and security audits
---   4. workspace/      - Studio shell, storyboard breakdown, and episode management
---   5. image-editor/   - Canvas, auto-crop, panels, layers, and edit cache history
---   6. video-editor/   - Video timeline, motion presets, audio tracks, and render outputs
---   7. creative/       - Creative Suite, AI director agent, and YouTube publishing
---   8. platform/       - Core platform hub, series projects, scraper engine, and jobs
---   9. profile/        - Creator profile, developer API keys, billing, and credit ledger
---  10. intelligence/   - AI Core, series studio, lore continuity, and token ledger
---
--- Total Tables: 28 Canonical Tables.
+-- Clean naming convention: domain + entity, with short and readable names.
+-- Examples:
+--   auth_users
+--   workspace_chapters
+--   platform_jobs
+--   intelligence_ledger
 -- =============================================================================
 
-
--- =============================================================================
--- DOMAIN 1: ADMIN & PLATFORM GOVERNANCE (admin/)
--- =============================================================================
-
--- 1. Platform Settings (Dynamic Configuration Flags & Feature Toggles)
-CREATE TABLE IF NOT EXISTS platform_settings (
+CREATE TABLE IF NOT EXISTS admin_settings (
   key         TEXT    PRIMARY KEY,
   value       TEXT    NOT NULL,
   updated_at  TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
--- 2. System Announcements (Platform Banner Notifications & Broadcasts)
-CREATE TABLE IF NOT EXISTS system_announcements (
+CREATE TABLE IF NOT EXISTS admin_announcements (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   title       TEXT    NOT NULL,
   message     TEXT    NOT NULL,
@@ -43,8 +28,7 @@ CREATE TABLE IF NOT EXISTS system_announcements (
   created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
--- 3. Content Moderation Audit Logs
-CREATE TABLE IF NOT EXISTS content_moderation_logs (
+CREATE TABLE IF NOT EXISTS admin_moderation_logs (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   series_id       TEXT,
   chapter_id      TEXT,
@@ -54,28 +38,15 @@ CREATE TABLE IF NOT EXISTS content_moderation_logs (
   previous_state  TEXT,
   new_state       TEXT,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (admin_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
-
--- =============================================================================
--- DOMAIN 2: PUBLIC LANDING & SHOWCASE (landing/)
--- =============================================================================
--- Note: The public landing domain is stateless and consumes read-only aggregate
--- metrics (e.g. series count, creator counts, demo video reels).
-
-
--- =============================================================================
--- DOMAIN 3: AUTHENTICATION & ACCESS CONTROL (auth/)
--- =============================================================================
-
--- 4. Users (Creator, Artist & Admin Accounts)
-CREATE TABLE IF NOT EXISTS users (
-  id                  TEXT    PRIMARY KEY,              -- UUID format, e.g. "user_7f9e2b1a"
+CREATE TABLE IF NOT EXISTS auth_users (
+  id                  TEXT    PRIMARY KEY,
   username            TEXT    NOT NULL UNIQUE,
   email               TEXT    NOT NULL UNIQUE,
   password_hash       TEXT    NOT NULL,
-  creator_role        TEXT    NOT NULL DEFAULT 'creator',-- "creator" | "admin" | "moderator"
+  creator_role        TEXT    NOT NULL DEFAULT 'creator',
   full_name           TEXT,
   avatar_url          TEXT,
   bio                 TEXT    NOT NULL DEFAULT '',
@@ -83,19 +54,19 @@ CREATE TABLE IF NOT EXISTS users (
   website             TEXT    NOT NULL DEFAULT '',
   timezone            TEXT    NOT NULL DEFAULT 'UTC',
   language            TEXT    NOT NULL DEFAULT 'en',
-  credits             INTEGER NOT NULL DEFAULT 840,     -- Canonical compute credits for AI generation
-  credit_balance      INTEGER NOT NULL DEFAULT 840,     -- Legacy mirror column for backward compatibility
-  last_claimed_date   TEXT,                             -- Daily bonus claim tracker (YYYY-MM-DD)
-  unlocked_rewards    TEXT    NOT NULL DEFAULT '[]',    -- JSON array of unlocked achievement badges
-  preferences         TEXT    NOT NULL DEFAULT '{}',    -- JSON string for UI customization & presets
-  google_id           TEXT,                             -- Google OAuth subject identifier
-  google_access_token TEXT,                             -- Transient OAuth bearer token
+  credits             INTEGER NOT NULL DEFAULT 840,
+  credit_balance      INTEGER NOT NULL DEFAULT 840,
+  last_claimed_date   TEXT,
+  unlocked_rewards    TEXT    NOT NULL DEFAULT '[]',
+  preferences         TEXT    NOT NULL DEFAULT '{}',
+  google_id           TEXT,
+  google_access_token TEXT,
   social_connections  TEXT    NOT NULL DEFAULT '{"google":true,"github":false,"discord":false}',
-  newsletter          INTEGER NOT NULL DEFAULT 0,       -- 1 if subscribed to product updates
-  portfolio_links     TEXT    NOT NULL DEFAULT '[]',    -- JSON array of external portfolio URLs
-  mfa_enabled         INTEGER NOT NULL DEFAULT 0,       -- Multi-factor authentication flag
-  is_locked           INTEGER NOT NULL DEFAULT 0,       -- Administrative account lock flag
-  is_banned           INTEGER NOT NULL DEFAULT 0,       -- Safety ban flag
+  newsletter          INTEGER NOT NULL DEFAULT 0,
+  portfolio_links     TEXT    NOT NULL DEFAULT '[]',
+  mfa_enabled         INTEGER NOT NULL DEFAULT 0,
+  is_locked           INTEGER NOT NULL DEFAULT 0,
+  is_banned           INTEGER NOT NULL DEFAULT 0,
   ban_reason          TEXT,
   last_login_at       TEXT,
   last_login_ip       TEXT,
@@ -103,8 +74,7 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at          TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
--- 5. Active User Sessions (Device & Browser Tracking)
-CREATE TABLE IF NOT EXISTS user_sessions (
+CREATE TABLE IF NOT EXISTS auth_sessions (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   session_id  TEXT    NOT NULL UNIQUE,
   user_id     TEXT    NOT NULL,
@@ -113,82 +83,68 @@ CREATE TABLE IF NOT EXISTS user_sessions (
   location    TEXT    NOT NULL,
   active      INTEGER NOT NULL DEFAULT 1,
   created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
--- 6. Security Audit Logs (Authentication & Sensitive Operations)
-CREATE TABLE IF NOT EXISTS user_audit_logs (
+CREATE TABLE IF NOT EXISTS auth_audit_logs (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id     TEXT    NOT NULL,
-  event       TEXT    NOT NULL,                         -- "login", "logout", "password_reset", "export"
+  event       TEXT    NOT NULL,
   ip          TEXT    NOT NULL,
-  status      TEXT    NOT NULL,                         -- "SUCCESS" | "FAILED"
+  status      TEXT    NOT NULL,
   created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
-
--- =============================================================================
--- DOMAIN 4: WORKSPACE & STORYBOARD (workspace/)
--- =============================================================================
-
--- 7. Chapters (Episodes Nested Under a Series)
-CREATE TABLE IF NOT EXISTS chapters (
-  id                TEXT    PRIMARY KEY,                -- UUID format, e.g. "chap_here_u_are_148"
+CREATE TABLE IF NOT EXISTS workspace_chapters (
+  id                TEXT    PRIMARY KEY,
   series_id         TEXT    NOT NULL,
-  episode_number    TEXT    NOT NULL,                   -- Display chapter title, e.g. "Chapter 148"
-  slug              TEXT    UNIQUE,                     -- URL slug, e.g. "chapter-here-u-are-148-2"
-  original_url      TEXT,                               -- Source scraped URL
-  status            TEXT    NOT NULL DEFAULT 'pending', -- "pending" | "processing" | "completed" | "failed"
-  panels_count      INTEGER NOT NULL DEFAULT 0,         -- Total storyboard panels
-  video_url         TEXT,                               -- Completed MP4 video export path
-  job_id            TEXT,                               -- Active background rendering job reference
-  total_tokens_used INTEGER NOT NULL DEFAULT 0,         -- AI tokens consumed generating this chapter
-  audio_settings    TEXT,                               -- Serialized JSON of audio mixer settings
-  project_type      TEXT    NOT NULL DEFAULT 'permanent',-- "temp" | "permanent"
+  episode_number    TEXT    NOT NULL,
+  slug              TEXT    UNIQUE,
+  original_url      TEXT,
+  status            TEXT    NOT NULL DEFAULT 'pending',
+  panels_count      INTEGER NOT NULL DEFAULT 0,
+  video_url         TEXT,
+  job_id            TEXT,
+  total_tokens_used INTEGER NOT NULL DEFAULT 0,
+  audio_settings    TEXT,
+  project_type      TEXT    NOT NULL DEFAULT 'permanent',
   created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at        TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (series_id) REFERENCES series(id) ON DELETE CASCADE
+  FOREIGN KEY (series_id) REFERENCES platform_series(id) ON DELETE CASCADE
 );
 
-
--- =============================================================================
--- DOMAIN 5: IMAGE EDITOR & AUTO-CROP (image-editor/)
--- =============================================================================
-
--- 8. Storyboard Panels (Extracted Comic Frames, Dialogue & Visual Effects)
-CREATE TABLE IF NOT EXISTS panels (
+CREATE TABLE IF NOT EXISTS image_panels (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   chapter_id         TEXT    NOT NULL,
-  panel_index        INTEGER NOT NULL,                  -- Sequential frame index (0, 1, 2, ...)
-  image_url          TEXT    NOT NULL,                  -- Clean cropped panel image path
-  original_url       TEXT,                              -- Source uncropped strip image
-  speech_text        TEXT    NOT NULL DEFAULT '',       -- Dialogue extracted from speech bubbles
-  sfx                TEXT    NOT NULL DEFAULT '',       -- Onomatopoeia / sound effect text
-  duration           REAL,                              -- Timeline display duration in seconds
-  motion_type        TEXT,                              -- "Ken Burns", "Pan Up", "Static"
-  visual_description TEXT,                              -- Frame visual description / artwork generation prompt
-  narrative          TEXT,                              -- Scene visual summary & context (unified narrative)
+  panel_index        INTEGER NOT NULL,
+  image_url          TEXT    NOT NULL,
+  original_url       TEXT,
+  speech_text        TEXT    NOT NULL DEFAULT '',
+  sfx                TEXT    NOT NULL DEFAULT '',
+  duration           REAL,
+  motion_type        TEXT,
+  visual_description TEXT,
+  narrative          TEXT,
   brightness         REAL,
   contrast           REAL,
   saturation         REAL,
-  grayscale          INTEGER DEFAULT 0,                 -- Grayscale filter toggle (0 or 1)
-  filter_preset      TEXT,                              -- "grayscale", "warm", "vintage", "dramatic"
-  bubble_method      TEXT,                              -- Detection algorithm: "opencv", "yolo", "manual"
-  detection_style    TEXT,                              -- Detection filter: "all", "white_only", "text_only"
-  bubble_sensitivity REAL    DEFAULT 0.5,               -- Bubble detection contour sensitivity threshold
-  bubble_dilation    INTEGER DEFAULT 2,                 -- Contour dilation pixel radius
-  inpaint_radius     INTEGER DEFAULT 5,                 -- Inpainting brush pixel radius
-  audio_url          TEXT,                              -- Generated TTS speech audio clip
-  smart_crop         INTEGER NOT NULL DEFAULT 0,        -- 1 if auto-crop heuristic applied
-  crop_padding       INTEGER DEFAULT 0,                 -- Outer bounding box padding in pixels
-  is_sanitized       INTEGER NOT NULL DEFAULT 0,        -- 1 if text bubbles have been inpainted
+  grayscale          INTEGER DEFAULT 0,
+  filter_preset      TEXT,
+  bubble_method      TEXT,
+  detection_style    TEXT,
+  bubble_sensitivity REAL    DEFAULT 0.5,
+  bubble_dilation    INTEGER DEFAULT 2,
+  inpaint_radius     INTEGER DEFAULT 5,
+  audio_url          TEXT,
+  smart_crop         INTEGER NOT NULL DEFAULT 0,
+  crop_padding       INTEGER DEFAULT 0,
+  is_sanitized       INTEGER NOT NULL DEFAULT 0,
   created_at         TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE CASCADE
+  FOREIGN KEY (chapter_id) REFERENCES workspace_chapters(id) ON DELETE CASCADE
 );
 
--- 9. Image Editor Stitched & Edited History (Cache Mapping)
-CREATE TABLE IF NOT EXISTS edit_history (
+CREATE TABLE IF NOT EXISTS image_edit_history (
   id           INTEGER PRIMARY KEY AUTOINCREMENT,
   edited_url   TEXT UNIQUE NOT NULL,
   original_url TEXT NOT NULL,
@@ -196,21 +152,7 @@ CREATE TABLE IF NOT EXISTS edit_history (
   created_at   TEXT DEFAULT (datetime('now'))
 );
 
-
--- =============================================================================
--- DOMAIN 6: VIDEO EDITOR & MOTION TIMELINE (video-editor/)
--- =============================================================================
--- Note: The video-editor domain operates directly on:
--- • `chapters`: Persists compiled video export URLs (`video_url`) and audio mixer settings (`audio_settings`).
--- • `panels`: Persists frame display timings (`duration`), transition motion presets (`motion_type`), and audio clips (`audio_url`).
-
-
--- =============================================================================
--- DOMAIN 7: CREATIVE SUITE & PUBLISHING (creative/)
--- =============================================================================
-
--- 10. Connected YouTube Channels
-CREATE TABLE IF NOT EXISTS user_youtube_channels (
+CREATE TABLE IF NOT EXISTS creative_youtube_channels (
   channel_id       TEXT NOT NULL,
   user_id          TEXT NOT NULL,
   title            TEXT NOT NULL,
@@ -220,16 +162,23 @@ CREATE TABLE IF NOT EXISTS user_youtube_channels (
   subscriber_count TEXT,
   view_count       TEXT,
   video_count      TEXT,
-  channel_type     TEXT DEFAULT 'personal',             -- "personal" | "brand"
-  is_selected      INTEGER NOT NULL DEFAULT 0,          -- 1 if active target channel
+  channel_type     TEXT DEFAULT 'personal',
+  is_selected      INTEGER NOT NULL DEFAULT 0,
   created_at       TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at       TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (user_id, channel_id),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
--- 11. YouTube Account OAuth Tokens
-CREATE TABLE IF NOT EXISTS youtube_oauth_tokens (
+CREATE TABLE IF NOT EXISTS creative_youtube_unlinked_channels (
+  user_id     TEXT NOT NULL,
+  channel_id  TEXT NOT NULL,
+  unlinked_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, channel_id),
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS creative_youtube_tokens (
   user_id                    TEXT PRIMARY KEY,
   access_token               TEXT NOT NULL,
   refresh_token              TEXT,
@@ -243,17 +192,16 @@ CREATE TABLE IF NOT EXISTS youtube_oauth_tokens (
   selected_channel_thumbnail TEXT,
   selected_channel_handle    TEXT,
   updated_at                 TEXT NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
--- 12. YouTube Publishing Profiles (Video Metadata Presets)
-CREATE TABLE IF NOT EXISTS youtube_profiles (
+CREATE TABLE IF NOT EXISTS creative_youtube_profiles (
   id                   INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id              TEXT    NOT NULL,
   name                 TEXT    NOT NULL,
   title_template       TEXT    NOT NULL,
   description_template TEXT    NOT NULL,
-  tags                 TEXT    NOT NULL,                -- JSON array format
+  tags                 TEXT    NOT NULL,
   category_id          TEXT    NOT NULL DEFAULT '1',
   privacy_status       TEXT    NOT NULL DEFAULT 'unlisted',
   is_short             INTEGER NOT NULL DEFAULT 0,
@@ -265,12 +213,11 @@ CREATE TABLE IF NOT EXISTS youtube_profiles (
   discord_link         TEXT,
   patreon_link         TEXT,
   created_at           TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE,
   UNIQUE(user_id, name)
 );
 
--- 13. YouTube Publication History (Upload Logs)
-CREATE TABLE IF NOT EXISTS youtube_publications (
+CREATE TABLE IF NOT EXISTS creative_youtube_publications (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id         TEXT    NOT NULL,
   chapter_id      TEXT,
@@ -278,22 +225,20 @@ CREATE TABLE IF NOT EXISTS youtube_publications (
   title           TEXT    NOT NULL,
   privacy_status  TEXT    NOT NULL DEFAULT 'unlisted',
   published_at    TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (chapter_id) REFERENCES chapters(id) ON DELETE SET NULL
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE,
+  FOREIGN KEY (chapter_id) REFERENCES workspace_chapters(id) ON DELETE SET NULL
 );
 
--- 14. YouTube Custom Client Credentials (BYO GCP Project)
-CREATE TABLE IF NOT EXISTS youtube_credentials (
+CREATE TABLE IF NOT EXISTS creative_youtube_credentials (
   user_id         TEXT    PRIMARY KEY,
   client_id       TEXT    NOT NULL,
   client_secret   TEXT    NOT NULL,
   project_id      TEXT    NOT NULL,
   updated_at      TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
--- 15. Creator Style Profiles (Director Style Preferences & Prompt Biases)
-CREATE TABLE IF NOT EXISTS creator_style_profiles (
+CREATE TABLE IF NOT EXISTS creative_style_profiles (
   creator_id                TEXT PRIMARY KEY,
   preferred_art_styles      TEXT DEFAULT '[]',
   pacing_bias               TEXT DEFAULT 'balanced',
@@ -304,130 +249,107 @@ CREATE TABLE IF NOT EXISTS creator_style_profiles (
   updated_at                TEXT DEFAULT (datetime('now'))
 );
 
-
--- =============================================================================
--- DOMAIN 8: PLATFORM HUB, PROJECTS & JOBS (platform/)
--- =============================================================================
-
--- 16. Series (Parent Manhwa / Comic / Manga Publication)
-CREATE TABLE IF NOT EXISTS series (
-  id          TEXT    PRIMARY KEY,                      -- UUID format, e.g. "ser_83cbec86"
+CREATE TABLE IF NOT EXISTS platform_series (
+  id          TEXT    PRIMARY KEY,
   user_id     TEXT    NOT NULL,
   title       TEXT    NOT NULL,
-  slug        TEXT    UNIQUE,                           -- URL slug, e.g. "here-u-are-1"
+  slug        TEXT    UNIQUE,
   author      TEXT    NOT NULL,
-  cover_image TEXT,                                     -- URL or path to series thumbnail poster
+  cover_image TEXT,
   genre       TEXT    NOT NULL DEFAULT 'general',
-  synopsis    TEXT,                                     -- Series overview / storyline summary
-  status      TEXT    NOT NULL DEFAULT 'ready',          -- "pending" | "processing" | "ready" | "archived"
-  is_flagged  INTEGER NOT NULL DEFAULT 0,               -- Content moderation flag
+  synopsis    TEXT,
+  status      TEXT    NOT NULL DEFAULT 'ready',
+  is_flagged  INTEGER NOT NULL DEFAULT 0,
   flag_reason TEXT,
   flagged_by  TEXT,
   flagged_at  TEXT,
   created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
   updated_at  TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
--- 17. Persistent Background Jobs (Asynchronous Worker Tasks)
-CREATE TABLE IF NOT EXISTS jobs (
-  id            TEXT    PRIMARY KEY,                    -- UUID format, e.g. "job_9a1b..."
+CREATE TABLE IF NOT EXISTS platform_jobs (
+  id            TEXT    PRIMARY KEY,
   user_id       TEXT    NOT NULL,
-  project_id    TEXT,                                   -- Reference to series or chapter
+  project_id    TEXT,
   chapter_id    TEXT,
-  type          TEXT    NOT NULL,                       -- "SCRAPE", "AUTOCROP", "TTS", "VIDEO"
-  status        TEXT    NOT NULL DEFAULT 'QUEUED',      -- "QUEUED", "PROCESSING", "COMPLETED", "FAILED"
-  progress      REAL    NOT NULL DEFAULT 0.0,           -- Progress percentage (0.0 to 100.0)
-  stage         TEXT    NOT NULL DEFAULT 'QUEUED',      -- Current pipeline stage description
-  result        TEXT,                                   -- Serialized JSON payload on completion
-  error         TEXT,                                   -- Error traceback on failure
-  metadata      TEXT,                                   -- Serialized JSON input parameters
+  type          TEXT    NOT NULL,
+  status        TEXT    NOT NULL DEFAULT 'QUEUED',
+  progress      REAL    NOT NULL DEFAULT 0.0,
+  stage         TEXT    NOT NULL DEFAULT 'QUEUED',
+  result        TEXT,
+  error         TEXT,
+  metadata      TEXT,
   created_at    TEXT    NOT NULL DEFAULT (datetime('now')),
   started_at    TEXT,
   completed_at  TEXT,
   cancelled_at  TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
--- 18. Scrape Sessions (Scraped URL Deck & Extracted Image URLs)
-CREATE TABLE IF NOT EXISTS scrape_sessions (
+CREATE TABLE IF NOT EXISTS platform_scrape_sessions (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   url         TEXT    NOT NULL,
-  image_urls  TEXT    NOT NULL,                         -- JSON array of raw scraped image URLs
+  image_urls  TEXT    NOT NULL,
   panel_count INTEGER NOT NULL DEFAULT 0,
   scraped_at  TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
--- 19. Series Chapters Discovery Cache (Aggregated Series Metadata)
-CREATE TABLE IF NOT EXISTS series_chapters_cache (
+CREATE TABLE IF NOT EXISTS platform_series_cache (
   series_url     TEXT    PRIMARY KEY,
   title          TEXT,
-  data_json      TEXT    NOT NULL,                      -- Serialized JSON chapter list
+  data_json      TEXT    NOT NULL,
   total_chapters INTEGER DEFAULT 0,
-  updated_at     TEXT,
+  updated_at     REAL,
   created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
--- 20. System Runtime Logs (Structured Application Diagnostics & Web Terminal)
-CREATE TABLE IF NOT EXISTS system_logs (
+CREATE TABLE IF NOT EXISTS platform_system_logs (
   id              INTEGER PRIMARY KEY AUTOINCREMENT,
   message         TEXT    NOT NULL,
-  level           TEXT    NOT NULL,                     -- "INFO" | "WARN" | "ERROR"
-  module          TEXT    NOT NULL,                     -- "Scraper", "AI", "Video", "Auth"
-  details         TEXT,                                 -- Serialized JSON diagnostic context
+  level           TEXT    NOT NULL,
+  module          TEXT    NOT NULL,
+  timestamp       TEXT,
+  details         TEXT,
   correlation_id  TEXT,
   user_id         TEXT,
   snapshot        TEXT,
   created_at      TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
-
--- =============================================================================
--- DOMAIN 9: PROFILE, DEVELOPER API & BILLING (profile/)
--- =============================================================================
-
--- 21. Developer API Keys (Programmatic SDK & Automation Credentials)
-CREATE TABLE IF NOT EXISTS user_api_keys (
+CREATE TABLE IF NOT EXISTS profile_api_keys (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   key_id      TEXT    NOT NULL UNIQUE,
   user_id     TEXT    NOT NULL,
   name        TEXT    NOT NULL,
   api_key     TEXT    NOT NULL UNIQUE,
   created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
--- 22. User Billing Invoices
-CREATE TABLE IF NOT EXISTS user_invoices (
+CREATE TABLE IF NOT EXISTS profile_invoices (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   invoice_id  TEXT    NOT NULL UNIQUE,
   user_id     TEXT    NOT NULL,
   amount      REAL    NOT NULL,
-  status      TEXT    NOT NULL,                         -- "paid" | "pending" | "failed"
+  status      TEXT    NOT NULL,
   created_at  TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
--- 23. Credit Transactions Ledger (User Wallet Balance Changes)
-CREATE TABLE IF NOT EXISTS credit_transactions (
+CREATE TABLE IF NOT EXISTS profile_credit_transactions (
   id                TEXT    PRIMARY KEY,
   user_id           TEXT    NOT NULL,
-  amount            INTEGER NOT NULL,                   -- +/- credit balance adjustment
-  feature_name      TEXT    NOT NULL,                   -- "tts", "video_render", "translation", "bonus"
-  transaction_type  TEXT    DEFAULT 'grant',            -- "grant" | "deduction" | "bonus" | "refund"
-  reference_id      TEXT,                               -- Associated job_id or payment reference
+  amount            INTEGER NOT NULL,
+  feature_name      TEXT    NOT NULL,
+  transaction_type  TEXT    DEFAULT 'grant',
+  reference_id      TEXT,
   metadata          TEXT    DEFAULT '{}',
   created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES auth_users(id) ON DELETE CASCADE
 );
 
-
--- =============================================================================
--- DOMAIN 10: INTELLIGENCE & AI CORE (intelligence/)
--- =============================================================================
-
--- 24. AI Generated Series Projects
-CREATE TABLE IF NOT EXISTS ai_series_projects (
+CREATE TABLE IF NOT EXISTS intelligence_projects (
   series_id   TEXT    PRIMARY KEY,
   title       TEXT    NOT NULL,
   format_type TEXT    NOT NULL,
@@ -438,25 +360,24 @@ CREATE TABLE IF NOT EXISTS ai_series_projects (
   data_json   TEXT    NOT NULL
 );
 
--- 25. Series Continuity Memory (Franchise Canon, World Rules & Character States)
-CREATE TABLE IF NOT EXISTS series_continuity_memory (
+CREATE TABLE IF NOT EXISTS intelligence_continuity_memory (
   series_id                TEXT PRIMARY KEY,
-  active_characters        TEXT,                        -- JSON: Character visual traits & current states
-  world_rules              TEXT,                        -- JSON: Immutable physics, power systems & world laws
-  lore_revelations         TEXT,                        -- JSON: Unveiled secrets & lore milestones
-  unresolved_threads       TEXT,                        -- JSON: Active plot hooks & foreshadowing
-  resolved_threads         TEXT,                        -- JSON: Concluded storyline arcs
-  canonical_locations      TEXT,                        -- JSON: Recurring locations & spatial continuity
+  active_characters        TEXT,
+  world_rules              TEXT,
+  lore_revelations         TEXT,
+  unresolved_threads       TEXT,
+  resolved_threads         TEXT,
+  canonical_locations      TEXT,
   total_chapters_generated INTEGER DEFAULT 0,
   last_synced_at           TEXT,
   updated_at               TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- 26. Creator Feedback & Quality Refinement Events (RLHF Event Stream)
-CREATE TABLE IF NOT EXISTS series_feedback_events (
+CREATE TABLE IF NOT EXISTS intelligence_feedback_events (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  feedback_id    TEXT    UNIQUE,
   series_id      TEXT    NOT NULL,
-  chapter_number TEXT    NOT NULL,
+  chapter_number TEXT,
   panel_index    INTEGER,
   feedback_type  TEXT    NOT NULL,
   user_comment   TEXT,
@@ -464,83 +385,110 @@ CREATE TABLE IF NOT EXISTS series_feedback_events (
   created_at     TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
--- 27. AI Token Usage Logs (Job & Chapter-Scoped LLM Cost Accounting)
-CREATE TABLE IF NOT EXISTS token_usage_logs (
+CREATE TABLE IF NOT EXISTS intelligence_token_usage (
   id                  TEXT    PRIMARY KEY,
   user_id             TEXT,
   project_id          TEXT    NOT NULL,
   chapter_id          TEXT,
   job_id              TEXT,
-  model_name          TEXT,                             -- "gemini-2.0-flash", "kokoro", "claude-3-7"
-  provider            TEXT,                             -- "google", "local", "anthropic"
-  input_tokens        INTEGER NOT NULL DEFAULT 0,       -- Prompt tokens consumed
-  output_tokens       INTEGER NOT NULL DEFAULT 0,       -- Completion tokens generated
+  model_name          TEXT,
+  provider            TEXT,
+  input_tokens        INTEGER NOT NULL DEFAULT 0,
+  output_tokens       INTEGER NOT NULL DEFAULT 0,
   total_tokens        INTEGER NOT NULL DEFAULT 0,
   estimated_cost_usd  REAL    NOT NULL DEFAULT 0.0,
   created_at          TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
--- 28. AI Telemetry Analytics Ledger (Fine-Grained Latency & Model Performance)
-CREATE TABLE IF NOT EXISTS ai_token_usage_ledger (
+CREATE TABLE IF NOT EXISTS intelligence_ledger (
   id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+  request_id          TEXT    UNIQUE,
   user_id             TEXT,
-  provider            TEXT    NOT NULL,                 -- "google", "local", "anthropic"
-  model               TEXT    NOT NULL,                 -- Model identifier
-  feature             TEXT    NOT NULL,                 -- "storyboard", "tts", "scripting"
+  provider            TEXT    NOT NULL,
+  model               TEXT    NOT NULL,
+  feature             TEXT    NOT NULL,
   prompt_tokens       INTEGER NOT NULL DEFAULT 0,
   completion_tokens   INTEGER NOT NULL DEFAULT 0,
   total_tokens        INTEGER NOT NULL DEFAULT 0,
-  latency_ms          INTEGER NOT NULL DEFAULT 0,       -- Response latency in milliseconds
+  latency_ms          REAL    NOT NULL DEFAULT 0.0,
   cost_estimate_usd   REAL    NOT NULL DEFAULT 0.0,
-  status              TEXT    NOT NULL DEFAULT 'success',
+  status              TEXT    NOT NULL DEFAULT 'SUCCESS',
   created_at          TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE INDEX IF NOT EXISTS idx_admin_moderation_logs_admin_id
+  ON admin_moderation_logs(admin_id);
 
--- =============================================================================
--- INDEXES & PERFORMANCE OPTIMIZATIONS
--- =============================================================================
+CREATE INDEX IF NOT EXISTS idx_auth_sessions_user_id
+  ON auth_sessions(user_id);
 
--- Core Foreign Key & Slug Indexes
-CREATE INDEX IF NOT EXISTS idx_series_user_id ON series(user_id);
-CREATE INDEX IF NOT EXISTS idx_series_slug ON series(slug);
-CREATE INDEX IF NOT EXISTS idx_series_status ON series(status);
-CREATE INDEX IF NOT EXISTS idx_chapters_series_id ON chapters(series_id);
-CREATE INDEX IF NOT EXISTS idx_chapters_slug ON chapters(slug);
-CREATE INDEX IF NOT EXISTS idx_panels_chapter_id ON panels(chapter_id);
-CREATE INDEX IF NOT EXISTS idx_panels_panel_index ON panels(chapter_id, panel_index);
-CREATE INDEX IF NOT EXISTS idx_edit_history_edited ON edit_history(edited_url);
-CREATE INDEX IF NOT EXISTS idx_edit_history_original ON edit_history(original_url);
-CREATE INDEX IF NOT EXISTS idx_scrape_url ON scrape_sessions(url);
-CREATE INDEX IF NOT EXISTS idx_series_ch_cache_url ON series_chapters_cache(series_url);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_user ON user_sessions(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_audit_logs_user ON user_audit_logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_invoices_user ON user_invoices(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_api_keys_user ON user_api_keys(user_id);
-CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id);
-CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id);
-CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
-CREATE INDEX IF NOT EXISTS idx_youtube_profiles_user ON youtube_profiles(user_id);
-CREATE INDEX IF NOT EXISTS idx_youtube_publications_user ON youtube_publications(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_yt_channels_user ON user_youtube_channels(user_id);
-CREATE INDEX IF NOT EXISTS idx_creator_style_creator ON creator_style_profiles(creator_id);
-CREATE INDEX IF NOT EXISTS idx_ai_series_updated ON ai_series_projects(updated_at DESC);
-CREATE INDEX IF NOT EXISTS idx_token_logs_project_id ON token_usage_logs(project_id);
-CREATE INDEX IF NOT EXISTS idx_token_logs_user_id ON token_usage_logs(user_id);
-CREATE INDEX IF NOT EXISTS idx_ai_token_ledger_user ON ai_token_usage_ledger(user_id);
-CREATE INDEX IF NOT EXISTS idx_credit_transactions_user ON credit_transactions(user_id);
-CREATE INDEX IF NOT EXISTS idx_system_logs_level ON system_logs(level);
-CREATE INDEX IF NOT EXISTS idx_system_logs_module ON system_logs(module);
+CREATE INDEX IF NOT EXISTS idx_auth_audit_logs_user_id
+  ON auth_audit_logs(user_id);
 
--- Universal High-Performance Date Sorting Indexes
-CREATE INDEX IF NOT EXISTS idx_series_created_at ON series(created_at);
-CREATE INDEX IF NOT EXISTS idx_series_updated_at ON series(updated_at);
-CREATE INDEX IF NOT EXISTS idx_chapters_created_at ON chapters(created_at);
-CREATE INDEX IF NOT EXISTS idx_chapters_updated_at ON chapters(updated_at);
-CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at);
-CREATE INDEX IF NOT EXISTS idx_jobs_completed_at ON jobs(completed_at);
-CREATE INDEX IF NOT EXISTS idx_token_logs_created_at ON token_usage_logs(created_at);
-CREATE INDEX IF NOT EXISTS idx_ai_token_ledger_created_at ON ai_token_usage_ledger(created_at);
-CREATE INDEX IF NOT EXISTS idx_scrape_sessions_scraped_at ON scrape_sessions(scraped_at);
-CREATE INDEX IF NOT EXISTS idx_youtube_pubs_published_at ON youtube_publications(published_at);
-CREATE INDEX IF NOT EXISTS idx_system_logs_created_at ON system_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_workspace_chapters_series_id
+  ON workspace_chapters(series_id);
+
+CREATE INDEX IF NOT EXISTS idx_workspace_chapters_slug
+  ON workspace_chapters(slug);
+
+CREATE INDEX IF NOT EXISTS idx_image_panels_chapter_id
+  ON image_panels(chapter_id);
+
+CREATE INDEX IF NOT EXISTS idx_image_panels_panel_index
+  ON image_panels(chapter_id, panel_index);
+
+CREATE INDEX IF NOT EXISTS idx_creative_youtube_publications_user_id
+  ON creative_youtube_publications(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_creative_youtube_unlinked_user_id
+  ON creative_youtube_unlinked_channels(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_platform_series_user_id
+  ON platform_series(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_platform_series_slug
+  ON platform_series(slug);
+
+CREATE INDEX IF NOT EXISTS idx_platform_series_status
+  ON platform_series(status);
+
+CREATE INDEX IF NOT EXISTS idx_platform_jobs_user_id
+  ON platform_jobs(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_platform_scrape_sessions_url
+  ON platform_scrape_sessions(url);
+
+CREATE INDEX IF NOT EXISTS idx_platform_series_cache_url
+  ON platform_series_cache(series_url);
+
+CREATE INDEX IF NOT EXISTS idx_profile_api_keys_user_id
+  ON profile_api_keys(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_profile_invoices_user_id
+  ON profile_invoices(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_platform_jobs_project_id ON platform_jobs(project_id);
+CREATE INDEX IF NOT EXISTS idx_platform_jobs_status ON platform_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_creative_youtube_profiles_user ON creative_youtube_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_creative_youtube_publications_user ON creative_youtube_publications(user_id);
+CREATE INDEX IF NOT EXISTS idx_creative_youtube_channels_user ON creative_youtube_channels(user_id);
+CREATE INDEX IF NOT EXISTS idx_creative_style_profiles_creator ON creative_style_profiles(creator_id);
+CREATE INDEX IF NOT EXISTS idx_intelligence_projects_updated ON intelligence_projects(updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_intelligence_token_usage_project_id ON intelligence_token_usage(project_id);
+CREATE INDEX IF NOT EXISTS idx_intelligence_token_usage_user_id ON intelligence_token_usage(user_id);
+CREATE INDEX IF NOT EXISTS idx_intelligence_ledger_user ON intelligence_ledger(user_id);
+CREATE INDEX IF NOT EXISTS idx_profile_credit_transactions_user ON profile_credit_transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_platform_system_logs_level ON platform_system_logs(level);
+CREATE INDEX IF NOT EXISTS idx_platform_system_logs_module ON platform_system_logs(module);
+
+CREATE INDEX IF NOT EXISTS idx_platform_series_created_at ON platform_series(created_at);
+CREATE INDEX IF NOT EXISTS idx_platform_series_updated_at ON platform_series(updated_at);
+CREATE INDEX IF NOT EXISTS idx_workspace_chapters_created_at ON workspace_chapters(created_at);
+CREATE INDEX IF NOT EXISTS idx_workspace_chapters_updated_at ON workspace_chapters(updated_at);
+CREATE INDEX IF NOT EXISTS idx_platform_jobs_created_at ON platform_jobs(created_at);
+CREATE INDEX IF NOT EXISTS idx_platform_jobs_completed_at ON platform_jobs(completed_at);
+CREATE INDEX IF NOT EXISTS idx_intelligence_token_usage_created_at ON intelligence_token_usage(created_at);
+CREATE INDEX IF NOT EXISTS idx_intelligence_ledger_created_at ON intelligence_ledger(created_at);
+CREATE INDEX IF NOT EXISTS idx_platform_scrape_sessions_scraped_at ON platform_scrape_sessions(scraped_at);
+CREATE INDEX IF NOT EXISTS idx_creative_youtube_publications_published_at ON creative_youtube_publications(published_at);
+CREATE INDEX IF NOT EXISTS idx_platform_system_logs_created_at ON platform_system_logs(created_at);

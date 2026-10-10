@@ -15,7 +15,7 @@ from database.engine import get_db_connection
 def get_user_invoices(user_id: str) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
-        rows = conn.execute("SELECT * FROM user_invoices WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
+        rows = conn.execute("SELECT * FROM profile_invoices WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()
@@ -27,7 +27,7 @@ def create_user_invoice(user_id: str, amount: float, status: str) -> Dict[str, A
         invoice_id = f"INV-2026-{random.randint(100, 999)}-{suffix}"
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         conn.execute("""
-            INSERT INTO user_invoices (invoice_id, user_id, amount, status, created_at)
+            INSERT INTO profile_invoices (invoice_id, user_id, amount, status, created_at)
             VALUES (?, ?, ?, ?, ?)
         """, (invoice_id, user_id, amount, status, created_at))
         conn.commit()

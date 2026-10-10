@@ -13,7 +13,7 @@ from database.engine import get_db_connection
 def get_announcements() -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT * FROM system_announcements ORDER BY created_at DESC').fetchall()
+        rows = conn.execute('SELECT * FROM admin_announcements ORDER BY created_at DESC').fetchall()
         return [dict(r) for r in rows]
     finally:
         conn.close()
@@ -23,7 +23,7 @@ def create_announcement(title: str, message: str, announcement_type: str = 'info
     conn = get_db_connection()
     try:
         cursor = conn.execute(
-            'INSERT INTO system_announcements (title, message, type, status) VALUES (?, ?, ?, ?) RETURNING *',
+            'INSERT INTO admin_announcements (title, message, type, status) VALUES (?, ?, ?, ?) RETURNING *',
             (title, message, announcement_type, 'active')
         )
         row = cursor.fetchone()
@@ -36,7 +36,7 @@ def create_announcement(title: str, message: str, announcement_type: str = 'info
 def delete_announcement(announcement_id: int) -> bool:
     conn = get_db_connection()
     try:
-        cursor = conn.execute('DELETE FROM system_announcements WHERE id = ?', (announcement_id,))
+        cursor = conn.execute('DELETE FROM admin_announcements WHERE id = ?', (announcement_id,))
         conn.commit()
         return cursor.rowcount > 0
     finally:

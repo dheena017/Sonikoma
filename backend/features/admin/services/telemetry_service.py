@@ -29,9 +29,9 @@ class AdminTelemetryService:
         try:
             rows = conn.execute("""
                 SELECT t.*, s.title as series_title, u.email as user_email
-                FROM token_usage_logs t
-                LEFT JOIN series s ON t.project_id = s.id
-                LEFT JOIN users u ON t.user_id = u.id
+                FROM intelligence_token_usage t
+                LEFT JOIN platform_series s ON t.project_id = s.id
+                LEFT JOIN auth_users u ON t.user_id = u.id
                 ORDER BY t.created_at DESC LIMIT ? OFFSET ?
             """, (limit, offset)).fetchall()
             logs = [dict(r) for r in rows]
@@ -42,7 +42,7 @@ class AdminTelemetryService:
                     SUM(output_tokens) as total_output,
                     SUM(total_tokens) as total_tokens,
                     SUM(estimated_cost_usd) as total_cost_usd
-                FROM token_usage_logs
+                FROM intelligence_token_usage
             """).fetchone()
 
             summary = {

@@ -41,7 +41,7 @@ def get_platform_settings() -> Dict[str, str]:
     }
     conn = get_db_connection()
     try:
-        rows = conn.execute('SELECT key, value FROM platform_settings').fetchall()
+        rows = conn.execute('SELECT key, value FROM admin_settings').fetchall()
         db_settings = {r['key']: r['value'] for r in rows}
         defaults.update(db_settings)
         return defaults
@@ -53,7 +53,7 @@ def update_platform_settings(settings: Dict[str, str]) -> None:
     conn = get_db_connection()
     try:
         for k, v in settings.items():
-            conn.execute('INSERT INTO platform_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=CURRENT_TIMESTAMP', (k, v))
+            conn.execute('INSERT INTO admin_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=CURRENT_TIMESTAMP', (k, v))
         conn.commit()
     finally:
         conn.close()
@@ -62,7 +62,7 @@ def update_platform_settings(settings: Dict[str, str]) -> None:
 def reset_platform_settings() -> Dict[str, str]:
     conn = get_db_connection()
     try:
-        conn.execute('DELETE FROM platform_settings')
+        conn.execute('DELETE FROM admin_settings')
         conn.commit()
     finally:
         conn.close()
@@ -72,7 +72,7 @@ def reset_platform_settings() -> Dict[str, str]:
 def purge_global_cache() -> None:
     conn = get_db_connection()
     try:
-        conn.execute('DELETE FROM scrape_sessions')
+        conn.execute('DELETE FROM platform_scrape_sessions')
         conn.execute('VACUUM')
         conn.commit()
     except Exception as e:

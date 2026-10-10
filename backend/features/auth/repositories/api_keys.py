@@ -14,7 +14,7 @@ from database.utils import uuid_hex, datetime_now_date
 def get_user_api_keys(user_id: str) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
-        rows = conn.execute("SELECT * FROM user_api_keys WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
+        rows = conn.execute("SELECT * FROM profile_api_keys WHERE user_id = ? ORDER BY created_at DESC", (user_id,)).fetchall()
         result = []
         for r in rows:
             d = dict(r)
@@ -31,8 +31,8 @@ def get_user_by_api_key(api_key: str) -> Optional[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         row = conn.execute("""
-            SELECT u.* FROM users u
-            JOIN user_api_keys k ON u.id = k.user_id
+            SELECT u.* FROM auth_users u
+            JOIN profile_api_keys k ON u.id = k.user_id
             WHERE k.api_key = ?
         """, (api_key,)).fetchone()
         if row:
@@ -50,7 +50,7 @@ def create_user_api_key(user_id: str, name: str, api_key: str) -> Dict[str, Any]
     try:
         key_id = f"key_{uuid_hex()}"
         conn.execute("""
-            INSERT INTO user_api_keys (key_id, user_id, name, api_key)
+            INSERT INTO profile_api_keys (key_id, user_id, name, api_key)
             VALUES (?, ?, ?, ?)
         """, (key_id, user_id, name, api_key))
         conn.commit()
@@ -62,7 +62,7 @@ def create_user_api_key(user_id: str, name: str, api_key: str) -> Dict[str, Any]
 def delete_user_api_key(user_id: str, key_id: str) -> None:
     conn = get_db_connection()
     try:
-        conn.execute("DELETE FROM user_api_keys WHERE user_id = ? AND key_id = ?", (user_id, key_id))
+        conn.execute("DELETE FROM profile_api_keys WHERE user_id = ? AND key_id = ?", (user_id, key_id))
         conn.commit()
     finally:
         conn.close()

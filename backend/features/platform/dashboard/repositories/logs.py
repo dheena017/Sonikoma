@@ -21,8 +21,8 @@ def get_global_audit_logs(limit: int = 50) -> List[Dict[str, Any]]:
     try:
         rows = conn.execute('''
             SELECT a.id, a.user_id, u.email, a.event as action, a.ip as ip_address, a.status, a.created_at
-            FROM user_audit_logs a
-            LEFT JOIN users u ON a.user_id = u.id
+            FROM auth_audit_logs a
+            LEFT JOIN auth_users u ON a.user_id = u.id
             ORDER BY a.created_at DESC LIMIT ?
         ''', (limit,)).fetchall()
         return [dict(r) for r in rows]
@@ -51,7 +51,7 @@ def insert_system_log(level: str, module: str, message: str, details: Optional[s
             timestamp = now.strftime("%H:%M:%S")
 
             conn.execute("""
-                INSERT INTO system_logs (timestamp, message, level, module, details, correlation_id, user_id, snapshot)
+                INSERT INTO platform_system_logs (timestamp, message, level, module, details, correlation_id, user_id, snapshot)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (timestamp, message, level, module, details, correlation_id, user_id, snapshot))
             conn.commit()
@@ -70,7 +70,7 @@ def get_system_logs(limit: int = 200, offset: int = 0, level: Optional[str] = No
     """
     conn = get_db_connection()
     try:
-        query = "SELECT * FROM system_logs WHERE 1=1"
+        query = "SELECT * FROM platform_system_logs WHERE 1=1"
         params = []
 
         if level and level != 'ALL':
@@ -115,7 +115,7 @@ def prune_system_logs(max_entries: Optional[int] = None, max_days: Optional[int]
         deleted_count = 0
         if max_days > 0:
             cursor = conn.execute(
-                "DELETE FROM system_logs WHERE created_at < datetime('now', ?)",
+                "DELETE FROM platform_system_logs WHERE created_at < datetime('now', ?)",
                 (f"-{max_days} days",)
             )
             deleted_count = cursor.rowcount
@@ -123,13 +123,13 @@ def prune_system_logs(max_entries: Optional[int] = None, max_days: Optional[int]
         # 2. Prune by total count (keep newest max_entries) (skip if 0)
         if max_entries > 0:
             row = conn.execute(
-                "SELECT id FROM system_logs ORDER BY created_at DESC LIMIT 1 OFFSET ?",
+                "SELECT id FROM platform_system_logs ORDER BY created_at DESC LIMIT 1 OFFSET ?",
                 (max_entries,)
             ).fetchone()
 
             if row:
                 cutoff_id = row['id']
-                cursor2 = conn.execute("DELETE FROM system_logs WHERE id <= ?", (cutoff_id,))
+                cursor2 = conn.execute("DELETE FROM platform_system_logs WHERE id <= ?", (cutoff_id,))
                 deleted_count += cursor2.rowcount
 
         conn.commit()
@@ -144,7 +144,7 @@ def wipe_system_logs() -> None:
     """Wipe all logs from the database."""
     conn = get_db_connection()
     try:
-        conn.execute("DELETE FROM system_logs")
+        conn.execute("DELETE FROM platform_system_logs")
         conn.commit()
     finally:
         conn.close()

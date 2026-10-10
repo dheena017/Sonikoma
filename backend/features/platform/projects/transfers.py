@@ -184,7 +184,7 @@ async def delete_series_endpoint(
 ):
     try:
         conn = get_db_connection()
-        row = conn.execute("SELECT user_id FROM series WHERE id = ?", (seriesId,)).fetchone()
+        row = conn.execute("SELECT user_id FROM platform_series WHERE id = ?", (seriesId,)).fetchone()
         conn.close()
         if not row:
             raise HTTPException(status_code=404, detail="Series not found.")

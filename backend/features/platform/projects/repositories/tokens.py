@@ -29,13 +29,13 @@ def insert_token_log(
     try:
         if not job_id:
             try:
-                ch = conn.execute("SELECT job_id FROM chapters WHERE id = ?", (project_id,)).fetchone()
+                ch = conn.execute("SELECT job_id FROM workspace_chapters WHERE id = ?", (project_id,)).fetchone()
                 if ch and ch["job_id"]:
                     job_id = ch["job_id"]
             except Exception:
                 pass
         conn.execute("""
-            INSERT INTO token_usage_logs (id, project_id, job_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd)
+            INSERT INTO intelligence_token_usage (id, project_id, job_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (log_id, project_id, job_id, input_tokens, output_tokens, total_tokens, estimated_cost_usd))
         conn.commit()
@@ -52,10 +52,10 @@ def get_token_logs(user_id: str) -> List[Dict[str, Any]]:
     conn = get_db_connection()
     try:
         rows = conn.execute("""
-            SELECT l.*, p.title
-            FROM token_usage_logs l
-            JOIN projects p ON l.project_id = p.project_id
-            WHERE p.user_id = ?
+            SELECT l.*, s.title
+            FROM intelligence_token_usage l
+            JOIN platform_series s ON l.project_id = s.id
+            WHERE s.user_id = ?
             ORDER BY l.created_at DESC
         """, (user_id,)).fetchall()
         return [dict(r) for r in rows]
@@ -63,9 +63,9 @@ def get_token_logs(user_id: str) -> List[Dict[str, Any]]:
         try:
             rows = conn.execute("""
                 SELECT l.*, c.episode_number, s.title
-                FROM token_usage_logs l
-                JOIN chapters c ON l.project_id = c.id
-                JOIN series s ON c.series_id = s.id
+                FROM intelligence_token_usage l
+                JOIN workspace_chapters c ON l.project_id = c.id
+                JOIN platform_series s ON c.series_id = s.id
                 WHERE s.user_id = ?
                 ORDER BY l.created_at DESC
             """, (user_id,)).fetchall()

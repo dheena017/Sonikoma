@@ -80,7 +80,7 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
                             series_slug = path_parts[1]
                             chapter_slug = path_parts[3]
                             session_row = await _db_fetchone(
-                                "SELECT url FROM scrape_sessions WHERE url LIKE ? AND url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
+                                "SELECT url FROM platform_scrape_sessions WHERE url LIKE ? AND url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
                                 (f"%{series_slug}%", f"%{chapter_slug.replace('chapter-', 'episode-')}%"),
                             )
                             if session_row:
@@ -88,19 +88,19 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
 
                 if not webtoon_url:
                     latest_session = await _db_fetchone(
-                        "SELECT url FROM scrape_sessions ORDER BY scraped_at DESC LIMIT 1"
+                        "SELECT url FROM platform_scrape_sessions ORDER BY scraped_at DESC LIMIT 1"
                     )
                     if latest_session:
                         webtoon_url = latest_session["url"]
 
                     if webtoon_url:
                         session_row = await _db_fetchone(
-                            "SELECT image_urls FROM scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
+                            "SELECT image_urls FROM platform_scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
                             (webtoon_url,)
                         )
                         if not session_row:
                             session_row = await _db_fetchone(
-                                "SELECT image_urls FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
+                                "SELECT image_urls FROM platform_scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
                                 (webtoon_url,)
                             )
                         if session_row:
@@ -126,7 +126,7 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
                         chapter_slug = path_parts[3]
                         conn = get_db_connection()
                         session_row = conn.execute(
-                            "SELECT url FROM scrape_sessions WHERE url LIKE ? AND url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
+                            "SELECT url FROM platform_scrape_sessions WHERE url LIKE ? AND url LIKE ? ORDER BY scraped_at DESC LIMIT 1",
                             (f"%{series_slug}%", f"%{chapter_slug.replace('chapter-', 'episode-')}%")
                         ).fetchone()
                         if session_row:
@@ -134,19 +134,19 @@ async def retrieve_cached_stitch_service(cache_id: str, referer: str | None = No
 
             if not webtoon_url:
                 latest_session = await _db_fetchone(
-                    "SELECT url FROM scrape_sessions ORDER BY scraped_at DESC LIMIT 1"
+                    "SELECT url FROM platform_scrape_sessions ORDER BY scraped_at DESC LIMIT 1"
                 )
                 if latest_session:
                     webtoon_url = latest_session["url"]
 
             if webtoon_url:
                 session_row = await _db_fetchone(
-                    "SELECT image_urls FROM scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
+                    "SELECT image_urls FROM platform_scrape_sessions WHERE url = ? AND image_urls LIKE '%http%' ORDER BY scraped_at ASC LIMIT 1",
                     (webtoon_url,)
                 )
                 if not session_row:
                     session_row = await _db_fetchone(
-                        "SELECT image_urls FROM scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
+                        "SELECT image_urls FROM platform_scrape_sessions WHERE url = ? ORDER BY scraped_at DESC LIMIT 1",
                         (webtoon_url,)
                     )
                 if session_row:

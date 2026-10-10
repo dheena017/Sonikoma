@@ -37,12 +37,13 @@ router = APIRouter()
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def init_token_ledger_db():
-    """Ensures the ai_token_usage_ledger table exists for live telemetry accounting."""
+    """Ensures the intelligence ledger exists for live telemetry accounting."""
     try:
         conn = get_db_connection()
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS ai_token_usage_ledger (
-                id TEXT PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS intelligence_ledger (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                request_id TEXT UNIQUE,
                 user_id TEXT,
                 provider TEXT NOT NULL,
                 model TEXT NOT NULL,
@@ -59,7 +60,7 @@ def init_token_ledger_db():
         conn.commit()
         conn.close()
     except Exception as e:
-        logger.warning("Failed to initialize ai_token_usage_ledger: %s", e)
+        logger.warning("Failed to initialize intelligence ledger: %s", e)
 
 # Run initialization on import
 init_token_ledger_db()
@@ -87,8 +88,8 @@ def log_ai_token_usage(
     try:
         conn = get_db_connection()
         conn.execute("""
-            INSERT INTO ai_token_usage_ledger 
-            (id, user_id, provider, model, feature, prompt_tokens, completion_tokens, total_tokens, latency_ms, cost_estimate_usd, status)
+            INSERT INTO intelligence_ledger
+            (request_id, user_id, provider, model, feature, prompt_tokens, completion_tokens, total_tokens, latency_ms, cost_estimate_usd, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (rec_id, uid, provider, model, feature, prompt_tokens, completion_tokens, total_tokens, latency_ms, cost_usd, status))
         conn.commit()
@@ -593,7 +594,7 @@ async def _execute_ai_analytics_summary(
                 COALESCE(SUM(completion_tokens), 0) as total_completion_tokens,
                 COALESCE(AVG(latency_ms), 0.0) as avg_latency_ms,
                 COALESCE(SUM(cost_estimate_usd), 0.0) as total_cost_usd
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             {time_filter}
         """).fetchone()
 
@@ -611,7 +612,7 @@ async def _execute_ai_analytics_summary(
                 COUNT(*) as calls,
                 COALESCE(SUM(total_tokens), 0) as tokens,
                 COALESCE(SUM(cost_estimate_usd), 0.0) as cost_usd
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             {time_filter}
             GROUP BY feature
             ORDER BY tokens DESC
@@ -649,7 +650,7 @@ async def _execute_ai_analytics_summary(
                 COUNT(*) as calls,
                 COALESCE(AVG(latency_ms), 0.0) as avg_latency_ms,
                 COALESCE(SUM(total_tokens), 0) as tokens
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             {time_filter}
             GROUP BY model, provider
             ORDER BY calls DESC
@@ -682,7 +683,7 @@ async def _execute_ai_analytics_summary(
                 COALESCE(SUM(total_tokens), 0) as total_toks,
                 COALESCE(SUM(cost_estimate_usd), 0.0) as cost_slot,
                 COUNT(*) as reqs
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             {time_filter}
             GROUP BY time_slot
             ORDER BY created_at ASC
@@ -699,7 +700,7 @@ async def _execute_ai_analytics_summary(
                 COUNT(*) as total_calls,
                 SUM(CASE WHEN status = 'SUCCESS' THEN 1 ELSE 0 END) as successful_calls,
                 SUM(CASE WHEN status != 'SUCCESS' THEN 1 ELSE 0 END) as failed_calls
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             {time_filter}
         """).fetchone()
         
@@ -718,7 +719,7 @@ async def _execute_ai_analytics_summary(
                 COALESCE(SUM(total_tokens), 0) as tokens,
                 COALESCE(SUM(cost_estimate_usd), 0.0) as cost_usd,
                 COALESCE(AVG(latency_ms), 0.0) as avg_lat
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             {time_filter}
             GROUP BY provider
         """).fetchall()
@@ -744,7 +745,7 @@ async def _execute_ai_analytics_summary(
         recent_log_rows = conn.execute(f"""
             SELECT id, user_id, provider, model, feature, prompt_tokens, completion_tokens,
                    total_tokens, latency_ms, cost_estimate_usd, status, created_at
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             {time_filter}
             ORDER BY created_at DESC
             LIMIT 10
@@ -858,7 +859,7 @@ async def _execute_usage_metrics(
                 COALESCE(SUM(completion_tokens), 0) as output_tokens,
                 COALESCE(SUM(total_tokens), 0) as total_tokens,
                 COALESCE(SUM(cost_estimate_usd), 0.0) as cost_usd
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             {time_filter}{model_clause}
             GROUP BY time_label
             ORDER BY created_at ASC
@@ -913,7 +914,7 @@ async def export_usage_data(
         rows = conn.execute("""
             SELECT id, user_id, provider, model, feature, prompt_tokens, completion_tokens,
                    total_tokens, latency_ms, cost_estimate_usd, status, created_at
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             ORDER BY created_at DESC
         """).fetchall()
         
@@ -954,7 +955,7 @@ async def get_ai_analytics_logs(
         rows = conn.execute("""
             SELECT id, user_id, provider, model, feature, prompt_tokens, completion_tokens, 
                    total_tokens, latency_ms, cost_estimate_usd, status, created_at
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             ORDER BY created_at DESC
             LIMIT ?
         """, (limit,)).fetchall()
@@ -1283,7 +1284,7 @@ async def get_safety_quotas(current_user: Optional[dict] = Depends(get_optional_
     try:
         spend_row = conn.execute("""
             SELECT COALESCE(SUM(cost_estimate_usd), 0.0) as today_cost 
-            FROM ai_token_usage_ledger 
+            FROM intelligence_ledger
             WHERE date(created_at) = date('now')
         """).fetchone()
         today_cost = round(spend_row["today_cost"], 4) if spend_row else 0.0
@@ -1414,7 +1415,7 @@ async def export_ai_analytics_ledger(
     """Exports all token ledger records."""
     conn = get_db_connection()
     try:
-        rows = conn.execute("SELECT * FROM ai_token_usage_ledger ORDER BY created_at DESC").fetchall()
+        rows = conn.execute("SELECT * FROM intelligence_ledger ORDER BY created_at DESC").fetchall()
         data = [dict(r) for r in rows]
         
         if format.lower() == "csv":
@@ -1472,7 +1473,7 @@ async def _execute_models_breakdown(
         # 1. Last 1 minute stats (Real RPM & TPM)
         rows_min = conn.execute("""
             SELECT LOWER(model) as model_id, COUNT(*) as rpm, COALESCE(SUM(total_tokens), 0) as tpm
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             WHERE created_at >= datetime('now', '-1 minute')
             GROUP BY LOWER(model)
         """).fetchall()
@@ -1482,7 +1483,7 @@ async def _execute_models_breakdown(
         # 2. Last 24 hours stats (Real RPD)
         rows_day = conn.execute("""
             SELECT LOWER(model) as model_id, COUNT(*) as rpd, COALESCE(SUM(total_tokens), 0) as tpd
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             WHERE created_at >= datetime('now', '-24 hours')
             GROUP BY LOWER(model)
         """).fetchall()
@@ -1496,7 +1497,7 @@ async def _execute_models_breakdown(
                    COALESCE(SUM(completion_tokens), 0) as total_completion, 
                    COALESCE(SUM(total_tokens), 0) as total_toks,
                    COUNT(*) as req_count
-            FROM ai_token_usage_ledger
+            FROM intelligence_ledger
             GROUP BY LOWER(model)
         """).fetchall()
         for r in rows:
@@ -1736,7 +1737,7 @@ async def get_telemetry_timeseries(
     """Returns granular timeseries points for latency, request volume, error rate, and token usage."""
     conn = get_db_connection()
     try:
-        query = "SELECT * FROM ai_token_usage_ledger"
+        query = "SELECT * FROM intelligence_ledger"
         params = []
         if model and model != "All Models":
             query += " WHERE LOWER(model) = LOWER(?)"

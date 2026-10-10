@@ -22,7 +22,7 @@ def create_user(data: Dict[str, Any]) -> None:
         preferences = data.get('preferences') or '{}'
 
         conn.execute("""
-            INSERT INTO users (id, username, email, password_hash, preferences, avatar_url, full_name, google_id)
+            INSERT INTO auth_users (id, username, email, password_hash, preferences, avatar_url, full_name, google_id)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             user_uuid,
@@ -66,7 +66,7 @@ def update_user(user_id: str, updates: Dict[str, Any]) -> None:
         if set_parts:
             set_parts.append("updated_at = datetime('now')")
             params.append(user_id)
-            query = f"UPDATE users SET {', '.join(set_parts)} WHERE id = ?"
+            query = f"UPDATE auth_users SET {', '.join(set_parts)} WHERE id = ?"
             conn.execute(query, tuple(params))
             conn.commit()
     finally:
@@ -81,23 +81,23 @@ def delete_user(user_id: str) -> None:
     try:
         with conn:
             # Delete chapters and panels by finding all series owned by the user
-            series_rows = conn.execute("SELECT id FROM series WHERE user_id = ?", (user_id,)).fetchall()
+            series_rows = conn.execute("SELECT id FROM platform_series WHERE user_id = ?", (user_id,)).fetchall()
             for s in series_rows:
                 series_id = s["id"]
-                conn.execute("DELETE FROM panels WHERE chapter_id IN (SELECT id FROM chapters WHERE series_id = ?)", (series_id,))
-                conn.execute("DELETE FROM chapters WHERE series_id = ?", (series_id,))
+                conn.execute("DELETE FROM image_panels WHERE chapter_id IN (SELECT id FROM workspace_chapters WHERE series_id = ?)", (series_id,))
+                conn.execute("DELETE FROM workspace_chapters WHERE series_id = ?", (series_id,))
 
             # Delete series
-            conn.execute("DELETE FROM series WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM platform_series WHERE user_id = ?", (user_id,))
 
             # Delete secondary data
-            conn.execute("DELETE FROM user_sessions WHERE user_id = ?", (user_id,))
-            conn.execute("DELETE FROM user_api_keys WHERE user_id = ?", (user_id,))
-            conn.execute("DELETE FROM user_audit_logs WHERE user_id = ?", (user_id,))
-            conn.execute("DELETE FROM user_invoices WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM auth_sessions WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM profile_api_keys WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM auth_audit_logs WHERE user_id = ?", (user_id,))
+            conn.execute("DELETE FROM profile_invoices WHERE user_id = ?", (user_id,))
 
             # Finally, delete the user
-            conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+            conn.execute("DELETE FROM auth_users WHERE id = ?", (user_id,))
     finally:
         conn.close()
 
@@ -109,7 +109,7 @@ def create_user_relational(user_id: str, username: str, email: str, password_has
     conn = get_db_connection()
     try:
         conn.execute("""
-            INSERT INTO users (id, username, email, password_hash, preferences)
+            INSERT INTO auth_users (id, username, email, password_hash, preferences)
             VALUES (?, ?, ?, ?, ?)
         """, (user_id, username, email, password_hash, preferences))
         conn.commit()

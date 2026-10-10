@@ -60,7 +60,7 @@ class AISeriesRepository:
             # 1. Projects Table
             cursor.execute(
                 """
-                CREATE TABLE IF NOT EXISTS ai_series_projects (
+                CREATE TABLE IF NOT EXISTS intelligence_projects (
                     series_id TEXT PRIMARY KEY,
                     title TEXT NOT NULL,
                     format_type TEXT NOT NULL,
@@ -75,8 +75,8 @@ class AISeriesRepository:
             # Index for fast listing
             cursor.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_ai_series_updated
-                ON ai_series_projects(updated_at DESC)
+                    CREATE INDEX IF NOT EXISTS idx_intelligence_projects_updated
+                ON intelligence_projects(updated_at DESC)
                 """
             )
             conn.commit()
@@ -93,7 +93,7 @@ class AISeriesRepository:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                INSERT INTO ai_series_projects (
+                INSERT INTO intelligence_projects (
                     series_id, title, format_type, art_style, status,
                     created_at, updated_at, data_json
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -117,7 +117,7 @@ class AISeriesRepository:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "SELECT data_json FROM ai_series_projects WHERE series_id = ?",
+                "SELECT data_json FROM intelligence_projects WHERE series_id = ?",
                 (series_id,),
             )
             row = cursor.fetchone()
@@ -133,7 +133,7 @@ class AISeriesRepository:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                UPDATE ai_series_projects
+                UPDATE intelligence_projects
                 SET title = ?, format_type = ?, art_style = ?, status = ?,
                     updated_at = ?, data_json = ?
                 WHERE series_id = ?
@@ -163,7 +163,7 @@ class AISeriesRepository:
             if format_filter:
                 cursor.execute(
                     """
-                    SELECT data_json FROM ai_series_projects
+                    SELECT data_json FROM intelligence_projects
                     WHERE format_type = ?
                     ORDER BY updated_at DESC
                     LIMIT ? OFFSET ?
@@ -173,7 +173,7 @@ class AISeriesRepository:
             else:
                 cursor.execute(
                     """
-                    SELECT data_json FROM ai_series_projects
+                    SELECT data_json FROM intelligence_projects
                     ORDER BY updated_at DESC
                     LIMIT ? OFFSET ?
                     """,
@@ -187,7 +187,7 @@ class AISeriesRepository:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "DELETE FROM ai_series_projects WHERE series_id = ?",
+                "DELETE FROM intelligence_projects WHERE series_id = ?",
                 (series_id,),
             )
             conn.commit()

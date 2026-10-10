@@ -17,7 +17,7 @@ export function AdminExplorerTab({
   fetchWithInterceptor: any;
 }) {
   const [view, setView] = useState<"index" | "table">("index");
-  const [activeTable, setActiveTable] = useState("series");
+  const [activeTable, setActiveTable] = useState("platform_series");
   const [tableData, setTableData] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -73,12 +73,12 @@ export function AdminExplorerTab({
   );
 
   const tables = [
-    "users",
-    "series",
-    "chapters",
-    "panels",
-    "user_audit_logs",
-    "platform_settings",
+    "auth_users",
+    "platform_series",
+    "workspace_chapters",
+    "image_panels",
+    "auth_audit_logs",
+    "admin_settings",
   ];
 
   return (

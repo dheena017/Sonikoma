@@ -357,17 +357,17 @@ def get_comprehensive_backend_status(
             except Exception:
                 return 0
 
-        counts.users = _get_count("users")
-        counts.series = _get_count("series")
-        counts.chapters = _get_count("chapters")
-        counts.panels = _get_count("panels")
-        counts.jobs = _get_count("jobs")
-        counts.scrape_sessions = _get_count("scrape_sessions")
-        counts.system_logs = _get_count("system_logs")
-        counts.token_usage_logs = _get_count("token_usage_logs")
-        counts.credit_transactions = _get_count("credit_transactions")
-        counts.platform_settings = _get_count("platform_settings")
-        counts.content_moderation_logs = _get_count("content_moderation_logs")
+        counts.users = _get_count("auth_users")
+        counts.series = _get_count("platform_series")
+        counts.chapters = _get_count("workspace_chapters")
+        counts.panels = _get_count("image_panels")
+        counts.jobs = _get_count("platform_jobs")
+        counts.scrape_sessions = _get_count("platform_scrape_sessions")
+        counts.system_logs = _get_count("platform_system_logs")
+        counts.token_usage_logs = _get_count("intelligence_token_usage")
+        counts.credit_transactions = _get_count("profile_credit_transactions")
+        counts.platform_settings = _get_count("admin_settings")
+        counts.content_moderation_logs = _get_count("admin_moderation_logs")
 
         # SQLite Pragmas
         db_journal_mode = None
@@ -463,7 +463,7 @@ def get_comprehensive_backend_status(
     job_queue = JobQueueStatus()
     try:
         conn = get_db_connection()
-        status_rows = conn.execute("SELECT status, COUNT(*) as c FROM jobs GROUP BY status").fetchall()
+        status_rows = conn.execute("SELECT status, COUNT(*) as c FROM platform_jobs GROUP BY status").fetchall()
         for r in status_rows:
             st = str(r["status"]).upper()
             cnt = int(r["c"])
@@ -481,7 +481,7 @@ def get_comprehensive_backend_status(
         job_queue.total_jobs = sum([job_queue.queued, job_queue.running, job_queue.completed, job_queue.failed, job_queue.cancelled])
 
         recent_rows = conn.execute(
-            "SELECT id, type, status, progress, stage, created_at, completed_at FROM jobs ORDER BY created_at DESC LIMIT 5"
+            "SELECT id, type, status, progress, stage, created_at, completed_at FROM platform_jobs ORDER BY created_at DESC LIMIT 5"
         ).fetchall()
         for r in recent_rows:
             job_queue.recent_jobs.append(

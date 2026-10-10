@@ -208,42 +208,42 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
     conn = get_db_connection()
     try:
         completed_row = conn.execute("""
-            SELECT COUNT(*) as c FROM chapters c
-            JOIN series s ON c.series_id = s.id
+            SELECT COUNT(*) as c FROM workspace_chapters c
+            JOIN platform_series s ON c.series_id = s.id
             WHERE s.user_id = ? AND c.status = 'completed'
         """, (user_id,)).fetchone()
         videos_completed = completed_row["c"] if completed_row else 0
 
         duration_row = conn.execute("""
-            SELECT SUM(p.duration) as d FROM panels p
-            JOIN chapters c ON p.chapter_id = c.id
-            JOIN series s ON c.series_id = s.id
+            SELECT SUM(p.duration) as d FROM image_panels p
+            JOIN workspace_chapters c ON p.chapter_id = c.id
+            JOIN platform_series s ON c.series_id = s.id
             WHERE s.user_id = ? AND c.status = 'completed'
         """, (user_id,)).fetchone()
         total_duration_sec = duration_row["d"] if duration_row and duration_row["d"] is not None else 0
 
         clean_row = conn.execute("""
-            SELECT COUNT(*) as c FROM panels p
-            JOIN chapters c ON p.chapter_id = c.id
-            JOIN series s ON c.series_id = s.id
+            SELECT COUNT(*) as c FROM image_panels p
+            JOIN workspace_chapters c ON p.chapter_id = c.id
+            JOIN platform_series s ON c.series_id = s.id
             WHERE s.user_id = ? AND (p.bubble_method IS NOT NULL OR p.grayscale = 1)
         """, (user_id,)).fetchone()
         bubble_cleans = clean_row["c"] if clean_row else 0
 
-        edit_row = conn.execute("SELECT COUNT(*) as c FROM edit_history").fetchone()
+        edit_row = conn.execute("SELECT COUNT(*) as c FROM image_edit_history").fetchone()
         total_edits = edit_row["c"] if edit_row else 0
 
         credits_optimized_pct = min(95, max(15, 10 + bubble_cleans * 3 + total_edits * 2))
         avg_latency = round(max(0.8, min(3.5, 1.8 + (bubble_cleans * 0.05) - (videos_completed * 0.02))), 1)
 
         chapter_rows = conn.execute("""
-            SELECT COUNT(*) as c FROM chapters c
-            JOIN series s ON c.series_id = s.id
+            SELECT COUNT(*) as c FROM workspace_chapters c
+            JOIN platform_series s ON c.series_id = s.id
             WHERE s.user_id = ?
         """, (user_id,)).fetchone()
         total_chaps = chapter_rows["c"] if chapter_rows else 0
 
-        user_row = conn.execute("SELECT preferences FROM users WHERE id = ?", (user_id,)).fetchone()
+        user_row = conn.execute("SELECT preferences FROM auth_users WHERE id = ?", (user_id,)).fetchone()
         pref_str = user_row["preferences"] if user_row else "{}"
         try:
             prefs = json.loads(pref_str)
@@ -278,8 +278,8 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
         activities = []
         chap_list = conn.execute("""
             SELECT c.id, c.episode_number, s.title, c.status, c.created_at
-            FROM chapters c
-            JOIN series s ON c.series_id = s.id
+            FROM workspace_chapters c
+            JOIN platform_series s ON c.series_id = s.id
             WHERE s.user_id = ?
             ORDER BY c.created_at DESC LIMIT 5
         """, (user_id,)).fetchall()
@@ -298,7 +298,7 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
                     "time": time_str,
                 })
 
-        edit_list = conn.execute("SELECT edit_type, created_at FROM edit_history ORDER BY created_at DESC LIMIT 5").fetchall()
+        edit_list = conn.execute("SELECT edit_type, created_at FROM image_edit_history ORDER BY created_at DESC LIMIT 5").fetchall()
         for edit in edit_list:
             activities.append({
                 "title": f"Cleaned panels via {edit['edit_type']}",
@@ -308,7 +308,7 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
 
         audit_list = conn.execute("""
             SELECT event, created_at
-            FROM user_audit_logs
+            FROM auth_audit_logs
             WHERE user_id = ?
             ORDER BY created_at DESC LIMIT 5
         """, (user_id,)).fetchall()
@@ -388,13 +388,13 @@ def get_creator_analytics(user_id: str) -> Dict[str, Any]:
 
         aggregate_counts("""
             SELECT strftime('%Y-%m-%d', c.created_at) as date, COUNT(*) as count
-            FROM chapters c
-            JOIN series s ON c.series_id = s.id
+            FROM workspace_chapters c
+            JOIN platform_series s ON c.series_id = s.id
             WHERE s.user_id = ?
             GROUP BY date
         """, (user_id,))
-        aggregate_counts("SELECT strftime('%Y-%m-%d', created_at) as date, COUNT(*) as count FROM user_audit_logs WHERE user_id = ? GROUP BY date", (user_id,))
-        aggregate_counts("SELECT strftime('%Y-%m-%d', created_at) as date, COUNT(*) as count FROM edit_history GROUP BY date")
+        aggregate_counts("SELECT strftime('%Y-%m-%d', created_at) as date, COUNT(*) as count FROM auth_audit_logs WHERE user_id = ? GROUP BY date", (user_id,))
+        aggregate_counts("SELECT strftime('%Y-%m-%d', created_at) as date, COUNT(*) as count FROM image_edit_history GROUP BY date")
 
         today = datetime.datetime.now().date()
         cells = []
@@ -445,13 +445,13 @@ def get_user_achievements_and_points(user_id: str) -> dict:
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM series WHERE user_id = ?", (user_id,))
+        cursor.execute("SELECT COUNT(*) FROM platform_series WHERE user_id = ?", (user_id,))
         row1 = cursor.fetchone()
         series_count = row1[0] if row1 else 0
         first_scrape = series_count > 0
 
         cursor.execute("""
-            SELECT COUNT(*) FROM user_audit_logs
+            SELECT COUNT(*) FROM auth_audit_logs
             WHERE user_id = ? AND (event LIKE '%translation%' OR event LIKE '%translate%')
         """, (user_id,))
         row2 = cursor.fetchone()
@@ -459,16 +459,16 @@ def get_user_achievements_and_points(user_id: str) -> dict:
         gemini_translator = translation_count > 0
 
         cursor.execute("""
-            SELECT COUNT(*) FROM user_audit_logs
+            SELECT COUNT(*) FROM auth_audit_logs
             WHERE user_id = ? AND event LIKE '%Saved Storyboard Panels%'
         """, (user_id,))
         row3 = cursor.fetchone()
         saved_panels_count = row3[0] if row3 else 0
 
         cursor.execute("""
-            SELECT COUNT(*) FROM panels p
-            JOIN chapters c ON p.chapter_id = c.id
-            JOIN series s ON c.series_id = s.id
+            SELECT COUNT(*) FROM image_panels p
+            JOIN workspace_chapters c ON p.chapter_id = c.id
+            JOIN platform_series s ON c.series_id = s.id
             WHERE s.user_id = ?
         """, (user_id,))
         row4 = cursor.fetchone()
@@ -476,8 +476,8 @@ def get_user_achievements_and_points(user_id: str) -> dict:
         keyframe_director = (saved_panels_count > 0) or (panels_count > 0)
 
         cursor.execute("""
-            SELECT COUNT(*) FROM chapters c
-            JOIN series s ON c.series_id = s.id
+            SELECT COUNT(*) FROM workspace_chapters c
+            JOIN platform_series s ON c.series_id = s.id
             WHERE s.user_id = ? AND c.status = 'completed'
         """, (user_id,))
         row5 = cursor.fetchone()
@@ -496,7 +496,7 @@ def get_user_achievements_and_points(user_id: str) -> dict:
 
         points = 80 + len(unlocked) * 100
 
-        cursor.execute("SELECT unlocked_rewards FROM users WHERE id = ?", (user_id,))
+        cursor.execute("SELECT unlocked_rewards FROM auth_users WHERE id = ?", (user_id,))
         row = cursor.fetchone()
         unlocked_rewards_str = row[0] if row else "[]"
         try:

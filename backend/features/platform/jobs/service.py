@@ -74,7 +74,7 @@ class UnifiedJobManager:
         try:
             with get_db_connection() as conn:
                 conn.execute("""
-                CREATE TABLE IF NOT EXISTS jobs (
+                CREATE TABLE IF NOT EXISTS platform_jobs (
                   id              TEXT    PRIMARY KEY,
                   user_id         TEXT    NOT NULL,
                   project_id      TEXT,
@@ -92,9 +92,9 @@ class UnifiedJobManager:
                   cancelled_at    TEXT
                 )
                 """)
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_user_id ON jobs(user_id)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_project_id ON jobs(project_id)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_platform_jobs_user_id ON platform_jobs(user_id)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_platform_jobs_project_id ON platform_jobs(project_id)")
+                conn.execute("CREATE INDEX IF NOT EXISTS idx_platform_jobs_status ON platform_jobs(status)")
                 conn.commit()
             self._cleanup_zombie_jobs()
         except Exception as e:
@@ -112,7 +112,7 @@ class UnifiedJobManager:
                 })
                 res = conn.execute(
                     """
-                    UPDATE jobs
+                    UPDATE platform_jobs
                     SET status = 'CANCELLED',
                         stage = 'cancelled',
                         cancelled_at = ?,
@@ -141,7 +141,7 @@ class UnifiedJobManager:
             })
             res = conn.execute(
                 """
-                UPDATE jobs
+                UPDATE platform_jobs
                 SET status = 'CANCELLED',
                     stage = 'cancelled',
                     cancelled_at = ?,
@@ -171,7 +171,7 @@ class UnifiedJobManager:
                 if config and getattr(config, "is_postgres", False):
                     conn.execute(
                         """
-                        INSERT INTO users (id, username, email, password_hash, creator_role)
+                        INSERT INTO auth_users (id, username, email, password_hash, creator_role)
                         VALUES (?, ?, ?, 'auto_hash', 'creator')
                         ON CONFLICT (id) DO NOTHING
                         """,
@@ -180,7 +180,7 @@ class UnifiedJobManager:
                 else:
                     conn.execute(
                         """
-                        INSERT OR IGNORE INTO users (id, username, email, password_hash, creator_role)
+                        INSERT OR IGNORE INTO auth_users (id, username, email, password_hash, creator_role)
                         VALUES (?, ?, ?, 'auto_hash', 'creator')
                         """,
                         (user_id, f"usr_{user_id[:8]}", f"{user_id}@sonikoma.internal")
@@ -190,7 +190,7 @@ class UnifiedJobManager:
 
             conn.execute(
                 """
-                INSERT INTO jobs (id, user_id, project_id, chapter_id, type, status, progress, stage, metadata, created_at)
+                INSERT INTO platform_jobs (id, user_id, project_id, chapter_id, type, status, progress, stage, metadata, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (job_id, user_id, project_id, chapter_id, job_type.value, JobStatus.QUEUED.value, 0.0, JobStage.QUEUED.value, metadata_json, now)
@@ -219,7 +219,7 @@ class UnifiedJobManager:
     def get_job(self, job_id: str) -> Optional[JobRecord]:
         """Retrieves a job by ID from the database."""
         with get_db_connection() as conn:
-            row = conn.execute("SELECT * FROM jobs WHERE id = ?", (job_id,)).fetchone()
+            row = conn.execute("SELECT * FROM platform_jobs WHERE id = ?", (job_id,)).fetchone()
             if not row:
                 return None
             return _job_record_from_row(dict(row))
@@ -236,7 +236,7 @@ class UnifiedJobManager:
     ) -> List[JobRecord]:
         """Lists jobs for a user, optionally filtered by project ID, chapter ID, status, and job type."""
         with get_db_connection() as conn:
-            query = "SELECT * FROM jobs WHERE user_id = ?"
+            query = "SELECT * FROM platform_jobs WHERE user_id = ?"
             params: list = [user_id]
 
             if project_id:
@@ -261,7 +261,7 @@ class UnifiedJobManager:
     def get_active_jobs(self, user_id: Optional[str] = None) -> List[JobRecord]:
         """Returns all currently active (RUNNING or QUEUED) jobs."""
         with get_db_connection() as conn:
-            query = "SELECT * FROM jobs WHERE status IN ('RUNNING', 'QUEUED')"
+            query = "SELECT * FROM platform_jobs WHERE status IN ('RUNNING', 'QUEUED')"
             params: list = []
             if user_id:
                 query += " AND user_id = ?"
@@ -282,7 +282,7 @@ class UnifiedJobManager:
     ) -> List[JobRecord]:
         """Lists all system jobs across users for administration."""
         with get_db_connection() as conn:
-            query = "SELECT * FROM jobs WHERE 1=1"
+            query = "SELECT * FROM platform_jobs WHERE 1=1"
             params: list = []
             if user_id:
                 query += " AND user_id = ?"
@@ -309,14 +309,14 @@ class UnifiedJobManager:
     def delete_job_admin(self, job_id: str) -> bool:
         """Deletes a job record from the database."""
         with get_db_connection() as conn:
-            res = conn.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+            res = conn.execute("DELETE FROM platform_jobs WHERE id = ?", (job_id,))
             conn.commit()
             return res.rowcount > 0
 
     def purge_completed_jobs_admin(self) -> int:
         """Purges all terminal (COMPLETED, FAILED, CANCELLED) jobs."""
         with get_db_connection() as conn:
-            res = conn.execute("DELETE FROM jobs WHERE status IN ('COMPLETED', 'FAILED', 'CANCELLED')")
+            res = conn.execute("DELETE FROM platform_jobs WHERE status IN ('COMPLETED', 'FAILED', 'CANCELLED')")
             conn.commit()
             return res.rowcount
 
@@ -352,7 +352,7 @@ class UnifiedJobManager:
         with get_db_connection() as conn:
             cursor = conn.execute(
                 """
-                UPDATE jobs
+                UPDATE platform_jobs
                 SET progress = ?, stage = ?, status = ?, started_at = ?
                 WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,
@@ -386,7 +386,7 @@ class UnifiedJobManager:
         with get_db_connection() as conn:
             cursor = conn.execute(
                 """
-                UPDATE jobs
+                UPDATE platform_jobs
                 SET status = ?, progress = ?, stage = ?, completed_at = ?, result = ?, chapter_id = COALESCE(chapter_id, ?)
                 WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,
@@ -437,7 +437,7 @@ class UnifiedJobManager:
         with get_db_connection() as conn:
             cursor = conn.execute(
                 """
-                UPDATE jobs
+                UPDATE platform_jobs
                 SET status = ?, stage = ?, completed_at = ?, error = ?
                 WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,
@@ -466,7 +466,7 @@ class UnifiedJobManager:
         with get_db_connection() as conn:
             cursor = conn.execute(
                 """
-                UPDATE jobs
+                UPDATE platform_jobs
                 SET status = ?, stage = ?, cancelled_at = ?
                 WHERE id = ? AND status NOT IN ('COMPLETED', 'FAILED', 'CANCELLED')
                 """,

@@ -48,9 +48,9 @@ class AdminAuditService:
         try:
             rows = conn.execute("""
                 SELECT m.*, u.email as admin_email, s.title as series_title
-                FROM content_moderation_logs m
-                LEFT JOIN users u ON m.admin_id = u.id
-                LEFT JOIN series s ON m.series_id = s.id
+                FROM admin_moderation_logs m
+                LEFT JOIN auth_users u ON m.admin_id = u.id
+                LEFT JOIN platform_series s ON m.series_id = s.id
                 ORDER BY m.created_at DESC LIMIT ? OFFSET ?
             """, (limit, offset)).fetchall()
             return {"success": True, "total": len(rows), "logs": [dict(r) for r in rows]}

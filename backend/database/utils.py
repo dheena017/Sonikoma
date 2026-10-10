@@ -78,24 +78,24 @@ def generate_missing_slugs(conn: sqlite3.Connection) -> None:
     """Backfill slugs for existing series and chapter rows that have none."""
     try:
         rows = conn.execute(
-            "SELECT id, title FROM series WHERE slug IS NULL"
+            "SELECT id, title FROM platform_series WHERE slug IS NULL"
         ).fetchall()
         for r in rows:
-            unique_slug = generate_unique_slug(r["title"], "series", conn)
-            conn.execute("UPDATE series SET slug = ? WHERE id = ?", (unique_slug, r["id"]))
+            unique_slug = generate_unique_slug(r["title"], "platform_series", conn)
+            conn.execute("UPDATE platform_series SET slug = ? WHERE id = ?", (unique_slug, r["id"]))
 
         rows = conn.execute(
             """
             SELECT c.id, c.episode_number, s.title AS series_title
-            FROM chapters c
-            JOIN series s ON c.series_id = s.id
+            FROM workspace_chapters c
+            JOIN platform_series s ON c.series_id = s.id
             WHERE c.slug IS NULL
             """
         ).fetchall()
         for r in rows:
             base_title = f"{r['series_title']} {r['episode_number']}"
-            unique_slug = generate_unique_slug(base_title, "chapters", conn)
-            conn.execute("UPDATE chapters SET slug = ? WHERE id = ?", (unique_slug, r["id"]))
+            unique_slug = generate_unique_slug(base_title, "workspace_chapters", conn)
+            conn.execute("UPDATE workspace_chapters SET slug = ? WHERE id = ?", (unique_slug, r["id"]))
 
         conn.commit()
     except Exception as e:
@@ -142,7 +142,7 @@ def ensure_user_exists(
     user_id: Optional[str],
     fallback_username: Optional[str] = None,
 ) -> str:
-    """Ensure a user row exists so FK references from series/chapters stay valid.
+    """Ensure a user row exists so FK references from series and chapters stay valid.
 
     For anonymous scraper requests, a lightweight fallback user is created
     automatically. Returns the resolved user_id.
@@ -150,7 +150,7 @@ def ensure_user_exists(
     normalized_user_id = (user_id or "system_default").strip() or "system_default"
 
     existing = conn.execute(
-        "SELECT id FROM users WHERE id = ? LIMIT 1", (normalized_user_id,)
+        "SELECT id FROM auth_users WHERE id = ? LIMIT 1", (normalized_user_id,)
     ).fetchone()
     if existing:
         return normalized_user_id
@@ -159,7 +159,7 @@ def ensure_user_exists(
     email = f"{normalized_user_id}@local.invalid"
     conn.execute(
         """
-        INSERT INTO users (id, username, email, password_hash,
+        INSERT INTO auth_users (id, username, email, password_hash,
                            preferences, avatar_url, full_name, google_id)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,

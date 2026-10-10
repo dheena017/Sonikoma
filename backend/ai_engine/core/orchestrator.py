@@ -316,14 +316,14 @@ class AIOrchestrator:
 
     @classmethod
     def load_custom_routing(cls, force: bool = False):
-        """Loads persistent custom routing from database platform_settings if available."""
+        """Loads persistent custom routing from canonical admin settings if available."""
         if cls._custom_capability_routing and not force:
             return
         try:
             from database.engine import get_db_connection
             conn = get_db_connection()
             try:
-                row = conn.execute("SELECT value FROM platform_settings WHERE key = 'ai_routing_config'").fetchone()
+                row = conn.execute("SELECT value FROM admin_settings WHERE key = 'ai_routing_config'").fetchone()
                 if row and row['value']:
                     data = json.loads(row['value'])
                     if isinstance(data, dict):
@@ -370,7 +370,7 @@ class AIOrchestrator:
             try:
                 json_str = json.dumps(cls._custom_capability_routing)
                 conn.execute(
-                    "INSERT INTO platform_settings (key, value) VALUES ('ai_routing_config', ?) "
+                    "INSERT INTO admin_settings (key, value) VALUES ('ai_routing_config', ?) "
                     "ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=CURRENT_TIMESTAMP",
                     (json_str,)
                 )
