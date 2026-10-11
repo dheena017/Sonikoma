@@ -11,6 +11,7 @@ import {
   Layers,
 } from "lucide-react";
 import { navigateToDashboardPath } from "../utils/dashboardHelpers";
+import { WORKFLOW_LOGOS } from "@/shared/constants/workflowLogos";
 
 interface DashboardQuickLinksProps {
   onGoToWorkspace?: () => void;
@@ -24,6 +25,7 @@ interface QuickActionModule {
   badge: string;
   description: string;
   path: string;
+  logo?: string;
   icon: React.ComponentType<{ className?: string }>;
 }
 
@@ -34,23 +36,8 @@ const MODULES: QuickActionModule[] = [
     badge: "Ingestion Hub",
     description: "Import chapters from URLs, Webtoons, MangaDex, or upload raw comic image files.",
     path: "/scraper",
+    logo: WORKFLOW_LOGOS.scrape,
     icon: Globe,
-  },
-  {
-    id: "video-editor",
-    title: "AI Video Editor & 2.5D Motion",
-    badge: "Timeline 2.5D",
-    description: "Keyframe camera pans, zooms, multi-plane parallax depth, and cinematic scene transitions.",
-    path: "/video-editor",
-    icon: Film,
-  },
-  {
-    id: "voice-studio",
-    title: "Voice Studio & Character Casting",
-    badge: "Neural Audio",
-    description: "Assign distinct voice actors, emotional tones, and generate expressive dialogue tracks.",
-    path: "/characters",
-    icon: Mic,
   },
   {
     id: "image-editor",
@@ -58,7 +45,35 @@ const MODULES: QuickActionModule[] = [
     badge: "Computer Vision",
     description: "Auto-detect comic gutters, erase speech bubbles with inpainting, and extract text transcriptions.",
     path: "/image-editor",
+    logo: WORKFLOW_LOGOS.crop,
     icon: Scissors,
+  },
+  {
+    id: "creative-suite",
+    title: "AI Narrative & Story Script",
+    badge: "Vision AI",
+    description: "Analyzes scene context, script narration beats, and autonomous comic workflow agent.",
+    path: "/creative-suite",
+    logo: WORKFLOW_LOGOS.narrative,
+    icon: Wand2,
+  },
+  {
+    id: "voice-studio",
+    title: "Voice Studio & Character Casting",
+    badge: "Neural Audio",
+    description: "Assign distinct voice actors, emotional tones, and generate expressive dialogue tracks.",
+    path: "/characters",
+    logo: WORKFLOW_LOGOS.voice,
+    icon: Mic,
+  },
+  {
+    id: "video-editor",
+    title: "AI Video Editor & 2.5D Motion",
+    badge: "Timeline 2.5D",
+    description: "Keyframe camera pans, zooms, multi-plane parallax depth, and cinematic scene transitions.",
+    path: "/video-editor",
+    logo: WORKFLOW_LOGOS.render,
+    icon: Film,
   },
   {
     id: "ai-series",
@@ -67,14 +82,6 @@ const MODULES: QuickActionModule[] = [
     description: "Generate multi-chapter series with consistent character DNA and closed story arcs.",
     path: "/ai-series",
     icon: Layers,
-  },
-  {
-    id: "creative-suite",
-    title: "Creative Suite & Distribution",
-    badge: "Productivity",
-    description: "AI auto-translation, anime thumbnail generator, and direct YouTube Shorts exporter.",
-    path: "/creative-suite",
-    icon: Wand2,
   },
 ];
 
@@ -145,8 +152,17 @@ export default function DashboardQuickLinks({
               <div>
                 {/* Card Top: Icon & Badge */}
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#141414] text-[#3B82F6] border border-[#2F2F2F] flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#141414] border border-[#2F2F2F] flex items-center justify-center shrink-0 overflow-hidden shadow-xs group-hover:border-[#3B82F6]/50 transition-colors">
+                    {module.logo ? (
+                      <img
+                        src={module.logo}
+                        alt={module.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-[#3B82F6]" />
+                    )}
                   </div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border border-[#2F2F2F] bg-[#141414] text-[#9CA3AF]">

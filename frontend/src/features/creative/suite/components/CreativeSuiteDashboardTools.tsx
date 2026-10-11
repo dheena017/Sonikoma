@@ -10,6 +10,7 @@ export interface CreativeSuiteDashboardTool {
   path: string;
   requiresPanels: boolean;
   badge: string;
+  logo?: string;
 }
 
 interface CreativeSuiteDashboardToolsProps {
@@ -37,8 +38,17 @@ const CreativeSuiteDashboardTools: React.FC<
           >
             <div>
               <div className="flex justify-between items-start mb-3">
-                <div className="p-2.5 bg-[#121212] border border-[#2F2F2F] rounded-xl text-[#9CA3AF] group-hover:text-[#3B82F6] group-hover:border-neutral-700 group-hover:bg-[#3B82F6]/10 transition-all shadow-inner">
-                  <Icon className="w-4.5 h-4.5" />
+                <div className="w-10 h-10 bg-[#121212] border border-[#2F2F2F] rounded-xl overflow-hidden flex items-center justify-center shrink-0 shadow-inner group-hover:border-[#3B82F6]/50 transition-all">
+                  {tool.logo ? (
+                    <img
+                      src={tool.logo}
+                      alt={tool.label}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <Icon className="w-4.5 h-4.5 text-[#9CA3AF] group-hover:text-[#3B82F6]" />
+                  )}
                 </div>
 
                 <div className="flex items-center gap-1.5">

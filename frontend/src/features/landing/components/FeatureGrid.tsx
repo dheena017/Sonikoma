@@ -11,6 +11,8 @@ import {
   Check,
 } from "lucide-react";
 
+import { WORKFLOW_LOGOS } from "@/shared/constants/workflowLogos";
+
 interface FeatureGridProps {
   themeMode?: "dark" | "light";
   onGetStarted: () => void;
@@ -26,6 +28,7 @@ export function FeatureGrid({
     {
       id: "slicing",
       icon: <Scissors className="w-6 h-6 text-blue-400" />,
+      logo: WORKFLOW_LOGOS.crop,
       tag: "Vision AI Slicer",
       tagColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
       title: "Intelligent Panel Segmentation",
@@ -41,6 +44,7 @@ export function FeatureGrid({
     {
       id: "inpainting",
       icon: <Sparkles className="w-6 h-6 text-purple-400" />,
+      logo: WORKFLOW_LOGOS.narrative,
       tag: "Neural Inpainting",
       tagColor: "bg-purple-500/10 text-purple-400 border-purple-500/20",
       title: "Seamless Speech Bubble Eraser",
@@ -56,6 +60,7 @@ export function FeatureGrid({
     {
       id: "dubbing",
       icon: <Volume2 className="w-6 h-6 text-cyan-400" />,
+      logo: WORKFLOW_LOGOS.voice,
       tag: "Character Dubbing",
       tagColor: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
       title: "Multi-Character AI Voice Cast",
@@ -71,6 +76,7 @@ export function FeatureGrid({
     {
       id: "camera",
       icon: <Film className="w-6 h-6 text-indigo-400" />,
+      logo: WORKFLOW_LOGOS.render,
       tag: "Cinematic Engine",
       tagColor: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
       title: "Dynamic Camera Choreography",
@@ -86,6 +92,7 @@ export function FeatureGrid({
     {
       id: "translation",
       icon: <Languages className="w-6 h-6 text-emerald-400" />,
+      logo: WORKFLOW_LOGOS.scrape,
       tag: "Multi-Lingual OCR",
       tagColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
       title: "Instant Manga & Manhwa Translation",
@@ -101,6 +108,7 @@ export function FeatureGrid({
     {
       id: "export",
       icon: <Share2 className="w-6 h-6 text-amber-400" />,
+      logo: WORKFLOW_LOGOS.render,
       tag: "Viral Formats",
       tagColor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
       title: "One-Click Social Video Exports",
@@ -171,13 +179,22 @@ export function FeatureGrid({
               <div className="space-y-5 relative z-10">
                 <div className="flex items-center justify-between">
                   <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-transform duration-300 group-hover:scale-110 ${
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center border overflow-hidden transition-transform duration-300 group-hover:scale-110 shadow-xs ${
                       isLight
                         ? "bg-slate-50 border-slate-200"
                         : "bg-white/5 border-white/10"
                     }`}
                   >
-                    {feature.icon}
+                    {feature.logo ? (
+                      <img
+                        src={feature.logo}
+                        alt={feature.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      feature.icon
+                    )}
                   </div>
 
                   <span

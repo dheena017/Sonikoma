@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { VideoFormat, PrivacyStatus } from "../types";
 import { CyberSelect, CyberSelectOption } from "@/shared/ui/common/CyberSelect";
+import { WORKFLOW_STAGES } from "@/shared/constants/workflowLogos";
+import { div } from "three/tsl";
 
 interface AgentInputCardProps {
   url: string;
@@ -206,6 +208,42 @@ export const AgentInputCard: React.FC<AgentInputCardProps> = ({
             placeholder="Select privacy..."
             ariaLabel="Select YouTube privacy"
           />
+        </div>
+      </div>
+
+      {/* ── 5-Stage Autonomous Pipeline Sequence Preview ── */}
+      <div className="pt-2 border-t border-[#282828]">
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="text-[11px] font-mono uppercase font-bold text-[#9CA3AF] flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
+            Autonomous 5-Stage Pipeline
+          </span>
+          <span className="text-[10px] font-mono text-[#6B7280]">
+            Zero-Touch Automated Sequence
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {WORKFLOW_STAGES.map((st, idx) => (
+            <div
+              key={st.key}
+              className="p-2 rounded-xl bg-[#141414] border border-[#282828] flex items-center gap-2 text-left shadow-xs"
+            >
+              <img
+                src={st.logo}
+                alt={st.label}
+                className="w-7 h-7 rounded-lg object-cover border border-white/10 shrink-0"
+                loading="lazy"
+              />
+              <div className="min-w-0">
+                <span className="text-[9px] font-mono text-[#6B7280] block leading-none">
+                  0{idx + 1}
+                </span>
+                <span className="text-xs font-bold text-[#E5E5E5] truncate block mt-0.5">
+                  {st.label}
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

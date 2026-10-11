@@ -14,6 +14,7 @@ import CreativeSuiteDashboardStats from "@/features/creative/suite/components/Cr
 import CreativeSuiteDashboardTools from "@/features/creative/suite/components/CreativeSuiteDashboardTools";
 import CreativeSuiteDashboardActiveProject from "@/features/creative/suite/components/CreativeSuiteDashboardActiveProject";
 import CreativeSuiteDashboardActivityLog from "@/features/creative/suite/components/CreativeSuiteDashboardActivityLog";
+import { WORKFLOW_LOGOS } from "@/shared/constants/workflowLogos";
 
 interface CreativeSuiteDashboardPageProps {
   user?: any;
@@ -124,6 +125,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       path: "/creative-suite/agent",
       requiresPanels: false,
       badge: "Auto-Pilot",
+      logo: WORKFLOW_LOGOS.render,
     },
     {
       id: "thumbnails",
@@ -142,6 +144,7 @@ const CreativeSuiteDashboardPage: React.FC<CreativeSuiteDashboardPageProps> = ({
       path: "/creative-suite/translation",
       requiresPanels: true,
       badge: "Visual",
+      logo: WORKFLOW_LOGOS.narrative,
     },
     {
       id: "youtube",

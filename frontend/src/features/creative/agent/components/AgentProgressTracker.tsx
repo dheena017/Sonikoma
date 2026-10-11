@@ -15,6 +15,8 @@ import {
 import { AgentStage } from "../types";
 import YouTubeOfficialLogo from "@/features/creative/youtube/components/YouTubeOfficialLogo";
 
+import { WORKFLOW_LOGOS } from "@/shared/constants/workflowLogos";
+
 interface AgentProgressTrackerProps {
   status: AgentStage;
   progress: number;
@@ -32,36 +34,42 @@ const STAGES = [
     label: "Scrape URL",
     desc: "Fetching chapter & images",
     icon: Globe,
+    logo: WORKFLOW_LOGOS.scrape,
   },
   {
     key: "processing_images",
     label: "Merge & Crop",
     desc: "Slicing clean story panels",
     icon: Scissors,
+    logo: WORKFLOW_LOGOS.crop,
   },
   {
     key: "generating_narrative",
     label: "AI Narrative",
     desc: "Writing script & translation",
     icon: BookOpen,
+    logo: WORKFLOW_LOGOS.narrative,
   },
   {
     key: "synthesizing_audio",
     label: "Voice Audio",
     desc: "Neural voiceover sync",
     icon: Mic,
+    logo: WORKFLOW_LOGOS.voice,
   },
   {
     key: "rendering_video",
     label: "Video Render",
     desc: "Cinematic motion assembly",
     icon: Film,
+    logo: WORKFLOW_LOGOS.render,
   },
   {
     key: "publishing_youtube",
     label: "YouTube Publish",
     desc: "SEO headers & channel push",
     icon: Youtube,
+    logo: null,
   },
 ];
 
@@ -188,22 +196,29 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
             >
               <div className="flex items-center justify-between mb-2">
                 <div
-                  className={`p-2 rounded-lg flex items-center justify-center ${
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border transition-all ${
                     stageState === "done"
-                      ? "bg-[#10B981]/20 text-[#10B981]"
+                      ? "border-[#10B981]/50 bg-[#10B981]/15 shadow-sm shadow-[#10B981]/20"
                       : stageState === "active"
-                      ? "bg-[#3B82F6]/20 text-[#3B82F6] animate-pulse"
+                      ? "border-[#3B82F6] bg-[#3B82F6]/20 shadow-md shadow-[#3B82F6]/30 ring-2 ring-[#3B82F6]/30"
                       : stageState === "failed"
-                      ? "bg-[#EF4444]/20 text-[#EF4444]"
+                      ? "border-[#EF4444]/40 bg-[#EF4444]/20"
                       : stageState === "stopped"
-                      ? "bg-amber-500/20 text-amber-400"
-                      : "bg-[#1E1E1E] text-[#6B7280]"
+                      ? "border-amber-500/40 bg-amber-500/20"
+                      : "border-[#2F2F2F] bg-[#1E1E1E]"
                   }`}
                 >
-                  {s.key === "publishing_youtube" ? (
-                    <YouTubeOfficialLogo className="w-4.5 h-3.5 object-contain" />
+                  {s.logo ? (
+                    <img
+                      src={s.logo}
+                      alt={s.label}
+                      className="w-full h-full object-cover rounded-lg"
+                      loading="lazy"
+                    />
+                  ) : s.key === "publishing_youtube" ? (
+                    <YouTubeOfficialLogo className="w-5 h-4 object-contain" />
                   ) : (
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4 text-[#6B7280]" />
                   )}
                 </div>
 

@@ -889,7 +889,7 @@ export default function LandingPage({
           onGetStarted={() => handleAction(onGetStarted)}
         />
 
-        {/* 3-STEP PROCESS SECTION */}
+        {/* 5-STEP PROCESS SECTION */}
         <section
           id="how-it-works"
           className={`py-24 px-6 scroll-mt-24 transition-colors relative z-10 ${
@@ -898,116 +898,216 @@ export default function LandingPage({
               : "bg-[#0d0e12] border-y border-[#2F2F2F]"
           }`}
         >
-          <div className="max-w-6xl mx-auto space-y-16">
+          <div className="max-w-7xl mx-auto space-y-16">
             <div className="text-center space-y-3">
               <span
                 className={`text-xs font-mono font-bold uppercase tracking-widest ${
                   isLight ? "text-blue-700" : "text-blue-400"
                 }`}
               >
-                Simple 3-Step Process
+                Autonomous 5-Step Pipeline
               </span>
               <h2
                 className={`text-3xl md:text-4xl font-black tracking-tight ${
                   isLight ? "text-slate-950" : "text-white"
                 }`}
               >
-                From chapter to finished story
+                From raw comic chapter to finished 4K video
               </h2>
               <p
                 className={`max-w-xl mx-auto text-sm leading-relaxed font-medium ${
                   isLight ? "text-slate-700" : "text-neutral-400"
                 }`}
               >
-                Start with a chapter or your own images, then shape each step
-                into a video that is ready to share.
+                Start with a chapter link or image archive, then let the neural pipeline
+                transform each panel into cinematic video reels.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Step 1 */}
               <div
-                className={`p-7 rounded-[28px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer ${
+                className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-neutral-700 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-neutral-700 hover:shadow-xl hover:shadow-blue-950/20"
+                    ? "bg-white border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-lg"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-blue-500/60 hover:shadow-xl hover:shadow-blue-950/20"
                 }`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-black mb-5">
-                  1
+                <div>
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden border border-blue-500/30 mb-4 shadow-md bg-neutral-900">
+                    <img
+                      src="/workflow-logos/simple_scrape_logo.jpg"
+                      alt="Scrape URL"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-blue-400 uppercase tracking-wider block mb-1">
+                    Step 01
+                  </span>
+                  <h3
+                    className={`text-base font-bold mb-1.5 ${
+                      isLight ? "text-slate-950" : "text-white"
+                    }`}
+                  >
+                    Scrape URL
+                  </h3>
+                  <p
+                    className={`text-xs leading-relaxed font-normal ${
+                      isLight ? "text-slate-700" : "text-neutral-400"
+                    }`}
+                  >
+                    Paste any chapter link from MangaDex or Webtoon, or upload comic image files.
+                  </p>
                 </div>
-                <h3
-                  className={`text-xl font-bold mb-2 ${
-                    isLight ? "text-slate-950" : "text-white"
-                  }`}
-                >
-                  Import Chapter
-                </h3>
-                <p
-                  className={`text-sm leading-relaxed font-normal ${
-                    isLight ? "text-slate-700" : "text-neutral-400"
-                  }`}
-                >
-                  Paste any chapter link from MangaDex or Webtoon, or upload
-                  your own comic image files directly.
-                </p>
               </div>
 
               {/* Step 2 */}
               <div
-                className={`p-7 rounded-[28px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer ${
+                className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-indigo-400 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-[#2F2F2F] hover:shadow-xl hover:shadow-indigo-950/20"
+                    ? "bg-white border-slate-200 shadow-sm hover:border-purple-400 hover:shadow-lg"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-purple-500/60 hover:shadow-xl hover:shadow-purple-950/20"
                 }`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-[#2F2F2F] text-indigo-400 flex items-center justify-center text-xl font-black mb-5">
-                  2
+                <div>
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden border border-purple-500/30 mb-4 shadow-md bg-neutral-900">
+                    <img
+                      src="/workflow-logos/simple_crop_logo.jpg"
+                      alt="Merge & Crop"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-purple-400 uppercase tracking-wider block mb-1">
+                    Step 02
+                  </span>
+                  <h3
+                    className={`text-base font-bold mb-1.5 ${
+                      isLight ? "text-slate-950" : "text-white"
+                    }`}
+                  >
+                    Merge &amp; Crop
+                  </h3>
+                  <p
+                    className={`text-xs leading-relaxed font-normal ${
+                      isLight ? "text-slate-700" : "text-neutral-400"
+                    }`}
+                  >
+                    Canny edge algorithms detect gutters and slice vertical strips into clean panels.
+                  </p>
                 </div>
-                <h3
-                  className={`text-xl font-bold mb-2 ${
-                    isLight ? "text-slate-950" : "text-white"
-                  }`}
-                >
-                  Auto-Slice & Clean
-                </h3>
-                <p
-                  className={`text-sm leading-relaxed font-normal ${
-                    isLight ? "text-slate-700" : "text-neutral-400"
-                  }`}
-                >
-                  AI automatically isolates each comic panel, erases dialogue
-                  text bubbles, and translates foreign text into English.
-                </p>
               </div>
 
               {/* Step 3 */}
               <div
-                className={`p-7 rounded-[28px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer ${
+                className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
                   isLight
-                    ? "bg-white border-slate-200 shadow-sm hover:border-neutral-700 hover:shadow-lg"
-                    : "bg-[#181818] border-[#2F2F2F] hover:border-neutral-700 hover:shadow-xl hover:shadow-cyan-950/20"
+                    ? "bg-white border-slate-200 shadow-sm hover:border-pink-400 hover:shadow-lg"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-pink-500/60 hover:shadow-xl hover:shadow-pink-950/20"
                 }`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl font-black mb-5">
-                  3
+                <div>
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden border border-pink-500/30 mb-4 shadow-md bg-neutral-900">
+                    <img
+                      src="/workflow-logos/simple_narrative_logo.jpg"
+                      alt="AI Narrative"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-pink-400 uppercase tracking-wider block mb-1">
+                    Step 03
+                  </span>
+                  <h3
+                    className={`text-base font-bold mb-1.5 ${
+                      isLight ? "text-slate-950" : "text-white"
+                    }`}
+                  >
+                    AI Narrative
+                  </h3>
+                  <p
+                    className={`text-xs leading-relaxed font-normal ${
+                      isLight ? "text-slate-700" : "text-neutral-400"
+                    }`}
+                  >
+                    Erases speech bubbles via neural inpainting and composes narrative scripts.
+                  </p>
                 </div>
-                <h3
-                  className={`text-xl font-bold mb-2 ${
-                    isLight ? "text-slate-950" : "text-white"
-                  }`}
-                >
-                  Add Voices & Export
-                </h3>
-                <p
-                  className={`text-sm leading-relaxed font-normal ${
-                    isLight ? "text-slate-700" : "text-neutral-400"
-                  }`}
-                >
-                  Select natural character voices and sound effects, preview
-                  camera pan animations, and download a ready-to-publish
-                  vertical MP4 video.
-                </p>
+              </div>
+
+              {/* Step 4 */}
+              <div
+                className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
+                  isLight
+                    ? "bg-white border-slate-200 shadow-sm hover:border-cyan-400 hover:shadow-lg"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-cyan-500/60 hover:shadow-xl hover:shadow-cyan-950/20"
+                }`}
+              >
+                <div>
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden border border-cyan-500/30 mb-4 shadow-md bg-neutral-900">
+                    <img
+                      src="/workflow-logos/simple_voice_logo.jpg"
+                      alt="Voice Audio"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase tracking-wider block mb-1">
+                    Step 04
+                  </span>
+                  <h3
+                    className={`text-base font-bold mb-1.5 ${
+                      isLight ? "text-slate-950" : "text-white"
+                    }`}
+                  >
+                    Voice Audio
+                  </h3>
+                  <p
+                    className={`text-xs leading-relaxed font-normal ${
+                      isLight ? "text-slate-700" : "text-neutral-400"
+                    }`}
+                  >
+                    Synthesizes neural voiceovers and dialogue timing synced to frame transitions.
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 5 */}
+              <div
+                className={`p-6 rounded-[24px] border transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col justify-between ${
+                  isLight
+                    ? "bg-white border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-lg"
+                    : "bg-[#181818] border-[#2F2F2F] hover:border-emerald-500/60 hover:shadow-xl hover:shadow-emerald-950/20"
+                }`}
+              >
+                <div>
+                  <div className="w-14 h-14 rounded-2xl overflow-hidden border border-emerald-500/30 mb-4 shadow-md bg-neutral-900">
+                    <img
+                      src="/workflow-logos/simple_video_render_logo.jpg"
+                      alt="Video Render"
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-wider block mb-1">
+                    Step 05
+                  </span>
+                  <h3
+                    className={`text-base font-bold mb-1.5 ${
+                      isLight ? "text-slate-950" : "text-white"
+                    }`}
+                  >
+                    Video Render
+                  </h3>
+                  <p
+                    className={`text-xs leading-relaxed font-normal ${
+                      isLight ? "text-slate-700" : "text-neutral-400"
+                    }`}
+                  >
+                    Renders 2.5D camera pan, particle SFX, and exports vertical 4K 60fps MP4 video.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

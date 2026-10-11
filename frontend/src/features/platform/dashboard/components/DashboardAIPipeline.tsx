@@ -10,10 +10,13 @@ import {
 } from "lucide-react";
 import { navigateToDashboardPath } from "../utils/dashboardHelpers";
 
+import { WORKFLOW_LOGOS } from "@/shared/constants/workflowLogos";
+
 interface PipelineStep {
   step: string;
   title: string;
   status: string;
+  logo: string;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
   targetPath: string;
@@ -23,8 +26,20 @@ interface PipelineStep {
 const PIPELINE_STEPS: PipelineStep[] = [
   {
     step: "01",
-    title: "Smart Panel Slicer",
+    title: "Scrape URL",
+    status: "Ingestion Engine",
+    logo: WORKFLOW_LOGOS.scrape,
+    icon: Scissors,
+    description:
+      "Fetches webtoon chapters directly from URLs, MangaDex, Webtoons, or local CBZ/image archives into organized asset pools.",
+    targetPath: "/scraper",
+    actionLabel: "Import URL",
+  },
+  {
+    step: "02",
+    title: "Merge & Crop",
     status: "Canny Edge CV",
+    logo: WORKFLOW_LOGOS.crop,
     icon: Scissors,
     description:
       "Runs Canny edge detection algorithms to detect comic gutters, isolate panel boundaries, and slice vertical strips into individual frames.",
@@ -32,19 +47,21 @@ const PIPELINE_STEPS: PipelineStep[] = [
     actionLabel: "Launch Slicer",
   },
   {
-    step: "02",
-    title: "Bubble OCR & Clean",
+    step: "03",
+    title: "AI Narrative",
     status: "Vision Inpaint",
+    logo: WORKFLOW_LOGOS.narrative,
     icon: Sliders,
     description:
       "Detects speech bubble boundaries, removes dialogue via seamless neural inpainting, and transcribes spoken text for voice routing.",
-    targetPath: "/image-editor",
-    actionLabel: "Speech Clean",
+    targetPath: "/creative-suite",
+    actionLabel: "Story Script",
   },
   {
-    step: "03",
-    title: "Dialogue Voice Synthesis",
+    step: "04",
+    title: "Voice Audio",
     status: "Kokoro & ElevenLabs",
+    logo: WORKFLOW_LOGOS.voice,
     icon: Volume2,
     description:
       "Synthesizes script lines using emotive voice models, auto-detects character tones, and binds multi-speaker dialogue tracks.",
@@ -52,9 +69,10 @@ const PIPELINE_STEPS: PipelineStep[] = [
     actionLabel: "Voice Casting",
   },
   {
-    step: "04",
-    title: "2.5D Video Compositor",
+    step: "05",
+    title: "Video Render",
     status: "60 FPS WebGPU",
+    logo: WORKFLOW_LOGOS.render,
     icon: Cpu,
     description:
       "Composites layered panels with camera zoom paths, particle effects, parallax anime motion, and synchronized SFX to produce MP4 reels.",
@@ -81,7 +99,7 @@ export default function DashboardAIPipeline() {
             </span>
           </div>
           <p className="text-xs text-[#9CA3AF] font-sans leading-relaxed max-w-2xl">
-            Sonikoma automates the end-to-end transformation of vertical webtoons into cinematic narrated anime videos across 4 interconnected neural pipelines.
+            Sonikoma automates the end-to-end transformation of vertical webtoons into cinematic narrated anime videos across 5 interconnected neural pipelines.
           </p>
         </div>
 
@@ -92,10 +110,9 @@ export default function DashboardAIPipeline() {
         </div>
       </div>
 
-      {/* 4 Pipeline Steps Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+      {/* 5 Pipeline Steps Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
         {PIPELINE_STEPS.map((item) => {
-          const Icon = item.icon;
           return (
             <div
               key={item.step}
@@ -104,14 +121,19 @@ export default function DashboardAIPipeline() {
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xs font-mono font-black text-[#6B7280] group-hover:text-[#3B82F6] transition-colors">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-xs font-mono font-black text-[#6B7280] group-hover:text-[#3B82F6] transition-colors shrink-0">
                       {item.step}
                     </span>
-                    <div className="p-2 rounded-xl bg-[#1E1E1E] text-[#3B82F6] border border-[#2F2F2F] shrink-0">
-                      <Icon className="h-4 w-4" />
+                    <div className="w-8 h-8 rounded-xl overflow-hidden border border-[#2F2F2F] bg-[#1E1E1E] shrink-0 flex items-center justify-center shadow-xs group-hover:border-[#3B82F6]/50 transition-colors">
+                      <img
+                        src={item.logo}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     </div>
-                    <h4 className="text-sm font-bold text-[#E5E5E5] group-hover:text-white transition-colors">
+                    <h4 className="text-sm font-bold text-[#E5E5E5] group-hover:text-white transition-colors truncate">
                       {item.title}
                     </h4>
                   </div>
@@ -121,12 +143,12 @@ export default function DashboardAIPipeline() {
                   </span>
                 </div>
 
-                <p className="text-xs text-[#9CA3AF] leading-relaxed font-sans mb-3 pl-8">
+                <p className="text-xs text-[#9CA3AF] leading-relaxed font-sans mb-3">
                   {item.description}
                 </p>
               </div>
 
-              <div className="pt-2.5 border-t border-[#232323] flex items-center justify-between text-[11px] font-mono pl-8">
+              <div className="pt-2.5 border-t border-[#232323] flex items-center justify-between text-[11px] font-mono">
                 <span className="text-[#6B7280] group-hover:text-[#9CA3AF] transition-colors">
                   Pipeline Step {item.step}
                 </span>

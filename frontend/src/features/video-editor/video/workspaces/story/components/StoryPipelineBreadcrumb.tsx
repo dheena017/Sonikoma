@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 interface PipelineStep {
   label: string;
   active: boolean;
+  logo?: string;
 }
 
 interface StoryPipelineBreadcrumbProps {
@@ -19,12 +20,19 @@ export const StoryPipelineBreadcrumb: React.FC<
         {steps.map((step, idx) => (
           <React.Fragment key={step.label}>
             <div
-              className={`flex items-center gap-1 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1.5 text-[9px] font-mono font-bold px-2 py-0.5 rounded-full transition-all whitespace-nowrap ${
                 step.active
                   ? "bg-[#3B82F6] text-white border border-[#60A5FA]/50 shadow-sm shadow-blue-500/25"
                   : "text-neutral-500 border border-transparent"
               }`}
             >
+              {step.logo && (
+                <img
+                  src={step.logo}
+                  alt={step.label}
+                  className="w-3.5 h-3.5 rounded-full object-cover shrink-0"
+                />
+              )}
               <span>{step.label}</span>
             </div>
             {idx < steps.length - 1 && (

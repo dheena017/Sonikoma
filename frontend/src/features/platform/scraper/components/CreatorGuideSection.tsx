@@ -8,6 +8,8 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+import { WORKFLOW_LOGOS } from "@/shared/constants/workflowLogos";
+
 interface CreatorGuideSectionProps {
   activeGuideTab: string;
   setActiveGuideTab: (value: string) => void;
@@ -36,12 +38,11 @@ const CreatorGuideSection: React.FC<CreatorGuideSectionProps> = ({
 
       <div className="flex border-b border-[#2F2F2F] overflow-x-auto">
         {[
-          { id: "general", label: "General Workflow", icon: Layout },
-          { id: "cropping", label: "Panel Extraction", icon: Scissors },
-          { id: "audio", label: "Voice & Audio Sync", icon: Music },
-          { id: "rendering", label: "HD Rendering & Output", icon: Settings },
+          { id: "general", label: "General Workflow", logo: WORKFLOW_LOGOS.scrape, icon: Layout },
+          { id: "cropping", label: "Panel Extraction", logo: WORKFLOW_LOGOS.crop, icon: Scissors },
+          { id: "audio", label: "Voice & Audio Sync", logo: WORKFLOW_LOGOS.voice, icon: Music },
+          { id: "rendering", label: "HD Rendering & Output", logo: WORKFLOW_LOGOS.render, icon: Settings },
         ].map((tab) => {
-          const TabIcon = tab.icon;
           const isActive = activeGuideTab === tab.id;
           return (
             <button
@@ -53,7 +54,12 @@ const CreatorGuideSection: React.FC<CreatorGuideSectionProps> = ({
                   : "border-transparent text-[#9CA3AF] hover:text-[#E5E5E5] hover:bg-[#262626]"
               }`}
             >
-              <TabIcon className="h-3.5 w-3.5" />
+              <img
+                src={tab.logo}
+                alt={tab.label}
+                className="w-4 h-4 rounded-md object-cover border border-white/10 shrink-0"
+                loading="lazy"
+              />
               {tab.label}
             </button>
           );
