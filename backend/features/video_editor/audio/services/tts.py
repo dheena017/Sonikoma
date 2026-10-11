@@ -423,11 +423,16 @@ async def batch_synthesize_panels_service(
     semaphore = asyncio.Semaphore(concurrency)
 
     async def _process(panel: Any, idx: int) -> Dict[str, Any]:
-        target_voice = getattr(panel, "voice", None) or voice or "en-US-GuyNeural"
-        dur = getattr(panel, "target_duration", None) or 4.0
-        p_idx = getattr(panel, "panel_index", None) or (idx + 1)
-        image_url = getattr(panel, "image_url", None)
-        panel_id = getattr(panel, "id", str(idx))
+        def _get_val(attr_name: str, default: Any = None) -> Any:
+            if isinstance(panel, dict):
+                return panel.get(attr_name, default)
+            return getattr(panel, attr_name, default)
+
+        target_voice = _get_val("voice") or voice or "en-US-GuyNeural"
+        dur = _get_val("target_duration") or _get_val("duration") or 4.0
+        p_idx = _get_val("panel_index") or _get_val("index") or (idx + 1)
+        image_url = _get_val("image_url")
+        panel_id = _get_val("id", str(idx))
         img_name = os.path.basename(image_url) if image_url else f"panel_{panel_id}"
         panel_tag = f"Panel {p_idx}/{total_panels} (ID: {panel_id}, Image: {img_name})"
 
@@ -435,17 +440,17 @@ async def batch_synthesize_panels_service(
         existing_audio_url = None
         existing_narrative_url = None
         if not force_regenerate:
-            existing_audio_url = getattr(panel, "audio_url", None)
-            existing_narrative_url = getattr(panel, "narrative_audio_url", None)
+            existing_audio_url = _get_val("audio_url")
+            existing_narrative_url = _get_val("narrative_audio_url")
 
         # Resolve dialogue list
-        dialogues: List[str] = getattr(panel, "dialogue_list", None) or []
+        dialogues: List[str] = _get_val("dialogue_list") or _get_val("dialogues") or []
         if not dialogues:
-            text = getattr(panel, "text", None)
-            if text and text.strip():
-                dialogues = [text.strip()]
+            text = _get_val("speech_text") or _get_val("text")
+            if text and str(text).strip():
+                dialogues = [str(text).strip()]
 
-        narrative = getattr(panel, "narrative", None)
+        narrative = _get_val("narrative") or _get_val("speech_text")
 
         async with semaphore:
             return await synthesize_panel_audio_service(

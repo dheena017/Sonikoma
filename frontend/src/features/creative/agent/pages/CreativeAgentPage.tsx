@@ -35,6 +35,14 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
     setLanguage,
     voice,
     setVoice,
+    narratorVoice,
+    setNarratorVoice,
+    protagonistVoice,
+    setProtagonistVoice,
+    chapterRangeStart,
+    setChapterRangeStart,
+    chapterRangeEnd,
+    setChapterRangeEnd,
     privacyStatus,
     setPrivacyStatus,
     reviewMode,
@@ -224,7 +232,7 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
               status={activeRun.status}
               progress={activeRun.progress}
               currentAction={activeRun.current_action}
-              onApprove={handleApprove}
+              onApprove={() => handleApprove()}
               onReset={handlePromptDiscard}
               onRestart={() => handleRestart()}
               onStop={() => handleStop()}
@@ -236,6 +244,7 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
               <AgentPanelsPreview
                 panels={activeRun.panels}
                 scrapedTitle={activeRun.scraped_title}
+                characterCast={activeRun.character_cast}
               />
             )}
 
@@ -255,6 +264,14 @@ export const CreativeAgentPage: React.FC<CreativeAgentPageProps> = ({
             setLanguage={setLanguage}
             voice={voice}
             setVoice={setVoice}
+            narratorVoice={narratorVoice}
+            setNarratorVoice={setNarratorVoice}
+            protagonistVoice={protagonistVoice}
+            setProtagonistVoice={setProtagonistVoice}
+            chapterRangeStart={chapterRangeStart}
+            setChapterRangeStart={setChapterRangeStart}
+            chapterRangeEnd={chapterRangeEnd}
+            setChapterRangeEnd={setChapterRangeEnd}
             privacyStatus={privacyStatus}
             setPrivacyStatus={setPrivacyStatus}
             reviewMode={reviewMode}

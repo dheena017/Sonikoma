@@ -12,6 +12,14 @@ from typing import List, Optional, Dict, Any, Literal
 from pydantic import BaseModel, Field
 
 
+class CharacterCastMember(BaseModel):
+    """A detected character in the webtoon/manhwa with their locked serious voice."""
+    name: str
+    role: str
+    voice: str
+    lines_count: int = 0
+
+
 class AgentRunRequest(BaseModel):
     """Configuration submitted by the user to launch the One-Click AI Agent."""
     url: str = Field(..., description="Target Webtoon, Manga, or Comic URL to scrape and transform")
@@ -24,8 +32,24 @@ class AgentRunRequest(BaseModel):
         description="Target narrative / translation language code (e.g. 'en', 'es', 'ja', 'ko', 'fr')"
     )
     voice: str = Field(
-        default="alloy",
-        description="Voice actor model identifier for neural text-to-speech"
+        default="en-US-ChristopherNeural",
+        description="Default voice actor model identifier for neural text-to-speech"
+    )
+    narrator_voice: Optional[str] = Field(
+        default="en-US-ChristopherNeural",
+        description="Master cinematic narrator voice model"
+    )
+    protagonist_voice: Optional[str] = Field(
+        default="en-US-GuyNeural",
+        description="Lead protagonist / MC voice model"
+    )
+    chapter_range_start: Optional[int] = Field(
+        default=None,
+        description="Optional starting chapter index for multi-chapter auto-pilot"
+    )
+    chapter_range_end: Optional[int] = Field(
+        default=None,
+        description="Optional ending chapter index for multi-chapter auto-pilot"
     )
     privacy_status: Literal["unlisted", "public", "private"] = Field(
         default="unlisted",
@@ -58,6 +82,9 @@ class AgentPanel(BaseModel):
     index: int
     image_url: str
     speech_text: str
+    speaker_name: Optional[str] = None
+    speaker_gender: Optional[str] = None
+    voice: Optional[str] = None
     audio_url: Optional[str] = None
     duration: float = 3.5
     motion_type: str = "zoom_in"
@@ -102,7 +129,12 @@ class AgentRunResponse(BaseModel):
     source_url: Optional[str] = None
     video_format: Optional[str] = "shorts"
     language: Optional[str] = "en"
-    voice: Optional[str] = "alloy"
+    voice: Optional[str] = "en-US-ChristopherNeural"
+    narrator_voice: Optional[str] = "en-US-ChristopherNeural"
+    protagonist_voice: Optional[str] = "en-US-GuyNeural"
+    chapter_range_start: Optional[int] = None
+    chapter_range_end: Optional[int] = None
+    character_cast: List[CharacterCastMember] = Field(default_factory=list)
     cover_image: Optional[str] = None
     duration: Optional[float] = None
     raw_images_count: int = 0
@@ -137,6 +169,7 @@ class AgentHistoryListResponse(BaseModel):
 
 
 __all__ = [
+    "CharacterCastMember",
     "AgentRunRequest",
     "AgentLogMessage",
     "AgentPanel",

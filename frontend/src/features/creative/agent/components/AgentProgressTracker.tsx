@@ -319,7 +319,7 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
             {onReset && (
               <button
                 type="button"
-                onClick={onReset}
+                onClick={() => onReset?.()}
                 className="px-4 py-2.5 rounded-xl bg-[#262626] hover:bg-[#333] border border-[#3F3F3F] text-[#E5E5E5] font-bold text-xs font-mono uppercase tracking-wide transition-all shadow-sm cursor-pointer active:scale-95 flex items-center gap-1.5"
                 title="Discard this run and launch with all chapter panels"
               >
@@ -328,7 +328,7 @@ export const AgentProgressTracker: React.FC<AgentProgressTrackerProps> = ({
             )}
             <button
               type="button"
-              onClick={onApprove}
+              onClick={() => onApprove?.()}
               className="px-5 py-2.5 rounded-xl bg-[#F59E0B] hover:bg-amber-400 text-neutral-950 font-black text-xs font-mono uppercase tracking-wide transition-all shadow-md cursor-pointer active:scale-95"
             >
               Approve &amp; Publish Video

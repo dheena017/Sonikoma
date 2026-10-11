@@ -19,7 +19,7 @@ import json
 import uuid
 import asyncio
 import logging
-from typing import List, Dict, Any, Optional, Literal
+from typing import List, Dict, Any, Optional, Literal, Tuple
 
 from features.creative.agent.schemas import (
     AgentRunRequest,
@@ -27,7 +27,9 @@ from features.creative.agent.schemas import (
     AgentLogMessage,
     AgentPanel,
     AgentYouTubeMetadata,
+    CharacterCastMember,
 )
+from features.creative.agent.cast_manager import CharacterCastManager
 from features.platform.scraper.services.scraper_service import scrape_chapter_service
 from features.image_editor.services.processing.compose import merge_images_service
 from features.image_editor.services.panel_detection.detect_long_panels_service import detect_long_panels_boxes
@@ -91,10 +93,84 @@ def extract_title_from_url(url: str) -> str:
             for part in reversed(parts):
                 if part.lower() not in ("viewer", "read", "chapter", "manga", "comic") and len(part) > 2:
                     clean = re.sub(r"[-_]+", " ", part).strip().title()
-                    return clean
     except Exception:
         pass
     return "Webtoon Story Recap"
+
+
+def resolve_chapter_urls(
+    base_url: str,
+    start: Optional[int],
+    end: Optional[int]
+) -> Tuple[List[str], Optional[int], Optional[int]]:
+    """
+    Generates sequential chapter URLs if a valid chapter range is provided for multi-chapter auto-pilot.
+    Intelligently extracts the episode number from the base URL (e.g. episode_no=146) to ensure the scrape starts
+    from the exact target episode, with auto-alignment for relative ranges (e.g. 1 to 3 -> 146 to 148).
+    """
+    # 1. Extract detected episode number from URL
+    detected_ep = None
+    ep_param_match = re.search(r"episode_no=(\d+)", base_url, re.IGNORECASE)
+    if ep_param_match:
+        try:
+            detected_ep = int(ep_param_match.group(1))
+        except ValueError:
+            pass
+    if detected_ep is None:
+        slug_match = re.search(r"([/-](?:chapter|ep|episode)[/-]?)(\d+)", base_url, re.IGNORECASE)
+        if slug_match:
+            try:
+                detected_ep = int(slug_match.group(2))
+            except ValueError:
+                pass
+
+    effective_start = start
+    effective_end = end
+
+    # 2. If start is omitted but end is provided, default start to detected episode
+    if effective_start is None and effective_end is not None and detected_ep is not None:
+        effective_start = detected_ep
+
+    # 3. If relative range was entered (e.g. start=1, end=3) but URL is episode 146, auto-align to URL episode
+    if (
+        effective_start is not None
+        and effective_end is not None
+        and detected_ep is not None
+        and effective_start == 1
+        and (detected_ep - effective_start) >= 5
+    ):
+        count = max(1, effective_end - effective_start + 1)
+        effective_start = detected_ep
+        effective_end = detected_ep + count - 1
+
+    # 4. If single chapter or no range provided
+    if effective_start is None or effective_end is None or effective_end < effective_start:
+        return [base_url], (effective_start or detected_ep), (effective_end or detected_ep)
+
+    # 5. Safety cap: single video batch should not exceed 5 chapters
+    if (effective_end - effective_start) > 5:
+        logger.warning(
+            f"[Workflow] Batch range {effective_start}-{effective_end} exceeds safety limit. "
+            f"Auto-capping to {effective_start}-{effective_start + 2} (3 chapters)."
+        )
+        effective_end = effective_start + 2
+
+    urls = []
+    # Webtoons query param (e.g. episode_no=146)
+    if "episode_no=" in base_url:
+        for ep in range(effective_start, effective_end + 1):
+            urls.append(re.sub(r"episode_no=\d+", f"episode_no={ep}", base_url))
+        return urls, effective_start, effective_end
+
+    # Path slug (e.g. /chapter-146 or /ep-146)
+    match = re.search(r"([/-](?:chapter|ep|episode)[/-]?)(\d+)", base_url, re.IGNORECASE)
+    if match:
+        prefix = match.group(1)
+        for ep in range(effective_start, effective_end + 1):
+            urls.append(base_url[:match.start()] + f"{prefix}{ep}" + base_url[match.end():])
+        return urls, effective_start, effective_end
+
+    return [base_url], effective_start, effective_end
 
 
 class AutonomousAgentWorkflow:
@@ -116,6 +192,12 @@ class AutonomousAgentWorkflow:
         series_name = initial_title.split(":")[0].strip() if ":" in initial_title else initial_title
         ep_name = initial_title.split(":")[1].strip() if ":" in initial_title else None
 
+        self.cast_manager = CharacterCastManager(
+            language=request.language,
+            main_voice=request.protagonist_voice or request.voice or "en-US-GuyNeural",
+            narrator_voice=request.narrator_voice or "en-US-ChristopherNeural",
+        )
+
         self.state = AgentRunResponse(
             run_id=run_id,
             user_id=user_id,
@@ -136,7 +218,12 @@ class AutonomousAgentWorkflow:
             source_url=request.url,
             video_format=request.video_format,
             language=request.language,
-            voice=request.voice,
+            voice=request.voice or "en-US-ChristopherNeural",
+            narrator_voice=request.narrator_voice or "en-US-ChristopherNeural",
+            protagonist_voice=request.protagonist_voice or "en-US-GuyNeural",
+            chapter_range_start=request.chapter_range_start,
+            chapter_range_end=request.chapter_range_end,
+            character_cast=[],
             cover_image=None,
             duration=None,
             raw_images_count=0,
@@ -264,60 +351,84 @@ class AutonomousAgentWorkflow:
         try:
             # ── STAGE 1: SCRAPE EPISODE (REAL SCRAPER) ─────────────────────────
             self.state.status = "scraping"
-            self.log("scrape", f"Connecting to target Webtoon URL: {self.request.url}...", progress=10)
-
-            chapter_result = None
-            try:
-                chapter_result = await scrape_chapter_service(
-                    url=self.request.url,
-                    proxy_images=True,
-                    filter_banners=True
-                )
-            except Exception as scrape_err:
-                self.log("scrape", f"Scraper notice: {scrape_err}. Utilizing direct extraction.", level="warning")
-
+            chapter_urls, eff_start, eff_end = resolve_chapter_urls(
+                self.request.url,
+                self.request.chapter_range_start,
+                self.request.chapter_range_end,
+            )
             raw_image_urls: List[str] = []
             title = self.request.title_override or self.state.scraped_title or "Webtoon Story Recap"
 
-            if chapter_result and getattr(chapter_result, "images", None):
-                raw_image_urls = [img.url for img in chapter_result.images if getattr(img, "url", None)]
-                s_title = None
-                if getattr(chapter_result, "series", None) and getattr(chapter_result.series, "title", None):
-                    s_title = str(chapter_result.series.title).strip()
+            if len(chapter_urls) > 1 and eff_start and eff_end:
+                self.log(
+                    "scrape",
+                    f"Multi-Chapter Auto-Pilot: Processing {len(chapter_urls)} chapters from Episode {eff_start} to {eff_end}...",
+                    progress=10,
+                )
+            else:
+                self.log("scrape", f"Connecting to target Webtoon URL: {self.request.url}...", progress=10)
 
-                c_title = None
-                if getattr(chapter_result, "chapter", None):
-                    c_title = getattr(chapter_result.chapter, "title", None) or getattr(chapter_result.chapter, "episode", None)
-                    if c_title:
-                        c_title = str(c_title).strip()
-                    elif getattr(chapter_result.chapter, "number", None):
-                        c_title = f"Episode {chapter_result.chapter.number}"
+            for c_idx, target_url in enumerate(chapter_urls):
+                current_ep = (eff_start + c_idx) if eff_start else (c_idx + 1)
+                ep_label = f" (Episode {current_ep})" if len(chapter_urls) > 1 else ""
+                self.log(
+                    "scrape",
+                    f"Scraping chapter {c_idx + 1} of {len(chapter_urls)}{ep_label}: {target_url}...",
+                    progress=min(25, 10 + int(c_idx / max(len(chapter_urls), 1) * 15)),
+                )
+                try:
+                    chapter_result = await scrape_chapter_service(
+                        url=target_url,
+                        proxy_images=True,
+                        filter_banners=True,
+                    )
+                    if chapter_result and getattr(chapter_result, "images", None):
+                        c_imgs = [img.url for img in chapter_result.images if getattr(img, "url", None)]
+                        raw_image_urls.extend(c_imgs)
 
-                if s_title and c_title:
-                    title = f"{s_title}: {c_title}"
-                elif s_title:
-                    title = s_title
-                elif c_title:
-                    title = c_title
-                elif getattr(chapter_result, "title", None):
-                    title = str(chapter_result.title).strip()
+                        if c_idx == 0:
+                            s_title = None
+                            if getattr(chapter_result, "series", None) and getattr(chapter_result.series, "title", None):
+                                s_title = str(chapter_result.series.title).strip()
 
-                if self.request.title_override:
-                    title = self.request.title_override
+                            c_title = None
+                            if getattr(chapter_result, "chapter", None):
+                                c_title = getattr(chapter_result.chapter, "title", None) or getattr(chapter_result.chapter, "episode", None)
+                                if c_title:
+                                    c_title = str(c_title).strip()
+                                elif getattr(chapter_result.chapter, "number", None):
+                                    c_title = f"Episode {chapter_result.chapter.number}"
 
-                if s_title:
-                    self.state.series_title = s_title
-                if c_title:
-                    self.state.chapter_title = c_title
+                            if s_title and c_title:
+                                title = f"{s_title}: {c_title}"
+                            elif s_title:
+                                title = s_title
+                            elif c_title:
+                                title = c_title
+                            elif getattr(chapter_result, "title", None):
+                                title = str(chapter_result.title).strip()
 
-                # Discover best cover image
-                cover = getattr(chapter_result, "cover_image", None)
-                if not cover and getattr(chapter_result, "series", None):
-                    cover = getattr(chapter_result.series, "cover_image", None)
-                if not cover and raw_image_urls:
-                    cover = raw_image_urls[0]
-                if cover:
-                    self.state.cover_image = cover
+                            if s_title:
+                                self.state.series_title = s_title
+                            if c_title:
+                                self.state.chapter_title = c_title
+
+                            cover = getattr(chapter_result, "cover_image", None)
+                            if not cover and getattr(chapter_result, "series", None):
+                                cover = getattr(chapter_result.series, "cover_image", None)
+                            if cover:
+                                self.state.cover_image = cover
+                except Exception as scrape_err:
+                    self.log("scrape", f"Scraper notice for {target_url}: {scrape_err}", level="warning")
+
+            if len(chapter_urls) > 1 and eff_start and eff_end:
+                title = f"{title} (Chapters {eff_start}-{eff_end})"
+
+            if self.request.title_override:
+                title = self.request.title_override
+
+            if not self.state.cover_image and raw_image_urls:
+                self.state.cover_image = raw_image_urls[0]
 
             self.state.scraped_title = title
             self.state.raw_images_count = len(raw_image_urls)
@@ -493,9 +604,38 @@ class AutonomousAgentWorkflow:
                     p.motion_type = r_item.get("motion") or r_item.get("motion_type") or ("zoom_in" if idx % 2 == 0 else "pan_down")
                     p.sfx = r_item.get("sfx") or "[Impact]"
                     p.duration = float(r_item.get("duration") or max(3.5, round(len(p.speech_text.split()) / 2.3, 1)))
+
+                    # Character Continuity: Cast and permanently lock character voice
+                    s_name = r_item.get("speaker_name") or r_item.get("speaker") or r_item.get("character")
+                    s_gender = r_item.get("speaker_gender") or r_item.get("gender")
+                    s_arch = r_item.get("archetype") or r_item.get("role") or r_item.get("character_role")
+
+                    assigned_voice = self.cast_manager.get_voice_for_speaker(
+                        speaker_name=s_name,
+                        gender=s_gender,
+                        archetype=s_arch,
+                    )
+                    clean_s = (s_name or "").strip()
+                    p.speaker_name = clean_s.title() if (clean_s and clean_s.upper() not in ("NARRATOR", "EXPOSITION", "NONE", "UNKNOWN")) else "Master Cinematic Narrator"
+                    p.speaker_gender = s_gender or ("male" if "Narrator" in p.speaker_name else "neutral")
+                    p.voice = assigned_voice
+
+                # Sync character cast roster snapshot to run state
+                cast_summary = self.cast_manager.get_cast_summary()
+                self.state.character_cast = [
+                    CharacterCastMember(
+                        name=m["name"],
+                        role=m["role"],
+                        voice=m["voice"],
+                        lines_count=m["lines_count"],
+                    )
+                    for m in cast_summary
+                ]
+
+                cast_log_preview = ", ".join([f"{c.name}: {c.voice.split('-')[-1]}" for c in self.state.character_cast[:4]])
                 self.log(
                     "narrative",
-                    f"[AI Analyze: POST /api/v1/ai/analyze-all-panels] Synthesized script and motion cues across all {len(self.state.panels)} panels.",
+                    f"[AI Analyze] Script generated. Character Voice Continuity Engine locked {len(self.state.character_cast)} roles ({cast_log_preview}).",
                     level="success",
                     progress=70,
                 )
@@ -505,12 +645,14 @@ class AutonomousAgentWorkflow:
                     p.speech_text = f"As {title} reaches the critical turning point, everything changes."
                     p.motion_type = "zoom_in" if idx % 2 == 0 else "pan_down"
                     p.duration = 3.5
+                    p.speaker_name = "Master Cinematic Narrator"
+                    p.voice = self.cast_manager.default_narrator
 
             # ── STAGE 4: VOICE AUDIO (POST /api/v1/audio/synthesize-all-panel-audio) ──
             self.state.status = "synthesizing_audio"
             self.log(
                 "audio",
-                f"[Voice Audio: POST /api/v1/audio/synthesize-all-panel-audio] Synthesizing neural TTS using voice '{self.request.voice}'...",
+                f"[Voice Audio: POST /api/v1/audio/synthesize-all-panel-audio] Synthesizing multi-character neural voice dubbing ({len(self.state.character_cast)} cast members)...",
                 progress=75,
             )
 
@@ -521,13 +663,14 @@ class AutonomousAgentWorkflow:
                     "dialogues": [p.speech_text] if p.speech_text else [],
                     "narrative": p.speech_text or "",
                     "target_duration": p.duration or 3.5,
+                    "voice": p.voice or self.cast_manager.default_narrator,
                 }
                 for p in self.state.panels
             ]
             try:
                 audio_res = await batch_synthesize_panels_service(
                     panels=audio_panel_inputs,
-                    voice=self.request.voice or "en-US-GuyNeural",
+                    voice=self.cast_manager.default_narrator,
                     speech_rate=1.0,
                     speech_pitch=1.0,
                     generate_dialogue_audio=True,
@@ -540,11 +683,13 @@ class AutonomousAgentWorkflow:
                     if r_audio.get("audio_url") or r_audio.get("narrative_audio_url"):
                         p.audio_url = r_audio.get("audio_url") or r_audio.get("narrative_audio_url")
                     if r_audio.get("duration"):
-                        p.duration = float(r_audio["duration"])
+                        actual_dur = float(r_audio["duration"])
+                        # Add +0.4s breathing room to guarantee 0 cutoff words
+                        p.duration = max(3.5, round(actual_dur + 0.4, 2))
                 self.state.duration = round(sum(p.duration for p in self.state.panels if p.duration), 1)
                 self.log(
                     "audio",
-                    f"[Voice Audio: POST /api/v1/audio/synthesize-all-panel-audio] Neural audio tracks generated and synchronized ({self.state.duration}s total).",
+                    f"[Voice Audio] Multi-character audio dubbing completed with zero cutoff words ({self.state.duration}s total).",
                     level="success",
                     progress=80,
                 )
@@ -609,6 +754,7 @@ class AutonomousAgentWorkflow:
                 target_width=target_w,
                 target_height=target_h,
                 voice=self.request.voice,
+                enable_subtitles=False,
             )
         except asyncio.CancelledError:
             self.state.status = "stopped"

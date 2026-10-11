@@ -47,10 +47,19 @@ export async function approveAgent(
   data?: AgentApproveRequest
 ): Promise<AgentRunResponse> {
   const fetcher = fetchWithInterceptor || window.fetch.bind(window);
+  const cleanData: Record<string, any> = {};
+  if (data) {
+    if (typeof data.title_override === "string") {
+      cleanData.title_override = data.title_override;
+    }
+    if (typeof data.privacy_status === "string") {
+      cleanData.privacy_status = data.privacy_status;
+    }
+  }
   const response = await fetcher(`${BASE_URL}/approve/${encodeURIComponent(runId)}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data || {}),
+    body: JSON.stringify(cleanData),
   });
 
   if (!response.ok) {

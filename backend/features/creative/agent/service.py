@@ -21,6 +21,7 @@ from features.creative.agent.schemas import (
     AgentLogMessage,
     AgentPanel,
     AgentYouTubeMetadata,
+    CharacterCastMember,
 )
 from features.creative.agent.workflow import AutonomousAgentWorkflow
 from database.engine import get_db_connection
@@ -70,6 +71,10 @@ class CreativeAgentService:
                     )
                     """
                 )
+                try:
+                    conn.execute("ALTER TABLE creative_agent_runs ADD COLUMN character_cast TEXT DEFAULT '[]'")
+                except Exception:
+                    pass
                 conn.execute(
                     "CREATE INDEX IF NOT EXISTS idx_creative_agent_runs_user_id ON creative_agent_runs(user_id)"
                 )
@@ -119,6 +124,7 @@ class CreativeAgentService:
             yt_meta = state.youtube_metadata.model_dump() if state.youtube_metadata else {}
             logs_data = [l.model_dump() for l in state.logs]
             panels_data = [p.model_dump() for p in state.panels]
+            cast_data = [c.model_dump() for c in (state.character_cast or [])]
 
             with get_db_connection() as conn:
                 conn.execute(
@@ -128,8 +134,8 @@ class CreativeAgentService:
                         scraped_title, series_title, chapter_title, source_url,
                         video_format, language, voice, cover_image, duration,
                         raw_images_count, video_filename, video_url, youtube_metadata,
-                        youtube_url, error, logs, panels, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        youtube_url, error, logs, panels, character_cast, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(run_id) DO UPDATE SET
                         user_id = COALESCE(excluded.user_id, creative_agent_runs.user_id),
                         status = excluded.status,
@@ -151,6 +157,7 @@ class CreativeAgentService:
                         error = excluded.error,
                         logs = excluded.logs,
                         panels = excluded.panels,
+                        character_cast = excluded.character_cast,
                         updated_at = excluded.updated_at
                     """,
                     (
@@ -176,6 +183,7 @@ class CreativeAgentService:
                         state.error,
                         json.dumps(logs_data),
                         json.dumps(panels_data),
+                        json.dumps(cast_data),
                         state.created_at,
                         state.updated_at,
                     ),
@@ -207,6 +215,13 @@ class CreativeAgentService:
         except Exception:
             panels = []
 
+        raw_cast = row["character_cast"] if "character_cast" in row.keys() else "[]"
+        try:
+            cast_list = json.loads(raw_cast) if isinstance(raw_cast, str) and raw_cast else []
+            character_cast = [CharacterCastMember(**c) for c in cast_list]
+        except Exception:
+            character_cast = []
+
         return AgentRunResponse(
             run_id=row["run_id"],
             user_id=row["user_id"],
@@ -221,6 +236,7 @@ class CreativeAgentService:
             video_format=row["video_format"],
             language=row["language"],
             voice=row["voice"],
+            character_cast=character_cast,
             cover_image=row["cover_image"],
             duration=row["duration"],
             raw_images_count=row["raw_images_count"] or 0,

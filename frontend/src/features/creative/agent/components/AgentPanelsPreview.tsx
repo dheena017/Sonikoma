@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { Film, Clock, Volume2, Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { AgentPanel } from "../types";
+import { Film, Clock, Volume2, Maximize2, X, ChevronLeft, ChevronRight, Users, Lock, Mic } from "lucide-react";
+import { AgentPanel, CharacterCastMember } from "../types";
 
 interface AgentPanelsPreviewProps {
   panels: AgentPanel[];
   scrapedTitle?: string;
+  characterCast?: CharacterCastMember[];
 }
 
 export const AgentPanelsPreview: React.FC<AgentPanelsPreviewProps> = ({
   panels,
   scrapedTitle,
+  characterCast,
 }) => {
   const [selectedPanel, setSelectedPanel] = useState<AgentPanel | null>(null);
 
@@ -32,8 +34,8 @@ export const AgentPanelsPreview: React.FC<AgentPanelsPreviewProps> = ({
   };
 
   return (
-    <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 sm:p-7 shadow-md space-y-4 text-left">
-      <div className="flex items-center justify-between pb-3 border-b border-[#2F2F2F]">
+    <div className="bg-[#1E1E1E] border border-[#2F2F2F] rounded-2xl p-6 sm:p-7 shadow-md space-y-6 text-left">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#2F2F2F] gap-2">
         <div>
           <h3 className="text-sm font-bold text-[#E5E5E5] flex items-center gap-2">
             <Film className="w-4 h-4 text-[#3B82F6]" />
@@ -43,11 +45,50 @@ export const AgentPanelsPreview: React.FC<AgentPanelsPreviewProps> = ({
             {panels.length} clean panels cropped &amp; synchronized for {scrapedTitle || "Story Recap"}
           </p>
         </div>
-        <span className="text-xs font-mono px-2.5 py-1 rounded bg-[#121212] border border-[#2F2F2F] text-[#9CA3AF]">
+        <span className="text-xs font-mono px-2.5 py-1 rounded bg-[#121212] border border-[#2F2F2F] text-[#9CA3AF] w-fit">
           Total Duration:{" "}
           {panels.reduce((acc, p) => acc + (p.duration || 3.5), 0).toFixed(1)}s
         </span>
       </div>
+
+      {/* ── Character Cast Roster Section ── */}
+      {characterCast && characterCast.length > 0 && (
+        <div className="p-4 rounded-xl bg-[#141414] border border-[#2A2A2A] space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-[#3B82F6]" />
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#E5E5E5]">
+                Character Voice Roster &amp; Continuity
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-800/40 flex items-center gap-1">
+              <Lock className="w-3 h-3" /> Voice Locked Across All Lines
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+            {characterCast.map((c, i) => (
+              <div
+                key={i}
+                className="p-2.5 rounded-lg bg-[#181818] border border-[#282828] flex items-center justify-between gap-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-bold text-[#E5E5E5] truncate font-mono flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#3B82F6] shrink-0" />
+                    {c.name}
+                  </div>
+                  <div className="text-[10px] text-[#9CA3AF] truncate mt-0.5">
+                    {c.role} • {c.lines_count} lines
+                  </div>
+                </div>
+                <div className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#202020] text-[#60A5FA] border border-[#303030] shrink-0">
+                  {c.voice.split("-").slice(-1)[0].replace("Neural", "")}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Grid of Panels */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -88,8 +129,19 @@ export const AgentPanelsPreview: React.FC<AgentPanelsPreviewProps> = ({
               </div>
             </div>
 
-            {/* Script Text */}
+            {/* Script Text & Speaker Badge */}
             <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2">
+              {p.speaker_name && (
+                <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-[#60A5FA] bg-[#1E293B]/70 px-2 py-0.5 rounded border border-[#3B82F6]/30 w-fit">
+                  <Mic className="w-3 h-3 text-[#3B82F6]" />
+                  <span className="truncate max-w-[130px]">{p.speaker_name}</span>
+                  {p.voice && (
+                    <span className="text-[#94A3B8] font-normal text-[9px]">
+                      • {p.voice.split("-").slice(-1)[0].replace("Neural", "")}
+                    </span>
+                  )}
+                </div>
+              )}
               <p className="text-xs text-[#E5E5E5] line-clamp-3 leading-relaxed font-sans">
                 {p.speech_text || "Visual action sequence."}
               </p>

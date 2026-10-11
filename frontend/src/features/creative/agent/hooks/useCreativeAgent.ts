@@ -33,7 +33,11 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
   const [url, setUrl] = useState("");
   const [videoFormat, setVideoFormat] = useState<VideoFormat>("shorts");
   const [language, setLanguage] = useState("en");
-  const [voice, setVoice] = useState("alloy");
+  const [voice, setVoice] = useState("en-US-ChristopherNeural");
+  const [narratorVoice, setNarratorVoice] = useState("en-US-ChristopherNeural");
+  const [protagonistVoice, setProtagonistVoice] = useState("en-US-GuyNeural");
+  const [chapterRangeStart, setChapterRangeStart] = useState<number | undefined>(undefined);
+  const [chapterRangeEnd, setChapterRangeEnd] = useState<number | undefined>(undefined);
   const [privacyStatus, setPrivacyStatus] = useState<PrivacyStatus>("unlisted");
   const [reviewMode, setReviewMode] = useState(false);
   const [maxPanels, setMaxPanels] = useState<number | undefined>(undefined);
@@ -193,7 +197,11 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
         url: url.trim(),
         video_format: videoFormat,
         language,
-        voice,
+        voice: narratorVoice || voice || "en-US-ChristopherNeural",
+        narrator_voice: narratorVoice,
+        protagonist_voice: protagonistVoice,
+        chapter_range_start: chapterRangeStart,
+        chapter_range_end: chapterRangeEnd,
         privacy_status: privacyStatus,
         review_mode: reviewMode,
         max_panels: maxPanels && maxPanels > 0 ? maxPanels : undefined,
@@ -217,6 +225,10 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     videoFormat,
     language,
     voice,
+    narratorVoice,
+    protagonistVoice,
+    chapterRangeStart,
+    chapterRangeEnd,
     privacyStatus,
     reviewMode,
     maxPanels,
@@ -226,12 +238,13 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     fetchHistory,
   ]);
 
-  const handleApprove = useCallback(async (customTitle?: string) => {
+  const handleApprove = useCallback(async (customTitle?: any) => {
     if (!activeRun?.run_id) return;
     try {
       setIsLoading(true);
+      const safeTitle = typeof customTitle === "string" ? customTitle : (titleOverride || undefined);
       const approvePayload: AgentApproveRequest = {
-        title_override: customTitle || titleOverride || undefined,
+        title_override: safeTitle,
         privacy_status: privacyStatus,
       };
       const resumed = await approveAgent(fetchWithInterceptor, activeRun.run_id, approvePayload);
@@ -361,6 +374,14 @@ export function useCreativeAgent(fetchWithInterceptor: any, addNotification?: an
     setLanguage,
     voice,
     setVoice,
+    narratorVoice,
+    setNarratorVoice,
+    protagonistVoice,
+    setProtagonistVoice,
+    chapterRangeStart,
+    setChapterRangeStart,
+    chapterRangeEnd,
+    setChapterRangeEnd,
     privacyStatus,
     setPrivacyStatus,
     reviewMode,

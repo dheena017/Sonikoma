@@ -15,11 +15,22 @@ export type AgentStage =
   | "stopped"
   | "paused";
 
+export interface CharacterCastMember {
+  name: string;
+  role: string;
+  voice: string;
+  lines_count: number;
+}
+
 export interface AgentRunRequest {
   url: string;
   video_format: VideoFormat;
   language: string;
   voice: string;
+  narrator_voice?: string;
+  protagonist_voice?: string;
+  chapter_range_start?: number;
+  chapter_range_end?: number;
   privacy_status: PrivacyStatus;
   review_mode: boolean;
   max_panels?: number;
@@ -37,6 +48,9 @@ export interface AgentPanel {
   index: number;
   image_url: string;
   speech_text: string;
+  speaker_name?: string;
+  speaker_gender?: string;
+  voice?: string;
   audio_url?: string;
   duration: number;
   motion_type: string;
@@ -67,6 +81,11 @@ export interface AgentRunResponse {
   video_format?: VideoFormat;
   language?: string;
   voice?: string;
+  narrator_voice?: string;
+  protagonist_voice?: string;
+  chapter_range_start?: number;
+  chapter_range_end?: number;
+  character_cast?: CharacterCastMember[];
   cover_image?: string;
   duration?: number;
   raw_images_count: number;

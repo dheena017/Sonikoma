@@ -42,6 +42,7 @@ async def compile_video_from_panels(
     voice: Optional[str] = None,
     enable_dialogue_audio: Optional[bool] = None,
     enable_narrative_audio: Optional[bool] = None,
+    enable_subtitles: bool = False,
     report_progress: Optional[Any] = None,
     **kwargs: Any
 ) -> str:
@@ -324,6 +325,9 @@ async def compile_video_from_panels(
                     or ""
                 )
 
+                subtitles_active = enable_subtitles or (kwargs.get("subtitles_style", "none") not in ("none", None, False))
+                subtitle_to_burn = caption if (subtitles_active and caption) else None
+
                 composite_clip, applied_motion = build_cinematic_motion_clip(
                     img=img,
                     target_width=target_width,
@@ -331,7 +335,7 @@ async def compile_video_from_panels(
                     duration=duration,
                     idx=idx,
                     motion_type=card_motion,
-                    subtitle_text=caption if caption else None,
+                    subtitle_text=subtitle_to_burn,
                 )
 
                 if has_audio:
